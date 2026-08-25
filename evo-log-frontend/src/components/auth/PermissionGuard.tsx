@@ -1,0 +1,20 @@
+'use client';
+
+import React from 'react';
+
+interface PermissionGuardProps {
+  permission: string;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+export default function PermissionGuard({ permission, children, fallback }: PermissionGuardProps) {
+  // TODO: Implement actual permission check from auth context
+  const hasPermission = true;
+
+  if (!hasPermission) {
+    return <>{fallback || null}</>;
+  }
+
+  return <>{children}</>;
+}

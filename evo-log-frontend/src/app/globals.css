@@ -1,0 +1,627 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Premium Onyx/Indigo Theme (Light) ── */
+    --background: 220 33% 98%;
+    --on-background: 222 47% 11%;
+
+    --surface: 0 0% 100%;
+    --on-surface: 222 47% 11%;
+    --surface-variant: 214 32% 91%;
+    --on-surface-variant: 215 16% 47%;
+
+    --primary: 221 83% 53%;
+    --on-primary: 210 40% 98%;
+    --primary-container: 221 83% 90%;
+    --on-primary-container: 221 83% 30%;
+
+    --secondary: 160 84% 39%;
+    --on-secondary: 0 0% 100%;
+    --secondary-container: 160 84% 90%;
+    --on-secondary-container: 160 84% 30%;
+
+    --tertiary: 43 100% 50%;
+    --on-tertiary: 0 0% 100%;
+    --tertiary-container: 43 100% 90%;
+    --on-tertiary-container: 43 100% 30%;
+
+    --error: 348 83% 47%;
+    --on-error: 0 0% 100%;
+    --error-container: 348 83% 90%;
+    --on-error-container: 348 83% 30%;
+
+    --outline: 214 32% 85%;
+    --outline-variant: 214 32% 91%;
+
+    /* Surface containers */
+    --surface-container-lowest: 0 0% 100%;
+    --surface-container-low: 220 33% 98%;
+    --surface-container: 214 32% 95%;
+    --surface-container-high: 214 32% 91%;
+    --surface-container-highest: 214 32% 85%;
+
+    --radius: 0.75rem;
+
+    /* ── EVO-LOG brand primary ── */
+    --EVO-LOG-primary: 221 83% 53%;
+
+    /* ── Module badge colors (light) - ERP Portuaire COMPLET ── */
+    /* Phase 1: Arrivée Navire */
+    --module-port-operations-bg: 199 95% 95%;
+    --module-port-operations-text: 199 72% 30%;
+    /* Phase 2: Dédouanement */
+    --module-transit-douane-bg: 263 85% 95%;
+    --module-transit-douane-text: 263 72% 35%;
+    /* Phase 3: Transport */
+    --module-transport-flotte-bg: 188 80% 92%;
+    --module-transport-flotte-text: 188 72% 28%;
+    /* Phase 4: Stock */
+    --module-magasin-stock-bg: 43 100% 93%;
+    --module-magasin-stock-text: 35 90% 35%;
+    /* Phase 5: Finance */
+    --module-finance-ohada-bg: 152 70% 93%;
+    --module-finance-ohada-text: 152 65% 28%;
+    /* Phase 6: Comptabilité */
+    --module-comptabilite-ohada-bg: 221 85% 95%;
+    --module-comptabilite-ohada-text: 221 75% 35%;
+    /* Support: Équipements */
+    --module-parc-vehicules-bg: 263 80% 95%;
+    --module-parc-vehicules-text: 263 72% 40%;
+    /* Support: Conformité */
+    --module-qhse-securite-bg: 0 80% 95%;
+    --module-qhse-securite-text: 0 72% 40%;
+    /* Support: RH */
+    --module-rh-personnel-bg: 330 80% 95%;
+    --module-rh-personnel-text: 330 72% 40%;
+    /* Support: Client */
+    --module-client-b2b-bg: 199 80% 93%;
+    --module-client-b2b-text: 199 72% 30%;
+    /* Support: Administration */
+    --module-admin-tenant-bg: 217 91% 95%;
+    --module-admin-tenant-text: 221 83% 40%;
+    /* Support: BI */
+    --module-reports-bi-bg: 263 80% 95%;
+    --module-reports-bi-text: 263 72% 40%;
+    
+    /* Legacy modules (existants) */
+    --module-admin-bg: 217 91% 95%;
+    --module-admin-text: 221 83% 40%;
+    --module-transport-bg: 188 80% 92%;
+    --module-transport-text: 188 72% 28%;
+    --module-finance-bg: 152 70% 93%;
+    --module-finance-text: 152 65% 28%;
+    --module-magasin-bg: 43 100% 93%;
+    --module-magasin-text: 35 90% 35%;
+    --module-parc-bg: 263 80% 95%;
+    --module-parc-text: 263 72% 40%;
+    --module-acconage-bg: 217 91% 94%;
+    --module-acconage-text: 221 83% 38%;
+    --module-transit-bg: 199 80% 93%;
+    --module-transit-text: 199 72% 30%;
+    --module-qhse-bg: 0 80% 95%;
+    --module-qhse-text: 0 72% 40%;
+    --module-maintenance-bg: 24 100% 93%;
+    --module-maintenance-text: 24 90% 36%;
+    --module-rh-bg: 330 80% 95%;
+    --module-rh-text: 330 72% 40%;
+    --module-cotations-bg: 48 100% 92%;
+    --module-cotations-text: 40 90% 33%;
+    --module-tracking-bg: 188 80% 92%;
+    --module-tracking-text: 188 72% 28%;
+    --module-fuel-guard-bg: 24 100% 93%;
+    --module-fuel-guard-text: 24 90% 36%;
+    --module-procurement-bg: 152 70% 93%;
+    --module-procurement-text: 152 65% 28%;
+    --module-compliance-bg: 172 70% 92%;
+    --module-compliance-text: 172 65% 28%;
+    --module-bi-bg: 263 80% 95%;
+    --module-bi-text: 263 72% 40%;
+    --module-client-portal-bg: 199 80% 93%;
+    --module-client-portal-text: 199 72% 30%;
+    --module-settings-bg: 215 16% 93%;
+    --module-settings-text: 215 16% 38%;
+    --module-audit-bg: 168 70% 93%;
+    --module-audit-text: 168 65% 32%;
+    --module-master-bg: 330 80% 95%;
+    --module-master-text: 330 72% 40%;
+    --module-dashboard-bg: 217 91% 95%;
+    --module-dashboard-text: 221 83% 40%;
+    --module-integration-bg: 0 80% 95%;
+    --module-integration-text: 0 72% 40%;
+
+    /* ── Header height ── */
+    --header-height: 64px;
+  }
+
+  .dark {
+    /* ── Premium Dark Mode ── */
+    --background: 220 20% 10%;
+    --on-background: 215 30% 92%;
+
+    --surface: 220 18% 14%;
+    --on-surface: 215 30% 92%;
+    --surface-variant: 220 16% 22%;
+    --on-surface-variant: 215 20% 72%;
+
+    --primary: 217 91% 62%;
+    --on-primary: 0 0% 100%;
+    --primary-container: 217 60% 28%;
+    --on-primary-container: 217 91% 88%;
+
+    --secondary: 160 70% 48%;
+    --on-secondary: 0 0% 100%;
+    --secondary-container: 160 50% 22%;
+    --on-secondary-container: 160 70% 88%;
+
+    --tertiary: 43 95% 58%;
+    --on-tertiary: 30 50% 10%;
+    --tertiary-container: 43 60% 22%;
+    --on-tertiary-container: 43 95% 88%;
+
+    --error: 4 80% 62%;
+    --on-error: 0 0% 100%;
+    --error-container: 4 60% 26%;
+    --on-error-container: 4 80% 90%;
+
+    --outline: 220 16% 32%;
+    --outline-variant: 220 16% 22%;
+
+    --surface-container-lowest: 220 20% 8%;
+    --surface-container-low: 220 18% 12%;
+    --surface-container: 220 16% 18%;
+    --surface-container-high: 220 16% 24%;
+    --surface-container-highest: 220 14% 30%;
+
+    /* ── EVO-LOG brand primary (dark) ── */
+    --EVO-LOG-primary: 217 91% 62%;
+
+    /* ── Module badge colors (dark) - ERP Portuaire COMPLET ── */
+    /* Phase 1: Arrivée Navire */
+    --module-port-operations-bg: 199 72% 18%;
+    --module-port-operations-text: 199 95% 75%;
+    /* Phase 2: Dédouanement */
+    --module-transit-douane-bg: 263 72% 18%;
+    --module-transit-douane-text: 263 85% 80%;
+    /* Phase 3: Transport */
+    --module-transport-flotte-bg: 188 72% 18%;
+    --module-transport-flotte-text: 188 80% 70%;
+    /* Phase 4: Stock */
+    --module-magasin-stock-bg: 43 90% 18%;
+    --module-magasin-stock-text: 43 100% 75%;
+    /* Phase 5: Finance */
+    --module-finance-ohada-bg: 152 65% 17%;
+    --module-finance-ohada-text: 152 70% 72%;
+    /* Phase 6: Comptabilité */
+    --module-comptabilite-ohada-bg: 221 75% 20%;
+    --module-comptabilite-ohada-text: 221 85% 78%;
+    /* Support: Équipements */
+    --module-parc-vehicules-bg: 263 72% 20%;
+    --module-parc-vehicules-text: 263 80% 80%;
+    /* Support: Conformité */
+    --module-qhse-securite-bg: 0 72% 22%;
+    --module-qhse-securite-text: 0 80% 80%;
+    /* Support: RH */
+    --module-rh-personnel-bg: 330 72% 20%;
+    --module-rh-personnel-text: 330 80% 80%;
+    /* Support: Client */
+    --module-client-b2b-bg: 199 72% 18%;
+    --module-client-b2b-text: 199 80% 75%;
+    /* Support: Administration */
+    --module-admin-tenant-bg: 221 83% 20%;
+    --module-admin-tenant-text: 217 91% 75%;
+    /* Support: BI */
+    --module-reports-bi-bg: 263 72% 20%;
+    --module-reports-bi-text: 263 80% 80%;
+    
+    /* Legacy modules (existants) */
+    --module-admin-bg: 221 83% 20%;
+    --module-admin-text: 217 91% 75%;
+    --module-transport-bg: 188 72% 18%;
+    --module-transport-text: 188 80% 70%;
+    --module-finance-bg: 152 65% 17%;
+    --module-finance-text: 152 70% 72%;
+    --module-magasin-bg: 43 90% 18%;
+    --module-magasin-text: 43 100% 75%;
+    --module-parc-bg: 263 72% 20%;
+    --module-parc-text: 263 80% 80%;
+    --module-acconage-bg: 221 83% 18%;
+    --module-acconage-text: 217 91% 78%;
+    --module-transit-bg: 199 72% 18%;
+    --module-transit-text: 199 80% 75%;
+    --module-qhse-bg: 0 72% 22%;
+    --module-qhse-text: 0 80% 80%;
+    --module-maintenance-bg: 24 90% 18%;
+    --module-maintenance-text: 24 100% 75%;
+    --module-rh-bg: 330 72% 20%;
+    --module-rh-text: 330 80% 80%;
+    --module-cotations-bg: 40 90% 18%;
+    --module-cotations-text: 48 100% 75%;
+    --module-tracking-bg: 188 72% 18%;
+    --module-tracking-text: 188 80% 70%;
+    --module-fuel-guard-bg: 24 90% 18%;
+    --module-fuel-guard-text: 24 100% 75%;
+    --module-procurement-bg: 152 65% 17%;
+    --module-procurement-text: 152 70% 72%;
+    --module-compliance-bg: 172 65% 17%;
+    --module-compliance-text: 172 70% 72%;
+    --module-bi-bg: 263 72% 20%;
+    --module-bi-text: 263 80% 80%;
+    --module-client-portal-bg: 199 72% 18%;
+    --module-client-portal-text: 199 80% 75%;
+    --module-settings-bg: 215 16% 22%;
+    --module-settings-text: 215 20% 72%;
+    --module-audit-bg: 168 65% 17%;
+    --module-audit-text: 168 70% 75%;
+    --module-master-bg: 330 72% 20%;
+    --module-master-text: 330 80% 80%;
+    --module-dashboard-bg: 221 83% 20%;
+    --module-dashboard-text: 217 91% 75%;
+    --module-integration-bg: 0 72% 22%;
+    --module-integration-text: 0 80% 80%;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* Dark mode overrides for legacy Tailwind slate utilities */
+  .dark .bg-white { background-color: hsl(var(--surface)) !important; }
+  .dark .bg-slate-50 { background-color: hsl(var(--surface-container-lowest)) !important; }
+  .dark .bg-slate-100 { background-color: hsl(var(--surface-container-low)) !important; }
+  .dark .bg-slate-200 { background-color: hsl(var(--surface-container)) !important; }
+  .dark .bg-slate-300 { background-color: hsl(var(--surface-container-high)) !important; }
+  .dark .text-slate-900,
+  .dark .text-slate-800,
+  .dark .text-slate-700 { color: hsl(var(--on-surface)) !important; }
+  .dark .text-slate-600,
+  .dark .text-slate-500,
+  .dark .text-slate-400 { color: hsl(var(--on-surface-variant)) !important; }
+  .dark .border-slate-200,
+  .dark .border-slate-300,
+  .dark .border-slate-400 { border-color: hsl(var(--outline)) !important; }
+}
+
+@layer base {
+  * {
+    @apply border-outline;
+  }
+  body {
+    @apply bg-background text-on-background font-sans antialiased transition-colors duration-300;
+  }
+}
+
+/* ── Material Symbols ── */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.7); }
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  /* ── Glassmorphism ── */
+  .glassmorphism {
+    @apply bg-surface/70 backdrop-blur-md border border-outline-variant/50 shadow-sm;
+  }
+  .glassmorphism-dark {
+    @apply bg-black/40 backdrop-blur-xl border border-white/10 shadow-lg;
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar-bg { @apply bg-slate-900 dark:bg-slate-950; }
+  .sidebar-border { @apply border-slate-800 dark:border-slate-800/80; }
+  .sidebar-smooth {
+    transition: width 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: width;
+    overflow: hidden;
+  }
+
+  /* ── Scrollbar slim ── */
+  .scrollbar-sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0.4) transparent;
+  }
+  .scrollbar-sidebar::-webkit-scrollbar { width: 4px; }
+  .scrollbar-sidebar::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 116, 139, 0.4);
+    border-radius: 4px;
+  }
+  .scrollbar-sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(100, 116, 139, 0.7);
+  }
+
+  /* ── Drawer / Modal ── */
+  .drawer-bg { @apply bg-surface border-outline; }
+  .drawer-header-bg { @apply bg-surface-container-low border-outline; }
+  .drawer-item-bg { @apply bg-surface border-outline; }
+  .drawer-text { @apply text-on-surface; }
+  .drawer-text-muted { @apply text-on-surface-variant; }
+
+  /* ── Module badges - ERP Portuaire COMPLET (dark-aware) ── */
+  
+  /* Modules principaux */
+  .module-badge-port-operations {
+    background-color: hsl(var(--module-port-operations-bg));
+    color: hsl(var(--module-port-operations-text));
+    border: 1px solid hsl(var(--module-port-operations-text) / 0.25);
+  }
+  .module-badge-transit-douane {
+    background-color: hsl(var(--module-transit-douane-bg));
+    color: hsl(var(--module-transit-douane-text));
+    border: 1px solid hsl(var(--module-transit-douane-text) / 0.25);
+  }
+  .module-badge-transport-flotte {
+    background-color: hsl(var(--module-transport-flotte-bg));
+    color: hsl(var(--module-transport-flotte-text));
+    border: 1px solid hsl(var(--module-transport-flotte-text) / 0.25);
+  }
+  .module-badge-magasin-stock {
+    background-color: hsl(var(--module-magasin-stock-bg));
+    color: hsl(var(--module-magasin-stock-text));
+    border: 1px solid hsl(var(--module-magasin-stock-text) / 0.25);
+  }
+  .module-badge-finance-ohada {
+    background-color: hsl(var(--module-finance-ohada-bg));
+    color: hsl(var(--module-finance-ohada-text));
+    border: 1px solid hsl(var(--module-finance-ohada-text) / 0.25);
+  }
+  .module-badge-comptabilite-ohada {
+    background-color: hsl(var(--module-comptabilite-ohada-bg));
+    color: hsl(var(--module-comptabilite-ohada-text));
+    border: 1px solid hsl(var(--module-comptabilite-ohada-text) / 0.25);
+  }
+  .module-badge-parc-vehicules {
+    background-color: hsl(var(--module-parc-vehicules-bg));
+    color: hsl(var(--module-parc-vehicules-text));
+    border: 1px solid hsl(var(--module-parc-vehicules-text) / 0.25);
+  }
+  .module-badge-qhse-securite {
+    background-color: hsl(var(--module-qhse-securite-bg));
+    color: hsl(var(--module-qhse-securite-text));
+    border: 1px solid hsl(var(--module-qhse-securite-text) / 0.25);
+  }
+  .module-badge-rh-personnel {
+    background-color: hsl(var(--module-rh-personnel-bg));
+    color: hsl(var(--module-rh-personnel-text));
+    border: 1px solid hsl(var(--module-rh-personnel-text) / 0.25);
+  }
+  .module-badge-client-b2b {
+    background-color: hsl(var(--module-client-b2b-bg));
+    color: hsl(var(--module-client-b2b-text));
+    border: 1px solid hsl(var(--module-client-b2b-text) / 0.25);
+  }
+  .module-badge-admin-tenant {
+    background-color: hsl(var(--module-admin-tenant-bg));
+    color: hsl(var(--module-admin-tenant-text));
+    border: 1px solid hsl(var(--module-admin-tenant-text) / 0.25);
+  }
+  .module-badge-reports-bi {
+    background-color: hsl(var(--module-reports-bi-bg));
+    color: hsl(var(--module-reports-bi-text));
+    border: 1px solid hsl(var(--module-reports-bi-text) / 0.25);
+  }
+
+  /* Legacy modules */
+  .module-badge-admin {
+    background-color: hsl(var(--module-admin-bg));
+    color: hsl(var(--module-admin-text));
+    border: 1px solid hsl(var(--module-admin-text) / 0.25);
+  }
+  .module-badge-transport {
+    background-color: hsl(var(--module-transport-bg));
+    color: hsl(var(--module-transport-text));
+    border: 1px solid hsl(var(--module-transport-text) / 0.25);
+  }
+  .module-badge-finance {
+    background-color: hsl(var(--module-finance-bg));
+    color: hsl(var(--module-finance-text));
+    border: 1px solid hsl(var(--module-finance-text) / 0.25);
+  }
+  .module-badge-magasin {
+    background-color: hsl(var(--module-magasin-bg));
+    color: hsl(var(--module-magasin-text));
+    border: 1px solid hsl(var(--module-magasin-text) / 0.25);
+  }
+  .module-badge-parc {
+    background-color: hsl(var(--module-parc-bg));
+    color: hsl(var(--module-parc-text));
+    border: 1px solid hsl(var(--module-parc-text) / 0.25);
+  }
+  .module-badge-acconage {
+    background-color: hsl(var(--module-acconage-bg));
+    color: hsl(var(--module-acconage-text));
+    border: 1px solid hsl(var(--module-acconage-text) / 0.25);
+  }
+  .module-badge-transit {
+    background-color: hsl(var(--module-transit-bg));
+    color: hsl(var(--module-transit-text));
+    border: 1px solid hsl(var(--module-transit-text) / 0.25);
+  }
+  .module-badge-qhse {
+    background-color: hsl(var(--module-qhse-bg));
+    color: hsl(var(--module-qhse-text));
+    border: 1px solid hsl(var(--module-qhse-text) / 0.25);
+  }
+  .module-badge-maintenance {
+    background-color: hsl(var(--module-maintenance-bg));
+    color: hsl(var(--module-maintenance-text));
+    border: 1px solid hsl(var(--module-maintenance-text) / 0.25);
+  }
+  .module-badge-rh {
+    background-color: hsl(var(--module-rh-bg));
+    color: hsl(var(--module-rh-text));
+    border: 1px solid hsl(var(--module-rh-text) / 0.25);
+  }
+  .module-badge-cotations {
+    background-color: hsl(var(--module-cotations-bg));
+    color: hsl(var(--module-cotations-text));
+    border: 1px solid hsl(var(--module-cotations-text) / 0.25);
+  }
+  .module-badge-tracking {
+    background-color: hsl(var(--module-tracking-bg));
+    color: hsl(var(--module-tracking-text));
+    border: 1px solid hsl(var(--module-tracking-text) / 0.25);
+  }
+  .module-badge-fuel-guard {
+    background-color: hsl(var(--module-fuel-guard-bg));
+    color: hsl(var(--module-fuel-guard-text));
+    border: 1px solid hsl(var(--module-fuel-guard-text) / 0.25);
+  }
+  .module-badge-procurement {
+    background-color: hsl(var(--module-procurement-bg));
+    color: hsl(var(--module-procurement-text));
+    border: 1px solid hsl(var(--module-procurement-text) / 0.25);
+  }
+  .module-badge-compliance {
+    background-color: hsl(var(--module-compliance-bg));
+    color: hsl(var(--module-compliance-text));
+    border: 1px solid hsl(var(--module-compliance-text) / 0.25);
+  }
+  .module-badge-bi {
+    background-color: hsl(var(--module-bi-bg));
+    color: hsl(var(--module-bi-text));
+    border: 1px solid hsl(var(--module-bi-text) / 0.25);
+  }
+  .module-badge-client-portal {
+    background-color: hsl(var(--module-client-portal-bg));
+    color: hsl(var(--module-client-portal-text));
+    border: 1px solid hsl(var(--module-client-portal-text) / 0.25);
+  }
+  .module-badge-settings {
+    background-color: hsl(var(--module-settings-bg));
+    color: hsl(var(--module-settings-text));
+    border: 1px solid hsl(var(--module-settings-text) / 0.25);
+  }
+  .module-badge-audit {
+    background-color: hsl(var(--module-audit-bg));
+    color: hsl(var(--module-audit-text));
+    border: 1px solid hsl(var(--module-audit-text) / 0.25);
+  }
+  .module-badge-master-data {
+    background-color: hsl(var(--module-master-bg));
+    color: hsl(var(--module-master-text));
+    border: 1px solid hsl(var(--module-master-text) / 0.25);
+  }
+  .module-badge-dashboard {
+    background-color: hsl(var(--module-dashboard-bg));
+    color: hsl(var(--module-dashboard-text));
+    border: 1px solid hsl(var(--module-dashboard-text) / 0.25);
+  }
+  .module-badge-integration-cameroun {
+    background-color: hsl(var(--module-integration-bg));
+    color: hsl(var(--module-integration-text));
+    border: 1px solid hsl(var(--module-integration-text) / 0.25);
+  }
+
+  /* ── ERP Card ── */
+  .erp-card { @apply bg-surface border border-outline rounded-xl shadow-sm; }
+  .erp-card-header { @apply bg-surface-container-low border-b border-outline px-5 py-3.5; }
+  .erp-card-body { @apply p-5; }
+
+  /* ── KPI Card ── */
+  .kpi-card { @apply erp-card flex flex-col justify-between p-5 hover:shadow-md transition-shadow; }
+  .kpi-icon-wrap { @apply p-2.5 rounded-xl; }
+
+  /* ── Glass card ── */
+  .glass-card { @apply bg-surface border border-outline rounded-xl shadow-sm; }
+
+  /* ── Status badges ── */
+  .status-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide;
+  }
+  .status-transit { @apply bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400; }
+  .status-loading { @apply bg-amber-500/15 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400; }
+  .status-delivered { @apply bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400; }
+  .status-maintenance { @apply bg-red-500/15 text-red-700 dark:bg-red-500/20 dark:text-red-400; }
+  .status-planified { @apply bg-violet-500/15 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400; }
+  .status-info { @apply bg-primary/10 text-primary; }
+
+  /* ── Table zebra ── */
+  .table-zebra-even { @apply bg-surface-container-lowest/70; }
+
+  /* ── No scroll (mobile sidebar open) ── */
+  .no-scroll { overflow: hidden; }
+
+  /* ── Gold shimmer animation ── */
+  .gold-shimmer {
+    background: linear-gradient(to right, #FFC300 0%, #FFDB66 50%, #FFC300 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* ── EVO-LOG primary color CSS variable for Tailwind ── */
+@layer utilities {
+  .text-EVO-LOG-primary { color: hsl(var(--EVO-LOG-primary)); }
+  .bg-EVO-LOG-primary { background-color: hsl(var(--EVO-LOG-primary)); }
+  .border-EVO-LOG-primary { border-color: hsl(var(--EVO-LOG-primary)); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+/* ── animate-in / fade-in / zoom-in / slide-in utilities ──────────────────── */
+/* Replaces tailwindcss-animate so the package is not required                 */
+@keyframes fade-in        { from { opacity: 0; }                           to { opacity: 1; } }
+@keyframes fade-out       { from { opacity: 1; }                           to { opacity: 0; } }
+@keyframes zoom-in-95     { from { transform: scale(.95); opacity: 0; }    to { transform: scale(1); opacity: 1; } }
+@keyframes zoom-out-95    { from { transform: scale(1);  opacity: 1; }    to { transform: scale(.95); opacity: 0; } }
+@keyframes slide-in-right { from { transform: translateX(100%); }          to { transform: translateX(0); } }
+@keyframes slide-in-left  { from { transform: translateX(-100%); }         to { transform: translateX(0); } }
+@keyframes slide-in-top   { from { transform: translateY(-0.5rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slide-in-bottom{ from { transform: translateY(0.25rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+@layer utilities {
+  /* animate-in base */
+  .animate-in  { animation-duration: 200ms; animation-fill-mode: both; animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+  .animate-out { animation-duration: 200ms; animation-fill-mode: both; animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+
+  /* duration overrides */
+  .duration-150 { animation-duration: 150ms; }
+  .duration-200 { animation-duration: 200ms; }
+  .duration-300 { animation-duration: 300ms; }
+  .duration-500 { animation-duration: 500ms; }
+
+  /* named animations */
+  .fade-in              { animation-name: fade-in; }
+  .fade-out             { animation-name: fade-out; }
+  .zoom-in-95           { animation-name: zoom-in-95; }
+  .zoom-out-95          { animation-name: zoom-out-95; }
+  .slide-in-from-right  { animation-name: slide-in-right; }
+  .slide-in-from-left   { animation-name: slide-in-left; }
+  .slide-in-from-top-1  { animation-name: slide-in-top; }
+  .slide-in-from-top-2  { animation-name: slide-in-top; }
+  .slide-in-from-bottom-2 { animation-name: slide-in-bottom; }
+}

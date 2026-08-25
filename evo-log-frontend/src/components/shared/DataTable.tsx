@@ -1,0 +1,56 @@
+'use client';
+
+import React from 'react';
+
+interface Column<T> {
+  key: string;
+  header: string;
+  render?: (item: T) => React.ReactNode;
+}
+
+interface DataTableProps<T> {
+  columns: Column<T>[];
+  data: T[];
+  keyField: string;
+  onRowClick?: (item: T) => void;
+  emptyMessage?: string;
+}
+
+export default function DataTable<T extends Record<string, any>>({ columns, data, keyField, onRowClick, emptyMessage = 'Aucune donnee' }: DataTableProps<T>) {
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        <p>{emptyMessage}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-gray-200">
+            {columns.map(col => (
+              <th key={col.key} className="text-left px-4 py-3 font-medium text-gray-600">{col.header}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item, idx) => (
+            <tr
+              key={item[keyField] || idx}
+              onClick={() => onRowClick?.(item)}
+              className={`border-b border-gray-100 ${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+            >
+              {columns.map(col => (
+                <td key={col.key} className="px-4 py-3 text-gray-700">
+                  {col.render ? col.render(item) : item[col.key]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}

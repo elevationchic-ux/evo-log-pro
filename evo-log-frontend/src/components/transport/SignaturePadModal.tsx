@@ -1,0 +1,51 @@
+'use client';
+
+import React, { useRef, useState } from 'react';
+import { X, Eraser } from 'lucide-react';
+
+interface SignaturePadModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSign: (signatureData: string) => void;
+  title?: string;
+}
+
+export default function SignaturePadModal({ isOpen, onClose, onSign, title = 'Signature' }: SignaturePadModalProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+
+  const handleSave = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      onSign(canvas.toDataURL('image/png'));
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-6 w-full max-w-lg">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="border-2 border-dashed border-gray-300 rounded-lg mb-4">
+          <canvas ref={canvasRef} width={450} height={200} className="w-full cursor-crosshair rounded-lg" />
+        </div>
+        <div className="flex gap-3">
+          <button onClick={clearCanvas} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"><Eraser className="w-4 h-4" /> Effacer</button>
+          <button onClick={handleSave} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Valider la signature</button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,43 @@
+'use client';
+
+import React, { useState } from 'react';
+import { X } from 'lucide-react';
+
+interface OperationCancelProps {
+  operationId: string;
+  onConfirm: (reason: string) => void;
+  onCancel: () => void;
+}
+
+export default function OperationCancel({ operationId, onConfirm, onCancel }: OperationCancelProps) {
+  const [reason, setReason] = useState('');
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-6 w-full max-w-md">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">Annuler l&apos;operation</h3>
+          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">Operation #{operationId}</p>
+        <textarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Raison de l&apos;annulation..."
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-red-500"
+          rows={3}
+        />
+        <div className="flex gap-3">
+          <button onClick={onCancel} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Retour</button>
+          <button
+            onClick={() => onConfirm(reason)}
+            disabled={!reason.trim()}
+            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+          >
+            Confirmer l&apos;annulation
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

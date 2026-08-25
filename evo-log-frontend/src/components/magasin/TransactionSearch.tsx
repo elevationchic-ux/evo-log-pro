@@ -1,0 +1,41 @@
+'use client';
+
+import React from 'react';
+import { Search, Calendar } from 'lucide-react';
+
+interface TransactionSearchProps {
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  typeFilter: string;
+  onTypeChange: (value: string) => void;
+}
+
+export default function TransactionSearch({ searchValue, onSearchChange, typeFilter, onTypeChange }: TransactionSearchProps) {
+  return (
+    <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          value={searchValue}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Rechercher une transaction..."
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <div className="relative">
+        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <select
+          value={typeFilter}
+          onChange={(e) => onTypeChange(e.target.value)}
+          className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+        >
+          <option value="">Tous les types</option>
+          <option value="entree">Entree</option>
+          <option value="sortie">Sortie</option>
+          <option value="transfert">Transfert</option>
+        </select>
+      </div>
+    </div>
+  );
+}
