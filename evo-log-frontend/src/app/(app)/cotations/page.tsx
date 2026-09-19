@@ -15,10 +15,10 @@ export default function CotationsPage() {
 
   // Form states
   const [clientNom, setClientNom] = useState('');
-  const [origine, setOrigine] = useState('Port de Douala');
-  const [destination, setDestination] = useState('N\'Djamena (Tchad)');
-  const [natureFret, setNatureFret] = useState('Conteneur 40ft High Cube');
-  const [montantEstime, setMontantEstime] = useState('4850000');
+  const [origine, setOrigine] = useState('');
+  const [destination, setDestination] = useState('');
+  const [natureFret, setNatureFret] = useState('');
+  const [montantEstime, setMontantEstime] = useState('');
 
   useEffect(() => {
     setMounted(true);
@@ -52,12 +52,12 @@ export default function CotationsPage() {
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     createMutation.mutate({
-      client_nom: clientNom || 'CFAO LOGISTICS CAMEROUN',
+      client_nom: clientNom,
       origine,
       destination,
       nature_fret: natureFret,
       montant_estime_xaf: Number(montantEstime),
-      marge_nette_pct: 18.5
+      marge_nette_pct: undefined
     });
   };
 
@@ -148,7 +148,7 @@ export default function CotationsPage() {
                 filteredItems.map((item: any, idx: number) => (
                   <tr key={item.id || idx} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-100">
-                      {item.reference || `COT-2026-00${item.id}`}
+                      {item.reference || `Cotation #${item.id}`}
                       <div className="text-xs font-normal text-slate-400 flex items-center gap-1 mt-0.5">
                         {item.client_nom || 'Client B2B'}
                       </div>
@@ -158,11 +158,11 @@ export default function CotationsPage() {
                       <div className="text-xs text-slate-400">{item.nature_fret}</div>
                     </td>
                     <td className="px-6 py-4 text-right font-mono font-bold text-emerald-400">
-                      {Number(item.montant_estime_xaf || 4850000).toLocaleString()} XAF
+                      {item.montant_estime_xaf != null ? Number(item.montant_estime_xaf).toLocaleString() : 'Non renseigné'} XAF
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        <CheckCircle2 className="w-3 h-3" /> ACCEPTÉ
+                        <CheckCircle2 className="w-3 h-3" /> {item.statut || 'Statut indisponible'}
                       </span>
                     </td>
                   </tr>
@@ -192,7 +192,7 @@ export default function CotationsPage() {
                   required
                   value={clientNom}
                   onChange={(e) => setClientNom(e.target.value)}
-                  placeholder="ex: CFAO LOGISTICS"
+                  placeholder="Nom du client"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
                 />
               </div>

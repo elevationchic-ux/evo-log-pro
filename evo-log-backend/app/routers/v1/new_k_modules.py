@@ -24,8 +24,8 @@ class EPodCreate(BaseModel):
     nom_destinataire: str
     signature_url: Optional[str] = None
     photo_livraison_url: Optional[str] = None
-    longitude: Optional[float] = 9.704
-    latitude: Optional[float] = 4.051
+    longitude: Optional[float] = None
+    latitude: Optional[float] = None
 
 class FuelSensorCreate(BaseModel):
     immatriculation_camion: str
@@ -39,8 +39,8 @@ class PurchaseOrderCreate(BaseModel):
 
 class ComplianceAuditCreate(BaseModel):
     dossier_reference: str
-    type_reglementation: Optional[str] = "ZLECAF / CEMAC"
-    score_conformite_pct: Optional[float] = 98.5
+    type_reglementation: Optional[str] = None
+    score_conformite_pct: Optional[float] = None
 
 # --- Endpoints K-Cotations ---
 @router.get("/cotations")

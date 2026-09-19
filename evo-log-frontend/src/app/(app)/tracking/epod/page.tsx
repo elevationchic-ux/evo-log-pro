@@ -7,14 +7,12 @@ import { FileCheck, ArrowLeft, Send, DollarSign, CheckCircle2, AlertCircle } fro
 import { toast } from 'sonner';
 import Link from 'next/link';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://EVO-LOG-backend-production.up.railway.app';
-
 export default function EPodCapturePage() {
   const queryClient = useQueryClient();
-  const [missionRef, setMissionRef] = useState('MIS-2026-001');
-  const [destinataire, setDestinataire] = useState('Jean-Paul EKANI (SABC)');
-  const [clientNom, setClientNom] = useState('SABC CAMEROUN');
-  const [montantFret, setMontantFret] = useState('1850000');
+  const [missionRef, setMissionRef] = useState('');
+  const [destinataire, setDestinataire] = useState('');
+  const [clientNom, setClientNom] = useState('');
+  const [montantFret, setMontantFret] = useState('');
   const [invoiceResult, setInvoiceResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,47 +22,16 @@ export default function EPodCapturePage() {
     setInvoiceResult(null);
 
     try {
-      // 1. Envoyer ePOD
-      const resEpod = await fetch(`${API_BASE}/api/v1/transport/missions/1/deliver`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          statut: 'LIVREE',
-          epod_signature: 'DATA_SIG_PNG_OK',
-          epod_note: `Reçu conforme par ${destinataire}`,
-          montant_fret_xaf: parseFloat(montantFret),
-          client_nom: clientNom
-        })
+      const response = await trackingAPI.createEpod({
+        reference_mission: missionRef,
+        nom_destinataire: destinataire,
       });
-
-      if (resEpod.ok) {
-        const data = await resEpod.json();
-        setInvoiceResult(data.facture_auto);
-        toast.success(`e-POD validé ! Facture automatique ${data.facture_auto?.numero_facture} générée.`);
-      } else {
-        // Fallback démo
-        const autoInv = {
-          numero_facture: `FAC-2026-AUTO-${Math.floor(1000 + Math.random() * 9000)}`,
-          client: clientNom,
-          montant_ht_xaf: parseFloat(montantFret),
-          tva_xaf: parseFloat(montantFret) * 0.1925,
-          montant_ttc_xaf: parseFloat(montantFret) * 1.1925,
-          statut: 'BROUILLON_AUTOMATIQUE'
-        };
-        setInvoiceResult(autoInv);
-        toast.success(`e-POD validé ! Facture automatique ${autoInv.numero_facture} créée dans K-Finance.`);
-      }
+      const data = response.data;
+      setInvoiceResult(data.facture_generee);
+      toast.success('e-POD enregistré.');
     } catch (err) {
-      const autoInv = {
-        numero_facture: `FAC-2026-AUTO-${Math.floor(1000 + Math.random() * 9000)}`,
-        client: clientNom,
-        montant_ht_xaf: parseFloat(montantFret),
-        tva_xaf: parseFloat(montantFret) * 0.1925,
-        montant_ttc_xaf: parseFloat(montantFret) * 1.1925,
-        statut: 'BROUILLON_AUTOMATIQUE'
-      };
-      setInvoiceResult(autoInv);
-      toast.success(`e-POD validé en mode résilient ! Facture ${autoInv.numero_facture} générée.`);
+      toast.error(err instanceof Error ? err.message : 'Impossible d’enregistrer l’e-POD.');
+      return;
     } finally {
       setLoading(false);
     }
@@ -138,7 +105,7 @@ export default function EPodCapturePage() {
             <label className="block text-xs font-bold text-muted-foreground uppercase mb-2">Signature Électronique du Destinataire</label>
             <div className="border border-dashed border-cyan-500/40 rounded-2xl p-6 bg-cyan-500/5 text-center cursor-pointer hover:bg-cyan-500/10 transition-all">
               <p className="text-xs text-cyan-400 font-mono font-bold">✓ Zone de signature tactile / stylet active</p>
-              <p className="text-xs text-muted-foreground mt-1">Signé par {destinataire} • Horodaté GPS 4.0511, 9.7042</p>
+              <p className="text-xs text-muted-foreground mt-1">La signature et la géolocalisation doivent être fournies par le dispositif de capture.</p>
             </div>
           </div>
 
