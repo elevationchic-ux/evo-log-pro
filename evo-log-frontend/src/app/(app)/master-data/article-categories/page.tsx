@@ -2,18 +2,13 @@
 
 import React, { useState } from "react";
 import { Layers, Plus, Search, Edit, Trash2, Package, Tag, Fuel, Wrench, Globe } from "lucide-react";
+import { toast } from "sonner";
 
-const CATEGORIES = [
-  { id: 1, code: "CONTENEUR", nom: "Conteneurs Maritimes", description: "20ft, 40ft, HC, RF, OT, FR", icon: "ðŸ“¦", articles: 6, couleur: "#06b6d4" },
-  { id: 2, code: "CARBURANT", nom: "Carburants & Lubrifiants", description: "Gasoil, essence, huiles moteur", icon: "â›½", articles: 3, couleur: "#f97316" },
-  { id: 3, code: "EMBALLAGE", nom: "Emballages & Conditionnement", description: "Palettes, caisses, housses", icon: "ðŸ“«", articles: 4, couleur: "#f59e0b" },
-  { id: 4, code: "PIECE_RECHANGE", nom: "PiÃ¨ces de Rechange", description: "Auto, poids lourds, pneumatiques", icon: "ðŸ”§", articles: 12, couleur: "#6366f1" },
-  { id: 5, code: "MARCHANDISE", nom: "Marchandises GÃ©nÃ©rales", description: "Fret divers et nÃ©goce", icon: "ðŸ“ƒ", articles: 8, couleur: "#10b981" },
-  { id: 6, code: "FOURNITURE", nom: "Fournitures & Consommables", description: "MatÃ©riel de bureau, EPI, consommables", icon: "ðŸ‚ï¸", articles: 5, couleur: "#8b5cf6" },
-];
+type ArticleCategory = { id: number; code: string; nom: string; description: string; icon: string; articles: number; couleur: string };
+const CATEGORIES: ArticleCategory[] = [];
 
 export default function ArticleCategoriesPage() {
-  const [categories, setCategories] = useState(CATEGORIES);
+  const [categories] = useState(CATEGORIES);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [newCat, setNewCat] = useState({ code: "", nom: "", description: "" });
@@ -24,9 +19,7 @@ export default function ArticleCategoriesPage() {
 
   const handleAdd = () => {
     if (!newCat.code || !newCat.nom) return;
-    setCategories(prev => [...prev, { id: prev.length + 1, ...newCat, icon: "ðŸ“¦", articles: 0, couleur: "#64748b" }]);
-    setNewCat({ code: "", nom: "", description: "" });
-    setShowForm(false);
+    toast.error("Le référentiel des catégories n'est pas encore relié à une API persistante.");
   };
 
   return (

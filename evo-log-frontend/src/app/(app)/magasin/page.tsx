@@ -10,6 +10,19 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+type RecentMovement = {
+  id: string | number;
+  type: string;
+  ref: string;
+  desc: string;
+  qte: number;
+  unite: string;
+  from: string;
+  to: string;
+  agent: string;
+  heure: string;
+};
+
 export default function WMSDashboardPage() {
   const [mounted, setMounted] = useState(false);
   const queryClient = useQueryClient();
@@ -102,15 +115,6 @@ export default function WMSDashboardPage() {
     }
   });
 
-  const defaultStockItems = [
-    { ref: 'ART-00291', desc: 'Ciment CPA 42.5R (Sacs 50kg)', zone: 'A', allee: '02', travee: '04', niveau: '01', qte: 850, unite: 'Sacs', seuil: 200, temp: 'Ambiante', methode: 'FIFO', statut: 'OK' },
-    { ref: 'ART-00087', desc: 'Huile Moteur Total 15W40 Bidons 5L', zone: 'B', allee: '01', travee: '02', niveau: '02', qte: 48, unite: 'Bidons', seuil: 100, temp: 'Ambiante', methode: 'FIFO', statut: 'ALERTE' },
-    { ref: 'ART-00512', desc: 'Médicaments Paracétamol 500mg (Boîtes)', zone: 'C', allee: '03', travee: '01', niveau: '01', qte: 2100, unite: 'Boîtes', seuil: 500, temp: '2°C - 8°C', methode: 'FEFO', statut: 'OK', peremption: '15/03/2027' },
-    { ref: 'ART-00341', desc: 'Acier Béton HA12 Barres 12m (Tiges)', zone: 'EXT', allee: 'SOL', travee: '01', niveau: 'SOL', qte: 340, unite: 'Tiges', seuil: 50, temp: 'Extérieur', methode: 'LIFO', statut: 'OK' },
-    { ref: 'ART-00102', desc: 'Farine Blé T55 (Sacs 25kg)', zone: 'A', allee: '05', travee: '01', niveau: '01', qte: 12, unite: 'Sacs', seuil: 100, temp: 'Ambiante', methode: 'FEFO', statut: 'CRITIQUE', peremption: '10/09/2026' },
-    { ref: 'ART-00890', desc: 'Câbles Électriques NYY 4x16mm² (Rouleaux)', zone: 'B', allee: '04', travee: '03', niveau: '02', qte: 215, unite: 'Rouleaux', seuil: 30, temp: 'Ambiante', methode: 'FIFO', statut: 'OK' },
-  ];
-
   const stockItems = Array.isArray(stocksData) && stocksData.length > 0 
     ? stocksData.map((s: any) => ({
         ref: s.code_article || s.ref || 'ART-GEN',
@@ -126,21 +130,16 @@ export default function WMSDashboardPage() {
         methode: s.methode_valorisation || 'FIFO',
         statut: (s.quantite_disponible ?? s.qte ?? 100) <= (s.seuil_alerte ?? 20) ? 'ALERTE' : 'OK'
       }))
-    : defaultStockItems;
+    : [];
 
   const kpis = [
-    { label: 'Capacité Utilisée', value: kpisData?.taux_occupation || '74%', sub: '3,480 / 4,680 emplacements', icon: Grid3X3, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', trend: '+4% vs sem.' },
-    { label: 'Articles en Stock', value: String(stockItems.length * 214), sub: 'Refs actives WMS', icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', trend: '+12 entrées aujourd\'hui' },
-    { label: 'Mouvements Aujourd\'hui', value: '94', sub: '57 entrées · 37 sorties', icon: ArrowRight, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', trend: '+8% vs hier' },
-    { label: 'Valeur Totale Stock', value: '4.35 Mds', sub: 'FCFA valorisation FIFO / PMP', icon: TrendingUp, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20', trend: 'Mis à jour en temps réel' },
+    { label: 'Capacité Utilisée', value: kpisData?.taux_occupation ?? '—', sub: kpisData ? 'Donnée WMS' : 'Indisponible sans API WMS', icon: Grid3X3, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', trend: '' },
+    { label: 'Articles en Stock', value: kpisData?.articles_total != null ? String(kpisData.articles_total) : '—', sub: 'Référentiel WMS', icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', trend: '' },
+    { label: 'Mouvements Aujourd’hui', value: kpisData?.mouvements_jour != null ? String(kpisData.mouvements_jour) : '—', sub: 'Mouvements persistés', icon: ArrowRight, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', trend: '' },
+    { label: 'Valeur Totale Stock', value: kpisData?.valeur_stock != null ? `${kpisData.valeur_stock} XAF` : '—', sub: 'Valorisation WMS', icon: TrendingUp, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20', trend: '' },
   ];
 
-  const recentMovements = [
-    { id: 'MVT-4512', type: 'ENTRÉE', ref: 'ART-00291', desc: 'Ciment CPA 42.5R', qte: 200, unite: 'Sacs', from: 'Quai Réception #3', to: 'A/02/04/01', agent: 'M. Foning', heure: '09:14' },
-    { id: 'MVT-4511', type: 'SORTIE', ref: 'ART-00512', desc: 'Paracétamol 500mg', qte: 50, unite: 'Boîtes', from: 'C/03/01/01', to: 'Expédition MEDIS', agent: 'Mme Ayuk', heure: '08:52' },
-    { id: 'MVT-4510', type: 'TRANSFERT', ref: 'ART-00890', desc: 'Câbles NYY 4x16', qte: 15, unite: 'Rouleaux', from: 'B/04/03/01', to: 'B/04/03/02', agent: 'M. Enow', heure: '08:30' },
-    { id: 'MVT-4509', type: 'ENTRÉE', ref: 'ART-00341', desc: 'Acier HA12 Barres', qte: 100, unite: 'Tiges', from: 'Quai Réception #1', to: 'EXT/SOL', agent: 'M. Foning', heure: '07:45' },
-  ];
+  const recentMovements: RecentMovement[] = [];
 
   const filteredItems = stockItems.filter(item =>
     !searchQuery ||
