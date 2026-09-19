@@ -522,6 +522,11 @@ export const aiAPI = {
   sendMessage: (message: string) => apiClient.post('/api/ai/chat', { message })
 };
 
+export const alertsAPI = {
+  getAlerts: (params?: Record<string, unknown>) => apiClient.get('/api/alerts/', { params }),
+  getSummary: () => apiClient.get('/api/alerts/summary'),
+};
+
 // â”€â”€â”€ Service Accostage (Acconage) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const acconageAPI = {
   getAcconages: (params?: Record<string, unknown>) => apiClient.get('/api/v1/acconage', { params }),

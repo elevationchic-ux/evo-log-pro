@@ -84,30 +84,7 @@ export default function ReportsBiDataExportPage() {
   const [exportHistory, setExportHistory] = useState<any[]>([]);
 
   const handleTriggerExport = () => {
-    setIsExporting(true);
-    setTimeout(() => {
-      setIsExporting(false);
-      const newEntry = {
-        id: `EXP-${Date.now().toString().slice(-4)}`,
-        name: selectedDataset.name,
-        format: selectedFormat,
-        date: new Date().toLocaleTimeString('fr-FR'),
-        status: 'Terminé',
-        size: '18.4 KB'
-      };
-      setExportHistory([newEntry, ...exportHistory]);
-      toast.success(`Export « ${selectedDataset.name} » généré au format ${selectedFormat}. Téléchargement lancé.`);
-
-      // Create downloadable empty template / CSV
-      const content = `Date,Reference,Description,Statut\n${new Date().toISOString()},INIT,Donnees Entreprise,ACTIF\n`;
-      const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${selectedDataset.id}_export_${Date.now()}.${selectedFormat.toLowerCase()}`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }, 800);
+    toast.error('L’export persistant de ce jeu de données n’est pas encore raccordé à une API.');
   };
 
   return (
@@ -271,7 +248,7 @@ export default function ReportsBiDataExportPage() {
                     </td>
                     <td className="p-3 text-right pr-5">
                       <button
-                        onClick={() => toast.success(`Téléchargement de ${entry.id} relancé.`)}
+                        onClick={() => toast.error('Le téléchargement persistant de cet export n’est pas disponible.')}
                         className="text-primary hover:underline font-bold text-xs"
                       >
                         Télécharger ({entry.size})

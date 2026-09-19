@@ -27,6 +27,8 @@ async def get_alerts(
 ):
     """Récupère les alertes de performance système"""
     query = db.query(AlertPerformance)
+    if not current_user.is_superuser:
+        query = query.filter(AlertPerformance.company_id == current_user.company_id)
 
     if statut:
         query = query.filter(AlertPerformance.statut == statut)
@@ -71,21 +73,25 @@ async def get_alerts_summary(
     now = datetime.utcnow()
     last_24h = now - timedelta(hours=24)
 
-    total_actives = db.query(func.count(AlertPerformance.id)).filter(
+    alerts_query = db.query(AlertPerformance)
+    if not current_user.is_superuser:
+        alerts_query = alerts_query.filter(AlertPerformance.company_id == current_user.company_id)
+
+    total_actives = alerts_query.filter(
         AlertPerformance.statut == "active"
     ).scalar() or 0
 
-    critique = db.query(func.count(AlertPerformance.id)).filter(
+    critique = alerts_query.filter(
         AlertPerformance.statut == "active",
         AlertPerformance.gravite == "critique"
     ).scalar() or 0
 
-    haute = db.query(func.count(AlertPerformance.id)).filter(
+    haute = alerts_query.filter(
         AlertPerformance.statut == "active",
         AlertPerformance.gravite == "haute"
     ).scalar() or 0
 
-    nouvelles_24h = db.query(func.count(AlertPerformance.id)).filter(
+    nouvelles_24h = alerts_query.filter(
         AlertPerformance.date_alerte >= last_24h
     ).scalar() or 0
 
@@ -112,7 +118,10 @@ async def get_alert(
     current_user: User = Depends(get_current_user)
 ):
     """Récupère une alerte spécifique"""
-    alert = db.query(AlertPerformance).filter(AlertPerformance.id == alert_id).first()
+    alert_query = db.query(AlertPerformance).filter(AlertPerformance.id == alert_id)
+    if not current_user.is_superuser:
+        alert_query = alert_query.filter(AlertPerformance.company_id == current_user.company_id)
+    alert = alert_query.first()
     if not alert:
         raise HTTPException(status_code=404, detail="Alerte introuvable")
     return {
