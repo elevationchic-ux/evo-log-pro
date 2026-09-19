@@ -2,6 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models.user import User
+from app.models.new_k_modules import FuelTankSensor
 
 router = APIRouter(prefix="/api/v1", tags=["New K-Modules"])
 
@@ -25,7 +30,7 @@ class EPodCreate(BaseModel):
 class FuelSensorCreate(BaseModel):
     immatriculation_camion: str
     niveau_actuel_litres: float
-    derniere_station: Optional[str] = "TotalEnergies Douala Port"
+    derniere_station: Optional[str] = None
 
 class PurchaseOrderCreate(BaseModel):
     fournisseur: str
@@ -64,18 +69,6 @@ _epods = [
         "latitude": 4.0511,
         "statut": "LIVRE_AVEC_SIGNATURE",
         "timestamp": datetime.utcnow().isoformat()
-    }
-]
-
-_fuel_sensors = [
-    {
-        "id": 1,
-        "immatriculation_camion": "LT-802-AA",
-        "niveau_actuel_litres": 340.0,
-        "capacite_totale_litres": 400.0,
-        "alerte_vol_detectee": False,
-        "derniere_station": "TotalEnergies Douala Port",
-        "updated_at": datetime.utcnow().isoformat()
     }
 ]
 
@@ -134,19 +127,6 @@ _invoices = [
     }
 ]
 
-_incidents_qhse = [
-    {
-        "id": 1,
-        "code_incident": "INC-2026-009",
-        "source": "CAPTEUR_FUEL_GUARD",
-        "severite": "CRITIQUE",
-        "camion": "LT-802-AA",
-        "description": "Baisse suspecte du niveau de carburant de 45L détectée au stationnement",
-        "statut": "OUVERT",
-        "created_at": datetime.utcnow().isoformat()
-    }
-]
-
 # --- Endpoints K-Tracking & e-POD ---
 @router.get("/tracking/epod")
 def get_epods():
@@ -180,36 +160,35 @@ def create_epod(payload: EPodCreate):
 
 # --- Endpoints K-FuelGuard ---
 @router.get("/fuel-guard/sensors")
-def get_fuel_sensors():
-    return {"items": _fuel_sensors, "incidents_securite": _incidents_qhse}
+def get_fuel_sensors(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(FuelTankSensor)
+    if not current_user.is_superuser:
+        query = query.filter(FuelTankSensor.company_id == current_user.company_id)
+    sensors = query.order_by(FuelTankSensor.updated_at.desc()).all()
+    return {"items": sensors, "incidents_securite": []}
 
 @router.post("/fuel-guard/sensors")
-def create_fuel_sensor(payload: FuelSensorCreate):
+def create_fuel_sensor(
+    payload: FuelSensorCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     alerte = payload.niveau_actuel_litres < 50.0
-    new_item = {
-        "id": len(_fuel_sensors) + 1,
-        **payload.dict(),
-        "capacite_totale_litres": 400.0,
-        "alerte_vol_detectee": alerte,
-        "updated_at": datetime.utcnow().isoformat()
-    }
-    _fuel_sensors.append(new_item)
-    
-    # Automatisme Inter-Module : Déclenchement automatique d'un ticket incident QHSE si alerte de vol
-    if alerte:
-        new_incident = {
-            "id": len(_incidents_qhse) + 1,
-            "code_incident": f"INC-2026-0{len(_incidents_qhse) + 10}",
-            "source": "CAPTEUR_FUEL_GUARD",
-            "severite": "CRITIQUE",
-            "camion": payload.immatriculation_camion,
-            "description": f"Alerte Télématique: niveau de carburant critique ({payload.niveau_actuel_litres}L)",
-            "statut": "OUVERT",
-            "created_at": datetime.utcnow().isoformat()
-        }
-        _incidents_qhse.append(new_incident)
-
-    return new_item
+    sensor = FuelTankSensor(
+        company_id=current_user.company_id,
+        immatriculation_camion=payload.immatriculation_camion,
+        niveau_actuel_litres=payload.niveau_actuel_litres,
+        capacite_totale_litres=400.0,
+        alerte_vol_detectee=alerte,
+        derniere_station=payload.derniere_station,
+    )
+    db.add(sensor)
+    db.commit()
+    db.refresh(sensor)
+    return sensor
 
 # --- Calculateur Tarifaire Douane Natif CEMAC / ZLECAF ---
 class RequeteCalculDouane(BaseModel):
@@ -355,4 +334,3 @@ def get_bandes_livraison():
         ],
         "total": 1
     }
-

@@ -34,6 +34,7 @@ class FuelTankSensor(Base):
     __tablename__ = "fuel_tank_sensors"
 
     id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
     immatriculation_camion = Column(String(50), index=True, nullable=False)
     niveau_actuel_litres = Column(Float, nullable=False)
     capacite_totale_litres = Column(Float, default=400.0)
