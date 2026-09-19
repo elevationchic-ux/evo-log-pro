@@ -1,53 +1,61 @@
-﻿'use client';
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import GenericDataPage from '@/components/ui/GenericDataPage';
+import { suppliersAPI } from '@/lib/api-client';
+import { useI18n } from '@/hooks/useI18n';
+import { Briefcase } from 'lucide-react';
 
-export default function Page() {
-  const [isLoading, setIsLoading] = useState(true);
+export default function SuppliersPage() {
+  const t = useI18n();
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
+    async function fetchSuppliers() {
+      try {
+        const res = await suppliersAPI.getSuppliers();
+        setSuppliers(res.data || []);
+      } catch (error) {
+        console.error("Failed to fetch suppliers:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSuppliers();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const columns = [
+    { key: 'code_supplier', label: 'Code' },
+    { key: 'raison_sociale', label: 'Raison Sociale' },
+    { key: 'categorie', label: 'Catégorie' },
+    { key: 'telephone_principal', label: 'Téléphone' },
+    { key: 'email_principal', label: 'Email' },
+    { 
+      key: 'statut', 
+      label: 'Statut',
+      render: (val: string) => {
+        let badgeClass = 'status-info';
+        if (val === 'ACTIF') badgeClass = 'status-delivered';
+        if (val === 'INACTIF') badgeClass = 'status-maintenance';
+        if (val === 'EN_ATTENTE_VALIDATION') badgeClass = 'status-transit';
+        return <span className={`status-badge ${badgeClass}`}>{val}</span>;
+      }
+    }
+  ];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Fournisseurs</h1>
-        <p className="text-gray-600 text-sm mt-1">Gestion des fournisseurs</p>
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Module en dÃ©veloppement</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Ce module est en cours de dÃ©veloppement et sera bientÃ´t disponible.
-          </p>
-        </div>
-      </div>
-    </div>
+    <GenericDataPage
+      title="Fournisseurs (K-Achats)"
+      description="Gestion du référentiel des fournisseurs et prestataires."
+      icon={<Briefcase className="w-5 h-5 text-primary" />}
+      columns={columns}
+      data={suppliers}
+      isLoading={loading}
+      primaryActionLabel="Nouveau Fournisseur"
+      onAdd={() => console.log('Add Supplier')}
+      onEdit={(row) => console.log('Edit Supplier', row)}
+      onDelete={(row) => console.log('Delete Supplier', row)}
+    />
   );
 }

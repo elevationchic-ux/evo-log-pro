@@ -1,53 +1,412 @@
-﻿'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { ModuleLayout } from '@/components/layout/ModuleLayout'
+import { ArrowRightLeft, Search, Plus, Calendar, Edit, FileText, CheckCircle2, Truck, Box, Link as LinkIcon } from 'lucide-react'
+import { CardSkeletonLoader } from '@/components/ui/Loaders'
+import { magasinAPI } from '@/lib/api-client'
+import { toast } from 'sonner'
+import Link from 'next/link'
 
-export default function Page() {
-  const [isLoading, setIsLoading] = useState(true);
+export default function OrdresTransfertPage() {
+  const queryClient = useQueryClient()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showModal, setShowModal] = useState(false)
 
-  useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const { data: ordres = [], isLoading: loading } = useQuery({
+    queryKey: ['ordres_transfert'],
+    queryFn: async () => {
+      const res = await magasinAPI.getOrdresTransfert()
+      return res.data || []
+    }
+  })
 
-  if (isLoading) {
+  const actionMutation = useMutation({
+    mutationFn: async ({ otId, action }: { otId: number, action: 'valider' | 'expedier' | 'receptionner' | 'annuler' }) => {
+      if (action === 'valider') return magasinAPI.validerOrdreTransfert(otId);
+      if (action === 'expedier') return magasinAPI.expedierOrdreTransfert(otId);
+      if (action === 'receptionner') return magasinAPI.receptionnerOrdreTransfert(otId);
+      if (action === 'annuler') return magasinAPI.annulerOrdreTransfert(otId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ordres_transfert'] })
+    },
+    onError: (error: any) => {
+      toast.error(`Erreur: ${error.response?.data?.detail || "Erreur de connexion"}`)
+    }
+  })
+
+  const handleAction = (otId: number, action: 'valider' | 'expedier' | 'receptionner' | 'annuler') => {
+    if (confirm(`Voulez-vous vraiment ${action} cet ordre de transfert ?`)) {
+      actionMutation.mutate({ otId, action })
+    }
+  }
+
+  const filteredOrdres = ordres.filter((o: any) =>
+    o.numero_ot?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (o.magasin_source?.nom || '')?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (o.magasin_dest?.nom || '')?.toLowerCase().includes(searchQuery.toLowerCase())
+  ).sort((a: any, b: any) => b.id - a.id)
+
+  const getStatusBadge = (status: string) => {
+    const styles = {
+      BROUILLON: 'bg-slate-100 text-slate-700',
+      VALIDE: 'bg-blue-100 text-blue-700',
+      EN_TRANSIT: 'bg-purple-100 text-purple-700',
+      RECEPTIONNE: 'bg-emerald-100 text-emerald-700',
+      ANNULE: 'bg-red-100 text-red-700'
+    } as any
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${styles[status] || 'bg-slate-100 text-slate-700'}`}>
+        {status}
+      </span>
+    )
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">ordres transfert</h1>
-        <p className="text-gray-600 text-sm mt-1">Module ordres-transfert</p>
-      </div>
+    <ModuleLayout module="magasin">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 animate-in fade-in duration-500">
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        {/* Header */}
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+              <ArrowRightLeft className="w-8 h-8 text-blue-600" />
+              Ordres de Transfert (OT)
+            </h1>
+            <p className="text-sm text-slate-500 mt-2">Gérez les transferts de marchandises entre vos différents magasins.</p>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Module en dÃ©veloppement</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Ce module est en cours de dÃ©veloppement et sera bientÃ´t disponible.
-          </p>
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition-all"
+          >
+            <Plus className="w-5 h-5" />
+            Nouvel OT
+          </button>
         </div>
+
+        {/* Search */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+          <div className="relative w-full sm:w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Rechercher (Numéro OT, Magasin)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none bg-slate-50"
+            />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-slate-50/80 border-b border-slate-100 text-xs uppercase font-bold text-slate-500">
+              <tr>
+                <th className="px-6 py-4">Numéro OT</th>
+                <th className="px-6 py-4">Trajet (Source → Dest)</th>
+                <th className="px-6 py-4">Marchandises</th>
+                <th className="px-6 py-4">Statut</th>
+                <th className="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading ? (
+                <tr><td colSpan={5} className="px-6 py-12"><CardSkeletonLoader /></td></tr>
+              ) : filteredOrdres.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-16 text-center text-slate-500 font-medium">
+                    Aucun ordre de transfert trouvé.
+                  </td>
+                </tr>
+              ) : filteredOrdres.map((ot: any) => (
+                <tr key={ot.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-6 py-4">
+                    <Link href={`/magasin/ordres-transfert/${ot.id}`}>
+                      <div className="font-mono font-black text-blue-600">{ot.numero_ot}</div>
+                    </Link>
+                    <div className="text-xs text-slate-500 flex items-center gap-1 mt-1 font-bold">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {new Date(ot.date_transfert).toLocaleDateString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-slate-100 px-3 py-1.5 rounded-lg text-sm font-bold text-slate-700">
+                        {ot.magasin_source?.nom || 'Inconnu'}
+                      </div>
+                      <ArrowRightLeft className="w-4 h-4 text-slate-400" />
+                      <div className="bg-blue-50 px-3 py-1.5 rounded-lg text-sm font-bold text-blue-700">
+                        {ot.magasin_dest?.nom || 'Inconnu'}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-bold text-slate-800">
+                      {ot.lignes?.length || 0} article(s)
+                    </div>
+                    {ot.declaration && (
+                      <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                        <FileText className="w-3 h-3" />
+                        BL: {ot.declaration.numero_bl}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    {getStatusBadge(ot.statut)}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end gap-2">
+                      <Link href={`/magasin/ordres-transfert/${ot.id}`} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Voir les détails">
+                        <FileText className="w-4 h-4" />
+                      </Link>
+                      {ot.statut === 'BROUILLON' && (
+                        <button onClick={() => handleAction(ot.id, 'valider')} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Valider (Déstocker source)">
+                          <CheckCircle2 className="w-5 h-5" />
+                        </button>
+                      )}
+                      {ot.statut === 'VALIDE' && (
+                        <button onClick={() => handleAction(ot.id, 'expedier')} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Expédier (En transit)">
+                          <Truck className="w-5 h-5" />
+                        </button>
+                      )}
+                      {(ot.statut === 'VALIDE' || ot.statut === 'EN_TRANSIT') && (
+                        <button onClick={() => handleAction(ot.id, 'receptionner')} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Réceptionner (Stocker destination)">
+                          <Box className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Modal Form */}
+        {showModal && (
+          <OTModal
+            onClose={() => setShowModal(false)}
+            onSuccess={() => { setShowModal(false); queryClient.invalidateQueries({ queryKey: ['ordres_transfert'] }); }}
+          />
+        )}
+      </div>
+    </ModuleLayout>
+  )
+}
+
+function OTModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
+  const queryClient = useQueryClient()
+  const [formData, setFormData] = useState({
+    magasin_source_id: '',
+    magasin_dest_id: '',
+    declaration_id: '',
+    motif: '',
+    notes: '',
+    code_article: '',
+    quantite: ''
+  })
+
+  const [magasins, setMagasins] = useState<any[]>([])
+  const [declarations, setDeclarations] = useState<any[]>([])
+  const [articleInfo, setArticleInfo] = useState<any>(null)
+
+  useEffect(() => {
+    // Fetch magasins
+    fetch('http://localhost:8000/api/magasin/magasins', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    }).then(r => r.json()).then(setMagasins).catch(console.error)
+
+    // Fetch declarations for tracking (optional)
+    fetch('http://localhost:8000/api/magasin/declarations', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    }).then(r => r.json()).then(setDeclarations).catch(console.error)
+  }, [])
+
+  useEffect(() => {
+    if (formData.code_article.length === 7) {
+      fetch(`http://localhost:8000/api/magasin/articles/by-code/${formData.code_article}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+      .then(async r => {
+        if (!r.ok) throw new Error()
+        return r.json()
+      })
+      .then(setArticleInfo)
+      .catch(() => setArticleInfo(null))
+    } else {
+      setArticleInfo(null)
+    }
+  }, [formData.code_article])
+
+  const mutation = useMutation({
+    mutationFn: (data: any) => magasinAPI.createOrdreTransfert(data),
+    onSuccess: () => {
+      toast.success('Ordre de transfert créé avec succès')
+      queryClient.invalidateQueries({ queryKey: ['ordres_transfert'] })
+      onSuccess()
+    },
+    onError: (err: any) => {
+      toast.error(`Erreur: ${err.response?.data?.detail || "Erreur inconnue"}`)
+    }
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!articleInfo) {
+      toast.error("Code article invalide.");
+      return
+    }
+
+    if (formData.magasin_source_id === formData.magasin_dest_id) {
+      toast.error("Le magasin source et destination doivent être différents.");
+      return
+    }
+
+    const payload = {
+      magasin_source_id: parseInt(formData.magasin_source_id),
+      magasin_dest_id: parseInt(formData.magasin_dest_id),
+      declaration_id: formData.declaration_id ? parseInt(formData.declaration_id) : null,
+      motif: formData.motif || null,
+      notes: formData.notes || null,
+      lignes: [
+        {
+          article_id: articleInfo.id,
+          quantite: parseFloat(formData.quantite),
+          unite_mesure: articleInfo.unite_mesure
+        }
+      ]
+    }
+
+    mutation.mutate(payload)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
+        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <ArrowRightLeft className="w-5 h-5 text-blue-600" />
+            Nouvel Ordre de Transfert
+          </h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><span className="material-symbols-outlined">close</span></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-1">Magasin Source *</label>
+              <select
+                required
+                value={formData.magasin_source_id}
+                onChange={e => setFormData({...formData, magasin_source_id: e.target.value})}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-slate-50"
+              >
+                <option value="">Sélectionner...</option>
+                {magasins.map(m => (
+                  <option key={m.id} value={m.id}>{m.nom}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-1">Magasin Destination *</label>
+              <select
+                required
+                value={formData.magasin_dest_id}
+                onChange={e => setFormData({...formData, magasin_dest_id: e.target.value})}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-blue-50/50"
+              >
+                <option value="">Sélectionner...</option>
+                {magasins.map(m => (
+                  <option key={m.id} value={m.id}>{m.nom}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-100 pt-6">
+            <label className="block text-sm font-bold text-slate-700 mb-1">Déclaration BL (Origine / Traçabilité)</label>
+            <select
+              value={formData.declaration_id}
+              onChange={e => setFormData({...formData, declaration_id: e.target.value})}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+            >
+              <option value="">Aucun lien spécifique (Transfert standard)</option>
+              {declarations.map(d => (
+                <option key={d.id} value={d.id}>{d.numero_bl} - {d.client?.nom}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+            <h3 className="font-bold text-slate-800">Article à transférer</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Code Article (7 chiffres) *</label>
+                <input
+                  type="text"
+                  required
+                  pattern="\d{7}"
+                  maxLength={7}
+                  value={formData.code_article}
+                  onChange={e => setFormData({...formData, code_article: e.target.value.replace(/\D/g, '')})}
+                  placeholder="Ex: 1111110"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 outline-none font-mono text-sm bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Quantité *</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number" step="0.001" required disabled={!articleInfo}
+                    value={formData.quantite}
+                    onChange={e => setFormData({...formData, quantite: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 outline-none disabled:bg-slate-100 text-sm font-bold"
+                  />
+                  {articleInfo && (
+                    <div className="flex items-center px-3 bg-slate-200 text-slate-700 font-bold rounded-xl text-xs">
+                      {articleInfo.unite_mesure}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="col-span-2">
+                <div className="bg-white p-2 rounded-lg border border-slate-200 text-sm flex items-center">
+                  {articleInfo ? (
+                    <span><span className="font-bold text-emerald-600 mr-2">Produit reconnu:</span> {articleInfo.nom}</span>
+                  ) : (
+                    <span className="text-slate-400 italic">Le produit s'affichera ici automatiquement...</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Motif du transfert</label>
+            <input
+              type="text"
+              value={formData.motif}
+              onChange={e => setFormData({...formData, motif: e.target.value})}
+              placeholder="Ex: Rééquilibrage stock, Demande client..."
+              className="w-full px-4 py-2 rounded-xl border border-slate-300 outline-none text-sm"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors">Annuler</button>
+            <button
+              type="submit"
+              disabled={!articleInfo}
+              className="px-5 py-2.5 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Créer l'OT (Brouillon)
+            </button>
+          </div>
+        </form>
       </div>
     </div>
-  );
+  )
 }

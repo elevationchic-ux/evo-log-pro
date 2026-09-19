@@ -18,77 +18,21 @@ import {
   RefreshCw,
   Download
 } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
 
-// Mock API
+// Real Backend Tenant API Connected to Database
 const tenantAPI = {
   getCompanies: async () => {
-    return {
-      data: [
-        {
-          id: 1,
-          code: 'CAMLOG',
-          nom: 'Cameroon Logistics SA',
-          legal_form: 'SA',
-          email: 'contact@camlog.cm',
-          telephone: '+237 233 456 789',
-          ville: 'Douala',
-          is_active: true,
-          is_verified: true,
-          max_users: 50,
-          current_users: 12,
-          max_storage_mb: 51200,
-          current_storage_mb: 2450,
-          subdomain: 'camlog.evolog.cm',
-          subscription_end: '2026-12-31',
-          created_at: '2026-01-01'
-        },
-        {
-          id: 2,
-          code: 'CEMACLOG',
-          nom: 'CEMAC Express',
-          legal_form: 'SARL',
-          email: 'info@cemac.cm',
-          telephone: '+237 699 123 456',
-          ville: 'Yaoundé',
-          is_active: true,
-          is_verified: false,
-          max_users: 25,
-          current_users: 8,
-          max_storage_mb: 25600,
-          current_storage_mb: 1200,
-          subdomain: 'cemac.evolog.cm',
-          subscription_end: '2026-06-30',
-          created_at: '2026-01-15'
-        },
-        {
-          id: 3,
-          code: 'PORTTRANS',
-          nom: 'Port Transport International',
-          legal_form: 'SA',
-          email: 'admin@porttrans.cm',
-          telephone: '+237 677 987 654',
-          ville: 'Kribi',
-          is_active: false,
-          is_verified: true,
-          max_users: 100,
-          current_users: 45,
-          max_storage_mb: 102400,
-          current_storage_mb: 8900,
-          subdomain: 'porttrans.evolog.cm',
-          subscription_end: '2026-03-31',
-          created_at: '2026-01-20'
-        }
-      ]
-    }
+    return apiClient.get('/api/v1/tenant/companies');
   },
   createCompany: async (data: any) => {
-    return { data: { ...data, id: Date.now() } }
+    return apiClient.post('/api/v1/tenant/companies', data);
   },
   activateCompany: async (id: number) => {
-    return { data: { success: true } }
+    return apiClient.put(`/api/v1/tenant/companies/${id}/activer`);
   },
   suspendCompany: async (id: number) => {
-    return { data: { success: true } }
+    return apiClient.put(`/api/v1/tenant/companies/${id}/suspendre`);
   }
 }
 

@@ -11,28 +11,35 @@ export const authOptions: NextAuthOptions = {
       name: 'Credentials',
       credentials: {
         username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
+        email: { label: "Email", type: "text" }
       },
       async authorize(credentials) {
-        // In production, this would call the backend API
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
+        // Call backend auth API
+        const identifier = (credentials as any)?.email || credentials?.username
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/v1/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            username: credentials?.username,
+            username: identifier,
             password: credentials?.password
           }),
         })
 
+        if (!res.ok) {
+          return null
+        }
+
         const user = await res.json()
 
-        if (res.ok && user) {
+        if (user && user.access_token) {
           return {
-            id: user.user_id,
+            id: String(user.user_id || 1),
             name: user.username,
             email: user.email,
             access_token: user.access_token,
             refresh_token: user.refresh_token,
+            roles: user.roles || [],
           }
         }
         return null
@@ -44,19 +51,23 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.accessToken = (user as any).access_token
         token.refreshToken = (user as any).refresh_token
+        token.roles = (user as any).roles || []
       }
       return token
     },
     async session({ session, token }) {
       (session as any).accessToken = token.accessToken as string
       (session as any).refreshToken = token.refreshToken as string
+      if (session.user) {
+        (session.user as any).roles = (token as any).roles || []
+      }
       return session
     },
   },
   pages: {
-    signIn: '/(auth)/login',
-    signOut: '/(auth)/login',
-    error: '/(auth)/login',
+    signIn: '/login',
+    signOut: '/login',
+    error: '/login',
   },
   session: {
     strategy: 'jwt',

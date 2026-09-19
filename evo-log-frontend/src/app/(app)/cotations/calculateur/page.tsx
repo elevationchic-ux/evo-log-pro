@@ -1,51 +1,97 @@
-﻿'use client';
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calculator, ArrowLeft, RefreshCw, DollarSign } from 'lucide-react';
+import Link from 'next/link';
 
-export default function Page() {
-  const [isLoading, setIsLoading] = useState(true);
+export default function CalculateurCotationPage() {
+  const [distanceKm, setDistanceKm] = useState('1150');
+  const [poidsTons, setPoidsTons] = useState('28');
+  const [fraisPort, setFraisPort] = useState('450000');
+  const [fraisDouane, setFraisDouane] = useState('850000');
 
-  useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const dist = Number(distanceKm) || 0;
+  const weight = Number(poidsTons) || 0;
+  const port = Number(fraisPort) || 0;
+  const customs = Number(fraisDouane) || 0;
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const coutCarburant = dist * 850; // 850 XAF / km
+  const coutChauffeur = dist * 120;
+  const coutTotal = coutCarburant + coutChauffeur + port + customs;
+  const prixConseille = coutTotal * 1.22; // 22% margin
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Calculateur</h1>
-        <p className="text-gray-600 text-sm mt-1">Outil de calcul</p>
-      </div>
+    <div className="max-w-4xl mx-auto py-8 px-4 text-white animate-in fade-in duration-500">
+      <Link href="/cotations" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white mb-6">
+        <ArrowLeft className="w-4 h-4" /> Retour aux cotations
+      </Link>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+        <div className="flex items-center gap-3 pb-6 border-b border-slate-800">
+          <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center border border-emerald-500/20">
+            <Calculator className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Module en dÃ©veloppement</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Ce module est en cours de dÃ©veloppement et sera bientÃ´t disponible.
-          </p>
+          <div>
+            <h1 className="text-2xl font-black">Calculateur de Marge & Tarif IA</h1>
+            <p className="text-sm text-slate-400">Simulation instantanée des coûts de transport multimodal et acconage.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Distance du Trajet (km)</label>
+            <input
+              type="number"
+              value={distanceKm}
+              onChange={(e) => setDistanceKm(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-emerald-400 font-mono font-bold"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Poids du Fret (Tonnes)</label>
+            <input
+              type="number"
+              value={poidsTons}
+              onChange={(e) => setPoidsTons(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-emerald-400 font-mono font-bold"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Frais d'Acconage & Quai (XAF)</label>
+            <input
+              type="number"
+              value={fraisPort}
+              onChange={(e) => setFraisPort(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-emerald-400 font-mono font-bold"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Frais Douane Estimés (XAF)</label>
+            <input
+              type="number"
+              value={fraisDouane}
+              onChange={(e) => setFraisDouane(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-emerald-400 font-mono font-bold"
+            />
+          </div>
+        </div>
+
+        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-3">
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-400">Coût Carburant Estimé :</span>
+            <span className="font-mono text-slate-200">{coutCarburant.toLocaleString()} XAF</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-400">Coût Total d'Opération (Prerequis) :</span>
+            <span className="font-mono text-slate-200">{coutTotal.toLocaleString()} XAF</span>
+          </div>
+          <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
+            <span className="font-bold text-base text-slate-100">Prix de Vente Conseillé (+22% Marge) :</span>
+            <span className="font-mono font-black text-2xl text-emerald-400">{Math.round(prixConseille).toLocaleString()} XAF</span>
+          </div>
         </div>
       </div>
     </div>

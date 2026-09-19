@@ -1,0 +1,149 @@
+'use client'
+
+import * as React from 'react'
+import { cn } from '@/lib/utils'
+
+// Minimal sidebar components to replace the corrupted file
+
+const SidebarProvider = ({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn('flex min-h-screen w-full', className)} {...props}>
+    {children}
+  </div>
+)
+
+const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, children, ...props }, ref) => (
+    <aside
+      ref={ref}
+      className={cn('flex h-full w-[260px] flex-col bg-sidebar text-sidebar-foreground', className)}
+      {...props}
+    >
+      {children}
+    </aside>
+  )
+)
+Sidebar.displayName = 'Sidebar'
+
+const SidebarHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn('flex flex-col gap-2 p-2', className)} {...props} />
+  )
+)
+SidebarHeader.displayName = 'SidebarHeader'
+
+const SidebarFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn('flex flex-col gap-2 p-2', className)} {...props} />
+  )
+)
+SidebarFooter.displayName = 'SidebarFooter'
+
+const SidebarContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn('flex flex-1 flex-col gap-2 overflow-auto p-2', className)} {...props} />
+  )
+)
+SidebarContent.displayName = 'SidebarContent'
+
+const SidebarGroup = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn('relative flex w-full min-w-0 flex-col p-2', className)} {...props} />
+  )
+)
+SidebarGroup.displayName = 'SidebarGroup'
+
+const SidebarGroupLabel = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn('duration-200 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none', className)} {...props} />
+  )
+)
+SidebarGroupLabel.displayName = 'SidebarGroupLabel'
+
+const SidebarGroupContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn('w-full text-sm', className)} {...props} />
+  )
+)
+SidebarGroupContent.displayName = 'SidebarGroupContent'
+
+const SidebarMenu = React.forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
+  ({ className, ...props }, ref) => (
+    <ul ref={ref} className={cn('flex w-full min-w-0 flex-col gap-1', className)} {...props} />
+  )
+)
+SidebarMenu.displayName = 'SidebarMenu'
+
+const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.HTMLAttributes<HTMLLIElement>>(
+  ({ className, ...props }, ref) => (
+    <li ref={ref} className={cn('group/menu-item relative', className)} {...props} />
+  )
+)
+SidebarMenuItem.displayName = 'SidebarMenuItem'
+
+const SidebarMenuButton = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean; isActive?: boolean; tooltip?: string }
+>(({ className, isActive, asChild, children, ...props }, ref) => (
+  <button
+    ref={ref}
+    className={cn(
+      'flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2',
+      isActive && 'bg-sidebar-accent font-medium text-sidebar-accent-foreground',
+      className
+    )}
+    {...props}
+  >
+    {children}
+  </button>
+))
+SidebarMenuButton.displayName = 'SidebarMenuButton'
+
+const SidebarTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
+  ({ className, ...props }, ref) => (
+    <button ref={ref} className={cn('h-7 w-7', className)} {...props} />
+  )
+)
+SidebarTrigger.displayName = 'SidebarTrigger'
+
+const SidebarInset = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <main ref={ref} className={cn('relative flex min-h-svh flex-1 flex-col bg-background', className)} {...props} />
+  )
+)
+SidebarInset.displayName = 'SidebarInset'
+
+const SidebarSeparator = React.forwardRef<HTMLHRElement, React.HTMLAttributes<HTMLHRElement>>(
+  ({ className, ...props }, ref) => (
+    <hr ref={ref} className={cn('mx-2 my-1 border-sidebar-border', className)} {...props} />
+  )
+)
+SidebarSeparator.displayName = 'SidebarSeparator'
+
+function useSidebar() {
+  return {
+    open: true,
+    setOpen: (_: boolean) => {},
+    openMobile: false,
+    setOpenMobile: (_: boolean) => {},
+    isMobile: false,
+    toggleSidebar: () => {},
+  }
+}
+
+export {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
+}

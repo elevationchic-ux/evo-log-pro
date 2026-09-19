@@ -1,0 +1,28 @@
+'use client'
+
+import * as React from 'react'
+import { cn } from '@/lib/utils'
+
+interface ResizablePanelGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+  direction?: 'horizontal' | 'vertical'
+}
+
+const ResizablePanelGroup = ({ className, direction = 'horizontal', ...props }: ResizablePanelGroupProps) => (
+  <div
+    className={cn('flex h-full w-full', direction === 'vertical' ? 'flex-col' : 'flex-row', className)}
+    {...props}
+  />
+)
+
+const ResizablePanel = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn('flex-1 overflow-auto', className)} {...props} />
+)
+
+const ResizableHandle = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn('relative flex w-px items-center justify-center bg-border after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 cursor-col-resize', className)}
+    {...props}
+  />
+)
+
+export { ResizablePanelGroup, ResizablePanel, ResizableHandle }

@@ -1,0 +1,29 @@
+'use client'
+
+import * as React from 'react'
+import { cn } from '@/lib/utils'
+import { Toggle } from '@/components/ui/toggle'
+
+const ToggleGroup = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { type?: 'single' | 'multiple'; value?: string; onValueChange?: (v: string) => void }
+>(({ className, children, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn('flex items-center justify-center gap-1', className)}
+    {...props}
+  >
+    {children}
+  </div>
+))
+ToggleGroup.displayName = 'ToggleGroup'
+
+const ToggleGroupItem = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentPropsWithoutRef<typeof Toggle> & { value: string }
+>(({ className, value, ...props }, ref) => (
+  <Toggle ref={ref} data-value={value} className={cn('', className)} {...props} />
+))
+ToggleGroupItem.displayName = 'ToggleGroupItem'
+
+export { ToggleGroup, ToggleGroupItem }

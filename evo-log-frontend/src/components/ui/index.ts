@@ -7,6 +7,7 @@ export { PageHeader } from './PageHeader';
 export { ModuleLayout } from './ModuleLayout';
 export { StatCard } from './StatCard';
 export { Card, CardHeader, CardContent, CardFooter } from './Card';
+
 export { SearchInput } from './SearchInput';
 
 // Re-export commonly used types

@@ -1,53 +1,128 @@
-﻿'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useState } from 'react'
+import { StockFilter } from '@/components/magasin/StockFilter'
+import { ModuleLayout } from '@/components/layout/ModuleLayout'
+import { Card } from '@/components/ui/Card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
 
-export default function Page() {
-  const [isLoading, setIsLoading] = useState(true);
+interface StockResult {
+  id: number
+  code_article: string
+  nom_article: string
+  magasin: string
+  quantite_disponible: number
+  quantite_udb: number
+  statut: string
+  categorie: string
+}
 
-  useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+export default function StockSearchPage() {
+  const [results, setResults] = useState<StockResult[]>([])
+  const [loading, setLoading] = useState(false)
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+  const handleFilter = async (filters: any) => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/magasin/stocks/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filters),
+      })
+      const data = await response.json()
+      setResults(data)
+    } catch (error) {
+      console.error('Erreur lors de la recherche:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getStatutColor = (statut: string) => {
+    switch (statut) {
+      case 'NORMAL':
+        return 'bg-green-100 text-green-800'
+      case 'DECHIRE':
+        return 'bg-red-100 text-red-800'
+      case 'MOUILLE':
+        return 'bg-blue-100 text-blue-800'
+      case 'ENDOMMAGE':
+        return 'bg-orange-100 text-orange-800'
+      case 'PERIME':
+        return 'bg-purple-100 text-purple-800'
+      case 'EN_ATTENTE':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'RESERVE':
+        return 'bg-gray-100 text-gray-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">search</h1>
-        <p className="text-gray-600 text-sm mt-1">Module search</p>
-      </div>
+    <ModuleLayout module="magasin">
+      <div className="container mx-auto p-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Recherche Avancée de Stock</h1>
+          <p className="text-gray-600">Recherchez des stocks avec des filtres avancés</p>
+        </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <StockFilter onFilter={handleFilter} />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Module en dÃ©veloppement</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Ce module est en cours de dÃ©veloppement et sera bientÃ´t disponible.
-          </p>
+
+          <div className="lg:col-span-2">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Résultats</h2>
+              
+              {loading ? (
+                <div className="text-center py-8 text-gray-500">
+                  Chargement...
+                </div>
+              ) : results.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  Aucun résultat trouvé
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Code Article</TableHead>
+                      <TableHead>Nom</TableHead>
+                      <TableHead>Magasin</TableHead>
+                      <TableHead>Quantité</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Catégorie</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {results.map((stock) => (
+                      <TableRow key={stock.id}>
+                        <TableCell className="font-mono">{stock.code_article}</TableCell>
+                        <TableCell>{stock.nom_article}</TableCell>
+                        <TableCell>{stock.magasin}</TableCell>
+                        <TableCell>
+                          {stock.quantite_disponible} UDB
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatutColor(stock.statut)}>
+                            {stock.statut}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{stock.categorie}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    </ModuleLayout>
+  )
 }

@@ -241,7 +241,7 @@ test.describe('Processus End-to-End: Navire → Client', () => {
       await page.fill('input[name="invoiceNumber"]', 'FAC-2024-08456');
       await page.fill('input[name="amount"]', '2500000');
       await page.selectOption('select[name="method"]', 'MOBILE_MONEY');
-      await page.fill('input[name="reference']", 'OM-20240824-001');
+      await page.fill('input[name="reference"]', 'OM-20240824-001');
       
       await page.click('button:has-text("Enregistrer")');
       await expect(page.locator('text=Paiement enregistré')).toBeVisible();

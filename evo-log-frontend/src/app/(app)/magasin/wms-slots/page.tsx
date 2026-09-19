@@ -1,53 +1,133 @@
-﻿'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import React from 'react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
+import { Button } from '@/components/ui/button'
+import { Plus, LayoutGrid, PackageSearch } from 'lucide-react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
 
-export default function Page() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+export default function WmsSlotsPage() {
+  // Static data representing StorageSlots
+  const slots = [
+    { id: 1, code: 'A-01-01', aisle: 'A', rack: '01', level: '1', status: 'OCCUPIED', maxWeight: 1000, currentWeight: 800 },
+    { id: 2, code: 'A-01-02', aisle: 'A', rack: '01', level: '2', status: 'AVAILABLE', maxWeight: 1000, currentWeight: 0 },
+    { id: 3, code: 'A-01-03', aisle: 'A', rack: '01', level: '3', status: 'AVAILABLE', maxWeight: 800, currentWeight: 0 },
+    { id: 4, code: 'B-01-01', aisle: 'B', rack: '01', level: '1', status: 'OCCUPIED', maxWeight: 1500, currentWeight: 1450 },
+    { id: 5, code: 'B-01-02', aisle: 'B', rack: '01', level: '2', status: 'MAINTENANCE', maxWeight: 1500, currentWeight: 0 },
+  ]
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">wms slots</h1>
-        <p className="text-gray-600 text-sm mt-1">Module wms-slots</p>
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Module en dÃ©veloppement</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Ce module est en cours de dÃ©veloppement et sera bientÃ´t disponible.
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Magasin: Cartographie WMS</h1>
+          <p className="text-muted-foreground mt-1">
+            Gérez les emplacements physiques (Allées, Racks, Niveaux) et le "Directed Put-away".
           </p>
         </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline">
+            <LayoutGrid className="w-4 h-4 mr-2" />
+            Vue 3D
+          </Button>
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvel Emplacement
+          </Button>
+        </div>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Total Emplacements</CardTitle>
+            <PackageSearch className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">1,240</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Libres</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">450</div>
+            <p className="text-xs text-muted-foreground mt-1">36% de la capacité</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Occupés</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">785</div>
+            <p className="text-xs text-muted-foreground mt-1">63% de la capacité</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Maintenance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">5</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Liste des Emplacements</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Code Emplacement</TableHead>
+                  <TableHead>Allée</TableHead>
+                  <TableHead>Rack</TableHead>
+                  <TableHead>Niveau</TableHead>
+                  <TableHead>Poids Max (kg)</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {slots.map((slot) => (
+                  <TableRow key={slot.id}>
+                    <TableCell className="font-mono font-medium">{slot.code}</TableCell>
+                    <TableCell>{slot.aisle}</TableCell>
+                    <TableCell>{slot.rack}</TableCell>
+                    <TableCell>{slot.level}</TableCell>
+                    <TableCell>
+                      {slot.currentWeight} / {slot.maxWeight}
+                      <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                        <div 
+                          className={`h-1.5 rounded-full ${slot.currentWeight / slot.maxWeight > 0.9 ? 'bg-red-500' : 'bg-blue-500'}`} 
+                          style={{ width: `${(slot.currentWeight / slot.maxWeight) * 100}%` }}
+                        ></div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={
+                        slot.status === 'AVAILABLE' ? 'default' : 
+                        slot.status === 'OCCUPIED' ? 'secondary' : 'destructive'
+                      }>
+                        {slot.status === 'AVAILABLE' ? 'Libre' : slot.status === 'OCCUPIED' ? 'Occupé' : 'Maintenance'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm">Détails</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 }

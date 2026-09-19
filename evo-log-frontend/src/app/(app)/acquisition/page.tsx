@@ -2,7 +2,7 @@
 
 import { LayoutDashboard } from 'lucide-react'
 
-export default function  $args[0].Value.ToUpper() cquisitionDashboard() {
+export default function AcquisitionDashboard() {
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -11,7 +11,7 @@ export default function  $args[0].Value.ToUpper() cquisitionDashboard() {
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
-        <h2 className="text-lg font-semibold mb-4">Fonctionnalités  $args[0].Value.ToUpper() cquisition</h2>
+        <h2 className="text-lg font-semibold mb-4">Fonctionnalités Acquisition</h2>
         <div className="space-y-3">
           <div className="flex items-start gap-3">
             <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2"></div>

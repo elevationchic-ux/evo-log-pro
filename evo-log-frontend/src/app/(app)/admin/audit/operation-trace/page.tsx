@@ -1,53 +1,103 @@
-﻿'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { adminAPI } from '@/lib/api-client'
+import GenericDataPage from '@/components/ui/GenericDataPage'
+import { History, ShieldAlert } from 'lucide-react'
 
-export default function Page() {
-  const [isLoading, setIsLoading] = useState(true);
+export default function AuditOperationTrace() {
+  const [logs, setLogs] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+    async function fetchLogs() {
+      try {
+        const res = await adminAPI.getAuditLogs()
+        setLogs(res.data || [])
+      } catch (err) {
+        console.error('Error fetching audit logs:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchLogs()
+  }, [])
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
-            ))}
-          </div>
+  const columns = [
+    {
+      key: 'timestamp',
+      label: 'Date & Heure',
+      render: (val: any) => (
+        <span className="text-sm font-medium text-slate-700">
+          {new Date(val).toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      key: 'user',
+      label: 'Utilisateur',
+      render: (val: any, row: any) => (
+        <div>
+          <div className="font-semibold text-slate-900">{row.user?.username || val || 'Système'}</div>
+          <div className="text-xs text-slate-500">{row.ip_address || '127.0.0.1'}</div>
         </div>
-      </div>
-    );
-  }
+      ),
+    },
+    {
+      key: 'action',
+      label: 'Action',
+      render: (val: any) => {
+        let style = 'bg-slate-50 text-slate-700 ring-slate-600/20'
+        if (val?.includes('CREATE') || val?.includes('LOGIN')) style = 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
+        if (val?.includes('UPDATE') || val?.includes('MODIFIED')) style = 'bg-blue-50 text-blue-700 ring-blue-600/20'
+        if (val?.includes('DELETE') || val?.includes('FAILED')) style = 'bg-red-50 text-red-700 ring-red-600/20'
+
+        return (
+          <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${style}`}>
+            {val || 'UNKNOWN_ACTION'}
+          </span>
+        )
+      }
+    },
+    {
+      key: 'resource',
+      label: 'Ressource',
+      render: (val: any) => (
+        <div className="text-sm text-slate-600 font-mono">
+          {val || 'N/A'}
+        </div>
+      )
+    },
+    {
+      key: 'details',
+      label: 'Détails',
+      render: (val: any) => (
+        <div className="text-xs text-slate-500 truncate max-w-[200px]" title={JSON.stringify(val)}>
+          {val ? JSON.stringify(val) : '-'}
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      label: 'Statut',
+      render: (val: any, row: any) => (
+        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${row.status === 'ERROR' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>
+          {row.status === 'ERROR' ? <ShieldAlert className="w-3 h-3" /> : null}
+          {row.status === 'ERROR' ? 'Échec' : 'Succès'}
+        </span>
+      )
+    }
+  ]
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Trace des OpÃ©rations</h1>
-        <p className="text-gray-600 text-sm mt-1">Historique des opÃ©rations</p>
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Module en dÃ©veloppement</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Ce module est en cours de dÃ©veloppement et sera bientÃ´t disponible.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+    <GenericDataPage
+      title="Traces d'Opérations (Audit Logs)"
+      description="Historique immuable de toutes les actions système, modifications de données et tentatives d'accès."
+      icon={<History className="w-6 h-6 text-slate-600" />}
+      columns={columns}
+      data={logs}
+      isLoading={loading}
+      onExport={() => console.log('Export logs')}
+    />
+  )
 }

@@ -275,202 +275,6 @@ export const NAVIGATION_MODULES: NavigationModule[] = [
   },
   {
     id: 'client-portal', name: 'Client Portal', path: '/client-portal', icon: '🌐',
-    color: '#06B6D4', gradient: 'linear-gradient(135deg, #06B6D4 0%, #0E7490 100%)',
-    category: 'Admin', description: 'Portail client',
-    firstPage: '/client-portal',
-  },
-  {
-    id: 'chauffeur', name: 'Chauffeur', path: '/chauffeur', icon: '🚛',
-    color: '#F97316', gradient: 'linear-gradient(135deg, #F97316 0%, #C2410C 100%)',
-    category: 'Operations', description: 'Espace chauffeur',
-    firstPage: '/chauffeur',
-  },
-];
-
-// =====================================================
-// HELPER FUNCTIONS
-// =====================================================
-
-export function getModuleById(id: string): NavigationModule | undefined {
-  return NAVIGATION_MODULES.find(m => m.id === id);
-}
-
-export function getModuleByPath(path: string): NavigationModule | undefined {
-  return NAVIGATION_MODULES.find(m =>
-    m.path === path || m.subModules?.some(s => s.path === path)
-  );
-}
-
-export function getCategories(): string[] {
-  return [...new Set(NAVIGATION_MODULES.map(m => m.category))];
-}
-
-export function getModulesByCategory(category: string): NavigationModule[] {
-  return NAVIGATION_MODULES.filter(m => m.category === category);
-}
-
-export function getFirstPage(moduleId: string): string | undefined {
-  return getModuleById(moduleId)?.firstPage;
-}EF4444', gradient: 'linear-gradient(135deg, #f5af19 0%, #f12711 100%)',
-    category: 'Operations', description: 'Gestion carburant',
-    firstPage: '/fuel-guard',
-  },
-  {
-    id: 'finance', name: 'Finance', path: '/finance', icon: '💰',
-    color: '#22C55E', gradient: 'linear-gradient(135deg, #96fbc4 0%, #f9f586 100%)',
-    category: 'Finance', description: 'Gestion financière',
-    firstPage: '/finance',
-  },
-  {
-    id: 'paiement-local', name: 'Paiements Locaux', path: '/paiement-local', icon: '💳',
-    color: '#4ECDC4', gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
-    category: 'Finance', description: 'Orange Money, MTN, Banques',
-    firstPage: '/paiement-local',
-  },
-  {
-    id: 'fiscalite-cameroun', name: 'Fiscalité Cameroun', path: '/fiscalite-cameroun', icon: '📊',
-    color: '#96CEB4', gradient: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
-    category: 'Finance', description: 'IRPP, IS, TCF, TDR, OHADA',
-    firstPage: '/fiscalite-cameroun',
-  },
-  {
-    id: 'purchase', name: 'Achat', path: '/purchase', icon: '�',
-    color: '#6366F1', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    category: 'Finance', description: 'Gestion des achats',
-    firstPage: '/purchase',
-  },
-  {
-    id: 'procurement', name: 'Approvisionnement', path: '/procurement', icon: '📥',
-    color: '#8B5CF6', gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
-    category: 'Finance', description: 'Chaîne d\'approvisionnement',
-    firstPage: '/procurement',
-  },
-  {
-    id: 'fournisseurs', name: 'Fournisseurs', path: '/fournisseurs', icon: '🏭',
-    color: '#D946EF', gradient: 'linear-gradient(135deg, #c471f5 0%, #fa71cd 100%)',
-    category: 'Finance', description: 'Gestion des fournisseurs',
-    firstPage: '/fournisseurs',
-  },
-  {
-    id: 'suppliers', name: 'Suppliers', path: '/suppliers', icon: '🤝',
-    color: '#A855F7', gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
-    category: 'Finance', description: 'Gestion partenaires',
-    firstPage: '/suppliers',
-  },
-  {
-    id: 'tiers', name: 'Tiers', path: '/tiers', icon: '👥',
-    color: '#6D28D9', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    category: 'Finance', description: 'Clients, fournisseurs, partenaires',
-    firstPage: '/tiers',
-  },
-  {
-    id: 'cotations', name: 'Cotations', path: '/cotations', icon: '💲',
-    color: '#F59E0B', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    category: 'Finance', description: 'Devis et cotations',
-    firstPage: '/cotations',
-  },
-
-  // ========== RH ==========
-  {
-    id: 'rh', name: 'Ressources Humaines', path: '/rh', icon: '👥',
-    color: '#F472B6', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    category: 'RH', description: 'Gestion du personnel',
-    firstPage: '/rh',
-  },
-  {
-    id: 'chauffeur', name: 'Chauffeurs', path: '/chauffeur', icon: '🚗',
-    color: '#FB923C', gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-    category: 'RH', description: 'Espace chauffeurs',
-    firstPage: '/chauffeur',
-  },
-
-  // ========== QHSE & Conformité ==========
-  {
-    id: 'qhse', name: 'QHSE', path: '/qhse', icon: '🛡️',
-    color: '#EAB308', gradient: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
-    category: 'QHSE', description: 'Qualité, Hygiène, Sécurité, Environnement',
-    firstPage: '/qhse',
-  },
-  {
-    id: 'compliance', name: 'Conformité', path: '/compliance', icon: '✅',
-    color: '#22D3EE', gradient: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
-    category: 'QHSE', description: 'Conformité réglementaire',
-    firstPage: '/compliance',
-  },
-  {
-    id: 'security', name: 'Sécurité', path: '/security', icon: '🔒',
-    color: '#EF4444', gradient: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)',
-    category: 'QHSE', description: 'Sécurité physique et informationnelle',
-    firstPage: '/security',
-  },
-  {
-    id: 'maintenance', name: 'Maintenance', path: '/maintenance', icon: '�',
-    color: '#64748B', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    category: 'QHSE', description: 'Maintenance préventive et corrective',
-    firstPage: '/maintenance',
-  },
-
-  // ========== Cameroun/CEMAC ==========
-  {
-    id: 'integration-cameroun', name: 'Intégration Cameroun', path: '/integration-cameroun', icon: '🇨🇲',
-    color: '#FF6B6B', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    category: 'Cameroun', description: 'BSC, CSC, SYGED, APE',
-    firstPage: '/integration-cameroun',
-  },
-  {
-    id: 'company', name: 'Company', path: '/company', icon: '🏢',
-    color: '#10B981', gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
-    category: 'Cameroun', description: 'Gestion entreprise Cameroun',
-    firstPage: '/company',
-  },
-
-  // ========== Administration ==========
-  {
-    id: 'admin', name: 'Admin', path: '/admin', icon: '⚙️',
-    color: '#6B7280', gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
-    category: 'Admin', description: 'Administration système',
-    firstPage: '/admin',
-  },
-  {
-    id: 'master-data', name: 'Master Data', path: '/master-data', icon: '🗄️',
-    color: '#9CA3AF', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    category: 'Admin', description: 'Données de référence',
-    firstPage: '/master-data',
-  },
-  {
-    id: 'integration', name: 'Intégration', path: '/integration', icon: '🔗',
-    color: '#4B5563', gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
-    category: 'Admin', description: 'Intégrations API et systèmes',
-    firstPage: '/integration',
-  },
-  {
-    id: 'settings', name: 'Paramètres', path: '/settings', icon: '⚡',
-    color: '#374151', gradient: 'linear-gradient(135deg, #c471f5 0%, #fa71cd 100%)',
-    category: 'Admin', description: 'Paramètres système',
-    firstPage: '/settings',
-  },
-  {
-    id: 'reports', name: 'Rapports', path: '/reports', icon: '📈',
-    color: '#1D4ED8', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    category: 'Admin', description: 'Rapports et analytics',
-    firstPage: '/reports',
-  },
-
-  // ========== Support ==========
-  {
-    id: 'support', name: 'Support', path: '/support', icon: '🎧',
-    color: '#059669', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    category: 'Support', description: 'Support technique et helpdesk',
-    firstPage: '/support',
-  },
-  {
-    id: 'notifications', name: 'Notifications', path: '/notifications', icon: '🔔',
-    color: '#D97706', gradient: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
-    category: 'Support', description: 'Centre de notifications',
-    firstPage: '/notifications',
-  },
-  {
-    id: 'client-portal', name: 'Client Portal', path: '/client-portal', icon: '🌐',
     color: '#7C3AED', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     category: 'Support', description: 'Portail clients externes',
     firstPage: '/client-portal',
@@ -487,8 +291,14 @@ export const getModuleByPath = (path: string): NavigationModule | undefined =>
 export const getModulesByCategory = (category: string): NavigationModule[] =>
   NAVIGATION_MODULES.filter(m => m.category === category);
 
+export const getCategories = (): string[] =>
+  [...new Set(NAVIGATION_MODULES.map(m => m.category))];
+
 export const getAllCategories = (): string[] =>
   [...new Set(NAVIGATION_MODULES.map(m => m.category))];
+
+export const getFirstPage = (moduleId: string): string | undefined =>
+  getModuleById(moduleId)?.firstPage;
 
 export const getModuleColor = (module: string | undefined): string => {
   if (!module) return '#3B82F6';
@@ -501,3 +311,4 @@ export const getModuleGradient = (module: string | undefined): string => {
   const mod = NAVIGATION_MODULES.find(m => m.id === module || m.path === module);
   return mod?.gradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
 };
+

@@ -1,3 +1,4 @@
+// src/components/layout/ModuleLayout.tsx - Layout principal unifié avec thème par module
 'use client';
 
 import { ReactNode } from 'react';
@@ -7,10 +8,10 @@ interface ModuleLayoutProps {
   module?: string;
 }
 
-export default function ModuleLayout({ children, module }: ModuleLayoutProps) {
-  return (
-    <div className="min-h-screen bg-gray-100">
-      {children}
-    </div>
-  );
+export function ModuleLayout({ children }: ModuleLayoutProps) {
+  return <>{children}</>;
 }
+
+export default ModuleLayout;
+
+

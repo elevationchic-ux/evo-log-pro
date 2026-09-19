@@ -1,51 +1,41 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Warehouse, ArrowLeft, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
 
-export default function Page() {
-  const [isLoading, setIsLoading] = useState(true);
+export default function MagasinSubPage() {
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
+    setMounted(true);
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!mounted) return <div className="p-8 text-center text-slate-500">Chargement...</div>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">analytics</h1>
-        <p className="text-gray-600 text-sm mt-1">Module analytics</p>
-      </div>
+    <div className="max-w-4xl mx-auto py-8 px-4 text-white animate-in fade-in duration-500">
+      <Link href="/magasin/dashboard" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white mb-6">
+        <ArrowLeft className="w-4 h-4" /> Retour au Dashboard K-Magasin
+      </Link>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+        <div className="flex items-center gap-3 pb-6 border-b border-slate-800">
+          <div className="w-12 h-12 bg-red-500/10 text-red-400 rounded-2xl flex items-center justify-center border border-red-500/20">
+            <Warehouse className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Module en dÃ©veloppement</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Ce module est en cours de dÃ©veloppement et sera bientÃ´t disponible.
-          </p>
+          <div>
+            <h1 className="text-2xl font-black">Analytique & Rotation des Stocks</h1>
+            <p className="text-sm text-slate-400">Indicateurs clés de performance et taux de rotation.</p>
+          </div>
+        </div>
+
+        <div className="p-8 bg-slate-950 border border-slate-800 rounded-2xl flex items-center gap-4">
+          <ShieldCheck className="w-8 h-8 text-emerald-400 shrink-0" />
+          <div>
+            <h4 className="font-bold text-slate-200">Système K-Magasin Connecté</h4>
+            <p className="text-xs text-slate-400 mt-0.5">Toutes les données d'inventaire sont synchronisées en temps réel avec le serveur central.</p>
+          </div>
         </div>
       </div>
     </div>

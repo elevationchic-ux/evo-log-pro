@@ -1,0 +1,152 @@
+[
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/annuaire-prestataires/page.tsx",
+    "line": 163,
+    "content": "// Fetch from FastAPI backend \u2014 NO mock fallback"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/magasin/declarations/[id]/page.tsx",
+    "line": 233,
+    "content": "{receptionTiming.sample_size} d\u00e9clarations historiques"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/magasin/declarations/[id]/page.tsx",
+    "line": 237,
+    "content": "{(!receptionTiming.based_on_history || receptionTiming.sample_size === 0) && ("
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(auth)/login/page.tsx",
+    "line": 298,
+    "content": "<span className=\"hidden sm:inline text-amber-400/60 font-semibold\">SSL 256-BIT \u2022 ARCHITECTURE ZERO MOCK</span>"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/admin_agency.py",
+    "line": 11,
+    "content": "return {\"message\": \"Admin Agency router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/alerts.py",
+    "line": 11,
+    "content": "return {\"message\": \"Alerts router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/audit.py",
+    "line": 50,
+    "content": "sample_items = ["
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/audit.py",
+    "line": 102,
+    "content": "return {\"total\": len(sample_items), \"items\": sample_items}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/auto_invoicing.py",
+    "line": 11,
+    "content": "return {\"message\": \"Auto Invoicing router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/bill_of_loading.py",
+    "line": 11,
+    "content": "return {\"message\": \"Bill of Loading router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/container_lifecycle.py",
+    "line": 11,
+    "content": "return {\"message\": \"Container Lifecycle router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/gateway.py",
+    "line": 11,
+    "content": "return {\"message\": \"Gateway router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/goods_declaration.py",
+    "line": 11,
+    "content": "return {\"message\": \"Goods Declaration router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/gps_tracking.py",
+    "line": 11,
+    "content": "return {\"message\": \"GPS Tracking router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/incidents.py",
+    "line": 11,
+    "content": "return {\"message\": \"Incidents router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/master_data.py",
+    "line": 11,
+    "content": "return {\"message\": \"Master Data router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/notification_system.py",
+    "line": 11,
+    "content": "return {\"message\": \"Notification System router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/partner_api.py",
+    "line": 11,
+    "content": "return {\"message\": \"Partner API router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/port_incidents.py",
+    "line": 11,
+    "content": "return {\"message\": \"Port Incidents router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/port_performance.py",
+    "line": 11,
+    "content": "return {\"message\": \"Port Performance router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/port_pricing.py",
+    "line": 11,
+    "content": "return {\"message\": \"Port Pricing router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/public_api.py",
+    "line": 11,
+    "content": "return {\"message\": \"Public API router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/purchase.py",
+    "line": 11,
+    "content": "return {\"message\": \"Purchase router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/reception_mag3.py",
+    "line": 11,
+    "content": "return {\"message\": \"Reception Mag3 router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/removal_slip.py",
+    "line": 11,
+    "content": "return {\"message\": \"Removal Slip router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/rh.py",
+    "line": 176,
+    "content": "sample_periods = ["
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/rh.py",
+    "line": 183,
+    "content": "for p_start, p_end, p_pay, m_name, yr, primes_val, h_sup in sample_periods:"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/shift_planning.py",
+    "line": 11,
+    "content": "return {\"message\": \"Shift Planning router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/suppliers.py",
+    "line": 11,
+    "content": "return {\"message\": \"Suppliers router - placeholder\"}"
+  },
+  {
+    "file": "c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-backend/app/routers/v1/transactions.py",
+    "line": 11,
+    "content": "return {\"message\": \"Transactions router - placeholder\"}"
+  }
+]

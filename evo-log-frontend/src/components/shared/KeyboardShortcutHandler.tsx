@@ -12,11 +12,11 @@ interface Shortcut {
 }
 
 interface KeyboardShortcutHandlerProps {
-  shortcuts: Shortcut[];
+  shortcuts?: Shortcut[];
   children?: React.ReactNode;
 }
 
-export default function KeyboardShortcutHandler({ shortcuts, children }: KeyboardShortcutHandlerProps) {
+export default function KeyboardShortcutHandler({ shortcuts = [], children }: KeyboardShortcutHandlerProps) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement;

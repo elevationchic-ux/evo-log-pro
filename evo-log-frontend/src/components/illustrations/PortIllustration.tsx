@@ -2,9 +2,9 @@
 
 import React from 'react';
 
-export default function PortIllustration() {
+export function PortIllustration({ className }: { className?: string } = {}) {
   return (
-    <svg viewBox="0 0 500 300" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 500 300" className={className || "w-full h-full"} xmlns="http://www.w3.org/2000/svg">
       <rect width="500" height="300" fill="#0c4a6e" rx="12" />
       <rect x="0" y="200" width="500" height="100" fill="#0369a1" rx="0" />
       <rect x="50" y="120" width="80" height="80" fill="#64748b" />

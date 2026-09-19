@@ -1,53 +1,131 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { ModuleLayout } from '@/components/layout/ModuleLayout';
+import { Map, Activity, MapPin, Search } from 'lucide-react';
+import { transportAPI } from '@/lib/api-client';
 
-export default function Page() {
-  const [isLoading, setIsLoading] = useState(true);
+// Dynamic import with SSR false is REQUIRED for react-leaflet
+const MapControlTower = dynamic(() => import('@/components/transport/MapControlTower'), { 
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-slate-100 rounded-2xl animate-pulse flex items-center justify-center">
+      <p className="text-slate-400 font-bold flex items-center gap-2">
+        <Map className="w-5 h-5 animate-spin" />
+        Initialisation de la tour de contrôle...
+      </p>
+    </div>
+  )
+});
+
+export default function GPSControlTowerPage() {
+  const [missions, setMissions] = useState<any[]>([]);
+  const [camions, setCamions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
+    async function loadData() {
+      try {
+        const [mRes, cRes] = await Promise.all([
+          transportAPI.getMissions().catch(() => ({ data: [] })),
+          transportAPI.getCamions().catch(() => ({ data: [] }))
+        ]);
+        setMissions(mRes.data || []);
+        setCamions(cRes.data || []);
+      } catch (e) {
+        console.error("Failed to load map data", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const filteredMissions = missions.filter(m => 
+    (m.reference && m.reference.toLowerCase().includes(search.toLowerCase())) ||
+    (m.camion_immatriculation && m.camion_immatriculation.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const enMouvement = camions.filter(c => c.statut === 'EN_ROUTE' || c.statut === 'MISSION').length;
+  const enArret = camions.filter(c => c.statut === 'DISPONIBLE').length;
+  const horsLigne = camions.filter(c => c.statut === 'EN_MAINTENANCE' || !c.actif).length;
+
+  const total = enMouvement + enArret + horsLigne || 1;
+  const pctMouvement = Math.round((enMouvement / total) * 100);
+  const pctArret = Math.round((enArret / total) * 100);
+  const pctHorsLigne = Math.round((horsLigne / total) * 100);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">map</h1>
-        <p className="text-gray-600 text-sm mt-1">Module map</p>
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+    <ModuleLayout module="transport">
+      <div className="h-[calc(100vh-theme(spacing.16))] flex flex-col p-4 animate-in fade-in duration-500">
+        
+        {/* Header Compact */}
+        <div className="flex justify-between items-center mb-4 shrink-0">
+          <div>
+            <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+              <Map className="w-6 h-6 text-blue-600" />
+              Tour de Contrôle GPS
+            </h1>
+            <p className="text-slate-500 text-sm">Suivi télématique en temps réel de la flotte.</p>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Module en dÃ©veloppement</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Ce module est en cours de dÃ©veloppement et sera bientÃ´t disponible.
-          </p>
+
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Rechercher OT, Camion..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 outline-none w-64"
+              />
+            </div>
+            <div className="bg-emerald-50 text-emerald-600 px-3 py-2 rounded-xl text-sm font-bold flex items-center gap-2 border border-emerald-100 shadow-sm">
+              <Activity className="w-4 h-4" />
+              Système En Ligne
+            </div>
+          </div>
         </div>
+
+        {/* Map Container */}
+        <div className="flex-1 rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative z-0">
+          {loading ? (
+            <div className="h-full w-full bg-slate-100 animate-pulse flex items-center justify-center">Chargement de la carte...</div>
+          ) : (
+            <MapControlTower vehicles={filteredMissions} />
+          )}
+          
+          {/* Overlay Stats Card */}
+          <div className="absolute top-4 right-4 z-[400] w-72 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-100">
+            <h3 className="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-blue-600" />
+              Statut Flotte ({camions.length} Véhicules)
+            </h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-slate-500">En Mouvement</span>
+                <span className="text-sm font-black text-emerald-600">{enMouvement}</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5"><div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${pctMouvement}%` }}></div></div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-slate-500">En Arrêt / Quai</span>
+                <span className="text-sm font-black text-amber-600">{enArret}</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5"><div className="bg-amber-500 h-1.5 rounded-full" style={{ width: `${pctArret}%` }}></div></div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-slate-500">Hors Ligne / Maintenance</span>
+                <span className="text-sm font-black text-red-600">{horsLigne}</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5"><div className="bg-red-500 h-1.5 rounded-full" style={{ width: `${pctHorsLigne}%` }}></div></div>
+            </div>
+          </div>
+        </div>
+        
       </div>
-    </div>
+    </ModuleLayout>
   );
 }

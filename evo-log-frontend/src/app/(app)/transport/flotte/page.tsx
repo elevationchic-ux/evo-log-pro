@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { KPICard, StatCard, Card, CardHeader, CardContent, DataTable, StatusBadge, StatusBadges, PageHeader } from '@/components/ui';
 
@@ -17,7 +17,7 @@ export default function TransportFlottePage() {
     { key: 'brand', header: 'Marque' },
     { key: 'model', header: 'Modèle' },
     { key: 'year', header: 'Année', sortable: true },
-    { key: 'status', header: 'Statut', render: (item: any) => StatusBadges.Transport[item.status === 'ACTIF' ? 'EN_ROUTE' : item.status === 'MAINTENANCE' ? 'loading' : 'pending'] },
+    { key: 'status', header: 'Statut', render: (item: any) => <StatusBadge label={item.status} variant={item.status === 'ACTIF' ? 'success' : item.status === 'MAINTENANCE' ? 'warning' : 'default'} /> },
     { key: 'mileage', header: 'Kilométrage', sortable: true },
   ];
 
@@ -36,7 +36,7 @@ export default function TransportFlottePage() {
       />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Parc Total" value="127" subtitle="Véhicules" icon={<span className="material-symbols-outlined text-2xl">directions_car</span>} color="primary" trend={{ value: 5, isPositive: true }} />
+        <KPICard title="Parc Total" value="127" subtitle="Véhicules" icon={<span className="material-symbols-outlined text-2xl">directions_car</span>} color="blue" trend={{ value: 5, isPositive: true }} />
         <KPICard title="En Service" value="89" subtitle="Actifs" icon={<span className="material-symbols-outlined text-2xl">check_circle</span>} color="emerald" />
         <KPICard title="En Maintenance" value="23" subtitle="Atelier" icon={<span className="material-symbols-outlined text-2xl">build</span>} color="amber" />
         <KPICard title="Kilométrage Moyen" value="156K km" subtitle="Par véhicule" icon={<span className="material-symbols-outlined text-2xl">speed</span>} color="blue" />

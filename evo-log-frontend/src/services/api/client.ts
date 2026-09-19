@@ -16,7 +16,7 @@ class ApiError extends Error {
 async function getAuthToken(): Promise<string | null> {
   try {
     const session = await getSession();
-    return session?.accessToken || null;
+    return (session as any)?.accessToken || null;
   } catch {
     return null;
   }
@@ -96,5 +96,11 @@ export const api = {
   delete: <T>(endpoint: string, config?: RequestConfig) =>
     apiClient<T>(endpoint, { ...config, method: 'DELETE' }),
 };
+
+apiClient.get = api.get;
+apiClient.post = api.post;
+apiClient.put = api.put;
+apiClient.patch = api.patch;
+apiClient.delete = api.delete;
 
 export default apiClient;

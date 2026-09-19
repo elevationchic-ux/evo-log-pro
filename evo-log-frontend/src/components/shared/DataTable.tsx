@@ -6,17 +6,36 @@ interface Column<T> {
   key: string;
   header: string;
   render?: (item: T) => React.ReactNode;
+  cell?: (item: T) => React.ReactNode;
 }
 
 interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
-  keyField: string;
+  keyField?: string;
   onRowClick?: (item: T) => void;
   emptyMessage?: string;
+  isLoading?: boolean;
+  loading?: boolean;
 }
 
-export default function DataTable<T extends Record<string, any>>({ columns, data, keyField, onRowClick, emptyMessage = 'Aucune donnee' }: DataTableProps<T>) {
+export function DataTable<T extends Record<string, any>>({
+  columns,
+  data,
+  keyField = 'id',
+  onRowClick,
+  emptyMessage = 'Aucune donnee',
+  isLoading = false,
+  loading = false,
+}: DataTableProps<T>) {
+  if (isLoading || loading) {
+    return (
+      <div className="text-center py-12 text-gray-500 flex items-center justify-center gap-2">
+        <span className="material-symbols-outlined animate-spin">progress_activity</span>
+        <span>Chargement...</span>
+      </div>
+    );
+  }
   if (data.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
@@ -44,7 +63,7 @@ export default function DataTable<T extends Record<string, any>>({ columns, data
             >
               {columns.map(col => (
                 <td key={col.key} className="px-4 py-3 text-gray-700">
-                  {col.render ? col.render(item) : item[col.key]}
+                  {col.render ? col.render(item) : col.cell ? col.cell(item) : item[col.key]}
                 </td>
               ))}
             </tr>
@@ -54,3 +73,5 @@ export default function DataTable<T extends Record<string, any>>({ columns, data
     </div>
   );
 }
+
+export default DataTable;

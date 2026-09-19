@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { KPICard, StatCard, Card, CardHeader, CardContent, DataTable, StatusBadge, StatusBadges, PageHeader } from '@/components/ui';
 
@@ -15,7 +15,7 @@ export default function MagasinDashboardPage() {
     { key: 'reference', header: 'Référence BL', sortable: true },
     { key: 'supplier', header: 'Fournisseur', sortable: true },
     { key: 'items', header: 'Colis', sortable: true },
-    { key: 'status', header: 'Statut', render: (item: any) => StatusBadges.Magasin[item.status] || <StatusBadge label={item.status} /> },
+    { key: 'status', header: 'Statut', render: (item: any) => (StatusBadges.Magasin as any)[item.status] || <StatusBadge label={item.status} /> },
     { key: 'date', header: 'Date', sortable: true },
     { key: 'warehouse', header: 'Zone' },
   ];
@@ -35,7 +35,7 @@ export default function MagasinDashboardPage() {
       />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Articles en Stock" value="12,847" subtitle="Articles différents" icon={<span className="material-symbols-outlined text-2xl">inventory_2</span>} color="primary" />
+        <KPICard title="Articles en Stock" value="12,847" subtitle="Articles différents" icon={<span className="material-symbols-outlined text-2xl">inventory_2</span>} color="blue" />
         <KPICard title="Mouvements Jour" value="247" subtitle="Entrées/Sorties" icon={<span className="material-symbols-outlined text-2xl">swap_horiz</span>} color="emerald" trend={{ value: 18, isPositive: true }} />
         <KPICard title="Taux de Service" value="96%" subtitle="OTIF" icon={<span className="material-symbols-outlined text-2xl">verified</span>} color="blue" trend={{ value: 2, isPositive: true }} />
         <KPICard title="Alertes Stock" value="23" subtitle="Seuil bas" icon={<span className="material-symbols-outlined text-2xl">warning</span>} color="amber" trend={{ value: 5, isPositive: false }} />
@@ -80,7 +80,7 @@ export default function MagasinDashboardPage() {
             <CardContent>
               <div className="space-y-3">
                 <div className="p-3 rounded border border-red-200 bg-red-500/5"><p className="font-medium text-sm">Stock critique</p><p className="text-xs text-on-surface-variant">Pièces détachées X-450 - 3 unités</p></div>
-                <div className="p-3 rounded border border-amber-200 bg-amber-500/5"><p className="font-medium text-sm"> Péremption proche</p><p className="text-xs text-on-surface-variant">12 articles < 30 jours</p></div>
+                <div className="p-3 rounded border border-amber-200 bg-amber-500/5"><p className="font-medium text-sm"> Péremption proche</p><p className="text-xs text-on-surface-variant">12 articles &lt; 30 jours</p></div>
                 <div className="p-3 rounded border border-blue-200 bg-blue-500/5"><p className="font-medium text-sm">Réception prévue</p><p className="text-xs text-on-surface-variant">SABC - 14h00</p></div>
               </div>
             </CardContent>

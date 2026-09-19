@@ -1,0 +1,92 @@
+[
+  {
+    "key": "dashboard",
+    "title": "Vue Globale ERP",
+    "path": "/dashboard/global"
+  },
+  {
+    "key": "port-operations",
+    "title": "🚢 Opérations Portuaires & Quai",
+    "path": "/port-operations/dashboard"
+  },
+  {
+    "key": "transit-douane",
+    "title": "🛃 Transit & Douane CEMAC",
+    "path": "/transit-douane/dashboard"
+  },
+  {
+    "key": "transport-flotte",
+    "title": "🚛 K-Transport & Flotte TMS",
+    "path": "/transport-flotte/control-tower"
+  },
+  {
+    "key": "magasin-stock",
+    "title": "📦 K-Magasin WMS & Stock",
+    "path": "/magasin-stock/dashboard"
+  },
+  {
+    "key": "comptabilite-ohada",
+    "title": "📚 Comptabilité OHADA (Sage)",
+    "path": "/comptabilite-ohada/dashboard"
+  },
+  {
+    "key": "finance-ohada",
+    "title": "💰 K-Finance & Trésorerie",
+    "path": "/finance-ohada/dashboard"
+  },
+  {
+    "key": "parc-vehicules",
+    "title": "🚗 K-Parc Véhicules & GMAO",
+    "path": "/parc-vehicules/dashboard"
+  },
+  {
+    "key": "rh-personnel",
+    "title": "👥 Ressources Humaines & Paie",
+    "path": "/rh-personnel/dashboard"
+  },
+  {
+    "key": "qhse-securite",
+    "title": "🛡️ K-QHSE & Sécurité Portuaire",
+    "path": "/qhse-securite/dashboard"
+  },
+  {
+    "key": "client-b2b",
+    "title": "🤝 Portail Client B2B & CRM",
+    "path": "/client-b2b/dashboard"
+  },
+  {
+    "key": "reports-bi",
+    "title": "📊 K-Analytics BI Executive",
+    "path": "/reports-bi/executive-dashboard"
+  },
+  {
+    "key": "admin-saas",
+    "title": "👑 Gouvernance Plateforme SaaS",
+    "path": "/admin-saas"
+  },
+  {
+    "key": "admin-tenant",
+    "title": "🏢 Administration de l Entreprise",
+    "path": "/admin-tenant/dashboard"
+  },
+  {
+    "key": "chat",
+    "title": "💬 Chat & Forum d Entreprise",
+    "path": "/chat"
+  },
+  {
+    "key": "portail-employe",
+    "title": "👤 Mon Espace Salarié (RH)",
+    "path": "/portail-employe"
+  },
+  {
+    "key": "annuaire-prestataires",
+    "title": "Annuaire des Prestataires & Sous-traitants",
+    "path": "/annuaire-prestataires"
+  },
+  {
+    "key": "chef-personnel",
+    "title": "Chef du Personnel (N+1 Rôles Passifs)",
+    "path": "/chef-personnel"
+  }
+]

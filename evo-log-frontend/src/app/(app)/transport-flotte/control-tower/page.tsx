@@ -1,132 +1,94 @@
 'use client';
 
-export default function TransportControlTowerPage() {
+import React, { useState } from 'react';
+import {
+  Compass, Search, Filter, Download, CheckCircle2,
+  AlertTriangle, MapPin, Radio, ShieldCheck, Clock, Navigation
+} from 'lucide-react';
+import { toast } from 'sonner';
+
+interface Checkpoint {
+  name: string;
+  country: string;
+  trucksInQueue: number;
+  avgWaitHours: number;
+  status: 'FLUIDE' | 'RALENTI' | 'BLOQUE';
+}
+
+const CHECKPOINTS: Checkpoint[] = [
+  { name: 'Kousseri / N\'Djamena (Pont N\'Gueli)', country: 'Cameroun ➔ Tchad', trucksInQueue: 14, avgWaitHours: 4.5, status: 'FLUIDE' },
+  { name: 'Garoua-Boulaï / Cantonnier', country: 'Cameroun ➔ RCA', trucksInQueue: 28, avgWaitHours: 12.0, status: 'RALENTI' },
+  { name: 'Touboro / Mbere', country: 'Cameroun ➔ Tchad Sud', trucksInQueue: 6, avgWaitHours: 2.0, status: 'FLUIDE' },
+  { name: 'Poste de Pesage d Edéa', country: 'Cameroun Axe Lourd', trucksInQueue: 8, avgWaitHours: 0.5, status: 'FLUIDE' },
+];
+
+export default function TransportFlotteControlTower() {
+  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>(CHECKPOINTS);
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-blue-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
-          <h1 className="text-2xl font-bold text-on-surface">🚛 Control Tower Transport</h1>
-          <p className="text-on-surface-variant">Centre de contrôle transport temps réel, dispatch missions</p>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-blue-500/20 text-blue-300 border border-blue-500/30">
+              Tour de Contrôle & ETA Frontières
+            </span>
+            <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+              T-Code : KTRN_RTE
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-100 flex items-center gap-3">
+            <Compass className="w-8 h-8 text-blue-400" />
+            Tour de Contrôle des Corridors CEMAC
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            Supervision 24/7 des flux routiers, temps d attente aux frontières et calcul dynamique des heures estimées d arrivée (ETA).
+          </p>
         </div>
-        <div className="flex gap-3">
-          <button className="rounded-lg border border-outline bg-surface px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-container">
-            Actualiser Live
-          </button>
-          <button className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:opacity-90">
-            Nouvelle Mission
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => toast.success('Cartographie radar des convois rafraîchie')}
+            className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
+          >
+            <Radio className="w-4 h-4" /> Radar Flotte Live
           </button>
         </div>
       </div>
 
-      {/* KPIs Transport */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <div className="erp-card p-6">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-cyan-500/10 p-3">
-              <span className="material-symbols-outlined text-cyan-600">local_shipping</span>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-on-surface">45</p>
-              <p className="text-sm text-on-surface-variant">Véhicules Actifs</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="erp-card p-6">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-emerald-500/10 p-3">
-              <span className="material-symbols-outlined text-emerald-600">route</span>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-on-surface">128</p>
-              <p className="text-sm text-on-surface-variant">Missions en Cours</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="erp-card p-6">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-amber-500/10 p-3">
-              <span className="material-symbols-outlined text-amber-600">local_gas_station</span>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-on-surface">87%</p>
-              <p className="text-sm text-on-surface-variant">Efficacité Carburant</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="erp-card p-6">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-blue-500/10 p-3">
-              <span className="material-symbols-outlined text-blue-600">schedule</span>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-on-surface">94%</p>
-              <p className="text-sm text-on-surface-variant">Ponctualité</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Carte et Missions Live */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="erp-card">
-          <div className="erp-card-header">
-            <h3 className="font-semibold text-on-surface">Missions Temps Réel</h3>
-          </div>
-          <div className="erp-card-body">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg border border-outline p-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse"></div>
-                  <div>
-                    <p className="font-medium text-on-surface">CMR-T-4512</p>
-                    <p className="text-sm text-on-surface-variant">Douala → Yaoundé • 3h15 restantes</p>
-                  </div>
-                </div>
-                <span className="status-badge status-transit">EN ROUTE</span>
+      {/* Grid: État des Frontières & Corridors */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {checkpoints.map(cp => (
+          <div key={cp.name} className="bg-slate-900/90 border border-slate-800 p-5 rounded-3xl space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5 font-bold text-slate-100">
+                <MapPin className="w-5 h-5 text-red-400" />
+                <span>{cp.name}</span>
               </div>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                cp.status === 'FLUIDE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                cp.status === 'RALENTI' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                'bg-red-500/10 text-red-400 border border-red-500/20'
+              }`}>
+                {cp.status}
+              </span>
+            </div>
 
-              <div className="flex items-center justify-between rounded-lg border border-outline p-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                  <div>
-                    <p className="font-medium text-on-surface">CMR-T-4513</p>
-                    <p className="text-sm text-on-surface-variant">Port → Client Bassa • Chargement</p>
-                  </div>
-                </div>
-                <span className="status-badge status-loading">CHARGEMENT</span>
+            <div className="text-xs text-slate-400 font-mono">{cp.country}</div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800 text-xs font-mono">
+              <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-850">
+                <div className="text-slate-500 text-[10px] uppercase">Camions en Attente</div>
+                <div className="font-bold text-slate-200 text-base">{cp.trucksInQueue} camions</div>
               </div>
-
-              <div className="flex items-center justify-between rounded-lg border border-outline p-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-3 w-3 rounded-full bg-emerald-500"></div>
-                  <div>
-                    <p className="font-medium text-on-surface">CMR-T-4510</p>
-                    <p className="text-sm text-on-surface-variant">Bafoussam • Livré avec e-POD</p>
-                  </div>
-                </div>
-                <span className="status-badge status-delivered">LIVRÉ</span>
+              <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-850">
+                <div className="text-slate-500 text-[10px] uppercase">Attente Moyenne</div>
+                <div className="font-bold text-amber-400 text-base">{cp.avgWaitHours} heures</div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="erp-card">
-          <div className="erp-card-header">
-            <h3 className="font-semibold text-on-surface">Carte GPS Live</h3>
-          </div>
-          <div className="erp-card-body">
-            <div className="aspect-video rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-              <div className="text-center">
-                <span className="material-symbols-outlined text-6xl text-slate-400 mb-4">map</span>
-                <p className="text-on-surface-variant">Intégration Carte GPS</p>
-                <p className="text-sm text-on-surface-variant">45 véhicules géolocalisés</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

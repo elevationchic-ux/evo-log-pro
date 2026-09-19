@@ -1,96 +1,223 @@
-﻿'use client';
+'use client';
 
-import { KPICard, StatCard, Card, CardHeader, CardContent, DataTable, StatusBadge, StatusBadges, PageHeader } from '@/components/ui';
+import React, { useState } from 'react';
+import {
+  Truck, MapPin, Zap, Navigation, AlertTriangle, CheckCircle2,
+  Clock, User, Phone, Fuel, Package, BarChart3, ChevronRight,
+  Activity, Shield, Target
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function TransportDispatchPage() {
-  const missions = [
-    { id: 'DISP-001', client: 'SABC', cargo: 'Marchandises', weight: '12.5T', origin: 'Port Douala', destination: 'Yaoundé', priority: 'HIGH', vehicle: 'CMR-T-4521', driver: 'M. Kamdem' },
-    { id: 'DISP-002', client: 'Alucam', cargo: 'Conteneurs', weight: '18.2T', origin: 'Zone Franche', destination: 'Bafoussam', priority: 'MEDIUM', vehicle: 'CMR-T-4518', driver: 'M. Ondoua' },
-    { id: 'DISP-003', client: 'MTN Cameroon', cargo: 'Équipements', weight: '8.7T', origin: 'Magasin Central', destination: 'Douala', priority: 'HIGH', vehicle: 'À affecter', driver: 'À affecter' },
-    { id: 'DISP-004', client: 'Nexttel', cargo: 'Marchandises', weight: '15.3T', origin: 'Port', destination: 'Garoua', priority: 'LOW', vehicle: 'CMR-T-4532', driver: 'M. Nguimdjeu' },
-    { id: 'DISP-005', client: 'Port Authority', cargo: 'Divers', weight: '22.1T', origin: 'Zone Port', destination: 'Kribi', priority: 'MEDIUM', vehicle: 'CMR-T-4509', driver: 'M. Talla' },
+  const [selectedVehicle, setSelectedVehicle] = useState<string | null>('TRK-CM-001');
+
+  const fleet = [
+    {
+      id: 'TRK-CM-001', immat: 'LT 2291 B', model: 'VOLVO FH 460 (2022)', chauffeur: 'M. Moukouri Jean',
+      tel: '+237 697 123 456', statut: 'EN TRANSIT', mission: 'MSQU7829104 → N\'Djamena',
+      position: 'Ngaoundéré Pk 12 RN1', gps: { lat: 7.3221, lng: 13.5835 },
+      kmParcourus: 489, kmTotal: 1580, fuel: 68, vitesse: 72, carburantConsomme: 145,
+      poids: '28.4 T / 30 T', prochainArret: 'Ngaoundéré (Contrôle Douane)  2h30',
+      alerts: []
+    },
+    {
+      id: 'TRK-CM-002', immat: 'LT 8840 A', model: 'MAN TGX 18.440 (2021)', chauffeur: 'Mme Ngono Sylvie',
+      tel: '+237 699 876 543', statut: 'CHARGEMENT', mission: 'Réception Quai Douala Port III',
+      position: 'Douala Port III  Terminal à Conteneurs',
+      gps: { lat: 4.0511, lng: 9.7679 },
+      kmParcourus: 0, kmTotal: 0, fuel: 95, vitesse: 0, carburantConsomme: 0,
+      poids: '0 T / 30 T', prochainArret: 'Départ prévu 14:00',
+      alerts: ['BAE en attente  Conteneur CMAU9102834']
+    },
+    {
+      id: 'TRK-CM-003', immat: 'LT 4421 C', model: 'IVECO STRALIS (2023)', chauffeur: 'M. Tsala Eric',
+      tel: '+237 694 321 789', statut: 'LIVRAISON', mission: 'HLXU3891025 → Yaoundé Cradat',
+      position: 'Yaoundé  Cradat Rd Bastos',
+      gps: { lat: 3.8667, lng: 11.5167 },
+      kmParcourus: 260, kmTotal: 260, fuel: 42, vitesse: 0, carburantConsomme: 78,
+      poids: '18.2 T / 28 T', prochainArret: 'Signature e-POD en cours',
+      alerts: ['Niveau carburant faible  Prévoir ravitaillement']
+    },
+    {
+      id: 'TRK-CM-004', immat: 'LT 1109 B', model: 'MERCEDES ACTROS (2020)', chauffeur: 'M. Mvogo Patrick',
+      tel: '+237 677 654 321', statut: 'DISPONIBLE', mission: '',
+      position: 'Parc Douala Zone Bassa',
+      gps: { lat: 4.0134, lng: 9.7218 },
+      kmParcourus: 0, kmTotal: 0, fuel: 100, vitesse: 0, carburantConsomme: 0,
+      poids: '0 T / 30 T', prochainArret: 'En attente d\'affectation',
+      alerts: []
+    },
   ];
 
-  const columns = [
-    { key: 'id', header: 'N° Dispatch', sortable: true },
-    { key: 'client', header: 'Client', sortable: true },
-    { key: 'cargo', header: 'Cargaison' },
-    { key: 'weight', header: 'Poids', sortable: true },
-    { key: 'origin', header: 'Origine' },
-    { key: 'destination', header: 'Destination' },
-    { 
-      key: 'priority', 
-      header: 'Priorité',
-      render: (item: any) => {
-        const colors: Record<string, string> = { HIGH: 'error', MEDIUM: 'warning', LOW: 'default' };
-        return <StatusBadge label={item.priority} variant={colors[item.priority] as any} icon />;
-      }
-    },
+  const selected = fleet.find(v => v.id === selectedVehicle);
+
+  const statutColors: Record<string, string> = {
+    'EN TRANSIT': 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    'CHARGEMENT': 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    'LIVRAISON': 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    'DISPONIBLE': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+  };
+
+  const fleetKpis = [
+    { label: 'Camions en Transit', value: fleet.filter(v => v.statut === 'EN TRANSIT').length, color: 'text-blue-400' },
+    { label: 'En Chargement', value: fleet.filter(v => v.statut === 'CHARGEMENT').length, color: 'text-amber-400' },
+    { label: 'En Livraison', value: fleet.filter(v => v.statut === 'LIVRAISON').length, color: 'text-purple-400' },
+    { label: 'Disponibles', value: fleet.filter(v => v.statut === 'DISPONIBLE').length, color: 'text-emerald-400' },
   ];
 
   return (
     <div className="space-y-6">
-      <PageHeader 
-        title="📋 Dispatch & Planification"
-        description="Affectation missions, optimisation tournées, planification journaux"
-        breadcrumbs={[{ label: 'Transport', href: '/transport' }, { label: 'Dispatch' }]}
-        actions={
-          <button className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:opacity-90 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Nouvelle Planification
-          </button>
-        }
-      />
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Missions à Planifier" value="23" subtitle="Aujourd'hui" icon={<span className="material-symbols-outlined text-2xl">event_note</span>} color="amber" trend={{ value: 15, isPositive: false }} />
-        <KPICard title="Véhicules Disponibles" value="38" subtitle="Sur 45" icon={<span className="material-symbols-outlined text-2xl">local_shipping</span>} color="emerald" />
-        <KPICard title="Chauffeurs Disponibles" value="12" subtitle="Aujourd'hui" icon={<span className="material-symbols-outlined text-2xl">badge</span>} color="blue" />
-        <KPICard title="Taux Occupation" value="87%" subtitle="Objectif: 90%" icon={<span className="material-symbols-outlined text-2xl">pie_chart</span>} color="violet" trend={{ value: 3, isPositive: true }} />
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-white flex items-center gap-2">
+            <Truck className="w-6 h-6 text-amber-400" /> Dispatch & Suivi Flotte en Temps Réel
+          </h1>
+          <p className="text-xs text-slate-400 mt-0.5">GPS live · Affectation missions · Consommation carburant · e-POD · Alertes corridor CEMAC</p>
+        </div>
+        <button
+          onClick={() => toast.info('Formulaire de création de mission transport')}
+          className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-lg"
+        >
+          <Zap className="w-4 h-4" /> Affecter Mission
+        </button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Tonnages Jour" value="142T" change={8} color="primary" icon={<span className="material-symbols-outlined">scale</span>} />
-        <StatCard label="Coût/Mission" value="45,000 CFA" change={-5} changeLabel="vs mois dernier" color="success" icon={<span className="material-symbols-outlined">payments</span>} />
-        <StatCard label="Distance Totale" value="2,450 km" change={12} color="info" icon={<span className="material-symbols-outlined">straighten</span>} />
-        <StatCard label="Retards Aujourd'hui" value="3" change={2} changeLabel="vs hier" color="danger" icon={<span className="material-symbols-outlined">schedule</span>} />
+      {/* Fleet KPIs */}
+      <div className="grid grid-cols-4 gap-3">
+        {fleetKpis.map((k, i) => (
+          <div key={i} className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-center">
+            <div className={`text-3xl font-black ${k.color} font-mono`}>{k.value}</div>
+            <div className="text-[11px] text-slate-400 mt-0.5">{k.label}</div>
+          </div>
+        ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader title="Missions à Affecter" subtitle="Priorisation par ordre de priorité" icon={<span className="material-symbols-outlined text-xl">list</span>} />
-            <CardContent>
-              <DataTable data={missions} columns={columns} keyField="id" onRowClick={(item) => console.log('Assign:', item.id)} />
-            </CardContent>
-          </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Fleet List */}
+        <div className="space-y-2 lg:col-span-1">
+          {fleet.map(v => (
+            <button
+              key={v.id}
+              onClick={() => setSelectedVehicle(v.id)}
+              className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedVehicle === v.id ? 'bg-amber-500/10 border-amber-500/40' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${statutColors[v.statut]}`}>
+                  <Truck className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-white">{v.immat}</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${statutColors[v.statut]}`}>{v.statut}</span>
+                  </div>
+                  <div className="text-[11px] text-slate-400 truncate">{v.chauffeur}</div>
+                  <div className="text-[10px] text-slate-500 truncate mt-0.5">{v.position}</div>
+                </div>
+                {v.alerts.length > 0 && <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />}
+              </div>
+
+              {/* Fuel Bar */}
+              <div className="mt-2 flex items-center gap-2">
+                <Fuel className="w-3 h-3 text-slate-500" />
+                <div className="flex-1 bg-slate-800 rounded-full h-1.5">
+                  <div
+                    className={`h-full rounded-full ${v.fuel > 50 ? 'bg-emerald-500' : v.fuel > 25 ? 'bg-amber-500' : 'bg-red-500'}`}
+                    style={{ width: `${v.fuel}%` }}
+                  ></div>
+                </div>
+                <span className="text-[10px] font-mono text-slate-400">{v.fuel}%</span>
+              </div>
+            </button>
+          ))}
         </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader title="Disponibilité Véhicules" icon={<span className="material-symbols-outlined text-xl">directions_car</span>} />
-            <CardContent>
-              <div className="space-y-3">
-                {['Camions 10T', 'Camions 20T', 'Tracteurs', 'Semi-remorques'].map((type, i) => (
-                  <div key={i} className="flex justify-between items-center p-2 rounded border border-outline">
-                    <span className="text-sm">{type}</span>
-                    <span className="font-bold text-primary">{5 + i * 2}</span>
+        {/* Vehicle Detail */}
+        <div className="lg:col-span-2">
+          {selected ? (
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-5 shadow-xl">
+              {/* Vehicle header */}
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg font-black text-white font-mono">{selected.immat}</span>
+                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statutColors[selected.statut]}`}>{selected.statut}</span>
                   </div>
-                ))}
+                  <div className="text-xs text-slate-400">{selected.model}</div>
+                </div>
+                <button onClick={() => toast.success(`Appel en cours vers ${selected.chauffeur}...`)} className="p-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl hover:bg-emerald-500/20 transition-colors">
+                  <Phone className="w-4 h-4" />
+                </button>
               </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader title="Planification Jour" icon={<span className="material-symbols-outlined text-xl">calendar_today</span>} />
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-on-surface-variant">Matin (6h-12h)</span><span className="font-medium">45 missions</span></div>
-                <div className="flex justify-between"><span className="text-on-surface-variant">Après-midi (12h-18h)</span><span className="font-medium">38 missions</span></div>
-                <div className="flex justify-between"><span className="text-on-surface-variant">Soir (18h-22h)</span><span className="font-medium">12 missions</span></div>
+              {/* GPS Map Placeholder */}
+              <div className="bg-slate-950 rounded-2xl h-48 flex items-center justify-center border border-slate-800 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-5">
+                  <svg width="100%" height="100%">
+                    {Array.from({ length: 15 }).map((_, i) => (
+                      <line key={`h${i}`} x1="0" y1={`${i * 7}%`} x2="100%" y2={`${i * 7}%`} stroke="#6366f1" strokeWidth="1" />
+                    ))}
+                    {Array.from({ length: 20 }).map((_, i) => (
+                      <line key={`v${i}`} x1={`${i * 5}%`} y1="0" x2={`${i * 5}%`} y2="100%" stroke="#6366f1" strokeWidth="1" />
+                    ))}
+                  </svg>
+                </div>
+                <div className="text-center z-10">
+                  <MapPin className="w-8 h-8 text-amber-400 mx-auto mb-1 animate-bounce" />
+                  <div className="text-xs font-bold text-white">{selected.position}</div>
+                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">{selected.gps.lat.toFixed(4)}°N, {selected.gps.lng.toFixed(4)}°E</div>
+                  <div className="text-[10px] text-amber-400/60 mt-0.5">GPS mis à jour il y a 45 sec</div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Mission & metrics */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {[
+                  { label: 'Mission', value: selected.mission, icon: Target },
+                  { label: 'Chauffeur', value: selected.chauffeur, icon: User },
+                  { label: 'Vitesse', value: `${selected.vitesse} km/h`, icon: Activity },
+                  { label: 'Km parcourus', value: `${selected.kmParcourus.toLocaleString()} km`, icon: Navigation },
+                  { label: 'Charge', value: selected.poids, icon: Package },
+                  { label: 'Carburant', value: `${selected.fuel}%  ${selected.carburantConsomme}L consommés`, icon: Fuel },
+                ].map((m, i) => {
+                  const Icon = m.icon;
+                  return (
+                    <div key={i} className="bg-slate-950 border border-slate-800/60 rounded-xl p-3">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Icon className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="text-[10px] text-slate-500 uppercase font-semibold">{m.label}</span>
+                      </div>
+                      <div className="text-xs font-bold text-slate-200 truncate">{m.value}</div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Alerts */}
+              {selected.alerts.length > 0 && (
+                <div className="space-y-2">
+                  {selected.alerts.map((alert, i) => (
+                    <div key={i} className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-2 text-xs text-amber-300">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      {alert}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Next stop */}
+              <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl text-xs text-blue-300">
+                <strong>Prochain arrêt :</strong> {selected.prochainArret}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-8 flex items-center justify-center h-full">
+              <div className="text-center text-slate-500">
+                <Truck className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Sélectionnez un véhicule pour voir les détails</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

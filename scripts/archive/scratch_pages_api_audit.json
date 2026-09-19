@@ -1,0 +1,2514 @@
+[
+  {
+    "page": "acconage/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 233
+  },
+  {
+    "page": "acconage/create/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 1
+  },
+  {
+    "page": "acconage/edit/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 273
+  },
+  {
+    "page": "acconage/edit/[id]/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 5
+  },
+  {
+    "page": "acconage/view/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 209
+  },
+  {
+    "page": "acconage/view/[id]/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 5
+  },
+  {
+    "page": "acconage-avance/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 41
+  },
+  {
+    "page": "acquisition/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 41
+  },
+  {
+    "page": "admin/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 757
+  },
+  {
+    "page": "admin/agencies/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 58
+  },
+  {
+    "page": "admin/alerts/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 173
+  },
+  {
+    "page": "admin/audit/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 200
+  },
+  {
+    "page": "admin/audit/operation-trace/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 103
+  },
+  {
+    "page": "admin/audit/system-health/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 196
+  },
+  {
+    "page": "admin/companies/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 375
+  },
+  {
+    "page": "admin/configuration-des-roles-rbac/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 165
+  },
+  {
+    "page": "admin/journal/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 195
+  },
+  {
+    "page": "admin/role-assignment/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 9
+  },
+  {
+    "page": "admin/security/mfa/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 167
+  },
+  {
+    "page": "admin/subscriptions/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 118
+  },
+  {
+    "page": "admin/user-management/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 373
+  },
+  {
+    "page": "admin/user-management/create/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 142
+  },
+  {
+    "page": "admin/user-management/listing/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 184
+  },
+  {
+    "page": "admin-agency/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "admin-saas/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 455
+  },
+  {
+    "page": "admin-saas/roles-permissions/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 367
+  },
+  {
+    "page": "admin-saas/tenants/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 217
+  },
+  {
+    "page": "admin-saas/users/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 340
+  },
+  {
+    "page": "admin-tenant/audit-logs/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 193
+  },
+  {
+    "page": "admin-tenant/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 92
+  },
+  {
+    "page": "admin-tenant/global-settings/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 253
+  },
+  {
+    "page": "admin-tenant/integrations/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 246
+  },
+  {
+    "page": "admin-tenant/multi-tenant/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 692
+  },
+  {
+    "page": "admin-tenant/system-admin/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 208
+  },
+  {
+    "page": "admin-tenant/users-rbac/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 223
+  },
+  {
+    "page": "alerts/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "annuaire-prestataires/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 1487
+  },
+  {
+    "page": "audit/dashboard/health/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 372
+  },
+  {
+    "page": "auto-invoicing/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "bi/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 101
+  },
+  {
+    "page": "bi/margins/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 45
+  },
+  {
+    "page": "bill-of-loading/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "chat/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 1069
+  },
+  {
+    "page": "chauffeur/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 167
+  },
+  {
+    "page": "chef-personnel/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 1205
+  },
+  {
+    "page": "client-b2b/after-sales/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 356
+  },
+  {
+    "page": "client-b2b/analytics/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 118
+  },
+  {
+    "page": "client-b2b/contracts/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 298
+  },
+  {
+    "page": "client-b2b/crm/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 339
+  },
+  {
+    "page": "client-b2b/dashboard/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 424
+  },
+  {
+    "page": "client-b2b/loyalty/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 270
+  },
+  {
+    "page": "client-b2b/portal/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 266
+  },
+  {
+    "page": "client-portal/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 411
+  },
+  {
+    "page": "client-portal/invoices/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 589
+  },
+  {
+    "page": "client-portal/litiges/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 585
+  },
+  {
+    "page": "client-portal/orders/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 68
+  },
+  {
+    "page": "client-portal/profile/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 538
+  },
+  {
+    "page": "client-portal/reports/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 81
+  },
+  {
+    "page": "client-portal/shipments/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 555
+  },
+  {
+    "page": "company/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 305
+  },
+  {
+    "page": "company/b2b-features/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 287
+  },
+  {
+    "page": "company/branding/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 300
+  },
+  {
+    "page": "company/departments/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 83
+  },
+  {
+    "page": "company/reporting/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 217
+  },
+  {
+    "page": "company/users/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 215
+  },
+  {
+    "page": "compliance/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 117
+  },
+  {
+    "page": "compliance/audits/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 35
+  },
+  {
+    "page": "comptabilite-ohada/chart-accounts/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 346
+  },
+  {
+    "page": "comptabilite-ohada/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 303
+  },
+  {
+    "page": "comptabilite-ohada/financial-statements/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 389
+  },
+  {
+    "page": "comptabilite-ohada/general-ledger/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 292
+  },
+  {
+    "page": "comptabilite-ohada/journal/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 586
+  },
+  {
+    "page": "comptabilite-ohada/monthly-closing/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 258
+  },
+  {
+    "page": "comptabilite-ohada/tax-package-cemac/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 397
+  },
+  {
+    "page": "container-lifecycle/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "cotations/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 253
+  },
+  {
+    "page": "cotations/calculateur/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 99
+  },
+  {
+    "page": "dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 7
+  },
+  {
+    "page": "dashboard/global/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 377
+  },
+  {
+    "page": "documents/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 348
+  },
+  {
+    "page": "documents/archive/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 267
+  },
+  {
+    "page": "finance/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 221
+  },
+  {
+    "page": "finance/billing/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 275
+  },
+  {
+    "page": "finance/encaissements/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 323
+  },
+  {
+    "page": "finance/gateway/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 9
+  },
+  {
+    "page": "finance/invoicing/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 315
+  },
+  {
+    "page": "finance/invoicing/create/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 350
+  },
+  {
+    "page": "finance/overview/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 216
+  },
+  {
+    "page": "finance/payroll/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 9
+  },
+  {
+    "page": "finance/rate-tables/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 17
+  },
+  {
+    "page": "finance/requisitions/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 205
+  },
+  {
+    "page": "finance/saisie-transaction-bancaire/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 314
+  },
+  {
+    "page": "finance/tarifs/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 17
+  },
+  {
+    "page": "finance/transactions/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 128
+  },
+  {
+    "page": "finance-ohada/collections/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 367
+  },
+  {
+    "page": "finance-ohada/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 185
+  },
+  {
+    "page": "finance-ohada/invoicing/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 166
+  },
+  {
+    "page": "finance-ohada/suppliers/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 405
+  },
+  {
+    "page": "finance-ohada/taxes-cemac/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 136
+  },
+  {
+    "page": "finance-ohada/treasury/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 370
+  },
+  {
+    "page": "fiscalite-cameroun/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 335
+  },
+  {
+    "page": "fournisseurs/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 375
+  },
+  {
+    "page": "fuel-guard/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 117
+  },
+  {
+    "page": "fuel-guard/alerts/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 33
+  },
+  {
+    "page": "gateway/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "goods/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "gps-tracking/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "integration/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "integration-cameroun/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 396
+  },
+  {
+    "page": "logout/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 55
+  },
+  {
+    "page": "magasin/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 499
+  },
+  {
+    "page": "magasin/advanced-analytics/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 43
+  },
+  {
+    "page": "magasin/analytics/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 43
+  },
+  {
+    "page": "magasin/articles/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 306
+  },
+  {
+    "page": "magasin/bandes-livraison/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 409
+  },
+  {
+    "page": "magasin/bandes-livraison/[id]/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 60
+  },
+  {
+    "page": "magasin/capacity/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 216
+  },
+  {
+    "page": "magasin/clients/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 17
+  },
+  {
+    "page": "magasin/commandes/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 502
+  },
+  {
+    "page": "magasin/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 92
+  },
+  {
+    "page": "magasin/declarations/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 453
+  },
+  {
+    "page": "magasin/declarations/[id]/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 258
+  },
+  {
+    "page": "magasin/history/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 43
+  },
+  {
+    "page": "magasin/ia-chat/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 43
+  },
+  {
+    "page": "magasin/import-export/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 43
+  },
+  {
+    "page": "magasin/inventory/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 260
+  },
+  {
+    "page": "magasin/inventory/physical/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 43
+  },
+  {
+    "page": "magasin/magasins/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 43
+  },
+  {
+    "page": "magasin/mouvement-de-stock-manuel/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 362
+  },
+  {
+    "page": "magasin/ordres-transfert/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 412
+  },
+  {
+    "page": "magasin/ordres-transfert/[id]/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 302
+  },
+  {
+    "page": "magasin/rapports/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 43
+  },
+  {
+    "page": "magasin/reception-mag3/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 43
+  },
+  {
+    "page": "magasin/removal-slip/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 205
+  },
+  {
+    "page": "magasin/saisie-inventaire-physique/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 287
+  },
+  {
+    "page": "magasin/stocks/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 214
+  },
+  {
+    "page": "magasin/stocks/search/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 128
+  },
+  {
+    "page": "magasin/transactions/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 115
+  },
+  {
+    "page": "magasin/wms-slots/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 133
+  },
+  {
+    "page": "magasin-avance/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "magasin-douane/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "magasin-stock/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 141
+  },
+  {
+    "page": "magasin-stock/inventory/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 160
+  },
+  {
+    "page": "magasin-stock/locations/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 128
+  },
+  {
+    "page": "magasin-stock/movements/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 160
+  },
+  {
+    "page": "magasin-stock/picking/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 150
+  },
+  {
+    "page": "magasin-stock/reception/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 128
+  },
+  {
+    "page": "maintenance/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 222
+  },
+  {
+    "page": "maintenance/create/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 1
+  },
+  {
+    "page": "maintenance/edit/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 223
+  },
+  {
+    "page": "maintenance/edit/[id]/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 5
+  },
+  {
+    "page": "maintenance/view/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 191
+  },
+  {
+    "page": "maintenance/view/[id]/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 5
+  },
+  {
+    "page": "maintenance-gmao/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "maintenance-gmao/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 294
+  },
+  {
+    "page": "master-data/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 405
+  },
+  {
+    "page": "master-data/article-categories/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 118
+  },
+  {
+    "page": "master-data/articles/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 323
+  },
+  {
+    "page": "master-data/tiers/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 984
+  },
+  {
+    "page": "master-data/tiers/[id]/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 317
+  },
+  {
+    "page": "master-data/tiers/[id]/transport/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 149
+  },
+  {
+    "page": "mobile-chauffeur/epod-signature/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 160
+  },
+  {
+    "page": "mobile-chauffeur/mission-active/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 167
+  },
+  {
+    "page": "mobile-chauffeur/rapport-carburant/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 159
+  },
+  {
+    "page": "notification-system/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "notifications/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "paiement-local/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 337
+  },
+  {
+    "page": "parc/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 17
+  },
+  {
+    "page": "parc/gate/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 258
+  },
+  {
+    "page": "parc/gestion-de-la-flotte/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 17
+  },
+  {
+    "page": "parc/work-orders/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 9
+  },
+  {
+    "page": "parc/work-orders/create/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 122
+  },
+  {
+    "page": "parc/workshop/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 9
+  },
+  {
+    "page": "parc/yard-map/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 124
+  },
+  {
+    "page": "parc/zones/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 62
+  },
+  {
+    "page": "parc-vehicules/costs-consumption/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 402
+  },
+  {
+    "page": "parc-vehicules/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 74
+  },
+  {
+    "page": "parc-vehicules/documents/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 315
+  },
+  {
+    "page": "parc-vehicules/fleet-complete/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 495
+  },
+  {
+    "page": "parc-vehicules/license-plates/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 431
+  },
+  {
+    "page": "parc-vehicules/preventive-maintenance/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 153
+  },
+  {
+    "page": "partner-api/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "port-incidents/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "port-operations/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 474
+  },
+  {
+    "page": "port-operations/berth-planning/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 300
+  },
+  {
+    "page": "port-operations/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 127
+  },
+  {
+    "page": "port-operations/drayage/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 291
+  },
+  {
+    "page": "port-operations/incidents/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 328
+  },
+  {
+    "page": "port-operations/manifests/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 376
+  },
+  {
+    "page": "port-operations/maritime-stats/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 140
+  },
+  {
+    "page": "port-operations/port-integration/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 198
+  },
+  {
+    "page": "port-operations/quai-operations/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 354
+  },
+  {
+    "page": "port-operations/stevedoring/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 269
+  },
+  {
+    "page": "port-operations/vessel-consignment/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 283
+  },
+  {
+    "page": "port-operations/weighbridge/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 345
+  },
+  {
+    "page": "port-performance/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "port-pricing/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "portail-b2b/dashboard/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 187
+  },
+  {
+    "page": "portail-b2b/factures-devis/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 283
+  },
+  {
+    "page": "portail-b2b/suivi-dossiers/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 545
+  },
+  {
+    "page": "portail-employe/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 834
+  },
+  {
+    "page": "procurement/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 215
+  },
+  {
+    "page": "procurement/orders/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 31
+  },
+  {
+    "page": "public-api/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "purchase/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 148
+  },
+  {
+    "page": "qhse/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 221
+  },
+  {
+    "page": "qhse/create/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 1
+  },
+  {
+    "page": "qhse/edit/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 215
+  },
+  {
+    "page": "qhse/edit/[id]/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 5
+  },
+  {
+    "page": "qhse/view/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 177
+  },
+  {
+    "page": "qhse/view/[id]/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 5
+  },
+  {
+    "page": "qhse-securite/dashboard/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 342
+  },
+  {
+    "page": "qhse-securite/environment/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 252
+  },
+  {
+    "page": "qhse-securite/incident-management/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 280
+  },
+  {
+    "page": "qhse-securite/ohada-compliance/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 256
+  },
+  {
+    "page": "qhse-securite/port-inspections/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 278
+  },
+  {
+    "page": "qhse-securite/safety-training/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 277
+  },
+  {
+    "page": "real-customs/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "reception-mag3/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "removal-slip/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "reporting/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "reports/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 213
+  },
+  {
+    "page": "reports/bibliotheque-modeles-enregistres/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 7
+  },
+  {
+    "page": "reports/custom/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 97
+  },
+  {
+    "page": "reports/custom/builder/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 288
+  },
+  {
+    "page": "reports/generateur-rapports-personnalises/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 7
+  },
+  {
+    "page": "reports/templates/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 201
+  },
+  {
+    "page": "reports/templates/create/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 7
+  },
+  {
+    "page": "reports/templates/edit/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 208
+  },
+  {
+    "page": "reports/templates/edit/[id]/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 7
+  },
+  {
+    "page": "reports/templates/library/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 220
+  },
+  {
+    "page": "reports-bi/compliance-audit/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 338
+  },
+  {
+    "page": "reports-bi/data-export/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 289
+  },
+  {
+    "page": "reports-bi/executive-dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 107
+  },
+  {
+    "page": "reports-bi/financial-reports-ohada/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 373
+  },
+  {
+    "page": "reports-bi/operational-analytics/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 121
+  },
+  {
+    "page": "reports-bi/report-generator/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 277
+  },
+  {
+    "page": "rh/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 17
+  },
+  {
+    "page": "rh/conges/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 203
+  },
+  {
+    "page": "rh/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 226
+  },
+  {
+    "page": "rh/employes/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 503
+  },
+  {
+    "page": "rh/mon-espace/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 196
+  },
+  {
+    "page": "rh/paie/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 235
+  },
+  {
+    "page": "rh-personnel/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 141
+  },
+  {
+    "page": "rh-personnel/employees/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 137
+  },
+  {
+    "page": "rh-personnel/payroll-ohada/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 184
+  },
+  {
+    "page": "rh-personnel/social-declarations/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 118
+  },
+  {
+    "page": "rh-personnel/time-attendance/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 129
+  },
+  {
+    "page": "rh-personnel/training-skills/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 128
+  },
+  {
+    "page": "role/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "security/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 207
+  },
+  {
+    "page": "security/alert-monitoring/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 130
+  },
+  {
+    "page": "security/alert-monitoring-center/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 9
+  },
+  {
+    "page": "security/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 9
+  },
+  {
+    "page": "security/dashboard-summary-metrics/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 9
+  },
+  {
+    "page": "security/notification-settings-escalation/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 216
+  },
+  {
+    "page": "security/notifications/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 227
+  },
+  {
+    "page": "security/reports/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 86
+  },
+  {
+    "page": "settings/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 245
+  },
+  {
+    "page": "settings/system/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 267
+  },
+  {
+    "page": "settings/system/audit-health/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 97
+  },
+  {
+    "page": "shift-planning/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "suppliers/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 61
+  },
+  {
+    "page": "support/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 334
+  },
+  {
+    "page": "tenant/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "tiers/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 59
+  },
+  {
+    "page": "tracking/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 115
+  },
+  {
+    "page": "tracking/epod/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 178
+  },
+  {
+    "page": "transactions/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "transit/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 219
+  },
+  {
+    "page": "transit/edit/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 262
+  },
+  {
+    "page": "transit/edit/[id]/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 5
+  },
+  {
+    "page": "transit/view/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 207
+  },
+  {
+    "page": "transit/view/[id]/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 5
+  },
+  {
+    "page": "transit-avance/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  },
+  {
+    "page": "transit-douane/bae/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 135
+  },
+  {
+    "page": "transit-douane/compliance/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 107
+  },
+  {
+    "page": "transit-douane/dashboard/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 153
+  },
+  {
+    "page": "transit-douane/declarations/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 148
+  },
+  {
+    "page": "transit-douane/dossiers-cemac/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 122
+  },
+  {
+    "page": "transit-douane/taxation-cameroun/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 227
+  },
+  {
+    "page": "transport/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 10
+  },
+  {
+    "page": "transport/analytics/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 120
+  },
+  {
+    "page": "transport/carte-live/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 144
+  },
+  {
+    "page": "transport/chatops/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 190
+  },
+  {
+    "page": "transport/containers/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 121
+  },
+  {
+    "page": "transport/containers/declaration/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 291
+  },
+  {
+    "page": "transport/control/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 252
+  },
+  {
+    "page": "transport/dispatch/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 225
+  },
+  {
+    "page": "transport/documents/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 262
+  },
+  {
+    "page": "transport/documents/bl/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 284
+  },
+  {
+    "page": "transport/documents/bl/[id]/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 220
+  },
+  {
+    "page": "transport/drivers/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 147
+  },
+  {
+    "page": "transport/drivers/new/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 284
+  },
+  {
+    "page": "transport/drivers/[id]/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 216
+  },
+  {
+    "page": "transport/epod/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 248
+  },
+  {
+    "page": "transport/flotte/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 89
+  },
+  {
+    "page": "transport/fuel/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 161
+  },
+  {
+    "page": "transport/fuel/history/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 171
+  },
+  {
+    "page": "transport/fuel/ticket/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 10
+  },
+  {
+    "page": "transport/goods-declaration/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 189
+  },
+  {
+    "page": "transport/maintenance/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 9
+  },
+  {
+    "page": "transport/map/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 131
+  },
+  {
+    "page": "transport/missions/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 231
+  },
+  {
+    "page": "transport/planning/page.tsx",
+    "has_api_call": true,
+    "has_use_effect": true,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 214
+  },
+  {
+    "page": "transport/saisie-ticket-carburant/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 347
+  },
+  {
+    "page": "transport-avance/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 75
+  },
+  {
+    "page": "transport-flotte/control-tower/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 95
+  },
+  {
+    "page": "transport-flotte/drivers/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 141
+  },
+  {
+    "page": "transport-flotte/fleet-management/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 128
+  },
+  {
+    "page": "transport-flotte/fuel-telematics/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 156
+  },
+  {
+    "page": "transport-flotte/missions-dispatch/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 189
+  },
+  {
+    "page": "transport-flotte/tracking-epod/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": true,
+    "has_static_data": false,
+    "size_lines": 151
+  },
+  {
+    "page": "transport-international/page.tsx",
+    "has_api_call": false,
+    "has_use_effect": false,
+    "has_hardcoded_arrays": false,
+    "has_static_data": false,
+    "size_lines": 13
+  }
+]

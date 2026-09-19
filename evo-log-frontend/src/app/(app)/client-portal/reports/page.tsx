@@ -1,53 +1,81 @@
-﻿'use client';
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
+  TrendingUp,
+  PieChart,
+  BarChart3,
+  Calendar,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
+  Search,
+  FileText,
+  ShoppingCart,
+  Truck,
+  Users
+} from 'lucide-react';
+import { financeAPI, transportAPI, magasinAPI, analyticsAPI } from '@/lib/api-client';
 
-export default function Page() {
-  const [isLoading, setIsLoading] = useState(true);
+export default function ClientReportsPage() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState({
+    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0]
+  });
+  const [reportType, setReportType] = useState('financial');
+  const [financialData, setFinancialData] = useState(null);
+  const [transportData, setTransportData] = useState(null);
+  const [inventoryData, setInventoryData] = useState(null);
+  const [chartData, setChartData] = useState({});
 
   useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+    loadReports();
+  }, [dateRange, reportType]);
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const loadReports = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Load data based on report type
+      switch (reportType) {
+        case 'financial':
+          const financialRes = await financeAPI.getAnalyticsChartData();
+          setFinancialData(financialRes.data || financialRes);
+          break;
+        case 'transport':
+          const transportRes = await transportAPI.getVehiclesHistory({
+            dateDebut: dateRange.startDate,
+            dateFin: dateRange.endDate
+          });
+          setTransportData(transportRes.data || transportRes);
+          break;
+        case 'inventory':
+          // For simplicity, we'll get general magasin stats
+          const magasinRes = await magasinAPI.getKpis();
+          setInventoryData(magasinRes.data || magasinRes);
+          break;
+        default:
+          setFinancialData(null);
+          setTransportData(null);
+          setInventoryData(null);
+      }
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Rapports</h1>
-        <p className="text-gray-600 text-sm mt-1">Rapports et statistiques</p>
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Module en dÃ©veloppement</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Ce module est en cours de dÃ©veloppement et sera bientÃ´t disponible.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+      // Load chart data for the selected report type
+      if (reportType === 'financial') {
+        const chartRes = await financeAPI.getAnalyticsChartData();
+        setChartData(chartRes.data || chartRes);
+      } else if (reportType === 'transport') {
+        const chartRes = await transportAPI.getKPIs();
+        setChartData(chartRes.data || chartRes);
+      }
+    } catch (err) {
+      console.error('Failed to load reports:', err);
+      setError('Impossible de charger les rapports. Veuillez réessayer.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  return <div><h1>Reports</h1></div>;
 }

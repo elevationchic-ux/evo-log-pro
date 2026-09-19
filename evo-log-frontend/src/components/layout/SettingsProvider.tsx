@@ -1,65 +1,106 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
+
+const SOUND_SETTINGS_KEY = 'evolog_erp_sound_enabled';
+const THEME_SETTINGS_KEY = 'evolog_erp_theme';
+const LANG_SETTINGS_KEY = 'evolog_erp_language';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
+export type LanguagePreference = 'fr' | 'en';
 
 interface SettingsContextType {
-  theme: ThemePreference;
-  setTheme: (theme: ThemePreference) => void;
-  toggleTheme: () => void;
-  language: 'fr' | 'en';
-  setLanguage: (lang: 'fr' | 'en') => void;
-  // Sound controls  used by ModuleHeader for WebSocket alert sounds
   soundEnabled: boolean;
   toggleSound: () => void;
   showSoundBadge: boolean;
   triggerSoundBadge: () => void;
+  theme: ThemePreference;
+  setTheme: (theme: ThemePreference) => void;
+  language: LanguagePreference;
+  setLanguage: (lang: LanguagePreference) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<ThemePreference>('light');
-  const [language, setLanguage] = useState<'fr' | 'en'>('fr');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showSoundBadge, setShowSoundBadge] = useState(false);
+  const [theme, setThemeState] = useState<ThemePreference>('system');
+  const [language, setLanguageState] = useState<LanguagePreference>('fr');
+  const soundBadgeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const toggleTheme = useCallback(() => {
-    setTheme(t => t === 'light' ? 'dark' : t === 'dark' ? 'system' : 'light');
+  useEffect(() => {
+    // Load all settings from localStorage on mount
+    const savedSound = localStorage.getItem(SOUND_SETTINGS_KEY);
+    if (savedSound !== null) setSoundEnabled(savedSound === 'true');
+
+    const savedTheme = localStorage.getItem(THEME_SETTINGS_KEY) as ThemePreference;
+    if (savedTheme) setThemeState(savedTheme);
+
+    const savedLang = localStorage.getItem(LANG_SETTINGS_KEY) as LanguagePreference;
+    if (savedLang) setLanguageState(savedLang);
   }, []);
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(theme);
+    }
+  }, [theme]);
 
   const toggleSound = useCallback(() => {
-    setSoundEnabled(s => !s);
+    const newValue = !soundEnabled;
+    setSoundEnabled(newValue);
+    localStorage.setItem(SOUND_SETTINGS_KEY, String(newValue));
+  }, [soundEnabled]);
+
+  const setTheme = useCallback((newTheme: ThemePreference) => {
+    setThemeState(newTheme);
+    localStorage.setItem(THEME_SETTINGS_KEY, newTheme);
   }, []);
 
-  /** Flash the sound badge indicator for 2 s when a critical alert fires */
+  const setLanguage = useCallback((newLang: LanguagePreference) => {
+    setLanguageState(newLang);
+    localStorage.setItem(LANG_SETTINGS_KEY, newLang);
+  }, []);
+
   const triggerSoundBadge = useCallback(() => {
     setShowSoundBadge(true);
-    setTimeout(() => setShowSoundBadge(false), 2000);
+    if (soundBadgeTimeoutRef.current) {
+      clearTimeout(soundBadgeTimeoutRef.current);
+    }
+    soundBadgeTimeoutRef.current = setTimeout(() => {
+      setShowSoundBadge(false);
+    }, 2000); // Show badge for 2 seconds
   }, []);
 
+  const value = {
+    soundEnabled,
+    toggleSound,
+    showSoundBadge,
+    triggerSoundBadge,
+    theme,
+    setTheme,
+    language,
+    setLanguage,
+  };
+
   return (
-    <SettingsContext.Provider
-      value={{
-        theme,
-        setTheme,
-        toggleTheme,
-        language,
-        setLanguage,
-        soundEnabled,
-        toggleSound,
-        showSoundBadge,
-        triggerSoundBadge,
-      }}
-    >
+    <SettingsContext.Provider value={value}>
       {children}
     </SettingsContext.Provider>
   );
 }
 
-export function useSettings() {
-  const ctx = useContext(SettingsContext);
-  if (!ctx) throw new Error('useSettings must be used within a SettingsProvider');
-  return ctx;
-}
+export const useSettings = () => {
+  const context = useContext(SettingsContext);
+  if (!context) {
+    throw new Error('useSettings must be used within a SettingsProvider');
+  }
+  return context;
+};

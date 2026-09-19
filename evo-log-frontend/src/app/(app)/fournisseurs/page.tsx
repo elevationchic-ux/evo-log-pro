@@ -240,23 +240,133 @@ export default function FournisseursPage() {
         </table>
       </div>
 
-      {/* Modal placeholder */}
+      {/* Modal Fournisseur Réel */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
-            <h2 className="text-xl font-bold mb-4">
-              {editingFournisseur ? 'Modifier le fournisseur' : 'Nouveau fournisseur'}
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4">
+            <h2 className="text-xl font-bold text-gray-900">
+              {editingFournisseur ? 'Modifier le Fournisseur' : 'Nouveau Fournisseur B2B'}
             </h2>
-            <p className="text-gray-600 mb-4">Formulaire en cours de développement...</p>
-            <button
-              onClick={() => {
-                setShowModal(false)
-                setEditingFournisseur(null)
-              }}
-              className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-            >
-              Fermer
-            </button>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const target = e.target as any;
+              const payload = {
+                code: target.code.value,
+                nom: target.nom.value,
+                email: target.email.value,
+                telephone: target.telephone.value,
+                adresse: target.adresse.value,
+                ville: target.ville.value,
+                type: target.type.value,
+                status: 'active'
+              };
+              try {
+                if (editingFournisseur) {
+                  await api.put(`/api/v1/suppliers/${editingFournisseur.id}`, payload);
+                } else {
+                  await api.post('/api/v1/suppliers', payload);
+                }
+                setShowModal(false);
+                setEditingFournisseur(null);
+                loadFournisseurs();
+              } catch (err) {
+                console.error(err);
+              }
+            }} className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold mb-1 text-gray-700">Code Fournisseur *</label>
+                  <input
+                    name="code"
+                    required
+                    defaultValue={editingFournisseur?.code || `FOURN-${Date.now().toString().slice(-4)}`}
+                    className="w-full px-3 py-2 border rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1 text-gray-700">Catégorie *</label>
+                  <select name="type" defaultValue={editingFournisseur?.type || 'Transporteur'} className="w-full px-3 py-2 border rounded-xl">
+                    <option value="Transporteur">Transporteur Routier</option>
+                    <option value="Transitaire">Transitaire Partenaire</option>
+                    <option value="Atelier & Pièces">Atelier & Pièces GMAO</option>
+                    <option value="Hydrocarbures">Fournisseur Carburant</option>
+                    <option value="Services">Services Généraux & Port</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-1 text-gray-700">Raison Sociale / Nom *</label>
+                <input
+                  name="nom"
+                  required
+                  defaultValue={editingFournisseur?.nom || ''}
+                  placeholder="Ex: CAMTRANS LOGISTICS SARL"
+                  className="w-full px-3 py-2 border rounded-xl text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold mb-1 text-gray-700">Téléphone</label>
+                  <input
+                    name="telephone"
+                    defaultValue={editingFournisseur?.telephone || ''}
+                    placeholder="+237 6..."
+                    className="w-full px-3 py-2 border rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1 text-gray-700">Email</label>
+                  <input
+                    name="email"
+                    type="email"
+                    defaultValue={editingFournisseur?.email || ''}
+                    placeholder="contact@fournisseur.cm"
+                    className="w-full px-3 py-2 border rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold mb-1 text-gray-700">Ville</label>
+                  <input
+                    name="ville"
+                    defaultValue={editingFournisseur?.ville || 'Douala'}
+                    className="w-full px-3 py-2 border rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1 text-gray-700">Adresse / Siège</label>
+                  <input
+                    name="adresse"
+                    defaultValue={editingFournisseur?.adresse || ''}
+                    placeholder="Zone Industrielle Bassa"
+                    className="w-full px-3 py-2 border rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingFournisseur(null);
+                  }}
+                  className="px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 font-semibold"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-primary text-white rounded-xl hover:opacity-90 font-semibold"
+                >
+                  {editingFournisseur ? 'Enregistrer Modifications' : 'Créer Fournisseur'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

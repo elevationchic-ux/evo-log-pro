@@ -10,7 +10,7 @@ import { ModuleHeader } from '@/components/layout/ModuleHeader';
 import SubModuleOrbitalBubble from '@/components/layout/SubModuleOrbitalBubble';
 import CommandPalette from '@/components/layout/CommandPalette';
 import { useModuleTheme } from '@/hooks/useModuleTheme';
-import { KeyboardShortcutHandler } from '@/components/shared/KeyboardShortcutHandler';
+import KeyboardShortcutHandler from '@/components/shared/KeyboardShortcutHandler';
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -69,7 +69,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Sticky Header */}
       <ModuleHeader
-        currentModule={currentModule}
+        currentModule={currentModule as any}
         onMenuClick={() => {
           if (isMobileViewport) {
             setIsMobileSidebarOpen(prev => !prev);
