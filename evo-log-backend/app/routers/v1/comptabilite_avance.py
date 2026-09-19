@@ -497,6 +497,8 @@ def lister_ecritures(
     """Lister les écritures comptables avec filtres multicritères"""
     from app.models.finance_ohada import EcritureComptableNew
     query = db.query(EcritureComptableNew)
+    if not current_user.is_superuser:
+        query = query.filter(EcritureComptableNew.company_id == current_user.company_id)
     if journal and journal != 'ALL':
         query = query.filter(EcritureComptableNew.journal == journal)
     if compte:
@@ -525,6 +527,7 @@ def creer_ecriture(
         date_ecr = datetime.strptime(date_ecr, "%Y-%m-%d").date()
         
     ecriture = EcritureComptableNew(
+        company_id=current_user.company_id,
         numero_ecriture=numero,
         date_ecriture=date_ecr,
         numero_piece=data.get("numero_piece") or data.get("piece", "PIECE-GEN"),
@@ -540,4 +543,3 @@ def creer_ecriture(
     db.commit()
     db.refresh(ecriture)
     return ecriture
-

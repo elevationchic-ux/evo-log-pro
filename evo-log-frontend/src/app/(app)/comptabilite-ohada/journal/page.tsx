@@ -119,36 +119,14 @@ export default function ComptabiliteOhadaJournal() {
       });
       if (res.ok) {
         toast.success(`Écriture enregistrée au journal ${newJournal}`);
-        fetchEntries();
+        await fetchEntries();
       } else {
-        const created: EntryLine = {
-          id: Date.now().toString(),
-          date: newDate,
-          piece: newPiece,
-          journal: newJournal,
-          compte: newCompte,
-          libelle: newLibelle,
-          debit: Number(newDebit) || 0,
-          credit: Number(newCredit) || 0,
-          validated: true
-        };
-        setEntries([created, ...entries]);
-        toast.success(`Écriture enregistrée au journal ${newJournal}`);
+        const detail = await res.text();
+        toast.error(detail || 'L’écriture n’a pas été enregistrée.');
       }
-    } catch {
-      const created: EntryLine = {
-        id: Date.now().toString(),
-        date: newDate,
-        piece: newPiece,
-        journal: newJournal,
-        compte: newCompte,
-        libelle: newLibelle,
-        debit: Number(newDebit) || 0,
-        credit: Number(newCredit) || 0,
-        validated: true
-      };
-      setEntries([created, ...entries]);
-      toast.success(`Écriture enregistrée au journal ${newJournal}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'L’écriture n’a pas été enregistrée.');
+      return;
     }
 
     setShowNewModal(false);
@@ -174,18 +152,12 @@ export default function ComptabiliteOhadaJournal() {
       return;
     }
 
-    setEntries(entries.map(e => selectedIds.includes(e.id) ? { ...e, lettrage: lettrageCode } : e));
-    toast.success(`Écritures lettrées avec le code [${lettrageCode}]`);
-    setSelectedIds([]);
-    setIsLettrageModalOpen(false);
-    setLettrageCode(`LA0${Math.floor(Math.random() * 80 + 10)}`);
+    toast.error('Le lettrage doit être enregistré par l’API comptable avant d’être affiché.');
   };
 
   const handleRemoveLettrage = () => {
     if (selectedIds.length === 0) return;
-    setEntries(entries.map(e => selectedIds.includes(e.id) ? { ...e, lettrage: undefined } : e));
-    toast.success('Lettrage supprimé sur la sélection');
-    setSelectedIds([]);
+    toast.error('La suppression du lettrage doit être enregistrée par l’API comptable avant d’être affichée.');
   };
 
   const toggleSelect = (id: string) => {
