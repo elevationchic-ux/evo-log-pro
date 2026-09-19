@@ -539,7 +539,7 @@ def get_finance_kpis(
     total_paiements = payment_query.with_entities(func.sum(Paiement.montant)).scalar() or 0.0
 
     impayes = max(0.0, chiffre_affaires - float(total_paiements))
-    taux_recouvrement = round((float(total_paiements) / chiffre_affaires * 100), 1) if chiffre_affaires > 0 else 92.5
+    taux_recouvrement = round((float(total_paiements) / chiffre_affaires * 100), 1) if chiffre_affaires > 0 else 0.0
 
     return {
         "chiffre_affaires": chiffre_affaires,
