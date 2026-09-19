@@ -25,11 +25,11 @@ export default function BiAnalyticsPage() {
   if (!mounted) return <div className="p-8 text-center text-slate-500">Chargement du module K-Analytics BI...</div>;
 
   const summary = data || {
-    chiffre_affaires_cumule_xaf: 142500000.0,
-    marge_brute_globale_pct: 22.4,
-    volume_fret_evp: 1280,
-    taux_livraison_ponctuel_pct: 97.8,
-    economie_carburant_xaf: 8400000.0
+    chiffre_affaires_cumule_xaf: null,
+    marge_brute_globale_pct: null,
+    volume_fret_evp: null,
+    taux_livraison_ponctuel_pct: null,
+    economie_carburant_xaf: null,
   };
 
   return (
@@ -62,7 +62,7 @@ export default function BiAnalyticsPage() {
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Chiffre d'Affaires Cumulé</p>
           <h2 className="text-2xl font-black text-slate-100 font-mono">
-            {Number(summary.chiffre_affaires_cumule_xaf).toLocaleString()} XAF
+            {summary.chiffre_affaires_cumule_xaf == null ? 'Non disponible' : `${Number(summary.chiffre_affaires_cumule_xaf).toLocaleString()} XAF`}
           </h2>
         </div>
 
@@ -72,7 +72,7 @@ export default function BiAnalyticsPage() {
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Marge Brute Globale</p>
           <h2 className="text-2xl font-black text-fuchsia-400 font-mono">
-            {summary.marge_brute_globale_pct}%
+            {summary.marge_brute_globale_pct == null ? 'Non disponible' : `${summary.marge_brute_globale_pct}%`}
           </h2>
         </div>
 
@@ -82,7 +82,7 @@ export default function BiAnalyticsPage() {
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Volume Fret Traité</p>
           <h2 className="text-2xl font-black text-slate-100 font-mono">
-            {summary.volume_fret_evp} EVP
+            {summary.volume_fret_evp == null ? 'Non disponible' : `${summary.volume_fret_evp} EVP`}
           </h2>
         </div>
 
@@ -92,7 +92,7 @@ export default function BiAnalyticsPage() {
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Économie Carburant IoT</p>
           <h2 className="text-2xl font-black text-emerald-400 font-mono">
-            +{Number(summary.economie_carburant_xaf).toLocaleString()} XAF
+            {summary.economie_carburant_xaf == null ? 'Non disponible' : `+${Number(summary.economie_carburant_xaf).toLocaleString()} XAF`}
           </h2>
         </div>
       </div>
