@@ -150,7 +150,7 @@ export default function CotationsPage() {
                     <td className="px-6 py-4 font-bold text-slate-100">
                       {item.reference || `Cotation #${item.id}`}
                       <div className="text-xs font-normal text-slate-400 flex items-center gap-1 mt-0.5">
-                        {item.client_nom || 'Client B2B'}
+                        {item.client_nom || 'Client non renseigné'}
                       </div>
                     </td>
                     <td className="px-6 py-4 font-semibold text-slate-200">
