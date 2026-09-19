@@ -529,27 +529,26 @@ def get_finance_kpis(
     """KPIs financiers consolidés pour les tableaux de bord"""
     from sqlalchemy import func
     from app.models.finance import Facture as FactureSimple, Paiement
-    from app.models.finance_ohada import FactureNew
-
-    # Tente de requêter FactureNew, sinon FactureSimple
-    ca_ohada = db.query(func.sum(FactureNew.montant_ttc)).scalar()
-    ca_simple = db.query(func.sum(FactureSimple.montant_ttc)).scalar()
-    chiffre_affaires = float(ca_ohada or ca_simple or 284500000.0)
-
-    total_factures = (db.query(func.count(FactureNew.id)).scalar() or 0) + (db.query(func.count(FactureSimple.id)).scalar() or 0)
-    total_paiements = db.query(func.sum(Paiement.montant)).scalar() or 0.0
+    invoice_query = db.query(FactureSimple)
+    payment_query = db.query(Paiement)
+    if not current_user.is_superuser:
+        invoice_query = invoice_query.filter(FactureSimple.company_id == current_user.company_id)
+        payment_query = payment_query.filter(Paiement.company_id == current_user.company_id)
+    chiffre_affaires = float(invoice_query.with_entities(func.sum(FactureSimple.montant_ttc)).scalar() or 0)
+    total_factures = invoice_query.with_entities(func.count(FactureSimple.id)).scalar() or 0
+    total_paiements = payment_query.with_entities(func.sum(Paiement.montant)).scalar() or 0.0
 
     impayes = max(0.0, chiffre_affaires - float(total_paiements))
     taux_recouvrement = round((float(total_paiements) / chiffre_affaires * 100), 1) if chiffre_affaires > 0 else 92.5
 
     return {
         "chiffre_affaires": chiffre_affaires,
-        "total_factures": max(total_factures, 142),
+        "total_factures": total_factures,
         "total_encaisse": float(total_paiements),
         "montant_impaye": impayes,
         "taux_recouvrement": taux_recouvrement,
-        "creances_douteuses": 12500000.0,
-        "tresorerie_disponible": 95400000.0
+        "creances_douteuses": None,
+        "tresorerie_disponible": None
     }
 
 
@@ -559,30 +558,4 @@ def get_finance_chart_data(
     current_user: User = Depends(get_current_user)
 ):
     """Séries temporelles pour les graphiques de performance financière et fret"""
-    return {
-        "week": [
-            {"day": "Lun", "revenue": 38.5, "fretTons": 1200},
-            {"day": "Mar", "revenue": 42.0, "fretTons": 1450},
-            {"day": "Mer", "revenue": 45.2, "fretTons": 1600},
-            {"day": "Jeu", "revenue": 41.8, "fretTons": 1380},
-            {"day": "Ven", "revenue": 52.4, "fretTons": 1900},
-            {"day": "Sam", "revenue": 34.6, "fretTons": 1100},
-            {"day": "Dim", "revenue": 30.0, "fretTons": 950}
-        ],
-        "month": [
-            {"day": "Sem 1", "revenue": 185.0, "fretTons": 5200},
-            {"day": "Sem 2", "revenue": 210.5, "fretTons": 6100},
-            {"day": "Sem 3", "revenue": 245.8, "fretTons": 7400},
-            {"day": "Sem 4", "revenue": 284.5, "fretTons": 8900}
-        ],
-        "year": [
-            {"day": "Jan", "revenue": 620, "fretTons": 18000},
-            {"day": "Fév", "revenue": 710, "fretTons": 21000},
-            {"day": "Mar", "revenue": 840, "fretTons": 25000},
-            {"day": "Avr", "revenue": 790, "fretTons": 23500},
-            {"day": "Mai", "revenue": 920, "fretTons": 28000},
-            {"day": "Juin", "revenue": 1050, "fretTons": 31000},
-            {"day": "Juil", "revenue": 1180, "fretTons": 34500}
-        ]
-    }
-
+    return {"week": [], "month": [], "year": []}

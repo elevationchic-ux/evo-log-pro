@@ -46,7 +46,12 @@ async def get_transactions(
     current_user: User = Depends(get_current_user)
 ):
     """Liste des transactions et règlements financiers avec pagination"""
-    query = db.query(Paiement)
+    query = db.query(Paiement).join(Facture, Paiement.facture_id == Facture.id)
+    if not current_user.is_superuser:
+        query = query.filter(
+            Paiement.company_id == current_user.company_id,
+            Facture.company_id == current_user.company_id,
+        )
 
     if mode_paiement:
         query = query.filter(Paiement.mode_paiement.ilike(f"%{mode_paiement}%"))
@@ -98,20 +103,24 @@ async def get_transaction_stats(
     current_user: User = Depends(get_current_user)
 ):
     """Statistiques financières globales des encaissements"""
-    total_tx = db.query(func.count(Paiement.id)).scalar() or 0
-    total_encaisse = db.query(func.sum(Paiement.montant)).filter(
-        Paiement.statut == PaiementStatus.VALIDE
+    query = db.query(Paiement)
+    if not current_user.is_superuser:
+        query = query.filter(Paiement.company_id == current_user.company_id)
+    total_tx = query.with_entities(func.count(Paiement.id)).scalar() or 0
+    total_encaisse = query.with_entities(func.sum(Paiement.montant)).filter(
+        Paiement.statut == PaiementStatus.CONFIRME
     ).scalar() or 0
-    en_attente = db.query(func.sum(Paiement.montant)).filter(
+    en_attente = query.with_entities(func.sum(Paiement.montant)).filter(
         Paiement.statut == PaiementStatus.EN_ATTENTE
     ).scalar() or 0
 
     # Répartition par mode de paiement
-    modes = db.query(
+    modes_query = query.with_entities(
         Paiement.mode_paiement,
         func.count(Paiement.id),
         func.sum(Paiement.montant)
     ).group_by(Paiement.mode_paiement).all()
+    modes = modes_query
 
     repartition_modes = [
         {
@@ -137,12 +146,16 @@ async def create_transaction(
     current_user: User = Depends(get_current_user)
 ):
     """Enregistre un nouveau paiement ou règlement pour une facture"""
-    facture = db.query(Facture).filter(Facture.id == payload.facture_id).first()
+    facture_query = db.query(Facture).filter(Facture.id == payload.facture_id)
+    if not current_user.is_superuser:
+        facture_query = facture_query.filter(Facture.company_id == current_user.company_id)
+    facture = facture_query.first()
     if not facture:
         raise HTTPException(status_code=404, detail=f"Facture #{payload.facture_id} non trouvée")
 
     paiement = Paiement(
         facture_id=payload.facture_id,
+        company_id=facture.company_id or current_user.company_id,
         montant=payload.montant,
         date_paiement=payload.date_paiement or date.today(),
         mode_paiement=payload.mode_paiement,
@@ -171,7 +184,10 @@ async def get_transaction(
     current_user: User = Depends(get_current_user)
 ):
     """Détail d'une transaction financière avec informations de facture"""
-    p = db.query(Paiement).filter(Paiement.id == id).first()
+    query = db.query(Paiement).filter(Paiement.id == id)
+    if not current_user.is_superuser:
+        query = query.filter(Paiement.company_id == current_user.company_id)
+    p = query.first()
     if not p:
         raise HTTPException(status_code=404, detail=f"Transaction #{id} non trouvée")
 

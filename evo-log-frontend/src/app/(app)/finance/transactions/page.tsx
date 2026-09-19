@@ -1,127 +1,87 @@
-﻿"use client";
+'use client';
 
-import React, { useState } from "react";
-import {
-  CreditCard, Search, Filter, TrendingUp, TrendingDown,
-  ArrowRightLeft, Plus, Download, Eye, Calendar
-} from "lucide-react";
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowRightLeft, CreditCard, RefreshCw, TrendingDown, TrendingUp } from 'lucide-react';
+import { transactionsAPI } from '@/lib/api-client';
 
-const fmtNum = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
-
-const TRANSACTIONS = [
-  { id: "TXN-2026-001", type: "ENCAISSEMENT", libelle: "Paiement Facture FAC-2026-0234 – CFAO LOGISTICS", montant_xaf: 4850000, compte: "UBA Douala - Compte Ops", tiers: "CFAO LOGISTICS CAMEROUN", date: "2026-08-10", statut: "VALIDE" },
-  { id: "TXN-2026-002", type: "PAIEMENT", libelle: "Règlement Fournisseur TOTALENERGIES – PO-2026-001", montant_xaf: -3600000, compte: "UBA Douala - Compte Ops", tiers: "TOTALENERGIES CAMEROUN", date: "2026-08-11", statut: "VALIDE" },
-  { id: "TXN-2026-003", type: "ENCAISSEMENT", libelle: "Acompte Mission Transport – MAERSK CM", montant_xaf: 2250000, compte: "Ecobank Douala - Compte Clients", tiers: "MAERSK CAMEROUN", date: "2026-08-09", statut: "EN_ATTENTE" },
-  { id: "TXN-2026-004", type: "VIREMENT_INTERNE", libelle: "Virement UBA → Ecobank – Trésorerie", montant_xaf: 5000000, compte: "UBA Douala → Ecobank Douala", tiers: "Interne EVO-LOG", date: "2026-08-08", statut: "VALIDE" },
-  { id: "TXN-2026-005", type: "PAIEMENT", libelle: "Salaires Juillet 2026 – Masse salariale", montant_xaf: -3656000, compte: "UBA Douala - Compte Salaires", tiers: "Personnel EVO-LOG", date: "2026-07-31", statut: "VALIDE" },
-];
-
-const typeConfig: Record<string, { label: string; color: string }> = {
-  ENCAISSEMENT: { label: "Encaissement", color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/30" },
-  PAIEMENT: { label: "Paiement", color: "text-red-400 bg-red-400/10 border-red-400/30" },
-  VIREMENT_INTERNE: { label: "Virement Interne", color: "text-blue-400 bg-blue-400/10 border-blue-400/30" },
+type Transaction = {
+  id: number;
+  facture_numero?: string | null;
+  facture_id: number;
+  montant: number;
+  date_paiement?: string | null;
+  mode_paiement?: string | null;
+  reference?: string | null;
+  statut?: string | null;
+  notes?: string | null;
 };
 
 export default function FinanceTransactionsPage() {
-  const [filterType, setFilterType] = useState("TOUS");
-  const [search, setSearch] = useState("");
+  const [rows, setRows] = useState<Transaction[]>([]);
+  const [filter, setFilter] = useState('TOUS');
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filtered = TRANSACTIONS.filter(t => {
-    const matchType = filterType === "TOUS" || t.type === filterType;
-    const matchSearch = search === "" || t.libelle.toLowerCase().includes(search.toLowerCase()) || t.tiers.toLowerCase().includes(search.toLowerCase()) || t.id.toLowerCase().includes(search.toLowerCase());
-    return matchType && matchSearch;
-  });
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await transactionsAPI.getAll({ limit: 500 });
+      const data = response.data;
+      setRows(Array.isArray(data) ? data : data?.items || []);
+    } catch (requestError: any) {
+      setRows([]);
+      setError(requestError?.response?.data?.detail || 'Impossible de charger les transactions.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const totalEntrees = TRANSACTIONS.filter(t => t.montant_xaf > 0).reduce((s, t) => s + t.montant_xaf, 0);
-  const totalSorties = TRANSACTIONS.filter(t => t.montant_xaf < 0).reduce((s, t) => s + Math.abs(t.montant_xaf), 0);
-  const soldeNet = totalEntrees - totalSorties;
+  useEffect(() => { load(); }, []);
+
+  const filtered = useMemo(() => rows.filter(row => {
+    const type = Number(row.montant) >= 0 ? 'ENCAISSEMENT' : 'PAIEMENT';
+    const text = `${row.reference || ''} ${row.facture_numero || ''} ${row.notes || ''}`.toLowerCase();
+    return (filter === 'TOUS' || filter === type) && (!search || text.includes(search.toLowerCase()));
+  }), [rows, filter, search]);
+
+  const total = rows.reduce((sum, row) => sum + Number(row.montant || 0), 0);
+  const entries = rows.filter(row => Number(row.montant) >= 0).reduce((sum, row) => sum + Number(row.montant || 0), 0);
+  const exits = rows.filter(row => Number(row.montant) < 0).reduce((sum, row) => sum + Math.abs(Number(row.montant || 0)), 0);
 
   return (
     <div className="min-h-screen p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <CreditCard className="text-emerald-400" size={28} />
-            Transactions Bancaires
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Flux de trésorerie, encaissements et paiements  Août 2026</p>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2"><CreditCard className="text-emerald-400" size={28} /> Transactions financières</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Règlements persistés de l’entreprise courante</p>
         </div>
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm hover:bg-accent transition-colors">
-            <Download size={14} />Export
-          </button>
-          <a href="/finance/saisie-transaction-bancaire" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors">
-            <Plus size={16} />Saisir Transaction
-          </a>
-        </div>
+        <button onClick={load} disabled={loading} className="px-3 py-2 rounded-xl border border-border text-sm"><RefreshCw size={14} className={`inline mr-2 ${loading ? 'animate-spin' : ''}`} /> Actualiser</button>
       </div>
-
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5">
-          <div className="flex items-center gap-2 mb-2 text-emerald-400"><TrendingUp size={16} /><span className="text-xs">Total Entrées</span></div>
-          <p className="text-2xl font-bold text-emerald-400">+{fmtNum(totalEntrees)}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">XAF encaissés</p>
-        </div>
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5">
-          <div className="flex items-center gap-2 mb-2 text-red-400"><TrendingDown size={16} /><span className="text-xs">Total Sorties</span></div>
-          <p className="text-2xl font-bold text-red-400">-{fmtNum(totalSorties)}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">XAF décaissés</p>
-        </div>
-        <div className={`rounded-2xl border p-5 ${soldeNet >= 0 ? "border-blue-500/20 bg-blue-500/5" : "border-amber-500/20 bg-amber-500/5"}`}>
-          <div className={`flex items-center gap-2 mb-2 ${soldeNet >= 0 ? "text-blue-400" : "text-amber-400"}`}><ArrowRightLeft size={16} /><span className="text-xs">Solde Net Période</span></div>
-          <p className={`text-2xl font-bold ${soldeNet >= 0 ? "text-blue-400" : "text-amber-400"}`}>{soldeNet > 0 ? "+" : ""}{fmtNum(soldeNet)}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">XAF net</p>
-        </div>
+      {error && <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 text-sm">{error}</div>}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5"><TrendingUp className="text-emerald-400" size={16} /><div className="text-2xl font-bold text-emerald-400 mt-2">{entries.toLocaleString('fr-FR')} XAF</div><div className="text-xs text-muted-foreground">Encaissements persistés</div></div>
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5"><TrendingDown className="text-red-400" size={16} /><div className="text-2xl font-bold text-red-400 mt-2">{exits.toLocaleString('fr-FR')} XAF</div><div className="text-xs text-muted-foreground">Montants sortants enregistrés</div></div>
+        <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-5"><ArrowRightLeft className="text-blue-400" size={16} /><div className="text-2xl font-bold text-blue-400 mt-2">{total.toLocaleString('fr-FR')} XAF</div><div className="text-xs text-muted-foreground">Solde calculé sur les données reçues</div></div>
       </div>
-
-      {/* Filtres */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input className="w-full bg-card border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 placeholder:text-muted-foreground" placeholder="Rechercher transaction, tiers..." value={search} onChange={e => setSearch(e.target.value)} />
-        </div>
-        <select className="bg-card border border-border rounded-xl px-4 py-2.5 text-sm" value={filterType} onChange={e => setFilterType(e.target.value)}>
-          <option value="TOUS">Tous types</option>
-          <option value="ENCAISSEMENT">Encaissements</option>
-          <option value="PAIEMENT">Paiements</option>
-          <option value="VIREMENT_INTERNE">Virements internes</option>
-        </select>
+      <div className="flex flex-wrap gap-3">
+        <input className="flex-1 min-w-[220px] bg-card border border-border rounded-xl px-4 py-2.5 text-sm" placeholder="Rechercher référence ou facture..." value={search} onChange={event => setSearch(event.target.value)} />
+        {['TOUS', 'ENCAISSEMENT', 'PAIEMENT'].map(value => <button key={value} onClick={() => setFilter(value)} className={`px-3 py-2 rounded-xl border text-xs ${filter === value ? 'border-emerald-400 text-emerald-300' : 'border-border text-muted-foreground'}`}>{value}</button>)}
       </div>
-
-      {/* Table */}
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 border-b border-border">
-              <tr>{["Réf.", "Type", "Libellé", "Tiers", "Compte", "Montant (XAF)", "Statut"].map(h => (
-                <th key={h} className="px-4 py-3 text-left font-semibold text-muted-foreground text-xs uppercase tracking-wide">{h}</th>
-              ))}</tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filtered.map(t => {
-                const cfg = typeConfig[t.type];
-                return (
-                  <tr key={t.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs font-bold text-emerald-400">{t.id}</td>
-                    <td className="px-4 py-3"><span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.color}`}>{cfg.label}</span></td>
-                    <td className="px-4 py-3 max-w-[220px] truncate text-sm text-foreground" title={t.libelle}>{t.libelle}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.tiers}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.compte}</td>
-                    <td className={`px-4 py-3 font-bold text-base ${t.montant_xaf > 0 ? "text-emerald-400" : "text-red-400"}`}>
-                      {t.montant_xaf > 0 ? "+" : ""}{fmtNum(t.montant_xaf)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs font-medium ${t.statut === "VALIDE" ? "text-emerald-400" : "text-amber-400"}`}>
-                        {t.statut === "VALIDE" ? "✓ Validé" : "⏳ En attente"}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        {loading ? <div className="p-6 text-muted-foreground">Chargement...</div> : filtered.length === 0 ? <div className="p-6 text-muted-foreground">Aucune transaction enregistrée.</div> : (
+          <div className="divide-y divide-border">
+            {filtered.map(row => <div key={row.id} className="p-4 grid grid-cols-1 md:grid-cols-6 gap-2 text-sm">
+              <span className="font-mono text-emerald-400">{row.reference || `Paiement #${row.id}`}</span>
+              <span className="text-foreground">{row.facture_numero || `Facture #${row.facture_id}`}</span>
+              <span className="text-foreground">{Number(row.montant).toLocaleString('fr-FR')} XAF</span>
+              <span className="text-muted-foreground">{row.mode_paiement || 'Mode indisponible'}</span>
+              <span className="text-muted-foreground">{row.date_paiement || 'Date indisponible'}</span>
+              <span className="text-muted-foreground">{row.statut || 'Statut indisponible'}</span>
+            </div>)}
+          </div>
+        )}
       </div>
     </div>
   );
