@@ -94,7 +94,26 @@ export default function ParcFleetCompletePage() {
 
   const handleCreateVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.error('La création de véhicule nécessite un endpoint flotte persistant.');
+    if (!formVehicle.immatriculation || !formVehicle.marque) {
+      toast.error('Veuillez renseigner l’immatriculation et la marque.');
+      return;
+    }
+    try {
+      await fleetAPI.createVehicle({
+        immatriculation: formVehicle.immatriculation.toUpperCase(),
+        marque: formVehicle.marque,
+        modele: formVehicle.modele || null,
+        annee: Number(formVehicle.annee) || null,
+        type_vehicule: formVehicle.type,
+        localisation: formVehicle.siteAffectation || null,
+        assigne_a: null,
+      });
+      setShowAddModal(false);
+      await loadVehicles();
+      toast.success('Véhicule enregistré.');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Impossible d’enregistrer le véhicule.');
+    }
   };
 
   const filteredVehicles = vehicles.filter(v => {
