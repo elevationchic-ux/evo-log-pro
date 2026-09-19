@@ -1,7 +1,7 @@
 """
 Magasin router - manages warehouse and inventory
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
@@ -9,8 +9,19 @@ from datetime import datetime
 from app.core.database import get_db
 from app.schemas.magasin import StockCreate, StockUpdate, StockResponse, MouvementStockCreate, MouvementStockResponse, EntrepotCreate, EntrepotResponse
 from app.models.magasin import Stock, MouvementStock, Entrepot
+from app.models.user import User
+from app.core.security import get_current_user
 
 router = APIRouter()
+
+
+def resolve_magasin_user(identity: str = Depends(get_current_user), db: Session = Depends(get_db)) -> User:
+    user = db.query(User).filter(User.id == int(identity)).first() if str(identity).isdigit() else db.query(User).filter(
+        (User.username == str(identity)) | (User.email == str(identity))
+    ).first()
+    if not user or not user.is_active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Utilisateur non authentifié.")
+    return user
 
 
 @router.get("/stocks", response_model=List[StockResponse])
@@ -34,18 +45,30 @@ async def create_stock(stock_data: StockCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/mouvements", response_model=MouvementStockResponse, status_code=status.HTTP_201_CREATED)
-async def create_mouvement_stock(mouvement_data: MouvementStockCreate, db: Session = Depends(get_db)):
+async def create_mouvement_stock(mouvement_data: MouvementStockCreate, db: Session = Depends(get_db), current_user: User = Depends(resolve_magasin_user)):
     """Create a stock movement"""
-    import random
-    import string
-    
-    reference = f"MOV-{datetime.now().strftime('%Y%m%d')}-{''.join(random.choices(string.ascii_uppercase + string.digits, k=6))}"
-    
-    db_mouvement = MouvementStock(reference=reference, **mouvement_data.model_dump())
+    if current_user.company_id is None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="L'utilisateur n'est rattaché à aucune société.")
+    reference = f"MOV-{datetime.now().strftime('%Y%m%d%H%M%S')}-{current_user.id}"
+
+    db_mouvement = MouvementStock(reference=reference, company_id=current_user.company_id, operateur_id=current_user.id, **mouvement_data.model_dump())
     db.add(db_mouvement)
     db.commit()
     db.refresh(db_mouvement)
     return db_mouvement
+
+
+@router.get("/mouvements", response_model=List[MouvementStockResponse])
+async def get_mouvements_stock(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_magasin_user),
+):
+    query = db.query(MouvementStock)
+    if not current_user.is_superuser:
+        query = query.filter(MouvementStock.company_id == current_user.company_id)
+    return query.order_by(MouvementStock.date_mouvement.desc()).offset(skip).limit(limit).all()
 
 
 @router.get("", response_model=List[StockResponse])

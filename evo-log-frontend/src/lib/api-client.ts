@@ -314,6 +314,8 @@ export const magasinAPI = {
     apiClient.get('/api/magasin/magasins', { params }),
   getStocks: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin/stocks', { params }),
+  getMouvements: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/magasin/mouvements', { params }),
   getKpis: () =>
     apiClient.get('/api/magasin/kpis'),
   getClients: (params?: Record<string, unknown>) =>
@@ -775,5 +777,4 @@ export const transitAvanceAPI = {
 };
 
 export default apiClient;
-
 
