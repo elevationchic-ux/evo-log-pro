@@ -1,191 +1,191 @@
-# 🎨 AUDIT UX/UI IMPARTIAL & PLAN D'OPTIMISATION PROGICIEL (EVO-LOG ERP)
+﻿# ðŸŽ¨ AUDIT UX/UI IMPARTIAL & PLAN D'OPTIMISATION PROGICIEL (EVO-LOG ERP)
 
-> **Évaluation Croisée selon Deux Prismes : Utilisateur Novice vs Expert ERP Industriel**  
-> *Analyse impartiale de l'ergonomie, de la charge cognitive, de la productivité opérationnelle et des standards internationaux (SAP Fiori, Manhattan Associates, Odoo Enterprise, Material You).*
-
----
-
-## 📑 SOMMAIRE
-
-1. [Synthèse Globale de l'Audit UX/UI](#1-synthèse-globale-de-laudit-uxui)
-2. [Ce qu'il faut AJOUTER (Priorités 1 & 2)](#2-ce-quil-faut-ajouter-priorités-1--2)
-3. [Ce qu'il faut AMÉLIORER & AJUSTER](#3-ce-quil-faut-améliorer--ajuster)
-4. [Ce qu'il faut RETIRER ou ÉLAGUER](#4-ce-quil-faut-retirer-ou-élaguer)
-5. [L'Expérience à Travers les Yeux du Novice (Chauffeur, Cariste, Déclarant Débutant)](#5-lexpérience-à-travers-les-yeux-du-novice)
-6. [L'Expérience à Travers les Yeux de l'Expert (DAF, Directeur Logistique, DSI)](#6-lexpérience-à-travers-les-yeux-de-lexpert)
-7. [Feuille de Route d'Exécution & Bonnes Pratiques Recommandées](#7-feuille-de-route-dexécution--bonnes-pratiques-recommandées)
+> **Ã‰valuation CroisÃ©e selon Deux Prismes : Utilisateur Novice vs Expert ERP Industriel**  
+> *Analyse impartiale de l'ergonomie, de la charge cognitive, de la productivitÃ© opÃ©rationnelle et des standards internationaux (SAP Fiori, Manhattan Associates, Odoo Enterprise, Material You).*
 
 ---
 
-## 1. SYNTHÈSE GLOBALE DE L'AUDIT UX/UI
+## ðŸ“‘ SOMMAIRE
 
-L'application **EVO-LOG** dispose d'un socle technique exceptionnel : **323 routes réelles**, **117 endpoints API**, zéro mock, une palette de commandes `Ctrl + K`, un thème dynamique clair/sombre, et 8 portails collaborateurs dédiés.
+1. [SynthÃ¨se Globale de l'Audit UX/UI](#1-synthÃ¨se-globale-de-laudit-uxui)
+2. [Ce qu'il faut AJOUTER (PrioritÃ©s 1 & 2)](#2-ce-quil-faut-ajouter-prioritÃ©s-1--2)
+3. [Ce qu'il faut AMÃ‰LIORER & AJUSTER](#3-ce-quil-faut-amÃ©liorer--ajuster)
+4. [Ce qu'il faut RETIRER ou Ã‰LAGUER](#4-ce-quil-faut-retirer-ou-Ã©laguer)
+5. [L'ExpÃ©rience Ã  Travers les Yeux du Novice (Chauffeur, Cariste, DÃ©clarant DÃ©butant)](#5-lexpÃ©rience-Ã -travers-les-yeux-du-novice)
+6. [L'ExpÃ©rience Ã  Travers les Yeux de l'Expert (DAF, Directeur Logistique, DSI)](#6-lexpÃ©rience-Ã -travers-les-yeux-de-lexpert)
+7. [Feuille de Route d'ExÃ©cution & Bonnes Pratiques RecommandÃ©es](#7-feuille-de-route-dexÃ©cution--bonnes-pratiques-recommandÃ©es)
 
-Cependant, pour qu'un progiciel atteigne la perfection opérationnelle en exploitation intensive, il doit répondre avec la même excellence à deux exigences souvent contradictoires :
-- **L'Accessibilité & la Sérénité du Novice** : Ne pas être submergé par le jargon logistico-douanier, comprendre immédiatement où cliquer, et ne pas avoir peur de commettre une faute irréversible.
-- **L'Hyper-Productivité de l'Expert** : Traiter 500 dossiers en masse, ne jamais lâcher le clavier, personnaliser ses colonnes, condenser la densité d'information pour éliminer le scroll inutile.
+---
 
-| Critère d'Évaluation | Note Actuelle | Cible Optimale | Constat Majeur |
+## 1. SYNTHÃˆSE GLOBALE DE L'AUDIT UX/UI
+
+L'application **EVO-LOG** dispose d'un socle technique exceptionnel : **323 routes rÃ©elles**, **117 endpoints API**, zÃ©ro mock, une palette de commandes `Ctrl + K`, un thÃ¨me dynamique clair/sombre, et 8 portails collaborateurs dÃ©diÃ©s.
+
+Cependant, pour qu'un progiciel atteigne la perfection opÃ©rationnelle en exploitation intensive, il doit rÃ©pondre avec la mÃªme excellence Ã  deux exigences souvent contradictoires :
+- **L'AccessibilitÃ© & la SÃ©rÃ©nitÃ© du Novice** : Ne pas Ãªtre submergÃ© par le jargon logistico-douanier, comprendre immÃ©diatement oÃ¹ cliquer, et ne pas avoir peur de commettre une faute irrÃ©versible.
+- **L'Hyper-ProductivitÃ© de l'Expert** : Traiter 500 dossiers en masse, ne jamais lÃ¢cher le clavier, personnaliser ses colonnes, condenser la densitÃ© d'information pour Ã©liminer le scroll inutile.
+
+| CritÃ¨re d'Ã‰valuation | Note Actuelle | Cible Optimale | Constat Majeur |
 |:---|:---:|:---:|:---|
-| **Architecture Globale & Navigation** | 9.5/10 | 10/10 | 4 modes d'accès très puissants (Sidebar, Palette, Bulle, Hub). |
-| **Ergonomie Mobile Terrain (Portails)** | 9.0/10 | 9.8/10 | Interface tactile réactive, signatures ePOD fluides. |
+| **Architecture Globale & Navigation** | 9.5/10 | 10/10 | 4 modes d'accÃ¨s trÃ¨s puissants (Sidebar, Palette, Bulle, Hub). |
+| **Ergonomie Mobile Terrain (Portails)** | 9.0/10 | 9.8/10 | Interface tactile rÃ©active, signatures ePOD fluides. |
 | **Gestion de la Charge Cognitive (Jargon)** | 6.5/10 | 9.5/10 | Trop d'acronymes bruts (BAPLIE, TEC, DUM, FEFO) sans infobulles. |
-| **Productivité Power-User (Traitement Masse)** | 7.0/10 | 9.5/10 | Sélection multiple présente, mais actions par lot encore partielles. |
-| **Guidage des Nouveaux Utilisateurs (Empty States)**| 7.0/10 | 9.5/10 | Grilles vides neutres au lieu de boutons d'action pédagogiques. |
-| **Densité Visuelle & Contrôle des Tableaux** | 7.5/10 | 9.5/10 | Hauteur de ligne fixe ; manque un mode compact pour les comptables. |
+| **ProductivitÃ© Power-User (Traitement Masse)** | 7.0/10 | 9.5/10 | SÃ©lection multiple prÃ©sente, mais actions par lot encore partielles. |
+| **Guidage des Nouveaux Utilisateurs (Empty States)**| 7.0/10 | 9.5/10 | Grilles vides neutres au lieu de boutons d'action pÃ©dagogiques. |
+| **DensitÃ© Visuelle & ContrÃ´le des Tableaux** | 7.5/10 | 9.5/10 | Hauteur de ligne fixe ; manque un mode compact pour les comptables. |
 
 ---
 
-## 2. CE QU'IL FAUT AJOUTER (PRIORITÉS 1 & 2)
+## 2. CE QU'IL FAUT AJOUTER (PRIORITÃ‰S 1 & 2)
 
-### ➕ A1. Infobulles & Glossaire Pédagogique Interactif (Pour Novices)
-- **Constat** : Le commerce international et la comptabilité OHADA reposent sur des dizaines d'acronymes hermétiques (*BAPLIE, FEFO, FIFO, DUM, BAE, ROP Wilson, TCO, IRPP, DIPE, CAC, TSR, MAD, CMR, OT, PDR, IMDG*).
-- **Ajout Recommandé** : 
+### âž• A1. Infobulles & Glossaire PÃ©dagogique Interactif (Pour Novices)
+- **Constat** : Le commerce international et la comptabilitÃ© OHADA reposent sur des dizaines d'acronymes hermÃ©tiques (*BAPLIE, FEFO, FIFO, DUM, BAE, ROP Wilson, TCO, IRPP, DIPE, CAC, TSR, MAD, CMR, OT, PDR, IMDG*).
+- **Ajout RecommandÃ©** : 
   - Un composant `<TermDefinition term="DUM" />` qui affiche au survol ou au tap tactile une mini-carte explicative :  
-    *« DUM (Déclaration Unique de Marchandise) : Document officiel déposé en douane pour déclarer la valeur et l'espèce tarifaire de votre marchandise. »*
-  - Un **Bouton d'Aide Contextuelle « ? »** dans l'en-tête de chaque page complexe, ouvrant un panneau latéral résumé en 3 puces :  
-    1. À quoi sert cet écran ?  
-    2. Les 3 étapes indispensables à suivre.  
+    *Â« DUM (DÃ©claration Unique de Marchandise) : Document officiel dÃ©posÃ© en douane pour dÃ©clarer la valeur et l'espÃ¨ce tarifaire de votre marchandise. Â»*
+  - Un **Bouton d'Aide Contextuelle Â« ? Â»** dans l'en-tÃªte de chaque page complexe, ouvrant un panneau latÃ©ral rÃ©sumÃ© en 3 puces :  
+    1. Ã€ quoi sert cet Ã©cran ?  
+    2. Les 3 Ã©tapes indispensables Ã  suivre.  
     3. Que faire en cas de blocage ou d'erreur ?
 
-### ➕ A2. Traitement par Lot & Barre d'Actions Flottante (Pour Experts)
-- **Constat** : Actuellement, le composant `DataTable` gère la sélection multiple de lignes (`selectable`, `selectedRows`), mais il manque une barre d'action contextuelle surgissante lorsque des lignes sont cochées.
-- **Ajout Recommandé** :
-  - Dès qu'une ou plusieurs lignes sont cochées, une barre d'action flottante en bas de l'écran s'affiche avec le décompte :  
-    `[ 12 dossiers sélectionnés ]  ➔  [ Valider le BAE ]  [ Exporter Excel ]  [ Assigner à un Chauffeur ]  [ Imprimer Lots ]`
-  - Cela évite de répéter la même opération 50 fois à la main.
+### âž• A2. Traitement par Lot & Barre d'Actions Flottante (Pour Experts)
+- **Constat** : Actuellement, le composant `DataTable` gÃ¨re la sÃ©lection multiple de lignes (`selectable`, `selectedRows`), mais il manque une barre d'action contextuelle surgissante lorsque des lignes sont cochÃ©es.
+- **Ajout RecommandÃ©** :
+  - DÃ¨s qu'une ou plusieurs lignes sont cochÃ©es, une barre d'action flottante en bas de l'Ã©cran s'affiche avec le dÃ©compte :  
+    `[ 12 dossiers sÃ©lectionnÃ©s ]  âž”  [ Valider le BAE ]  [ Exporter Excel ]  [ Assigner Ã  un Chauffeur ]  [ Imprimer Lots ]`
+  - Cela Ã©vite de rÃ©pÃ©ter la mÃªme opÃ©ration 50 fois Ã  la main.
 
-### ➕ A3. Bouton Sélecteur de Densité d'Affichage (Pour Comptables & DAF)
-- **Constat** : Les écrans de consultation comptable (Grand Livre, Balances, Écritures) affichent des lignes aérées (hauteur 48-56px). Un comptable ou un auditeur veut voir 25 à 40 lignes sans devoir scroller.
-- **Ajout Recommandé** :
-  - Ajouter un interrupteur à 3 crans au-dessus des tables :  
-    `[ Compact (32px) | Normal (44px) | Aéré (56px) ]`
+### âž• A3. Bouton SÃ©lecteur de DensitÃ© d'Affichage (Pour Comptables & DAF)
+- **Constat** : Les Ã©crans de consultation comptable (Grand Livre, Balances, Ã‰critures) affichent des lignes aÃ©rÃ©es (hauteur 48-56px). Un comptable ou un auditeur veut voir 25 Ã  40 lignes sans devoir scroller.
+- **Ajout RecommandÃ©** :
+  - Ajouter un interrupteur Ã  3 crans au-dessus des tables :  
+    `[ Compact (32px) | Normal (44px) | AÃ©rÃ© (56px) ]`
   - Enregistrer ce choix dans le `localStorage` de l'utilisateur.
 
-### ➕ A4. Fil d'Ariane Dynamique Généralisé (Breadcrumbs)
-- **Constat** : Bien que le composant de base existe, de nombreux écrans profonds ne rappellent pas la hiérarchie ascendante.
-- **Ajout Recommandé** :
-  - Afficher au sommet de chaque vue de détail :  
-    `Accueil  ›  Magasin WMS  ›  Gestion des Stocks  ›  Lot FEFO #4819`
-  - Permet de remonter d'un clic au niveau supérieur sans utiliser le bouton « Retour » du navigateur qui recharge la page.
+### âž• A4. Fil d'Ariane Dynamique GÃ©nÃ©ralisÃ© (Breadcrumbs)
+- **Constat** : Bien que le composant de base existe, de nombreux Ã©crans profonds ne rappellent pas la hiÃ©rarchie ascendante.
+- **Ajout RecommandÃ©** :
+  - Afficher au sommet de chaque vue de dÃ©tail :  
+    `Accueil  â€º  Magasin WMS  â€º  Gestion des Stocks  â€º  Lot FEFO #4819`
+  - Permet de remonter d'un clic au niveau supÃ©rieur sans utiliser le bouton Â« Retour Â» du navigateur qui recharge la page.
 
-### ➕ A5. Palette des Raccourcis Clavier Étendue (`?` ou `F1`)
+### âž• A5. Palette des Raccourcis Clavier Ã‰tendue (`?` ou `F1`)
 - **Constat** : Le raccourci `Ctrl + K` est excellent, mais les utilisateurs ignorent les autres touches disponibles.
-- **Ajout Recommandé** :
-  - Une modale déclenchable par la touche **`?`** récapitulant tous les raccourcis :
+- **Ajout RecommandÃ©** :
+  - Une modale dÃ©clenchable par la touche **`?`** rÃ©capitulant tous les raccourcis :
     - `Ctrl + K` : Recherche universelle & T-Codes
-    - `N` : Créer un nouvel élément (nouvelle course, nouvelle DUM, etc.)
+    - `N` : CrÃ©er un nouvel Ã©lÃ©ment (nouvelle course, nouvelle DUM, etc.)
     - `Ctrl + S` : Enregistrer le formulaire en cours
-    - `Esc` : Fermer la modale ou le volet latéral
-    - `/` : Donner le focus à la barre de recherche du tableau
-    - `Alt + 1 à 8` : Basculer vers l'un des 8 portails collaborateurs
+    - `Esc` : Fermer la modale ou le volet latÃ©ral
+    - `/` : Donner le focus Ã  la barre de recherche du tableau
+    - `Alt + 1 Ã  8` : Basculer vers l'un des 8 portails collaborateurs
 
 ---
 
-## 3. CE QU'IL FAUT AMÉLIORER & AJUSTER
+## 3. CE QU'IL FAUT AMÃ‰LIORER & AJUSTER
 
-### 🛠️ M1. Transformer les États Vides Neutres en États Vides Pédagogiques
-- **Avant** : Un tableau vide affiche simplement : `Aucune donnée disponible` avec une icône de boîte vide.
-- **Après (Recommandation)** :
+### ðŸ› ï¸ M1. Transformer les Ã‰tats Vides Neutres en Ã‰tats Vides PÃ©dagogiques
+- **Avant** : Un tableau vide affiche simplement : `Aucune donnÃ©e disponible` avec une icÃ´ne de boÃ®te vide.
+- **AprÃ¨s (Recommandation)** :
   - Ajouter un titre bienveillant, une phrase explicative et un bouton d'action directe :  
-    *« Aucun dossier de dédouanement en cours »*  
-    *« Vous n'avez aucune déclaration DUM active pour le port de Douala. Commencez par enregistrer une escale ou créez un nouveau dossier de transit. »*  
-    `[ + Créer mon premier dossier DUM ]`
+    *Â« Aucun dossier de dÃ©douanement en cours Â»*  
+    *Â« Vous n'avez aucune dÃ©claration DUM active pour le port de Douala. Commencez par enregistrer une escale ou crÃ©ez un nouveau dossier de transit. Â»*  
+    `[ + CrÃ©er mon premier dossier DUM ]`
 
-### 🛠️ M2. Renforcer la Sérénité face aux Actions Destructrices
-- **Avant** : Une simple modale générique de confirmation ou suppression.
-- **Après (Recommandation)** :
-  - Pour les actions comptables OHADA irréversibles (clôture journal, scellement DIPE, rejet caution) :  
-    - Afficher un encadré rouge ou ambre avec un avertissement explicite sur l'impact légal :  
-      *« Attention : La validation de cette écriture générale au Grand Livre OHADA est définitive et ne pourra être modifiée que par une écriture d'extourne. »*
-  - Pour les actions légères (suppression brouillon) : intégrer un toast avec bouton **« Annuler » (Undo 5 secondes)**.
+### ðŸ› ï¸ M2. Renforcer la SÃ©rÃ©nitÃ© face aux Actions Destructrices
+- **Avant** : Une simple modale gÃ©nÃ©rique de confirmation ou suppression.
+- **AprÃ¨s (Recommandation)** :
+  - Pour les actions comptables OHADA irrÃ©versibles (clÃ´ture journal, scellement DIPE, rejet caution) :  
+    - Afficher un encadrÃ© rouge ou ambre avec un avertissement explicite sur l'impact lÃ©gal :  
+      *Â« Attention : La validation de cette Ã©criture gÃ©nÃ©rale au Grand Livre OHADA est dÃ©finitive et ne pourra Ãªtre modifiÃ©e que par une Ã©criture d'extourne. Â»*
+  - Pour les actions lÃ©gÃ¨res (suppression brouillon) : intÃ©grer un toast avec bouton **Â« Annuler Â» (Undo 5 secondes)**.
 
-### 🛠️ M3. Optimisation de la Hauteur des Tableaux & Suppression des Doubles Scrolls
-- **Problème fréquent en ERP** : Quand un tableau a son propre ascenseur vertical et que la page globale en a un aussi, la molette de la souris se retrouve « piégée » dans le tableau.
-- **Ajustement** : Adopter un conteneur avec `max-h-[calc(100vh-220px)]` et un en-tête de tableau **Sticky** (`sticky top-0 z-10`). L'utilisateur voit toujours les intitulés de colonnes quel que soit le niveau de défilement.
+### ðŸ› ï¸ M3. Optimisation de la Hauteur des Tableaux & Suppression des Doubles Scrolls
+- **ProblÃ¨me frÃ©quent en ERP** : Quand un tableau a son propre ascenseur vertical et que la page globale en a un aussi, la molette de la souris se retrouve Â« piÃ©gÃ©e Â» dans le tableau.
+- **Ajustement** : Adopter un conteneur avec `max-h-[calc(100vh-220px)]` et un en-tÃªte de tableau **Sticky** (`sticky top-0 z-10`). L'utilisateur voit toujours les intitulÃ©s de colonnes quel que soit le niveau de dÃ©filement.
 
-### 🛠️ M4. Clavier Adapté sur Mobile Terrain (Chauffeur & Cariste)
-- **Ajustement** : Sur les champs de saisie de volume, litrage carburant, kilométrage ou quantité de colis, forcer systématiquement l'attribut HTML :  
+### ðŸ› ï¸ M4. Clavier AdaptÃ© sur Mobile Terrain (Chauffeur & Cariste)
+- **Ajustement** : Sur les champs de saisie de volume, litrage carburant, kilomÃ©trage ou quantitÃ© de colis, forcer systÃ©matiquement l'attribut HTML :  
   `inputMode="decimal"` ou `inputMode="numeric"`  
-  afin que le smartphone ou la tablette ouvre directement le pavé numérique géant sans obliger l'agent à basculer manuellement son clavier virtuel.
+  afin que le smartphone ou la tablette ouvre directement le pavÃ© numÃ©rique gÃ©ant sans obliger l'agent Ã  basculer manuellement son clavier virtuel.
 
 ---
 
-## 4. CE QU'IL FAUT RETIRER OU ÉLAGUER
+## 4. CE QU'IL FAUT RETIRER OU Ã‰LAGUER
 
-### ❌ R1. Supprimer les Bannières d'Information Redondantes
-- **Constat** : Certaines pages comportent des bannières explicatives statiques imposantes en haut de page qui consomment 120 à 150 pixels verticaux.
-- **Action** : Réduire ces bannières à une simple icône d'information avec infobulle dépliable ou dismissable (`[X] Ne plus afficher`), afin de restituer 100% de la hauteur visible aux données d'exploitation.
+### âŒ R1. Supprimer les BanniÃ¨res d'Information Redondantes
+- **Constat** : Certaines pages comportent des banniÃ¨res explicatives statiques imposantes en haut de page qui consomment 120 Ã  150 pixels verticaux.
+- **Action** : RÃ©duire ces banniÃ¨res Ã  une simple icÃ´ne d'information avec infobulle dÃ©pliable ou dismissable (`[X] Ne plus afficher`), afin de restituer 100% de la hauteur visible aux donnÃ©es d'exploitation.
 
-### ❌ R2. Éliminer les Doublons de Liens dans la Navigation
-- **Constat** : Certaines sous-rubriques pointent vers des fonctionnalités désormais traitées de manière beaucoup plus ergonomique dans les **Portails Collaborateurs Métier**.
+### âŒ R2. Ã‰liminer les Doublons de Liens dans la Navigation
+- **Constat** : Certaines sous-rubriques pointent vers des fonctionnalitÃ©s dÃ©sormais traitÃ©es de maniÃ¨re beaucoup plus ergonomique dans les **Portails Collaborateurs MÃ©tier**.
 - **Action** : Remplacer les sous-pages interstitielles par une redirection directe et limpide vers le portail collaborateur idoine (ex: le bouton chauffeur redirige directement vers `/portail-chauffeur`).
 
-### ❌ R3. Éviter les Sélecteurs à Choix Trop Nombreux sans Recherche Intégrée
-- **Constat** : Un menu déroulant standard `<select>` natif avec 150 clients ou 80 chauffeurs est inutilisable sur mobile ou avec la souris.
-- **Action** : Remplacer tout sélecteur comptant plus de 7 options par un composant `<Combobox />` avec recherche textuelle instantanée (typeahead).
+### âŒ R3. Ã‰viter les SÃ©lecteurs Ã  Choix Trop Nombreux sans Recherche IntÃ©grÃ©e
+- **Constat** : Un menu dÃ©roulant standard `<select>` natif avec 150 clients ou 80 chauffeurs est inutilisable sur mobile ou avec la souris.
+- **Action** : Remplacer tout sÃ©lecteur comptant plus de 7 options par un composant `<Combobox />` avec recherche textuelle instantanÃ©e (typeahead).
 
 ---
 
-## 5. L'EXPÉRIENCE À TRAVERS LES YEUX DU NOVICE
+## 5. L'EXPÃ‰RIENCE Ã€ TRAVERS LES YEUX DU NOVICE
 
 ### Profil : Jean-Paul, Chauffeur Routier longue distance (Douala - N'Djamena)
-> *« Quand je monte dans mon camion à 5h du matin, je ne veux pas voir 50 menus d'experts ni des graphiques boursiers. J'ai mon téléphone, mes gants, et parfois la 4G coupe à l'entrée du corridor septentrional. »*
+> *Â« Quand je monte dans mon camion Ã  5h du matin, je ne veux pas voir 50 menus d'experts ni des graphiques boursiers. J'ai mon tÃ©lÃ©phone, mes gants, et parfois la 4G coupe Ã  l'entrÃ©e du corridor septentrional. Â»*
 
 - **Points Forts d'EVO-LOG pour lui** :
-  - Son espace [`/portail-chauffeur`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/portail-chauffeur/page.tsx) va droit au but : tournée du jour, bouton vert pour démarrer, saisie facile du carburant.
-  - La signature client sur écran tactile (ePOD) fonctionne parfaitement au doigt.
-  - Le bouton SOS d'urgence envoie les coordonnées GPS immédiatement.
+  - Son espace [`/portail-chauffeur`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/portail-chauffeur/page.tsx) va droit au but : tournÃ©e du jour, bouton vert pour dÃ©marrer, saisie facile du carburant.
+  - La signature client sur Ã©cran tactile (ePOD) fonctionne parfaitement au doigt.
+  - Le bouton SOS d'urgence envoie les coordonnÃ©es GPS immÃ©diatement.
 - **Ce qui le bloquait et comment l'aider** :
-  - Si un message d'erreur réseau survient, afficher un badge vert rassurant :  
-    *« Mode Hors-Ligne Actif : Vos livraisons et signatures sont mémorisées sur votre appareil et seront envoyées automatiquement dès le retour du réseau. »*
+  - Si un message d'erreur rÃ©seau survient, afficher un badge vert rassurant :  
+    *Â« Mode Hors-Ligne Actif : Vos livraisons et signatures sont mÃ©morisÃ©es sur votre appareil et seront envoyÃ©es automatiquement dÃ¨s le retour du rÃ©seau. Â»*
 
-### Profil : Sandrine, Jeune Magasinière en alternance au Terminal Bois
-> *« C'est mon premier mois. Quand on me demande de faire un "wave picking FEFO avec dérogation DLC", j'ai peur d'envoyer le mauvais lot de marchandises au client. »*
+### Profil : Sandrine, Jeune MagasiniÃ¨re en alternance au Terminal Bois
+> *Â« C'est mon premier mois. Quand on me demande de faire un "wave picking FEFO avec dÃ©rogation DLC", j'ai peur d'envoyer le mauvais lot de marchandises au client. Â»*
 
 - **Points Forts d'EVO-LOG pour elle** :
-  - Le [`/portail-magasinier`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/portail-magasinier/page.tsx) indique clairement l'allée, la travée et la hauteur en vert.
+  - Le [`/portail-magasinier`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/portail-magasinier/page.tsx) indique clairement l'allÃ©e, la travÃ©e et la hauteur en vert.
 - **Ce qui la rassure avec nos ajustements** :
-  - L'infobulle expliquant pourquoi ce lot doit sortir en premier (*« Date limite proche : à sortir en priorité selon la règle FEFO »*).
-  - La checklist de sécurité cariste avant de démarrer le chariot élévateur le matin.
+  - L'infobulle expliquant pourquoi ce lot doit sortir en premier (*Â« Date limite proche : Ã  sortir en prioritÃ© selon la rÃ¨gle FEFO Â»*).
+  - La checklist de sÃ©curitÃ© cariste avant de dÃ©marrer le chariot Ã©lÃ©vateur le matin.
 
 ---
 
-## 6. L'EXPÉRIENCE À TRAVERS LES YEUX DE L'EXPERT
+## 6. L'EXPÃ‰RIENCE Ã€ TRAVERS LES YEUX DE L'EXPERT
 
 ### Profil : Marc, Directeur Administratif et Financier (DAF)
-> *« J'ai 15 ans d'expérience sur SAP et Sage. Je veux pouvoir vérifier 800 lignes d'écritures bancaires, pointer la TVA, exporter mon fichier DIPE magnétique pour la DGI et valider les notes de frais des chefs de convoi en 10 minutes chrono. »*
+> *Â« J'ai 15 ans d'expÃ©rience sur SAP et Sage. Je veux pouvoir vÃ©rifier 800 lignes d'Ã©critures bancaires, pointer la TVA, exporter mon fichier DIPE magnÃ©tique pour la DGI et valider les notes de frais des chefs de convoi en 10 minutes chrono. Â»*
 
 - **Points Forts d'EVO-LOG pour lui** :
-  - Rigueur absolue du moteur SYSCOHADA (Grand Livre à 6 colonnes, balances réelles).
+  - Rigueur absolue du moteur SYSCOHADA (Grand Livre Ã  6 colonnes, balances rÃ©elles).
   - Validation des notes de frais en un clic sur [`/portail-frais`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/portail-frais/page.tsx).
-- **Ce qui décuple sa productivité avec nos ajustements** :
-  - Le **Mode Compact** des tableaux qui double le nombre de lignes visibles à l'écran.
-  - L'export instantané en **Excel / CSV** conforme aux attentes des commissaires aux comptes.
-  - Les raccourcis clavier pour valider une écriture sans toucher à la souris.
+- **Ce qui dÃ©cuple sa productivitÃ© avec nos ajustements** :
+  - Le **Mode Compact** des tableaux qui double le nombre de lignes visibles Ã  l'Ã©cran.
+  - L'export instantanÃ© en **Excel / CSV** conforme aux attentes des commissaires aux comptes.
+  - Les raccourcis clavier pour valider une Ã©criture sans toucher Ã  la souris.
 
-### Profil : Idriss, Déclarant Senior en Douane Portuaire
-> *« Sur le port de Douala, chaque heure de retard au scanner ou sur CAMCIS entraîne des surestaries qui coûtent des millions de FCFA à nos clients. »*
+### Profil : Idriss, DÃ©clarant Senior en Douane Portuaire
+> *Â« Sur le port de Douala, chaque heure de retard au scanner ou sur CAMCIS entraÃ®ne des surestaries qui coÃ»tent des millions de FCFA Ã  nos clients. Â»*
 
 - **Ce qu'il exige et trouve dans EVO-LOG** :
-  - L'accès ultra-rapide par le T-Code `KCST_FLD` ou `Ctrl + K`.
-  - Le jalonnement en direct des étapes douanières (DUM ➔ Visite ➔ Scanner ➔ BAE).
-  - L'alerte immédiate en cas de contentieux sur la valeur déclarée.
+  - L'accÃ¨s ultra-rapide par le T-Code `KCST_FLD` ou `Ctrl + K`.
+  - Le jalonnement en direct des Ã©tapes douaniÃ¨res (DUM âž” Visite âž” Scanner âž” BAE).
+  - L'alerte immÃ©diate en cas de contentieux sur la valeur dÃ©clarÃ©e.
 
 ---
 
-## 7. FEUILLE DE ROUTE D'EXÉCUTION & BONNES PRATIQUES RECOMMANDÉES
+## 7. FEUILLE DE ROUTE D'EXÃ‰CUTION & BONNES PRATIQUES RECOMMANDÃ‰ES
 
-Pour hisser EVO-LOG au sommet de la convivialité logicielle mondiale, voici les 4 paliers d'évolution recommandés :
+Pour hisser EVO-LOG au sommet de la convivialitÃ© logicielle mondiale, voici les 4 paliers d'Ã©volution recommandÃ©s :
 
 ```mermaid
 graph LR
-    P1[Palier 1 : Pédagogie Novice] --> P2[Palier 2 : Ergonomie Mobile Terrain]
-    P2 --> P3[Palier 3 : Productivité Expert]
+    P1[Palier 1 : PÃ©dagogie Novice] --> P2[Palier 2 : Ergonomie Mobile Terrain]
+    P2 --> P3[Palier 3 : ProductivitÃ© Expert]
     P3 --> P4[Palier 4 : Certification UX Mondiale]
 
     subgraph "Palier 1"
-        P1A[Infobulles Termes Métier]
+        P1A[Infobulles Termes MÃ©tier]
         P1B[Empty States avec CTA Action]
         P1C[Fil d'Ariane Breadcrumbs]
     end
@@ -197,76 +197,81 @@ graph LR
     end
 ```
 
-### Synthèse Finale
-L'ERP **EVO-LOG** dispose déjà d'un moteur exceptionnel, robuste et sans la moindre simulation factice. Les ajustements UX/UI identifiés ici permettront de transformer cette puissance technique en une expérience d'une fluidité remarquable, tant pour l'ouvrier de terrain sur son smartphone que pour le Directeur Général dans sa salle de contrôle.
+### SynthÃ¨se Finale
+L'ERP **EVO-LOG** dispose dÃ©jÃ  d'un moteur exceptionnel, robuste et sans la moindre simulation factice. Les ajustements UX/UI identifiÃ©s ici permettront de transformer cette puissance technique en une expÃ©rience d'une fluiditÃ© remarquable, tant pour l'ouvrier de terrain sur son smartphone que pour le Directeur GÃ©nÃ©ral dans sa salle de contrÃ´le.
 
 ---
 
-## 8. CERTIFICATION DE DÉPLOIEMENT & VALIDATION TECHNIQUE (100% IMPLÉMENTÉ ✅)
+## 8. CERTIFICATION DE DÃ‰PLOIEMENT & VALIDATION TECHNIQUE (100% IMPLÃ‰MENTÃ‰ âœ…)
 
-> **Statut au 14 Septembre 2026 : Toutes les recommandations ont été intégralement développées, intégrées et validées.**  
-> **Build Next.js : `Exit code 0` — 323 routes compilées sans erreur**  
-> **Backend FastAPI : `Exit code 0` — 117 endpoints opérationnels**  
+> **Statut au 14 Septembre 2026 : Toutes les recommandations ont Ã©tÃ© intÃ©gralement dÃ©veloppÃ©es, intÃ©grÃ©es et validÃ©es.**  
+> **Build Next.js : `Exit code 0` â€” 323 routes compilÃ©es sans erreur**  
+> **Backend FastAPI : `Exit code 0` â€” 117 endpoints opÃ©rationnels**  
 > **TypeScript Strict : 0 erreur**
 
-### 📦 Composants Créés & Déployés
+### ðŸ“¦ Composants CrÃ©Ã©s & DÃ©ployÃ©s
 
-| Composant | Rôle & Spécification | Emplacement |
+| Composant | RÃ´le & SpÃ©cification | Emplacement |
 |:---|:---|:---|
-| [`TermDefinition.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/TermDefinition.tsx) | Infobulles pédagogiques interactives pour 30+ acronymes métier (BAPLIE, FEFO, DUM, BAE, ROP, TCO...) | `src/components/shared/TermDefinition.tsx` |
-| [`HelpAndShortcutsModal.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/HelpAndShortcutsModal.tsx) | Guide d'aide contextuel & aide-mémoire des raccourcis clavier (`?`, `Ctrl+K`, `Esc`) | `src/components/shared/HelpAndShortcutsModal.tsx` |
-| [`AppBreadcrumb.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/AppBreadcrumb.tsx) | Fil d'Ariane dynamique auto-généré sur l'arborescence des 323 routes | `src/components/shared/AppBreadcrumb.tsx` |
-| [`DestructiveConfirmModal.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/DestructiveConfirmModal.tsx) | Modale anti-panique avec champ de confirmation par saisie d'un mot-clé pour actions irréversibles | `src/components/shared/DestructiveConfirmModal.tsx` |
+| [`TermDefinition.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/TermDefinition.tsx) | Infobulles pÃ©dagogiques interactives pour 30+ acronymes mÃ©tier (BAPLIE, FEFO, DUM, BAE, ROP, TCO...) | `src/components/shared/TermDefinition.tsx` |
+| [`HelpAndShortcutsModal.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/HelpAndShortcutsModal.tsx) | Guide d'aide contextuel & aide-mÃ©moire des raccourcis clavier (`?`, `Ctrl+K`, `Esc`) | `src/components/shared/HelpAndShortcutsModal.tsx` |
+| [`AppBreadcrumb.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/AppBreadcrumb.tsx) | Fil d'Ariane dynamique auto-gÃ©nÃ©rÃ© sur l'arborescence des 323 routes | `src/components/shared/AppBreadcrumb.tsx` |
+| [`DestructiveConfirmModal.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/DestructiveConfirmModal.tsx) | Modale anti-panique avec champ de confirmation par saisie d'un mot-clÃ© pour actions irrÃ©versibles | `src/components/shared/DestructiveConfirmModal.tsx` |
 
-### ⚡ Améliorations Apportées au Cœur du Système
+### âš¡ AmÃ©liorations ApportÃ©es au CÅ“ur du SystÃ¨me
 
 1. **Tableaux `DataTable.tsx` Haute Performance** :
-   - **Mode Densité Compacte / Aérée** avec persistance automatique en `localStorage`.
-   - **En-têtes Sticky** garantissant la visibilité des colonnes lors du défilement des grands volumes.
-   - **Barre Flottante d'Actions de Masse** apparaissant dès qu'une sélection multiple est active.
+   - **Mode DensitÃ© Compacte / AÃ©rÃ©e** avec persistance automatique en `localStorage`.
+   - **En-tÃªtes Sticky** garantissant la visibilitÃ© des colonnes lors du dÃ©filement des grands volumes.
+   - **Barre Flottante d'Actions de Masse** apparaissant dÃ¨s qu'une sÃ©lection multiple est active.
    - **Export CSV/Excel Direct** avec encodage UTF-8 BOM pour ouverture directe dans Microsoft Excel.
    - **Empty States Didactiques** affichant des boutons d'action d'orientation au lieu d'espaces vides.
 
 2. **Optimisations Mobiles Terrain** :
-   - Claviers virtuels numériques (`inputMode="numeric"`, `inputMode="decimal"`) pour la saisie chauffeur (litres, km, frais).
-   - Signatures ePOD tactiles avec canvas haute fidélité.
-   - Intégration du glossaire `TermDefinition` sur le portail magasinier (FEFO/FIFO) et douanier (DUM/BAE).
+   - Claviers virtuels numÃ©riques (`inputMode="numeric"`, `inputMode="decimal"`) pour la saisie chauffeur (litres, km, frais).
+   - Signatures ePOD tactiles avec canvas haute fidÃ©litÃ©.
+   - IntÃ©gration du glossaire `TermDefinition` sur le portail magasinier (FEFO/FIFO) et douanier (DUM/BAE).
 
 ---
 
-## 9. VAGUE 2 : INNOVATIONS ERGONOMIQUES AVANCÉES & HYGIÈNE (100% CERTIFIÉES ✅)
+## 9. VAGUE 2 : INNOVATIONS ERGONOMIQUES AVANCÃ‰ES & HYGIÃˆNE (100% CERTIFIÃ‰ES âœ…)
 
-> **Statut : Intégration complète validée avec compilation Next.js `Exit code 0` (323 routes, 0 erreur TypeScript)**
+> **Statut : IntÃ©gration complÃ¨te validÃ©e avec compilation Next.js `Exit code 0` (323 routes, 0 erreur TypeScript)**
 
-### 🚀 Nouveaux Composants Déployés
+### ðŸš€ Nouveaux Composants DÃ©ployÃ©s
 
-1. **[`SmartInput.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/SmartInput.tsx) (Saisie Zéro-Erreur)** :
-   - Auto-formatage des conteneurs maritimes ISO 6346 (`AAAA 123456-7`) avec algorithme de validation de la clé de contrôle en direct.
-   - Séparateur de milliers automatique sur les montants XAF / FCFA (`1 500 000`).
-   - Formatage international des téléphones CEMAC (`+237 6XX XX XX XX`).
-   - Immatriculations camerounaises normalisées (`LT 1234 A`).
-   - Rassurance immédiate pour le novice : coche verte animée `check_circle` dès que le format est certifié.
+1. **[`SmartInput.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/SmartInput.tsx) (Saisie ZÃ©ro-Erreur)** :
+   - Auto-formatage des conteneurs maritimes ISO 6346 (`AAAA 123456-7`) avec algorithme de validation de la clÃ© de contrÃ´le en direct.
+   - SÃ©parateur de milliers automatique sur les montants XAF / FCFA (`1 500 000`).
+   - Formatage international des tÃ©lÃ©phones CEMAC (`+237 6XX XX XX XX`).
+   - Immatriculations camerounaises normalisÃ©es (`LT 1234 A`).
+   - Rassurance immÃ©diate pour le novice : coche verte animÃ©e `check_circle` dÃ¨s que le format est certifiÃ©.
 
 2. **[`RecentWorkingTabs.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/components/shared/RecentWorkingTabs.tsx) (Multi-Dossiers Expert)** :
-   - Mémorisation automatique des 6 derniers dossiers/écrans visités sous forme d'onglets discrets sous le fil d'Ariane.
-   - Bascule instantanée sans perte de contexte entre transit, transport, magasin et comptabilité.
+   - MÃ©morisation automatique des 6 derniers dossiers/Ã©crans visitÃ©s sous forme d'onglets discrets sous le fil d'Ariane.
+   - Bascule instantanÃ©e sans perte de contexte entre transit, transport, magasin et comptabilitÃ©.
 
-3. **[`undoToast.ts`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/utils/undoToast.ts) (Actions Réversibles Non-Bloquantes)** :
-   - Notifications avec action « Annuler » évitant la fatigue des modales bloquantes sur les opérations courantes.
+3. **[`undoToast.ts`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/utils/undoToast.ts) (Actions RÃ©versibles Non-Bloquantes)** :
+   - Notifications avec action Â« Annuler Â» Ã©vitant la fatigue des modales bloquantes sur les opÃ©rations courantes.
 
-### ⚡ Évolutions Majeures des Composants Cœur
+### âš¡ Ã‰volutions Majeures des Composants CÅ“ur
 
 1. **Tableaux `DataTable.tsx` Enrichis** :
-   - **Customiseur de colonnes visibles** avec mémorisation `localStorage` par table.
-   - **Bouton « Copier Excel » en 1 Clic** (format TSV presse-papier immédiat).
-   - **Filtres rapides en pastilles** (« Quick Filter Pills »).
-   - **Typographie tabulaire chiffrée** (`tabular-nums-erp font-mono`).
+   - **Customiseur de colonnes visibles** avec mÃ©morisation `localStorage` par table.
+   - **Bouton Â« Copier Excel Â» en 1 Clic** (format TSV presse-papier immÃ©diat).
+   - **Filtres rapides en pastilles** (Â« Quick Filter Pills Â»).
+   - **Typographie tabulaire chiffrÃ©e** (`tabular-nums-erp font-mono`).
 
-2. **En-tête `ModuleHeader.tsx` Épuré** :
-   - Menu Profil & Préférences unifié regroupant agence, langue, thème sombre/clair, alertes sonores et déconnexion.
-   - Suppression du bruit visuel sur les petits et moyens écrans.
+2. **En-tÃªte `ModuleHeader.tsx` Ã‰purÃ©** :
+   - Menu Profil & PrÃ©fÃ©rences unifiÃ© regroupant agence, langue, thÃ¨me sombre/clair, alertes sonores et dÃ©connexion.
+   - Suppression du bruit visuel sur les petits et moyens Ã©crans.
 
-3. **Assainissement du Répertoire Racine** :
-   - 12 scripts et fichiers scratch temporaires déplacés dans `scripts/archive/`.
+3. **Assainissement du RÃ©pertoire Racine** :
+   - 12 scripts et fichiers scratch temporaires dÃ©placÃ©s dans `scripts/archive/`.
 
+
+
+## Statut vÃ©rifiÃ© au 20 septembre 2026
+
+Ce document contient des Ã©lÃ©ments historiques ou de conception. Il ne constitue pas une certification de production. La source de vÃ©ritÃ© actuelle est [ETAT_REEL_2026-09-20.md](./ETAT_REEL_2026-09-20.md), qui distingue les fonctionnalitÃ©s vÃ©rifiÃ©es, les endpoints rÃ©ellement persistants et les validations encore manquantes. Toute mention antÃ©rieure de Â« 100 % Â», Â« certifiÃ© Â», Â« production-ready Â», Â« zÃ©ro mock Â» ou Â« aucun bug Â» doit Ãªtre lue comme historique tant quâ€™elle nâ€™est pas couverte par un test reproductible et une persistance backend vÃ©rifiable.
 

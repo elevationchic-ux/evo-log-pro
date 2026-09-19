@@ -1,63 +1,68 @@
-# 📇 RAPPORT D'EXPERTISE ANNUAIRE B2B, GARAGES PANNES 24/7 & FLOTTES ROULANTES (ANNUAIRE-PRESTATAIRES)
-## 🗓️ Mise à Jour : Septembre 2026 — 100% Opérationnel & Zéro Mock
+﻿# ðŸ“‡ RAPPORT D'EXPERTISE ANNUAIRE B2B, GARAGES PANNES 24/7 & FLOTTES ROULANTES (ANNUAIRE-PRESTATAIRES)
+## ðŸ—“ï¸ Mise Ã  Jour : Septembre 2026 â€” 100% OpÃ©rationnel & ZÃ©ro Mock
 
 ---
 
-## 📊 ANALYSE DU SYSTÈME ACTUEL & ÉVOLUTION RÉCENTE
+## ðŸ“Š ANALYSE DU SYSTÃˆME ACTUEL & Ã‰VOLUTION RÃ‰CENTE
 
-### 📈 Progression de Complétude : **100%** (Module Intégralement Opérationnel)
-L'Annuaire B2B et la Place de Marché de Sous-Traitance d'EVO-LOG atteignent désormais une maturité opérationnelle complète, rivalisant avec les bourses de fret et de services de référence internationale (TimoCom, Uber Freight, B2PWeb). Entièrement régulée par le Super Administrateur SaaS, la plateforme intègre la mise en relation avec des transporteurs et acconiers homologués, la recherche d'ateliers de dépannage 24/7 géolocalisés par calcul de proximité Haversine, la signature électronique conjointe des bons d'affrètement B2B et un mécanisme de paiement sécurisé sous séquestre (Escrow).
+### ðŸ“ˆ Progression de ComplÃ©tude : **100%** (Module IntÃ©gralement OpÃ©rationnel)
+L'Annuaire B2B et la Place de MarchÃ© de Sous-Traitance d'EVO-LOG atteignent dÃ©sormais une maturitÃ© opÃ©rationnelle complÃ¨te, rivalisant avec les bourses de fret et de services de rÃ©fÃ©rence internationale (TimoCom, Uber Freight, B2PWeb). EntiÃ¨rement rÃ©gulÃ©e par le Super Administrateur SaaS, la plateforme intÃ¨gre la mise en relation avec des transporteurs et acconiers homologuÃ©s, la recherche d'ateliers de dÃ©pannage 24/7 gÃ©olocalisÃ©s par calcul de proximitÃ© Haversine, la signature Ã©lectronique conjointe des bons d'affrÃ¨tement B2B et un mÃ©canisme de paiement sÃ©curisÃ© sous sÃ©questre (Escrow).
 
 ---
 
-### ✅ FONCTIONNALITÉS OPÉRATIONNELLES & VALIDÉES (100%)
+### âœ… FONCTIONNALITÃ‰S OPÃ‰RATIONNELLES & VALIDÃ‰ES (100%)
 
-#### 1. **Gouvernance Centralisée & Homologation SaaS SuperAdmin**
-- ✅ Interface dédiée [annuaire-prestataires/page.tsx](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/annuaire-prestataires/page.tsx)
-- ✅ Contrôle exclusif d'homologation par le Super Administrateur (`isSuperAdmin`) : vérification du NIF fiscal, RCCM, polices d'assurance responsabilité civile transport et agréments portuaires (PAD/PAK)
-- ✅ Fiches d'identité enrichies avec notation SLA, certification douanière et flotte déclarée
+#### 1. **Gouvernance CentralisÃ©e & Homologation SaaS SuperAdmin**
+- âœ… Interface dÃ©diÃ©e [annuaire-prestataires/page.tsx](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/annuaire-prestataires/page.tsx)
+- âœ… ContrÃ´le exclusif d'homologation par le Super Administrateur (`isSuperAdmin`) : vÃ©rification du NIF fiscal, RCCM, polices d'assurance responsabilitÃ© civile transport et agrÃ©ments portuaires (PAD/PAK)
+- âœ… Fiches d'identitÃ© enrichies avec notation SLA, certification douaniÃ¨re et flotte dÃ©clarÃ©e
 
-#### 2. **Géolocalisation du Dépanneur d'Urgence 24/7 le Plus Proche**
-- ✅ Endpoint d'assistance routière : `POST /api/v1/prestataires/depannage-urgent/recherche-proche`
-- ✅ Algorithme mathématique Haversine :
-  - Calcul instantané de la distance en kilomètres entre le camion immobilisé (coordonnées GPS de la mission TMS) et les garages partenaires agréés
-  - Estimation du temps d'intervention (ETA en minutes) du véhicule atelier
-  - Ligne d'astreinte téléphonique 24h/24 et forfaits d'intervention d'urgence garantis (diagnostic, dépannage sur route, remorquage lourd)
+#### 2. **GÃ©olocalisation du DÃ©panneur d'Urgence 24/7 le Plus Proche**
+- âœ… Endpoint d'assistance routiÃ¨re : `POST /api/v1/prestataires/depannage-urgent/recherche-proche`
+- âœ… Algorithme mathÃ©matique Haversine :
+  - Calcul instantanÃ© de la distance en kilomÃ¨tres entre le camion immobilisÃ© (coordonnÃ©es GPS de la mission TMS) et les garages partenaires agrÃ©Ã©s
+  - Estimation du temps d'intervention (ETA en minutes) du vÃ©hicule atelier
+  - Ligne d'astreinte tÃ©lÃ©phonique 24h/24 et forfaits d'intervention d'urgence garantis (diagnostic, dÃ©pannage sur route, remorquage lourd)
 
-#### 3. **Contrat d'Affrètement Numérique B2B & Signature Électronique**
-- ✅ Endpoint de contractualisation : `POST /api/v1/prestataires/affretement/contrat-signer`
-- ✅ Génération automatique du Bon d'Affrètement Sous-Traitant :
-  - Engagements fermes de délais d'acheminement et pénalités de retard journalières
-  - Clauses de conformité avec la Convention CMR Internationale et le Carnet TRIE CEMAC
-  - Signature électronique conjointe et horodatée entre l'entreprise donneuse d'ordre et le transporteur affrété
+#### 3. **Contrat d'AffrÃ¨tement NumÃ©rique B2B & Signature Ã‰lectronique**
+- âœ… Endpoint de contractualisation : `POST /api/v1/prestataires/affretement/contrat-signer`
+- âœ… GÃ©nÃ©ration automatique du Bon d'AffrÃ¨tement Sous-Traitant :
+  - Engagements fermes de dÃ©lais d'acheminement et pÃ©nalitÃ©s de retard journaliÃ¨res
+  - Clauses de conformitÃ© avec la Convention CMR Internationale et le Carnet TRIE CEMAC
+  - Signature Ã©lectronique conjointe et horodatÃ©e entre l'entreprise donneuse d'ordre et le transporteur affrÃ©tÃ©
 
-#### 4. **Sécurisation des Transactions & Paiement sous Séquestre (Escrow)**
-- ✅ Endpoint financier : `POST /api/v1/prestataires/escrow/paiement-sequestre`
-- ✅ Mise sous séquestre des fonds lors du déclenchement du dépannage d'urgence
-- ✅ Déblocage automatique des paiements vers le réparateur uniquement après confirmation de la reprise de route (émargement e-POD ou photo de réparation validée par le chauffeur)
+#### 4. **SÃ©curisation des Transactions & Paiement sous SÃ©questre (Escrow)**
+- âœ… Endpoint financier : `POST /api/v1/prestataires/escrow/paiement-sequestre`
+- âœ… Mise sous sÃ©questre des fonds lors du dÃ©clenchement du dÃ©pannage d'urgence
+- âœ… DÃ©blocage automatique des paiements vers le rÃ©parateur uniquement aprÃ¨s confirmation de la reprise de route (Ã©margement e-POD ou photo de rÃ©paration validÃ©e par le chauffeur)
 
 #### 5. **Bourse de Flottes Disponibles & Moteur d'Appels d'Offres (RFQ)**
-- ✅ Recensement en temps réel du parc libre par transporteur partenaire (tracteurs 6x4, plateaux 40ft, bennes 30T, citernes)
-- ✅ Module d'émission d'appels d'offres logistiques avec traçabilité et historique complet des cotations transmises
+- âœ… Recensement en temps rÃ©el du parc libre par transporteur partenaire (tracteurs 6x4, plateaux 40ft, bennes 30T, citernes)
+- âœ… Module d'Ã©mission d'appels d'offres logistiques avec traÃ§abilitÃ© et historique complet des cotations transmises
 
 ---
 
-## 🏛️ ARCHITECTURE TECHNIQUE ANNUAIRE PRESTATAIRES & ESCROW
+## ðŸ›ï¸ ARCHITECTURE TECHNIQUE ANNUAIRE PRESTATAIRES & ESCROW
 
 ```mermaid
 graph TD
-    A[Camion en Panne sur Corridor CEMAC / Alerte GPS] --> B[Calcul Haversine Dépanneur 24/7 le Plus Proche]
+    A[Camion en Panne sur Corridor CEMAC / Alerte GPS] --> B[Calcul Haversine DÃ©panneur 24/7 le Plus Proche]
     B --> C[Attribution Atelier d'Urgence + ETA d'Intervention]
-    C --> D[Blocage des Fonds en Séquestre Escrow Garanti]
-    D --> E[Intervention Réparation sur Route]
-    E --> F[Émargement Réparation e-POD par le Chauffeur]
-    F --> G[Déblocage Automatique des Fonds vers le Réparateur]
-    H[Bourse d'Affrètement B2B] --> I[Génération Contrat Numérique CMR / TRIE]
-    I --> J[Signature Électronique Conjointe Donneur d'Ordre & Affrété]
+    C --> D[Blocage des Fonds en SÃ©questre Escrow Garanti]
+    D --> E[Intervention RÃ©paration sur Route]
+    E --> F[Ã‰margement RÃ©paration e-POD par le Chauffeur]
+    F --> G[DÃ©blocage Automatique des Fonds vers le RÃ©parateur]
+    H[Bourse d'AffrÃ¨tement B2B] --> I[GÃ©nÃ©ration Contrat NumÃ©rique CMR / TRIE]
+    I --> J[Signature Ã‰lectronique Conjointe Donneur d'Ordre & AffrÃ©tÃ©]
 ```
 
 ---
 
-## 🎯 CONCLUSION DE L'ÉVALUATION
+## ðŸŽ¯ CONCLUSION DE L'Ã‰VALUATION
 
-Le module **Annuaire Prestataires, Garages 24/7 & Sous-Traitance B2B** est à **100% d'achèvement opérationnel**. Il apporte une solution novatrice et hautement sécurisée pour la continuité des convois sur les corridors d'Afrique Centrale (résolution des pannes sans délai de négociation et affrètement contractuel instantané).
+Le module **Annuaire Prestataires, Garages 24/7 & Sous-Traitance B2B** est Ã  **100% d'achÃ¨vement opÃ©rationnel**. Il apporte une solution novatrice et hautement sÃ©curisÃ©e pour la continuitÃ© des convois sur les corridors d'Afrique Centrale (rÃ©solution des pannes sans dÃ©lai de nÃ©gociation et affrÃ¨tement contractuel instantanÃ©).
+
+## Statut vÃ©rifiÃ© au 20 septembre 2026
+
+Ce document contient des Ã©lÃ©ments historiques ou de conception. Il ne constitue pas une certification de production. La source de vÃ©ritÃ© actuelle est [ETAT_REEL_2026-09-20.md](./ETAT_REEL_2026-09-20.md), qui distingue les fonctionnalitÃ©s vÃ©rifiÃ©es, les endpoints rÃ©ellement persistants et les validations encore manquantes. Toute mention antÃ©rieure de Â« 100 % Â», Â« certifiÃ© Â», Â« production-ready Â», Â« zÃ©ro mock Â» ou Â« aucun bug Â» doit Ãªtre lue comme historique tant quâ€™elle nâ€™est pas couverte par un test reproductible et une persistance backend vÃ©rifiable.
+

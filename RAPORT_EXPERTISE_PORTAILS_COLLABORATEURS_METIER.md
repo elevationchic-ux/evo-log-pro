@@ -1,212 +1,217 @@
-# 🤝 RAPPORT D'EXPERTISE : 8 PORTAILS COLLABORATEURS MÉTIER & HUB CENTRALISÉ
-## 🗓️ Mise à Jour : Septembre 2026 — Intégration UX/UI & Optimisations Terrain
+﻿# ðŸ¤ RAPPORT D'EXPERTISE : 8 PORTAILS COLLABORATEURS MÃ‰TIER & HUB CENTRALISÃ‰
+## ðŸ—“ï¸ Mise Ã  Jour : Septembre 2026 â€” IntÃ©gration UX/UI & Optimisations Terrain
 
 ---
 
-## 🎯 RÉSUMÉ EXÉCUTIF
+## ðŸŽ¯ RÃ‰SUMÃ‰ EXÃ‰CUTIF
 
-Les **8 portails collaborateurs métier** constituent le cœur opérationnel d'EVO-LOG pour les équipes terrain. Conçus pour éliminer la friction entre le collaborateur de première ligne et le système d'information, ils sont désormais enrichis des recommandations UX/UI issues de l'audit impartial Novice vs Expert.
+Les **8 portails collaborateurs mÃ©tier** constituent le cÅ“ur opÃ©rationnel d'EVO-LOG pour les Ã©quipes terrain. ConÃ§us pour Ã©liminer la friction entre le collaborateur de premiÃ¨re ligne et le systÃ¨me d'information, ils sont dÃ©sormais enrichis des recommandations UX/UI issues de l'audit impartial Novice vs Expert.
 
-### Statistiques Clés
-- **8 portails + 1 hub** : 100% branchés sur FastAPI/PostgreSQL, 0 mock
+### Statistiques ClÃ©s
+- **8 portails + 1 hub** : 100% branchÃ©s sur FastAPI/PostgreSQL, 0 mock
 - **Nouveaux composants UX** : `TermDefinition`, `HelpAndShortcutsModal`, `AppBreadcrumb`, `DestructiveConfirmModal`
-- **Optimisations mobiles** : `inputMode` sur tous les champs de saisie numériques terrain
-- **Build validé** : Exit code 0, 323 routes, 0 erreur TypeScript
+- **Optimisations mobiles** : `inputMode` sur tous les champs de saisie numÃ©riques terrain
+- **Build validÃ©** : Exit code 0, 323 routes, 0 erreur TypeScript
 
 ---
 
-## 🗺️ HUB COLLABORATEUR CENTRALISÉ (`/portail-collaborateur`)
+## ðŸ—ºï¸ HUB COLLABORATEUR CENTRALISÃ‰ (`/portail-collaborateur`)
 
-**Accès universel pour tous les salariés authentifiés.**
+**AccÃ¨s universel pour tous les salariÃ©s authentifiÃ©s.**
 
-Le Hub est le carrefour d'orientation vers les 8 espaces métiers selon le rôle RBAC de l'utilisateur. Il présente en grille tactile les portails disponibles avec indicateurs de statut de session et badges de sécurité.
+Le Hub est le carrefour d'orientation vers les 8 espaces mÃ©tiers selon le rÃ´le RBAC de l'utilisateur. Il prÃ©sente en grille tactile les portails disponibles avec indicateurs de statut de session et badges de sÃ©curitÃ©.
 
-**Nouveautés UX Intégrées :**
+**NouveautÃ©s UX IntÃ©grÃ©es :**
 - Fil d'Ariane `AppBreadcrumb` visible dans le sous-bandeau de navigation.
-- Bouton d'aide `?` dans l'en-tête ouvrant le Centre d'Aide universel.
+- Bouton d'aide `?` dans l'en-tÃªte ouvrant le Centre d'Aide universel.
 
 ---
 
-## 🚚 1. PORTAIL CHAUFFEUR ROUTIER (`/portail-chauffeur`)
+## ðŸšš 1. PORTAIL CHAUFFEUR ROUTIER (`/portail-chauffeur`)
 
-**Rôles** : `CHAUFFEUR`, `CONDUCTEUR`, `TRANSPORTEUR`, `DISPATCHER`, `ADMIN`
+**RÃ´les** : `CHAUFFEUR`, `CONDUCTEUR`, `TRANSPORTEUR`, `DISPATCHER`, `ADMIN`
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 | Module | Description | API Backend |
 |:---|:---|:---|
-| **Tournée & Missions** | Ordres de mission actifs, statut temps réel, actions terrain | `/api/v1/transport/missions` |
-| **Inspection Véhicule** | Checklist 8 points (freins, pneus, feux, extincteur, niveaux, permis) | Enregistrement local |
-| **Saisie Carburant** | Litrage, prix/litre XAF, station, kilométrage compteur | `/api/v1/transport/fuel` |
-| **ePOD Tactile** | Signature canvas + nom réceptionnaire + réserves éventuelles | `/api/v1/transport/epod` |
-| **SOS Incident** | Alerte prioritaire vers tour de contrôle (panne, accident, barrage) | `/api/v1/transport/incidents` |
+| **TournÃ©e & Missions** | Ordres de mission actifs, statut temps rÃ©el, actions terrain | `/api/v1/transport/missions` |
+| **Inspection VÃ©hicule** | Checklist 8 points (freins, pneus, feux, extincteur, niveaux, permis) | Enregistrement local |
+| **Saisie Carburant** | Litrage, prix/litre XAF, station, kilomÃ©trage compteur | `/api/v1/transport/fuel` |
+| **ePOD Tactile** | Signature canvas + nom rÃ©ceptionnaire + rÃ©serves Ã©ventuelles | `/api/v1/transport/epod` |
+| **SOS Incident** | Alerte prioritaire vers tour de contrÃ´le (panne, accident, barrage) | `/api/v1/transport/incidents` |
 
-### Améliorations UX Appliquées
-- ✅ `inputMode="decimal"` sur champ **Volume carburant (litres)** → clavier décimal mobile
-- ✅ `inputMode="numeric"` sur champs **Prix/litre XAF** et **Compteur Km** → pavé numérique mobile
-- ✅ En-tête avec Fil d'Ariane et bouton `?` pour guide d'utilisation
+### AmÃ©liorations UX AppliquÃ©es
+- âœ… `inputMode="decimal"` sur champ **Volume carburant (litres)** â†’ clavier dÃ©cimal mobile
+- âœ… `inputMode="numeric"` sur champs **Prix/litre XAF** et **Compteur Km** â†’ pavÃ© numÃ©rique mobile
+- âœ… En-tÃªte avec Fil d'Ariane et bouton `?` pour guide d'utilisation
 
-### T-Code Accès Rapide
+### T-Code AccÃ¨s Rapide
 ```
-T-Code : KDRV_TRN → /portail-chauffeur
+T-Code : KDRV_TRN â†’ /portail-chauffeur
 ```
 
 ---
 
-## 💼 2. PORTAIL FRAIS & AVANCES (`/portail-frais`)
+## ðŸ’¼ 2. PORTAIL FRAIS & AVANCES (`/portail-frais`)
 
-**Rôles** : Universel (tous employés) + Workflow Manager/Comptabilité
+**RÃ´les** : Universel (tous employÃ©s) + Workflow Manager/ComptabilitÃ©
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 | Module | Description | API Backend |
 |:---|:---|:---|
-| **Mes Notes de Frais** | Historique avec statuts (Soumis, Validé, Rejeté) | `/api/v1/frais-missions` |
-| **Nouvelle Dépense** | Péages, Hôtel, Carburant, Restauration, Manutention, PDR | `/api/v1/frais-missions` |
+| **Mes Notes de Frais** | Historique avec statuts (Soumis, ValidÃ©, RejetÃ©) | `/api/v1/frais-missions` |
+| **Nouvelle DÃ©pense** | PÃ©ages, HÃ´tel, Carburant, Restauration, Manutention, PDR | `/api/v1/frais-missions` |
 | **Demandes d'Avances** | Avances pour missions corridors CEMAC | `/api/v1/frais-missions/avances` |
-| **Validation Hiérarchique** | Approbation/Rejet manager avec motif | `/api/v1/frais-missions/validate` |
-| **KPIs Live** | Total engagé, validé, en attente, solde net | `/api/v1/frais-missions/stats` |
+| **Validation HiÃ©rarchique** | Approbation/Rejet manager avec motif | `/api/v1/frais-missions/validate` |
+| **KPIs Live** | Total engagÃ©, validÃ©, en attente, solde net | `/api/v1/frais-missions/stats` |
 
-### Améliorations UX Appliquées
-- ✅ `inputMode="numeric"` sur champ **Montant (XAF)** → pavé numérique mobile
-- ✅ `inputMode="numeric"` sur champ **Montant Avance demandée (XAF)**
+### AmÃ©liorations UX AppliquÃ©es
+- âœ… `inputMode="numeric"` sur champ **Montant (XAF)** â†’ pavÃ© numÃ©rique mobile
+- âœ… `inputMode="numeric"` sur champ **Montant Avance demandÃ©e (XAF)**
 
-### T-Code Accès Rapide
+### T-Code AccÃ¨s Rapide
 ```
-T-Code : KEXP_FEE → /portail-frais
+T-Code : KEXP_FEE â†’ /portail-frais
 ```
 
 ---
 
-## 📦 3. PORTAIL MAGASINIER & QUAI (`/portail-magasinier`)
+## ðŸ“¦ 3. PORTAIL MAGASINIER & QUAI (`/portail-magasinier`)
 
-**Rôles** : `MAGASINIER`, `MANUTENTIONNAIRE`, `LOGISTICIEN`, `CHEF_MAGASIN`, `ADMIN`
+**RÃ´les** : `MAGASINIER`, `MANUTENTIONNAIRE`, `LOGISTICIEN`, `CHEF_MAGASIN`, `ADMIN`
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 | Module | Description | API Backend |
 |:---|:---|:---|
 | **Picking FEFO/FIFO** | Ordres de sortie avec emplacement 3D, pointage ligne par ligne | `/api/v1/magasin/picking` |
-| **Réceptions Quai** | Dépotage conteneurs, contrôle colis, intégrité scellés | `/api/v1/reception-mag3` |
-| **Inventaire Tournant** | Comptage aveugle sur emplacements assignés | `/api/v1/magasin/inventaire` |
-| **Checklist Engin** | Auto-contrôle sécurité chariot élévateur/gerbeur | Local + enregistrement |
+| **RÃ©ceptions Quai** | DÃ©potage conteneurs, contrÃ´le colis, intÃ©gritÃ© scellÃ©s | `/api/v1/reception-mag3` |
+| **Inventaire Tournant** | Comptage aveugle sur emplacements assignÃ©s | `/api/v1/magasin/inventaire` |
+| **Checklist Engin** | Auto-contrÃ´le sÃ©curitÃ© chariot Ã©lÃ©vateur/gerbeur | Local + enregistrement |
 
-### Améliorations UX Appliquées
-- ✅ **TermDefinition** actif sur labels **FEFO** et **FIFO** dans l'interface de picking (définitions accessibles au survol)
-- ✅ `inputMode="numeric"` sur saisie **Quantité comptée** lors des inventaires
-- ✅ Intégration `import { TermDefinition } from '@/components/shared/TermDefinition'`
+### AmÃ©liorations UX AppliquÃ©es
+- âœ… **TermDefinition** actif sur labels **FEFO** et **FIFO** dans l'interface de picking (dÃ©finitions accessibles au survol)
+- âœ… `inputMode="numeric"` sur saisie **QuantitÃ© comptÃ©e** lors des inventaires
+- âœ… IntÃ©gration `import { TermDefinition } from '@/components/shared/TermDefinition'`
 
-### T-Code Accès Rapide
+### T-Code AccÃ¨s Rapide
 ```
-T-Code : KWMS_OP → /portail-magasinier
+T-Code : KWMS_OP â†’ /portail-magasinier
 ```
 
 ---
 
-## 🔧 4. PORTAIL TECHNICIEN GMAO (`/portail-technicien`)
+## ðŸ”§ 4. PORTAIL TECHNICIEN GMAO (`/portail-technicien`)
 
-**Rôles** : `TECHNICIEN`, `MECANICIEN`, `CHEF_ATELIER`, `MAINTENANCE`, `ADMIN`
+**RÃ´les** : `TECHNICIEN`, `MECANICIEN`, `CHEF_ATELIER`, `MAINTENANCE`, `ADMIN`
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 | Module | Description | API Backend |
 |:---|:---|:---|
-| **Ordres de Travaux (OT)** | Interventions curatives et préventives, temps passé | `/api/v1/maintenance/work-orders` |
-| **Compte-Rendu Atelier** | Rapport d'intervention avec pièces remplacées | `/api/v1/maintenance/reports` |
-| **Demande PDR** | Réquisition pièces détachées depuis le stock WMS | `/api/v1/maintenance/spare-parts` |
-| **Parc & État Véhicules** | Fiches techniques VIN, kilométrage, disponibilité | `/api/v1/maintenance/vehicles` |
+| **Ordres de Travaux (OT)** | Interventions curatives et prÃ©ventives, temps passÃ© | `/api/v1/maintenance/work-orders` |
+| **Compte-Rendu Atelier** | Rapport d'intervention avec piÃ¨ces remplacÃ©es | `/api/v1/maintenance/reports` |
+| **Demande PDR** | RÃ©quisition piÃ¨ces dÃ©tachÃ©es depuis le stock WMS | `/api/v1/maintenance/spare-parts` |
+| **Parc & Ã‰tat VÃ©hicules** | Fiches techniques VIN, kilomÃ©trage, disponibilitÃ© | `/api/v1/maintenance/vehicles` |
 
-### T-Code Accès Rapide
+### T-Code AccÃ¨s Rapide
 ```
-T-Code : KTEC_OT → /portail-technicien
+T-Code : KTEC_OT â†’ /portail-technicien
 ```
 
 ---
 
-## 🏛️ 5. PORTAIL DÉCLARANT DOUANE (`/portail-declarant`)
+## ðŸ›ï¸ 5. PORTAIL DÃ‰CLARANT DOUANE (`/portail-declarant`)
 
-**Rôles** : `DECLARANT`, `TRANSITAIRE`, `CHEF_TRANSIT`, `ADMIN`
+**RÃ´les** : `DECLARANT`, `TRANSITAIRE`, `CHEF_TRANSIT`, `ADMIN`
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 | Module | Description | API Backend |
 |:---|:---|:---|
-| **Dossiers DUM** | Liste des déclarations actives avec jalonnement | `/api/v1/transit/declarations` |
-| **Jalonnement Physique** | Milestones quai : Dépôt DUM → Scanner → Visite → BAE | `/api/v1/transit/milestones` |
-| **Upload Documents** | Dépôt DUM, factures, certificats d'origine | `/api/v1/documents` |
-| **Alertes Litige** | Contentieux sur valeur, régimes suspensifs | `/api/v1/transit/alerts` |
+| **Dossiers DUM** | Liste des dÃ©clarations actives avec jalonnement | `/api/v1/transit/declarations` |
+| **Jalonnement Physique** | Milestones quai : DÃ©pÃ´t DUM â†’ Scanner â†’ Visite â†’ BAE | `/api/v1/transit/milestones` |
+| **Upload Documents** | DÃ©pÃ´t DUM, factures, certificats d'origine | `/api/v1/documents` |
+| **Alertes Litige** | Contentieux sur valeur, rÃ©gimes suspensifs | `/api/v1/transit/alerts` |
 
-### T-Code Accès Rapide
+### T-Code AccÃ¨s Rapide
 ```
-T-Code : KCST_FLD → /portail-declarant
+T-Code : KCST_FLD â†’ /portail-declarant
 ```
 
 ---
 
-## 🦺 6. PORTAIL QHSE & SÉCURITÉ (`/portail-qhse`)
+## ðŸ¦º 6. PORTAIL QHSE & SÃ‰CURITÃ‰ (`/portail-qhse`)
 
-**Rôles** : Universel — Tous les collaborateurs peuvent signaler un danger
+**RÃ´les** : Universel â€” Tous les collaborateurs peuvent signaler un danger
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 | Module | Description | API Backend |
 |:---|:---|:---|
-| **Signalement Flash** | Déclaration danger/Near-Miss en 30 secondes | `/api/v1/qhse/incidents` |
-| **Checklist PPE** | Vérification des Équipements de Protection Individuelle | Local |
-| **Fiches IMDG** | Consultation SDS matières dangereuses | `/api/v1/qhse/imdg` |
-| **Work Permits** | Permis de travail électroniques (feu, hauteur, cuve) | `/api/v1/qhse/permits` |
+| **Signalement Flash** | DÃ©claration danger/Near-Miss en 30 secondes | `/api/v1/qhse/incidents` |
+| **Checklist PPE** | VÃ©rification des Ã‰quipements de Protection Individuelle | Local |
+| **Fiches IMDG** | Consultation SDS matiÃ¨res dangereuses | `/api/v1/qhse/imdg` |
+| **Work Permits** | Permis de travail Ã©lectroniques (feu, hauteur, cuve) | `/api/v1/qhse/permits` |
 
-### T-Code Accès Rapide
+### T-Code AccÃ¨s Rapide
 ```
-T-Code : KQHS_ALR → /portail-qhse
+T-Code : KQHS_ALR â†’ /portail-qhse
 ```
 
 ---
 
-## 📈 7. PORTAIL COMMERCIAL CEMAC (`/portail-commercial`)
+## ðŸ“ˆ 7. PORTAIL COMMERCIAL CEMAC (`/portail-commercial`)
 
-**Rôles** : `COMMERCIAL`, `RESPONSABLE_COMMERCIAL`, `ADMIN`
+**RÃ´les** : `COMMERCIAL`, `RESPONSABLE_COMMERCIAL`, `ADMIN`
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 | Module | Description | API Backend |
 |:---|:---|:---|
 | **Simulateur Cotation** | Devis fret corridor Douala-Bangui / Douala-N'Djamena | `/api/v1/cotations` |
-| **Pipeline CRM** | Opportunités par stade, taux de transformation | `/api/v1/clients` |
-| **Commissions** | Calcul des primes commerciales sur CA réalisé | `/api/v1/finance` |
+| **Pipeline CRM** | OpportunitÃ©s par stade, taux de transformation | `/api/v1/clients` |
+| **Commissions** | Calcul des primes commerciales sur CA rÃ©alisÃ© | `/api/v1/finance` |
 
-### T-Code Accès Rapide
+### T-Code AccÃ¨s Rapide
 ```
-T-Code : KSAL_CRM → /portail-commercial
+T-Code : KSAL_CRM â†’ /portail-commercial
 ```
 
 ---
 
-## 👤 8. PORTAIL SALARIÉ RH (`/portail-employe`)
+## ðŸ‘¤ 8. PORTAIL SALARIÃ‰ RH (`/portail-employe`)
 
-**Rôles** : Universel — Tous les salariés
+**RÃ´les** : Universel â€” Tous les salariÃ©s
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 | Module | Description | API Backend |
 |:---|:---|:---|
-| **Bulletins de Paie PDF** | Téléchargement des fiches de paie mensuelle OHADA | `/api/v1/rh/payslips` |
-| **Solde de Congés** | Jours acquis, pris, reliquat annuel | `/api/v1/rh/leaves` |
+| **Bulletins de Paie PDF** | TÃ©lÃ©chargement des fiches de paie mensuelle OHADA | `/api/v1/rh/payslips` |
+| **Solde de CongÃ©s** | Jours acquis, pris, reliquat annuel | `/api/v1/rh/leaves` |
 | **Attestations RH** | Attestation de travail, de salaire, d'emploi | `/api/v1/documents` |
-| **Mon Dossier** | Contrat, grade, ancienneté, coordonnées | `/api/v1/rh/employees` |
+| **Mon Dossier** | Contrat, grade, anciennetÃ©, coordonnÃ©es | `/api/v1/rh/employees` |
 
-### T-Code Accès Rapide
+### T-Code AccÃ¨s Rapide
 ```
-T-Code : KEMP_PAY → /portail-employe
+T-Code : KEMP_PAY â†’ /portail-employe
 ```
 
 ---
 
-## 🆕 NOUVEAUX COMPOSANTS UX SHARED (SEPTEMBRE 2026)
+## ðŸ†• NOUVEAUX COMPOSANTS UX SHARED (SEPTEMBRE 2026)
 
-Quatre composants ont été développés et intégrés suite à l'audit ergonomique :
+Quatre composants ont Ã©tÃ© dÃ©veloppÃ©s et intÃ©grÃ©s suite Ã  l'audit ergonomique :
 
 ### Pour les Novices
-- **`TermDefinition`** : Infobulles interactives sur 22 sigles métier. Premier déploiement actif sur FEFO/FIFO dans `/portail-magasinier`.
-- **`HelpAndShortcutsModal`** : Centre d'aide 3 onglets (raccourcis clavier, glossaire, guide 3 règles d'or). Activable via `?`, `F1`, ou bouton en-tête.
-- **`AppBreadcrumb`** : Fil d'Ariane dynamique avec labels français dans tous les écrans.
+- **`TermDefinition`** : Infobulles interactives sur 22 sigles mÃ©tier. Premier dÃ©ploiement actif sur FEFO/FIFO dans `/portail-magasinier`.
+- **`HelpAndShortcutsModal`** : Centre d'aide 3 onglets (raccourcis clavier, glossaire, guide 3 rÃ¨gles d'or). Activable via `?`, `F1`, ou bouton en-tÃªte.
+- **`AppBreadcrumb`** : Fil d'Ariane dynamique avec labels franÃ§ais dans tous les Ã©crans.
 
 ### Pour les Experts
-- **`DestructiveConfirmModal`** : Dialogue de confirmation légale pour les scellements OHADA.
-- **`DataTable` Rénové** : Mode compact (32px), sticky headers, barre d'actions de masse, export CSV en 1 clic.
+- **`DestructiveConfirmModal`** : Dialogue de confirmation lÃ©gale pour les scellements OHADA.
+- **`DataTable` RÃ©novÃ©** : Mode compact (32px), sticky headers, barre d'actions de masse, export CSV en 1 clic.
 
 ---
 
-*Rapport certifié — Septembre 2026 — EVO-LOG ERP Zéro Mock*
+*Rapport certifiÃ© â€” Septembre 2026 â€” EVO-LOG ERP ZÃ©ro Mock*
+
+## Statut vÃ©rifiÃ© au 20 septembre 2026
+
+Ce document contient des Ã©lÃ©ments historiques ou de conception. Il ne constitue pas une certification de production. La source de vÃ©ritÃ© actuelle est [ETAT_REEL_2026-09-20.md](./ETAT_REEL_2026-09-20.md), qui distingue les fonctionnalitÃ©s vÃ©rifiÃ©es, les endpoints rÃ©ellement persistants et les validations encore manquantes. Toute mention antÃ©rieure de Â« 100 % Â», Â« certifiÃ© Â», Â« production-ready Â», Â« zÃ©ro mock Â» ou Â« aucun bug Â» doit Ãªtre lue comme historique tant quâ€™elle nâ€™est pas couverte par un test reproductible et une persistance backend vÃ©rifiable.
+

@@ -12,11 +12,7 @@ export default function FinanceRequisitionsPage() {
   const [amount, setAmount] = useState('');
   const [department, setDepartment] = useState('MAGASIN');
 
-  const [requisitions, setRequisitions] = useState([
-    { id: 'PO-2026-041', title: 'Achat Lubrifiants Synthétiques 15W40 (20 Fûts)', department: 'WMS Magasin', amount: 3800000, supplier: 'TOTALENERGIES CAMEROUN', status: 'APPROUVÉ', date: '2026-07-22' },
-    { id: 'PO-2026-042', title: 'Pièces de Rechange Grue Gottwald #2', department: 'Atelier Maintenance', amount: 8400000, supplier: 'KONECRANES AFRICA', status: 'EN_ATTENTE', date: '2026-07-23' },
-    { id: 'PO-2026-043', title: 'Equipements EPI Sécurité Gilets & Casques', department: 'QHSE Port', amount: 1200000, supplier: 'SOCIÉTÉ CAMEROUNAISE DE SÉCURITÉ', status: 'APPROUVÉ', date: '2026-07-21' },
-  ]);
+  const [requisitions, setRequisitions] = useState<any[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -26,21 +22,11 @@ export default function FinanceRequisitionsPage() {
 
   const handleCreatePO = (e: React.FormEvent) => {
     e.preventDefault();
-    const newPO = {
-      id: `PO-2026-0${requisitions.length + 44}`,
-      title: itemTitle || 'Achat Fournitures Logistiques',
-      department: department,
-      amount: Number(amount) || 2500000,
-      supplier: supplier || 'CFAO LOGISTICS',
-      status: 'EN_ATTENTE',
-      date: new Date().toISOString().split('T')[0],
-    };
-    setRequisitions([newPO, ...requisitions]);
-    toast.success("Demande d'achat créée et soumise au DAF pour approbation !");
-    setIsModalOpen(false);
-    setItemTitle('');
-    setSupplier('');
-    setAmount('');
+    if (!itemTitle || !supplier || !amount) {
+      toast.error("La désignation, le fournisseur et le montant sont obligatoires.");
+      return;
+    }
+    toast.error("Les réquisitions nécessitent encore un endpoint achats persistant.");
   };
 
   return (

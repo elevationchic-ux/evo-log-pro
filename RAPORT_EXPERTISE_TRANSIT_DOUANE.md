@@ -1,78 +1,82 @@
-# 🏛️ RAPPORT D'EXPERTISE : TRANSIT, DOUANE CEMAC & CAMCIS
-## 🗓️ Mise à Jour : Septembre 2026 — 100% Opérationnel & Zéro Mock
+﻿# ðŸ›ï¸ RAPPORT D'EXPERTISE : TRANSIT, DOUANE CEMAC & CAMCIS
+## ðŸ—“ï¸ Mise Ã  Jour : Septembre 2026 â€” 100% OpÃ©rationnel & ZÃ©ro Mock
 
 ---
 
-## 🎯 DOMAINE FONCTIONNEL
+## ðŸŽ¯ DOMAINE FONCTIONNEL
 
-Le module **Transit & Douane CEMAC** couvre la totalité du cycle de dédouanement des marchandises importées, exportées et réexportées : déclaration DUM, passage scanner CAMCIS, obtention du BAE, gestion des corridors Douala-Bangui et Douala-N'Djamena, et apurement des cautions bancaires.
+Le module **Transit & Douane CEMAC** couvre la totalitÃ© du cycle de dÃ©douanement des marchandises importÃ©es, exportÃ©es et rÃ©exportÃ©es : dÃ©claration DUM, passage scanner CAMCIS, obtention du BAE, gestion des corridors Douala-Bangui et Douala-N'Djamena, et apurement des cautions bancaires.
 
-**Parité internationale : Sydonia World / CAMCIS (Cameroon Customs Information System)**
+**ParitÃ© internationale : Sydonia World / CAMCIS (Cameroon Customs Information System)**
 
 ---
 
-## 📊 MÉTRIQUES CLÉS (DONNÉES RÉELLES POSTGRESQL)
+## ðŸ“Š MÃ‰TRIQUES CLÃ‰S (DONNÃ‰ES RÃ‰ELLES POSTGRESQL)
 
 | Indicateur | Endpoint API |
 |:---|:---|
 | Dossiers DUM actifs par bureau de douane | `/api/v1/transit/declarations` |
-| Délai moyen dédouanement (jours) | `/api/v1/transit/stats` |
+| DÃ©lai moyen dÃ©douanement (jours) | `/api/v1/transit/stats` |
 | Cautions bancaires en cours | `/api/v1/transit/bonds` |
 | Alertes contentieux / valeurs | `/api/v1/transit/alerts` |
-| BAE délivrés ce mois | `/api/v1/transit/bae` |
+| BAE dÃ©livrÃ©s ce mois | `/api/v1/transit/bae` |
 
 ---
 
-## 🗂️ PAGES & ROUTES COUVERTES (12 ROUTES)
+## ðŸ—‚ï¸ PAGES & ROUTES COUVERTES (12 ROUTES)
 
 | Route | Description |
 |:---|:---|
 | `/transit` | Dashboard dossiers transit actifs |
-| `/transit-avance` | Gestion avancée des régimes douaniers |
+| `/transit-avance` | Gestion avancÃ©e des rÃ©gimes douaniers |
 | `/transit-douane/declarations` | Saisie et suivi des DUM CAMCIS |
 | `/transit-douane/dossiers-cemac` | Corridors Douala-Bangui / Douala-N'Djamena |
 | `/transit-douane/taxation-cameroun` | Calcul droits de douane TEC CEMAC |
-| `/transit-douane/bae` | Délivrance et archivage des BAE |
-| `/transit-douane/compliance` | Conformité réglementaire et audits |
+| `/transit-douane/bae` | DÃ©livrance et archivage des BAE |
+| `/transit-douane/compliance` | ConformitÃ© rÃ©glementaire et audits |
 | `/real-customs` | Connecteur direct CAMCIS / Sydonia World |
 
 ---
 
-## 🏗️ FONCTIONNALITÉS AVANCÉES
+## ðŸ—ï¸ FONCTIONNALITÃ‰S AVANCÃ‰ES
 
-### Déclaration DUM Intégrale
-- Saisie assistée des rubriques douanières : espèce tarifaire, valeur CAF, pays d'origine, régime douanier.
-- Connexion EDI avec CAMCIS pour dépôt électronique de la déclaration.
-- Suivi du statut en temps réel : Déposée → Sélection → Scanner → Visite → Liquidation → BAE.
+### DÃ©claration DUM IntÃ©grale
+- Saisie assistÃ©e des rubriques douaniÃ¨res : espÃ¨ce tarifaire, valeur CAF, pays d'origine, rÃ©gime douanier.
+- Connexion EDI avec CAMCIS pour dÃ©pÃ´t Ã©lectronique de la dÃ©claration.
+- Suivi du statut en temps rÃ©el : DÃ©posÃ©e â†’ SÃ©lection â†’ Scanner â†’ Visite â†’ Liquidation â†’ BAE.
 
 ### Corridors CEMAC Transfrontaliers
-- Suivi des dossiers de transit par corridor avec jalons douaniers aux frontières.
+- Suivi des dossiers de transit par corridor avec jalons douaniers aux frontiÃ¨res.
 - Gestion des carnets TIR et des lettres de voiture CMR internationales.
-- Apurement automatique des cautions bancaires à la réception destination.
+- Apurement automatique des cautions bancaires Ã  la rÃ©ception destination.
 
 ### Calcul Automatique Droits de Douane
-- Application du Tarif Extérieur Commun CEMAC (TEC) selon la position tarifaire SH.
+- Application du Tarif ExtÃ©rieur Commun CEMAC (TEC) selon la position tarifaire SH.
 - Calcul TVA, droits de douane, ECOBP, CAE et autres taxes parafiscales.
-- Génération du titre de perception pour paiement auprès du receveur des douanes.
+- GÃ©nÃ©ration du titre de perception pour paiement auprÃ¨s du receveur des douanes.
 
 ---
 
-## 🆕 AMÉLIORATIONS UX/UI (SEPTEMBRE 2026)
+## ðŸ†• AMÃ‰LIORATIONS UX/UI (SEPTEMBRE 2026)
 
 ### TermDefinition Active
-- **DUM** : "*Déclaration Unique de Marchandises — Document officiel soumis en douane.*"
-- **BAE** : "*Bon à Enlever — Autorisation de retirer la marchandise du port.*"
-- **CAMCIS** : "*Cameroon Customs Information System — Plateforme nationale de dédouanement.*"
+- **DUM** : "*DÃ©claration Unique de Marchandises â€” Document officiel soumis en douane.*"
+- **BAE** : "*Bon Ã  Enlever â€” Autorisation de retirer la marchandise du port.*"
+- **CAMCIS** : "*Cameroon Customs Information System â€” Plateforme nationale de dÃ©douanement.*"
 
-### Portail Déclarant Enrichi
+### Portail DÃ©clarant Enrichi
 - Centre d'aide `?` disponible pour le guide de jalonnement physique quai.
-- Empty States pédagogiques : Quand aucun dossier n'est actif, message de guidage vers création de dossier.
+- Empty States pÃ©dagogiques : Quand aucun dossier n'est actif, message de guidage vers crÃ©ation de dossier.
 
-### DataTable Rénové
-- Mode Compact pour les listes de déclarations (gestion multi-dossiers simultanés).
-- Filtres rapides préenregistrés : `[En Cours]` `[En Attente Scanner]` `[BAE Obtenu]` `[Contentieux]`.
-- Export CSV de l'état des dossiers pour reporting journalier DGD.
+### DataTable RÃ©novÃ©
+- Mode Compact pour les listes de dÃ©clarations (gestion multi-dossiers simultanÃ©s).
+- Filtres rapides prÃ©enregistrÃ©s : `[En Cours]` `[En Attente Scanner]` `[BAE Obtenu]` `[Contentieux]`.
+- Export CSV de l'Ã©tat des dossiers pour reporting journalier DGD.
 
 ---
 
-*Rapport certifié conforme — EVO-LOG ERP Transit & Douane CEMAC — Septembre 2026*
+*Rapport certifiÃ© conforme â€” EVO-LOG ERP Transit & Douane CEMAC â€” Septembre 2026*
+## Statut vÃ©rifiÃ© au 20 septembre 2026
+
+Ce document contient des Ã©lÃ©ments historiques ou de conception. Il ne constitue pas une certification de production. La source de vÃ©ritÃ© actuelle est [ETAT_REEL_2026-09-20.md](./ETAT_REEL_2026-09-20.md), qui distingue les fonctionnalitÃ©s vÃ©rifiÃ©es, les endpoints rÃ©ellement persistants et les validations encore manquantes. Toute mention antÃ©rieure de Â« 100 % Â», Â« certifiÃ© Â», Â« production-ready Â», Â« zÃ©ro mock Â» ou Â« aucun bug Â» doit Ãªtre lue comme historique tant quâ€™elle nâ€™est pas couverte par un test reproductible et une persistance backend vÃ©rifiable.
+

@@ -55,10 +55,13 @@ export default function SaisieTransactionBancairePage() {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    toast.success('Saisie enregistrée avec succès.')
-    fetchTransactions()
+    if (!formData.libelle || !formData.montant) {
+      toast.error('Le libellé et le montant sont obligatoires.')
+      return
+    }
+    toast.error('La saisie bancaire nécessite encore un endpoint comptable persistant.')
   }
 
   const formatCurrency = (amount: number) => {

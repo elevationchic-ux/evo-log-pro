@@ -852,3 +852,7 @@ POST   /api/v1/partner/customs-declaration
 **Auteur**: Équipe KAMLOG ERP Development
 
 © 2024-2026 KAMLOG ERP. Tous droits réservés.
+
+## Statut vérifié au 20 septembre 2026
+
+Ce document contient des éléments historiques ou de conception. Il ne constitue pas une certification de production. La source de vérité actuelle est [ETAT_REEL_2026-09-20.md](./ETAT_REEL_2026-09-20.md), qui distingue les fonctionnalités vérifiées, les endpoints réellement persistants et les validations encore manquantes. Toute mention antérieure de « 100 % », « certifié », « production-ready », « zéro mock » ou « aucun bug » doit être lue comme historique tant qu’elle n’est pas couverte par un test reproductible et une persistance backend vérifiable.
