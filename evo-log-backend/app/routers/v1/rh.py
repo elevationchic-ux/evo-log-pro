@@ -50,29 +50,24 @@ def resolve_rh_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
     db: Session = Depends(get_db)
 ) -> User:
-    """Safely extracts authenticated User object from token or falls back to active user in dev."""
-    if credentials and credentials.credentials:
-        try:
-            payload = decode_token(credentials.credentials)
-            user_id = payload.get("sub")
-            if user_id:
-                if str(user_id).isdigit():
-                    u = db.query(User).filter(User.id == int(user_id)).first()
-                    if u and u.is_active:
-                        return u
-                u = db.query(User).filter((User.username == str(user_id)) | (User.email == str(user_id))).first()
-                if u and u.is_active:
-                    return u
-        except Exception:
-            pass
-
-    default_user = db.query(User).filter(User.is_active == True).first()
-    if not default_user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Session non valide ou compte non authentifié."
-        )
-    return default_user
+    """Resolve only the authenticated user; never substitute another tenant user."""
+    if not credentials or not credentials.credentials:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentification requise.")
+    try:
+        payload = decode_token(credentials.credentials)
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session non valide.") from exc
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session non valide.")
+    query = db.query(User).filter(User.is_active == True)
+    if str(user_id).isdigit():
+        user = query.filter(User.id == int(user_id)).first()
+    else:
+        user = query.filter((User.username == str(user_id)) | (User.email == str(user_id))).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Utilisateur non authentifié.")
+    return user
 
 
 def get_user_role_label(user: User) -> str:
@@ -87,6 +82,88 @@ def get_user_role_label(user: User) -> str:
     return "Collaborateur Opérationnel"
 
 
+@router.get("/employes")
+def get_employes(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user),
+):
+    """Return only employees belonging to the authenticated company."""
+    query = db.query(User).filter(User.is_active == True)
+    if not current_user.is_superuser:
+        if current_user.company_id is None:
+            return []
+        query = query.filter(User.company_id == current_user.company_id)
+    employees = query.order_by(User.id).offset(skip).limit(limit).all()
+    return [
+        {
+            "id": employee.id,
+            "matricule": getattr(employee, "employee_number", None),
+            "nom": employee.full_name or employee.username,
+            "full_name": employee.full_name or employee.username,
+            "email": employee.email,
+            "telephone": employee.phone,
+            "poste": get_user_role_label(employee),
+            "departement": employee.department.name if employee.department else None,
+            "agence": employee.agency.name if employee.agency else None,
+            "statut": "ACTIF" if employee.is_active else "INACTIF",
+        }
+        for employee in employees
+    ]
+
+
+@router.get("/employes/me")
+def get_mon_employe(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user),
+):
+    """Return the authenticated employee profile without generated business data."""
+    return get_portail_mon_profil(db=db, current_user=current_user)
+
+
+@router.get("/paie")
+def get_paie(
+    employe_id: Optional[int] = Query(None, ge=1),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user),
+):
+    """Return persisted payroll entries visible within the authenticated tenant."""
+    target_id = employe_id or current_user.id
+    target = db.query(User).filter(User.id == target_id, User.is_active == True).first()
+    if not target or (not current_user.is_superuser and target.company_id != current_user.company_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employé introuvable.")
+    salaries = db.query(Salaire).filter(Salaire.employe_id == target.id).order_by(Salaire.periode_fin.desc()).all()
+    return [
+        {
+            "id": salary.id,
+            "employe_id": salary.employe_id,
+            "periode_debut": salary.periode_debut,
+            "periode_fin": salary.periode_fin,
+            "salaire_base": float(salary.salaire_base),
+            "salaire_net": float(salary.salaire_net),
+            "heures_sup": float(salary.heures_supplementaires or 0),
+            "primes": sum(float(value or 0) for value in (
+                salary.prime_anciennete,
+                salary.prime_performance,
+                salary.prime_responsabilite,
+                salary.prime_logement,
+                salary.prime_transport,
+                salary.prime_autre,
+            )),
+            "deductions": sum(float(value or 0) for value in (
+                salary.deductions_cnps,
+                salary.deductions_impot,
+                salary.deductions_avances,
+                salary.autres_deductions,
+            )),
+            "date_paiement": salary.date_paiement,
+            "statut": salary.statut,
+        }
+        for salary in salaries
+    ]
+
+
 # ============================================================================
 # 👤 PORTAIL EMPLOYÉ RH (ACCESSIBLE À TOUT SALARIÉ NON-RH)
 # ============================================================================
@@ -96,6 +173,34 @@ class PortailDemandeCongeIn(BaseModel):
     date_debut: date
     date_fin: date
     motif: Optional[str] = ""
+
+
+@router.get("/conges")
+def get_conges(
+    employe_id: Optional[int] = Query(None, ge=1),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user),
+):
+    """List persisted leave requests within the authenticated company."""
+    query = db.query(Conge).join(User, Conge.employe_id == User.id)
+    if not current_user.is_superuser:
+        query = query.filter(User.company_id == current_user.company_id)
+    if employe_id is not None:
+        query = query.filter(Conge.employe_id == employe_id)
+    return [
+        {
+            "id": leave.id,
+            "employe_id": leave.employe_id,
+            "type_conge": leave.type_conge.value if leave.type_conge else None,
+            "date_debut": leave.date_debut,
+            "date_fin": leave.date_fin,
+            "nombre_jours": leave.nombre_jours,
+            "motif": leave.motif,
+            "statut": leave.statut.value if leave.statut else None,
+            "date_demande": leave.date_demande,
+        }
+        for leave in query.order_by(Conge.date_demande.desc()).all()
+    ]
 
 
 @router.get("/portail/me")
@@ -109,10 +214,8 @@ def get_portail_mon_profil(
     """
     matricule = f"LPC-EMP-{str(current_user.id).zfill(4)}"
     role_label = get_user_role_label(current_user)
-    agency_name = current_user.agency.name if current_user.agency else "Siège Portuaire Douala (Quai 14 PAD)"
-    dept_name = current_user.department.name if current_user.department else (
-        "Opérations Maritimes & Quai" if "DOCKER" in role_label.upper() or "MAGASIN" in role_label.upper() else "Exploitation & Logistique Portuaire"
-    )
+    agency_name = current_user.agency.name if current_user.agency else None
+    dept_name = current_user.department.name if current_user.department else None
 
     # Calculate leave balance (standard OHADA: 24 working days/year)
     conges_pris = db.query(Conge).filter(
@@ -127,27 +230,27 @@ def get_portail_mon_profil(
         Salaire.employe_id == current_user.id
     ).order_by(Salaire.periode_fin.desc()).first()
 
-    dernier_net = float(last_salaire.salaire_net) if last_salaire else 385000.0
+    dernier_net = float(last_salaire.salaire_net) if last_salaire else None
 
     return {
         "id": current_user.id,
         "full_name": current_user.full_name or current_user.username,
         "username": current_user.username,
         "email": current_user.email,
-        "phone": current_user.phone or "+237 670 12 34 56",
-        "matricule": matricule,
+        "phone": current_user.phone,
+        "matricule": None,
         "poste": role_label,
         "departement": dept_name,
         "agence": agency_name,
-        "statut_contrat": "CDI Cadre / Agent de Maîtrise",
-        "date_embauche": "12 Janvier 2022",
-        "cnps_matricule": f"CNPS-CM-{str(current_user.id * 8374).zfill(8)}",
-        "couverture_sociale": "CNPS Conforme & Assurance Maladie AXA Cameroun (80%)",
+        "statut_contrat": None,
+        "date_embauche": None,
+        "cnps_matricule": None,
+        "couverture_sociale": None,
         "solde_conges": solde_restant,
         "jours_pris": jours_utilises,
         "dernier_net_paye": dernier_net,
-        "prochain_jour_paie": "28 du mois en cours",
-        "compte_bancaire": f"Afriland First Bank CM - 10005-00{str(current_user.id).zfill(4)}-78"
+        "prochain_jour_paie": None,
+        "compte_bancaire": None
     }
 
 
@@ -163,50 +266,6 @@ def get_portail_bulletins(
     salaires = db.query(Salaire).filter(
         Salaire.employe_id == current_user.id
     ).order_by(Salaire.periode_fin.desc()).all()
-
-    # If user has no payslips in database yet, auto-seed realistic OHADA payslips for past months
-    if not salaires:
-        # Determine base salary according to role
-        base_salary = 380000.0
-        if current_user.is_superuser or (current_user.roles and "ADMIN" in current_user.roles[0].name):
-            base_salary = 750000.0
-        elif current_user.roles and ("COMPTABLE" in current_user.roles[0].name or "DISPATCHER" in current_user.roles[0].name):
-            base_salary = 480000.0
-
-        sample_periods = [
-            (date(2026, 3, 1), date(2026, 3, 31), date(2026, 3, 28), "Mars", 2026, 85000.0, 12),
-            (date(2026, 2, 1), date(2026, 2, 28), date(2026, 2, 27), "Février", 2026, 75000.0, 8),
-            (date(2026, 1, 1), date(2026, 1, 31), date(2026, 1, 29), "Janvier", 2026, 80000.0, 10),
-            (date(2025, 12, 1), date(2025, 12, 31), date(2025, 12, 24), "Décembre", 2025, 120000.0, 16),
-        ]
-
-        for p_start, p_end, p_pay, m_name, yr, primes_val, h_sup in sample_periods:
-            brut = base_salary + primes_val + (h_sup * (base_salary / 173.33) * 1.25)
-            cnps = round(brut * 0.042, 0)
-            irpp = round(brut * 0.065, 0)
-            net = round(brut - cnps - irpp, 0)
-
-            sal = Salaire(
-                employe_id=current_user.id,
-                periode_debut=p_start,
-                periode_fin=p_end,
-                salaire_base=base_salary,
-                heures_supplementaires=h_sup,
-                prime_anciennete=30000.0,
-                prime_performance=primes_val - 30000.0,
-                prime_transport=25000.0,
-                deductions_cnps=cnps,
-                deductions_impot=irpp,
-                salaire_net=net,
-                date_paiement=p_pay,
-                statut="paye"
-            )
-            db.add(sal)
-
-        db.commit()
-        salaires = db.query(Salaire).filter(
-            Salaire.employe_id == current_user.id
-        ).order_by(Salaire.periode_fin.desc()).all()
 
     results = []
     mois_noms = ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
@@ -237,9 +296,9 @@ def get_portail_bulletins(
             "netAPayer": float(s.salaire_net),
             "statut": "PAYE",
             "statut_libelle": "Virement bancaire exécuté",
-            "datePaiement": s.date_paiement.strftime("%d/%m/%Y") if s.date_paiement else "28/03/2026",
-            "banque": "Afriland First Bank Cameroun",
-            "reference_virement": f"VIR-OHADA-{annee}{str(m_num).zfill(2)}-{str(current_user.id * 109).zfill(6)}"
+            "datePaiement": s.date_paiement.strftime("%d/%m/%Y") if s.date_paiement else None,
+            "banque": None,
+            "reference_virement": None
         })
 
     return results
