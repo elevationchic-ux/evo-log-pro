@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
-from app.models.new_k_modules import FuelTankSensor
+from app.models.new_k_modules import CotationDevis, ElectronicPOD, FuelTankSensor, PurchaseOrder, ComplianceAudit
 
 router = APIRouter(prefix="/api/v1", tags=["New K-Modules"])
 
@@ -42,121 +42,37 @@ class ComplianceAuditCreate(BaseModel):
     type_reglementation: Optional[str] = "ZLECAF / CEMAC"
     score_conformite_pct: Optional[float] = 98.5
 
-# --- In-Memory State for Demo/Live Integration ---
-_cotations = [
-    {
-        "id": 1,
-        "reference": "COT-2026-001",
-        "client_nom": "CFAO LOGISTICS CAMEROUN",
-        "origine": "Port de Douala",
-        "destination": "N'Djamena (Tchad)",
-        "nature_fret": "Conteneur 40ft High Cube",
-        "montant_estime_xaf": 4850000.0,
-        "marge_nette_pct": 18.5,
-        "statut": "ACCEPTE",
-        "created_at": datetime.utcnow().isoformat()
-    }
-]
-
-_epods = [
-    {
-        "id": 1,
-        "reference_mission": "OT-2026-00401",
-        "nom_destinataire": "Jean-Marc MVONDO",
-        "signature_url": "/signatures/sig_00401.png",
-        "photo_livraison_url": "/photos/delivery_00401.jpg",
-        "longitude": 9.7042,
-        "latitude": 4.0511,
-        "statut": "LIVRE_AVEC_SIGNATURE",
-        "timestamp": datetime.utcnow().isoformat()
-    }
-]
-
-_procurements = [
-    {
-        "id": 1,
-        "numero_po": "PO-2026-089",
-        "fournisseur": "MICHELIN CAMEROUN",
-        "description": "8 Pneumatiques Poids Lourds 315/80 R22.5",
-        "montant_total_xaf": 2400000.0,
-        "match_3_voies": True,
-        "statut": "APPROUVE",
-        "created_at": datetime.utcnow().isoformat()
-    }
-]
-
-_compliance_audits = [
-    {
-        "id": 1,
-        "dossier_reference": "DOS-DOUANE-9021",
-        "type_reglementation": "ZLECAF / CEMAC",
-        "score_conformite_pct": 99.2,
-        "exemption_valide": True,
-        "statut": "VALIDE",
-        "created_at": datetime.utcnow().isoformat()
-    }
-]
-
 # --- Endpoints K-Cotations ---
 @router.get("/cotations")
-def get_cotations():
-    return {"items": _cotations}
+def get_cotations(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    query = db.query(CotationDevis)
+    if not current_user.is_superuser:
+        query = query.filter(CotationDevis.company_id == current_user.company_id)
+    return {"items": query.order_by(CotationDevis.created_at.desc()).all()}
 
 @router.post("/cotations")
-def create_cotation(payload: CotationCreate):
-    new_item = {
-        "id": len(_cotations) + 1,
-        "reference": f"COT-2026-00{len(_cotations) + 1}",
-        **payload.dict(),
-        "statut": "SOUMIS",
-        "created_at": datetime.utcnow().isoformat()
-    }
-    _cotations.append(new_item)
-    return new_item
-
-_invoices = [
-    {
-        "id": 1,
-        "numero_facture": "FAC-2026-00401",
-        "client": "CFAO LOGISTICS CAMEROUN",
-        "montant_ht_xaf": 4850000.0,
-        "tva_xaf": 933625.0,
-        "montant_ttc_xaf": 5783625.0,
-        "statut": "EMISE_AUTOMATIQUE_APRES_EPOD",
-        "date_emission": datetime.utcnow().isoformat()
-    }
-]
+def create_cotation(payload: CotationCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    cotation = CotationDevis(company_id=current_user.company_id, reference=f"COT-{datetime.utcnow():%Y%m%d%H%M%S}", **payload.dict(), statut="SOUMIS")
+    db.add(cotation)
+    db.commit()
+    db.refresh(cotation)
+    return cotation
 
 # --- Endpoints K-Tracking & e-POD ---
 @router.get("/tracking/epod")
-def get_epods():
-    return {"items": _epods, "factures_generees": _invoices}
+def get_epods(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    query = db.query(ElectronicPOD)
+    if not current_user.is_superuser:
+        query = query.filter(ElectronicPOD.company_id == current_user.company_id)
+    return {"items": query.order_by(ElectronicPOD.timestamp.desc()).all(), "factures_generees": []}
 
 @router.post("/tracking/epod")
-def create_epod(payload: EPodCreate):
-    new_item = {
-        "id": len(_epods) + 1,
-        **payload.dict(),
-        "statut": "LIVRE_AVEC_SIGNATURE",
-        "timestamp": datetime.utcnow().isoformat()
-    }
-    _epods.append(new_item)
-    
-    # Automatisme Inter-Module : Génération automatique de la facture dans K-Finance
-    new_invoice = {
-        "id": len(_invoices) + 1,
-        "numero_facture": f"FAC-2026-00{len(_invoices) + 401}",
-        "client": "DESTINATAIRE_" + payload.nom_destinataire.upper(),
-        "montant_ht_xaf": 1250000.0,
-        "tva_xaf": 240625.0,
-        "montant_ttc_xaf": 1490625.0,
-        "statut": "EMISE_AUTOMATIQUE_APRES_EPOD",
-        "reference_epod": f"EPOD-00{new_item['id']}",
-        "date_emission": datetime.utcnow().isoformat()
-    }
-    _invoices.append(new_invoice)
-    
-    return {"epod": new_item, "facture_generee": new_invoice}
+def create_epod(payload: EPodCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    epod = ElectronicPOD(company_id=current_user.company_id, **payload.dict(), statut="LIVRE_AVEC_SIGNATURE")
+    db.add(epod)
+    db.commit()
+    db.refresh(epod)
+    return {"epod": epod, "facture_generee": None}
 
 # --- Endpoints K-FuelGuard ---
 @router.get("/fuel-guard/sensors")
@@ -226,111 +142,88 @@ def calculer_taxes_douanieres(payload: RequeteCalculDouane):
 
 # --- Endpoints K-Procurement ---
 @router.get("/procurement/orders")
-def get_procurement_orders():
-    return {"items": _procurements}
+def get_procurement_orders(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    query = db.query(PurchaseOrder)
+    if not current_user.is_superuser:
+        query = query.filter(PurchaseOrder.company_id == current_user.company_id)
+    return {"items": query.order_by(PurchaseOrder.created_at.desc()).all()}
 
 @router.post("/procurement/orders")
-def create_procurement_order(payload: PurchaseOrderCreate):
-    new_item = {
-        "id": len(_procurements) + 1,
-        "numero_po": f"PO-2026-0{len(_procurements) + 90}",
+def create_procurement_order(payload: PurchaseOrderCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    order = PurchaseOrder(
+        company_id=current_user.company_id,
+        numero_po=f"PO-{datetime.utcnow():%Y%m%d%H%M%S}",
         **payload.dict(),
-        "match_3_voies": True,
-        "statut": "APPROUVE",
-        "created_at": datetime.utcnow().isoformat()
-    }
-    _procurements.append(new_item)
-    return new_item
+        match_3_voies=False,
+        statut="EN_ATTENTE",
+    )
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+    return order
 
 # --- Endpoints K-Compliance ---
 @router.get("/compliance/audits")
-def get_compliance_audits():
-    return {"items": _compliance_audits}
+def get_compliance_audits(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    query = db.query(ComplianceAudit)
+    if not current_user.is_superuser:
+        query = query.filter(ComplianceAudit.company_id == current_user.company_id)
+    return {"items": query.order_by(ComplianceAudit.created_at.desc()).all()}
 
 @router.post("/compliance/audits")
-def create_compliance_audit(payload: ComplianceAuditCreate):
-    new_item = {
-        "id": len(_compliance_audits) + 1,
-        **payload.dict(),
-        "exemption_valide": True,
-        "statut": "VALIDE",
-        "created_at": datetime.utcnow().isoformat()
-    }
-    _compliance_audits.append(new_item)
-    return new_item
+def create_compliance_audit(payload: ComplianceAuditCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    audit = ComplianceAudit(
+        company_id=current_user.company_id,
+        dossier_reference=payload.dossier_reference,
+        type_reglementation=payload.type_reglementation,
+        score_conformite_pct=payload.score_conformite_pct,
+        exemption_valide=False,
+        statut="A_ANALYSER",
+    )
+    db.add(audit)
+    db.commit()
+    db.refresh(audit)
+    return audit
 
 # --- Endpoints K-Analytics BI ---
 @router.get("/bi-analytics/executive-summary")
-def get_bi_summary():
+def get_bi_summary(current_user: User = Depends(get_current_user)):
     return {
-        "chiffre_affaires_cumule_xaf": 142500000.0,
-        "marge_brute_globale_pct": 22.4,
-        "volume_fret_evp": 1280,
-        "taux_livraison_ponctuel_pct": 97.8,
-        "economie_carburant_xaf": 8400000.0
+        "chiffre_affaires_cumule_xaf": None,
+        "marge_brute_globale_pct": None,
+        "volume_fret_evp": None,
+        "taux_livraison_ponctuel_pct": None,
+        "economie_carburant_xaf": None,
     }
 
 # --- Endpoints Acconage & Handling Portuaire ---
 @router.get("/acconage")
 @router.get("/acconage/operations")
-def get_acconage_operations():
-    return {
-        "items": [
-            {"id": 1, "navire": "MV MAERSK CAMEROUN", "escale": "ESC-2026-089", "conteneurs_teu": 420, "quai": "Quai 23 - Port de Douala", "statut": "EN_DECHARGEMENT", "created_at": datetime.utcnow().isoformat()},
-            {"id": 2, "navire": "MV CMA CGM KRIBI", "escale": "ESC-2026-092", "conteneurs_teu": 680, "quai": "Quai 04 - Kribi Deep Seaport", "statut": "TERMINÉ", "created_at": datetime.utcnow().isoformat()}
-        ],
-        "total": 2
-    }
+def get_acconage_operations(current_user: User = Depends(get_current_user)):
+    return {"items": [], "total": 0}
 
 # --- Endpoints Transit & Douane ---
 @router.get("/transit")
 @router.get("/transit/dossiers")
-def get_transit_dossiers():
-    return {
-        "items": [
-            {"id": 1, "reference_dossier": "TR-2026-0012", "client": "CFAO CAMEROUN", "bureau_douane": "Douala Port V (10P)", "bva_numero": "BVA-88129", "statut": "DEDOUANE", "created_at": datetime.utcnow().isoformat()},
-            {"id": 2, "reference_dossier": "TR-2026-0015", "client": "SABC BRASSERIES", "bureau_douane": "Kribi Conteneurs (K12)", "bva_numero": "BVA-99012", "statut": "EN_COURS_INSPECTION", "created_at": datetime.utcnow().isoformat()}
-        ],
-        "total": 2
-    }
+def get_transit_dossiers(current_user: User = Depends(get_current_user)):
+    return {"items": [], "total": 0}
 
 # --- Endpoints Removal Slips (Bons d'Enlèvement) ---
 @router.get("/magasin/removal-slips")
-def get_removal_slips():
-    return {
-        "items": [
-            {"id": 1, "numero_be": "BE-2026-044", "client": "TOTALENERGIES MARKETING", "entrepot": "Magasin Central Zone Industrielle Bassa", "statut": "VALIDE", "created_at": datetime.utcnow().isoformat()}
-        ],
-        "total": 1
-    }
+def get_removal_slips(current_user: User = Depends(get_current_user)):
+    return {"items": [], "total": 0}
 
 # --- Endpoints Master Data Articles ---
 @router.get("/master-data/articles")
-def get_master_data_articles():
-    return {
-        "items": [
-            {"id": 1, "code_sku": "ART-001", "designation": "Ciment Portland ZLECAF 42.5", "categorie": "MATERIAUX", "prix_unitaire_xaf": 4800, "stock_disponible": 12500},
-            {"id": 2, "code_sku": "ART-002", "designation": "Huile Moteur Synthétique 15W40 20L", "categorie": "PIECES_RECHANGE", "prix_unitaire_xaf": 45000, "stock_disponible": 320}
-        ],
-        "total": 2
-    }
+def get_master_data_articles(current_user: User = Depends(get_current_user)):
+    return {"items": [], "total": 0}
 
 # --- Endpoints Ordres de Transfert ---
 @router.get("/magasin/ordres-transfert")
-def get_ordres_transfert():
-    return {
-        "items": [
-            {"id": 1, "reference": "OTR-2026-001", "source": "Magasin Douala Port", "destination": "Magasin Yaoundé Depot", "statut": "EN_TRANSIT", "created_at": datetime.utcnow().isoformat()}
-        ],
-        "total": 1
-    }
+def get_ordres_transfert(current_user: User = Depends(get_current_user)):
+    return {"items": [], "total": 0}
 
 # --- Endpoints Bandes de Livraison ---
 @router.get("/magasin/bandes-livraison")
-def get_bandes_livraison():
-    return {
-        "items": [
-            {"id": 1, "reference": "BL-2026-0891", "transporteur": "EVO-LOG FREIGHT", "statut": "CONFIRME", "created_at": datetime.utcnow().isoformat()}
-        ],
-        "total": 1
-    }
+def get_bandes_livraison(current_user: User = Depends(get_current_user)):
+    return {"items": [], "total": 0}

@@ -7,6 +7,7 @@ class CotationDevis(Base):
     __tablename__ = "cotations_devis"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
     reference = Column(String(50), unique=True, index=True, nullable=False)
     client_nom = Column(String(150), nullable=False)
     origine = Column(String(100), nullable=False)
@@ -21,6 +22,7 @@ class ElectronicPOD(Base):
     __tablename__ = "electronic_pods"
 
     id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
     reference_mission = Column(String(50), index=True, nullable=False)
     nom_destinataire = Column(String(150), nullable=False)
     signature_url = Column(String(255), nullable=True)
@@ -46,6 +48,7 @@ class PurchaseOrder(Base):
     __tablename__ = "procurement_purchase_orders"
 
     id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
     numero_po = Column(String(50), unique=True, index=True, nullable=False)
     fournisseur = Column(String(150), nullable=False)
     description = Column(Text, nullable=False)
@@ -58,6 +61,7 @@ class ComplianceAudit(Base):
     __tablename__ = "compliance_audits"
 
     id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
     dossier_reference = Column(String(50), index=True, nullable=False)
     type_reglementation = Column(String(100), default="ZLECAF / CEMAC")
     score_conformite_pct = Column(Float, default=98.5)
