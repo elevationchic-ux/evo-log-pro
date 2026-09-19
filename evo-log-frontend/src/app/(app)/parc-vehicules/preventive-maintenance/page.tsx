@@ -37,6 +37,8 @@ const MAINTENANCE_ORDERS: MaintenanceOrder[] = [
 ];
 
 export default function ParcVehiculesPreventiveMaintenance() {
+  return <div className="p-8 text-center text-slate-400">La maintenance préventive attend un endpoint GMAO persistant. Les ordres de démonstration sont désactivés.</div>;
+  /*
   const [orders] = useState<MaintenanceOrder[]>(MAINTENANCE_ORDERS);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -48,7 +50,7 @@ export default function ParcVehiculesPreventiveMaintenance() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
+      {/* Header * /}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-amber-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -77,7 +79,7 @@ export default function ParcVehiculesPreventiveMaintenance() {
         </div>
       </div>
 
-      {/* Table OT */}
+      {/* Table OT * /}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
         <div className="p-4 border-b border-slate-800">
           <div className="relative max-w-md">
@@ -150,4 +152,5 @@ export default function ParcVehiculesPreventiveMaintenance() {
       </div>
     </div>
   );
+  */
 }

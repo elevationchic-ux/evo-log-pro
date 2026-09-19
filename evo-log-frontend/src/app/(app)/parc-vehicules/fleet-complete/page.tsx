@@ -62,20 +62,20 @@ export default function ParcFleetCompletePage() {
       const res = await fleetAPI.getVehicles({ limit: 100 });
       const raw = res.data?.items || res.data || [];
       if (Array.isArray(raw) && raw.length > 0) {
-        setVehicles(raw.map((v: any) => ({
-          id: v.id?.toString() || Math.random().toString(),
-          immatriculation: v.immatriculation || v.plaque || 'LT-TR-001',
-          numeroParc: v.numero_parc || v.code || `PARC-${v.id || 1}`,
+        setVehicles(raw.filter((v: any) => v.id != null).map((v: any) => ({
+          id: v.id.toString(),
+          immatriculation: v.immatriculation || v.plaque || '',
+          numeroParc: v.numero_parc || v.code || '',
           type: v.type || 'TRACTEUR',
-          marque: v.marque || 'Mercedes-Benz',
-          modele: v.modele || 'Actros',
-          annee: Number(v.annee) || 2022,
-          vin: v.vin || v.chassis || 'WDB9340321K987654',
-          chauffeurAttitre: v.chauffeur_nom || v.driver || 'Chauffeur titulaire',
+          marque: v.marque || '',
+          modele: v.modele || '',
+          annee: Number(v.annee) || 0,
+          vin: v.vin || v.chassis || '',
+          chauffeurAttitre: v.chauffeur_nom || v.driver || '',
           statut: v.statut || 'DISPONIBLE',
-          derniereRevision: v.derniere_revision || '2025-01-10',
-          prochaineVisiteTechnique: v.visite_technique || '2025-07-15',
-          siteAffectation: v.site || 'Douala Port (Base DIT)'
+          derniereRevision: v.derniere_revision || '',
+          prochaineVisiteTechnique: v.visite_technique || '',
+          siteAffectation: v.site || ''
         })));
       } else {
         setVehicles([]);
@@ -94,41 +94,7 @@ export default function ParcFleetCompletePage() {
 
   const handleCreateVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formVehicle.immatriculation || !formVehicle.marque) {
-      toast.error('Veuillez renseigner l\'immatriculation et la marque.');
-      return;
-    }
-
-    const created: VehicleComplete = {
-      id: Date.now().toString(),
-      immatriculation: formVehicle.immatriculation.toUpperCase(),
-      numeroParc: formVehicle.numeroParc || `P-${Date.now().toString().slice(-3)}`,
-      type: formVehicle.type as any,
-      marque: formVehicle.marque,
-      modele: formVehicle.modele || 'Standard',
-      annee: Number(formVehicle.annee) || 2024,
-      vin: formVehicle.vin || 'NON-RENSEIGNÉ',
-      chauffeurAttitre: formVehicle.chauffeurAttitre || 'Non assigné',
-      statut: 'DISPONIBLE',
-      derniereRevision: new Date().toISOString().split('T')[0],
-      prochaineVisiteTechnique: new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0],
-      siteAffectation: formVehicle.siteAffectation
-    };
-
-    setVehicles([created, ...vehicles]);
-    setShowAddModal(false);
-    setFormVehicle({
-      immatriculation: '',
-      numeroParc: '',
-      type: 'TRACTEUR',
-      marque: '',
-      modele: '',
-      annee: 2024,
-      vin: '',
-      chauffeurAttitre: '',
-      siteAffectation: 'Douala Port'
-    });
-    toast.success(`Véhicule ${created.immatriculation} ajouté à la flotte active.`);
+    toast.error('La création de véhicule nécessite un endpoint flotte persistant.');
   };
 
   const filteredVehicles = vehicles.filter(v => {

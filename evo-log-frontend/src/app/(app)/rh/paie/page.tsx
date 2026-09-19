@@ -60,6 +60,14 @@ function computePayroll(salaireBase: number, anciennete: number, primes: number,
 }
 
 export default function RHPaiePage() {
+  return (
+    <div className="p-8 text-center text-slate-400">
+      La paie est désactivée dans cette vue tant qu’un endpoint de calcul et de génération de bulletin
+      persistant n’est pas raccordé. Aucun montant local n’est présenté.
+    </div>
+  );
+
+  /*
   const [selectedEmp, setSelectedEmp] = useState('EMP-002');
   const [salaireBase, setSalaireBase] = useState(720000);
   const [anciennete, setAnciennete] = useState(5);
@@ -79,7 +87,7 @@ export default function RHPaiePage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header * /}
       <div>
         <h1 className="text-2xl font-black text-white flex items-center gap-2">
           <Calculator className="w-6 h-6 text-amber-400" /> Moteur de Paie OHADA Cameroun
@@ -88,13 +96,13 @@ export default function RHPaiePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Inputs */}
+        {/* Inputs * /}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
           <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
             <User className="w-4 h-4 text-blue-400" /> Paramètres de la Fiche de Paie
           </h2>
 
-          {/* Employee selector */}
+          {/* Employee selector * /}
           <div>
             <label className="block text-xs font-bold text-slate-300 uppercase mb-1.5">Employé</label>
             <select
@@ -142,13 +150,13 @@ export default function RHPaiePage() {
           </button>
         </div>
 
-        {/* Pay Result */}
+        {/* Pay Result * /}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
           <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-emerald-400" /> Résultat de Paie (Calcul Temps Réel)
           </h2>
 
-          {/* GAINS section */}
+          {/* GAINS section * /}
           <div>
             <div className="text-[10px] font-bold text-slate-400 uppercase mb-2">ÉLÉMENTS DE RÉMUNÉRATION</div>
             <div className="space-y-1">
@@ -170,7 +178,7 @@ export default function RHPaiePage() {
             </div>
           </div>
 
-          {/* COTISATIONS */}
+          {/* COTISATIONS * /}
           <div>
             <div className="text-[10px] font-bold text-slate-400 uppercase mb-2">RETENUES SALARIALES</div>
             <div className="space-y-1">
@@ -187,7 +195,7 @@ export default function RHPaiePage() {
             </div>
           </div>
 
-          {/* NET */}
+          {/* NET * /}
           <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
             <div className="flex justify-between items-center">
               <div>
@@ -203,7 +211,7 @@ export default function RHPaiePage() {
             </div>
           </div>
 
-          {/* Charges patronales */}
+          {/* Charges patronales * /}
           <div>
             <div className="text-[10px] font-bold text-slate-400 uppercase mb-2">CHARGES PATRONALES</div>
             <div className="space-y-1">
@@ -232,4 +240,5 @@ export default function RHPaiePage() {
       </div>
     </div>
   );
+  */
 }

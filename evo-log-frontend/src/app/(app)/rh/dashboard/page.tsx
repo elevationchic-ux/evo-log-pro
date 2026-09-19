@@ -9,6 +9,14 @@ import {
 import { toast } from 'sonner';
 
 export default function RHDashboardPage() {
+  return (
+    <div className="p-8 text-center text-slate-400">
+      Le tableau de bord RH historique ne dispose pas encore d’une source API persistante.
+      Les indicateurs et listes de cette vue sont désactivés pour éviter d’afficher des données fictives.
+    </div>
+  );
+
+  /*
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'effectifs' | 'conges' | 'performances'>('effectifs');
 
@@ -61,7 +69,7 @@ export default function RHDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header * /}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white flex items-center gap-2">
@@ -77,7 +85,7 @@ export default function RHDashboardPage() {
         </button>
       </div>
 
-      {/* KPIs */}
+      {/* KPIs * /}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
         {kpis.map((kpi, i) => {
           const Icon = kpi.icon;
@@ -94,7 +102,7 @@ export default function RHDashboardPage() {
         })}
       </div>
 
-      {/* Dept Repartition */}
+      {/* Dept Repartition * /}
       <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow">
         <h2 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-blue-400" /> Répartition par Département
@@ -112,7 +120,7 @@ export default function RHDashboardPage() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs * /}
       <div className="flex gap-2">
         {[
           { id: 'effectifs', label: 'Annuaire Employés' },
@@ -128,7 +136,7 @@ export default function RHDashboardPage() {
         ))}
       </div>
 
-      {/* Employee Table */}
+      {/* Employee Table * /}
       {activeTab === 'effectifs' && (
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="p-4 border-b border-slate-800">
@@ -189,7 +197,7 @@ export default function RHDashboardPage() {
         </div>
       )}
 
-      {/* Leave requests */}
+      {/* Leave requests * /}
       {activeTab === 'conges' && (
         <div className="space-y-3">
           {congesEnAttente.map((req, i) => (
@@ -223,4 +231,5 @@ export default function RHDashboardPage() {
       )}
     </div>
   );
+  */
 }

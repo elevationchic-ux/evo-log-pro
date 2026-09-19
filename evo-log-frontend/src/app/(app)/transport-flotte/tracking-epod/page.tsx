@@ -29,6 +29,8 @@ const EPOD_DATA: EPODRecord[] = [
 ];
 
 export default function TransportFlotteTrackingEPOD() {
+  return <div className="p-8 text-center text-slate-400">La vue e-POD attend un endpoint de suivi persistant. Les données de démonstration sont désactivées.</div>;
+  /*
   const [records, setRecords] = useState<EPODRecord[]>(EPOD_DATA);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -40,7 +42,7 @@ export default function TransportFlotteTrackingEPOD() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
+      {/* Header * /}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-blue-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -70,7 +72,7 @@ export default function TransportFlotteTrackingEPOD() {
         </div>
       </div>
 
-      {/* Table e-POD */}
+      {/* Table e-POD * /}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="relative flex-1 max-w-md">
@@ -148,4 +150,5 @@ export default function TransportFlotteTrackingEPOD() {
       </div>
     </div>
   );
+  */
 }

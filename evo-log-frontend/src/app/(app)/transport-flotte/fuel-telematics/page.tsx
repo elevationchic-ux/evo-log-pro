@@ -27,6 +27,8 @@ const FUEL_DATA: FuelRecord[] = [
 ];
 
 export default function TransportFlotteFuelTelematics() {
+  return <div className="p-8 text-center text-slate-400">La télématique carburant attend une intégration fournisseur persistante. Les données de démonstration sont désactivées.</div>;
+  /*
   const [data, setData] = useState<FuelRecord[]>(FUEL_DATA);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -37,7 +39,7 @@ export default function TransportFlotteFuelTelematics() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
+      {/* Header * /}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-blue-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -67,7 +69,7 @@ export default function TransportFlotteFuelTelematics() {
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards * /}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Consommation Moyenne Flotte</div>
@@ -96,7 +98,7 @@ export default function TransportFlotteFuelTelematics() {
         </div>
       </div>
 
-      {/* Table Télématique */}
+      {/* Table Télématique * /}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="relative flex-1 max-w-md">
@@ -153,4 +155,5 @@ export default function TransportFlotteFuelTelematics() {
       </div>
     </div>
   );
+  */
 }

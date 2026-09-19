@@ -53,14 +53,14 @@ export default function ParcLicensePlatesPage() {
       const res = await fleetAPI.getVehicles({ limit: 100 });
       const raw = res.data?.items || res.data || [];
       if (Array.isArray(raw) && raw.length > 0) {
-        setRecords(raw.map((v: any) => ({
-          id: v.id?.toString() || Math.random().toString(),
-          immatriculation: v.immatriculation || v.plaque || 'LT-TR-001',
-          numeroChassis: v.vin || v.chassis || 'WDB9340321K',
-          typeEngin: v.type || 'Tracteur Routier',
-          carteGriseNumero: v.carte_grise || `CG-${v.id || 101}`,
-          dateExpirationVisite: v.date_visite || '2025-09-30',
-          dateExpirationAssurance: v.date_assurance || '2025-11-15',
+        setRecords(raw.filter((v: any) => v.id != null).map((v: any) => ({
+          id: v.id.toString(),
+          immatriculation: v.immatriculation || v.plaque || '',
+          numeroChassis: v.vin || v.chassis || '',
+          typeEngin: v.type || '',
+          carteGriseNumero: v.carte_grise || '',
+          dateExpirationVisite: v.date_visite || '',
+          dateExpirationAssurance: v.date_assurance || '',
           agrementPortuairePad: true,
           statut: 'VALIDE'
         })));
@@ -81,35 +81,7 @@ export default function ParcLicensePlatesPage() {
 
   const handleCreateRecord = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.immatriculation || !form.carteGriseNumero) {
-      toast.error('Veuillez renseigner l\'immatriculation et le numéro de carte grise.');
-      return;
-    }
-
-    const created: LicenseRecord = {
-      id: Date.now().toString(),
-      immatriculation: form.immatriculation.toUpperCase(),
-      numeroChassis: form.numeroChassis || 'CHASSIS-INCONNU',
-      typeEngin: form.typeEngin,
-      carteGriseNumero: form.carteGriseNumero.toUpperCase(),
-      dateExpirationVisite: form.dateExpirationVisite || new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0],
-      dateExpirationAssurance: form.dateExpirationAssurance || new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
-      agrementPortuairePad: form.agrementPortuairePad,
-      statut: 'VALIDE'
-    };
-
-    setRecords([created, ...records]);
-    setShowAddModal(false);
-    setForm({
-      immatriculation: '',
-      numeroChassis: '',
-      typeEngin: 'Tracteur Routier',
-      carteGriseNumero: '',
-      dateExpirationVisite: '',
-      dateExpirationAssurance: '',
-      agrementPortuairePad: true
-    });
-    toast.success(`Titre d'immatriculation pour ${created.immatriculation} enregistré avec succès.`);
+    toast.error('La création de titres d’immatriculation nécessite un endpoint flotte persistant.');
   };
 
   const filteredRecords = records.filter(r => {

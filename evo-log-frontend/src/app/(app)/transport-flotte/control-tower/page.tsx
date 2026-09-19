@@ -23,11 +23,13 @@ const CHECKPOINTS: Checkpoint[] = [
 ];
 
 export default function TransportFlotteControlTower() {
+  return <div className="p-8 text-center text-slate-400">Le control tower attend une source de positions et checkpoints persistante. Les données de démonstration sont désactivées.</div>;
+  /*
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>(CHECKPOINTS);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
+      {/* Header * /}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-blue-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -57,7 +59,7 @@ export default function TransportFlotteControlTower() {
         </div>
       </div>
 
-      {/* Grid: État des Frontières & Corridors */}
+      {/* Grid: État des Frontières & Corridors * /}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {checkpoints.map(cp => (
           <div key={cp.name} className="bg-slate-900/90 border border-slate-800 p-5 rounded-3xl space-y-3">
@@ -92,4 +94,5 @@ export default function TransportFlotteControlTower() {
       </div>
     </div>
   );
+  */
 }
