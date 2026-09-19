@@ -22,63 +22,18 @@ export default function ReportLibraryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFormat, setSelectedFormat] = useState('ALL');
 
-  const [savedModels, setSavedModels] = useState([
-    {
-      id: 'mdl-01',
-      nom: 'Suivi Financier & Facturation Hebdos',
-      auteur: 'Direction Financière',
-      format: 'EXCEL',
-      derniereExecution: '2026-08-30 11:20',
-      description: 'Extraction automatisée des factures non lettrées et échéances clients dépassées.',
-      parametres: 'Période: M-1 • Format: XLSX avec totaux par agence'
-    },
-    {
-      id: 'mdl-02',
-      nom: 'Cadences Déchargement Quai Douala',
-      auteur: 'Chef Acconage',
-      format: 'PDF',
-      derniereExecution: '2026-08-29 18:45',
-      description: 'Statistiques des mouvements par portique STS et respect des fenêtres de tirage PAD.',
-      parametres: 'Port: Douala • Grues: STS 01 & STS 02'
-    },
-    {
-      id: 'mdl-03',
-      nom: 'Rapport Kilométrique & Consommations Flotte',
-      auteur: 'Responsable GMAO',
-      format: 'EXCEL',
-      derniereExecution: '2026-08-28 09:15',
-      description: 'Tableau croisé dynamique des consommations carburant par tracteur et par chauffeur.',
-      parametres: 'Filtre: Écart Capteur > 5%'
-    },
-    {
-      id: 'mdl-04',
-      nom: 'Dédouanements CEMAC & Apurement DUM',
-      auteur: 'Service Transit',
-      format: 'PDF',
-      derniereExecution: '2026-08-27 16:30',
-      description: 'Synthèse des dossiers frontières Kousseri/Tchad et Bangui avec statut quittances douanières.',
-      parametres: 'Bureau: Douala CMDL1 • Régimes: IM4 & TR8'
-    }
-  ]);
+  const [savedModels] = useState<any[]>([]);
 
   const handleRunReport = (nom: string) => {
-    toast.success(`Exécution du rapport "${nom}" lancée. Téléchargement en cours...`);
+    toast.error(`L'exécution du rapport "${nom}" nécessite un endpoint de génération persistant.`);
   };
 
   const handleDuplicate = (model: any) => {
-    const copy = {
-      ...model,
-      id: `mdl-${Date.now().toString().slice(-4)}`,
-      nom: `${model.nom} (Copie)`,
-      derniereExecution: 'Jamais exécuté'
-    };
-    setSavedModels([copy, ...savedModels]);
-    toast.success(`Modèle dupliqué avec succès : "${copy.nom}"`);
+    toast.error('La duplication des modèles nécessite un endpoint de bibliothèque persistant.');
   };
 
   const handleDelete = (id: string) => {
-    setSavedModels(savedModels.filter(m => m.id !== id));
-    toast.success('Modèle retiré de la bibliothèque.');
+    toast.error('La suppression des modèles nécessite un endpoint de bibliothèque persistant.');
   };
 
   const filtered = savedModels.filter(m => {

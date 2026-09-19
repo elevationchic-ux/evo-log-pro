@@ -126,14 +126,14 @@ export default function PortailMagasinierPage() {
 
     const allDone = updated.articles.every((a) => a.picked);
     if (allDone) {
-      toast.success('Tous les articles ont été prélevés ! Commande prête pour mise à quai.');
+      toast.error('Le prélèvement doit être confirmé par le service WMS persistant.');
     }
   };
 
   const handleValidateReception = async (id: number) => {
     try {
       await receptionMag3API.validate(id);
-      toast.success('Réception quai validée et enregistrée en stock');
+      toast.error('La réception quai doit être validée par le service WMS persistant.');
       fetchData();
     } catch (err: any) {
       toast.error('Erreur lors de la validation de réception');
@@ -141,7 +141,7 @@ export default function PortailMagasinierPage() {
   };
 
   const handleSaveInventaire = () => {
-    toast.success('Comptage inventaire tournant enregistré et transmis au chef magasin');
+    toast.error('Le comptage doit être enregistré par le service inventaire persistant.');
   };
 
   return (
@@ -249,7 +249,7 @@ export default function PortailMagasinierPage() {
                     <p className="text-xs text-slate-500">Client : {selectedOrder.client}</p>
                   </div>
                   <button
-                    onClick={() => toast.success('Mise à quai confirmée pour expédition')}
+                    onClick={() => toast.error('La mise à quai doit être confirmée par le service WMS persistant.')}
                     className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold transition-colors shadow-sm self-start sm:self-auto"
                   >
                     Valider le Bon de Sortie
@@ -448,7 +448,7 @@ export default function PortailMagasinierPage() {
           <button
             onClick={() => {
               setChariotValidated(true);
-              toast.success('Contrôle engin de manutention validé et archivé');
+              toast.error('Le contrôle engin doit être archivé par le service maintenance persistant.');
             }}
             className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-sm"
           >
