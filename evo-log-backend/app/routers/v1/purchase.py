@@ -30,6 +30,8 @@ async def get_purchases(
     query = db.query(EcritureComptableNew).filter(
         EcritureComptableNew.journal == "ACHATS"
     )
+    if not current_user.is_superuser:
+        query = query.filter(EcritureComptableNew.company_id == current_user.company_id)
 
     if date_debut:
         try:

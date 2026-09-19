@@ -180,7 +180,7 @@ export const financeAPI = {
 // â”€â”€â”€ Service Purchases (K-Achats) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const purchaseAPI = {
   getRequisitions: (params?: Record<string, unknown>) =>
-    apiClient.get('/api/purchase/requisitions/', { params }),
+    apiClient.get('/api/purchase/', { params }),
   createRequisition: (data: unknown) =>
     apiClient.post('/api/purchase/requisitions/', data),
   getRequisition: (id: number) =>
@@ -777,4 +777,3 @@ export const transitAvanceAPI = {
 };
 
 export default apiClient;
-

@@ -72,6 +72,7 @@ class EcritureComptableNew(Base):
     __tablename__ = "ecritures_comptables_ohada"
     
     id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     numero_ecriture = Column(String(50), unique=True, nullable=False, index=True)
     date_ecriture = Column(Date, nullable=False)
     numero_piece = Column(String(50))
