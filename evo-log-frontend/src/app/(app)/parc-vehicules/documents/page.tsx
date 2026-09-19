@@ -52,28 +52,7 @@ export default function ParcVehiculesDocumentsPage() {
       return;
     }
 
-    const created: FleetDocument = {
-      id: Date.now().toString(),
-      immatriculation: form.immatriculation.toUpperCase(),
-      titre: form.titre,
-      categorie: form.categorie as any,
-      dateEmission: form.dateEmission,
-      dateExpiration: form.dateExpiration || '2026-12-31',
-      tailleFichier: '1.8 MB (PDF)',
-      statut: 'VALIDE'
-    };
-
-    setDocuments([created, ...documents]);
-    setShowUploadModal(false);
-    setForm({
-      immatriculation: '',
-      titre: '',
-      categorie: 'CARTE_GRISE',
-      dateEmission: new Date().toISOString().split('T')[0],
-      dateExpiration: '',
-      fichierNom: ''
-    });
-    toast.success(`Document « ${created.titre} » numérisé et classé dans le dossier de ${created.immatriculation}.`);
+    toast.error("Le classement des documents flotte nécessite un endpoint GED persistant.");
   };
 
   const filteredDocs = documents.filter(d => {

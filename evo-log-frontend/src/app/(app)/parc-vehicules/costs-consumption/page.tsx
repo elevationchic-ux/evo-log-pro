@@ -62,10 +62,10 @@ export default function ParcCostsConsumptionPage() {
           const coutTot = depCarb + depMaint;
           const coutKm = totalKm > 0 ? Math.round(coutTot / totalKm) : 0;
           return {
-            id: v.id?.toString() || Math.random().toString(),
-            immatriculation: v.immatriculation || v.plaque || 'LT-TR-001',
-            marque: v.marque || 'Mercedes-Benz',
-            modele: v.modele || 'Actros 3340',
+            id: v.id?.toString(),
+            immatriculation: v.immatriculation || v.plaque || '',
+            marque: v.marque || '',
+            modele: v.modele || '',
             totalKm: totalKm,
             litresCarburant: Number(v.litres_consommes || 0),
             depensesCarburant: depCarb,
@@ -97,32 +97,7 @@ export default function ParcCostsConsumptionPage() {
       return;
     }
 
-    const created: VehicleTCO = {
-      id: Date.now().toString(),
-      immatriculation: newExpense.immatriculation.toUpperCase(),
-      marque: 'Camion / Tracteur',
-      modele: 'Flotte Pro',
-      totalKm: Number(newExpense.kilometrage) || 0,
-      litresCarburant: Number(newExpense.litres) || 0,
-      depensesCarburant: newExpense.type === 'CARBURANT' ? Number(newExpense.montant) : 0,
-      depensesMaintenance: newExpense.type === 'MAINTENANCE' ? Number(newExpense.montant) : 0,
-      coutTotal: Number(newExpense.montant),
-      coutParKm: Number(newExpense.kilometrage) > 0 ? Math.round(Number(newExpense.montant) / Number(newExpense.kilometrage)) : 0,
-      statut: 'OPTIMAL'
-    };
-
-    setVehicles([created, ...vehicles]);
-    setShowAddExpenseModal(false);
-    setNewExpense({
-      immatriculation: '',
-      type: 'CARBURANT',
-      montant: '',
-      litres: '',
-      kilometrage: '',
-      fournisseur: '',
-      date: new Date().toISOString().split('T')[0]
-    });
-    toast.success('Dépense de flotte enregistrée avec succès dans le grand livre analytique.');
+    toast.error("L'enregistrement des dépenses flotte nécessite un endpoint analytique persistant.");
   };
 
   const filteredVehicles = vehicles.filter(v => 

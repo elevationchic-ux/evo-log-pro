@@ -49,9 +49,13 @@ export default function MaintenancePage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!truckId.trim() || !description.trim()) {
+      toast.error("L'immatriculation et la description sont obligatoires.");
+      return;
+    }
     createMutation.mutate({
-      immatriculation_camion: truckId || 'LT-901-BA',
-      description: description || 'Vidange moteur 50.000km',
+      immatriculation_camion: truckId,
+      description,
       priorite: priority,
     });
   };
@@ -126,7 +130,7 @@ export default function MaintenancePage() {
                   <tr key={item.id || idx} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-100 flex items-center gap-2 font-mono">
                       <Truck className="w-4 h-4 text-amber-400" />
-                      {item.immatriculation_camion || 'LT-901-BA'}
+                      {item.immatriculation_camion || 'Immatriculation indisponible'}
                     </td>
                     <td className="px-6 py-4 font-semibold text-slate-200">
                       {item.description || 'Vidange moteur 50.000km'}

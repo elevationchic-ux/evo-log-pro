@@ -57,8 +57,11 @@ export default function EmployesPage() {
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const matriculeGen = formData.matricule || `EMP-2026-${Math.floor(100 + Math.random() * 900)}`
-      await rhAPI.createEmploye({ ...formData, matricule: matriculeGen })
+      if (!formData.matricule.trim()) {
+        toast.error("Le matricule doit être fourni par le référentiel RH ou le backend.")
+        return
+      }
+      await rhAPI.createEmploye(formData)
       toast.success(`Employé ${formData.prenom} ${formData.nom} créé avec succès !`)
       setShowCreateModal(false)
       setFormData({
