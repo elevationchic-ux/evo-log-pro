@@ -175,6 +175,30 @@ export default function AdminHubPage() {
       .catch(() => {
         if (!cancelled) toast.error("Impossible de charger les utilisateurs depuis l'API.")
       })
+    adminAPI.getRoles()
+      .then((response: any) => {
+        if (!cancelled) {
+          const roles = Array.isArray(response) ? response : response?.items ?? []
+          setRolesList(roles.map((role: any) => ({
+            ...role,
+            modules_allowed: typeof role.modules_allowed === 'string'
+              ? (() => {
+                  try { return JSON.parse(role.modules_allowed) } catch { return [] }
+                })()
+              : role.modules_allowed ?? [],
+          })))
+        }
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Impossible de charger les rôles depuis l'API.")
+      })
+    adminAPI.getAuditLogs()
+      .then((response: any) => {
+        if (!cancelled) setAuditLogs(response?.items ?? [])
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Impossible de charger le journal d'audit depuis l'API.")
+      })
     return () => { cancelled = true }
   }, [])
 
@@ -197,31 +221,9 @@ export default function AdminHubPage() {
     { id: 'client-portal', label: 'Portail Client B2B' },
   ]
 
-  // Roles Matrix State
-  const [rolesList, setRolesList] = useState([
-    { id: 'ADMIN', name: 'Administrateur', modules: ['TOUS LES MODULES'], count: 1 },
-    { id: 'CHAUFFEUR', name: 'Chauffeur / Transporteur', modules: ['K-Transport', 'Tracking e-POD'], count: 1 },
-    { id: 'MAGASINIER', name: 'Gestionnaire Entrepôt MAG3', modules: ['K-Magasin', 'Tiers'], count: 1 },
-    { id: 'FINANCE', name: 'Responsable Finance', modules: ['K-Finance', 'Facturation'], count: 1 },
-    { id: 'QHSE', name: 'Inspecteur QHSE', modules: ['K-QHSE', 'Conformité'], count: 1 },
-    { id: 'DOUANE', name: 'Agent Douane & Transit', modules: ['K-Transit', 'Documents'], count: 1 },
-  ])
-
-  // Agencies List
-  const [agencies] = useState([
-    { id: 1, code: 'DLA-PORT', name: 'Agence Portuaire Douala (Siège)', ville: 'Douala', statut: 'ACTIF', usersCount: 4 },
-    { id: 2, code: 'KRB-DEEP', name: 'Succursale Kribi Conteneurs', ville: 'Kribi', statut: 'ACTIF', usersCount: 2 },
-    { id: 3, code: 'YDE-CENT', name: 'Bureau Régional Yaoundé', ville: 'Yaoundé', statut: 'ACTIF', usersCount: 1 },
-    { id: 4, code: 'GAR-NORTH', name: 'Hangar Logistique Garoua', ville: 'Garoua', statut: 'MAINTENANCE', usersCount: 1 },
-  ])
-
-  // Audit Logs List
-  const [auditLogs] = useState([
-    { id: 'LOG-109', action: 'Création Compte Utilisateur', user: 'admin@evo-log.cm', target: 'kamga@evo-log.cm', timestamp: '22/07/2026 01:15', status: 'SUCCESS' },
-    { id: 'LOG-108', action: 'Changement Obligatoire Mot de Passe', user: 'kamga@evo-log.cm', target: 'kamga@evo-log.cm', timestamp: '22/07/2026 01:05', status: 'SUCCESS' },
-    { id: 'LOG-107', action: 'Connexion Réussie (NextAuth)', user: 'admin@evo-log.cm', target: 'Système ERP', timestamp: '22/07/2026 00:45', status: 'SUCCESS' },
-    { id: 'LOG-106', action: 'Modification Matrice RBAC', user: 'admin@evo-log.cm', target: 'Rôle MAGASINIER', timestamp: '21/07/2026 23:30', status: 'SUCCESS' },
-  ])
+  const [rolesList, setRolesList] = useState<any[]>([])
+  const [agencies] = useState<any[]>([])
+  const [auditLogs, setAuditLogs] = useState<any[]>([])
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -284,15 +286,18 @@ export default function AdminHubPage() {
     }
   }
 
-  const toggleUserStatus = (userId: string) => {
-    setUsers(users.map(u => {
-      if (u.id === userId) {
-        const updated = !u.is_active
-        toast.info(`Statut du compte ${u.email} mis à jour : ${updated ? 'Actif' : 'Désactivé'}`)
-        return { ...u, is_active: updated }
-      }
-      return u
-    }))
+  const toggleUserStatus = async (userId: string) => {
+    const user = users.find((entry) => entry.id === userId)
+    if (!user) return
+    try {
+      const response: any = await adminAPI.toggleUserStatus(Number(userId), { is_active: !user.is_active })
+      setUsers(users.map((entry) => entry.id === userId
+        ? { ...entry, is_active: Boolean(response?.is_active ?? !entry.is_active) }
+        : entry))
+      toast.success(`Statut du compte ${user.email} mis à jour.`)
+    } catch {
+      toast.error("Le statut du compte n'a pas pu être modifié.")
+    }
   }
 
   const handleResetPassword = (email: string) => {
@@ -556,15 +561,15 @@ export default function AdminHubPage() {
               <div key={r.id} className="bg-slate-950 border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-xs">
-                    {r.id}
+                    {r.name}
                   </span>
-                  <span className="text-xs text-slate-400 font-mono">{r.count} Utilisateur(s)</span>
+                  <span className="text-xs text-slate-400 font-mono">{r.nb_users ?? 0} Utilisateur(s)</span>
                 </div>
-                <h3 className="text-base font-bold text-white">{r.name}</h3>
+                <h3 className="text-base font-bold text-white">{r.label ?? r.name}</h3>
                 <div className="text-xs text-slate-400">
                   <span className="block font-semibold text-slate-300 mb-1">Modules Autorisés :</span>
                   <div className="flex flex-wrap gap-1.5">
-                    {r.modules.map((m, idx) => (
+                    {(r.modules_allowed ?? []).map((m: string, idx: number) => (
                       <span key={idx} className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-200 text-[11px] font-mono">
                         {m}
                       </span>
@@ -633,7 +638,7 @@ export default function AdminHubPage() {
                   </div>
                   <div>
                     <div className="font-bold text-slate-100 text-xs">{log.action}</div>
-                    <div className="text-[11px] text-slate-400 font-mono">Par: {log.user} → Cible: {log.target}</div>
+                    <div className="text-[11px] text-slate-400 font-mono">Par: {log.user_email} → Cible: {log.resource}</div>
                   </div>
                 </div>
                 <span className="text-xs text-slate-400 font-mono">{log.timestamp}</span>
