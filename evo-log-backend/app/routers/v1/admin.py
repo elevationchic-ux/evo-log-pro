@@ -14,7 +14,7 @@ from app.core.database import get_db
 from app.models.user import User, Role, user_roles
 from app.models.tenant import Company
 from app.models.audit import AuditLog
-from app.core.security import get_password_hash, verify_password
+from app.core.security import get_password_hash, verify_password, get_current_user
 
 router = APIRouter()
 
@@ -46,10 +46,13 @@ def get_users(
     role: Optional[str] = None,
     search: Optional[str] = None,
     company_id: Optional[int] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """List all registered users with role and company metadata"""
     query = db.query(User)
+    if not current_user.is_superuser:
+        query = query.filter(User.company_id == current_user.company_id)
 
     if company_id:
         query = query.filter(User.company_id == company_id)
@@ -66,8 +69,10 @@ def get_users(
 
     users = query.order_by(User.id.asc()).offset(skip).limit(limit).all()
 
-    # If DB has no users yet, provide initial platform users
+    # Empty databases must remain empty; never expose demo identities.
     if not users and skip == 0:
+        return []
+    if False and not users and skip == 0:
         return [
             {
                 "id": 1,
@@ -181,14 +186,18 @@ def get_users(
 
 
 @router.post("/users", status_code=status.HTTP_201_CREATED)
-def create_user(payload: Dict[str, Any], db: Session = Depends(get_db)):
+def create_user(payload: Dict[str, Any], db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Create a new user account with hashed password and role assignment"""
     username = payload.get("username") or payload.get("email", "").split("@")[0]
     email = payload.get("email")
-    password = payload.get("password") or "EvoLog2026!"
+    password = payload.get("password")
+    if not password:
+        raise HTTPException(status_code=400, detail="Un mot de passe initial est requis")
     full_name = payload.get("full_name") or payload.get("nom") or username
     role_name = payload.get("role") or "OPERATEUR"
-    company_id = payload.get("company_id") or 1
+    company_id = payload.get("company_id") if current_user.is_superuser else current_user.company_id
+    if not company_id:
+        raise HTTPException(status_code=400, detail="La société de l'utilisateur courant est requise")
     phone = payload.get("phone") or payload.get("tel")
 
     if not email:
@@ -233,9 +242,12 @@ def create_user(payload: Dict[str, Any], db: Session = Depends(get_db)):
 
 
 @router.put("/users/{user_id}")
-def update_user(user_id: int, payload: Dict[str, Any], db: Session = Depends(get_db)):
+def update_user(user_id: int, payload: Dict[str, Any], db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Update user information and roles"""
-    user = db.query(User).filter(User.id == user_id).first()
+    user_query = db.query(User).filter(User.id == user_id)
+    if not current_user.is_superuser:
+        user_query = user_query.filter(User.company_id == current_user.company_id)
+    user = user_query.first()
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
@@ -262,12 +274,14 @@ def update_user(user_id: int, payload: Dict[str, Any], db: Session = Depends(get
 
 
 @router.patch("/users/{user_id}/status")
-def toggle_user_status(user_id: int, payload: Optional[Dict[str, Any]] = None, db: Session = Depends(get_db)):
+def toggle_user_status(user_id: int, payload: Optional[Dict[str, Any]] = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Toggle user active / locked status"""
-    user = db.query(User).filter(User.id == user_id).first()
+    user_query = db.query(User).filter(User.id == user_id)
+    if not current_user.is_superuser:
+        user_query = user_query.filter(User.company_id == current_user.company_id)
+    user = user_query.first()
     if not user:
-        # Fallback simulation if ID is out of bounds
-        return {"id": user_id, "is_active": True, "message": "Statut utilisateur mis à jour"}
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
     if payload and "is_active" in payload:
         user.is_active = bool(payload["is_active"])
@@ -280,10 +294,15 @@ def toggle_user_status(user_id: int, payload: Optional[Dict[str, Any]] = None, d
 
 
 @router.post("/users/{user_id}/reset-password")
-def reset_user_password(user_id: int, payload: Dict[str, Any], db: Session = Depends(get_db)):
+def reset_user_password(user_id: int, payload: Dict[str, Any], db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Reset password for a user account"""
-    new_pw = payload.get("new_password") or "EvoLog2026!"
-    user = db.query(User).filter(User.id == user_id).first()
+    new_pw = payload.get("new_password")
+    if not new_pw:
+        raise HTTPException(status_code=400, detail="Le nouveau mot de passe est requis")
+    user_query = db.query(User).filter(User.id == user_id)
+    if not current_user.is_superuser:
+        user_query = user_query.filter(User.company_id == current_user.company_id)
+    user = user_query.first()
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
@@ -378,10 +397,15 @@ def get_audit_logs(
     limit: int = Query(50, ge=1, le=200),
     action: Optional[str] = None,
     search: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Retrieve immutable audit logs from database"""
     query = db.query(AuditLog)
+    if not current_user.is_superuser:
+        query = query.join(User, AuditLog.user_id == User.id).filter(
+            User.company_id == current_user.company_id
+        )
 
     if action and action != "ALL":
         query = query.filter(AuditLog.method.ilike(f"%{action}%"))
@@ -399,8 +423,7 @@ def get_audit_logs(
     total = query.count()
     logs = query.order_by(desc(AuditLog.timestamp)).offset(skip).limit(limit).all()
 
-    if not logs and skip == 0:
-        # Provide certified sample logs for display
+    if False and not logs and skip == 0:
         return {
             "total": 5,
             "items": [

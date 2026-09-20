@@ -98,9 +98,15 @@ export default function UserManagementPage() {
   };
 
   const handleResetPassword = async (user: any) => {
+    const newPassword = window.prompt(`Nouveau mot de passe pour ${user.email} (minimum 12 caractères) :`);
+    if (!newPassword) return;
+    if (newPassword.length < 12) {
+      toast.error('Le nouveau mot de passe doit contenir au moins 12 caractères.');
+      return;
+    }
     try {
-      await adminAPI.resetPassword(user.id, "EvoLog2026!");
-      toast.success(`Mot de passe réinitialisé pour ${user.email} (défaut: EvoLog2026!).`);
+      await adminAPI.resetPassword(user.id, newPassword);
+      toast.success(`Mot de passe réinitialisé pour ${user.email}.`);
     } catch (err: any) {
       toast.error(err?.response?.data?.detail || "Erreur lors de la réinitialisation.");
     }

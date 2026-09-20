@@ -44,7 +44,7 @@ export default function AdminHubPage() {
   const [roleFilter, setRoleFilter] = useState('ALL')
 
   // Initial Seeded Users List
-  const [users, setUsers] = useState<SystemUser[]>([
+  const [users, setUsers] = useState<SystemUser[]>([] /* [
     {
       id: 'usr-001',
       email: 'admin@evo-log.cm',
@@ -141,7 +141,7 @@ export default function AdminHubPage() {
       must_change_password: true,
       created_at: '2026-03-15',
     },
-  ])
+  ] */)
 
   // New User Creation Modal State
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -207,10 +207,16 @@ export default function AdminHubPage() {
 
     setIsSubmitting(true)
     try {
-      // Call backend API or simulate local addition
+      const password = window.prompt('Mot de passe initial (minimum 12 caractères) :')
+      if (!password || password.length < 12) {
+        toast.error('Un mot de passe initial de 12 caractères minimum est requis.')
+        return
+      }
       try {
         await adminAPI.createUser({
           email: newEmail,
+          username: newEmail,
+          password,
           nom_complet: newNomComplet,
           role: newRole,
           roles: [newRole],
@@ -219,7 +225,8 @@ export default function AdminHubPage() {
           telephone: newTelephone
         })
       } catch (err) {
-        console.warn("Backend API indisponible, enregistrement local effectué", err)
+        toast.error("Le compte n'a pas pu être créé car l'API est indisponible.")
+        return
       }
 
       const newUserObj: SystemUser = {
@@ -236,7 +243,7 @@ export default function AdminHubPage() {
       }
 
       setUsers([newUserObj, ...users])
-      toast.success(`Compte créé avec succès pour ${newNomComplet} (${newModulesAllowed.length} modules autorisés - Mot de passe: admin123)`)
+      toast.success(`Compte créé avec succès pour ${newNomComplet}.`)
       
       // Reset form
       setNewNomComplet('')
@@ -264,7 +271,7 @@ export default function AdminHubPage() {
   }
 
   const handleResetPassword = (email: string) => {
-    toast.success(`Mot de passe réinitialisé pour ${email} à "admin123". L'utilisateur aura obligation de le changer à la connexion.`)
+    toast.info(`Utilisez la gestion utilisateurs pour définir un nouveau mot de passe pour ${email}.`)
   }
 
   const filteredUsers = users.filter(u => {
@@ -459,7 +466,7 @@ export default function AdminHubPage() {
                     <td className="p-4 text-slate-300">
                       {u.must_change_password ? (
                         <span className="text-amber-400 font-semibold flex items-center gap-1">
-                          <AlertTriangle className="w-3.5 h-3.5" /> Défaut (admin123)
+                          <AlertTriangle className="w-3.5 h-3.5" /> Réinitialisation requise
                         </span>
                       ) : (
                         <span className="text-emerald-400 font-semibold flex items-center gap-1">
@@ -482,7 +489,7 @@ export default function AdminHubPage() {
                       <button
                         onClick={() => handleResetPassword(u.email)}
                         className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg font-semibold text-[11px] transition cursor-pointer"
-                        title="Réinitialiser le mot de passe à admin123"
+                        title="Réinitialiser le mot de passe"
                       >
                         Reset Password
                       </button>
@@ -738,7 +745,7 @@ export default function AdminHubPage() {
 
               <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-[11px] font-semibold flex items-center gap-2">
                 <Lock className="w-4 h-4 shrink-0" />
-                <span>Mot de passe par défaut : <b>admin123</b>. L'utilisateur devra obligatoirement le changer à sa première connexion.</span>
+                <span>Un mot de passe initial sera demandé et ne sera jamais affiché dans cette interface.</span>
               </div>
 
               <button
