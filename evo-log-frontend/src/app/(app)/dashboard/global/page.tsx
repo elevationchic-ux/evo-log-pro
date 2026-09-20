@@ -44,7 +44,7 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getRouteFromTCode } from '@/utils/tcodeLookup'
-import { financeAPI, transportAPI, adminAPI } from '@/lib/api-client'
+import { financeAPI, transportAPI } from '@/lib/api-client'
 
 export default function GlobalDashboard() {
   const router = useRouter()
@@ -54,72 +54,30 @@ export default function GlobalDashboard() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [lastSync, setLastSync] = useState(new Date().toLocaleTimeString())
 
-  // KPI State with rich default values
-  const [monthlyRevenue, setMonthlyRevenue] = useState('284.5M')
-  const [activeMissions, setActiveMissions] = useState('48')
-  const [activeVehicles, setActiveVehicles] = useState('82')
-  const [stockValue, setStockValue] = useState('14.2M$')
-  const [warehouseCapacity, setWarehouseCapacity] = useState('88.5%')
-  const [transitDeclarations, setTransitDeclarations] = useState('142')
-  const [qhseScore, setQhseScore] = useState('98.5%')
+  const [monthlyRevenue, setMonthlyRevenue] = useState<string | null>(null)
+  const [activeMissions, setActiveMissions] = useState<string | null>(null)
+  const [activeVehicles, setActiveVehicles] = useState<string | null>(null)
+  const [stockValue] = useState<string | null>(null)
+  const [warehouseCapacity] = useState<string | null>(null)
+  const [transitDeclarations] = useState<string | null>(null)
+  const [qhseScore] = useState<string | null>(null)
 
   // Sample Chart Data for Enterprise Performance (Week, Month, Year)
-  const [revenueDataWeek] = useState([
-    { day: 'Lun', revenue: 38.5, fretTons: 1200 },
-    { day: 'Mar', revenue: 42.0, fretTons: 1450 },
-    { day: 'Mer', revenue: 45.2, fretTons: 1600 },
-    { day: 'Jeu', revenue: 41.8, fretTons: 1380 },
-    { day: 'Ven', revenue: 52.4, fretTons: 1900 },
-    { day: 'Sam', revenue: 34.6, fretTons: 1100 },
-    { day: 'Dim', revenue: 30.0, fretTons: 950 },
-  ])
-
-  const [revenueDataMonth] = useState([
-    { day: 'Sem 1', revenue: 185.0, fretTons: 5200 },
-    { day: 'Sem 2', revenue: 210.5, fretTons: 6100 },
-    { day: 'Sem 3', revenue: 245.8, fretTons: 7400 },
-    { day: 'Sem 4', revenue: 284.5, fretTons: 8900 },
-  ])
-
-  const [revenueDataYear] = useState([
-    { day: 'Jan', revenue: 620, fretTons: 18000 },
-    { day: 'Fév', revenue: 710, fretTons: 21000 },
-    { day: 'Mar', revenue: 840, fretTons: 25000 },
-    { day: 'Avr', revenue: 790, fretTons: 23500 },
-    { day: 'Mai', revenue: 920, fretTons: 28000 },
-    { day: 'Juin', revenue: 1050, fretTons: 31000 },
-    { day: 'Juil', revenue: 1180, fretTons: 34500 },
-  ])
+  const revenueDataWeek: Array<{ day: string; revenue: number; fretTons: number }> = []
+  const revenueDataMonth: Array<{ day: string; revenue: number; fretTons: number }> = []
+  const revenueDataYear: Array<{ day: string; revenue: number; fretTons: number }> = []
 
   const activeChartData = period === 'year' ? revenueDataYear : period === 'month' ? revenueDataMonth : revenueDataWeek;
 
-  const [fleetStatusData] = useState([
-    { name: 'En Mission Active', count: 82, color: '#10b981' },
-    { name: 'En Entretien / Garages', count: 12, color: '#f59e0b' },
-    { name: 'En Attente au Dépôt', count: 18, color: '#6366f1' },
-  ])
-
-  const [warehouseZonesData] = useState([
-    { zone: 'MAG1 (Conteneurs)', occupancy: 92 },
-    { zone: 'MAG2 (Vrac Souterrain)', occupancy: 78 },
-    { zone: 'MAG3 (Frigo Séquentiel)', occupancy: 85 },
-    { zone: 'Quai Nord Acconage', occupancy: 95 },
-  ])
-
-  const [liveOperationLogs] = useState([
-    { id: 1, type: 'TRANSPORT', text: 'Camion LT-890-AA arrivé au Port de Kribi - e-POD signé avec succès', time: '10 min ago', status: 'SUCCESS' },
-    { id: 2, type: 'MAGASIN', text: 'Entrée en stock BL-4901 (400 Tonnes de Ciment ZLECAF) au MAG3', time: '25 min ago', status: 'INFO' },
-    { id: 3, type: 'TRANSIT', text: 'Déclaration Douane DEC-2026-908 Liquidée sans pénalité', time: '45 min ago', status: 'SUCCESS' },
-    { id: 4, type: 'QHSE', text: 'Inspection Sécurité Véhicule TR-402-BB validée (Note 100%)', time: '1h ago', status: 'INFO' },
-    { id: 5, type: 'FINANCE', text: 'Facture Client F-2026-088 acquittée (14.5M FCFA par Virement BGFI)', time: '2h ago', status: 'SUCCESS' },
-  ])
+  const fleetStatusData: Array<{ name: string; count: number; color: string }> = []
+  const warehouseZonesData: Array<{ zone: string; occupancy: number }> = []
+  const liveOperationLogs: Array<{ id: number; type: string; text: string; time: string; status: string }> = []
 
   const fetchRealData = useCallback(async () => {
     try {
-      const [finRes, transRes, dashRes] = await Promise.allSettled([
+      const [finRes, transRes] = await Promise.allSettled([
         financeAPI.getKpis(),
-        transportAPI.getKpis(),
-        adminAPI.getDashboardKpis()
+        transportAPI.getKpis()
       ])
 
       if (finRes.status === 'fulfilled' && finRes.value?.data?.chiffre_affaires) {
