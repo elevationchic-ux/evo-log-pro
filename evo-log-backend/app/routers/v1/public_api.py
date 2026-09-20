@@ -52,7 +52,12 @@ async def public_track_shipment(
 ):
     """Suivi public en temps réel d'un conteneur, dossier ou connaissement sans authentification requise"""
     # 1. Recherche conteneur
-    conteneur = db.query(Conteneur).filter(Conteneur.numero_conteneur.ilike(f"%{reference}%")).first()
+    normalized_reference = reference.strip().lower()
+    if not normalized_reference:
+        raise HTTPException(status_code=400, detail="La référence est obligatoire")
+    conteneur = db.query(Conteneur).filter(
+        func.lower(Conteneur.numero_conteneur) == normalized_reference
+    ).first()
     if conteneur:
         return {
             "type": "conteneur",
@@ -68,8 +73,8 @@ async def public_track_shipment(
     # 2. Recherche par connaissement BSC
     bsc = db.query(BSC).filter(
         or_(
-            BSC.numero_connaisse.ilike(f"%{reference}%"),
-            BSC.numero_bsc.ilike(f"%{reference}%")
+            func.lower(BSC.numero_connaisse) == normalized_reference,
+            func.lower(BSC.numero_bsc) == normalized_reference
         )
     ).first()
     if bsc:
@@ -85,7 +90,9 @@ async def public_track_shipment(
         }
 
     # 3. Recherche dossier transit
-    dossier = db.query(DossierTransit).filter(DossierTransit.numero_dossier.ilike(f"%{reference}%")).first()
+    dossier = db.query(DossierTransit).filter(
+        func.lower(DossierTransit.numero_dossier) == normalized_reference
+    ).first()
     if dossier:
         return {
             "type": "dossier_transit",
@@ -143,9 +150,8 @@ async def submit_public_contact(
     payload: PublicContactMessage,
     db: Session = Depends(get_db)
 ):
-    """Envoi d'un message public ou d'une demande de renseignement commercial"""
-    return {
-        "status": "received",
-        "message": f"Merci {payload.nom}, votre demande concernant '{payload.sujet}' a bien été enregistrée.",
-        "reference_ticket": f"PUB-{datetime.now().strftime('%Y%m%d%H%M%S')}"
-    }
+    """Envoi d'un message public ou d'une demande de renseignement commercial."""
+    raise HTTPException(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        detail="Le formulaire de contact n'est pas encore raccordé à une file de demandes persistante.",
+    )
