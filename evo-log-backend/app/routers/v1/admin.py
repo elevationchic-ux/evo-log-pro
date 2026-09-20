@@ -318,7 +318,7 @@ def reset_user_password(user_id: int, payload: Dict[str, Any], db: Session = Dep
 # ==============================================================================
 
 @router.get("/roles")
-def get_roles(db: Session = Depends(get_db)):
+def get_roles(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get all RBAC roles with assigned user count"""
     db_roles = db.query(Role).all()
     roles_dict = {r.name: r for r in db_roles}
@@ -330,7 +330,7 @@ def get_roles(db: Session = Depends(get_db)):
         nb_users = len(db_r.users) if db_r else 0
 
         results.append({
-            "id": db_r.id if db_r else (len(results) + 1),
+            "id": db_r.id if db_r else None,
             "name": name,
             "label": std["label"],
             "description": db_r.description if db_r and db_r.description else std["desc"],
@@ -358,7 +358,7 @@ def get_roles(db: Session = Depends(get_db)):
 
 
 @router.post("/roles", status_code=status.HTTP_201_CREATED)
-def create_role(payload: Dict[str, Any], db: Session = Depends(get_db)):
+def create_role(payload: Dict[str, Any], db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Create a new role"""
     name = payload.get("name", "").strip().upper().replace(" ", "_")
     description = payload.get("description", "")
@@ -501,15 +501,20 @@ def get_audit_logs(
 # ==============================================================================
 
 @router.get("/dashboard/global-kpis")
-def get_global_kpis(db: Session = Depends(get_db)):
+def get_global_kpis(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Consolidated platform KPIs for SaaS Super Administrator"""
-    companies_count = db.query(Company).count() or 4
-    active_companies = db.query(Company).filter(Company.is_active == True).count() or 4
-    users_count = db.query(User).count() or 87
-    active_users = db.query(User).filter(User.is_active == True).count() or 82
+    company_query = db.query(Company)
+    user_query = db.query(User)
+    if not current_user.is_superuser:
+        company_query = company_query.filter(Company.id == current_user.company_id)
+        user_query = user_query.filter(User.company_id == current_user.company_id)
+    companies_count = company_query.count()
+    active_companies = company_query.filter(Company.is_active == True).count()
+    users_count = user_query.count()
+    active_users = user_query.filter(User.is_active == True).count()
 
     # Storage estimation in GB
-    total_storage_mb = db.query(func.sum(Company.current_storage_mb)).scalar() or 18200
+    total_storage_mb = company_query.with_entities(func.sum(Company.current_storage_mb)).scalar() or 0
     storage_gb = round(total_storage_mb / 1024, 1)
 
     return {
@@ -518,15 +523,15 @@ def get_global_kpis(db: Session = Depends(get_db)):
         "users_total": users_count,
         "users_actifs": active_users,
         "storage_used_gb": storage_gb,
-        "system_uptime": "99.98%",
-        "active_sessions": 28,
-        "api_calls_today": 14250,
-        "security_threats_blocked": 4
+        "system_uptime": None,
+        "active_sessions": None,
+        "api_calls_today": None,
+        "security_threats_blocked": None
     }
 
 
 @router.get("/system-health")
-def get_system_health(db: Session = Depends(get_db)):
+def get_system_health(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Health check status and latencies of all micro-services and third-party bridges"""
     t0 = time.time()
     db_ok = True
@@ -542,56 +547,56 @@ def get_system_health(db: Session = Depends(get_db)):
     services = [
         {
             "service": "Passerelle API CADC ERP (FastAPI)",
-            "status": "OK",
-            "uptime": "99.98%",
-            "responseMs": 18,
+            "status": "OK" if db_ok else "DOWN",
+            "uptime": None,
+            "responseMs": db_latency,
             "lastCheck": now_str,
             "category": "CORE"
         },
         {
             "service": "Base de Données Principale PostgreSQL",
             "status": "OK" if db_ok else "DOWN",
-            "uptime": "99.99%",
+            "uptime": None,
             "responseMs": max(db_latency, 4),
             "lastCheck": now_str,
             "category": "STORAGE"
         },
         {
             "service": "Serveur de Stockage & Coffre GED Sécurisé",
-            "status": "OK",
-            "uptime": "99.92%",
-            "responseMs": 42,
+            "status": "NOT_CONFIGURED",
+            "uptime": None,
+            "responseMs": None,
             "lastCheck": now_str,
             "category": "STORAGE"
         },
         {
             "service": "Passerelle Douane SYDONIA / CAMCIS DGD",
-            "status": "OK",
-            "uptime": "98.50%",
-            "responseMs": 145,
+            "status": "NOT_CONFIGURED",
+            "uptime": None,
+            "responseMs": None,
             "lastCheck": now_str,
             "category": "INTEGRATION"
         },
         {
             "service": "Passerelle Mobile Money (MTN MoMo / Orange Money)",
-            "status": "OK",
-            "uptime": "99.70%",
-            "responseMs": 95,
+            "status": "NOT_CONFIGURED",
+            "uptime": None,
+            "responseMs": None,
             "lastCheck": now_str,
             "category": "PAYMENT"
         },
         {
             "service": "Serveur Télématique Flotte & GPS Live",
-            "status": "OK",
-            "uptime": "99.40%",
-            "responseMs": 68,
+            "status": "NOT_CONFIGURED",
+            "uptime": None,
+            "responseMs": None,
             "lastCheck": now_str,
             "category": "IOT"
         }
     ]
 
     return {
-        "status": "ALL_SYSTEMS_OPERATIONAL",
+        "status": "OPERATIONAL" if db_ok else "DEGRADED",
         "timestamp": now_str,
         "services": services
     }

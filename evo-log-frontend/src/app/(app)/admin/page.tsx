@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Users,
   ShieldCheck,
@@ -152,6 +152,31 @@ export default function AdminHubPage() {
   const [newTelephone, setNewTelephone] = useState('')
   const [newModulesAllowed, setNewModulesAllowed] = useState<string[]>(['transport', 'tracking', 'fuel-guard'])
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    adminAPI.getUsers()
+      .then((response: any) => {
+        if (cancelled) return
+        const records = Array.isArray(response) ? response : response?.items ?? []
+        setUsers(records.map((user: any) => ({
+          id: String(user.id),
+          email: user.email,
+          nom_complet: user.full_name ?? user.username,
+          role: user.role ?? 'OPERATEUR',
+          roles: user.roles ?? [],
+          departement: user.department ?? '',
+          telephone: user.phone,
+          is_active: Boolean(user.is_active),
+          must_change_password: Boolean(user.must_change_password),
+          created_at: user.created_at ?? '',
+        })))
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Impossible de charger les utilisateurs depuis l'API.")
+      })
+    return () => { cancelled = true }
+  }, [])
 
   const ALL_AVAILABLE_MODULES = [
     { id: 'transport', label: 'K-Transport' },
