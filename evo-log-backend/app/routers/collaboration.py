@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, Depends
 from typing import List, Optional, Dict
 from pydantic import BaseModel
 from datetime import datetime
 import asyncio
+from app.utils.tenant import get_current_tenant_context, TenantContext
 
-router = APIRouter(tags=["Collaboration"])
+router = APIRouter(tags=["Collaboration"], dependencies=[Depends(get_current_tenant_context)])
 
 class CollabMessage(BaseModel):
     room_id: str
@@ -20,90 +21,37 @@ class Room(BaseModel):
     participants: Optional[List[str]] = []
 
 # Gestion des rooms de collaboration
-_rooms: Dict[str, dict] = {
-    "transport-dispatch": {
-        "room_id": "transport-dispatch",
-        "nom": "Dispatch Transport",
-        "module": "TRANSPORT",
-        "participants": ["dispatcher-001", "chauffeur-001", "chauffeur-002"],
-        "created_at": datetime.utcnow().isoformat()
-    },
-    "magasin-wms": {
-        "room_id": "magasin-wms",
-        "nom": "Opérations WMS MAG3",
-        "module": "MAGASIN",
-        "participants": ["magasinier-001", "chef-magasin-001"],
-        "created_at": datetime.utcnow().isoformat()
-    },
-    "global-ops": {
-        "room_id": "global-ops",
-        "nom": "Opérations Globales Port Douala",
-        "module": "GENERAL",
-        "participants": ["admin-001", "dispatcher-001", "chef-magasin-001"],
-        "created_at": datetime.utcnow().isoformat()
-    }
-}
-
-_messages: Dict[str, List[dict]] = {
-    "transport-dispatch": [
-        {"id": 1, "user_id": "dispatcher-001", "user_nom": "Marie NGUEMA", "message": "Mission OT-2026-00401 confirmée. MVONDO Jean-Marc prend le départ à 06h00.", "type": "MISSION_UPDATE", "timestamp": datetime.utcnow().isoformat()},
-        {"id": 2, "user_id": "chauffeur-001", "user_nom": "Jean-Marc MVONDO", "message": "Chargement terminé. En route pour N'Djamena. ETA 16 août à 14h00.", "type": "TEXT", "timestamp": datetime.utcnow().isoformat()},
-    ],
-    "global-ops": [
-        {"id": 1, "user_id": "admin-001", "user_nom": "Administrateur", "message": "Bienvenue dans le centre opérationnel EVO-LOG Port de Douala.", "type": "SYSTEM", "timestamp": datetime.utcnow().isoformat()},
-    ]
-}
+_rooms: Dict[str, dict] = {}
+_messages: Dict[str, List[dict]] = {}
 
 # Connexions WebSocket par room
 _room_connections: Dict[str, List[WebSocket]] = {}
 
 @router.get("/rooms")
 def list_rooms():
-    return {"total": len(_rooms), "rooms": list(_rooms.values())}
+    raise HTTPException(status_code=501, detail="La persistance de la collaboration n'est pas encore implémentée.")
 
 @router.post("/rooms")
 def create_room(data: Room):
-    room = {**data.dict(), "created_at": datetime.utcnow().isoformat()}
-    _rooms[data.room_id] = room
-    _messages[data.room_id] = []
-    return room
+    raise HTTPException(status_code=501, detail="La persistance de la collaboration n'est pas encore implémentée.")
 
 @router.get("/rooms/{room_id}")
 def get_room(room_id: str):
-    room = _rooms.get(room_id)
-    if not room:
-        raise HTTPException(status_code=404, detail="Room non trouvée")
-    return room
+    raise HTTPException(status_code=501, detail="La persistance de la collaboration n'est pas encore implémentée.")
 
 @router.get("/rooms/{room_id}/messages")
 def get_room_messages(room_id: str, limit: int = 50):
-    if room_id not in _rooms:
-        raise HTTPException(status_code=404, detail="Room non trouvée")
-    msgs = _messages.get(room_id, [])
-    return {"room_id": room_id, "total": len(msgs), "messages": msgs[-limit:]}
+    raise HTTPException(status_code=501, detail="La persistance de la collaboration n'est pas encore implémentée.")
 
 @router.post("/rooms/{room_id}/messages")
 def send_message(room_id: str, data: CollabMessage):
-    if room_id not in _rooms:
-        raise HTTPException(status_code=404, detail="Room non trouvée")
-    if room_id not in _messages:
-        _messages[room_id] = []
-    msg_id = len(_messages[room_id]) + 1
-    msg = {
-        "id": msg_id,
-        "user_id": data.user_id,
-        "user_nom": data.user_nom,
-        "message": data.message,
-        "type": data.type,
-        "timestamp": datetime.utcnow().isoformat()
-    }
-    _messages[room_id].append(msg)
-    return msg
+    raise HTTPException(status_code=501, detail="La persistance de la collaboration n'est pas encore implémentée.")
 
 @router.websocket("/ws/{room_id}")
 async def websocket_collaboration(websocket: WebSocket, room_id: str, user_id: Optional[str] = None):
     """WebSocket temps réel pour collaboration par room"""
-    await websocket.accept()
+    await websocket.close(code=1008, reason="La collaboration persistante n'est pas encore implémentée.")
+    return
 
     if room_id not in _room_connections:
         _room_connections[room_id] = []
