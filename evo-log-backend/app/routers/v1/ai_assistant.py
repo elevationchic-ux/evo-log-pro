@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from datetime import datetime
+from app.models.user import User
+from app.utils.rbac import get_current_user
 
-router = APIRouter(tags=["AI Assistant"])
+router = APIRouter(tags=["AI Assistant"], dependencies=[Depends(get_current_user)])
 
 class ChatMessage(BaseModel):
     message: str
@@ -124,64 +126,28 @@ Pouvez-vous préciser votre demande ? Je peux rechercher dans tous les modules a
 
 @router.post("/chat")
 def chat_with_ai(data: ChatMessage):
-    global _next_msg_id
-    msg_id = f"MSG-{datetime.now().strftime('%Y%m%d')}-{_next_msg_id:04d}"
-    
-    response = _generate_ai_response(data.message, data.context or "GENERAL")
-    
-    entry = {
-        "id": msg_id,
-        "user_message": data.message,
-        "ai_response": response,
-        "context": data.context,
-        "timestamp": datetime.utcnow().isoformat(),
-        "tokens_used": len(data.message.split()) * 2,  # Estimation
-    }
-    _conversation_history.insert(0, entry)
-    _next_msg_id += 1
-    
-    return {
-        "id": msg_id,
-        "response": response,
-        "context": data.context,
-        "timestamp": entry["timestamp"],
-    }
+    raise HTTPException(
+        status_code=503,
+        detail="Le service d'assistant IA n'est pas configuré avec une source de données réelle.",
+    )
 
 @router.get("/history")
 def get_chat_history(user_id: Optional[str] = None, limit: int = 20):
-    results = _conversation_history[:limit]
-    return {"total": len(_conversation_history), "messages": results}
+    return {"total": 0, "messages": [], "available": False}
 
 @router.post("/feedback")
 def submit_feedback(data: FeedbackMessage):
-    return {
-        "message": "Feedback enregistré. Merci pour votre retour !",
-        "message_id": data.message_id,
-        "rating": data.rating
-    }
+    raise HTTPException(
+        status_code=501,
+        detail="La persistance des retours de l'assistant IA n'est pas encore implémentée.",
+    )
 
 @router.get("/suggestions")
 def get_ai_suggestions(module: Optional[str] = None):
     """Suggestions contextuelles basées sur l'état du système"""
-    suggestions = [
-        {"titre": "Planifier maintenance DLA-TRK-007", "priorite": "URGENTE", "module": "MAINTENANCE", "action": "Créer ordre réparation"},
-        {"titre": "Réapprovisionner pneus poids lourds", "priorite": "HAUTE", "module": "PROCUREMENT", "action": "Créer bon commande"},
-        {"titre": "Relancer facture BOLLORE 30j", "priorite": "HAUTE", "module": "FINANCE", "action": "Envoyer relance"},
-        {"titre": "Dossier CEMAC-2026-087 en attente paiement", "priorite": "NORMALE", "module": "TRANSIT", "action": "Suivre dossier"},
-    ]
-    if module:
-        suggestions = [s for s in suggestions if s["module"].upper() == module.upper()]
-    return {"suggestions": suggestions}
+    return {"suggestions": [], "available": False}
 
 @router.get("/kpis-summary")
 def ai_kpis_summary():
     """Résumé KPIs global pour l'assistant IA"""
-    return {
-        "score_sante_global": 87,
-        "alertes_critiques": 2,
-        "missions_en_cours": 12,
-        "stocks_critiques": 2,
-        "factures_impayees": 3,
-        "incidents_ouverts": 2,
-        "last_updated": datetime.utcnow().isoformat(),
-    }
+    return {"available": False, "last_updated": None}
