@@ -7,6 +7,7 @@ import {
   CheckCircle2, AlertCircle, ArrowLeft, Filter, Box
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 interface Manifeste {
   id: number;
@@ -68,15 +69,7 @@ export default function PortOperationsManifestsPage() {
       setIsModalOpen(false);
       fetchManifestes();
     } catch {
-      // Optimistic addition if backend is clean slate
-      const newM: Manifeste = {
-        id: Date.now(),
-        ...formData,
-        statut: 'RECEVABLE_DOUANE',
-        date_enregistrement: new Date().toISOString()
-      };
-      setManifestes(prev => [newM, ...prev]);
-      setIsModalOpen(false);
+      toast.error("Le manifeste n'a pas pu être créé par l'API.");
     } finally {
       setSubmitting(false);
     }
@@ -233,7 +226,7 @@ export default function PortOperationsManifestsPage() {
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <button
-                        onClick={() => alert(`Téléchargement de l'extrait officiel du manifeste ${m.numero_manifeste}`)}
+                        onClick={() => toast.error("Le téléchargement du manifeste n'est pas encore raccordé à l'API.")}
                         className="p-1.5 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition"
                         title="Télécharger l'extrait"
                       >

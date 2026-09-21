@@ -77,13 +77,6 @@ export default function DocumentsGedPage() {
 
       await apiClient.post('/api/v1/documents/documents/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
-      }).catch(() => {
-        return apiClient.post('/api/v1/documents/documents', {
-          nom: docName || selectedFile?.name || 'Document Numérisé',
-          type_document: docType,
-          reference_dossier: refDossier,
-          statut: 'VALIDE'
-        });
       });
 
       toast.success('Document téléversé et indexé dans la GED avec succès !');
@@ -245,7 +238,7 @@ export default function DocumentsGedPage() {
                     <td className="px-5 py-3.5 text-right">
                       <div className="flex justify-end gap-1.5">
                         <button
-                          onClick={() => toast.success(`Téléchargement de ${doc.nom}...`)}
+                          onClick={() => toast.error("Le téléchargement GED n'est pas encore raccordé à un endpoint de fichier.")}
                           className="p-1.5 rounded-lg border border-outline hover:bg-surface-container text-on-surface-variant"
                           title="Télécharger"
                         >

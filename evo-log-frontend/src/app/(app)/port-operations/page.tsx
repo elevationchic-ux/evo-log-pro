@@ -8,6 +8,7 @@ import {
   CheckCircle2, Clock, MapPin, ArrowUpRight
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 interface Escale {
   id: number;
@@ -78,14 +79,7 @@ export default function PortOperationsMainPage() {
       });
       fetchEscales();
     } catch {
-      // Optimistic addition if backend table is empty or fresh
-      const newEscale: Escale = {
-        id: Date.now(),
-        ...formData,
-        statut: 'PROGRAMMEE'
-      };
-      setEscales(prev => [newEscale, ...prev]);
-      setIsModalOpen(false);
+      toast.error("L'escale n'a pas pu être créée par l'API.");
     } finally {
       setSubmitting(false);
     }

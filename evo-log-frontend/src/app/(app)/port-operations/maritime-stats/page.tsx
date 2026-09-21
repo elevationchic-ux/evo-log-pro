@@ -6,6 +6,7 @@ import {
   BarChart3, ArrowLeft, Download, RefreshCw, Calendar,
   Ship, Anchor, Clock, ArrowUpRight, CheckCircle2
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function PortOperationsMaritimeStatsPage() {
   const [periode, setPeriode] = useState('CE_MOIS');
@@ -51,7 +52,7 @@ export default function PortOperationsMaritimeStatsPage() {
             <option value="KRIBI">Kribi - Port Mboro</option>
           </select>
           <button
-            onClick={() => alert('Export du rapport analytique maritime sous format Excel / PDF généré avec succès.')}
+            onClick={() => toast.error("L'export maritime n'est pas encore raccordé à un endpoint de génération de fichier.")}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium text-sm shadow-lg shadow-violet-600/30 transition"
           >
             <Download className="w-4 h-4" />

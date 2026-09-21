@@ -173,13 +173,13 @@ export default function ParcVehiculesDocumentsPage() {
 
               <div className="pt-2 border-t border-outline/50 flex justify-between items-center">
                 <button
-                  onClick={() => toast.success(`Ouverture du document ${doc.titre} en haute résolution...`)}
+                  onClick={() => toast.error("La consultation du document véhicule n'est pas encore raccordée à l'API.")}
                   className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
                 >
                   <Eye className="w-3.5 h-3.5" /> Voir
                 </button>
                 <button
-                  onClick={() => toast.success(`Téléchargement de ${doc.titre}`)}
+                  onClick={() => toast.error("Le téléchargement du document véhicule n'est pas encore raccordé à l'API.")}
                   className="p-1.5 hover:bg-surface-container rounded-lg text-on-surface-variant hover:text-on-surface"
                 >
                   <Download className="w-3.5 h-3.5" />

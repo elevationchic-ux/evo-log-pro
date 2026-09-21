@@ -6,6 +6,7 @@ import {
   Radio, ArrowLeft, RefreshCw, CheckCircle2, AlertTriangle,
   Server, ArrowRightLeft, Send, ShieldCheck
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface EDIExchange {
   id: number;
@@ -20,55 +21,10 @@ interface EDIExchange {
 
 export default function PortOperationsPortIntegrationPage() {
   const [loading, setLoading] = useState(false);
-  const [exchanges, setExchanges] = useState<EDIExchange[]>([
-    {
-      id: 1,
-      systeme: 'GUCE (Guichet Unique Commerce Extérieur)',
-      type_message: 'CUSCAR - Notification Manifeste',
-      reference_externe: 'GUCE-DLA-2026-8941',
-      direction: 'OUTBOUND',
-      statut: 'SUCCES',
-      horodatage: 'Aujourd\'hui à 11:42',
-      latence_ms: 120
-    },
-    {
-      id: 2,
-      systeme: 'CAMCIS (Direction Générale des Douanes)',
-      type_message: 'CUSDEC - Déclaration Marchandise',
-      reference_externe: 'CAMCIS-D6-44120',
-      direction: 'OUTBOUND',
-      statut: 'SUCCES',
-      horodatage: 'Aujourd\'hui à 10:15',
-      latence_ms: 240
-    },
-    {
-      id: 3,
-      systeme: 'Port Autonome de Douala (PAD - SIP)',
-      type_message: 'BERMAN - Demande Accostage Poste 14',
-      reference_externe: 'PAD-SIP-2026-092',
-      direction: 'INBOUND',
-      statut: 'SUCCES',
-      horodatage: 'Aujourd\'hui à 08:30',
-      latence_ms: 95
-    },
-    {
-      id: 4,
-      systeme: 'Port Autonome de Kribi (PAK - PCS)',
-      type_message: 'COPRAR - Ordre Déchargement',
-      reference_externe: 'PAK-PCS-7721',
-      direction: 'INBOUND',
-      statut: 'SUCCES',
-      horodatage: 'Hier à 19:10',
-      latence_ms: 110
-    }
-  ]);
+  const [exchanges] = useState<EDIExchange[]>([]);
 
   const handleTestPing = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      alert('Diagnostic de passerelle EDI terminé : Les liaisons avec le GUCE, CAMCIS Douanes, le PAD et le PAK sont 100% opérationnelles (Latence moyenne : 141 ms).');
-    }, 800);
+    toast.error("Le diagnostic EDI n'est pas disponible sans connecteurs configurés.");
   };
 
   return (

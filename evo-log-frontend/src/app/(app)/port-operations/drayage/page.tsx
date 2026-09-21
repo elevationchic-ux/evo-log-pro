@@ -6,6 +6,7 @@ import {
   Truck, Plus, Search, ArrowLeft, CheckCircle2,
   Clock, MapPin, Box, ArrowRight
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface TransfertDrayage {
   id: number;
@@ -34,27 +35,7 @@ export default function PortOperationsDrayagePage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const id = Date.now();
-    const newTransfert: TransfertDrayage = {
-      id,
-      numero_navette: `DRY-2026-${String(transferts.length + 1).padStart(4, '0')}`,
-      numero_conteneur: formData.numero_conteneur.toUpperCase(),
-      provenance_quai: formData.provenance_quai,
-      destination_mad: formData.destination_mad,
-      tracteur_parc: formData.tracteur_parc,
-      chauffeur_navette: formData.chauffeur_navette,
-      heure_chargement: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-      statut: 'EN_TRANSIT'
-    };
-    setTransferts(prev => [newTransfert, ...prev]);
-    setIsModalOpen(false);
-    setFormData({
-      numero_conteneur: '',
-      provenance_quai: 'Poste 14 (Terre-plein Sous-douane)',
-      destination_mad: 'Entrepôt MAD Bonabéri (Douala)',
-      tracteur_parc: 'Tracteur Kalmar TT-04',
-      chauffeur_navette: 'Kotto Paul (Chauffeur Parc)',
-    });
+    toast.error("Le transfert de drayage n'est pas encore raccordé à une API persistante.");
   };
 
   const filtered = transferts.filter(t =>
@@ -180,9 +161,7 @@ export default function PortOperationsDrayagePage() {
                     <td className="py-3.5 px-4 text-right">
                       {t.statut !== 'LIVRE_MAD' && (
                         <button
-                          onClick={() => {
-                            setTransferts(prev => prev.map(item => item.id === t.id ? { ...item, statut: 'LIVRE_MAD' } : item));
-                          }}
+                          onClick={() => toast.error("La confirmation de livraison MAD n'est pas encore raccordée à l'API.")}
                           className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs rounded border border-emerald-500/30 transition"
                         >
                           Confirmer MAD
