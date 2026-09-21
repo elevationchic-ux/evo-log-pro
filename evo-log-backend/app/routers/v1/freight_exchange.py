@@ -17,35 +17,10 @@ class FreightOfferSchema(BaseModel):
     offered_price_xaf: float = Field(..., example=2800000.0)
 
 @router.get("/offers")
-def list_freight_offers():
+def list_freight_offers(context: TenantContext = Depends(get_current_tenant_context)):
     """Retrieve public/partner carrier freight exchange offers."""
-    return {
-        "status": "success",
-        "offers": [
-            {
-                "id": "FRT-OFF-001",
-                "origin": "Port de Douala Quai 10",
-                "destination": "N'Djamena Tchad",
-                "cargo_type": "Conteneur 40ft HC",
-                "weight_tons": 28.5,
-                "offered_price_xaf": 2800000.0,
-                "publisher_name": "EVO-LOG Transports SARL",
-                "status": "AVAILABLE",
-                "created_at": datetime.utcnow().isoformat()
-            }
-        ]
-    }
+    return {"status": "unavailable", "offers": []}
 
 @router.post("/offers", status_code=status.HTTP_201_CREATED)
 def publish_freight_offer(payload: FreightOfferSchema, context: TenantContext = Depends(get_current_tenant_context)):
-    return {
-        "status": "success",
-        "message": "Freight offer published on Freight Exchange platform.",
-        "offer": {
-            "id": f"FRT-OFF-{datetime.utcnow().strftime('%M%S')}",
-            "organization_id": context.organization_id,
-            **payload.dict(),
-            "status": "AVAILABLE",
-            "created_at": datetime.utcnow().isoformat()
-        }
-    }
+    raise HTTPException(status_code=501, detail="La persistance Freight Exchange n'est pas encore implémentée.")
