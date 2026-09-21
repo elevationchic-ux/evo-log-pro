@@ -6,6 +6,7 @@ import {
   Ship, Plus, Search, ArrowLeft, CheckCircle2,
   Clock, Fuel, Users, Anchor, FileCheck
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ConsignmentService {
   id: number;
@@ -33,21 +34,7 @@ export default function PortOperationsVesselConsignmentPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const newService: ConsignmentService = {
-      id: Date.now(),
-      ...formData,
-      date_demande: new Date().toISOString(),
-      statut: 'COMMANDE'
-    };
-    setServices(prev => [newService, ...prev]);
-    setIsModalOpen(false);
-    setFormData({
-      navire_nom: '',
-      type_service: 'Pilotage & Remorquage',
-      prestataire: 'Boluda Towage Cameroun',
-      montant_estime_xaf: 1850000,
-      commentaires: 'Assistance entrée chenal et évitage poste 14',
-    });
+    toast.error("La persistance des services de consignation n'est pas encore raccordée à l'API.");
   };
 
   const filtered = services.filter(s =>
@@ -170,9 +157,7 @@ export default function PortOperationsVesselConsignmentPage() {
                     <td className="py-3.5 px-4 text-right">
                       {s.statut !== 'VALIDE_DEBOURS' && (
                         <button
-                          onClick={() => {
-                            setServices(prev => prev.map(item => item.id === s.id ? { ...item, statut: 'VALIDE_DEBOURS' } : item));
-                          }}
+                          onClick={() => toast.error("La clôture des débours n'est pas encore raccordée à l'API.")}
                           className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs rounded border border-emerald-500/30 transition"
                         >
                           Clôturer Débours

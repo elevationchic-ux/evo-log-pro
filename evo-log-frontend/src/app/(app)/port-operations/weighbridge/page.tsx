@@ -6,6 +6,7 @@ import {
   Scale, Plus, Search, ArrowLeft, Download, CheckCircle2,
   AlertTriangle, RefreshCw, Printer, FileCheck
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface PeseeVGM {
   id: number;
@@ -39,34 +40,7 @@ export default function PortOperationsWeighbridgePage() {
 
   const handleCreatePesee = (e: React.FormEvent) => {
     e.preventDefault();
-    const masse_vgm = Math.max(0, formData.poids_brut - formData.tare);
-    const id = Date.now();
-    const newPesee: PeseeVGM = {
-      id,
-      numero_ticket: `PB-2026-${String(pesees.length + 1).padStart(4, '0')}`,
-      numero_conteneur: formData.numero_conteneur.toUpperCase(),
-      type_conteneur: formData.type_conteneur,
-      poids_brut: formData.poids_brut,
-      tare: formData.tare,
-      masse_vgm,
-      tolerance_conforme: masse_vgm <= 30480, // Max gross payload
-      camion_immatriculation: formData.camion_immatriculation,
-      transporteur: formData.transporteur,
-      date_pesee: new Date().toISOString(),
-      operateur: 'Pont-Bascule Quai 14',
-      certificat_solas: `VGM-CMR-${id.toString().slice(-6)}`
-    };
-
-    setPesees(prev => [newPesee, ...prev]);
-    setIsModalOpen(false);
-    setFormData({
-      numero_conteneur: '',
-      type_conteneur: "40' High Cube",
-      poids_brut: 28500,
-      tare: 3800,
-      camion_immatriculation: 'LT 842 BC',
-      transporteur: 'Afric Heavy Logistics',
-    });
+    toast.error("La persistance des pesées VGM n'est pas encore raccordée à l'API.");
   };
 
   const filtered = pesees.filter(p =>
@@ -211,7 +185,7 @@ export default function PortOperationsWeighbridgePage() {
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <button
-                        onClick={() => alert(`Impression du Certificat VGM Officiel pour le conteneur ${p.numero_conteneur} (Ticket ${p.numero_ticket})`)}
+                        onClick={() => toast.error("La génération du certificat VGM n'est pas encore raccordée à l'API.")}
                         className="p-1.5 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition"
                         title="Imprimer Certificat VGM"
                       >
