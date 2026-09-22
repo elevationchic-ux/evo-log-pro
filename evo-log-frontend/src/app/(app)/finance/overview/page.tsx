@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, ArrowDownRight, ArrowUpRight, Banknote, DollarSign, RefreshCw, TrendingUp } from 'lucide-react';
 import { financeAPI } from '@/lib/api-client';
+import { Button } from '@/components/design-system/Button';
+import { EmptyStates } from '@/components/design-system/EmptyState';
 
 type FinanceKpis = {
   chiffre_affaires: number;
@@ -57,14 +59,28 @@ export default function FinanceOverviewPage() {
           <h1 className="text-2xl font-black text-white flex items-center gap-2"><DollarSign className="w-6 h-6 text-amber-400" /> Finance & Trésorerie OHADA</h1>
           <p className="text-xs text-slate-400 mt-1">Données persistées et filtrées par société</p>
         </div>
-        <button onClick={load} disabled={loading} className="px-3 py-2 rounded-xl border border-slate-800 text-xs text-slate-200">
-          <RefreshCw className={`inline mr-2 w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Actualiser
-        </button>
+        <Button
+          onClick={load}
+          disabled={loading}
+          variant="ghost"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Actualiser
+        </Button>
       </div>
 
       {error && <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 text-sm">{error}</div>}
-      {loading && <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/80 text-slate-400">Chargement des indicateurs financiers...</div>}
-      {!loading && !error && !kpis && <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/80 text-slate-400">Aucune donnée financière disponible.</div>}
+      {loading && <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/80 text-slate-400 flex items-center justify-center gap-2"><RefreshCw className="w-5 h-5 animate-spin" /> Chargement des indicateurs financiers...</div>}
+      {!loading && !error && !kpis && <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/80">
+        <EmptyStates.NoData
+          description="Aucune donnée financière disponible."
+          action={{
+            label: 'Actualiser',
+            onClick: load
+          }}
+        />
+      </div>}
 
       {kpis && <>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
