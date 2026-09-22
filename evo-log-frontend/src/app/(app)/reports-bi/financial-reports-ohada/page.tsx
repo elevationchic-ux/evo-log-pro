@@ -68,14 +68,11 @@ export default function ReportsBiFinancialReportsOhadaPage() {
   }, [selectedYear, selectedSite]);
 
   const handleExportPDF = () => {
-    toast.success(`Génération de la liasse fiscale SYSCOHADA ${selectedYear} au format PDF en cours...`);
-    setTimeout(() => {
-      window.print();
-    }, 500);
+    toast.error("La génération de la liasse fiscale SYSCOHADA n'est pas encore raccordée à l'API.");
   };
 
   const handleExportExcel = () => {
-    toast.success(`Export du grand livre & états financiers SYSCOHADA ${selectedYear} au format Excel généré.`);
+    toast.error("L'export des états financiers SYSCOHADA n'est pas encore raccordé à l'API.");
   };
 
   return (

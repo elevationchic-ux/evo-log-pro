@@ -43,12 +43,12 @@ export default function ReportsBiReportGeneratorPage() {
         generatedAt: new Date().toISOString(),
         rows: [] // Fresh system ready for real business data
       });
-      toast.success('Rapport analytique généré avec succès.');
+      toast.error("La génération de rapports analytiques n'est pas encore raccordée à l'API.");
     }, 600);
   };
 
   const handleExport = (format: string) => {
-    toast.success(`Export du rapport au format ${format} téléchargé.`);
+    toast.error(`L'export de rapports au format ${format} n'est pas encore raccordé à l'API.`);
   };
 
   return (

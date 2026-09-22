@@ -42,7 +42,7 @@ export default function MobileChauffeurMissionPage() {
         ARRIVE: '📍 Arrivée signalée  En attente de déchargement',
         LIVRE: '✅ Livraison confirmée  e-POD à signer'
       };
-      toast.success(msgs[next] ?? '');
+      toast.error("La mise à jour du statut de mission n'est pas encore raccordée à l'API.");
       if (next === 'EN_ROUTE') setKm(0);
       if (next === 'ARRIVE') setKm(MISSION.distance_km);
     }

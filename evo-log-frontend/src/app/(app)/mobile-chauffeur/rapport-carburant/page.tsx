@@ -32,7 +32,7 @@ export default function MobileChauffeurCarburantPage() {
     if (parseFloat(consoL100) > SEUIL_ALERTE_L100) {
       toast.warning(`⚠️ Consommation anormale détectée : ${consoL100} L/100km  Signal anti-siphonnage envoyé`);
     } else {
-      toast.success('✅ Rapport carburant transmis au dispatching');
+      toast.error("La transmission du rapport carburant n'est pas encore raccordée à l'API.");
     }
     setSubmitted(true);
   };

@@ -83,7 +83,7 @@ export default function ReportsBiComplianceAuditPage() {
   });
 
   const handleExport = () => {
-    toast.success('Piste d\'audit exportée avec succès au format CSV certifié.');
+    toast.error("L'export de la piste d'audit n'est pas encore raccordé à l'API.");
   };
 
   return (

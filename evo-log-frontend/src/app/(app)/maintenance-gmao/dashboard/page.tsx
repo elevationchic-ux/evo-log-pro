@@ -89,10 +89,10 @@ export default function MaintenanceGMAODashboardPage() {
           <p className="text-xs text-slate-400 mt-0.5">Préventive planifiée · Corrective OT · MTBF/MTTR · TCO · Certification MINTT/MINTP</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => toast.info('Créer Ordre de Travail corrective')} className="px-4 py-2.5 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center gap-2">
+          <button onClick={() => toast.error("La création d'ordres de travail n'est pas encore raccordée à l'API.")} className="px-4 py-2.5 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center gap-2">
             <Plus className="w-4 h-4" /> Ordre de Travail
           </button>
-          <button onClick={() => toast.info('Planifier maintenance préventive')} className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-lg">
+          <button onClick={() => toast.error("La planification de maintenance préventive n'est pas encore raccordée à l'API.")} className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-lg">
             <Calendar className="w-4 h-4" /> Planifier PM
           </button>
         </div>

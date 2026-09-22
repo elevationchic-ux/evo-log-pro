@@ -199,7 +199,7 @@ export default function TransitDouaneTaxationPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => toast.success('Simulation enregistrée dans les brouillons DUM')}
+                  onClick={() => toast.error("L'enregistrement des simulations DUM n'est pas encore raccordé à l'API.")}
                   className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-xs rounded-xl border border-amber-500/30 transition-colors"
                 >
                   Enregistrer

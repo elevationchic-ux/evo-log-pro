@@ -100,13 +100,13 @@ export default function AdminTenantIntegrationsPage() {
     setTestingId(connector.id);
     setTimeout(() => {
       setTestingId(null);
-      toast.success(`Connexion établie avec succès avec ${connector.name} (${Math.floor(Math.random() * 40 + 20)}ms)`);
+      toast.error(`Le test de connexion pour ${connector.name} n'est pas encore raccordé à l'API.`);
     }, 800);
   };
 
   const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(`Identifiants d'API pour ${selectedConnector?.name} mis à jour et scellés.`);
+    toast.error("La sauvegarde des identifiants d'API n'est pas encore raccordée à l'API.");
     setSelectedConnector(null);
     setApiKeyInput('');
   };
@@ -129,7 +129,7 @@ export default function AdminTenantIntegrationsPage() {
 
         <button
           onClick={() => {
-            toast.success('Vérification de tous les certificats d\'échange EDI en cours...');
+            toast.error("La vérification des certificats EDI n'est pas encore raccordée à l'API.");
           }}
           className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-primary text-on-primary hover:opacity-95 transition-opacity"
         >

@@ -60,7 +60,7 @@ export default function MobileChauffeurEPODPage() {
 
   const validateEPOD = () => {
     setSigned(true);
-    toast.success('✅ e-POD signé et transmis au dispatching EVO-LOG !');
+    toast.error("La transmission de l'e-POD n'est pas encore raccordée à l'API.");
   };
 
   return (
