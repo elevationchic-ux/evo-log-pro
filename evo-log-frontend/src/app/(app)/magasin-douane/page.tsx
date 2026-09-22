@@ -14,7 +14,7 @@ export default function MagasinDouanePage() {
   const [loading, setLoading] = useState(true);
   const [showEntrepotForm, setShowEntrepotForm] = useState(false);
   const [newEntrepot, setNewEntrepot] = useState({
-    code_entrepot: `EA-${Date.now().toString().slice(-5)}`,
+    code_entrepot: '',
     nom: '',
     regime_douanier: 'entrepôt_public_type_A',
     capacite_m3: '',

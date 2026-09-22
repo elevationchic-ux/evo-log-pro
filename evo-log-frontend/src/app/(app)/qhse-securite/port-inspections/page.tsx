@@ -6,6 +6,7 @@ import {
   ShieldCheck, Plus, Search, ArrowLeft, CheckCircle2,
   Calendar, MapPin, ClipboardList, AlertCircle
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface InspectionISPS {
   id: number;
@@ -35,13 +36,7 @@ export default function QhsePortInspectionsPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const newInsp: InspectionISPS = {
-      id: Date.now(),
-      reference: `ISP-ISPS-${String(inspections.length + 1).padStart(3, '0')}`,
-      ...formData,
-      date_inspection: new Date().toISOString().split('T')[0]
-    };
-    setInspections(prev => [newInsp, ...prev]);
+    toast.error("L'enregistrement des inspections port ISPS n'est pas encore raccordé à l'API.");
     setIsModalOpen(false);
   };
 

@@ -40,11 +40,11 @@ export default function AdminTenantAuditLogsPage() {
       const raw = res.data?.items || res.data || [];
       if (Array.isArray(raw) && raw.length > 0) {
         setLogs(raw.map((l: any) => ({
-          id: l.id?.toString() || Math.random().toString(),
-          timestamp: l.timestamp || l.created_at || new Date().toISOString(),
-          adminUser: l.user_email || 'admin@cadc-erp.cm',
-          action: l.action || 'MODIFICATION_PARAMETRES_SYSTEME',
-          category: (l.category || 'CONFIG') as any,
+          id: l.id?.toString(),
+          timestamp: l.timestamp || l.created_at,
+          adminUser: l.user_email,
+          action: l.action,
+          category: l.category,
           target: l.entity_id || 'PARAM_FISCAL_TVA',
           ip: l.ip_address || '192.168.1.5',
           status: l.status === 'FAILED' ? 'FAILED' : 'SUCCESS'

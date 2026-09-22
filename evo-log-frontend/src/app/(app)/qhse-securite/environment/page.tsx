@@ -6,6 +6,7 @@ import {
   Leaf, Plus, Search, ArrowLeft, CheckCircle2,
   Trash2, Droplets, Wind, FileText, AlertCircle
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface DechetEnvironnement {
   id: number;
@@ -32,14 +33,7 @@ export default function QhseEnvironmentPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const newD: DechetEnvironnement = {
-      id: Date.now(),
-      bordereau_numero: `BSDD-2026-${String(dechets.length + 1).padStart(4, '0')}`,
-      ...formData,
-      date_evacuation: new Date().toISOString().split('T')[0],
-      statut_conformite: 'VALIDE'
-    };
-    setDechets(prev => [newD, ...prev]);
+    toast.error("L'enregistrement des déchets environnementaux n'est pas encore raccordé à l'API.");
     setIsModalOpen(false);
   };
 

@@ -140,7 +140,7 @@ export default function EPodPage() {
             <div className="text-right">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">DATE</p>
               <p className="text-sm font-bold text-slate-700">
-                {format(new Date(mission.date_chargement_prevue || Date.now()), 'dd/MM/yyyy')}
+                {mission.date_chargement_prevue ? format(new Date(mission.date_chargement_prevue), 'dd/MM/yyyy') : '-'}
               </p>
             </div>
           </div>

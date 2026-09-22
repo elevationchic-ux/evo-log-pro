@@ -7,6 +7,7 @@ import {
   Activity, Play, CheckCircle2, Pause
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 interface OperationQuai {
   id: number;
@@ -68,13 +69,6 @@ export default function PortOperationsQuaiPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newOp: OperationQuai = {
-      id: Date.now(),
-      ...formData,
-      statut: 'EN_COURS',
-      mouvements_realises: 0,
-      heure_debut: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-    };
     try {
       await apiClient.post('/api/v1/acconage-avance/grues', {
         nom: formData.grue_assignee,
@@ -82,10 +76,11 @@ export default function PortOperationsQuaiPage() {
         capacite_tonnes: 65.0,
         en_service: true
       });
+      toast.success('Grue enregistrée avec succès');
+      fetchOperations();
     } catch {
-      // Optimistic
+      toast.error("L'enregistrement des opérations de quai n'est pas encore disponible.");
     }
-    setOperations(prev => [newOp, ...prev]);
     setIsModalOpen(false);
   };
 

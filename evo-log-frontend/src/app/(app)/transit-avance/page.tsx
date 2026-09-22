@@ -13,7 +13,7 @@ export default function TransitAvancePage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [newBureau, setNewBureau] = useState({
-    code_bureau: `BD-${Date.now().toString().slice(-4)}`,
+    code_bureau: '',
     nom: '',
     pays: 'Cameroun',
     type_bureau: 'principal',

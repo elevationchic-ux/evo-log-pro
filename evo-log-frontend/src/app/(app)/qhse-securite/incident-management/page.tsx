@@ -6,6 +6,7 @@ import {
   AlertTriangle, Plus, Search, ArrowLeft, CheckCircle2,
   Clock, ShieldAlert, FileText, UserCheck
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface IncidentInvestigation {
   id: number;
@@ -33,17 +34,7 @@ export default function QhseIncidentManagementPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const newInv: IncidentInvestigation = {
-      id: Date.now(),
-      code_incident: `CAPA-2026-${String(investigations.length + 1).padStart(3, '0')}`,
-      titre: formData.titre,
-      responsable_enquete: formData.responsable_enquete,
-      cause_racine: formData.cause_racine,
-      action_corrective: formData.action_corrective,
-      echeance: formData.echeance,
-      statut: 'PLAN_ACTION'
-    };
-    setInvestigations(prev => [newInv, ...prev]);
+    toast.error("L'enregistrement des investigations incidents n'est pas encore raccordé à l'API.");
     setIsModalOpen(false);
   };
 

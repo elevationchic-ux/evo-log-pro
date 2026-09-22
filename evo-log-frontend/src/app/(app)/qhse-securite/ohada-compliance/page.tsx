@@ -6,6 +6,7 @@ import {
   FileCheck, Plus, Search, ArrowLeft, CheckCircle2,
   Calendar, Scale, AlertCircle, BookOpen
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ConformiteItem {
   id: number;
@@ -59,16 +60,7 @@ export default function QhseOhadaCompliancePage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const newItem: ConformiteItem = {
-      id: Date.now(),
-      article_reference: formData.article_reference,
-      theme: formData.theme,
-      exigence_legale: formData.exigence_legale,
-      niveau_conformite: 'CONFORME',
-      derniere_revue: new Date().toISOString().split('T')[0],
-      actions_mises_en_oeuvre: formData.actions_mises_en_oeuvre
-    };
-    setItems(prev => [newItem, ...prev]);
+    toast.error("L'enregistrement des conformités OHADA n'est pas encore raccordé à l'API.");
     setIsModalOpen(false);
   };
 

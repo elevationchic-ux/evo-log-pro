@@ -43,9 +43,13 @@ export default function RemovalSlipPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!reference) {
+      toast.error('Veuillez renseigner la référence du bon d\'enlèvement.');
+      return;
+    }
     createMutation.mutate({
-      reference: reference || `BE-${Date.now().toString().slice(-6)}`,
-      client: clientName || 'Client Général',
+      reference,
+      client: clientName,
       description: cargoDesc,
       statut: 'EMIS'
     });

@@ -6,6 +6,7 @@ import {
   AlertTriangle, Plus, Search, ArrowLeft, CheckCircle2,
   FileText, Camera, ShieldAlert, Clock
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface QuaiIncident {
   id: number;
@@ -38,21 +39,7 @@ export default function PortOperationsIncidentsPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const id = Date.now();
-    const newInc: QuaiIncident = {
-      id,
-      numero_dossier: `AVR-2026-${String(incidents.length + 1).padStart(4, '0')}`,
-      numero_conteneur: formData.numero_conteneur.toUpperCase(),
-      type_incident: formData.type_incident,
-      navire_concerne: formData.navire_concerne,
-      lieu_exact: formData.lieu_exact,
-      date_incident: new Date().toISOString(),
-      gravite: formData.gravite,
-      statut: 'DECLARE',
-      montant_dommage_estime_xaf: formData.montant_dommage_estime_xaf,
-      description: formData.description
-    };
-    setIncidents(prev => [newInc, ...prev]);
+    toast.error("L'enregistrement des incidents de quai n'est pas encore raccordé à l'API.");
     setIsModalOpen(false);
     setFormData({
       type_incident: 'Avarie de Conteneur (Choc / Déformation)',

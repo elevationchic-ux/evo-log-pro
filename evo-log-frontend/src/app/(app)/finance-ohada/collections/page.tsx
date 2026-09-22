@@ -42,12 +42,12 @@ export default function FinanceOhadaCollections() {
             id: String(item.client_id || idx + 1),
             client: item.client_nom || item.client || 'Client',
             totalDue: parseFloat(item.total_solde || 0),
-            current: parseFloat(item.solde_courant || item.total_solde * 0.4 || 0),
-            days30: parseFloat(item.days30 || item.total_solde * 0.3 || 0),
-            days60: parseFloat(item.days60 || item.total_solde * 0.2 || 0),
-            days90Plus: parseFloat(item.days90Plus || item.total_solde * 0.1 || 0),
-            dso: item.dso || Math.floor(Math.random() * 40 + 20),
-            riskLevel: item.risk_level || (item.total_solde > 10000000 ? 'CRITIQUE' : 'FAIBLE')
+            current: parseFloat(item.solde_courant || 0),
+            days30: parseFloat(item.days30 || 0),
+            days60: parseFloat(item.days60 || 0),
+            days90Plus: parseFloat(item.days90Plus || 0),
+            dso: item.dso || 0,
+            riskLevel: item.risk_level
           })));
         } else {
           setData([

@@ -13,12 +13,12 @@ export default function MaintenanceGMAOPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [newOrdre, setNewOrdre] = useState({
-    numero_ordre: `OM-${Date.now().toString().slice(-6)}`,
+    numero_ordre: '',
     equipement_id: '',
     type_maintenance: 'préventive',
     priorite: 'normale',
     description: '',
-    date_planifiee: new Date().toISOString().slice(0, 16),
+    date_planifiee: '',
   });
 
   const fetchData = useCallback(async () => {

@@ -279,7 +279,7 @@ export default function FournisseursPage() {
                   <input
                     name="code"
                     required
-                    defaultValue={editingFournisseur?.code || `FOURN-${Date.now().toString().slice(-4)}`}
+                    defaultValue={editingFournisseur?.code || ''}
                     className="w-full px-3 py-2 border rounded-xl"
                   />
                 </div>

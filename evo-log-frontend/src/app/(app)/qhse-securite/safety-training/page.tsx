@@ -6,6 +6,7 @@ import {
   Users, Plus, Search, ArrowLeft, CheckCircle2,
   Calendar, Award, AlertTriangle, Shield
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface HabilitationSecurite {
   id: number;
@@ -34,12 +35,7 @@ export default function QhseSafetyTrainingPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const newForm: HabilitationSecurite = {
-      id: Date.now(),
-      ...formData,
-      statut: 'VALIDE'
-    };
-    setFormations(prev => [newForm, ...prev]);
+    toast.error("L'enregistrement des habilitations sécurité n'est pas encore raccordé à l'API.");
     setIsModalOpen(false);
   };
 

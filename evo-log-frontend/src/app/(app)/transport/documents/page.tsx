@@ -6,6 +6,7 @@ import {
   FileText, Plus, Search, ArrowLeft, Download, CheckCircle2,
   Printer, Eye, Upload, Filter
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface DocumentTransport {
   id: number;
@@ -31,17 +32,7 @@ export default function TransportDocumentsPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const id = Date.now();
-    const newDoc: DocumentTransport = {
-      id,
-      reference: `DOC-TRN-${String(documents.length + 1).padStart(4, '0')}`,
-      type_document: formData.type_document,
-      mission_numero: formData.mission_numero,
-      client: formData.client,
-      date_emission: new Date().toLocaleDateString('fr-FR'),
-      statut: 'EMIS'
-    };
-    setDocuments(prev => [newDoc, ...prev]);
+    toast.error("La création de documents de transport n'est pas encore raccordée à l'API.");
     setIsModalOpen(false);
   };
 

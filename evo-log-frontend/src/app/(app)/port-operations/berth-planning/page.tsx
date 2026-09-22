@@ -6,6 +6,7 @@ import {
   Clock, Plus, Search, ArrowLeft, Ship, CheckCircle2,
   Calendar, MapPin, Anchor, RefreshCw
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface BerthAllocation {
   id: number;
@@ -38,12 +39,7 @@ export default function PortOperationsBerthPlanningPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const newBerth: BerthAllocation = {
-      id: Date.now(),
-      ...formData,
-      statut: 'OCCUPE'
-    };
-    setBerths(prev => [newBerth, ...prev]);
+    toast.error("L'allocation de poste à quai n'est pas encore raccordée à l'API.");
     setIsModalOpen(false);
     setFormData({
       poste_quai: 'Poste 14 (Quai Conteneurs)',

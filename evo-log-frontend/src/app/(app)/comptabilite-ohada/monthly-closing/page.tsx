@@ -50,9 +50,9 @@ export default function ComptabiliteOhadaMonthlyClosing() {
         status,
         closedAt,
         closedBy,
-        entriesCount: idx <= currentMonthIdx ? Math.floor(Math.random() * 800 + 400) : 0,
-        amortizationsDone: idx < currentMonthIdx,
-        provisionsDone: idx < currentMonthIdx
+        entriesCount: 0,
+        amortizationsDone: false,
+        provisionsDone: false
       };
     });
   });

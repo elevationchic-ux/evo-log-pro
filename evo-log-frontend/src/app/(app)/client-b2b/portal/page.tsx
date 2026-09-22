@@ -49,18 +49,7 @@ export default function ClientB2bPortalPage() {
       return;
     }
 
-    const created: B2BPortalUser = {
-      id: Date.now().toString(),
-      nomEntreprise: inviteForm.nomEntreprise,
-      contactEmail: inviteForm.contactEmail,
-      nomContact: inviteForm.nomContact || 'Correspondant Logistique',
-      statut: 'ACTIF',
-      dossiersSuivis: 0,
-      dateInvitation: new Date().toISOString().split('T')[0],
-      dernierAcces: 'Jamais'
-    };
-
-    setPortalUsers([created, ...portalUsers]);
+    toast.error("L'invitation au portail B2B n'est pas encore raccordée à l'API.");
     setShowInviteModal(false);
     setInviteForm({
       nomEntreprise: '',

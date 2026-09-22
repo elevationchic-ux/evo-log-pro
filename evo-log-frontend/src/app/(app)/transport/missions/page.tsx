@@ -61,7 +61,8 @@ export default function MissionsPage() {
 
       // Date
       if (dateFilter) {
-        const mDate = new Date(m.date_creation || Date.now()).toISOString().split('T')[0];
+        if (!m.date_creation) return false;
+        const mDate = new Date(m.date_creation).toISOString().split('T')[0];
         if (mDate !== dateFilter) return false;
       }
 
@@ -177,7 +178,7 @@ export default function MissionsPage() {
                     <div className="font-black text-slate-900">{mission.reference}</div>
                     <div className="text-xs font-bold text-slate-400 flex items-center gap-1 mt-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {new Date(mission.date_creation || Date.now()).toLocaleDateString()}
+                      {mission.date_creation ? new Date(mission.date_creation).toLocaleDateString() : '-'}
                     </div>
                   </td>
                   <td className="px-6 py-4">

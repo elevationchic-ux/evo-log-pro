@@ -46,12 +46,12 @@ export default function ReportsBiComplianceAuditPage() {
       const raw = res.data?.items || res.data || [];
       if (Array.isArray(raw) && raw.length > 0) {
         setLogs(raw.map((l: any) => ({
-          id: l.id?.toString() || Math.random().toString(),
-          timestamp: l.timestamp || l.created_at || new Date().toISOString(),
-          user_email: l.user_email || l.user || 'admin@cadc-erp.cm',
-          user_role: l.user_role || l.role || 'DG / Direction',
-          action: l.action || 'CONSULTATION_DOSSIER',
-          module: l.module || 'TRANSIT',
+          id: l.id?.toString(),
+          timestamp: l.timestamp || l.created_at,
+          user_email: l.user_email || l.user,
+          user_role: l.user_role || l.role,
+          action: l.action,
+          module: l.module,
           entity_id: l.entity_id || l.target || 'DUM-2025-001',
           ip_address: l.ip_address || '192.168.1.10',
           status: l.status || 'SUCCESS',

@@ -8,6 +8,7 @@ import {
   ArrowUpRight, Clock, HeartHandshake, Leaf
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 interface IncidentQHSE {
   id: number;
@@ -36,18 +37,7 @@ export default function QhseSecuriteDashboardPage() {
 
   const handleCreateIncident = (e: React.FormEvent) => {
     e.preventDefault();
-    const newInc: IncidentQHSE = {
-      id: Date.now(),
-      reference: `INC-2026-${String(incidents.length + 1).padStart(4, '0')}`,
-      type_evenement: formData.type_evenement,
-      lieu: formData.lieu,
-      date_heure: new Date().toLocaleString('fr-FR'),
-      gravite: formData.gravite,
-      arret_travail: formData.arret_travail,
-      statut: 'EN_COURS',
-      description: formData.description
-    };
-    setIncidents(prev => [newInc, ...prev]);
+    toast.error("L'enregistrement des incidents QHSE n'est pas encore raccordé à l'API.");
     setIsModalOpen(false);
   };
 

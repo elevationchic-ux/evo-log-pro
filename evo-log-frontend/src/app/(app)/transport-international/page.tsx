@@ -13,7 +13,7 @@ export default function TransportInternationalPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [newOrdre, setNewOrdre] = useState({
-    numero_ordre: `OTI-${Date.now().toString().slice(-5)}`,
+    numero_ordre: '',
     mode_transport: 'routier',
     pays_depart: 'Cameroun',
     pays_destination: 'Tchad',

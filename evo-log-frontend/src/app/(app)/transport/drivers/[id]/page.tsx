@@ -176,7 +176,7 @@ export default function DriverProfilePage() {
                           </span>
                         </div>
                         <span className="text-xs font-bold text-slate-400">
-                          {new Date(mission.date_creation || Date.now()).toLocaleDateString()}
+                          {mission.date_creation ? new Date(mission.date_creation).toLocaleDateString() : '-'}
                         </span>
                       </div>
                       
