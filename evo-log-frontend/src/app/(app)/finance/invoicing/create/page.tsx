@@ -32,22 +32,14 @@ export default function CreateInvoicePage() {
 
   // Form State
   const [clientId, setClientId] = useState('');
-  const [numeroFacture, setNumeroFacture] = useState(`FAC-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`);
-  const [dateEmission, setDateEmission] = useState(new Date().toISOString().slice(0, 10));
-  const [dateEcheance, setDateEcheance] = useState(new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10));
+  const [numeroFacture, setNumeroFacture] = useState('');
+  const [dateEmission, setDateEmission] = useState('');
+  const [dateEcheance, setDateEcheance] = useState('');
   const [modeReglement, setModeReglement] = useState('VIREMENT');
   const [referenceDossier, setReferenceDossier] = useState('');
   const [conditionsPaiement, setConditionsPaiement] = useState('Paiement à 30 jours fin de mois');
 
-  const [lines, setLines] = useState<InvoiceLine[]>([
-    {
-      id: '1',
-      designation: 'Prestation Transit & Dédouanement Conteneur 40ft',
-      quantite: 1,
-      prix_unitaire_ht: 350000,
-      taux_tva: 19.25
-    }
-  ]);
+  const [lines, setLines] = useState<InvoiceLine[]>([]);
 
   useEffect(() => {
     tiersAPI.getTiers()

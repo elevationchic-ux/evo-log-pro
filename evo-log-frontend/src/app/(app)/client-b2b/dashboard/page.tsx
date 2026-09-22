@@ -59,16 +59,16 @@ export default function ClientB2bDashboardPage() {
       const raw = res.data?.items || res.data || [];
       if (Array.isArray(raw) && raw.length > 0) {
         setOpportunities(raw.map((c: any) => ({
-          id: c.id?.toString() || Math.random().toString(),
-          nomEntreprise: c.raison_sociale || c.nom || 'Importateur CEMAC',
-          contactNom: c.contact_nom || 'Responsable Supply Chain',
-          telephone: c.telephone || '+237 600 00 00 00',
-          email: c.email || 'client@domain.cm',
-          typeService: 'TRANSIT_DOUANE',
-          montantEstime: Number(c.chiffre_affaires) || 15000000,
-          etape: 'GAGNE',
-          dateCreation: c.created_at || '2025-01-15',
-          responsableCommercial: 'Direction Commerciale'
+          id: c.id?.toString(),
+          nomEntreprise: c.raison_sociale || c.nom,
+          contactNom: c.contact_nom,
+          telephone: c.telephone,
+          email: c.email,
+          typeService: c.type_service,
+          montantEstime: Number(c.montant_estime),
+          etape: c.etape,
+          dateCreation: c.created_at,
+          responsableCommercial: c.responsable_commercial
         })));
       } else {
         setOpportunities([]);
@@ -92,20 +92,7 @@ export default function ClientB2bDashboardPage() {
       return;
     }
 
-    const created: B2BOpportunity = {
-      id: Date.now().toString(),
-      nomEntreprise: form.nomEntreprise,
-      contactNom: form.contactNom,
-      telephone: form.telephone,
-      email: form.email,
-      typeService: form.typeService as any,
-      montantEstime: Number(form.montantEstime) || 0,
-      etape: 'PROSPECTION',
-      dateCreation: new Date().toISOString().split('T')[0],
-      responsableCommercial: form.responsableCommercial
-    };
-
-    setOpportunities([created, ...opportunities]);
+    toast.error("L'ajout de prospects commerciaux n'est pas encore raccordé à l'API.");
     setShowAddModal(false);
     setForm({
       nomEntreprise: '',
@@ -116,7 +103,6 @@ export default function ClientB2bDashboardPage() {
       montantEstime: '',
       responsableCommercial: 'Équipe Commerciale CADC'
     });
-    toast.error("L'ajout de prospects commerciaux n'est pas encore raccordé à l'API.");
   };
 
   const filteredOpps = opportunities.filter(o => {

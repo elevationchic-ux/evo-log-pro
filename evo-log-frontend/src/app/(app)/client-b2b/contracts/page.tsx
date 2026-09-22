@@ -40,8 +40,8 @@ export default function ClientB2bContractsPage() {
     reference: '',
     clientNom: '',
     typeContrat: 'TRANSIT_CADRE',
-    dateDebut: new Date().toISOString().split('T')[0],
-    dateFin: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
+    dateDebut: '',
+    dateFin: '',
     conditionPaiement: '30 jours fin de mois',
     franchiseSurestarieJours: 14,
     valeurAnnuelleEstimee: ''
@@ -54,32 +54,18 @@ export default function ClientB2bContractsPage() {
       return;
     }
 
-    const created: B2BContract = {
-      id: Date.now().toString(),
-      reference: form.reference.toUpperCase(),
-      clientNom: form.clientNom,
-      typeContrat: form.typeContrat as any,
-      dateDebut: form.dateDebut,
-      dateFin: form.dateFin,
-      conditionPaiement: form.conditionPaiement,
-      franchiseSurestarieJours: Number(form.franchiseSurestarieJours) || 10,
-      statut: 'ACTIF',
-      valeurAnnuelleEstimee: Number(form.valeurAnnuelleEstimee) || 0
-    };
-
-    setContracts([created, ...contracts]);
+    toast.error("L'enregistrement des contrats-cadre n'est pas encore raccordé à l'API.");
     setShowAddModal(false);
     setForm({
       reference: '',
       clientNom: '',
       typeContrat: 'TRANSIT_CADRE',
-      dateDebut: new Date().toISOString().split('T')[0],
-      dateFin: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
+      dateDebut: '',
+      dateFin: '',
       conditionPaiement: '30 jours fin de mois',
       franchiseSurestarieJours: 14,
       valeurAnnuelleEstimee: ''
     });
-    toast.error("L'enregistrement des contrats-cadre n'est pas encore raccordé à l'API.");
   };
 
   const filteredContracts = contracts.filter(c => 

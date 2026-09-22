@@ -85,19 +85,7 @@ export default function ClientB2bAfterSalesPage() {
       return;
     }
 
-    const created: B2BClaim = {
-      id: Date.now().toString(),
-      reference: form.reference || `REC-${Date.now().toString().slice(-4)}`,
-      clientNom: form.clientNom,
-      typeLitige: form.typeLitige as any,
-      priorite: form.priorite as any,
-      description: form.description,
-      statut: 'OUVERT',
-      dateDeclaration: new Date().toISOString().split('T')[0],
-      montantReclame: Number(form.montantReclame) || 0
-    };
-
-    setClaims([created, ...claims]);
+    toast.error("L'ouverture des dossiers de litige n'est pas encore raccordée à l'API.");
     setShowAddModal(false);
     setForm({
       reference: '',
@@ -107,7 +95,6 @@ export default function ClientB2bAfterSalesPage() {
       description: '',
       montantReclame: ''
     });
-    toast.error("L'ouverture des dossiers de litige n'est pas encore raccordée à l'API.");
   };
 
   const filteredClaims = claims.filter(c => {

@@ -54,16 +54,16 @@ export default function ClientB2bCrmPage() {
       const raw = res.data?.items || res.data || [];
       if (Array.isArray(raw) && raw.length > 0) {
         setContacts(raw.map((c: any) => ({
-          id: c.id?.toString() || Math.random().toString(),
-          nomEntreprise: c.raison_sociale || c.nom || 'Client Partenaire',
-          contactNom: c.contact_nom || 'Responsable Expéditions',
-          poste: c.poste || 'Directeur des Opérations',
-          telephone: c.telephone || '+237 233 00 00 00',
-          email: c.email || 'contact@client.cm',
-          ville: c.ville || 'Douala',
-          pays: c.pays || 'Cameroun',
-          noteSla: 5,
-          dernierEchange: 'Récemment'
+          id: c.id?.toString(),
+          nomEntreprise: c.raison_sociale || c.nom,
+          contactNom: c.contact_nom,
+          poste: c.poste,
+          telephone: c.telephone,
+          email: c.email,
+          ville: c.ville,
+          pays: c.pays,
+          noteSla: c.note_sla,
+          dernierEchange: c.dernier_echange
         })));
       } else {
         setContacts([]);
@@ -87,20 +87,7 @@ export default function ClientB2bCrmPage() {
       return;
     }
 
-    const created: B2BContact = {
-      id: Date.now().toString(),
-      nomEntreprise: form.nomEntreprise,
-      contactNom: form.contactNom,
-      poste: form.poste,
-      telephone: form.telephone,
-      email: form.email,
-      ville: form.ville,
-      pays: form.pays,
-      noteSla: 5,
-      dernierEchange: 'Aujourd\'hui'
-    };
-
-    setContacts([created, ...contacts]);
+    toast.error("L'ajout de contacts CRM n'est pas encore raccordé à l'API.");
     setShowAddModal(false);
     setForm({
       nomEntreprise: '',
@@ -111,7 +98,6 @@ export default function ClientB2bCrmPage() {
       ville: 'Douala',
       pays: 'Cameroun'
     });
-    toast.error("L'ajout de contacts CRM n'est pas encore raccordé à l'API.");
   };
 
   const filteredContacts = contacts.filter(c => 

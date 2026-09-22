@@ -260,36 +260,7 @@ export default function AnnuairePrestatairesPage() {
       });
     }
 
-    const newP: PrestataireItem = {
-      id: prestataires.length + 1,
-      code: `PREST-${newSpecialite.substring(0, 3)}-${Math.floor(Math.random() * 9000 + 1000)}`,
-      raison_sociale: newRaisonSociale,
-      sigle: newSigle || undefined,
-      logo_url: newLogoUrl || undefined,
-      type_entite: newTypeEntite,
-      specialite: newSpecialite,
-      ville: newVille,
-      tax_id: newNif || 'En cours d attribution',
-      rccm: newRccm || undefined,
-      agrement_portuaire: newAgrement || `PAD-AGR-${new Date().getFullYear()}-${Math.floor(Math.random() * 800 + 100)}`,
-      est_homologue: true,
-      statut_agrement: 'VALIDE',
-      contact_nom: newContact,
-      contact_telephone: newTel,
-      telephone_astreinte_24h: newTelAstreinte || undefined,
-      contact_email: newEmail,
-      specialites_panne: newTypeEntite === 'GARAGE' ? ['Moteur / Culasse', 'Pneumatique PL', 'Remorquage Lourd 24/7'] : undefined,
-      forfaits_proposes: forfaits.length > 0 ? forfaits : undefined,
-      vehicules_disponibles: vehicules.length > 0 ? vehicules : undefined,
-      note_globale: 4.9,
-      nb_missions_realisees: 0,
-      taux_ponctualite: 98.5,
-      taux_conformite_qhse: 100.0,
-      devise: 'XAF',
-      conditions_reglement: 'Virement 30j fin de mois'
-    };
-
-    setPrestataires([newP, ...prestataires]);
+    toast.error("L'enregistrement des prestataires n'est pas encore raccordé à l'API.");
     setIsNewPrestataireModalOpen(false);
     setNewRaisonSociale('');
     setNewSigle('');
