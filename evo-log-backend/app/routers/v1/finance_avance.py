@@ -176,37 +176,22 @@ def pointer_operation(
 ):
     """Pointer une ligne de relevé bancaire avec une écriture comptable"""
     ecriture_id = data.get("ecriture_id")
-    montant = data.get("montant", 0.0)
     return {
-        "status": "success",
-        "message": f"Opération {ecriture_id} pointée avec succès pour un montant de {montant} XAF",
-        "ecart": 0.0,
-        "date_rapprochement": date.today().isoformat()
+        "status": "unavailable",
+        "message": f"Le rapprochement bancaire n'est pas encore configuré pour l'écriture {ecriture_id}",
+        "ecart": None,
+        "date_rapprochement": None
     }
 
 
-@router.post("/creances/relancer")
+@router.post("/creances/relancer", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def relancer_client(
     data: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Émettre une relance graduée (Niveau 1, Niveau 2, Niveau 3 avec blocage)"""
-    client_id = data.get("client_id")
-    client_nom = data.get("client_nom", "Client")
-    niveau = data.get("niveau", 1)
-    
-    actions = {
-        1: "Rappel courtois (Email + SMS)",
-        2: "Mise en demeure avec calcul d'intérêts moratoires",
-        3: "Mise en contentieux & Blocage automatique des bons d'enlèvement conteneurs au port"
-    }
-    
-    return {
-        "status": "success",
-        "client_id": client_id,
-        "client_nom": client_nom,
-        "niveau_relance": niveau,
-        "action_menee": actions.get(niveau, "Rappel standard"),
-        "date_envoi": datetime.utcnow().isoformat()
-    }
+    raise HTTPException(
+        status_code=501,
+        detail="Le système de relance clients n'est pas encore configuré pour ce tenant."
+    )
