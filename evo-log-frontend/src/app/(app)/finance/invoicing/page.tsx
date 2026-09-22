@@ -20,6 +20,9 @@ import {
 import { financeAPI } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { CompanyDocumentHeader, CompanyDocumentFooter } from '@/components/documents/CompanyDocumentHeader';
+import { Button } from '@/components/design-system/Button';
+import { Input } from '@/components/design-system/Input';
+import { EmptyStates } from '@/components/design-system/EmptyState';
 
 export default function InvoicingPage() {
   const router = useRouter();

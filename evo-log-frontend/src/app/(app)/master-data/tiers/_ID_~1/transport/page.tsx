@@ -97,7 +97,7 @@ export default function ClientTransportHistoryPage() {
                   <td className="px-6 py-4">
                     <div className="font-black text-slate-900">OT-{mission.id.toString().padStart(4, '0')}</div>
                     <div className="text-xs text-slate-500 font-medium flex items-center gap-1 mt-1">
-                      <Calendar className="w-3 h-3" /> {new Date(mission.date_creation || Date.now()).toLocaleDateString()}
+                      <Calendar className="w-3 h-3" /> {mission.date_creation ? new Date(mission.date_creation).toLocaleDateString() : '-'}
                     </div>
                   </td>
                   <td className="px-6 py-4">
