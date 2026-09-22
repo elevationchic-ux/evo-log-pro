@@ -64,7 +64,7 @@ export default function TransportFlotteTrackingEPOD() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => toast.success('Bordereaux e-POD certifiés exportés en archive PDF')}
+            onClick={() => toast.error("L'export des dossiers e-POD n'est pas encore raccordé à l'API.")}
             className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
           >
             <Download className="w-4 h-4" /> Exporter Dossiers e-POD
@@ -136,7 +136,7 @@ export default function TransportFlotteTrackingEPOD() {
                   </td>
                   <td className="py-3.5 px-4 text-center">
                     <button
-                      onClick={() => toast.success(`Affichage du procès-verbal e-POD ${r.missionCode}`)}
+                      onClick={() => toast.error("L'affichage des procès-verbaux e-POD n'est pas encore raccordé à l'API.")}
                       className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-blue-300 font-bold text-[10px] rounded-lg border border-slate-700"
                     >
                       Consulter

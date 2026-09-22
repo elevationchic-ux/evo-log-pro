@@ -71,7 +71,7 @@ export default function ParcVehiculesPreventiveMaintenance() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => toast.success('Génération automatique des OT préventifs du mois')}
+            onClick={() => toast.error("La génération des OT préventifs n'est pas encore raccordée à l'API.")}
             className="px-4 py-2.5 bg-gradient-to-r from-amber-600 to-orange-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-amber-500/25 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Générer OT Préventifs

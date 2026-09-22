@@ -126,7 +126,7 @@ export default function ParcCostsConsumptionPage() {
 
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => toast.success('Export du rapport TCO généré en XLSX.')}
+            onClick={() => toast.error("L'export du rapport TCO n'est pas encore raccordé à l'API.")}
             className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-surface border border-outline hover:bg-surface-container text-on-surface transition-colors"
           >
             <Download className="w-4 h-4" />

@@ -63,9 +63,7 @@ export default function TransportControlPage() {
       return res.data || res;
     },
     onSuccess: (data: any) => {
-      toast.success(
-        `Optimisation VRP réussie ! ${data?.kms_a_vide_economises || 43.8} km à vide économisés (${data?.carburant_economise_xaf || 13500} XAF de gasoil). Backhaul actif.`
-      );
+      toast.success("Optimisation VRP réussie !");
       queryClient.invalidateQueries({ queryKey: ['transport-missions'] });
     },
     onError: () => {
@@ -73,13 +71,7 @@ export default function TransportControlPage() {
     }
   });
 
-  const defaultMissions = [
-    { id: 'TR-2024-0847', vehicle: 'CMR-T-4521', driver: 'M. Kamdem', client: 'SABC', origin: 'Port Douala (Quai 14)', destination: 'Yaoundé', status: 'EN_ROUTE', eta: '3h15', progress: 65 },
-    { id: 'TR-2024-0848', vehicle: 'CMR-T-4518', driver: 'M. Ondoua', client: 'Alucam', origin: 'Magasin A', destination: 'Bafoussam', status: 'CHARGEMENT', eta: 'En cours', progress: 20 },
-    { id: 'TR-2024-0849', vehicle: 'CMR-T-4532', driver: 'M. Nguimdjeu', client: 'Port Authority', origin: 'Zone Port', destination: 'Kribi (KCT)', status: 'LIVRÉ', eta: 'Terminé', progress: 100 },
-    { id: 'TR-2024-0850', vehicle: 'CMR-T-4509', driver: 'M. Talla', client: 'MTN Cameroon', origin: 'Entrepôt Bassa', destination: 'Douala Port', status: 'ATTENTE', eta: '14:00', progress: 0 },
-    { id: 'TR-2024-0851', vehicle: 'CMR-T-4525', driver: 'M. Fouda', client: 'Bolloré / Dangote', origin: 'Quai Douala', destination: "N'Djamena (Corridor)", status: 'EN_ROUTE', eta: '6 jours', progress: 35 },
-  ];
+  const defaultMissions: any[] = [];
 
   const missions = Array.isArray(missionsData) && missionsData.length > 0
     ? missionsData.map((m: any) => ({
@@ -166,10 +158,10 @@ export default function TransportControlPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Camions en Service" value="42" change={5} color="primary" icon={<span className="material-symbols-outlined">local_shipping</span>} />
-        <StatCard label="Chauffeurs Actifs" value="38" change={2} color="success" icon={<span className="material-symbols-outlined">person</span>} />
-        <StatCard label="Kilomètres Jour" value="3,150 km" change={15} color="info" icon={<span className="material-symbols-outlined">speed</span>} />
-        <StatCard label="Consommation Moyenne" value="31.8 L/100km" change={-4} changeLabel="vs cible" color="warning" icon={<span className="material-symbols-outlined">local_gas_station</span>} />
+        <StatCard label="Camions en Service" value="--" change={0} color="primary" icon={<span className="material-symbols-outlined">local_shipping</span>} />
+        <StatCard label="Chauffeurs Actifs" value="--" change={0} color="success" icon={<span className="material-symbols-outlined">person</span>} />
+        <StatCard label="Kilomètres Jour" value="--" change={0} color="info" icon={<span className="material-symbols-outlined">speed</span>} />
+        <StatCard label="Consommation Moyenne" value="--" change={0} color="warning" icon={<span className="material-symbols-outlined">local_gas_station</span>} />
       </div>
 
       {/* Main Content Grid */}
@@ -208,14 +200,14 @@ export default function TransportControlPage() {
                 <div className="p-3 rounded-xl border border-slate-800 bg-slate-900/60">
                   <div className="text-xs font-bold text-white flex justify-between">
                     <span>Axe Douala - N'Djamena (1 850 km)</span>
-                    <span className="text-emerald-400 font-mono">14 convois</span>
+                    <span className="text-slate-400 font-mono">--</span>
                   </div>
                   <p className="text-[11px] text-slate-400 mt-1">Carnet TRIE Inter-États • Escorte Ngaoundéré-Kousseri active.</p>
                 </div>
                 <div className="p-3 rounded-xl border border-slate-800 bg-slate-900/60">
                   <div className="text-xs font-bold text-white flex justify-between">
                     <span>Axe Douala - Bangui (1 430 km)</span>
-                    <span className="text-cyan-400 font-mono">9 convois</span>
+                    <span className="text-slate-400 font-mono">--</span>
                   </div>
                   <p className="text-[11px] text-slate-400 mt-1">Poste frontière Garoua-Boulaï • Caution apurée à 100%.</p>
                 </div>
