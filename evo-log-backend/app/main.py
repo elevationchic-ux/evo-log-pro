@@ -435,12 +435,18 @@ async def setup_database():
     from app.models.user import User, Role
     from app.models.tenant import Company, SubscriptionPlan, SubscriptionPlanType
 
-    # Step 1: create all tables (idempotent — safe if tables already exist)
-    try:
-        Base.metadata.create_all(bind=engine)
-    except Exception as e:
-        # DuplicateTable / already exists → tables are already there, continue
-        logger.warning(f"create_all warning (tables may already exist): {e}")
+    # Step 1: create all tables individually (skip tables/indexes that already exist)
+    tables_created = 0
+    tables_skipped = 0
+    for table in Base.metadata.sorted_tables:
+        try:
+            table.create(bind=engine, checkfirst=True)
+            tables_created += 1
+        except Exception as e:
+            # Table or index already exists — skip and continue
+            logger.warning(f"Table {table.name} skip: {e}")
+            tables_skipped += 1
+    logger.info(f"✅ Tables: {tables_created} created, {tables_skipped} skipped (already exist)")
 
     db = SessionLocal()
     try:
