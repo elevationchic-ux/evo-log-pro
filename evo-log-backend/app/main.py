@@ -19,7 +19,7 @@ from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-# prometheus_fastapi_instrumentator disabled - incompatible with FastAPI 0.115+ router
+from prometheus_client import make_asgi_app
 
 from app.core.config import settings
 from app.core.database import engine, get_db
