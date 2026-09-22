@@ -161,7 +161,7 @@ export default function ClientB2bPortalPage() {
                     </td>
                     <td className="p-3 text-right pr-5">
                       <button
-                        onClick={() => toast.success(`Lien de réinitialisation mot de passe envoyé à ${u.contactEmail}`)}
+                        onClick={() => toast.error("L'envoi des liens de réinitialisation n'est pas encore raccordé à l'API.")}
                         className="text-xs font-semibold text-primary hover:underline"
                       >
                         Renvoyer Accès

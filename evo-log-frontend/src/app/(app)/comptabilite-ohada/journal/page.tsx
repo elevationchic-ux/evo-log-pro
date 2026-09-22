@@ -165,8 +165,7 @@ export default function ComptabiliteOhadaJournal() {
   };
 
   const handlePrint = () => {
-    toast.success('Génération de l\'état certifié du Journal OHADA...');
-    window.print();
+    toast.error("La génération du journal OHADA n'est pas encore raccordée à l'API.");
   };
 
   return (

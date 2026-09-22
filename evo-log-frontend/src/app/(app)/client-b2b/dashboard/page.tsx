@@ -306,7 +306,7 @@ export default function ClientB2bDashboardPage() {
                   </span>
                 </div>
                 <button
-                  onClick={() => toast.success(`Ouverture du dossier commercial de ${opp.nomEntreprise}`)}
+                  onClick={() => toast.error("L'ouverture des dossiers commerciaux n'est pas encore raccordée à l'API.")}
                   className="p-2 hover:bg-surface-container rounded-lg text-primary"
                 >
                   <ChevronRight className="w-4 h-4" />

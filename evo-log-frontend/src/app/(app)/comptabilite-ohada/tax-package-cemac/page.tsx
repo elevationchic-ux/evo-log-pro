@@ -126,7 +126,7 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
         },
         body: JSON.stringify({ periode: currentPeriode }),
       });
-      toast.success('Télédéclaration TVA validée et transmise à la DGI (e-bulletin)');
+      toast.error("La télédéclaration TVA vers la DGI n'est pas encore raccordée à l'API.");
       await loadTVA();
     } catch {
       toast.error('Erreur lors de la validation. Vérifiez la connexion au portail DGI.');

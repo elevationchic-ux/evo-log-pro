@@ -214,7 +214,7 @@ export default function ClientB2bCrmPage() {
               <div className="pt-2 border-t border-outline/50 flex justify-between items-center text-[11px] text-on-surface-variant">
                 <span>Dernier échange : <strong className="text-on-surface">{c.dernierEchange}</strong></span>
                 <button
-                  onClick={() => toast.success(`Journal d'appel ouvert pour ${c.contactNom}`)}
+                  onClick={() => toast.error("L'ouverture du journal d'appel n'est pas encore raccordée à l'API.")}
                   className="text-primary hover:underline font-bold"
                 >
                   Contacter

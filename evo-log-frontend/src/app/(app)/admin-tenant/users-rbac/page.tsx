@@ -117,7 +117,7 @@ export default function AdminTenantUsersRbac() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => toast.info('Formulaire de création d un nouvel utilisateur CADC ERP')}
+            onClick={() => toast.error("La création d'utilisateurs n'est pas encore raccordée à l'API.")}
             className="px-4 py-2.5 bg-gradient-to-r from-rose-600 to-pink-500 text-white font-black text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-rose-500/25 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Créer Utilisateur
@@ -183,14 +183,14 @@ export default function AdminTenantUsersRbac() {
                   </td>
                   <td className="py-3.5 px-4 text-center flex items-center justify-center gap-1.5">
                     <button
-                      onClick={() => toast.info(`Modification du profil de ${u.fullName}`)}
+                      onClick={() => toast.error("La modification des profils utilisateurs n'est pas encore raccordée à l'API.")}
                       className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg cursor-pointer"
                       title="Modifier"
                     >
                       <Edit className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => toast.info(`Gestion des permissions T-Code pour ${u.fullName}`)}
+                      onClick={() => toast.error("La gestion des permissions T-Code n'est pas encore raccordée à l'API.")}
                       className="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg cursor-pointer"
                       title="Permissions T-Code"
                     >

@@ -178,7 +178,7 @@ export default function FinanceOhadaSuppliers() {
           <button onClick={exportCSV} disabled={filtered.length === 0} className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl flex items-center gap-2 border border-slate-700 transition-all">
             <Download className="w-4 h-4 text-emerald-400" /> CSV
           </button>
-          <button onClick={() => toast.info('Ordonnancement groupé — disponible après validation DFC')} className="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-500/25 transition-all">
+          <button onClick={() => toast.error("L'ordonnancement groupé n'est pas encore raccordé à l'API.")} className="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-500/25 transition-all">
             <CreditCard className="w-4 h-4" /> Ordonnancer Règlements
           </button>
         </div>
