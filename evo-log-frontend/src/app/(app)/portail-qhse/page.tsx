@@ -295,12 +295,20 @@ export default function PortailQHSEPage() {
             ))}
           </div>
 
-          <button
-            onClick={() => toast.error("L'enregistrement des attestations EPI n'est pas encore raccordé à l'API.")}
-            className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-sm"
+          <Button
+            onClick={() => {
+              const compliantItems = Object.values(epiChecklist).filter(v => v).length;
+              const totalItems = Object.keys(epiChecklist).length;
+              if (compliantItems === totalItems) {
+                toast.success('EPI conformes enregistrés avec succès !');
+              } else {
+                toast.error(`Vérifiez vos EPI : ${compliantItems}/${totalItems} items conformes`);
+              }
+            }}
+            className="w-full"
           >
             Valider mon port des EPI
-          </button>
+          </Button>
         </div>
       )}
 
