@@ -52,7 +52,7 @@ export default function TransportDispatchPage() {
         model: c.modele || 'Modèle inconnu',
         chauffeur: c.chauffeur_nom || 'Non assigné',
         tel: c.chauffeur_telephone || 'N/A',
-        statut: c.statut || 'DISPONIBLE',
+        statut: (c.statut || 'DISPONIBLE').replace(/\s/g, '_'),
         mission: c.mission_reference || '',
         position: c.position || 'Non disponible',
         gps: { lat: 0, lng: 0 },
@@ -80,15 +80,8 @@ export default function TransportDispatchPage() {
 
   const selectedVehicleData = fleet.find(v => v.id === selectedVehicle);
 
-  const statutColors: Record<string, string> = {
-    'EN_TRANSIT': 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-    'CHARGEMENT': 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-    'LIVRAISON': 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-    'DISPONIBLE': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-  };
-
   const fleetKpis = [
-    { label: 'Camions en Transit', value: fleet.filter(v => v.statut === 'EN_TRANSIT' || v.statut === 'EN TRANSIT').length, color: 'text-blue-400' },
+    { label: 'Camions en Transit', value: fleet.filter(v => v.statut === 'EN_TRANSIT').length, color: 'text-blue-400' },
     { label: 'En Chargement', value: fleet.filter(v => v.statut === 'CHARGEMENT').length, color: 'text-amber-400' },
     { label: 'En Livraison', value: fleet.filter(v => v.statut === 'LIVRAISON').length, color: 'text-purple-400' },
     { label: 'Disponibles', value: fleet.filter(v => v.statut === 'DISPONIBLE').length, color: 'text-emerald-400' },
@@ -148,13 +141,13 @@ export default function TransportDispatchPage() {
                 className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedVehicle === v.id ? 'bg-amber-500/10 border-amber-500/40' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}`}
               >
               <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${statutColors[v.statut.replace(/\s/g, '_')] || 'bg-slate-700 text-slate-400'}`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${v.statut === 'EN_TRANSIT' ? 'bg-blue-500/10 text-blue-400' : v.statut === 'CHARGEMENT' ? 'bg-amber-500/10 text-amber-400' : v.statut === 'LIVRAISON' ? 'bg-purple-500/10 text-purple-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
                   <Truck className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black text-white">{v.immat}</span>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${statutColors[v.statut.replace(/\s/g, '_')] || 'bg-slate-700 text-slate-400 border-slate-600'}`}>{v.statut}</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${v.statut === 'EN_TRANSIT' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : v.statut === 'CHARGEMENT' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : v.statut === 'LIVRAISON' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'}`}>{v.statut}</span>
                   </div>
                   <div className="text-[11px] text-slate-400 truncate">{v.chauffeur}</div>
                   <div className="text-[10px] text-slate-500 truncate mt-0.5">{v.position}</div>
@@ -187,7 +180,7 @@ export default function TransportDispatchPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-lg font-black text-white font-mono">{selectedVehicleData?.immat || 'N/A'}</span>
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statutColors[selectedVehicleData?.statut?.replace(/\s/g, '_')] || 'bg-slate-700 text-slate-400 border-slate-600'}`}>{selectedVehicleData?.statut || 'N/A'}</span>
+                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${selectedVehicleData?.statut === 'EN_TRANSIT' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : selectedVehicleData?.statut === 'CHARGEMENT' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : selectedVehicleData?.statut === 'LIVRAISON' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'}`}>{selectedVehicleData?.statut || 'N/A'}</span>
                   </div>
                   <div className="text-xs text-slate-400">{selectedVehicleData?.model || 'N/A'}</div>
                 </div>
