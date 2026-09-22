@@ -48,10 +48,10 @@ export default function TransportFlottePage() {
   ];
 
   const kpis = [
-    { title: 'Parc Total', value: vehicles.length.toString(), subtitle: 'Véhicules', icon: <span className="material-symbols-outlined text-2xl">directions_car</span>, color: 'blue' },
-    { title: 'En Service', value: vehicles.filter(v => v.status === 'ACTIF' || v.status === 'DISPONIBLE').length.toString(), subtitle: 'Actifs', icon: <span className="material-symbols-outlined text-2xl">check_circle</span>, color: 'emerald' },
-    { title: 'Maintenance', value: vehicles.filter(v => v.status === 'MAINTENANCE').length.toString(), subtitle: 'En atelier', icon: <span className="material-symbols-outlined text-2xl">build</span>, color: 'amber' },
-    { title: 'Hors Service', value: vehicles.filter(v => v.status === 'HORS_SERVICE').length.toString(), subtitle: 'Indisponibles', icon: <span className="material-symbols-outlined text-2xl">block</span>, color: 'red' },
+    { title: 'Parc Total', value: vehicles.length.toString(), subtitle: 'Véhicules', icon: <span className="material-symbols-outlined text-2xl">directions_car</span>, color: 'blue' as const },
+    { title: 'En Service', value: vehicles.filter(v => v.status === 'ACTIF' || v.status === 'DISPONIBLE').length.toString(), subtitle: 'Actifs', icon: <span className="material-symbols-outlined text-2xl">check_circle</span>, color: 'emerald' as const },
+    { title: 'Maintenance', value: vehicles.filter(v => v.status === 'MAINTENANCE').length.toString(), subtitle: 'En atelier', icon: <span className="material-symbols-outlined text-2xl">build</span>, color: 'amber' as const },
+    { title: 'Hors Service', value: vehicles.filter(v => v.status === 'HORS_SERVICE').length.toString(), subtitle: 'Indisponibles', icon: <span className="material-symbols-outlined text-2xl">block</span>, color: 'red' as const },
   ];
 
   return (

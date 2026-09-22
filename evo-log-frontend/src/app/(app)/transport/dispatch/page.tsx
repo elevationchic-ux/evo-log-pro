@@ -186,10 +186,10 @@ export default function TransportDispatchPage() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg font-black text-white font-mono">{selectedVehicleData.immat}</span>
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statutColors[selectedVehicleData.statut]}`}>{selectedVehicleData.statut}</span>
+                    <span className="text-lg font-black text-white font-mono">{selectedVehicleData?.immat || 'N/A'}</span>
+                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statutColors[selectedVehicleData?.statut?.replace(/\s/g, '_')] || 'bg-slate-700 text-slate-400 border-slate-600'}`}>{selectedVehicleData?.statut || 'N/A'}</span>
                   </div>
-                  <div className="text-xs text-slate-400">{selectedVehicleData.model}</div>
+                  <div className="text-xs text-slate-400">{selectedVehicleData?.model || 'N/A'}</div>
                 </div>
                 <button onClick={() => toast.error("L'appel chauffeur n'est pas encore raccordé à l'API.")} className="p-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl hover:bg-emerald-500/20 transition-colors">
                   <Phone className="w-4 h-4" />
@@ -210,8 +210,8 @@ export default function TransportDispatchPage() {
                 </div>
                 <div className="text-center z-10">
                   <MapPin className="w-8 h-8 text-amber-400 mx-auto mb-1 animate-bounce" />
-                  <div className="text-xs font-bold text-white">{selectedVehicleData.position}</div>
-                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">{selectedVehicleData.gps.lat.toFixed(4)}°N, {selectedVehicleData.gps.lng.toFixed(4)}°E</div>
+                  <div className="text-xs font-bold text-white">{selectedVehicleData?.position || 'Non disponible'}</div>
+                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">{selectedVehicleData?.gps?.lat?.toFixed(4) || '0'}°N, {selectedVehicleData?.gps?.lng?.toFixed(4) || '0'}°E</div>
                   <div className="text-[10px] text-amber-400/60 mt-0.5">GPS mis à jour il y a 45 sec</div>
                 </div>
               </div>
@@ -219,12 +219,12 @@ export default function TransportDispatchPage() {
               {/* Mission & metrics */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {[
-                  { label: 'Mission', value: selectedVehicleData.mission, icon: Target },
-                  { label: 'Chauffeur', value: selectedVehicleData.chauffeur, icon: User },
-                  { label: 'Vitesse', value: `${selectedVehicleData.vitesse} km/h`, icon: Activity },
-                  { label: 'Km parcourus', value: `${selectedVehicleData.kmParcourus.toLocaleString()} km`, icon: Navigation },
-                  { label: 'Charge', value: selectedVehicleData.poids, icon: Package },
-                  { label: 'Carburant', value: `${selectedVehicleData.fuel}%  ${selectedVehicleData.carburantConsomme}L consommés`, icon: Fuel },
+                  { label: 'Mission', value: selectedVehicleData?.mission || 'Aucune', icon: Target },
+                  { label: 'Chauffeur', value: selectedVehicleData?.chauffeur || 'Non assigné', icon: User },
+                  { label: 'Vitesse', value: `${selectedVehicleData?.vitesse || 0} km/h`, icon: Activity },
+                  { label: 'Km parcourus', value: `${(selectedVehicleData?.kmParcourus || 0).toLocaleString()} km`, icon: Navigation },
+                  { label: 'Charge', value: selectedVehicleData?.poids || '0 T', icon: Package },
+                  { label: 'Carburant', value: `${selectedVehicleData?.fuel || 0}%  ${selectedVehicleData?.carburantConsomme || 0}L consommés`, icon: Fuel },
                 ].map((m, i) => {
                   const Icon = m.icon;
                   return (
@@ -240,7 +240,7 @@ export default function TransportDispatchPage() {
               </div>
 
               {/* Alerts */}
-              {selectedVehicleData.alerts.length > 0 && (
+              {selectedVehicleData?.alerts && selectedVehicleData.alerts.length > 0 && (
                 <div className="space-y-2">
                   {selectedVehicleData.alerts.map((alert, i) => (
                     <div key={i} className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-2 text-xs text-amber-300">
@@ -253,7 +253,7 @@ export default function TransportDispatchPage() {
 
               {/* Next stop */}
               <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl text-xs text-blue-300">
-                <strong>Prochain arrêt :</strong> {selectedVehicleData.prochainArret}
+                <strong>Prochain arrêt :</strong> {selectedVehicleData?.prochainArret || 'Non disponible'}
               </div>
             </div>
           ) : (
