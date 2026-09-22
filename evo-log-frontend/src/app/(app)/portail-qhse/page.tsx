@@ -8,6 +8,10 @@ import {
 } from 'lucide-react';
 import { qhseAPI } from '@/lib/api-client';
 import { toast } from 'sonner';
+import { Card, CardBody, CardHeader } from '@/components/design-system/Card';
+import { Button } from '@/components/design-system/Button';
+import { EmptyStates } from '@/components/design-system/EmptyState';
+import { Input } from '@/components/design-system/Input';
 
 interface IncidentItem {
   id: number;
