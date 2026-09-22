@@ -146,14 +146,14 @@ export default function ChauffeurPage() {
               </div>
               
               <div className="p-4 bg-gray-50/50 flex gap-3">
-                <button 
+                <button
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-                  onClick={() => toast.success("Ouvre le GPS (Google Maps)")}
+                  onClick={() => toast.error("L'ouverture du GPS n'est pas encore raccordée à l'API.")}
                 >
                   <Navigation className="w-4 h-4" />
                   Naviguer
                 </button>
-                <button 
+                <button
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200"
                   onClick={() => handleOpenEPOD(mission.id)}
                 >

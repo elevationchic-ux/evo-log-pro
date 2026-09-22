@@ -61,7 +61,7 @@ export default function TransportFlotteFuelTelematics() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => toast.success('Rapport télématique carburant exporté')}
+            onClick={() => toast.error("L'export du rapport télématique carburant n'est pas encore raccordé à l'API.")}
             className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
           >
             <Download className="w-4 h-4" /> Rapport Carburant

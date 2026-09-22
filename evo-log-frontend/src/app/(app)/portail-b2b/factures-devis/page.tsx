@@ -152,7 +152,7 @@ export default function PortailB2BFacturesPage() {
                         </button>
                       ) : (
                         <button
-                          onClick={() => toast.info(`Téléchargement de la Quittance Officielle ${f.id}.pdf`)}
+                          onClick={() => toast.error("Le téléchargement des quittances n'est pas encore raccordé à l'API.")}
                           className="p-1.5 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                           title="Télécharger la facture"
                         >

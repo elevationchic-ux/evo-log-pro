@@ -99,7 +99,7 @@ export default function PortailTechnicienPage() {
 
   const handleDemandePieces = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Demande de pièces transmise au magasin de pièces détachées');
+    toast.error("La demande de pièces n'est pas encore raccordée à l'API.");
     setPiecesForm({
       article: '',
       quantite: '1',

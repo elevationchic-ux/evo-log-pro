@@ -51,7 +51,7 @@ export default function TransportFlotteControlTower() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => toast.success('Cartographie radar des convois rafraîchie')}
+            onClick={() => toast.error("La cartographie radar des convois n'est pas encore raccordée à l'API.")}
             className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
           >
             <Radio className="w-4 h-4" /> Radar Flotte Live

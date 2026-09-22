@@ -67,9 +67,7 @@ export default function AdminSaasTenantsPage() {
       }
       fetchTenants();
     } catch {
-      // Local optimistic update
-      setTenants(prev => prev.map(t => t.id === tenant.id ? { ...t, is_active: !t.is_active } : t));
-      toast.success(`Statut du tenant ${tenant.nom} mis à jour`);
+      toast.error("Impossible de modifier le statut du tenant.");
     }
   };
 

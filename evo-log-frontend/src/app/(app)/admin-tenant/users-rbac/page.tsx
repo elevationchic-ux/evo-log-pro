@@ -88,8 +88,7 @@ export default function AdminTenantUsersRbac() {
       setUsers(prev => prev.map(u => u.id === id ? { ...u, isActive: !u.isActive } : u));
       toast.success('Statut utilisateur mis à jour');
     } catch {
-      setUsers(prev => prev.map(u => u.id === id ? { ...u, isActive: !u.isActive } : u));
-      toast.success('Statut utilisateur mis à jour');
+      toast.error("Impossible de modifier le statut utilisateur.");
     }
   };
 

@@ -318,7 +318,7 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
               ))}
             </div>
           </div>
-          <button onClick={() => toast.success('Bordereau IS téléchargé (PDF officiel DGI)')} className="w-full px-4 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2">
+          <button onClick={() => toast.error("Le téléchargement du bordereau IS n'est pas encore raccordé à l'API.")} className="w-full px-4 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2">
             <Download className="w-4 h-4" /> Télécharger le Bordereau IS Officiel DGI
           </button>
         </div>
@@ -349,7 +349,7 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
               </div>
             ))}
           </div>
-          <button onClick={() => toast.success('Bordereau DIPE généré pour la CNPS Cameroun')} className="w-full px-4 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2">
+          <button onClick={() => toast.error("La génération du bordereau DIPE n'est pas encore raccordée à l'API.")} className="w-full px-4 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2">
             <Download className="w-4 h-4" /> Générer le Bordereau DIPE (CNPS)
           </button>
         </div>
@@ -380,13 +380,13 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <button onClick={() => toast.success(`Tableau ${item.num} téléchargé`)} className="text-violet-400 hover:text-violet-300 font-bold text-[10px]">PDF</button>
+                  <button onClick={() => toast.error("Le téléchargement des tableaux fiscaux n'est pas encore raccordé à l'API.")} className="text-violet-400 hover:text-violet-300 font-bold text-[10px]">PDF</button>
                 </div>
               </div>
             ))}
           </div>
           <button
-            onClick={() => toast.success('Liasse Fiscale SYSCOHADA complète générée (Tableaux 1-36)')}  
+            onClick={() => toast.error("Le téléchargement de la liasse fiscale n'est pas encore raccordé à l'API.")}
             className="w-full px-4 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2">
             <Download className="w-4 h-4" /> Télécharger la Liasse Fiscale Complète (Tableaux 1-36)
           </button>
