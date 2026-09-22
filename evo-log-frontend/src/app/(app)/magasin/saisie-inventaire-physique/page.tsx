@@ -116,7 +116,7 @@ export default function SaisieInventairePhysiquePage() {
   const handleValidateInventory = () => {
     const shortages = inventoryItems.filter(i => i.status === 'shortage').length
     const overages = inventoryItems.filter(i => i.status === 'overage').length
-    toast.success(`Inventaire WMS validé ! Écritures de régularisation générées : ${shortages} pertes, ${overages} surplus.`)
+    toast.error("La validation d'inventaire WMS n'est pas encore raccordée à l'API.")
   }
 
   return (

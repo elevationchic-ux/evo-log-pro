@@ -47,7 +47,7 @@ export default function ChatOpsDashboard() {
         body: JSON.stringify({ message: testMessage, sender: testSender })
       });
       setTestMessage('');
-      toast.success("Message envoyé à K-Bot !");
+      toast.error("L'envoi de messages à K-Bot n'est pas encore raccordé à l'API.");
       setTimeout(fetchLogs, 500); // Quick refresh after sending
     } catch (err) {
       toast.error("Erreur lors de l'envoi");

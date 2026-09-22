@@ -14,7 +14,7 @@ export default function SecurityReportsPage() {
   if (!mounted) return <div className="p-8 text-center text-slate-500 font-mono">Chargement des Rapports de Sécurité...</div>;
 
   const handleExportPDF = (title: string) => {
-    toast.success(`Génération du rapport PDF [${title}] lancée !`);
+    toast.error("La génération de rapports PDF de sécurité n'est pas encore raccordée à l'API.");
   };
 
   const reportsList = [

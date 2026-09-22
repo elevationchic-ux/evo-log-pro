@@ -145,7 +145,7 @@ export default function TransportDispatchPage() {
                   </div>
                   <div className="text-xs text-slate-400">{selected.model}</div>
                 </div>
-                <button onClick={() => toast.success(`Appel en cours vers ${selected.chauffeur}...`)} className="p-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl hover:bg-emerald-500/20 transition-colors">
+                <button onClick={() => toast.error("L'appel chauffeur n'est pas encore raccordé à l'API.")} className="p-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl hover:bg-emerald-500/20 transition-colors">
                   <Phone className="w-4 h-4" />
                 </button>
               </div>

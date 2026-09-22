@@ -18,7 +18,7 @@ export default function CustomReportsPage() {
 
   const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(`Rapport sur mesure [Source : ${source}, Format : ${format}] généré avec succès !`);
+    toast.error("La génération de rapports sur mesure n'est pas encore raccordée à l'API.");
   };
 
   return (

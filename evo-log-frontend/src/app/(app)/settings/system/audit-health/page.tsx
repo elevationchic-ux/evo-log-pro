@@ -14,7 +14,7 @@ export default function AuditHealthSettingsPage() {
   if (!mounted) return <div className="p-8 text-center text-slate-500 font-mono">Chargement du Diagnostic Système...</div>;
 
   const handleRefreshMetrics = () => {
-    toast.success("Statistiques de santé et métriques rafraîchies !");
+    toast.error("Le rafraîchissement des métriques système n'est pas encore raccordé à l'API.");
   };
 
   return (

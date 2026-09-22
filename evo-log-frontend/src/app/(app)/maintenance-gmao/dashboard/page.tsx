@@ -249,7 +249,7 @@ export default function MaintenanceGMAODashboardPage() {
                     </div>
                   )}
                 </div>
-                <button onClick={() => toast.success(`OT Maintenance ${pm.ref} validé`)} className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs rounded-xl hover:bg-emerald-500/20 shrink-0">
+                <button onClick={() => toast.error("La validation des OT préventifs n'est pas encore raccordée à l'API.")} className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs rounded-xl hover:bg-emerald-500/20 shrink-0">
                   Valider PM
                 </button>
               </div>
@@ -281,7 +281,7 @@ export default function MaintenanceGMAODashboardPage() {
                     </div>
                   )}
                 </div>
-                <button onClick={() => toast.success(`OT ${ot.ref} clôturé`)} className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs rounded-xl hover:bg-emerald-500/20 shrink-0">
+                <button onClick={() => toast.error("La clôture des OT correctifs n'est pas encore raccordée à l'API.")} className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs rounded-xl hover:bg-emerald-500/20 shrink-0">
                   Clôturer OT
                 </button>
               </div>
