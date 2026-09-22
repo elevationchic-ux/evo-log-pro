@@ -17,30 +17,15 @@ class APIKeyCreateSchema(BaseModel):
 def list_tenant_api_keys(context: TenantContext = Depends(get_current_tenant_context)):
     """Retrieve API Keys for 3rd party integrations and marketplace apps."""
     return {
-        "status": "success",
+        "status": "unavailable",
         "organization_id": context.organization_id,
-        "api_keys": [
-            {
-                "id": "KEY-001",
-                "key_name": "Intégration Odoo / SAP B2B",
-                "key_prefix": "evo_live_89a...",
-                "created_at": datetime.utcnow().isoformat(),
-                "is_active": True
-            }
-        ]
+        "api_keys": []
     }
 
-@router.post("/api-keys", status_code=status.HTTP_201_CREATED)
+@router.post("/api-keys", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def create_tenant_api_key(payload: APIKeyCreateSchema, context: TenantContext = Depends(get_current_tenant_context)):
     """Generate a new public API key for the active tenant."""
-    raw_key = f"evo_live_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_sec99"
-    return {
-        "status": "success",
-        "message": "API key generated successfully! Store this secret key securely.",
-        "api_key": {
-            "id": f"KEY-00{datetime.utcnow().strftime('%S')}",
-            "key_name": payload.key_name,
-            "secret_key": raw_key,
-            "created_at": datetime.utcnow().isoformat()
-        }
-    }
+    raise HTTPException(
+        status_code=501,
+        detail="La génération de clés API n'est pas encore configurée pour ce tenant."
+    )
