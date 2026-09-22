@@ -76,11 +76,11 @@ export default function AdminTenantSystemAdmin() {
   }
 
   const handleBackup = () => {
-    toast.success('Sauvegarde complète de la base de données initiée (ETA : 8 min)');
+    toast.error("La sauvegarde de base de données n'est pas encore raccordée à l'API.");
   };
 
   const handleClearCache = () => {
-    toast.success('Cache Redis purgé avec succès sur tous les nœuds');
+    toast.error("Le vidage du cache Redis n'est pas encore raccordé à l'API.");
   };
 
   return (

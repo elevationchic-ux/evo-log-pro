@@ -147,19 +147,7 @@ export default function FinanceOhadaSuppliers() {
   };
 
   const exportCSV = () => {
-    const headers = ['Fournisseur', 'Compte 401', 'Catégorie', 'Total Dû (XAF)', 'Non Échu', 'Échu 1-30j', 'Échu 31-60j', 'Échu +60j', 'DPO', 'Mode'];
-    const rows = filtered.map(d => [
-      d.fournisseur_nom, d.compte_401, d.categorie,
-      d.total_du, d.non_echu, d.echu_1_30, d.echu_31_60, d.echu_plus_60,
-      `${d.dpo_jours}j`, d.mode_paiement
-    ]);
-    const csv = [headers, ...rows].map(r => r.join(';')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `balance_agee_fournisseurs_${today}.csv`; a.click();
-    URL.revokeObjectURL(url);
-    toast.success('Balance âgée exportée (CSV)');
+    toast.error("L'export de la balance âgée fournisseurs n'est pas encore raccordé à l'API.");
   };
 
   return (

@@ -82,12 +82,7 @@ export default function ComptabiliteOhadaGeneralLedger() {
   }), { debInit: 0, credInit: 0, mouvDeb: 0, mouvCred: 0, debFin: 0, credFin: 0 });
 
   const handlePrint = () => {
-    toast.success(
-      viewMode === 'BALANCE'
-        ? 'Impression de la Balance Générale à 6 Colonnes...'
-        : 'Impression du Grand Livre Général des Comptes...'
-    );
-    window.print();
+    toast.error("L'impression des états comptables n'est pas encore raccordée à l'API.");
   };
 
   return (

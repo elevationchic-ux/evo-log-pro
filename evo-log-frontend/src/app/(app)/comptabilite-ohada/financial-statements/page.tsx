@@ -77,8 +77,7 @@ export default function ComptabiliteOhadaFinancialStatements() {
   }, [exercice]);
 
   const handlePrint = () => {
-    toast.success('Impression de la liasse financière SYSCOHADA certifiée...');
-    window.print();
+    toast.error("L'impression de la liasse financière n'est pas encore raccordée à l'API.");
   };
 
   return (

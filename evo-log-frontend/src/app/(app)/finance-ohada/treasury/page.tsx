@@ -116,8 +116,7 @@ export default function FinanceOhadaTreasury() {
   };
 
   const handlePrint = () => {
-    toast.success('Génération de l\'état certifié de trésorerie consolidée...');
-    window.print();
+    toast.error("La génération de l'état de trésorerie n'est pas encore raccordée à l'API.");
   };
 
   return (

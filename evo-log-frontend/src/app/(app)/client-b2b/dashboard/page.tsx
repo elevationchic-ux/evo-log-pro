@@ -116,7 +116,7 @@ export default function ClientB2bDashboardPage() {
       montantEstime: '',
       responsableCommercial: 'Équipe Commerciale CADC'
     });
-    toast.success(`Prospect commercial « ${created.nomEntreprise} » ajouté au pipeline.`);
+    toast.error("L'ajout de prospects commerciaux n'est pas encore raccordé à l'API.");
   };
 
   const filteredOpps = opportunities.filter(o => {

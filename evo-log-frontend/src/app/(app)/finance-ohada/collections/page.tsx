@@ -115,8 +115,7 @@ export default function FinanceOhadaCollections() {
   };
 
   const handlePrint = () => {
-    toast.success('Génération de la Balance Âgée Clients certifiée...');
-    window.print();
+    toast.error("La génération de la balance âgée clients n'est pas encore raccordée à l'API.");
   };
 
   return (

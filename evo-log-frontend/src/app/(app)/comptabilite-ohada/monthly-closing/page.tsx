@@ -98,14 +98,14 @@ export default function ComptabiliteOhadaMonthlyClosing() {
 
       toast.success(`La période ${selectedPeriod.label} a été verrouillée et clôturée avec succès.`);
     } catch {
-      toast.success(`La période ${selectedPeriod.label} a été verrouillée et clôturée avec succès.`);
+      toast.error("Impossible de verrouiller la période comptable.");
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleRunAnnualClosing = async () => {
-    toast.success(`Clôture annuelle de l'exercice ${currentYear} initialisée avec calcul des reports à nouveau.`);
+    toast.error("La clôture annuelle n'est pas encore raccordée à l'API.");
   };
 
   return (

@@ -147,15 +147,7 @@ export default function ComptabiliteOhadaChartAccounts() {
   };
 
   const exportCSV = () => {
-    const csv = ['Code;Intitulé;Classe;Type;Nature;Sens', ...filtered.map(a =>
-      `${a.code};${a.intitule};${a.classe};${a.type};${a.nature};${a.sens}`
-    )].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url; link.download = 'plan_comptable_syscohada.csv'; link.click();
-    URL.revokeObjectURL(url);
-    toast.success('Plan comptable exporté (CSV)');
+    toast.error("L'export du plan comptable n'est pas encore raccordé à l'API.");
   };
 
   return (

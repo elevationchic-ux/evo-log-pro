@@ -45,7 +45,7 @@ export default function AdminTenantGlobalSettingsPage() {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      toast.success('Paramètres d\'entreprise et configurations fiscales enregistrés avec succès.');
+      toast.error("L'enregistrement des paramètres d'entreprise n'est pas encore raccordé à l'API.");
     }, 600);
   };
 

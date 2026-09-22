@@ -56,7 +56,7 @@ export default function NotificationSettingsEscalationPage() {
       await securityAPI.saveEscalationRules(settings);
       toast.success("Politique d'escalade et paramètres d'alerte enregistrés avec succès sur le serveur.");
     } catch {
-      toast.success("Politique d'escalade et paramètres d'alerte enregistrés avec succès.");
+      toast.error("Impossible d'enregistrer la politique d'escalade.");
     } finally {
       setSaving(false);
     }
