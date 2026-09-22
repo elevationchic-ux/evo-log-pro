@@ -49,18 +49,7 @@ export default function ClientB2bLoyaltyPage() {
       return;
     }
 
-    const created: LoyaltyAccount = {
-      id: Date.now().toString(),
-      clientNom: form.clientNom,
-      palier: form.palier as any,
-      volumesCumulesTeu: Number(form.volumesCumulesTeu) || 0,
-      tauxRistourneRfa: Number(form.tauxRistourneRfa) || 0,
-      joursFranchiseOfferts: Number(form.joursFranchiseOfferts) || 0,
-      gestionnaireDedie: form.gestionnaireDedie,
-      statut: 'ACTIF'
-    };
-
-    setAccounts([created, ...accounts]);
+    toast.error("L'activation des barèmes de fidélisation n'est pas encore raccordée à l'API.");
     setShowAddModal(false);
     setForm({
       clientNom: '',
@@ -70,7 +59,6 @@ export default function ClientB2bLoyaltyPage() {
       joursFranchiseOfferts: 5,
       gestionnaireDedie: 'Service Grands Comptes CADC'
     });
-    toast.error("L'activation des barèmes de fidélisation n'est pas encore raccordée à l'API.");
   };
 
   const filteredAccounts = accounts.filter(a => 

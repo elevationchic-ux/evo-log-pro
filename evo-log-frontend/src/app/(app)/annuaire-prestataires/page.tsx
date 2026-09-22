@@ -8,6 +8,7 @@ import {
   Wrench, ChevronRight, AlertOctagon,
   FileCheck2, Compass
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAuth } from '@/components/shared/AuthProvider';
 
 export interface VehiculeDisponible {
@@ -226,20 +227,7 @@ export default function AnnuairePrestatairesPage() {
     e.preventDefault();
     if (!selectedPrestataireForRfq) return;
 
-    const newRfq: CotationItem = {
-      id: cotations.length + 1,
-      numero_dossier: `RFQ-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${Math.floor(Math.random() * 900 + 100)}`,
-      titre_besoin: rfqTitle,
-      description_besoin: rfqDesc,
-      urgence: rfqUrgence,
-      lieu_intervention: rfqLieu,
-      statut: 'TRANSMIS',
-      budget_max_estime: rfqBudget ? parseFloat(rfqBudget) : undefined,
-      created_at: new Date().toISOString(),
-      prestataire_nom: selectedPrestataireForRfq.raison_sociale
-    };
-
-    setCotations([newRfq, ...cotations]);
+    toast.error("La création de demandes de cotation n'est pas encore raccordée à l'API.");
     setRfqSuccess(true);
     setTimeout(() => {
       setRfqSuccess(false);

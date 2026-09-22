@@ -53,7 +53,7 @@ export default function ClientB2bAfterSalesPage() {
       const raw = res.data?.items || res.data || [];
       if (Array.isArray(raw) && raw.length > 0) {
         setClaims(raw.map((i: any) => ({
-          id: i.id?.toString() || Math.random().toString(),
+          id: i.id?.toString() || '',
           reference: i.reference || `REC-${i.id || 101}`,
           clientNom: i.client_nom || i.auteur_nom || 'Client Partenaire',
           typeLitige: (i.type || 'AVARIE_MARCHANDISE') as any,

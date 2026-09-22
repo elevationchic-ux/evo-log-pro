@@ -6,6 +6,7 @@ import {
   Box, Plus, Search, ArrowLeft, CheckCircle2,
   AlertTriangle, FileCheck, ShieldAlert
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ContainerEIR {
   id: number;
@@ -36,20 +37,7 @@ export default function TransportContainersDeclarationPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const id = Date.now();
-    const newEIR: ContainerEIR = {
-      id,
-      numero_eir: `EIR-2026-${String(eirList.length + 1).padStart(4, '0')}`,
-      numero_conteneur: formData.numero_conteneur.toUpperCase(),
-      type_operation: formData.type_operation,
-      etat_general: formData.etat_general,
-      numero_scelle: formData.numero_scelle,
-      camion_immatriculation: formData.camion_immatriculation,
-      date_constat: new Date().toLocaleDateString('fr-FR'),
-      inspecteur: 'Agent Contrôle Guérite PAD',
-      remarques: formData.remarques
-    };
-    setEirList(prev => [newEIR, ...prev]);
+    toast.error("La création de déclarations EIR n'est pas encore raccordée à l'API.");
     setIsModalOpen(false);
   };
 

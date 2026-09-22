@@ -15,7 +15,7 @@ const companyAPI = {
     }
   },
   inviteUser: async (companyId: number, data: any) => {
-    return { data: { ...data, id: Date.now() } }
+    throw new Error("L'invitation d'utilisateurs n'est pas encore raccordée à l'API.")
   }
 }
 
@@ -40,16 +40,15 @@ export default function CompanyUsersPage() {
 
   const inviteMutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await companyAPI.inviteUser(1, data)
-      return res.data
+      await companyAPI.inviteUser(1, data)
     },
     onSuccess: () => {
       console.log('Invitation envoyée avec succès')
       queryClient.invalidateQueries({ queryKey: ['company-users'] })
       setIsModalOpen(false)
     },
-    onError: () => {
-      console.log('Erreur lors de l\'invitation')
+    onError: (err: any) => {
+      console.log('Erreur lors de l\'invitation:', err?.message || 'Erreur inconnue')
     },
   })
 

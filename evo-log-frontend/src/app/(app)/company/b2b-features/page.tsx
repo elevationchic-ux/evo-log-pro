@@ -15,19 +15,13 @@ const b2bAPI = {
     }
   },
   createQuote: async (companyId: number, data: any) => {
-    return { data: { ...data, id: Date.now() } }
+    throw new Error("La création de cotations n'est pas encore raccordée à l'API.")
   },
   getChatMessages: async (companyId: number) => {
-    return {
-      data: [
-        { id: 1, message: 'Bonjour, je voudrais des informations sur le transport Douala-Yaoundé', expediteur: 'client', date: '2026-01-18 10:30' },
-        { id: 2, message: 'Bonjour, le prix est de 150000 FCFA pour le trajet standard', expediteur: 'support', date: '2026-01-18 10:35' },
-        { id: 3, message: 'Est-ce que le camion est disponible demain ?', expediteur: 'client', date: '2026-01-18 10:40' }
-      ]
-    }
+    return { data: [] }
   },
   sendMessage: async (companyId: number, message: string) => {
-    return { data: { success: true } }
+    throw new Error("L'envoi de messages n'est pas encore raccordé à l'API.")
   }
 }
 
@@ -62,27 +56,28 @@ export default function B2BFeaturesPage() {
 
   const createQuoteMutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await b2bAPI.createQuote(1, data)
-      return res.data
+      await b2bAPI.createQuote(1, data)
     },
     onSuccess: () => {
       console.log('Devis créé avec succès')
       queryClient.invalidateQueries({ queryKey: ['b2b-quotes'] })
       setIsQuoteModalOpen(false)
     },
-    onError: () => {
-      console.log('Erreur lors de la création du devis')
+    onError: (err: any) => {
+      console.log('Erreur lors de la création du devis:', err?.message || 'Erreur inconnue')
     },
   })
 
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
-      const res = await b2bAPI.sendMessage(1, message)
-      return res.data
+      await b2bAPI.sendMessage(1, message)
     },
     onSuccess: () => {
       setChatMessage('')
       queryClient.invalidateQueries({ queryKey: ['b2b-chat'] })
+    },
+    onError: (err: any) => {
+      console.log('Erreur lors de l\'envoi du message:', err?.message || 'Erreur inconnue')
     },
   })
 

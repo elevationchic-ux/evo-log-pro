@@ -6,6 +6,7 @@ import {
   FileCheck, Plus, Search, ArrowLeft, Download, CheckCircle2,
   Printer, Truck, UserCheck, Calendar
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface BonLivraison {
   id: number;
@@ -37,20 +38,7 @@ export default function TransportBLPage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const id = Date.now();
-    const newBL: BonLivraison = {
-      id,
-      numero_bl: `BL-2026-${String(blList.length + 1).padStart(4, '0')}`,
-      mission_ref: formData.mission_ref,
-      client_destinataire: formData.client_destinataire,
-      adresse_livraison: formData.adresse_livraison,
-      chauffeur: formData.chauffeur,
-      camion: formData.camion,
-      date_livraison: new Date().toLocaleDateString('fr-FR'),
-      nombre_colis: formData.nombre_colis,
-      statut: 'EN_COURS_LIVRAISON'
-    };
-    setBlList(prev => [newBL, ...prev]);
+    toast.error("La création de bons de livraison n'est pas encore raccordée à l'API.");
     setIsModalOpen(false);
   };
 

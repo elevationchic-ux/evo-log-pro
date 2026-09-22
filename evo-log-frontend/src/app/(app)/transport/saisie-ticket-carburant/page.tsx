@@ -6,6 +6,7 @@ import {
   Fuel, Plus, Search, ArrowLeft, CheckCircle2,
   AlertTriangle, DollarSign, Gauge, Calendar, Truck
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface TicketCarburant {
   id: number;
@@ -44,22 +45,7 @@ export default function SaisieTicketCarburantPage() {
     const conso_calculee = parseFloat(((formData.litres / distance_parcourue) * 100).toFixed(1));
     const alerte = conso_calculee > 42.0; // Seuil standard poids lourd
 
-    const newTicket: TicketCarburant = {
-      id: Date.now(),
-      numero_ticket: formData.numero_ticket || `TCK-2026-${String(tickets.length + 1).padStart(4, '0')}`,
-      immatriculation: formData.immatriculation,
-      chauffeur: formData.chauffeur,
-      station: formData.station,
-      litres: formData.litres,
-      prix_litre_xaf: formData.prix_litre_xaf,
-      montant_total_xaf: formData.litres * formData.prix_litre_xaf,
-      index_km: formData.index_km,
-      conso_calculee_l100: conso_calculee,
-      alerte_surconsommation: alerte,
-      date_plein: new Date().toLocaleDateString('fr-FR')
-    };
-
-    setTickets(prev => [newTicket, ...prev]);
+    toast.error("La création de tickets carburant n'est pas encore raccordée à l'API.");
     setIsModalOpen(false);
     setFormData({
       numero_ticket: '',
