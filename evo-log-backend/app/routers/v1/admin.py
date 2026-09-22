@@ -340,63 +340,6 @@ def get_audit_logs(
     total = query.count()
     logs = query.order_by(desc(AuditLog.timestamp)).offset(skip).limit(limit).all()
 
-    if False and not logs and skip == 0:
-        return {
-            "total": 5,
-            "items": [
-                {
-                    "id": 1,
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "user_email": "supadmin@evo-log.cm",
-                    "action": "MISE_A_JOUR_QUOTAS",
-                    "resource": "Company #1 (LPC SA)",
-                    "details": "Augmentation max_users: 20 -> 50, quota stockage: 5000 Mo",
-                    "ip": "192.168.1.10",
-                    "status": "SUCCESS"
-                },
-                {
-                    "id": 2,
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "user_email": "c.oussibela@evo-log.cm",
-                    "action": "CREATION_MISSION",
-                    "resource": "Transport / Mission #2026-089",
-                    "details": "Trajet Douala Port Quai 14 -> Kribi Terminal",
-                    "ip": "10.0.4.15",
-                    "status": "SUCCESS"
-                },
-                {
-                    "id": 3,
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "user_email": "m.essomba@evo-log.cm",
-                    "action": "VALIDATION_DECLARATION_TVA",
-                    "resource": "Fiscalité / Tax Package CEMAC",
-                    "details": "Clôture déclaration mensuelle TVA et télédéclaration DGI",
-                    "ip": "10.0.4.22",
-                    "status": "SUCCESS"
-                },
-                {
-                    "id": 4,
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "user_email": "system@evo-log.cm",
-                    "action": "SAUVEGARDE_AUTOMATIQUE",
-                    "resource": "Base PostgreSQL kamlog_erp",
-                    "details": "Snapshot quotidien immuable certifié ISO 27001",
-                    "ip": "127.0.0.1",
-                    "status": "SUCCESS"
-                },
-                {
-                    "id": 5,
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "user_email": "inconnu@197.234.12.8",
-                    "action": "TENTATIVE_CONNEXION_ECHOUEE",
-                    "resource": "Auth / Login",
-                    "details": "3 tentatives infructueuses - Compte temporairement protégé",
-                    "ip": "197.234.12.8",
-                    "status": "FAILED"
-                }
-            ]
-        }
-
     items = []
     for l in logs:
         items.append({

@@ -56,7 +56,7 @@ export default function CreateInvoicePage() {
     setLines([
       ...lines,
       {
-        id: Math.random().toString(),
+        id: Date.now().toString(),
         designation: '',
         quantite: 1,
         prix_unitaire_ht: 0,
