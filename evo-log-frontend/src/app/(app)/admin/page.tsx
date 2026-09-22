@@ -24,6 +24,10 @@ import {
 } from 'lucide-react'
 import { adminAPI, authAPI } from '@/lib/api-client'
 import { toast } from 'sonner'
+import { Card, CardBody, CardHeader } from '@/components/design-system/Card'
+import { Button } from '@/components/design-system/Button'
+import { EmptyStates } from '@/components/design-system/EmptyState'
+import { Input } from '@/components/design-system/Input'
 
 interface SystemUser {
   id: string
@@ -460,29 +464,42 @@ export default function AdminHubPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-sans">
-                {filteredUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-800/40 transition">
-                    <td className="p-4 font-semibold text-slate-100">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-amber-400">
-                          {u.nom_complet.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-bold text-slate-100">{u.nom_complet}</div>
-                          <div className="text-[11px] text-slate-400 font-mono">{u.email}</div>
-                        </div>
-                      </div>
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-8">
+                      <EmptyStates.NoData
+                        description="Aucun utilisateur trouvé. Créez le premier utilisateur pour commencer."
+                        action={{
+                          label: 'Créer un utilisateur',
+                          onClick: () => setShowCreateModal(true)
+                        }}
+                      />
                     </td>
-                    <td className="p-4">
-                      <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-[11px] uppercase">
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="p-4 text-slate-300 font-mono">{u.departement}</td>
-                    <td className="p-4 text-slate-300">
-                      {u.must_change_password ? (
-                        <span className="text-amber-400 font-semibold flex items-center gap-1">
-                          <AlertTriangle className="w-3.5 h-3.5" /> Réinitialisation requise
+                  </tr>
+                ) : (
+                  filteredUsers.map((u) => (
+                    <tr key={u.id} className="hover:bg-slate-800/40 transition">
+                      <td className="p-4 font-semibold text-slate-100">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-amber-400">
+                            {u.nom_complet.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="font-bold text-slate-100">{u.nom_complet}</div>
+                            <div className="text-[11px] text-slate-400 font-mono">{u.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-[11px] uppercase">
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="p-4 text-slate-300 font-mono">{u.departement}</td>
+                      <td className="p-4 text-slate-300">
+                        {u.must_change_password ? (
+                          <span className="text-amber-400 font-semibold flex items-center gap-1">
+                            <AlertTriangle className="w-3.5 h-3.5" /> Réinitialisation requise
                         </span>
                       ) : (
                         <span className="text-emerald-400 font-semibold flex items-center gap-1">
@@ -521,7 +538,8 @@ export default function AdminHubPage() {
                       </button>
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
