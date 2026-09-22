@@ -22,7 +22,7 @@ from slowapi.errors import RateLimitExceeded
 # prometheus_fastapi_instrumentator disabled - incompatible with FastAPI 0.115+ router
 
 from app.core.config import settings
-from app.core.database import engine, get_db
+from app.core.database import engine, get_db, Base
 from app.core.security import limiter
 from app.middleware.audit import AuditMiddleware
 from app.middleware.idempotency import IdempotencyMiddleware
@@ -47,6 +47,14 @@ async def lifespan(app: FastAPI):
     
     # Startup
     logger.info("Starting EVO-LOG EM-ERP API...")
+
+    # Auto-create all DB tables (idempotent - safe to run multiple times)
+    try:
+        import app.models  # noqa: F401 - ensure all models are imported
+        Base.metadata.create_all(bind=engine)
+        logger.info("✅ Database tables created/verified")
+    except Exception as e:
+        logger.error(f"❌ Failed to create database tables: {e}")
 
     await event_service.start()
     if event_service.redis is not None:
