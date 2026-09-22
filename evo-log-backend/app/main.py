@@ -61,7 +61,7 @@ async def lifespan(app: FastAPI):
         logger.info("Redis realtime bus connected")
     else:
         logger.warning(
-            "Redis realtime bus unavailable — running in degraded mode. "
+            "Redis realtime bus unavailable  running in degraded mode. "
             "REST API is fully operational; real-time WebSocket pub/sub across "
             "multiple processes is disabled until Redis becomes reachable."
         )
@@ -247,7 +247,8 @@ app.add_middleware(
 async def api_v1_rewrite_middleware(request: Request, call_next):
     """Transparently route legacy /api/* requests to /api/v1/*"""
     path = request.url.path
-    if path.startswith("/api/") and not path.startswith("/api/v1/") and not path.startswith("/api/health") and not path.startswith("/api/docs") and not path.startswith("/api/redoc") and not path.startswith("/api/openapi.json"):
+    EXCLUDED = ("/api/v1/", "/api/health", "/api/docs", "/api/redoc", "/api/openapi.json", "/api/setup")
+    if path.startswith("/api/") and not any(path.startswith(e) for e in EXCLUDED):
         new_path = path.replace("/api/", "/api/v1/", 1)
         request.scope["path"] = new_path
     return await call_next(request)
@@ -417,6 +418,97 @@ async def health_check():
             "errors": startup_errors
         }
     return {"status": "ok", "service": "EVO-LOG EM-ERP", "version": "2.0.0"}
+
+
+@app.post('/api/setup')
+@app.get('/api/setup')
+@app.post('/api/v1/setup')
+@app.get('/api/v1/setup')
+async def setup_database():
+    """
+    One-time database initialization: creates all tables and seeds initial admin users.
+    Safe to call multiple times  skips if users already exist.
+    """
+    from app.core.database import Base, engine, SessionLocal
+    import app.models  # noqa: ensure all models registered
+    from app.core.security import get_password_hash
+    from app.models.user import User, Role
+    from app.models.tenant import Company, SubscriptionPlan, SubscriptionPlanType
+
+    # Step 1: create all tables
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        return {"status": "error", "step": "create_tables", "detail": str(e)}
+
+    db = SessionLocal()
+    try:
+        # Step 2: check if already seeded
+        existing = db.query(User).filter(User.username == "supadmin").first()
+        if existing:
+            return {"status": "already_initialized", "message": "Database already seeded. Login: supadmin / supadmin123"}
+
+        # Step 3: create super admin role
+        admin_role = db.query(Role).filter(Role.name == "superadmin").first()
+        if not admin_role:
+            admin_role = Role(name="superadmin", description="Super Administrateur SaaS")
+            db.add(admin_role)
+            db.flush()
+
+        # Step 4: create default company
+        company = db.query(Company).first()
+        if not company:
+            plan = SubscriptionPlan(
+                code="ENTERPRISE",
+                nom="SaaS Entreprise",
+                type_plan=SubscriptionPlanType.ENTERPRISE,
+                prix_mensuel=1500000.0,
+                prix_annuel=15000000.0,
+                max_users=100,
+            )
+            db.add(plan)
+            db.flush()
+            company = Company(
+                nom="LPC SA",
+                code="LPC",
+                subscription_plan_id=plan.id,
+            )
+            db.add(company)
+            db.flush()
+
+        # Step 5: create users
+        users_to_create = [
+            {"username": "supadmin", "email": "supadmin@evo-log.cm", "password": "supadmin123", "is_superuser": True},
+            {"username": "admin",    "email": "admin@evo-log.cm",    "password": "admin123",    "is_superuser": False},
+        ]
+        created = []
+        for u in users_to_create:
+            user = User(
+                username=u["username"],
+                email=u["email"],
+                hashed_password=get_password_hash(u["password"]),
+                is_active=True,
+                is_superuser=u["is_superuser"],
+                company_id=company.id,
+            )
+            db.add(user)
+            created.append(u["username"])
+
+        db.commit()
+        return {
+            "status": "success",
+            "message": "Database initialized successfully",
+            "users_created": created,
+            "credentials": [
+                {"username": "supadmin", "password": "supadmin123", "role": "Super Admin SaaS"},
+                {"username": "admin",    "password": "admin123",    "role": "Admin Entreprise"},
+            ]
+        }
+    except Exception as e:
+        db.rollback()
+        return {"status": "error", "step": "seed", "detail": str(e)}
+    finally:
+        db.close()
 
 
 @app.get("/", response_class=HTMLResponse)
