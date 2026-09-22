@@ -1,0 +1,25 @@
+'use client';
+
+import React from 'react';
+
+export default function LoginPanelSVG() {
+  return (
+    <svg viewBox="0 0 400 400" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style={{ stopColor: '#1e40af', stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
+        </linearGradient>
+      </defs>
+      <rect width="400" height="400" fill="url(#grad1)" rx="20" />
+      <g transform="translate(100, 80)">
+        <rect x="20" y="40" width="160" height="120" rx="8" fill="white" opacity="0.9" />
+        <rect x="40" y="60" width="60" height="8" rx="4" fill="#1e40af" opacity="0.6" />
+        <rect x="40" y="80" width="100" height="8" rx="4" fill="#1e40af" opacity="0.4" />
+        <rect x="40" y="100" width="80" height="8" rx="4" fill="#1e40af" opacity="0.3" />
+        <circle cx="100" cy="200" r="30" fill="white" opacity="0.2" />
+        <path d="M90 200 L100 210 L115 190" stroke="white" strokeWidth="4" fill="none" />
+      </g>
+    </svg>
+  );
+}

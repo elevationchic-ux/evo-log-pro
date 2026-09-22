@@ -1,0 +1,26 @@
+'use client';
+
+import React from 'react';
+
+const roleColors: Record<string, string> = {
+  admin: 'bg-red-100 text-red-800',
+  manager: 'bg-blue-100 text-blue-800',
+  user: 'bg-gray-100 text-gray-800',
+  viewer: 'bg-green-100 text-green-800',
+};
+
+interface RoleBadgeProps {
+  role: string;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+export function RoleBadge({ role, size = 'sm' }: RoleBadgeProps) {
+  const color = roleColors[role.toLowerCase()] || 'bg-gray-100 text-gray-800';
+  const sizeClass = size === 'sm' ? 'px-2 py-0.5 text-xs' : size === 'md' ? 'px-3 py-1 text-sm' : 'px-4 py-1.5 text-base';
+
+  return (
+    <span className={`inline-flex items-center rounded-full font-medium ${color} ${sizeClass}`}>
+      {role}
+    </span>
+  );
+}
