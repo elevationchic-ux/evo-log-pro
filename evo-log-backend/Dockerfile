@@ -16,11 +16,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Install the application
-RUN pip install -e .
-
 # Expose port
 EXPOSE 8000
 
-# Run the application - use PORT env var (Railway injects it)
+# Run the application - PORT env var injected by Railway
 CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1
