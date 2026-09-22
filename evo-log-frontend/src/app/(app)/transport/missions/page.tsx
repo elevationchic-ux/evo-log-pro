@@ -6,6 +6,9 @@ import { Mission } from '@/types';
 import { ModuleLayout } from '@/components/layout/ModuleLayout';
 import { Truck, MapPin, Calendar, Package, Search, Filter, FilterX } from 'lucide-react';
 import { CardSkeletonLoader } from '@/components/ui/Loaders';
+import { EmptyStates } from '@/components/design-system/EmptyState';
+import { Button } from '@/components/design-system/Button';
+import { Input } from '@/components/design-system/Input';
 
 export default function MissionsPage() {
   const [missions, setMissions] = useState<any[]>([]);
@@ -91,26 +94,26 @@ export default function MissionsPage() {
             </h1>
             <p className="text-sm text-slate-500 mt-2">Suivi global, historique et recherche avancée des ordres de transport.</p>
           </div>
-          <button onClick={() => window.location.href='/transport/dispatch'} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition-all">
+          <Button onClick={() => window.location.href='/transport/dispatch'} className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[20px]">add</span>
             Nouvel Ordre (Dispatch)
-          </button>
+          </Button>
         </div>
 
         {/* Filters Bar */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col sm:flex-row gap-4 items-center">
           <div className="flex-1 w-full relative">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Rechercher (Référence, Origine, Destination, Fret...)" 
+            <Input
+              type="text"
+              placeholder="Rechercher (Référence, Origine, Destination, Fret...)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none"
+              className="w-full pl-10"
             />
           </div>
           <div className="flex gap-4 w-full sm:w-auto">
-            <select 
+            <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none"
@@ -122,21 +125,21 @@ export default function MissionsPage() {
               <option value="TERMINEE">Terminée</option>
               <option value="FACTUREE">Facturée</option>
             </select>
-            <input 
+            <Input
               type="date"
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none"
             />
             {activeFiltersCount > 0 && (
-              <button 
+              <Button
+                variant="ghost"
                 onClick={clearFilters}
-                className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 text-sm font-bold flex items-center gap-2"
+                className="flex items-center gap-2"
                 title="Effacer les filtres"
               >
                 <FilterX className="w-4 h-4" />
                 <span className="hidden sm:inline">Effacer</span>
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -167,9 +170,20 @@ export default function MissionsPage() {
                 <tr><td colSpan={5} className="px-6 py-12"><CardSkeletonLoader /></td></tr>
               ) : filteredMissions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-16 text-center">
-                    <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-500 font-medium text-lg">Aucune mission ne correspond à vos filtres.</p>
+                  <td colSpan={5} className="px-6 py-8">
+                    <EmptyStates.NoResults
+                      description={searchTerm || statusFilter || dateFilter
+                        ? "Aucune mission ne correspond à vos filtres."
+                        : "Aucune mission disponible pour le moment."}
+                      action={(searchTerm || statusFilter || dateFilter) ? {
+                        label: 'Effacer les filtres',
+                        onClick: () => {
+                          setSearchTerm('');
+                          setStatusFilter('');
+                          setDateFilter('');
+                        }
+                      } : undefined}
+                    />
                   </td>
                 </tr>
               ) : filteredMissions.map((mission) => (
@@ -212,14 +226,16 @@ export default function MissionsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => window.open(`/transport/documents/bl/${mission.id}`, '_blank')}
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 ml-auto"
+                      className="flex items-center gap-1.5 ml-auto"
                       title="Imprimer le Bon de Livraison"
                     >
                       <span className="material-symbols-outlined text-[16px]">print</span>
                       BL
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
