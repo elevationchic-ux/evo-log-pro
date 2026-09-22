@@ -296,7 +296,7 @@ export default function PortailQHSEPage() {
           </div>
 
           <button
-            onClick={() => toast.success('Attestation de conformité EPI enregistrée')}
+            onClick={() => toast.error("L'enregistrement des attestations EPI n'est pas encore raccordé à l'API.")}
             className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-sm"
           >
             Valider mon port des EPI

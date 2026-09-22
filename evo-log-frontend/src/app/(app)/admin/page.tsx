@@ -251,32 +251,18 @@ export default function AdminHubPage() {
           departement: newDepartement,
           telephone: newTelephone
         })
+        toast.success(`Compte créé avec succès pour ${newNomComplet}.`)
+        // Reset form
+        setNewNomComplet('')
+        setNewEmail('')
+        setNewRole('CHAUFFEUR')
+        setNewTelephone('')
+        setNewModulesAllowed(['transport', 'tracking', 'fuel-guard'])
+        setShowCreateModal(false)
       } catch (err) {
         toast.error("Le compte n'a pas pu être créé car l'API est indisponible.")
         return
       }
-
-      const newUserObj: SystemUser = {
-        id: `usr-${String(users.length + 1).padStart(3, '0')}`,
-        email: newEmail.toLowerCase().trim ? newEmail.toLowerCase().trim() : newEmail,
-        nom_complet: newNomComplet,
-        role: newRole,
-        roles: [newRole],
-        departement: newDepartement,
-        telephone: newTelephone || '+237 600 00 00 00',
-        is_active: true,
-        must_change_password: true,
-        created_at: new Date().toISOString().split('T')[0]
-      }
-
-      setUsers([newUserObj, ...users])
-      toast.success(`Compte créé avec succès pour ${newNomComplet}.`)
-      
-      // Reset form
-      setNewNomComplet('')
-      setNewEmail('')
-      setNewRole('CHAUFFEUR')
-      setNewTelephone('')
       setNewModulesAllowed(['transport', 'tracking', 'fuel-guard'])
       setShowCreateModal(false)
     } catch (error: any) {
@@ -301,7 +287,7 @@ export default function AdminHubPage() {
   }
 
   const handleResetPassword = (email: string) => {
-    toast.info(`Utilisez la gestion utilisateurs pour définir un nouveau mot de passe pour ${email}.`)
+    toast.error("La réinitialisation de mot de passe nécessite l'accès au panneau de gestion utilisateurs.")
   }
 
   const filteredUsers = users.filter(u => {

@@ -503,28 +503,7 @@ def rapport_securite(
 @router.get("/")
 def lister_enregistrements_qhse_root():
     """List summary QHSE records and audits for frontend dashboard"""
-    return [
-        {
-            "id": 1,
-            "type": "INSPECTION_SECURITE",
-            "zone": "Poste à Quai 14 PAD",
-            "statut": "CONFORME",
-            "score_conformite": 94,
-            "inspecteur": "Officier ISPS Mbarga",
-            "date": "2026-03-10",
-            "observations": "EPI complets dockers, balisage conforme"
-        },
-        {
-            "id": 2,
-            "type": "PERMIS_DE_FEU",
-            "zone": "Atelier Réparation Conteneurs",
-            "statut": "APPROUVE",
-            "score_conformite": 100,
-            "inspecteur": "Chef Sécurité Portuaire",
-            "date": "2026-03-11",
-            "observations": "Soudure sur paroi conteneur 40ft validée"
-        }
-    ]
+    return []
 
 
 # ============ PERMIS DE TRAVAIL DÉMATÉRIALISÉS ============
