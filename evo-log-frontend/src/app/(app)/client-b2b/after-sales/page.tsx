@@ -107,7 +107,7 @@ export default function ClientB2bAfterSalesPage() {
       description: '',
       montantReclame: ''
     });
-    toast.success(`Dossier de litige ${created.reference} ouvert. Notification transmise au service assurance.`);
+    toast.error("L'ouverture des dossiers de litige n'est pas encore raccordée à l'API.");
   };
 
   const filteredClaims = claims.filter(c => {

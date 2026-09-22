@@ -69,7 +69,7 @@ export default function ClientB2bPortalPage() {
       autoriserTelechargementBl: true,
       autoriserDepotReclamations: true
     });
-    toast.success(`Accès portail activé pour ${created.nomEntreprise}. Lien sécurisé transmis à ${created.contactEmail}.`);
+    toast.error("L'activation des accès portail n'est pas encore raccordée à l'API.");
   };
 
   const filteredUsers = portalUsers.filter(u => 

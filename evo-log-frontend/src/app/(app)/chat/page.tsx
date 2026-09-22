@@ -348,7 +348,7 @@ export default function EnterpriseChatPage() {
         }).catch(() => {});
       }
 
-      toast.success(`Appel vidéo connecté : ${peerLabel}`);
+      toast.info(`Appel vidéo initialisé avec ${peerLabel}`);
     } catch (err) {
       console.error("Erreur lors de l'appel vidéo:", err);
       toast.error("Impossible d'initialiser l'appel vidéo.");

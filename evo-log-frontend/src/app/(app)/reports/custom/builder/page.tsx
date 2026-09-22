@@ -109,7 +109,7 @@ export default function CustomReportBuilderPage() {
   };
 
   const handleExport = (format: 'excel' | 'pdf') => {
-    toast.success(`Génération du rapport personnalisé (${format.toUpperCase()}) terminée avec succès.`);
+    toast.error(`La génération du rapport personnalisé (${format.toUpperCase()}) n'est pas encore raccordée à l'API.`);
   };
 
   return (

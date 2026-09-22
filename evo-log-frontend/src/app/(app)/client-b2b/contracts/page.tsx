@@ -79,7 +79,7 @@ export default function ClientB2bContractsPage() {
       franchiseSurestarieJours: 14,
       valeurAnnuelleEstimee: ''
     });
-    toast.success(`Contrat-cadre ${created.reference} enregistré et activé.`);
+    toast.error("L'enregistrement des contrats-cadre n'est pas encore raccordé à l'API.");
   };
 
   const filteredContracts = contracts.filter(c => 

@@ -74,7 +74,7 @@ export default function MagasinInventoryPage() {
     setSubmitting(true);
     try {
       // Send adjustments for all items with counts recorded
-      toast.success("Session d'inventaire physique clôturée et transmise au contrôle de gestion.");
+      toast.error("La validation de l'inventaire physique n'est pas encore raccordée à l'API.");
       setInventoryMode(false);
       setCounts({});
       loadData();

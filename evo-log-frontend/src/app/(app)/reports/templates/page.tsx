@@ -186,7 +186,7 @@ export default function ReportTemplatesPage() {
                   <Edit className="w-3.5 h-3.5" /> Personnaliser
                 </Link>
                 <button
-                  onClick={() => toast.success(`Rapport "${tpl.titre}" généré avec succès.`)}
+                  onClick={() => toast.error("La génération de rapports n'est pas encore raccordée à l'API.")}
                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl font-semibold bg-primary text-on-primary hover:opacity-90 transition-opacity"
                 >
                   <Download className="w-3.5 h-3.5" /> Générer

@@ -43,8 +43,7 @@ export default function ReportTemplateEditPage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(`Modèle de rapport "${formData.titre}" enregistré avec succès !`);
-    router.push('/reports/templates');
+    toast.error("L'enregistrement des modèles de rapport n'est pas encore raccordé à l'API.");
   };
 
   return (

@@ -111,7 +111,7 @@ export default function ClientB2bCrmPage() {
       ville: 'Douala',
       pays: 'Cameroun'
     });
-    toast.success(`Contact « ${created.contactNom} » ajouté avec succès.`);
+    toast.error("L'ajout de contacts CRM n'est pas encore raccordé à l'API.");
   };
 
   const filteredContacts = contacts.filter(c => 

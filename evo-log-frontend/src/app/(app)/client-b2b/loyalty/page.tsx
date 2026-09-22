@@ -70,7 +70,7 @@ export default function ClientB2bLoyaltyPage() {
       joursFranchiseOfferts: 5,
       gestionnaireDedie: 'Service Grands Comptes CADC'
     });
-    toast.success(`Barème de fidélisation RFA activé pour ${created.clientNom}.`);
+    toast.error("L'activation des barèmes de fidélisation n'est pas encore raccordée à l'API.");
   };
 
   const filteredAccounts = accounts.filter(a => 

@@ -70,7 +70,7 @@ export default function SystemSettingsPage() {
       });
       toast.success('Paramètres système mis à jour avec succès.');
     } catch (err: any) {
-      toast.success('Configuration système enregistrée et appliquée au runtime.');
+      toast.error("Impossible de mettre à jour les paramètres système.");
     } finally {
       setSaving(false);
     }

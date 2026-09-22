@@ -71,7 +71,7 @@ export default function ClientB2bAnalyticsPage() {
             <option value="2024">Exercice 2024</option>
           </select>
           <button
-            onClick={() => toast.success('Export rapport analytics clients généré.')}
+            onClick={() => toast.error("L'export du rapport analytics n'est pas encore raccordé à l'API.")}
             className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-primary text-on-primary hover:opacity-95"
           >
             <Download className="w-4 h-4" />

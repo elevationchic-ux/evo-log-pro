@@ -85,7 +85,7 @@ export default function InvoicingPage() {
             <RefreshCw className="w-4 h-4" />
           </button>
           <button
-            onClick={() => toast.success('Export du journal des ventes téléchargé.')}
+            onClick={() => toast.error("L'export du journal des ventes n'est pas encore raccordé à l'API.")}
             className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold border border-outline rounded-xl hover:bg-surface-container text-on-surface"
           >
             <Download className="w-4 h-4" /> Exporter
