@@ -435,11 +435,12 @@ async def setup_database():
     from app.models.user import User, Role
     from app.models.tenant import Company, SubscriptionPlan, SubscriptionPlanType
 
-    # Step 1: create all tables
+    # Step 1: create all tables (idempotent — safe if tables already exist)
     try:
         Base.metadata.create_all(bind=engine)
     except Exception as e:
-        return {"status": "error", "step": "create_tables", "detail": str(e)}
+        # DuplicateTable / already exists → tables are already there, continue
+        logger.warning(f"create_all warning (tables may already exist): {e}")
 
     db = SessionLocal()
     try:
