@@ -2,7 +2,7 @@
 Transport router - manages vehicles, drivers, and missions
 """
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 
 from app.core.database import get_db
@@ -78,8 +78,11 @@ async def create_conducteur(conducteur_data: ConducteurCreate, db: Session = Dep
 
 @router.get("/missions", response_model=List[MissionResponse])
 async def get_all_missions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Get all missions"""
-    missions = db.query(Mission).offset(skip).limit(limit).all()
+    """Get all missions with eager loading to avoid N+1 queries"""
+    missions = db.query(Mission).options(
+        joinedload(Mission.conducteur),
+        joinedload(Mission.camion)
+    ).offset(skip).limit(limit).all()
     return missions
 
 

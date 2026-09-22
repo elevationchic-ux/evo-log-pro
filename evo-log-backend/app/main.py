@@ -241,6 +241,10 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-Idempotency-Key", "X-Request-ID", "trace-id", "baggage", "sentry-trace"],
 )
 
+# Prometheus metrics endpoint for monitoring
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
+
 
 @app.middleware("http")
 async def api_v1_rewrite_middleware(request: Request, call_next):
