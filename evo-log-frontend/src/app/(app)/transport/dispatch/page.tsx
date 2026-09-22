@@ -1,65 +1,94 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Truck, MapPin, Zap, Navigation, AlertTriangle, CheckCircle2,
   Clock, User, Phone, Fuel, Package, BarChart3, ChevronRight,
-  Activity, Shield, Target
+  Activity, Shield, Target, RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { transportAPI } from '@/lib/api-client';
+import { EmptyStates } from '@/components/design-system/EmptyState';
+import { Button } from '@/components/design-system/Button';
+
+interface VehicleData {
+  id: string;
+  immat: string;
+  model: string;
+  chauffeur: string;
+  tel: string;
+  statut: string;
+  mission: string;
+  position: string;
+  gps: { lat: number; lng: number };
+  kmParcourus: number;
+  kmTotal: number;
+  fuel: number;
+  vitesse: number;
+  carburantConsomme: number;
+  poids: string;
+  prochainArret: string;
+  alerts: string[];
+}
 
 export default function TransportDispatchPage() {
-  const [selectedVehicle, setSelectedVehicle] = useState<string | null>('TRK-CM-001');
+  const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
+  const [fleet, setFleet] = useState<VehicleData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const fleet = [
-    {
-      id: 'TRK-CM-001', immat: 'LT 2291 B', model: 'VOLVO FH 460 (2022)', chauffeur: 'M. Moukouri Jean',
-      tel: '+237 697 123 456', statut: 'EN TRANSIT', mission: 'MSQU7829104 → N\'Djamena',
-      position: 'Ngaoundéré Pk 12 RN1', gps: { lat: 7.3221, lng: 13.5835 },
-      kmParcourus: 489, kmTotal: 1580, fuel: 68, vitesse: 72, carburantConsomme: 145,
-      poids: '28.4 T / 30 T', prochainArret: 'Ngaoundéré (Contrôle Douane)  2h30',
-      alerts: []
-    },
-    {
-      id: 'TRK-CM-002', immat: 'LT 8840 A', model: 'MAN TGX 18.440 (2021)', chauffeur: 'Mme Ngono Sylvie',
-      tel: '+237 699 876 543', statut: 'CHARGEMENT', mission: 'Réception Quai Douala Port III',
-      position: 'Douala Port III  Terminal à Conteneurs',
-      gps: { lat: 4.0511, lng: 9.7679 },
-      kmParcourus: 0, kmTotal: 0, fuel: 95, vitesse: 0, carburantConsomme: 0,
-      poids: '0 T / 30 T', prochainArret: 'Départ prévu 14:00',
-      alerts: ['BAE en attente  Conteneur CMAU9102834']
-    },
-    {
-      id: 'TRK-CM-003', immat: 'LT 4421 C', model: 'IVECO STRALIS (2023)', chauffeur: 'M. Tsala Eric',
-      tel: '+237 694 321 789', statut: 'LIVRAISON', mission: 'HLXU3891025 → Yaoundé Cradat',
-      position: 'Yaoundé  Cradat Rd Bastos',
-      gps: { lat: 3.8667, lng: 11.5167 },
-      kmParcourus: 260, kmTotal: 260, fuel: 42, vitesse: 0, carburantConsomme: 78,
-      poids: '18.2 T / 28 T', prochainArret: 'Signature e-POD en cours',
-      alerts: ['Niveau carburant faible  Prévoir ravitaillement']
-    },
-    {
-      id: 'TRK-CM-004', immat: 'LT 1109 B', model: 'MERCEDES ACTROS (2020)', chauffeur: 'M. Mvogo Patrick',
-      tel: '+237 677 654 321', statut: 'DISPONIBLE', mission: '',
-      position: 'Parc Douala Zone Bassa',
-      gps: { lat: 4.0134, lng: 9.7218 },
-      kmParcourus: 0, kmTotal: 0, fuel: 100, vitesse: 0, carburantConsomme: 0,
-      poids: '0 T / 30 T', prochainArret: 'En attente d\'affectation',
-      alerts: []
-    },
-  ];
+  useEffect(() => {
+    loadFleet();
+  }, []);
 
-  const selected = fleet.find(v => v.id === selectedVehicle);
+  const loadFleet = async () => {
+    try {
+      const res = await transportAPI.getCamions();
+      const d = res.data;
+      const list = Array.isArray(d) ? d : (d?.items || (Array.isArray(res) ? res : []));
+      // Transform API data to expected format
+      const transformed = list.map((c: any) => ({
+        id: c.id?.toString() || `TRK-${c.id}`,
+        immat: c.immatriculation || 'N/A',
+        model: c.modele || 'Modèle inconnu',
+        chauffeur: c.chauffeur_nom || 'Non assigné',
+        tel: c.chauffeur_telephone || 'N/A',
+        statut: c.statut || 'DISPONIBLE',
+        mission: c.mission_reference || '',
+        position: c.position || 'Non disponible',
+        gps: { lat: 0, lng: 0 },
+        kmParcourus: c.km_parcourus || 0,
+        kmTotal: c.km_total || 0,
+        fuel: c.niveau_carburant || 0,
+        vitesse: c.vitesse || 0,
+        carburantConsomme: c.carburant_consomme || 0,
+        poids: `${c.poids_actuel || 0} T / ${c.capacite || 30} T`,
+        prochainArret: c.prochain_arret || 'Non disponible',
+        alerts: c.alertes || []
+      }));
+      setFleet(transformed);
+      if (transformed.length > 0 && !selectedVehicle) {
+        setSelectedVehicle(transformed[0].id);
+      }
+    } catch (err) {
+      console.error('Error loading fleet:', err);
+      toast.error('Impossible de charger la flotte');
+      setFleet([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectedVehicleData = fleet.find(v => v.id === selectedVehicle);
 
   const statutColors: Record<string, string> = {
-    'EN TRANSIT': 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    'EN_TRANSIT': 'bg-blue-500/10 text-blue-400 border-blue-500/30',
     'CHARGEMENT': 'bg-amber-500/10 text-amber-400 border-amber-500/30',
     'LIVRAISON': 'bg-purple-500/10 text-purple-400 border-purple-500/30',
     'DISPONIBLE': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
   };
 
   const fleetKpis = [
-    { label: 'Camions en Transit', value: fleet.filter(v => v.statut === 'EN TRANSIT').length, color: 'text-blue-400' },
+    { label: 'Camions en Transit', value: fleet.filter(v => v.statut === 'EN_TRANSIT' || v.statut === 'EN TRANSIT').length, color: 'text-blue-400' },
     { label: 'En Chargement', value: fleet.filter(v => v.statut === 'CHARGEMENT').length, color: 'text-amber-400' },
     { label: 'En Livraison', value: fleet.filter(v => v.statut === 'LIVRAISON').length, color: 'text-purple-400' },
     { label: 'Disponibles', value: fleet.filter(v => v.statut === 'DISPONIBLE').length, color: 'text-emerald-400' },
@@ -75,12 +104,12 @@ export default function TransportDispatchPage() {
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">GPS live · Affectation missions · Consommation carburant · e-POD · Alertes corridor CEMAC</p>
         </div>
-        <button
+        <Button
           onClick={() => toast.info('Formulaire de création de mission transport')}
-          className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-lg"
+          className="flex items-center gap-2"
         >
           <Zap className="w-4 h-4" /> Affecter Mission
-        </button>
+        </Button>
       </div>
 
       {/* Fleet KPIs */}
@@ -96,20 +125,36 @@ export default function TransportDispatchPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Fleet List */}
         <div className="space-y-2 lg:col-span-1">
-          {fleet.map(v => (
-            <button
-              key={v.id}
-              onClick={() => setSelectedVehicle(v.id)}
-              className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedVehicle === v.id ? 'bg-amber-500/10 border-amber-500/40' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}`}
-            >
+          {loading ? (
+            <div className="p-8 text-center text-slate-400">
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
+              <span className="text-sm">Chargement de la flotte...</span>
+            </div>
+          ) : fleet.length === 0 ? (
+            <div className="p-8">
+              <EmptyStates.NoData
+                description="Aucun véhicule dans la flotte."
+                action={{
+                  label: 'Rafraîchir',
+                  onClick: loadFleet
+                }}
+              />
+            </div>
+          ) : (
+            fleet.map(v => (
+              <button
+                key={v.id}
+                onClick={() => setSelectedVehicle(v.id)}
+                className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedVehicle === v.id ? 'bg-amber-500/10 border-amber-500/40' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}`}
+              >
               <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${statutColors[v.statut]}`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${statutColors[v.statut.replace(/\s/g, '_')] || 'bg-slate-700 text-slate-400'}`}>
                   <Truck className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black text-white">{v.immat}</span>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${statutColors[v.statut]}`}>{v.statut}</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${statutColors[v.statut.replace(/\s/g, '_')] || 'bg-slate-700 text-slate-400 border-slate-600'}`}>{v.statut}</span>
                   </div>
                   <div className="text-[11px] text-slate-400 truncate">{v.chauffeur}</div>
                   <div className="text-[10px] text-slate-500 truncate mt-0.5">{v.position}</div>
@@ -122,28 +167,29 @@ export default function TransportDispatchPage() {
                 <Fuel className="w-3 h-3 text-slate-500" />
                 <div className="flex-1 bg-slate-800 rounded-full h-1.5">
                   <div
-                    className={`h-full rounded-full ${v.fuel > 50 ? 'bg-emerald-500' : v.fuel > 25 ? 'bg-amber-500' : 'bg-red-500'}`}
-                    style={{ width: `${v.fuel}%` }}
+                    className={`h-full rounded-full ${(v.fuel || 0) > 50 ? 'bg-emerald-500' : (v.fuel || 0) > 25 ? 'bg-amber-500' : 'bg-red-500'}`}
+                    style={{ width: `${v.fuel || 0}%` }}
                   ></div>
                 </div>
-                <span className="text-[10px] font-mono text-slate-400">{v.fuel}%</span>
+                <span className="text-[10px] font-mono text-slate-400">{v.fuel || 0}%</span>
               </div>
             </button>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Vehicle Detail */}
         <div className="lg:col-span-2">
-          {selected ? (
+          {selectedVehicle ? (
             <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-5 shadow-xl">
               {/* Vehicle header */}
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg font-black text-white font-mono">{selected.immat}</span>
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statutColors[selected.statut]}`}>{selected.statut}</span>
+                    <span className="text-lg font-black text-white font-mono">{selectedVehicleData.immat}</span>
+                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statutColors[selectedVehicleData.statut]}`}>{selectedVehicleData.statut}</span>
                   </div>
-                  <div className="text-xs text-slate-400">{selected.model}</div>
+                  <div className="text-xs text-slate-400">{selectedVehicleData.model}</div>
                 </div>
                 <button onClick={() => toast.error("L'appel chauffeur n'est pas encore raccordé à l'API.")} className="p-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl hover:bg-emerald-500/20 transition-colors">
                   <Phone className="w-4 h-4" />
@@ -164,8 +210,8 @@ export default function TransportDispatchPage() {
                 </div>
                 <div className="text-center z-10">
                   <MapPin className="w-8 h-8 text-amber-400 mx-auto mb-1 animate-bounce" />
-                  <div className="text-xs font-bold text-white">{selected.position}</div>
-                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">{selected.gps.lat.toFixed(4)}°N, {selected.gps.lng.toFixed(4)}°E</div>
+                  <div className="text-xs font-bold text-white">{selectedVehicleData.position}</div>
+                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">{selectedVehicleData.gps.lat.toFixed(4)}°N, {selectedVehicleData.gps.lng.toFixed(4)}°E</div>
                   <div className="text-[10px] text-amber-400/60 mt-0.5">GPS mis à jour il y a 45 sec</div>
                 </div>
               </div>
@@ -173,12 +219,12 @@ export default function TransportDispatchPage() {
               {/* Mission & metrics */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {[
-                  { label: 'Mission', value: selected.mission, icon: Target },
-                  { label: 'Chauffeur', value: selected.chauffeur, icon: User },
-                  { label: 'Vitesse', value: `${selected.vitesse} km/h`, icon: Activity },
-                  { label: 'Km parcourus', value: `${selected.kmParcourus.toLocaleString()} km`, icon: Navigation },
-                  { label: 'Charge', value: selected.poids, icon: Package },
-                  { label: 'Carburant', value: `${selected.fuel}%  ${selected.carburantConsomme}L consommés`, icon: Fuel },
+                  { label: 'Mission', value: selectedVehicleData.mission, icon: Target },
+                  { label: 'Chauffeur', value: selectedVehicleData.chauffeur, icon: User },
+                  { label: 'Vitesse', value: `${selectedVehicleData.vitesse} km/h`, icon: Activity },
+                  { label: 'Km parcourus', value: `${selectedVehicleData.kmParcourus.toLocaleString()} km`, icon: Navigation },
+                  { label: 'Charge', value: selectedVehicleData.poids, icon: Package },
+                  { label: 'Carburant', value: `${selectedVehicleData.fuel}%  ${selectedVehicleData.carburantConsomme}L consommés`, icon: Fuel },
                 ].map((m, i) => {
                   const Icon = m.icon;
                   return (
@@ -194,9 +240,9 @@ export default function TransportDispatchPage() {
               </div>
 
               {/* Alerts */}
-              {selected.alerts.length > 0 && (
+              {selectedVehicleData.alerts.length > 0 && (
                 <div className="space-y-2">
-                  {selected.alerts.map((alert, i) => (
+                  {selectedVehicleData.alerts.map((alert, i) => (
                     <div key={i} className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-2 text-xs text-amber-300">
                       <AlertTriangle className="w-4 h-4 shrink-0" />
                       {alert}
@@ -207,15 +253,14 @@ export default function TransportDispatchPage() {
 
               {/* Next stop */}
               <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl text-xs text-blue-300">
-                <strong>Prochain arrêt :</strong> {selected.prochainArret}
+                <strong>Prochain arrêt :</strong> {selectedVehicleData.prochainArret}
               </div>
             </div>
           ) : (
             <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-8 flex items-center justify-center h-full">
-              <div className="text-center text-slate-500">
-                <Truck className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Sélectionnez un véhicule pour voir les détails</p>
-              </div>
+              <EmptyStates.NoData
+                description="Sélectionnez un véhicule pour voir les détails en temps réel."
+              />
             </div>
           )}
         </div>
