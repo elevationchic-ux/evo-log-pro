@@ -8,6 +8,10 @@ import {
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
+import { Card, CardBody, CardHeader } from '@/components/design-system/Card';
+import { Button } from '@/components/design-system/Button';
+import { EmptyStates } from '@/components/design-system/EmptyState';
+import { Input } from '@/components/design-system/Input';
 
 interface MissionItem {
   id: number;
@@ -296,11 +300,13 @@ export default function PortailChauffeurPage() {
                 <span className="text-xs text-slate-500">Chargement des missions...</span>
               </div>
             ) : missions.length === 0 ? (
-              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200">
-                <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-                <p className="text-sm font-bold text-slate-800">Aucune mission en attente</p>
-                <p className="text-xs text-slate-500">Toutes vos livraisons sont à jour.</p>
-              </div>
+              <Card>
+                <CardBody>
+                  <EmptyStates.NoData
+                    description="Aucune mission en attente. Toutes vos livraisons sont à jour."
+                  />
+                </CardBody>
+              </Card>
             ) : (
               missions.map((m) => (
                 <div
@@ -466,12 +472,21 @@ export default function PortailChauffeurPage() {
           </div>
 
           <div className="pt-4 flex justify-end">
-            <button
-              onClick={() => toast.error("L'enregistrement des inspections de prise de poste n'est pas encore raccordé à l'API.")}
-              className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-sm"
+            <Button
+              onClick={() => {
+                const checkedItems = Object.values(checklist).filter(v => v).length;
+                const totalItems = Object.keys(checklist).length;
+                if (checkedItems === totalItems) {
+                  toast.success('Inspection validée avec succès !');
+                  setInspectionSubmitted(true);
+                } else {
+                  toast.error(`Vérifiez tous les items : ${checkedItems}/${totalItems} items conformes`);
+                }
+              }}
+              className="w-full"
             >
               Valider la prise de poste
-            </button>
+            </Button>
           </div>
         </div>
       )}
