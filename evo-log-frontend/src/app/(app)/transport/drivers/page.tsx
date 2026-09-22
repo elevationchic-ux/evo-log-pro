@@ -7,6 +7,9 @@ import { transportAPI } from '@/lib/api-client';
 import { UserPlus, Search, Phone, FileText, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { ModuleLayout } from '@/components/layout/ModuleLayout';
 import { CardSkeletonLoader } from '@/components/ui/Loaders';
+import { EmptyStates } from '@/components/design-system/EmptyState';
+import { Button } from '@/components/design-system/Button';
+import { Input } from '@/components/design-system/Input';
 
 export default function DriversListPage() {
   const router = useRouter();
@@ -45,21 +48,21 @@ export default function DriversListPage() {
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Rechercher un chauffeur..." 
+              <Input
+                type="text"
+                placeholder="Rechercher un chauffeur..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64 text-sm"
+                className="pl-10 w-64"
               />
             </div>
-            <button 
+            <Button
               onClick={() => router.push('/transport/drivers/new')}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition-all active:scale-95"
+              className="flex items-center gap-2"
             >
               <UserPlus className="w-5 h-5" />
               Nouveau Chauffeur
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -81,11 +84,19 @@ export default function DriversListPage() {
                 <tr><td colSpan={6} className="px-6 py-12"><CardSkeletonLoader /></td></tr>
               ) : filteredChauffeurs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                    <div className="flex flex-col items-center justify-center">
-                      <ShieldAlert className="w-12 h-12 text-slate-300 mb-4" />
-                      <p className="text-lg font-medium text-slate-600">Aucun chauffeur trouvé</p>
-                    </div>
+                  <td colSpan={6} className="px-6 py-8">
+                    <EmptyStates.NoResults
+                      description={searchTerm
+                        ? "Aucun chauffeur ne correspond à votre recherche."
+                        : "Aucun chauffeur enregistré pour le moment."}
+                      action={searchTerm ? {
+                        label: 'Effacer la recherche',
+                        onClick: () => setSearchTerm('')
+                      } : {
+                        label: 'Créer un chauffeur',
+                        onClick: () => router.push('/transport/drivers/new')
+                      }}
+                    />
                   </td>
                 </tr>
               ) : (
@@ -131,9 +142,14 @@ export default function DriversListPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Voir profil">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-2"
+                        title="Voir profil"
+                      >
                         <FileText className="w-5 h-5" />
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))
