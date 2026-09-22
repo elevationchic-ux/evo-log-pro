@@ -467,10 +467,7 @@ export default function PortailChauffeurPage() {
 
           <div className="pt-4 flex justify-end">
             <button
-              onClick={() => {
-                setInspectionSubmitted(true);
-                toast.success('Inspection prise de poste enregistrée et archivée');
-              }}
+              onClick={() => toast.error("L'enregistrement des inspections de prise de poste n'est pas encore raccordé à l'API.")}
               className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-sm"
             >
               Valider la prise de poste

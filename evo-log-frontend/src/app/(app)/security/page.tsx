@@ -57,8 +57,7 @@ export default function SecuritySettingsPage() {
       setTwoFactorEnabled(nextState);
       toast.success(nextState ? '2FA TOTP activée avec succès.' : '2FA désactivée.');
     } catch {
-      setTwoFactorEnabled(nextState);
-      toast.success(nextState ? '2FA TOTP activée avec succès.' : '2FA désactivée.');
+      toast.error("Impossible de modifier le paramètre 2FA TOTP.");
     }
   };
 
@@ -67,7 +66,7 @@ export default function SecuritySettingsPage() {
       await authAPI.revokeSessions();
       toast.success('Toutes les autres sessions actives ont été révoquées avec succès.');
     } catch {
-      toast.success('Toutes les autres sessions actives ont été révoquées.');
+      toast.error("Impossible de révoquer les sessions actives.");
     }
   };
 

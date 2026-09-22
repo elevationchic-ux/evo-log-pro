@@ -71,7 +71,7 @@ export default function PortailDeclarantPage() {
   const handleToggleJalon = (key: keyof typeof jalons) => {
     setJalons(prev => {
       const next = { ...prev, [key]: !prev[key] };
-      toast.success(`Jalon terrain mis à jour`);
+      toast.error("La mise à jour des jalons terrain n'est pas encore raccordée à l'API.");
       return next;
     });
   };
