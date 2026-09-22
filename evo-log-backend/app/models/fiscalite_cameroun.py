@@ -118,8 +118,11 @@ class RetenueSourceCameroun(Base):
     """Retenue à la source - Cameroon (fiscalité locale, utilise la même table que RetenueSource OHADA)"""
     __tablename__ = "retenues_source"
     __table_args__ = {'extend_existing': True}
-    
-    id = Column(Integer, primary_key=True, index=True)
+    # PAS index=True ici: la table est deja declaree par RetenueSource
+    # (finance_ohada) et redeclarer l'index creerait un doublon
+    # 'ix_retenues_source_id' qui fait echouer create_all (Postgres et
+    # SQLite partagent les noms d'index au niveau du schema).
+    id = Column(Integer, primary_key=True)
 
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=False)
     type_retenue = Column(String(50), nullable=False)  # SALAIRE, HONORAIRE, DIVIDENDE, LOYER

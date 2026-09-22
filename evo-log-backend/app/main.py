@@ -247,7 +247,7 @@ app.add_middleware(
 async def api_v1_rewrite_middleware(request: Request, call_next):
     """Transparently route legacy /api/* requests to /api/v1/*"""
     path = request.url.path
-    EXCLUDED = ("/api/v1/", "/api/health", "/api/docs", "/api/redoc", "/api/openapi.json", "/api/setup")
+    EXCLUDED = ("/api/v1/", "/api/health", "/api/docs", "/api/redoc", "/api/openapi.json", "/api/setup", "/api/seed")
     if path.startswith("/api/") and not any(path.startswith(e) for e in EXCLUDED):
         new_path = path.replace("/api/", "/api/v1/", 1)
         request.scope["path"] = new_path
@@ -420,49 +420,53 @@ async def health_check():
     return {"status": "ok", "service": "EVO-LOG EM-ERP", "version": "2.0.0"}
 
 
-@app.post('/api/setup')
-@app.get('/api/setup')
-@app.post('/api/v1/setup')
-@app.get('/api/v1/setup')
-async def setup_database():
+def _bootstrap_schema_and_seed():
     """
-    One-time database initialization: creates all tables and seeds initial admin users.
-    Safe to call multiple times  skips if users already exist.
+    Source de verite unique de l'initialisation de la base, partagee par
+    /api/setup et /api/seed :
+      1. Base.metadata.create_all()  un seul appel, tri topologique correct
+         (checkfirst implicite). La contrainte circulaire users<->departments
+         est declaree use_alter=True cote Department.manager_id, donc emise
+         en ALTER TABLE apres creation des deux tables : sans cela, le cycle
+         corrompait tout le tri et des CREATE TABLE echouaient en
+         cascade ("relation users does not exist") ;
+      2. insere le role superadmin, le plan / la societe par defaut et les
+         utilisateurs admin via la session ORM (typage sur, notamment pour
+         l'enum type_plan).
+    Idempotent : sans effet si 'supadmin' existe deja. Bloquant -> appele
+    via asyncio.to_thread depuis les endpoints. Retourne un dict normalise
+    avec 'status' in {success, already, error}.
     """
     from app.core.database import Base, engine, SessionLocal
-    import app.models  # noqa: ensure all models registered
+    import app.models  # noqa: F401 - enregistre tous les modeles
     from app.core.security import get_password_hash
     from app.models.user import User, Role
     from app.models.tenant import Company, SubscriptionPlan, SubscriptionPlanType
+    from sqlalchemy import inspect as sa_inspect
 
-    # Step 1: create all tables individually (skip tables/indexes that already exist)
-    tables_created = 0
-    tables_skipped = 0
-    for table in Base.metadata.sorted_tables:
-        try:
-            table.create(bind=engine, checkfirst=True)
-            tables_created += 1
-        except Exception as e:
-            # Table or index already exists — skip and continue
-            logger.warning(f"Table {table.name} skip: {e}")
-            tables_skipped += 1
-    logger.info(f"✅ Tables: {tables_created} created, {tables_skipped} skipped (already exist)")
+    before = set(sa_inspect(engine).get_table_names())
+    Base.metadata.create_all(bind=engine)
+    after = set(sa_inspect(engine).get_table_names())
+    tables_created = len(after - before)
+    tables_skipped = len(after & before)
+    logger.info(f"Tables: {tables_created} created, {tables_skipped} already present")
 
     db = SessionLocal()
     try:
-        # Step 2: check if already seeded
         existing = db.query(User).filter(User.username == "supadmin").first()
         if existing:
-            return {"status": "already_initialized", "message": "Database already seeded. Login: supadmin / supadmin123"}
+            return {
+                "status": "already",
+                "tables_created": tables_created,
+                "tables_skipped": tables_skipped,
+            }
 
-        # Step 3: create super admin role
         admin_role = db.query(Role).filter(Role.name == "superadmin").first()
         if not admin_role:
             admin_role = Role(name="superadmin", description="Super Administrateur SaaS")
             db.add(admin_role)
             db.flush()
 
-        # Step 4: create default company
         company = db.query(Company).first()
         if not company:
             plan = SubscriptionPlan(
@@ -475,47 +479,95 @@ async def setup_database():
             )
             db.add(plan)
             db.flush()
-            company = Company(
-                nom="LPC SA",
-                code="LPC",
-                subscription_plan_id=plan.id,
-            )
+            company = Company(nom="LPC SA", code="LPC", subscription_plan_id=plan.id)
             db.add(company)
             db.flush()
 
-        # Step 5: create users
-        users_to_create = [
-            {"username": "supadmin", "email": "supadmin@evo-log.cm", "password": "supadmin123", "is_superuser": True},
-            {"username": "admin",    "email": "admin@evo-log.cm",    "password": "admin123",    "is_superuser": False},
+        users_spec = [
+            {"username": "supadmin", "email": "supadmin@evo-log.cm", "password": "supadmin123", "is_superuser": True, "role_level": 0},
+            {"username": "admin", "email": "admin@evo-log.cm", "password": "admin123", "is_superuser": False, "role_level": 1},
         ]
         created = []
-        for u in users_to_create:
-            user = User(
+        for u in users_spec:
+            db.add(User(
                 username=u["username"],
                 email=u["email"],
                 hashed_password=get_password_hash(u["password"]),
                 is_active=True,
                 is_superuser=u["is_superuser"],
+                role_level=u["role_level"],
                 company_id=company.id,
-            )
-            db.add(user)
+            ))
             created.append(u["username"])
-
         db.commit()
         return {
             "status": "success",
-            "message": "Database initialized successfully",
+            "tables_created": tables_created,
+            "tables_skipped": tables_skipped,
             "users_created": created,
-            "credentials": [
-                {"username": "supadmin", "password": "supadmin123", "role": "Super Admin SaaS"},
-                {"username": "admin",    "password": "admin123",    "role": "Admin Entreprise"},
-            ]
         }
     except Exception as e:
         db.rollback()
         return {"status": "error", "step": "seed", "detail": str(e)}
     finally:
         db.close()
+
+
+@app.post('/api/setup')
+@app.get('/api/setup')
+@app.post('/api/v1/setup')
+@app.get('/api/v1/setup')
+async def setup_database():
+    """
+    One-time database initialization: creates all tables and seeds initial admin users.
+    Safe to call multiple times  skips if users already exist.
+    Logique partagee avec /api/seed via _bootstrap_schema_and_seed().
+    """
+    result = await asyncio.to_thread(_bootstrap_schema_and_seed)
+    if result["status"] == "already":
+        return {"status": "already_initialized", "message": "Database already seeded. Login: supadmin / supadmin123"}
+    if result["status"] == "error":
+        return result
+    return {
+        "status": "success",
+        "message": "Database initialized successfully",
+        "users_created": result.get("users_created", []),
+        "tables": {"created": result["tables_created"], "skipped": result["tables_skipped"]},
+        "credentials": [
+            {"username": "supadmin", "password": "supadmin123", "role": "Super Admin SaaS"},
+            {"username": "admin",    "password": "admin123",    "role": "Admin Entreprise"},
+        ],
+    }
+
+
+@app.post('/api/seed')
+@app.get('/api/seed')
+@app.post('/api/v1/seed')
+@app.get('/api/v1/seed')
+async def seed_users_raw():
+    """
+    Emergency seed endpoint. Partage la meme logique que /api/setup via
+    _bootstrap_schema_and_seed : create_all() sur le schema des modeles
+    (parite stricte avec l'ORM, aucun DDL ecrit a la main qui derive),
+    puis seed les admins. Idempotent et sur.
+    """
+    result = await asyncio.to_thread(_bootstrap_schema_and_seed)
+    if result["status"] == "already":
+        return {
+            "status": "already_seeded",
+            "message": "Users already exist. Login: supadmin / supadmin123",
+        }
+    if result["status"] == "error":
+        return result
+    return {
+        "status": "success",
+        "message": "Tables ensured and admin users seeded",
+        "tables": {"created": result["tables_created"], "skipped": result["tables_skipped"]},
+        "credentials": [
+            {"username": "supadmin", "password": "supadmin123", "role": "Super Admin"},
+            {"username": "admin", "password": "admin123", "role": "Admin"},
+        ],
+    }
 
 
 @app.get("/", response_class=HTMLResponse)

@@ -175,7 +175,12 @@ class Department(Base):
     
     # Hierarchy
     parent_id = Column(Integer, ForeignKey('departments.id'))
-    manager_id = Column(Integer, ForeignKey('users.id'))
+    # use_alter: users.department_id -> departments.id cree un cycle FK
+    # users<->departments. Sans ALTER TABLE differe, le tri topologique de
+    # create_all est corrompu et la creation en cascade echoue sur Postgres
+    # ("relation users does not exist"). La contrainte est ajoutee apres
+    # creation des deux tables.
+    manager_id = Column(Integer, ForeignKey('users.id', use_alter=True, name='fk_departments_manager_id_users'))
     
     # Modules authorized for this department
     modules_allowed = Column(Text)  # JSON string
