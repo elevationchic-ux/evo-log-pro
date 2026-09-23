@@ -84,5 +84,11 @@ def downgrade():
             op.drop_index(f"ix_{table}_company_id", table_name=table)
         cols = _existing_columns(inspector, table)
         if "company_id" in cols:
-            op.drop_constraint(f"fk_{table}_company_id", table, type_="foreignkey")
-            op.drop_column(table, "company_id")
+            # batch_alter_table : sur Postgres, DROP COLUMN cascade deja sur la
+            # FK de cette colonne ; sur SQLite, un ALTER ... DROP CONSTRAINT /
+            # DROP COLUMN natif n'existe pas -> le copy-and-move (RecreateStrategy)
+            # recree la table sans company_id, ce qui retire aussi sa FK. On n'a
+            # donc pas besoin d'un drop_constraint explicite (et SQLite ne garde
+            # pas de nom de FK, ce qui ferait echouer un drop par nom).
+            with op.batch_alter_table(table) as batch_op:
+                batch_op.drop_column("company_id")

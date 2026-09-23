@@ -1639,6 +1639,24 @@ def upgrade():
 
 
 def downgrade():
+    # Snapshot des tables presentes a l'entree de CE downgrade. Cette revision
+    # est un snapshot monolithique qui re-declare des tables creees ailleurs
+    # (conteneurs, factures par 002, ecritures_comptables par 003). Alembic
+    # invoque chaque revision separement, donc une table deja droppee par une
+    # autre revision n'est plus presente ici : on ne droppe les tables
+    # "collision" que si elles existent reellement -> rollback lineaire robuste
+    # (sans garde : "no such table / no such index").
+    _insp = sa.inspect(op.get_bind())
+    _existing = set(_insp.get_table_names())
+
+    def _has_index(table, name):
+        # Le bloc create_table de ces tables "collision" est saute a l'upgrade
+        # quand la table pre-existe (creee par 002/003), donc les INDEX nommes
+        # propres a 005 n'ont jamais ete crees non plus : guard par index.
+        try:
+            return name in {i["name"] for i in _insp.get_indexes(table)}
+        except Exception:
+            return False
     # Drop tables in reverse order
     
     # Transport International
@@ -1667,9 +1685,12 @@ def downgrade():
     op.drop_index(op.f('ix_connaissements_id'), table_name='connaissements')
     op.drop_table('connaissements')
     
-    op.drop_index(op.f('ix_conteneurs_numero'), table_name='conteneurs')
-    op.drop_index(op.f('ix_conteneurs_id'), table_name='conteneurs')
-    op.drop_table('conteneurs')
+    if 'conteneurs' in _existing:
+        if _has_index('conteneurs', 'ix_conteneurs_numero'):
+            op.drop_index(op.f('ix_conteneurs_numero'), table_name='conteneurs')
+        if _has_index('conteneurs', 'ix_conteneurs_id'):
+            op.drop_index(op.f('ix_conteneurs_id'), table_name='conteneurs')
+        op.drop_table('conteneurs')
     
     op.drop_index(op.f('ix_amarages_id'), table_name='amarages')
     op.drop_table('amarages')
@@ -1728,17 +1749,23 @@ def downgrade():
     op.drop_index(op.f('ix_tva_declarables_id'), table_name='tva_declarables')
     op.drop_table('tva_declarables')
     
-    op.drop_index(op.f('ix_factures_numero_facture'), table_name='factures')
-    op.drop_index(op.f('ix_factures_id'), table_name='factures')
-    op.drop_table('factures')
+    if 'factures' in _existing:
+        if _has_index('factures', 'ix_factures_numero_facture'):
+            op.drop_index(op.f('ix_factures_numero_facture'), table_name='factures')
+        if _has_index('factures', 'ix_factures_id'):
+            op.drop_index(op.f('ix_factures_id'), table_name='factures')
+        op.drop_table('factures')
     
     op.drop_index(op.f('ix_exercices_comptables_numero_exercice'), table_name='exercices_comptables')
     op.drop_index(op.f('ix_exercices_comptables_id'), table_name='exercices_comptables')
     op.drop_table('exercices_comptables')
     
-    op.drop_index(op.f('ix_ecritures_comptables_numero_ecriture'), table_name='ecritures_comptables')
-    op.drop_index(op.f('ix_ecritures_comptables_id'), table_name='ecritures_comptables')
-    op.drop_table('ecritures_comptables')
+    if 'ecritures_comptables' in _existing:
+        if _has_index('ecritures_comptables', 'ix_ecritures_comptables_numero_ecriture'):
+            op.drop_index(op.f('ix_ecritures_comptables_numero_ecriture'), table_name='ecritures_comptables')
+        if _has_index('ecritures_comptables', 'ix_ecritures_comptables_id'):
+            op.drop_index(op.f('ix_ecritures_comptables_id'), table_name='ecritures_comptables')
+        op.drop_table('ecritures_comptables')
     
     op.drop_index(op.f('ix_plan_comptable_ohada_numero_compte'), table_name='plan_comptable_ohada')
     op.drop_index(op.f('ix_plan_comptable_ohada_id'), table_name='plan_comptable_ohada')

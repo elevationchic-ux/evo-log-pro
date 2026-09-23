@@ -340,11 +340,15 @@ def upgrade():
 
 
 def downgrade():
+    # 'ecritures_comptables' est re-declare (donc droppe) aussi par 005 ; garde
+    # d'existence pour un rollback lineaire robuste.
+    _existing = set(sa.inspect(op.get_bind()).get_table_names())
     op.drop_table('procedures_securite')
     op.drop_table('rapports_qhse')
     op.drop_table('declarations_douanieres')
     op.drop_table('operations_acconage')
-    op.drop_table('ecritures_comptables')
+    if 'ecritures_comptables' in _existing:
+        op.drop_table('ecritures_comptables')
     op.drop_table('comptes')
     op.drop_table('paiements')
     op.drop_table('lignes_factures')

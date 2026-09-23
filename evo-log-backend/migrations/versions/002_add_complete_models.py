@@ -266,13 +266,18 @@ def upgrade():
 
 
 def downgrade():
+    # 'factures' est re-declare (donc droppe) aussi par 005 ; selon l'ordre de
+    # downgrade la table peut deja avoir ete retiree. Garde d'existence ->
+    # rollback lineaire robuste.
+    _existing = set(sa.inspect(op.get_bind()).get_table_names())
     op.drop_table('audit_logs')
     op.drop_table('incidents')
     op.drop_table('dossiers_transit')
     op.drop_table('escales')
     op.drop_table('navires')
     op.drop_table('stocks')
-    op.drop_table('factures')
+    if 'factures' in _existing:
+        op.drop_table('factures')
     op.drop_table('missions')
     op.drop_table('conducteurs')
     op.drop_table('camions')

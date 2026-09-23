@@ -704,6 +704,11 @@ def upgrade():
 
 
 def downgrade():
+    # 'conteneurs' est re-declare par cette revision UNIQUEMENT si absent
+    # (garde cote upgrade) ; sur une base ou 005 l'a deja cree, 007 ne l'a pas
+    # cree et ne doit pas le re-dropper. Snapshot + garde d'existence ->
+    # rollback lineaire robuste ("no such table/index" evite).
+    _existing = set(sa.inspect(op.get_bind()).get_table_names())
     # Drop tables in reverse order
     op.drop_index(op.f('ix_inspections_conteneur_id'), table_name='inspections_conteneur')
     op.drop_table('inspections_conteneur')
@@ -717,9 +722,10 @@ def downgrade():
     op.drop_index(op.f('ix_cycle_conteneur_id'), table_name='cycle_conteneur')
     op.drop_table('cycle_conteneur')
     
-    op.drop_index(op.f('ix_conteneurs_numero'), table_name='conteneurs')
-    op.drop_index(op.f('ix_conteneurs_id'), table_name='conteneurs')
-    op.drop_table('conteneurs')
+    if 'conteneurs' in _existing:
+        op.drop_index(op.f('ix_conteneurs_numero'), table_name='conteneurs')
+        op.drop_index(op.f('ix_conteneurs_id'), table_name='conteneurs')
+        op.drop_table('conteneurs')
     
     op.drop_index(op.f('ix_incidents_corridor_id'), table_name='incidents_corridor')
     op.drop_table('incidents_corridor')

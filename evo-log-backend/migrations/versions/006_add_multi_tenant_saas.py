@@ -223,30 +223,31 @@ def upgrade():
 
 
 def downgrade():
-    # Remove foreign keys
-    op.drop_constraint('roles_company_id_fkey', 'roles', type_='foreignkey')
-    op.drop_constraint('users_b2b_portal_id_fkey', 'users', type_='foreignkey')
-    op.drop_constraint('users_department_id_fkey', 'users', type_='foreignkey')
-    op.drop_constraint('users_company_id_fkey', 'users', type_='foreignkey')
-    
-    # Remove columns from users
-    op.drop_column('users', 'created_by')
-    op.drop_column('users', 'locked_until')
-    op.drop_column('users', 'failed_login_attempts')
-    op.drop_column('users', 'timezone')
-    op.drop_column('users', 'language')
-    op.drop_column('users', 'bio')
-    op.drop_column('users', 'avatar_url')
-    op.drop_column('users', 'b2b_portal_id')
-    op.drop_column('users', 'is_b2b')
-    op.drop_column('users', 'role_level')
-    op.drop_column('users', 'department_id')
-    op.drop_column('users', 'company_id')
-    
-    # Remove columns from roles
-    op.drop_column('roles', 'is_system')
-    op.drop_column('roles', 'company_id')
-    op.drop_column('roles', 'level')
+    # batch_alter_table : sur SQLite, ni ALTER ... DROP CONSTRAINT ni DROP
+    # COLUMN ne sont supportes en natif -> copy-and-move (RecreateStrategy).
+    # Supprimer une colonne via batch recree la table SANS cette colonne et
+    # emporte donc automatiquement sa FK ; pas besoin d'un drop_constraint
+    # explicite (de toute facon SQLite ne conserve pas le nom des FK, un drop
+    # par nom echouerait). Sur Postgres, batch = ALTER natif et DROP COLUMN
+    # cascade deja sur la contrainte de la colonne.
+    with op.batch_alter_table('roles') as batch_op:
+        batch_op.drop_column('is_system')
+        batch_op.drop_column('company_id')
+        batch_op.drop_column('level')
+
+    with op.batch_alter_table('users') as batch_op:
+        batch_op.drop_column('created_by')
+        batch_op.drop_column('locked_until')
+        batch_op.drop_column('failed_login_attempts')
+        batch_op.drop_column('timezone')
+        batch_op.drop_column('language')
+        batch_op.drop_column('bio')
+        batch_op.drop_column('avatar_url')
+        batch_op.drop_column('b2b_portal_id')
+        batch_op.drop_column('is_b2b')
+        batch_op.drop_column('role_level')
+        batch_op.drop_column('department_id')
+        batch_op.drop_column('company_id')
     
     # Drop tables
     op.drop_index(op.f('ix_tenant_audit_logs_id'), table_name='tenant_audit_logs')
