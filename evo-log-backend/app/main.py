@@ -3,7 +3,7 @@ EVO-LOG EM-ERP API - Main Application Entry Point
 ERP Logistique Portuaire - Système de gestion complet pour le port de Douala
 """
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Header
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -11,6 +11,8 @@ from sqlalchemy import text
 from sqlalchemy.engine import Engine
 import asyncio
 import logging
+import secrets
+from typing import Optional
 import sentry_sdk
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
@@ -464,6 +466,46 @@ async def health_check():
     return {"status": "ok", "service": "EVO-LOG EM-ERP", "version": "2.0.0"}
 
 
+def _setup_password_provided(username: str) -> bool:
+    """True si l'operateur a fourni explicitement le mot de passe initial."""
+    attr = "SETUP_SUPERADMIN_PASSWORD" if username == "supadmin" else "SETUP_ADMIN_PASSWORD"
+    return bool(getattr(settings, attr, None))
+
+
+def _setup_password(env_attr: str) -> str:
+    """Mot de passe initial admin : valeur env si presente, sinon genere.
+
+    On ne code jamais de credential en dur ; un mot de passe fort est genere
+    et n'est renvoye qu'une seule fois a l'appelant autorise.
+    """
+    value = getattr(settings, env_attr, None)
+    if value:
+        return value
+    # 16 caracteres URL-safe -> ~96 bits d'entropie, conforme a la politique.
+    return secrets.token_urlsafe(16)
+
+
+def _enforce_setup_access(x_setup_token: Optional[str]) -> None:
+    """Gating des endpoints d'initialisation.
+
+    - SETUP_TOKEN configure : le header X-Setup-Token doit correspondre
+      exactement (comparaison temps-constant), sinon 403.
+    - SETUP_TOKEN vide : en PRODUCTION -> 403 (fail-closed) ; en dev/test ->
+      acces libre pour la convenance locale uniquement.
+    """
+    expected = (settings.SETUP_TOKEN or "").strip()
+    if expected:
+        supplied = (x_setup_token or "").strip()
+        if not supplied or not secrets.compare_digest(supplied, expected):
+            raise HTTPException(status_code=403, detail="Jeton d'initialisation invalide.")
+        return
+    if settings.ENVIRONMENT.lower() in {"production", "prod"}:
+        raise HTTPException(
+            status_code=403,
+            detail="Initialisation refusee en production sans SETUP_TOKEN.",
+        )
+
+
 def _bootstrap_schema_and_seed():
     """
     Source de verite unique de l'initialisation de la base, partagee par
@@ -528,10 +570,11 @@ def _bootstrap_schema_and_seed():
             db.flush()
 
         users_spec = [
-            {"username": "supadmin", "email": "supadmin@evo-log.cm", "password": "supadmin123", "is_superuser": True, "role_level": 0},
-            {"username": "admin", "email": "admin@evo-log.cm", "password": "admin123", "is_superuser": False, "role_level": 1},
+            {"username": "supadmin", "email": "supadmin@evo-log.cm", "password": _setup_password("SETUP_SUPERADMIN_PASSWORD"), "is_superuser": True, "role_level": 0},
+            {"username": "admin", "email": "admin@evo-log.cm", "password": _setup_password("SETUP_ADMIN_PASSWORD"), "is_superuser": False, "role_level": 1},
         ]
         created = []
+        returned_creds = []
         for u in users_spec:
             db.add(User(
                 username=u["username"],
@@ -541,14 +584,20 @@ def _bootstrap_schema_and_seed():
                 is_superuser=u["is_superuser"],
                 role_level=u["role_level"],
                 company_id=company.id,
+                must_change_password=True,
             ))
             created.append(u["username"])
+            # On ne renvoie que les mots de passe GENERES aleatoirement ;
+            # ceux fournis par l'operateur via l'env ne transitent jamais API.
+            if not _setup_password_provided(u["username"]):
+                returned_creds.append({"username": u["username"], "password": u["password"]})
         db.commit()
         return {
             "status": "success",
             "tables_created": tables_created,
             "tables_skipped": tables_skipped,
             "users_created": created,
+            "generated_credentials": returned_creds,
         }
     except Exception as e:
         db.rollback()
@@ -561,15 +610,17 @@ def _bootstrap_schema_and_seed():
 @app.get('/api/setup')
 @app.post('/api/v1/setup')
 @app.get('/api/v1/setup')
-async def setup_database():
+async def setup_database(x_setup_token: Optional[str] = Header(None)):
     """
     One-time database initialization: creates all tables and seeds initial admin users.
-    Safe to call multiple times  skips if users already exist.
-    Logique partagee avec /api/seed via _bootstrap_schema_and_seed().
+    Protege par jeton (X-Setup-Token) ; refuse en production sans SETUP_TOKEN.
+    Les mots de passe fixes ne sont plus jamais renvoyes : uniquement les
+    mots de passe generes aleatoirement, une seule fois.
     """
+    _enforce_setup_access(x_setup_token)
     result = await asyncio.to_thread(_bootstrap_schema_and_seed)
     if result["status"] == "already":
-        return {"status": "already_initialized", "message": "Database already seeded. Login: supadmin / supadmin123"}
+        return {"status": "already_initialized", "message": "Base deja initialisee."}
     if result["status"] == "error":
         return result
     return {
@@ -577,10 +628,8 @@ async def setup_database():
         "message": "Database initialized successfully",
         "users_created": result.get("users_created", []),
         "tables": {"created": result["tables_created"], "skipped": result["tables_skipped"]},
-        "credentials": [
-            {"username": "supadmin", "password": "supadmin123", "role": "Super Admin SaaS"},
-            {"username": "admin",    "password": "admin123",    "role": "Admin Entreprise"},
-        ],
+        "generated_credentials": result.get("generated_credentials", []),
+        "note": "Mot de passe a changer a la premiere connexion.",
     }
 
 
@@ -588,18 +637,17 @@ async def setup_database():
 @app.get('/api/seed')
 @app.post('/api/v1/seed')
 @app.get('/api/v1/seed')
-async def seed_users_raw():
+async def seed_users_raw(x_setup_token: Optional[str] = Header(None)):
     """
-    Emergency seed endpoint. Partage la meme logique que /api/setup via
-    _bootstrap_schema_and_seed : create_all() sur le schema des modeles
-    (parite stricte avec l'ORM, aucun DDL ecrit a la main qui derive),
-    puis seed les admins. Idempotent et sur.
+    Emergency seed endpoint. Meme protection par jeton que /api/setup et meme
+    logique via _bootstrap_schema_and_seed. Ne renvoie plus de credential fixe.
     """
+    _enforce_setup_access(x_setup_token)
     result = await asyncio.to_thread(_bootstrap_schema_and_seed)
     if result["status"] == "already":
         return {
             "status": "already_seeded",
-            "message": "Users already exist. Login: supadmin / supadmin123",
+            "message": "Utilisateurs existants deja.",
         }
     if result["status"] == "error":
         return result
@@ -607,10 +655,8 @@ async def seed_users_raw():
         "status": "success",
         "message": "Tables ensured and admin users seeded",
         "tables": {"created": result["tables_created"], "skipped": result["tables_skipped"]},
-        "credentials": [
-            {"username": "supadmin", "password": "supadmin123", "role": "Super Admin"},
-            {"username": "admin", "password": "admin123", "role": "Admin"},
-        ],
+        "generated_credentials": result.get("generated_credentials", []),
+        "note": "Mot de passe a changer a la premiere connexion.",
     }
 
 

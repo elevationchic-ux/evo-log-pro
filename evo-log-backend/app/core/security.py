@@ -48,6 +48,38 @@ def get_password_hash(password: str) -> str:
     return bcrypt.hashpw(plain_bytes, salt).decode('utf-8')
 
 
+# Liste courte de mots de passe bannis (les plus frequents / evidents).
+_COMMON_PASSWORDS = {
+    "password", "motdepasse", "12345678", "123456789", "azertyuiop",
+    "admin123", "supadmin123", "qwer1234", "11111111", "iloveyou",
+}
+
+
+def validate_password_strength(password: str, username: str | None = None) -> None:
+    """Verifie la robustesse minimale d'un mot de passe.
+
+    Leve une ``ValueError`` (message pret a afficher) si la politique n'est
+    pas satisfaite. Politique volontairement raisonnable pour ne pas bloquer
+    les utilisateurs legitimes :
+      - au moins 8 caracteres ;
+      - au moins une lettre et au moins un chiffre ;
+      - ne doit pas figurer dans la liste des mots de passe les plus courants ;
+      - ne doit pas egaliser le nom d'utilisateur.
+    """
+    if not password or len(password) < 8:
+        raise ValueError("Le mot de passe doit contenir au moins 8 caracteres.")
+    if not any(c.isdigit() for c in password):
+        raise ValueError("Le mot de passe doit contenir au moins un chiffre.")
+    if not any(c.isalpha() for c in password):
+        raise ValueError("Le mot de passe doit contenir au moins une lettre.")
+    lowered = password.lower()
+    if lowered in _COMMON_PASSWORDS:
+        raise ValueError("Ce mot de passe est trop courant, choisissez-en un autre.")
+    if username and lowered == username.lower():
+        raise ValueError("Le mot de passe ne peut pas etre identique au nom d'utilisateur.")
+
+
+
 def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
     """Create JWT access token"""
     to_encode = data.copy()

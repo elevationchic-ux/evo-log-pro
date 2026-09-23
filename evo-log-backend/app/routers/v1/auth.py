@@ -1,16 +1,17 @@
 """
 Authentication router - handles user authentication and authorization
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import Optional
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from app.core.database import get_db
 from app.core.security import (
     verify_password, get_password_hash, create_access_token, 
-    create_refresh_token, decode_token
+    create_refresh_token, decode_token, get_current_user,
+    validate_password_strength, limiter,
 )
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserResponse, Token, TokenData
@@ -21,8 +22,19 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("20/hour")
+async def register(request: Request, user_data: UserCreate, db: Session = Depends(get_db)):
     """Register a new user"""
+    # Politique de mot de passe minimale (nonce au niveau route pour ne pas
+    # casser les schemas internes qui creent des utilisateurs de service).
+    try:
+        validate_password_strength(user_data.password, username=user_data.username)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
     # Check if username exists
     if db.query(User).filter(User.username == user_data.username).first():
         raise HTTPException(
@@ -56,9 +68,8 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
-
 @router.post("/login", response_model=Token)
+@limiter.limit("10/minute")
 async def login(request: Request, db: Session = Depends(get_db)):
     """Authenticate user and return tokens (supports JSON and form-encoded data, username or email)"""
     content_type = request.headers.get("content-type", "")
@@ -226,45 +237,41 @@ async def logout(token: str = Depends(oauth2_scheme)):
 @router.post("/change-password")
 async def change_password(
     request: Request,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Change current user's password with verification of old password"""
+    """Change the authenticated user's password (requires current password)."""
     body = await request.json()
     current_password = body.get("current_password") or body.get("old_password")
     new_password = body.get("new_password")
-    user_id = body.get("user_id")
 
-    if not new_password or len(new_password) < 8:
+    # Le user_id fourni dans le body est IGNOREE : on agit toujours sur le
+    # compte authentifie (sinon = prise de controle de compte d'autrui).
+    if not current_password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Le nouveau mot de passe doit contenir au moins 8 caractères."
+            detail="Le mot de passe actuel est requis.",
+        )
+    if not verify_password(current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Le mot de passe actuel est incorrect.",
         )
 
-    # Resolve user
-    user = None
-    if user_id:
-        user = db.query(User).filter(User.id == int(user_id)).first()
-    if not user:
-        # Fallback to first admin or default user
-        user = db.query(User).filter(User.is_active == True).first()
+    try:
+        validate_password_strength(new_password or "", username=current_user.username)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
 
-    if not user:
-        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
-
-    # If current password was supplied, verify it
-    if current_password and user.hashed_password:
-        if not verify_password(current_password, user.hashed_password):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Le mot de passe actuel est incorrect."
-            )
-
-    user.hashed_password = get_password_hash(new_password)
-    user.must_change_password = False
-    user.password_changed_at = datetime.utcnow()
+    current_user.hashed_password = get_password_hash(new_password)
+    current_user.must_change_password = False
+    current_user.password_changed_at = datetime.utcnow()
     db.commit()
 
-    return {"success": True, "message": "Mot de passe mis à jour avec succès !"}
+    return {"success": True, "message": "Mot de passe mis a jour avec succes !"}
 
 
 @router.post("/2fa/toggle")
