@@ -39,10 +39,17 @@ class TwoFactorAuthMiddleware(BaseHTTPMiddleware):
     
     @staticmethod
     def verify_2fa_token(user, token: str) -> bool:
-        """Verify 2FA token"""
-        # In production, use user's secret key
-        totp = pyotp.TOTP("JBSWY3DPEHPK3PXP")  # Demo secret
-        return totp.verify(token, valid_window=1)
+        """Verify 2FA token against the user's OWN stored TOTP secret.
+
+        (Avant : secret codé en dur 'JBSWY3DPEHPK3PXP' -> n'importe quel code
+        genere a partir de ce secret ouvrait tous les comptes. Desormais on
+        s'appuie sur user.two_factor_secret reellement provisionne.)
+        """
+        from app.core.security import verify_totp
+        secret = getattr(user, "two_factor_secret", None)
+        if not secret:
+            return False
+        return verify_totp(secret, token)
 
 
 class IPWhitelistMiddleware(BaseHTTPMiddleware):

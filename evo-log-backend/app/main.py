@@ -53,13 +53,20 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting EVO-LOG EM-ERP API...")
 
-    # Auto-create all DB tables (idempotent - safe to run multiple times)
-    try:
-        import app.models  # noqa: F401 - ensure all models are imported
-        Base.metadata.create_all(bind=engine)
-        logger.info("✅ Database tables created/verified")
-    except Exception as e:
-        logger.error(f"❌ Failed to create database tables: {e}")
+    # Auto-create all DB tables (idempotent - safe to run multiple times).
+    # En production, le schema est pilote EXCLUSIVEMENT par Alembic (via
+    # docker-entrypoint.sh) : create_all est desactive pour eviter qu'une
+    # table emergeante ne contourne la chaine de migrations et ne fausse la
+    # parite schema/versions.
+    if settings.is_production:
+        logger.info("Environment production : schema gere par Alembic (create_all ignore)")
+    else:
+        try:
+            import app.models  # noqa: F401 - ensure all models are imported
+            Base.metadata.create_all(bind=engine)
+            logger.info("✅ Database tables created/verified")
+        except Exception as e:
+            logger.error(f"❌ Failed to create database tables: {e}")
 
     await event_service.start()
     if event_service.redis is not None:

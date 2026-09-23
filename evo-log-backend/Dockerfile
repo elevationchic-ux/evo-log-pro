@@ -16,8 +16,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Alembic-managed deploy entrypoint (migrate then serve). Ensure it runs on
+# LF/Unix line endings regardless of the build host.
+RUN chmod +x docker-entrypoint.sh && sed -i 's/\r$//' docker-entrypoint.sh
+
 # Expose port
 EXPOSE 8000
 
-# Run the application - PORT env var injected by Railway
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1
+# Run migrations then start the application - PORT env var injected by Railway
+CMD ["./docker-entrypoint.sh"]

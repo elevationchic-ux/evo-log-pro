@@ -1,9 +1,26 @@
-// src/lib/api-client.ts  Client API TypeScript EVO-LOG
+// src/lib/api-client.ts  Client API TypeScript EVO-LOG — SOURCE UNIQUE DE VÉRITÉ
+// Toutes les pages doivent passer par ce client (apiClient ou les services *API exportés ici).
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-83b1.up.railway.app';
 if (process.env.NODE_ENV === 'production' && BASE_URL.includes('localhost')) {
   BASE_URL = 'https://backend-production-83b1.up.railway.app';
+}
+
+/** Préfixe d'API versionné exposé par le backend FastAPI. */
+export const API_PREFIX = '/api/v1';
+
+/**
+ * Construit une URL d'API canonique : apiUrl('/magasin/articles')
+ * -> '/api/v1/magasin/articles'. Accepte les variantes '/api/x', 'x', '/api/v1/x'.
+ */
+export function apiUrl(path: string): string {
+  let p = path;
+  if (p.startsWith(API_PREFIX + '/') || p === API_PREFIX) return p;
+  if (p.startsWith('/api/v1/')) return p;
+  if (p.startsWith('/api/')) return API_PREFIX + p.slice('/api'.length);
+  if (p.startsWith('api/')) return API_PREFIX + p.slice('api'.length);
+  return API_PREFIX + (p.startsWith('/') ? p : '/' + p);
 }
 
 export const apiClient: AxiosInstance = axios.create({
@@ -20,15 +37,19 @@ export function setAuthToken(token: string | null) {
   _authToken = token;
 }
 
-// Intercepteur REQUEST - inject Bearer token from NextAuth session
+// Intercepteur REQUEST — injecte le Bearer token (session NextAuth ou localStorage)
+// et normalise les URLs d'API vers le préfixe versionné /api/v1.
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    if (_authToken && !config.headers['Authorization']) {
-      config.headers['Authorization'] = `Bearer ${_authToken}`;
+    const hasAuthHeader = Boolean(config.headers['Authorization'] || config.headers?.get?.('Authorization'));
+    if (!hasAuthHeader) {
+      const fallbackToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+      const token = _authToken || fallbackToken;
+      if (token) config.headers['Authorization'] = `Bearer ${token}`;
     }
-    // Auto-rewrite /api/... to /api/v1/... if needed
-    if (config.url && config.url.startsWith('/api/') && !config.url.startsWith('/api/v1/') && !config.url.startsWith('/api/docs') && !config.url.startsWith('/api/health')) {
-      config.url = config.url.replace(/^\/api\//, '/api/v1/');
+    // Normalisation explicite /api/... et variantes -> /api/v1/... (documents + tolérante)
+    if (config.url && config.url.startsWith('/') && !config.url.startsWith('/api/docs') && !config.url.startsWith('/api/health')) {
+      config.url = apiUrl(config.url);
     }
     return config;
   },
@@ -36,18 +57,49 @@ apiClient.interceptors.request.use(
 );
 
 // Intercepteur RESPONSE
-// IMPORTANT: Ne déclencher le logout automatique QUE pour les endpoints d'auth,
-// PAS pour les appels de données (dashboard, magasin, etc.) qui peuvent retourner 401
-// quand le backend distant est temporairement indisponible.
+// IMPORTANT: ne déclencher le logout automatique QUE pour les endpoints d'auth;
+// les appels de données peuvent légitimement retourner 401 quand le backend distant
+// est temporairement indisponible — le refresh est tenté une fois avant de renoncer.
+let _refreshInFlight: Promise<boolean> | null = null;
+
+async function tryRefreshToken(): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  const refreshToken = localStorage.getItem('refresh_token');
+  if (!refreshToken) return false;
+  try {
+    const res = await axios.post(`${BASE_URL}${API_PREFIX}/auth/refresh`, { refresh_token: refreshToken }, { timeout: 10000 });
+    const { access_token, refresh_token } = res.data || {};
+    if (access_token) {
+      localStorage.setItem('access_token', access_token);
+      if (refresh_token) localStorage.setItem('refresh_token', refresh_token);
+      _authToken = access_token;
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      const url = error.config?.url || '';
-      const isAuthEndpoint = url.includes('/auth/me') || url.includes('/auth/refresh');
-      if (typeof window !== 'undefined' && isAuthEndpoint) {
-        window.dispatchEvent(new CustomEvent('auth-error', { detail: { reason: 'unauthorized' } }));
+  async (error) => {
+    const status = error.response?.status;
+    const url: string = error.config?.url || '';
+    const isAuthEndpoint = url.includes('/auth/me') || url.includes('/auth/refresh') || url.includes('/auth/login');
+
+    if (status === 401 && !isAuthEndpoint && error.config && !error.config._retriedAfterRefresh) {
+      _refreshInFlight = _refreshInFlight ?? tryRefreshToken().finally(() => { _refreshInFlight = null; });
+      const refreshed = await _refreshInFlight;
+      if (refreshed) {
+        error.config._retriedAfterRefresh = true;
+        if (error.config.headers) error.config.headers['Authorization'] = `Bearer ${_authToken}`;
+        return apiClient(error.config);
       }
+    }
+
+    if (status === 401 && isAuthEndpoint && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('auth-error', { detail: { reason: 'unauthorized' } }));
     }
     return Promise.reject(error);
   }
@@ -83,8 +135,18 @@ export const authAPI = {
     apiClient.get('/api/auth/me'),
   changePassword: (data: { current_password?: string; new_password: string; user_id?: number }) =>
     apiClient.post('/api/v1/auth/change-password', data),
-  toggle2FA: (enabled: boolean) =>
-    apiClient.post('/api/v1/auth/2fa/toggle', { enabled }),
+  // 2FA / TOTP : le toggle bidonne a ete remplace par le vrai flux backend
+  // (status -> setup -> enable | disable), le secret n'est jamais relus.
+  get2FAStatus: () =>
+    apiClient.get('/api/v1/auth/2fa/status'),
+  setup2FA: () =>
+    apiClient.post('/api/v1/auth/2fa/setup'),
+  enable2FA: (code: string) =>
+    apiClient.post('/api/v1/auth/2fa/enable', { code }),
+  disable2FA: (password: string) =>
+    apiClient.post('/api/v1/auth/2fa/disable', { password }),
+  verify2FA: (data: { two_factor_token: string; code: string }) =>
+    apiClient.post('/api/v1/auth/2fa/verify', data),
   revokeSessions: () =>
     apiClient.post('/api/v1/auth/revoke-sessions'),
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Shield,
   KeyRound,
@@ -20,8 +20,35 @@ export default function SecuritySettingsPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+
+  // Etat 2FA reel (pilote par le backend, plus de toggle optimiste bidonne)
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState(true);
+  const [setupSecret, setSetupSecret] = useState<string | null>(null);
+  const [setupUri, setSetupUri] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [disablePassword, setDisablePassword] = useState('');
+  const [showDisableForm, setShowDisableForm] = useState(false);
+  const [busy2FA, setBusy2FA] = useState(false);
+
+  const refreshStatus = useCallback(async () => {
+    try {
+      const { data } = await authAPI.get2FAStatus();
+      setTwoFactorEnabled(Boolean(data?.two_factor_enabled));
+    } catch {
+      // Statut indisponible (backend distant momentanement hors ligne) : on
+      // n'affiche pas d'etat par defaut trompeur, mais on ne bloque pas la page.
+      setTwoFactorEnabled(false);
+    } finally {
+      setLoadingStatus(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshStatus();
+  }, [refreshStatus]);
+
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,15 +77,64 @@ export default function SecuritySettingsPage() {
     }
   };
 
-  const handleToggle2FA = async () => {
-    const nextState = !twoFactorEnabled;
+  const handleStartEnable = async () => {
+    setBusy2FA(true);
     try {
-      await authAPI.toggle2FA(nextState);
-      setTwoFactorEnabled(nextState);
-      toast.success(nextState ? '2FA TOTP activée avec succès.' : '2FA désactivée.');
-    } catch {
-      setTwoFactorEnabled(nextState);
-      toast.success(nextState ? '2FA TOTP activée avec succès.' : '2FA désactivée.');
+      const { data } = await authAPI.setup2FA();
+      setSetupSecret(data?.secret ?? null);
+      setSetupUri(data?.otpauth_uri ?? null);
+      setCode('');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Impossible d'initialiser la 2FA.");
+    } finally {
+      setBusy2FA(false);
+    }
+  };
+
+  const handleConfirmEnable = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!code || code.trim().length < 6) {
+      toast.error('Saisissez le code a 6 chiffres genere par votre application.');
+      return;
+    }
+    setBusy2FA(true);
+    try {
+      await authAPI.enable2FA(code.trim());
+      toast.success('2FA TOTP activee avec succes.');
+      setSetupSecret(null);
+      setSetupUri(null);
+      setCode('');
+      setTwoFactorEnabled(true);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Code invalide. Verifiez votre application d'authentification.");
+    } finally {
+      setBusy2FA(false);
+    }
+  };
+
+  const handleCancelEnable = () => {
+    setSetupSecret(null);
+    setSetupUri(null);
+    setCode('');
+  };
+
+  const handleDisable = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!disablePassword) {
+      toast.error('Le mot de passe est requis pour desactiver la 2FA.');
+      return;
+    }
+    setBusy2FA(true);
+    try {
+      await authAPI.disable2FA(disablePassword);
+      toast.success('2FA desactivee.');
+      setDisablePassword('');
+      setShowDisableForm(false);
+      setTwoFactorEnabled(false);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Mot de passe incorrect. Desactivation refusee.");
+    } finally {
+      setBusy2FA(false);
     }
   };
 
@@ -157,19 +233,143 @@ export default function SecuritySettingsPage() {
               Sécurisez vos accès opérationnels contre les intrusions en exigeant un code à 6 chiffres lors de chaque connexion.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={handleToggle2FA}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap ${
-              twoFactorEnabled
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600'
-                : 'bg-primary text-on-primary border-primary'
-            }`}
-          >
-            {twoFactorEnabled ? '2FA Activée (Désactiver)' : 'Activer la 2FA'}
-          </button>
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            {loadingStatus ? (
+              <span className="text-xs text-on-surface-variant">Chargement…</span>
+            ) : twoFactorEnabled ? (
+              <>
+                <span className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-600">
+                  <CheckCircle2 className="w-4 h-4" /> 2FA Activée
+                </span>
+                {!showDisableForm && (
+                  <button
+                    type="button"
+                    onClick={() => setShowDisableForm(true)}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 transition-colors"
+                  >
+                    Désactiver
+                  </button>
+                )}
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={handleStartEnable}
+                disabled={busy2FA || !!setupSecret}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary border border-primary hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {busy2FA && !setupSecret ? 'Initialisation…' : 'Activer la 2FA'}
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Etape 1 : presentation du secret (saisie manuelle, aucun QR tierce-partie pour ne pas fuiter le secret) */}
+        {setupSecret && !twoFactorEnabled && (
+          <div className="mt-2 p-4 bg-surface-container-low rounded-xl border border-outline space-y-3">
+            <div className="flex items-start gap-2 text-xs text-on-surface-variant">
+              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+              <p>
+                Enregistrez ce secret en toute securite. Ouvrez votre application
+                d'authentification, choisissez « Ajouter une cle » et saisissez la cle
+                ci-dessous (ou importez l'URI otpauth). Puis confirmez avec un code valide.
+              </p>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-on-surface-variant mb-1">Cle secrete (base32)</label>
+              <input
+                readOnly
+                value={setupSecret}
+                onFocus={(e) => e.target.select()}
+                className="w-full px-3 py-2 text-sm font-mono bg-surface border border-outline rounded-xl text-on-surface focus:outline-none focus:border-primary"
+              />
+            </div>
+            {setupUri && (
+              <div>
+                <label className="block text-xs font-semibold text-on-surface-variant mb-1">URI otpauth</label>
+                <input
+                  readOnly
+                  value={setupUri}
+                  onFocus={(e) => e.target.select()}
+                  className="w-full px-3 py-2 text-xs font-mono bg-surface border border-outline rounded-xl text-on-surface-variant focus:outline-none focus:border-primary"
+                />
+              </div>
+            )}
+            <form onSubmit={handleConfirmEnable} className="flex flex-col sm:flex-row sm:items-end gap-3">
+              <div className="flex-1">
+                <label className="block text-xs font-semibold text-on-surface-variant mb-1">Code de verification *</label>
+                <input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  required
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="123456"
+                  className="w-full px-3 py-2 text-sm tracking-widest bg-surface border border-outline rounded-xl text-on-surface focus:outline-none focus:border-primary"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={busy2FA}
+                  className="px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {busy2FA ? 'Verification…' : 'Confirmer l\'activation'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEnable}
+                  disabled={busy2FA}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold border border-outline text-on-surface-variant hover:bg-surface transition-colors"
+                >
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Desactivation : exige le mot de passe (protection contre detournement de session) */}
+        {showDisableForm && twoFactorEnabled && (
+          <form onSubmit={handleDisable} className="mt-2 p-4 bg-surface-container-low rounded-xl border border-outline space-y-3">
+            <p className="text-xs text-on-surface-variant">
+              Confirmez votre mot de passe pour desactiver la 2FA.
+            </p>
+            <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+              <div className="flex-1">
+                <label className="block text-xs font-semibold text-on-surface-variant mb-1">Mot de passe *</label>
+                <input
+                  type="password"
+                  required
+                  value={disablePassword}
+                  onChange={(e) => setDisablePassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full px-3 py-2 text-sm bg-surface border border-outline rounded-xl text-on-surface focus:outline-none focus:border-primary"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={busy2FA}
+                  className="px-5 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {busy2FA ? 'Traitement…' : 'Confirmer la désactivation'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowDisableForm(false); setDisablePassword(''); }}
+                  disabled={busy2FA}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold border border-outline text-on-surface-variant hover:bg-surface transition-colors"
+                >
+                  Annuler
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
       </div>
+
 
       {/* Active Sessions */}
       <div className="bg-surface border border-outline rounded-2xl p-6 space-y-4 shadow-sm">

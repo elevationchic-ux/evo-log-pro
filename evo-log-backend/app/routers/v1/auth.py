@@ -12,6 +12,8 @@ from app.core.security import (
     verify_password, get_password_hash, create_access_token, 
     create_refresh_token, decode_token, get_current_user,
     validate_password_strength, limiter,
+    generate_totp_secret, build_otpauth_uri, verify_totp,
+    create_2fa_token, decode_2fa_token,
 )
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserResponse, Token, TokenData
@@ -68,7 +70,7 @@ async def register(request: Request, user_data: UserCreate, db: Session = Depend
     return db_user
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login")
 @limiter.limit("10/minute")
 async def login(request: Request, db: Session = Depends(get_db)):
     """Authenticate user and return tokens (supports JSON and form-encoded data, username or email)"""
@@ -124,6 +126,25 @@ async def login(request: Request, db: Session = Depends(get_db)):
             detail="User account is disabled"
         )
 
+    # Second facteur : si l'utilisateur a active le 2FA, le mot de passe seul
+    # ne suffit PAS. On delivre un jeton intermediaire court et on exige la
+    # verification TOTP via POST /auth/2fa/verify avant toute emission de token.
+    if getattr(user, "two_factor_enabled", False) and getattr(user, "two_factor_secret", None):
+        return {
+            "two_factor_required": True,
+            "two_factor_token": create_2fa_token(user.id),
+            "token_type": "bearer",
+        }
+
+    return _build_login_payload(user)
+
+
+def _build_login_payload(user: User) -> dict:
+    """Construit la reponse de session (tokens + roles + modules autorises).
+
+    Partagee par /auth/login et /auth/2fa/verify pour garantir une structure
+    de reponse strictement identique (contrat attendu par NextAuth cote front).
+    """
     # Create tokens
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
@@ -274,19 +295,115 @@ async def change_password(
     return {"success": True, "message": "Mot de passe mis a jour avec succes !"}
 
 
-@router.post("/2fa/toggle")
-async def toggle_2fa(
-    request: Request,
-    db: Session = Depends(get_db)
-):
-    """Enable or disable two-factor authentication (TOTP)"""
-    body = await request.json()
-    enabled = body.get("enabled", True)
+@router.get("/2fa/status")
+async def get_2fa_status(current_user: User = Depends(get_current_user)):
+    """Etat courant de la 2FA pour l'utilisateur authentifie."""
     return {
-        "success": True,
-        "two_factor_enabled": enabled,
-        "message": f"Authentification à double facteur (2FA) {'activée' if enabled else 'désactivée'}."
+        "two_factor_enabled": bool(getattr(current_user, "two_factor_enabled", False)),
+        "configured": bool(getattr(current_user, "two_factor_secret", None)),
     }
+
+
+@router.post("/2fa/setup")
+async def setup_2fa(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Genere un secret TOTP (mise en attente) + l'URI otpauth a encoder en QR.
+
+    La 2FA n'est PAS encore active : il faut confirmer via /2fa/enable avec un
+    code valide. Le secret n'est jamais renvoye par un autre endpoint.
+    """
+    secret = generate_totp_secret()
+    current_user.two_factor_secret = secret
+    current_user.two_factor_enabled = False
+    db.commit()
+    return {
+        "secret": secret,
+        "otpauth_uri": build_otpauth_uri(secret, current_user.username),
+        "message": "Scannez le QR puis confirmez avec un code pour activer la 2FA.",
+    }
+
+
+@router.post("/2fa/enable")
+async def enable_2fa(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Active la 2FA seulement si le code TOTP correspond au secret en attente."""
+    body = await request.json()
+    code = body.get("code")
+    secret = getattr(current_user, "two_factor_secret", None)
+    if not secret:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Aucun secret 2FA en attente. Appelez d'abord /auth/2fa/setup.",
+        )
+    if not verify_totp(secret, code or ""):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Code de verification invalide.",
+        )
+    current_user.two_factor_enabled = True
+    current_user.two_factor_confirmed_at = datetime.utcnow()
+    db.commit()
+    return {"success": True, "two_factor_enabled": True, "message": "2FA activee."}
+
+
+@router.post("/2fa/disable")
+async def disable_2fa(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Desactive la 2FA. Exige le mot de passe pour eviter toute desactivation
+    par detournement de session."""
+    body = await request.json()
+    password = body.get("password")
+    if not password or not verify_password(password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mot de passe requis et valide pour desactiver la 2FA.",
+        )
+    current_user.two_factor_enabled = False
+    current_user.two_factor_secret = None
+    current_user.two_factor_confirmed_at = None
+    db.commit()
+    return {"success": True, "two_factor_enabled": False, "message": "2FA desactivee."}
+
+
+@router.post("/2fa/verify", response_model=Token)
+async def verify_2fa(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Echange un jeton 2FA (delivre par /login) + code TOTP contre une vraie
+    session. Repond avec la MEME structure que /login pour rester compatible
+    avec NextAuth cote frontend."""
+    body = await request.json()
+    two_factor_token = body.get("two_factor_token")
+    code = body.get("code")
+    if not two_factor_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="two_factor_token requis.",
+        )
+
+    user_id = decode_2fa_token(two_factor_token)
+    user = db.query(User).filter(User.id == user_id, User.is_active.is_(True)).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Utilisateur introuvable ou inactif.",
+        )
+    if not getattr(user, "two_factor_secret", None) or not verify_totp(user.two_factor_secret, code or ""):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Code de verification invalide.",
+        )
+
+    return _build_login_payload(user)
 
 
 @router.post("/revoke-sessions")

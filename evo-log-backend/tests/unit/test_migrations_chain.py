@@ -49,6 +49,17 @@ def _table_names(url: str):
         engine.dispose()
 
 
+def _user_columns(url: str):
+    engine = create_engine(url)
+    try:
+        insp = inspect(engine)
+        if "users" not in set(insp.get_table_names()):
+            return set()
+        return {c["name"] for c in insp.get_columns("users")}
+    finally:
+        engine.dispose()
+
+
 def test_full_chain_upgrade_then_downgrade(tmp_path, monkeypatch):
     assert ALEMBIC_INI.exists(), f"alembic.ini introuvable: {ALEMBIC_INI}"
 
@@ -63,11 +74,18 @@ def test_full_chain_upgrade_then_downgrade(tmp_path, monkeypatch):
     command.upgrade(cfg, "head")
     head = _current_rev(url)
     assert head is not None, "aucune revision appliquee apres upgrade head"
+    # Le head courant doit etre la revision 2FA (chaine lineaire attendue).
+    assert head == "015_add_2fa_fields", f"head inattendu: {head}"
 
     tables = _table_names(url)
     # Certaines tables cles doivent exister une fois la chaine montee.
     for expected in ("users", "companies", "roles"):
         assert expected in tables, f"table attendue absente apres upgrade: {expected}"
+
+    # Les colonnes 2FA introduites par 015 doivent etre presentes.
+    cols = _user_columns(url)
+    for col in ("two_factor_enabled", "two_factor_secret", "two_factor_confirmed_at"):
+        assert col in cols, f"colonne 2FA absente apres upgrade: {col}"
 
     # 2) Redescend jusqu'a la base (rollback lineaire complet).
     command.downgrade(cfg, "base")
@@ -76,3 +94,30 @@ def test_full_chain_upgrade_then_downgrade(tmp_path, monkeypatch):
     # Apres redescinte, les tables cles creees par la chaine ont disparu.
     remaining = _table_names(url)
     assert "users" not in remaining, "table 'users' subsiste apres downgrade base"
+
+
+def test_015_only_adds_and_removes_2fa_columns(tmp_path, monkeypatch):
+    """Isole la revision 015 : de 014 a 015, puis re-downgrade vers 014.
+
+    Verifie que 015 n'ajoute/retire QUE les colonnes 2FA et ne casse pas le
+    reste du schema (cas reel du deploiement : on 'stamp' 014 puis upgrade)."""
+    db_file = tmp_path / "mig_015.db"
+    url = f"sqlite:///{db_file.as_posix()}"
+    monkeypatch.setenv("DATABASE_URL", url)
+    cfg = _make_config()
+
+    command.upgrade(cfg, "014_schema_parity_from_orm")
+    before = _user_columns(url)
+    for col in ("two_factor_enabled", "two_factor_secret", "two_factor_confirmed_at"):
+        assert col not in before
+
+    command.upgrade(cfg, "015_add_2fa_fields")
+    after = _user_columns(url)
+    for col in ("two_factor_enabled", "two_factor_secret", "two_factor_confirmed_at"):
+        assert col in after
+
+    command.downgrade(cfg, "014_schema_parity_from_orm")
+    reverted = _user_columns(url)
+    for col in ("two_factor_enabled", "two_factor_secret", "two_factor_confirmed_at"):
+        assert col not in reverted
+    assert _current_rev(url) == "014_schema_parity_from_orm"

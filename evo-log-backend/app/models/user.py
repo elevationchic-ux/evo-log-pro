@@ -57,6 +57,10 @@ class User(Base):
     last_login = Column(DateTime(timezone=True))
     failed_login_attempts = Column(Integer, default=0)
     locked_until = Column(DateTime(timezone=True))
+    # Authentification a deux facteurs (TOTP / RFC 6238)
+    two_factor_enabled = Column(Boolean, default=False, nullable=False)
+    two_factor_secret = Column(String(64))  # secret base32, jamais expose en clair
+    two_factor_confirmed_at = Column(DateTime(timezone=True))
     
     # Metadata
     created_at = Column(DateTime(timezone=True), server_default=func.now())

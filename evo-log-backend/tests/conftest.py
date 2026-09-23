@@ -3,6 +3,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base, get_db
 
@@ -10,6 +11,11 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
+    # StaticPool : une seule connexion partagee entre tous les threads. Sans
+    # cela, chaque thread (celui du TestClient/portal asynchrone) ouvrirait sa
+    # propre base memoire :memory: vide -> "no such table" sur les endpoints
+    # appeles apres le premier.
+    poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -17,6 +23,11 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 @pytest.fixture(scope="function")
 def db():
     """Create a fresh in-memory database for each test."""
+    # Importer l'application complete enregistre TOUS les modeles SQLAlchemy
+    # (les routers importent des modeles qui ne sont pas tous exposes via
+    # app.models.__init__, ex. 'navires' via le module acconage). Sans cela,
+    # Base.metadata.create_all() echoue sur des cles etrangeres non resolvees.
+    import app.main  # noqa: F401
     Base.metadata.create_all(bind=engine)
     session = TestingSessionLocal()
     try:

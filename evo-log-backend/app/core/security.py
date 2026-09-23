@@ -8,6 +8,7 @@ from fastapi import Depends, HTTPException, WebSocket, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+import pyotp
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.user import User
@@ -101,6 +102,58 @@ def create_refresh_token(data: dict) -> str:
     return encoded_jwt
 
 
+# --------------------------------------------------------------------------- #
+# Authentification a deux facteurs (TOTP / RFC 6238)
+# --------------------------------------------------------------------------- #
+TOTP_VALID_WINDOW = 1  # accepte le code precedent/suivant (tolerance d'horloge)
+TWO_FACTOR_TOKEN_EXPIRE_MINUTES = 5
+
+
+def generate_totp_secret() -> str:
+    """Genere un secret TOTP base32 (compat Google Authenticator / Authy)."""
+    return pyotp.random_base32()
+
+
+def build_otpauth_uri(secret: str, username: str, issuer: str = "EVO-LOG") -> str:
+    """URI otpauth:// a encoder en QR code pour l'app d'authentification."""
+    return pyotp.TOTP(secret).provisioning_uri(name=username, issuer_name=issuer)
+
+
+def verify_totp(secret: str, code: str) -> bool:
+    """Verifie un code a 6 chiffres contre le secret. Robuste aux entrees vides."""
+    if not secret or not code:
+        return False
+    try:
+        return pyotp.TOTP(secret).verify(str(code).strip(), valid_window=TOTP_VALID_WINDOW)
+    except Exception:
+        return False
+
+
+def create_2fa_token(user_id: int) -> str:
+    """Jeton intermediaire court delivre apres mot de passe correct, AVANT que
+    le code TOTP soit valide. N'est PAS un token d'acces (type='2fa')."""
+    expire = datetime.utcnow() + timedelta(minutes=TWO_FACTOR_TOKEN_EXPIRE_MINUTES)
+    payload = {"sub": str(user_id), "type": "2fa", "exp": expire}
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def decode_2fa_token(token: str) -> int:
+    """Retourne l'user_id porteur d'un jeton 2FA valide, sinon leve 401."""
+    payload = decode_token(token)
+    if payload.get("type") != "2fa":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Jeton de verification 2FA invalide",
+        )
+    user_id = payload.get("sub")
+    if not str(user_id).isdigit():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Jeton de verification 2FA invalide",
+        )
+    return int(user_id)
+
+
 def decode_token(token: str) -> dict:
     """Decode and validate JWT token"""
     try:
@@ -119,10 +172,13 @@ def get_token_payload(
 ) -> dict:
     """Validate an access token and return its claims."""
     payload = decode_token(credentials.credentials)
-    if payload.get("type") == "refresh":
+    # Seul un token d'ACCES est admis ici. Les refresh ("refresh") et les jetons
+    # intermediaires 2FA ("2fa") ne doivent JAMAIS autoriser un acces API.
+    token_type = payload.get("type")
+    if token_type is not None and token_type != "access":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Refresh token cannot be used for access",
+            detail=f"Token type '{token_type}' cannot be used for access",
         )
     return payload
 

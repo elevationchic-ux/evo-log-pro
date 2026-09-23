@@ -70,6 +70,10 @@ class Settings(BaseSettings):
     
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT.lower() in {"production", "prod"}
+
     def model_post_init(self, __context: object) -> None:
         environment = self.ENVIRONMENT.lower()
         if not self.SECRET_KEY and environment in {"development", "dev", "test", "testing"}:
