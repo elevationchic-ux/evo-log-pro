@@ -68,7 +68,7 @@ export default function MagasinDouanePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Warehouse className="w-3.5 h-3.5" /> Entrepôt Sous Douane — Régimes Spéciaux Code des Douanes CEMAC
+            <Warehouse className="w-3.5 h-3.5" /> Entrepôt Sous Douane  Régimes Spéciaux Code des Douanes CEMAC
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">Magasin Douane & Entrepôt Sous Douane</h1>
           <p className="text-xs text-slate-400 mt-1">Gestion des entrepôts agréés DGD, déclarations de mise en entrepôt, inventaires douaniers et surveillance douanière physique.</p>
@@ -156,7 +156,7 @@ export default function MagasinDouanePage() {
               {entrepots.map((e: any) => (
                 <div key={e.id} className="p-4 hover:bg-slate-800/40 transition-colors">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-white">{e.code_entrepot} — {e.nom}</span>
+                    <span className="text-sm font-bold text-white">{e.code_entrepot}  {e.nom}</span>
                     <span className={`px-2 py-1 rounded-lg text-[10px] font-bold border ${e.statut === 'actif' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-500/20 text-slate-400 border-slate-500/30'}`}>
                       {e.statut || 'Actif'}
                     </span>

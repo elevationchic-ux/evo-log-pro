@@ -205,16 +205,21 @@ def upgrade():
     op.add_column('users', sa.Column('locked_until', sa.DateTime(timezone=True), nullable=True))
     op.add_column('users', sa.Column('created_by', sa.Integer(), nullable=True))
     
-    op.create_foreign_key('users_company_id_fkey', 'users', 'companies', ['company_id'], ['id'])
-    op.create_foreign_key('users_department_id_fkey', 'users', 'departments', ['department_id'], ['id'])
-    op.create_foreign_key('users_b2b_portal_id_fkey', 'users', 'b2b_portals', ['b2b_portal_id'], ['id'])
+    # batch_alter_table : equivalent a un ALTER ... ADD CONSTRAINT natif sur
+    # Postgres, mais necessaire pour le rejouage SQLite (copy-and-move). Sans
+    # cela, "alembic upgrade head" sur base vierge echoue cote SQLite.
+    with op.batch_alter_table('users') as batch_op:
+        batch_op.create_foreign_key('users_company_id_fkey', 'companies', ['company_id'], ['id'])
+        batch_op.create_foreign_key('users_department_id_fkey', 'departments', ['department_id'], ['id'])
+        batch_op.create_foreign_key('users_b2b_portal_id_fkey', 'b2b_portals', ['b2b_portal_id'], ['id'])
     
     # Add role_level and company_id to roles table
     op.add_column('roles', sa.Column('level', sa.Integer(), nullable=True, server_default='3'))
     op.add_column('roles', sa.Column('company_id', sa.Integer(), nullable=True))
     op.add_column('roles', sa.Column('is_system', sa.Boolean(), nullable=True, server_default='false'))
     
-    op.create_foreign_key('roles_company_id_fkey', 'roles', 'companies', ['company_id'], ['id'])
+    with op.batch_alter_table('roles') as batch_op:
+        batch_op.create_foreign_key('roles_company_id_fkey', 'companies', ['company_id'], ['id'])
 
 
 def downgrade():

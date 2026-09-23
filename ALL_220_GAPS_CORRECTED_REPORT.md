@@ -143,7 +143,7 @@ Pour finaliser l'intégration:
 ---
 
 *Document préparé pour:* KAMLOG EM-ERP  
-*Statut:* Rapport historique — validation complémentaire requise  
+*Statut:* Rapport historique  validation complémentaire requise  
 *Date de rectification:* 19 septembre 2026  
 *Version:* 2.0  
 *Expertise:* 15 ans d'expérience logistique

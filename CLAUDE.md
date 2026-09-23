@@ -1,4 +1,4 @@
-﻿# CLAUDE.md — Directives & Commandes EVO-LOG SaaS
+﻿# CLAUDE.md  Directives & Commandes EVO-LOG SaaS
 
 Ce document contient les instructions et commandes de référence pour l'utilisation des assistants de code sur le dépôt **EVO-LOG SaaS**.
 

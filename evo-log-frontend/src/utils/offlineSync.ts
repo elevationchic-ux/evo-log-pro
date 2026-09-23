@@ -1,5 +1,5 @@
 /**
- * offlineSync.ts — Offline Outbox Pattern for EVO-LOG field operations.
+ * offlineSync.ts  Offline Outbox Pattern for EVO-LOG field operations.
  *
  * Designed for Cameroon transit corridors with intermittent connectivity:
  *   • Autoroute Douala-Yaoundé
@@ -86,7 +86,7 @@ export async function enqueueOperation(
     const tx = db.transaction(STORE_NAME, 'readwrite');
     tx.objectStore(STORE_NAME).add(record);
     tx.oncomplete = () => {
-      console.info(`[OfflineSync] Queued ${op.type} — ID: ${id}`);
+      console.info(`[OfflineSync] Queued ${op.type}  ID: ${id}`);
       window.dispatchEvent(new CustomEvent('offline-queue-updated'));
       resolve(id);
     };
@@ -161,12 +161,12 @@ async function syncOperation(op: OfflineOperation, baseUrl: string): Promise<voi
 
       if (response.ok) {
         await deleteOperation(op.id);
-        console.info(`[OfflineSync] ✅ Synced ${op.type} — ID: ${op.id}`);
+        console.info(`[OfflineSync] ✅ Synced ${op.type}  ID: ${op.id}`);
         window.dispatchEvent(new CustomEvent('offline-op-synced', { detail: { id: op.id, type: op.type } }));
         return;
       }
 
-      // 4xx errors are permanent failures — no point retrying
+      // 4xx errors are permanent failures  no point retrying
       if (response.status >= 400 && response.status < 500) {
         const errText = await response.text();
         await updateOperation(op.id, { status: 'FAILED', error: errText });
@@ -216,7 +216,7 @@ export async function syncOutbox(baseUrl: string = ''): Promise<{ synced: number
   }
 
   window.dispatchEvent(new CustomEvent('offline-queue-updated'));
-  console.info(`[OfflineSync] Sync complete — ✅ ${synced} synced, ❌ ${failed} failed`);
+  console.info(`[OfflineSync] Sync complete  ✅ ${synced} synced, ❌ ${failed} failed`);
   return { synced, failed };
 }
 
@@ -229,7 +229,7 @@ export function installAutoSync(baseUrl: string = ''): () => void {
   _syncListenerInstalled = true;
 
   const handleOnline = async () => {
-    console.info('[OfflineSync] 🌐 Network restored — starting outbox sync...');
+    console.info('[OfflineSync] 🌐 Network restored  starting outbox sync...');
     await syncOutbox(baseUrl);
   };
 

@@ -204,7 +204,7 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
-              <h3 className="text-base font-black text-slate-100">Déclaration Mensuelle de TVA — {currentPeriode}</h3>
+              <h3 className="text-base font-black text-slate-100">Déclaration Mensuelle de TVA  {currentPeriode}</h3>
               <p className="text-xs text-slate-400 font-mono">Taux normal : 17.5% + CAC 10% = 19.25% TTC</p>
             </div>
             <div className="flex items-center gap-3">
@@ -286,7 +286,7 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
-              <h3 className="text-base font-black text-slate-100">Impôt sur les Sociétés (IS) — Exercice {currentExercice}</h3>
+              <h3 className="text-base font-black text-slate-100">Impôt sur les Sociétés (IS)  Exercice {currentExercice}</h3>
               <p className="text-xs text-slate-400 font-mono">Taux IS Cameroun : 30% | Minimum de Perception : 1 000 000 XAF</p>
             </div>
             {loading && <Loader2 className="w-5 h-5 text-violet-400 animate-spin" />}
@@ -329,14 +329,14 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
-              <h3 className="text-base font-black text-slate-100">Document d Information sur le Personnel Employé (DIPE) — {currentPeriode}</h3>
+              <h3 className="text-base font-black text-slate-100">Document d Information sur le Personnel Employé (DIPE)  {currentPeriode}</h3>
               <p className="text-xs text-slate-400 font-mono">Déclaration mensuelle CNPS + IRCM (Code du Travail Cameroun)</p>
             </div>
             {loading && <Loader2 className="w-5 h-5 text-violet-400 animate-spin" />}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
             {[
-              { label: 'Effectif Déclaré', value: `${dipeData?.nb_employes ?? '—'} salariés`, color: 'text-slate-100' },
+              { label: 'Effectif Déclaré', value: `${dipeData?.nb_employes ?? ''} salariés`, color: 'text-slate-100' },
               { label: 'Masse Salariale Brute', value: `${(dipeData?.masse_salariale_brute ?? 0).toLocaleString('fr-FR')} XAF`, color: 'text-violet-400' },
               { label: 'IRCM Versé (DGI)', value: `${(dipeData?.ircm_verse ?? 0).toLocaleString('fr-FR')} XAF`, color: 'text-amber-400' },
               { label: 'CNPS Part Patronale (17.4%)', value: `${(dipeData?.cnps_patron ?? 0).toLocaleString('fr-FR')} XAF`, color: 'text-blue-400' },
@@ -359,7 +359,7 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
       {selectedTax === 'LIASSE' && (
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
           <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-base font-black text-slate-100">Liasse Fiscale &amp; Statistique SYSCOHADA — Exercice {currentExercice}</h3>
+            <h3 className="text-base font-black text-slate-100">Liasse Fiscale &amp; Statistique SYSCOHADA  Exercice {currentExercice}</h3>
             <p className="text-xs text-slate-400 font-mono">Tableaux 1 à 36 conformes CGI Cameroun &amp; Directives OHADA révisées</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -367,8 +367,8 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
               { num: 1, label: 'Bilan Actif (Tableau 1)', statut: 'DISPONIBLE' },
               { num: 2, label: 'Bilan Passif (Tableau 2)', statut: 'DISPONIBLE' },
               { num: 3, label: 'Compte de Résultat SIG OHADA (Tableau 3)', statut: 'DISPONIBLE' },
-              { num: 4, label: 'TAFIRE — Tableau de Financement (Tableau 4)', statut: 'DISPONIBLE' },
-              { num: 5, label: 'Notes Annexes — Immobilisations (Tableau 5-7)', statut: 'DISPONIBLE' },
+              { num: 4, label: 'TAFIRE  Tableau de Financement (Tableau 4)', statut: 'DISPONIBLE' },
+              { num: 5, label: 'Notes Annexes  Immobilisations (Tableau 5-7)', statut: 'DISPONIBLE' },
               { num: 8, label: 'État des Échéances Dettes & Créances', statut: 'DISPONIBLE' },
               { num: 12, label: 'Détail des Provisions (Tableau 12)', statut: 'DISPONIBLE' },
               { num: 20, label: 'Effectif & Masse Salariale (Tableau 20)', statut: 'DISPONIBLE' },

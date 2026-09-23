@@ -40,7 +40,7 @@ export default function B2BCotationsPage() {
     { value: 'CORRIDOR_TCHAD', label: 'Corridor CEMAC - Tchad', icon: '🚛', desc: "Transport Douala ➔ N'Djamena via Ngaoundéré / Kousseri" },
     { value: 'CORRIDOR_RCA', label: 'Corridor CEMAC - Centrafrique', icon: '🌐', desc: 'Transport Douala ➔ Bangui via Garoua-Boulaï' },
     { value: 'WAREHOUSING', label: 'Entreposage Sous-Douane (MAD)', icon: '📦', desc: 'Stockage en Magasin et Aires de Dédouanement Agréées' },
-    { value: 'DOMESTIC', label: 'Transport Domestique Cameroun', icon: '🚗', desc: 'Douala ↔ Yaoundé, Bafoussam, Garoua, Bertoua' },
+    { value: 'DOMESTIC', label: 'Transport Domestique Cameroun', icon: '🚗', desc: 'Douala ↔ Yaoundé, limbé, Garoua, Bertoua' },
   ];
 
   const containerTypes = [

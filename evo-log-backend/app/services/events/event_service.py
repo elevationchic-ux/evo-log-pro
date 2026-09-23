@@ -41,7 +41,7 @@ class ReactiveEventBus:
         except Exception as exc:
             await client.aclose()
             logger.warning(
-                "Redis realtime bus unavailable (%s) — starting in degraded mode. "
+                "Redis realtime bus unavailable (%s)  starting in degraded mode. "
                 "Real-time cross-process fan-out is disabled; in-process WebSocket "
                 "delivery and the REST API are fully operational.",
                 exc,

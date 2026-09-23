@@ -1,5 +1,5 @@
 # 🔍 RAPPORT D'EXPERTISE COMPTABILITÉ OHADA / SYSCOHADA (CERTIFIÉ 100%)
-## 🗓️ Mise à Jour : Septembre 2026 — état non certifié
+## 🗓️ Mise à Jour : Septembre 2026  état non certifié
 
 > Les affirmations de fonctionnement à 100% et de zéro mock ne sont pas une certification. Les parcours OHADA doivent encore être validés avec PostgreSQL, données de test réelles et contrôles comptables. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 
@@ -21,7 +21,7 @@ Le module **Comptabilité OHADA / SYSCOHADA** contient les composants décrits, 
 - ✅ Export CSV du plan comptable filtré par classe avec encodage UTF-8 BOM.
 - ✅ Filtrage par Classes 1 à 7 et recherche textuelle instantanée sur code ou intitulé.
 
-### 2. **Journal des Écritures & Lettrage Interactif — Zéro Mock**
+### 2. **Journal des Écritures & Lettrage Interactif  Zéro Mock**
 - ✅ [`journal/page.tsx`](file:///c:/Users/chris/Documents/Projet/Documents/evo-log/evo-log-frontend/src/app/(app)/comptabilite-ohada/journal/page.tsx) connecté à `/comptabilite-avance/ecritures`.
 - ✅ Sélection des journaux auxiliaires normalisés : VE (Ventes), AC (Achats), BQ (Banque), CA (Caisse), OD-PAY, OD-DOT, OD.
 - ✅ Modal de saisie d'écriture avec contrôle strict de l'équilibre Débit = Crédit en temps réel.

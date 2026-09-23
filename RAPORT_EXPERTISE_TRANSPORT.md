@@ -1,5 +1,5 @@
 # 🚚 RAPPORT D'EXPERTISE : TRANSPORT TMS, FLOTTE & CORRIDORS CEMAC
-## 🗓️ Mise à Jour : Septembre 2026 — état non certifié
+## 🗓️ Mise à Jour : Septembre 2026  état non certifié
 
 > Les affirmations « 100% opérationnel » et « zéro mock » nécessitent encore une validation fonctionnelle et de charge. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 
@@ -80,4 +80,4 @@ Le module **Transport TMS & Flotte** est le cœur opérationnel de la mobilité 
 
 ---
 
-*Rapport certifié conforme — EVO-LOG ERP Transport TMS — Septembre 2026*
+*Rapport certifié conforme  EVO-LOG ERP Transport TMS  Septembre 2026*

@@ -295,7 +295,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
                         title="Briefing Sécurité Portuaire"
                       >
                         <Shield className="w-3 h-3" />
-                        Briefing {docker.briefing_securite_fait ? '✓' : '—'}
+                        Briefing {docker.briefing_securite_fait ? '✓' : ''}
                       </button>
                     </div>
 

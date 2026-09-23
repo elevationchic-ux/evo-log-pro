@@ -1014,7 +1014,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         icon: Building,
         badge: 'Agences',
         tcode: 'KADM_AGC',
-        description: 'Gestion des agences Siège Douala, Port Kribi et Bafoussam',
+        description: 'Gestion des agences Siège Douala, Port Kribi et limbé',
         businessProcess: 'Organisation locale',
         requiredRoles: ['ADMIN', 'SUPER_ADMIN']
       },
@@ -1414,7 +1414,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         icon: Users,
         badge: 'Effectifs',
         tcode: 'KCP_STF',
-        description: 'Présence en temps réel des agents par site (Douala, Kribi, Bafoussam)',
+        description: 'Présence en temps réel des agents par site (Douala, Kribi, limbé)',
         businessProcess: 'Contrôle présence'
       },
       {

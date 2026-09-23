@@ -157,6 +157,10 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
     socket.onmessage = (event) => {
       const alert = JSON.parse(event.data)
       window.dispatchEvent(new CustomEvent('evo-log:event', { detail: alert }))
+      // Les événements chat sont traités par la page /chat (rafraîchissement
+      // des fils) : ils ne doivent pas polluer la cloche ni déclencher de toast.
+      if (typeof alert.type === 'string' && alert.type.startsWith('chat.')) return
+      if (alert.type === 'ping' || alert.type === 'heartbeat') return
       const newNotif: ERPNotification = { ...alert, id: alert.id || `notif-${notificationIdRef.current++}`, read: false, timestamp: alert.timestamp || new Date().toISOString() }
       setNotifications((prev) => [newNotif, ...prev])
       if (alert.severity === 'CRITICAL' && soundEnabledRef.current) {
@@ -422,7 +426,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
               <span className="material-symbols-outlined text-[20px]">help</span>
             </button>
 
-            {/* Offline Sync Indicator — visible for field agents on transit corridors */}
+            {/* Offline Sync Indicator  visible for field agents on transit corridors */}
             <OfflineSyncIndicator baseUrl={typeof window !== 'undefined' ? window.location.origin : ''} />
 
             {/* Notifications bell */}

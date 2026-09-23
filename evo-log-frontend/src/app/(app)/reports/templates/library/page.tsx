@@ -17,6 +17,7 @@ import {
   FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
+import PageNonConnectee from '@/components/shared/PageNonConnectee';
 
 export default function ReportLibraryPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,6 +91,7 @@ export default function ReportLibraryPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <PageNonConnectee module="Bibliothèque de modèles" message="Modèles de démonstration locaux : ni les modèles ni les exports ne sont connectés au backend de reporting." />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline pb-5">
         <div className="flex items-center gap-3">

@@ -1,5 +1,5 @@
 # 📂 RAPPORT D'EXPERTISE GESTION ÉLECTRONIQUE DES DOCUMENTS & WORKFLOWS (K-GED)
-## 🗓️ Mise à Jour : Septembre 2026 — 100% Opérationnel & Zéro Mock
+## 🗓️ Mise à Jour : Septembre 2026  100% Opérationnel & Zéro Mock
 
 ---
 

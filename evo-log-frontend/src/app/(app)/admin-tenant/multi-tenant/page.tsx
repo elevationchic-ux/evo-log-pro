@@ -271,7 +271,7 @@ export default function AdminTenantMultiTenant() {
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-100 flex items-center gap-3">
             <Building2 className="w-8 h-8 text-rose-400" />
-            Gestion Multi-Tenant — Sociétés Clientes
+            Gestion Multi-Tenant  Sociétés Clientes
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Provisionnement, onboarding, quotas, logo, informations légales OHADA et modules activés.

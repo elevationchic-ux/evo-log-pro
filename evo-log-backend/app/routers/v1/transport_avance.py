@@ -25,7 +25,7 @@ from app.schemas.transport_avance import (
 )
 
 
-router = APIRouter(prefix="/transport-avance", tags=["Transport Avancé"])
+router = APIRouter(tags=["Transport Avancé"])  # monte sur /api/v1/transport-avance par main.py
 
 
 # ============ TOURNÉES ============

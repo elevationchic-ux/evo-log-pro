@@ -1,5 +1,5 @@
 # 🤝 RAPPORT D'EXPERTISE PORTAIL CLIENT B2B & CRM (K-PORTAL B2B)
-## 🗓️ Mise à Jour : Septembre 2026 — état vérifié partiellement
+## 🗓️ Mise à Jour : Septembre 2026  état vérifié partiellement
 
 > Les écrans B2B ciblés utilisent maintenant les APIs réelles, mais l'ensemble du portail n'est pas certifié 100% opérationnel. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 

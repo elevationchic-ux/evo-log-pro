@@ -264,8 +264,9 @@ class BonReception(Base):
     __tablename__ = "bons_reception"
     
     id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     numero_bon = Column(String(50), unique=True, nullable=False)
-    commande_fournisseur_id = Column(Integer, ForeignKey('commandes_fournisseur.id'))
+    commande_fournisseur_id = Column(Integer, ForeignKey('commandes_fournisseur.id'), nullable=True)
     fournisseur_id = Column(Integer, ForeignKey('fournisseurs.id'), nullable=False)
     entrepot_id = Column(Integer, ForeignKey('entrepots.id'), nullable=False)
     date_reception = Column(Date, server_default=func.current_date())

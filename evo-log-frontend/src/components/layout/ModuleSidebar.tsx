@@ -95,38 +95,44 @@ export default function ModuleSidebar({
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-slate-900 border-r border-slate-800 text-slate-300 w-full select-none">
-      {/* Header / Logo */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-black flex items-center justify-center shadow-lg shadow-indigo-600/30">
-            E
-          </div>
-          {!isCollapsed && (
+      {/* Header / Logo : compact sur desktop (l'en-tête global occupe déjà 64px),
+          complet uniquement dans le tiroir mobile qui recouvre l'en-tête. */}
+      {isMobile ? (
+        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-black flex items-center justify-center shadow-lg shadow-indigo-600/30">
+              E
+            </div>
             <div>
               <span className="font-black text-slate-100 tracking-wider text-sm block">EVO-LOG SaaS</span>
               <span className="text-[10px] text-slate-400 font-mono block">
                 {isAdmin ? "Accès Admin Total" : `Profil : ${userRoles[0] || 'Utilisateur'}`}
               </span>
             </div>
-          )}
-        </div>
+          </div>
 
-        {isMobile ? (
           <button onClick={onClose} className="p-1 text-slate-400 hover:text-white">
             <X className="w-5 h-5" />
           </button>
-        ) : (
-          onToggle && (
+        </div>
+      ) : (
+        <div className="flex items-center h-9 px-3 border-b border-slate-800 shrink-0 gap-2">
+          {!isCollapsed && (
+            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider truncate flex-1">
+              {isAdmin ? "Accès Admin Total" : `Profil : ${userRoles[0] || 'Utilisateur'}`}
+            </span>
+          )}
+          {onToggle && (
             <button
               onClick={onToggle}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ml-auto"
               title={isCollapsed ? "Déplier la Sidebar" : "Rétracter la Sidebar"}
             >
               {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
             </button>
-          )
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Navigation List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-1">

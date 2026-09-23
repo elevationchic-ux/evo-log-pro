@@ -1,5 +1,5 @@
 # 👥 RAPPORT D'EXPERTISE RESSOURCES HUMAINES & PAIE - SIRH PROFESSIONNEL
-## 🗓️ Mise à Jour : Septembre 2026 — état non certifié
+## 🗓️ Mise à Jour : Septembre 2026  état non certifié
 
 > Les affirmations « 100% opérationnel » et « zéro mock » ne sont pas une preuve de couverture globale. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 

@@ -409,15 +409,20 @@ def get_audit_logs(
 
 @router.get("/dashboard/global-kpis")
 def get_global_kpis(db: Session = Depends(get_db)):
-    """Consolidated platform KPIs for SaaS Super Administrator"""
-    companies_count = db.query(Company).count() or 4
-    active_companies = db.query(Company).filter(Company.is_active == True).count() or 4
-    users_count = db.query(User).count() or 87
-    active_users = db.query(User).filter(User.is_active == True).count() or 82
+    """Consolidated platform KPIs for SaaS Super Administrator.
 
-    # Storage estimation in GB
-    total_storage_mb = db.query(func.sum(Company.current_storage_mb)).scalar() or 18200
-    storage_gb = round(total_storage_mb / 1024, 1)
+    Uniquement des agregats reels : aucune valeur par defaut inventee, aucun
+    compteur fake (uptime/sessions/appels). Les metriques non mesurees en base
+    sont renvoyees a null pour que le frontend affiche un etat honnete.
+    """
+    companies_count = db.query(Company).count()
+    active_companies = db.query(Company).filter(Company.is_active == True).count()  # noqa: E712
+    users_count = db.query(User).count()
+    active_users = db.query(User).filter(User.is_active == True).count()  # noqa: E712
+
+    # Storage estimation in GB (0 reel si aucune donnee)
+    total_storage_mb = db.query(func.sum(Company.current_storage_mb)).scalar() or 0
+    storage_gb = round(float(total_storage_mb) / 1024, 1)
 
     return {
         "tenants_total": companies_count,
@@ -425,10 +430,11 @@ def get_global_kpis(db: Session = Depends(get_db)):
         "users_total": users_count,
         "users_actifs": active_users,
         "storage_used_gb": storage_gb,
-        "system_uptime": "99.98%",
-        "active_sessions": 28,
-        "api_calls_today": 14250,
-        "security_threats_blocked": 4
+        # Non mesures cote applicatif (sondage infra requis) -> null explicite
+        "system_uptime": None,
+        "active_sessions": None,
+        "api_calls_today": None,
+        "security_threats_blocked": None,
     }
 
 

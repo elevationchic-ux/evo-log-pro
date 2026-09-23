@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  FileText, 
-  Sparkles, 
-  Play, 
-  Download, 
-  Settings2, 
-  Database, 
-  Filter, 
-  Calendar, 
-  BarChart3, 
+import {
+  FileText,
+  Sparkles,
+  Play,
+  Download,
+  Settings2,
+  Database,
+  Filter,
+  Calendar,
+  BarChart3,
   CheckCircle2,
   Table,
   Layers,
@@ -107,11 +107,10 @@ export default function ReportsBiReportGeneratorPage() {
               <label
                 key={item.id}
                 onClick={() => setDomain(item.id)}
-                className={`p-3 rounded-xl border flex flex-col gap-1 cursor-pointer transition-all ${
-                  domain === item.id
+                className={`p-3 rounded-xl border flex flex-col gap-1 cursor-pointer transition-all ${domain === item.id
                     ? 'border-primary bg-primary/5 text-on-surface shadow-sm'
                     : 'border-outline hover:bg-surface-container text-on-surface-variant'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-xs text-on-surface">{item.label}</span>
@@ -148,11 +147,10 @@ export default function ReportsBiReportGeneratorPage() {
               <label
                 key={metric.id}
                 onClick={() => toggleMetric(metric.id)}
-                className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                  metrics.includes(metric.id)
+                className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${metrics.includes(metric.id)
                     ? 'border-primary bg-primary/5 text-on-surface'
                     : 'border-outline hover:bg-surface-container text-on-surface-variant'
-                }`}
+                  }`}
               >
                 <span className="text-xs font-semibold text-on-surface">{metric.label}</span>
                 <input
@@ -205,7 +203,7 @@ export default function ReportsBiReportGeneratorPage() {
                 <option value="week">Hebdomadaire</option>
                 <option value="month">Mensuel</option>
                 <option value="quarter">Trimestriel</option>
-                <option value="site">Par Site / Port (Douala, Kribi, Bafoussam)</option>
+                <option value="site">Par Site / Port (Douala, Kribi, limbé)</option>
                 <option value="client">Par Client / Donneur d'Ordre</option>
               </select>
             </div>

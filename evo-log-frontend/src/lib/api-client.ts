@@ -316,6 +316,8 @@ export const magasinAPI = {
     apiClient.get('/api/magasin/stocks', { params }),
   getKpis: () =>
     apiClient.get('/api/magasin/kpis'),
+  getEntrepotsOccupation: () =>
+    apiClient.get('/api/magasin/entrepots/occupation'),
   getClients: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin/clients', { params }),
   createClient: (data: unknown) =>

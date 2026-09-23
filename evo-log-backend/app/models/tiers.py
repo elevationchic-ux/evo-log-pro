@@ -24,6 +24,8 @@ class Tiers(Base):
     }
     
     id = Column(Integer, primary_key=True, index=True)
+    # Isolation multi-tenant : porte toutes les lignes clients/fournisseurs/partenaires.
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     code = Column(String(20), unique=True, nullable=False, index=True)
     type = Column(Enum(TiersType), nullable=False)
     name = Column(String(100), nullable=False)

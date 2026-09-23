@@ -1,4 +1,4 @@
-"""Router FastAPI — Portail B2B Client EVO-LOG"""
+"""Router FastAPI  Portail B2B Client EVO-LOG"""
 from fastapi import APIRouter, Depends, Query, Body, HTTPException
 from sqlalchemy.orm import Session
 from typing import Dict, Any

@@ -9,6 +9,7 @@ from app.models.user import User
 from app.models.organization import Organization
 from app.utils.tenant import get_current_tenant_context, TenantContext
 from app.utils.rbac import get_current_user
+from app.core.not_implemented import not_implemented
 
 router = APIRouter()
 
@@ -96,10 +97,9 @@ def notify_security_breach(
     payload: BreachNotificationSchema,
     current_user: User = Depends(get_current_user)
 ):
-    """Data breach notification procedure trigger compliant with APDP directives."""
-    return {
-        "status": "logged",
-        "message": "Incident de sécurité enregistré dans le registre des violations APDP.",
-        "incident": payload.dict(),
-        "reported_at": datetime.utcnow().isoformat()
-    }
+    """Declaration de violation APDP : 501 (ne persistait/declarait rien reellement)."""
+    not_implemented(
+        "Declaration d'une violation de donnees personnelles (APDP)",
+        "une table d'incidents de violation + une teleprocedure/notifications "
+        "vers l'autorite (le statut 'logged' etait retourne sans aucune ecriture)",
+    )

@@ -23,6 +23,7 @@ class DossierTransit(Base):
     __tablename__ = "dossiers_transit"
     
     id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     numero_dossier = Column(String(50), unique=True, nullable=False, index=True)
     client_id = Column(Integer, ForeignKey('clients.id'))
     transitaire_id = Column(Integer, ForeignKey('partenaires.id'))

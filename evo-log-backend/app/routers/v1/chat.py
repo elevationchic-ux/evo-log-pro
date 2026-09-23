@@ -25,6 +25,7 @@ from app.core.security import get_current_user
 from app.models.user import User, Role
 from app.models.chat import EnterpriseChatMessage, ChatMeetingRoom, ChatRoomMember
 from app.services.outbox_service import enqueue_event
+from app.services.events.outbox_delivery import deliver_outbox_event
 from app.core.config import settings
 from app.services.realtime_store import RedisSignalingStore
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -292,7 +293,7 @@ def get_forum_messages(
 
 
 @router.post("/forum", response_model=ChatMessageOut)
-def post_forum_message(
+async def post_forum_message(
     payload: SendMessageSchema,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_chat_user)
@@ -315,7 +316,7 @@ def post_forum_message(
     )
     db.add(msg)
     db.flush()
-    enqueue_event(
+    outbox_evt = enqueue_event(
         db,
         event_type="chat.message.created",
         aggregate_type="chat_message",
@@ -324,6 +325,9 @@ def post_forum_message(
     )
     db.commit()
     db.refresh(msg)
+    # Diffusion temps reel immediate ; en cas d'echec l'evenement reste en
+    # outbox et sera rejoue par le pump (ou le worker Celery).
+    await deliver_outbox_event(db, outbox_evt)
 
     return ChatMessageOut(
         id=msg.id,
@@ -404,7 +408,7 @@ def get_direct_messages(
 
 
 @router.post("/direct", response_model=ChatMessageOut)
-def send_direct_message(
+async def send_direct_message(
     payload: SendMessageSchema,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_chat_user)
@@ -435,15 +439,24 @@ def send_direct_message(
     )
     db.add(msg)
     db.flush()
-    enqueue_event(
+    outbox_evt = enqueue_event(
         db,
         event_type="chat.message.created",
         aggregate_type="chat_message",
         aggregate_id=str(msg.id),
-        payload={"company_id": current_user.company_id, "message_id": msg.id, "recipient_id": msg.recipient_id, "sender_id": msg.sender_id},
+        payload={
+            "company_id": current_user.company_id,
+            "message_id": msg.id,
+            "recipient_id": msg.recipient_id,
+            "sender_id": msg.sender_id,
+            # un DM n'est diffuse qu'a ses deux interlocuteurs (pas tout le tenant)
+            "_target_users": [current_user.id, recipient.id],
+        },
     )
     db.commit()
     db.refresh(msg)
+    # Diffusion temps reel immediate vers les deux interlocuteurs ; fallback pump.
+    await deliver_outbox_event(db, outbox_evt)
 
     return ChatMessageOut(
         id=msg.id,
@@ -664,7 +677,7 @@ def get_room_messages(
 
 
 @router.post("/rooms/{room_identifier}/messages", response_model=ChatMessageOut)
-def send_room_message(
+async def send_room_message(
     room_identifier: str,
     payload: SendRoomMessageSchema,
     db: Session = Depends(get_db),
@@ -689,15 +702,35 @@ def send_room_message(
     )
     db.add(msg)
     db.flush()
-    enqueue_event(
+    # Salon prive : diffusion restreinte aux membres. Canal thematique public :
+    # tout le tenant (metadata de message, jamais le contenu sur le wire).
+    target_users = None
+    if room.is_private:
+        target_users = [
+            m.user_id
+            for m in db.query(ChatRoomMember.user_id).filter(
+                ChatRoomMember.room_id == room.id
+            ).all()
+        ] or [current_user.id]
+    outbox_evt = enqueue_event(
         db,
         event_type="chat.message.created",
         aggregate_type="chat_message",
         aggregate_id=str(msg.id),
-        payload={"company_id": current_user.company_id, "message_id": msg.id, "room_id": msg.room_id, "sender_id": msg.sender_id},
+        payload={
+            "company_id": current_user.company_id,
+            "message_id": msg.id,
+            "room_id": msg.room_id,
+            "room_uuid": room.room_uuid,
+            "sender_id": msg.sender_id,
+            "_target_users": target_users,
+        },
     )
     db.commit()
     db.refresh(msg)
+    # Diffusion temps reel immediate ; en cas d'echec l'evenement reste en
+    # outbox et sera rejoue par le pump (ou le worker Celery).
+    await deliver_outbox_event(db, outbox_evt)
 
     return ChatMessageOut(
         id=msg.id,

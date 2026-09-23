@@ -27,8 +27,8 @@ class TestPlanComptableService:
             solde_debit=0.0,
             solde_credit=100000.0
         )
-        assert compte.numero == "401000"
-        assert compte.libelle == "Fournisseurs"
+        assert compte.numero_compte == "401000"
+        assert compte.intitule == "Fournisseurs"
         assert compte.classe == 4
         assert compte.actif is True
     
@@ -134,7 +134,7 @@ class TestPaiementService:
             mode_paiement="virement",
             reference_bancaire="BGFI-001"
         )
-        assert paiement.numero_paiement == "P-2026-001"
+        assert paiement.numero_reglement == "P-2026-001"
         assert paiement.montant == 119250.0
         assert paiement.mode_paiement == "virement"
 
@@ -152,8 +152,8 @@ class TestTaxeService:
             date=date(2026, 1, 15)
         )
         assert tva.base_imposable == 100000.0
-        assert tva.taux == 19.25
-        assert tva.montant_tva == 19250.0
+        assert float(tva.tva_collectee) == 19250.0
+        assert float(tva.tva_a_payer) == 19250.0
     
     def test_calculer_retenu_source(self, db: Session):
         """Test withholding tax calculation"""
@@ -165,5 +165,5 @@ class TestTaxeService:
             date=date(2026, 1, 15)
         )
         assert retenu.base_imposable == 100000.0
-        assert retenu.taux == 5.0
-        assert retenu.montant_retenu == 5000.0
+        assert float(retenu.taux_retenu) == 5.0
+        assert float(retenu.montant_retenu) == 5000.0

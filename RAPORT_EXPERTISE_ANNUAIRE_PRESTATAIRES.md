@@ -1,5 +1,5 @@
 # 📇 RAPPORT D'EXPERTISE ANNUAIRE B2B, GARAGES PANNES 24/7 & FLOTTES ROULANTES (ANNUAIRE-PRESTATAIRES)
-## 🗓️ Mise à Jour : Septembre 2026 — 100% Opérationnel & Zéro Mock
+## 🗓️ Mise à Jour : Septembre 2026  100% Opérationnel & Zéro Mock
 
 ---
 

@@ -29,7 +29,7 @@ from app.services.comptabilite_avance_service import (
 )
 from app.models.finance_ohada import JournalAuxiliaire, Lettrage, GrandLivreLigne, BalanceVerification, BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, AnnexesOHADA
 
-router = APIRouter(prefix="/comptabilite-avance", tags=["Comptabilité Avancée"])
+router = APIRouter(tags=["Comptabilité Avancée"])  # monte sur /api/v1/comptabilite-avance par main.py
 
 
 # ============ JOURNAUX AUXILIAIRES ============

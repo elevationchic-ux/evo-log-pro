@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  FileSpreadsheet, 
-  Download, 
-  Calendar, 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Filter, 
+import {
+  FileSpreadsheet,
+  Download,
+  Calendar,
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Filter,
   RefreshCw,
   Layers,
   BookOpen,
@@ -143,7 +143,7 @@ export default function ReportsBiFinancialReportsOhadaPage() {
             <option value="TOUS">Tous les sites (Consolidé CEMAC)</option>
             <option value="DOUALA">Douala - Port Autonome (PAD / DIT)</option>
             <option value="KRIBI">Kribi - Port en Eau Profonde (PAK)</option>
-            <option value="BAFOUSSAM">Bafoussam - Base Logistique Ouest</option>
+            <option value="limbé">limbé - Base Logistique Ouest</option>
             <option value="NDJAMENA">N'Djamena - Corridor Tchad</option>
           </select>
         </div>
@@ -161,41 +161,37 @@ export default function ReportsBiFinancialReportsOhadaPage() {
       <div className="flex border-b border-outline gap-2">
         <button
           onClick={() => setActiveTab('bilan')}
-          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${
-            activeTab === 'bilan'
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${activeTab === 'bilan'
               ? 'border-primary text-primary'
               : 'border-transparent text-on-surface-variant hover:text-on-surface'
-          }`}
+            }`}
         >
           1. Bilan (Actif / Passif)
         </button>
         <button
           onClick={() => setActiveTab('resultat')}
-          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${
-            activeTab === 'resultat'
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${activeTab === 'resultat'
               ? 'border-primary text-primary'
               : 'border-transparent text-on-surface-variant hover:text-on-surface'
-          }`}
+            }`}
         >
           2. Compte de Résultat
         </button>
         <button
           onClick={() => setActiveTab('tafire')}
-          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${
-            activeTab === 'tafire'
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${activeTab === 'tafire'
               ? 'border-primary text-primary'
               : 'border-transparent text-on-surface-variant hover:text-on-surface'
-          }`}
+            }`}
         >
           3. TAFIRE (Flux de Trésorerie)
         </button>
         <button
           onClick={() => setActiveTab('balance')}
-          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${
-            activeTab === 'balance'
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${activeTab === 'balance'
               ? 'border-primary text-primary'
               : 'border-transparent text-on-surface-variant hover:text-on-surface'
-          }`}
+            }`}
         >
           4. Grand Livre & Balance 8 Colonnes
         </button>
@@ -273,7 +269,7 @@ export default function ReportsBiFinancialReportsOhadaPage() {
       {activeTab === 'resultat' && (
         <div className="bg-surface border border-outline rounded-2xl p-6 space-y-4">
           <h2 className="text-base font-bold text-on-surface mb-2">Soldes Intermédiaires de Gestion (SIG) - OHADA</h2>
-          
+
           <div className="space-y-3 divide-y divide-outline/50">
             <div className="flex justify-between items-center py-2 text-sm">
               <span className="font-medium text-on-surface">+ Chiffre d'Affaires Opérations Portuaires & Transit</span>

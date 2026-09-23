@@ -133,10 +133,10 @@ export default function WMSDashboardPage() {
     : [];
 
   const kpis = [
-    { label: 'Capacité Utilisée', value: kpisData?.taux_occupation ?? '—', sub: kpisData ? 'Donnée WMS' : 'Indisponible sans API WMS', icon: Grid3X3, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', trend: '' },
-    { label: 'Articles en Stock', value: kpisData?.articles_total != null ? String(kpisData.articles_total) : '—', sub: 'Référentiel WMS', icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', trend: '' },
-    { label: 'Mouvements Aujourd’hui', value: kpisData?.mouvements_jour != null ? String(kpisData.mouvements_jour) : '—', sub: 'Mouvements persistés', icon: ArrowRight, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', trend: '' },
-    { label: 'Valeur Totale Stock', value: kpisData?.valeur_stock != null ? `${kpisData.valeur_stock} XAF` : '—', sub: 'Valorisation WMS', icon: TrendingUp, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20', trend: '' },
+    { label: 'Capacité Utilisée', value: kpisData?.taux_occupation ?? '', sub: kpisData ? 'Donnée WMS' : 'Indisponible sans API WMS', icon: Grid3X3, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', trend: '' },
+    { label: 'Articles en Stock', value: kpisData?.articles_total != null ? String(kpisData.articles_total) : '', sub: 'Référentiel WMS', icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', trend: '' },
+    { label: 'Mouvements Aujourd’hui', value: kpisData?.mouvements_jour != null ? String(kpisData.mouvements_jour) : '', sub: 'Mouvements persistés', icon: ArrowRight, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', trend: '' },
+    { label: 'Valeur Totale Stock', value: kpisData?.valeur_stock != null ? `${kpisData.valeur_stock} XAF` : '', sub: 'Valorisation WMS', icon: TrendingUp, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20', trend: '' },
   ];
 
   const recentMovements: RecentMovement[] = [];

@@ -1,5 +1,5 @@
 # 📦 RAPPORT D'EXPERTISE : MAGASIN WMS & GESTION DES STOCKS
-## 🗓️ Mise à Jour : Septembre 2026 — état non certifié
+## 🗓️ Mise à Jour : Septembre 2026  état non certifié
 
 > Le WMS nécessite encore des tests de stock, concurrence, isolation et charge sur données réelles avant toute certification. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 
@@ -60,8 +60,8 @@ Le module **Magasin WMS & Stocks** couvre la réception physique des marchandise
 ## 🆕 AMÉLIORATIONS UX/UI (SEPTEMBRE 2026)
 
 ### TermDefinition Intégrée dans le Portail Magasinier
-- **FEFO** : Infobulle "*Premier Périmé, Premier Sorti — Les lots à Date Limite la plus proche sont prélevés en priorité.*"
-- **FIFO** : Infobulle "*Premier Entré, Premier Sorti — Le premier article réceptionné est le premier expédié.*"
+- **FEFO** : Infobulle "*Premier Périmé, Premier Sorti  Les lots à Date Limite la plus proche sont prélevés en priorité.*"
+- **FIFO** : Infobulle "*Premier Entré, Premier Sorti  Le premier article réceptionné est le premier expédié.*"
 - **ROP** : Infobulle disponible sur les alertes de rupture de stock.
 - **MAD** : Infobulle disponible sur les sections entrepôt sous-douane.
 
@@ -76,4 +76,4 @@ Le module **Magasin WMS & Stocks** couvre la réception physique des marchandise
 
 ---
 
-*Rapport certifié conforme — EVO-LOG ERP Magasin WMS — Septembre 2026*
+*Rapport certifié conforme  EVO-LOG ERP Magasin WMS  Septembre 2026*

@@ -26,7 +26,7 @@ export default function RolePage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/api/v1/roles/roles');
+      const res = await apiClient.get('/api/v1/roles/');
       if (res.data) setRoles(res.data || []);
     } catch (err) {
       console.error('Roles fetch error:', err);
@@ -46,7 +46,7 @@ export default function RolePage() {
 
   const handleCreateRole = async () => {
     try {
-      await apiClient.post('/api/v1/roles/roles', { ...newRole });
+      await apiClient.post('/api/v1/roles/', { ...newRole });
       setShowCreateForm(false);
       fetchData();
     } catch (err) { console.error('Erreur création rôle:', err); }
@@ -54,7 +54,7 @@ export default function RolePage() {
 
   const handleUpdateModules = async (id: number, modules: string[]) => {
     try {
-      await apiClient.put(`/api/v1/roles/roles/${id}/modules`, { modules });
+      await apiClient.put(`/api/v1/roles/${id}/modules`, { modules });
       fetchData();
     } catch (err) { console.error('Erreur mise à jour modules:', err); }
   };
@@ -78,7 +78,7 @@ export default function RolePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Shield className="w-3.5 h-3.5" /> RBAC — Contrôle d'Accès Basé sur les Rôles
+            <Shield className="w-3.5 h-3.5" /> RBAC  Contrôle d'Accès Basé sur les Rôles
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">Gestion des Rôles & Permissions</h1>
           <p className="text-xs text-slate-400 mt-1">Configuration fine des rôles système (SuperAdmin, Directeur, Agent, Opérateur) et attribution des modules autorisés par rôle.</p>
@@ -109,7 +109,7 @@ export default function RolePage() {
               <span className="text-xs font-semibold text-slate-400">{s.label}</span>
               <s.icon className={`w-4 h-4 ${s.color}`} />
             </div>
-            <p className={`text-2xl font-black mt-2 ${s.color}`}>{loading ? '—' : s.value}</p>
+            <p className={`text-2xl font-black mt-2 ${s.color}`}>{loading ? '' : s.value}</p>
           </div>
         ))}
       </div>

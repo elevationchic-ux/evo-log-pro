@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 
 from app.core.database import get_db
+from app.core.not_implemented import not_implemented
 
 router = APIRouter()
 
@@ -35,13 +36,9 @@ def get_escalation_rules():
 
 @router.post("/escalation-rules")
 def save_escalation_rules(payload: Dict[str, Any]):
-    """Update and persist alert escalation policies"""
-    global _CURRENT_ESCALATION_SETTINGS
-    _CURRENT_ESCALATION_SETTINGS.update(payload)
-    _CURRENT_ESCALATION_SETTINGS["last_updated"] = datetime.utcnow().isoformat()
-
-    return {
-        "success": True,
-        "message": "Politique d'escalade et règles d'alerte enregistrées avec succès.",
-        "settings": _CURRENT_ESCALATION_SETTINGS
-    }
+    """Persistance des regles d'escalade : 501 (modifiait seulement la memoire)."""
+    not_implemented(
+        "Enregistrement des regles d'escalade et d'alerte",
+        "une table de configuration par tenant pour persister ces regles "
+        "(les valeurs modifiees etaient perdues au redemarrage)",
+    )

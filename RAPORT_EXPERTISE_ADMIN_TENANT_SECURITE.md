@@ -1,5 +1,5 @@
 # 🛡️ RAPPORT D'EXPERTISE ADMINISTRATION ENTREPRISE & SÉCURITÉ (ADMIN-TENANT)
-## 🗓️ Mise à Jour : Septembre 2026 — état non certifié
+## 🗓️ Mise à Jour : Septembre 2026  état non certifié
 
 > Les affirmations « 100% opérationnel » et « zéro mock » sont historiques. Les contrôles existent sur plusieurs parcours, mais la couverture exhaustive et les tests inter-tenant ne sont pas prouvés. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 

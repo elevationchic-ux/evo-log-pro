@@ -275,6 +275,7 @@ class BonCommande(Base):
     __tablename__ = "bons_commande"
     
     id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     numero_bc = Column(String(50), unique=True, nullable=False, index=True)
     contrat_cadre_id = Column(Integer, ForeignKey('contrats_cadre.id'), nullable=True)
     fournisseur_id = Column(Integer, ForeignKey('tiers.id'))

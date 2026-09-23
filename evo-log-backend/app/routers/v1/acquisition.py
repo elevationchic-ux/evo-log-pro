@@ -33,7 +33,7 @@ from app.services.acquisition_service import (
 )
 from app.models.acquisition import AppelOffres, CahierCharges, Comparatif, ContratCadre, BonCommande
 
-router = APIRouter(prefix="/acquisition", tags=["Acquisition"])
+router = APIRouter(tags=["Acquisition"])  # monte sur /api/v1/acquisition par main.py
 
 
 # ============ APPELS D'OFFRES ============

@@ -181,4 +181,4 @@
 
 ---
 
-**Version 2.0 — état de développement avancé, production non certifiée** ⚠️
+**Version 2.0  état de développement avancé, production non certifiée** ⚠️

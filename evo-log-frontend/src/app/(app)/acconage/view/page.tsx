@@ -195,7 +195,7 @@ export default function AcconageViewPage() {
         </div>
       </div>
 
-      {/* Dockers Temporaires & Shifts — Restriction stricte à la durée du déchargement */}
+      {/* Dockers Temporaires & Shifts  Restriction stricte à la durée du déchargement */}
       <div className="pt-4 border-t border-outline">
         <AcconageTemporaryDockersManager
           escaleId={operation.id}

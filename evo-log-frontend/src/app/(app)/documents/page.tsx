@@ -48,8 +48,8 @@ export default function DocumentsGedPage() {
   const loadDocuments = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/api/v1/documents/documents').catch(() => {
-        return apiClient.get('/api/documents');
+      const res = await apiClient.get('/api/v1/documents/').catch(() => {
+        return apiClient.get('/api/documents/');
       });
       const raw = res.data?.items || res.data || [];
       setDocuments(Array.isArray(raw) ? raw : []);
@@ -75,10 +75,10 @@ export default function DocumentsGedPage() {
       formData.append('type_document', docType);
       formData.append('reference_dossier', refDossier);
 
-      await apiClient.post('/api/v1/documents/documents/upload', formData, {
+      await apiClient.post('/api/v1/documents/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       }).catch(() => {
-        return apiClient.post('/api/v1/documents/documents', {
+        return apiClient.post('/api/v1/documents/', {
           nom: docName || selectedFile?.name || 'Document Numérisé',
           type_document: docType,
           reference_dossier: refDossier,

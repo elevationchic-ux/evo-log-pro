@@ -62,9 +62,9 @@ export default function TransitAvancePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Globe className="w-3.5 h-3.5" /> Transit Avancé — Corridors CEMAC, TIR, Bureaux Douane
+            <Globe className="w-3.5 h-3.5" /> Transit Avancé  Corridors CEMAC, TIR, Bureaux Douane
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Transit Routier Avancé — Corridor CEMAC</h1>
+          <h1 className="text-3xl font-black text-white tracking-tight">Transit Routier Avancé  Corridor CEMAC</h1>
           <p className="text-xs text-slate-400 mt-1">Suivi des dossiers de transit sur les corridors Douala-N'Djaména, Douala-Bangui, Douala-Moundou avec les bureaux de douane CEMAC.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -173,7 +173,7 @@ export default function TransitAvancePage() {
               {bureauxDouane.map((b: any) => (
                 <div key={b.id} className="p-4 hover:bg-slate-800/40 transition-colors">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-white">{b.code_bureau} — {b.nom}</span>
+                    <span className="text-sm font-bold text-white">{b.code_bureau}  {b.nom}</span>
                     <span className="text-xs text-slate-400">{b.pays}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-1">Type: {b.type_bureau} • {b.adresse || '-'}</p>

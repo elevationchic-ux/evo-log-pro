@@ -22,11 +22,13 @@ from slowapi.errors import RateLimitExceeded
 # prometheus_fastapi_instrumentator disabled - incompatible with FastAPI 0.115+ router
 
 from app.core.config import settings
-from app.core.database import engine, get_db, Base
+from app.core.database import engine, get_db, Base, SessionLocal
 from app.core.security import limiter
 from app.middleware.audit import AuditMiddleware
 from app.middleware.idempotency import IdempotencyMiddleware
 from app.middleware.tracing import TracingMiddleware
+from app.middleware.tenant_context import TenantContextMiddleware
+import app.core.tenant_enforcement  # noqa: F401 - enregistre les evenements ORM d'isolation tenant
 from app.utils.error_handlers import setup_error_handlers, setup_monitoring
 from app.services.events.event_service import event_service
 from app.services.events.workflow_orchestrator import register_all_handlers
@@ -38,6 +40,7 @@ logger = logging.getLogger(__name__)
 # Global startup errors for health check
 startup_errors = []
 heartbeat_task = None
+outbox_pump_task = None
 
 
 @asynccontextmanager
@@ -85,7 +88,11 @@ async def lifespan(app: FastAPI):
     
     # Start heartbeat task for WebSocket connections
     heartbeat_task = asyncio.create_task(_heartbeat_loop())
-    
+
+    # Pump de l'outbox : bascule les evenements persistes (chat, workflows)
+    # vers le bus temps reel meme si aucun worker Celery n'est actif.
+    outbox_pump_task = asyncio.create_task(_outbox_pump_loop())
+
     yield
     
     # Shutdown: close connections
@@ -97,6 +104,14 @@ async def lifespan(app: FastAPI):
         heartbeat_task.cancel()
         try:
             await heartbeat_task
+        except asyncio.CancelledError:
+            pass
+
+    # Stop outbox pump task
+    if outbox_pump_task:
+        outbox_pump_task.cancel()
+        try:
+            await outbox_pump_task
         except asyncio.CancelledError:
             pass
 
@@ -113,6 +128,30 @@ async def _heartbeat_loop():
         except Exception as e:
             logger.error(f"Error in heartbeat loop: {e}")
             await asyncio.sleep(5)  # Wait before retrying
+
+
+async def _outbox_pump_loop():
+    """Live le outbox transactionnel vers le bus temps reel (Redis/WebSocket).
+
+    Revendication atomique pending->processing : sur et un seul livreur par
+    evenement quand plusieurs replicas (ou le worker Celery) tournent.
+    """
+    from app.services.events.outbox_delivery import pump_outbox
+    while True:
+        try:
+            await asyncio.sleep(2)
+            db = SessionLocal()
+            try:
+                delivered = await pump_outbox(db)
+                if delivered:
+                    logger.debug("Outbox pump: %d event(s) delivered to realtime bus", delivered)
+            finally:
+                db.close()
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logger.error(f"Error in outbox pump loop: {e}")
+            await asyncio.sleep(5)
 
 
 app = FastAPI(
@@ -231,6 +270,11 @@ app.add_middleware(TracingMiddleware)
 # Middlewares de Sécurité et Audit (Niveau World Pro)
 app.add_middleware(AuditMiddleware)
 app.add_middleware(IdempotencyMiddleware, redis_url=settings.REDIS_URL)
+
+# Isolation multi-tenant : publie le company_id du JWT dans le contexte courant.
+# app.core.tenant_enforcement filtre alors SELECT/UPDATE/DELETE et auto-trie les
+# INSERT au niveau ORM pour toutes les entites portees par une cle company_id.
+app.add_middleware(TenantContextMiddleware)
 
 # CORS autoriser les frontends locaux et l'origine de production explicite.
 app.add_middleware(
@@ -358,7 +402,7 @@ try:
     safe_include_router(ws.router, prefix="/api/v1/ws", tags=["WebSockets"])
     safe_include_router(collaboration.router, prefix="/api/v1/collaboration", tags=["Collaboration"])
     safe_include_router(iot.router, prefix="/api/v1/iot", tags=["IoT"])
-    safe_include_router(webhook_whatsapp.router, prefix="/api/v1/webhook-whatsapp", tags=["Webhook WhatsApp"])
+    safe_include_router(webhook_whatsapp.router, tags=["Webhook WhatsApp"])  # routes auto-porteuses (pas de double prefix)
     safe_include_router(telematics.router, prefix="/api/v1/telematics", tags=["Telematics"])
 except ImportError as e:
     logger.warning(f"Additional routers not yet implemented: {e}")

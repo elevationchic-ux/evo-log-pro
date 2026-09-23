@@ -200,6 +200,7 @@ export default function EnterpriseChatPage() {
   useEffect(() => {
     const handleRealtimeEvent = (event: Event) => {
       const detail = (event as CustomEvent).detail;
+      if (detail?.type !== 'chat.message.created') return;
       const data = detail?.data || {};
       if (activeTab === 'direct' && selectedColleague) {
         if (data.recipient_id === selectedColleague.id || data.sender_id === selectedColleague.id) {

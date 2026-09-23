@@ -15,7 +15,7 @@ from app.services.b2b_service import (
 from app.middleware.tenant import TenantSecurity
 
 
-router = APIRouter(prefix="/b2b", tags=["B2B Portal"])
+router = APIRouter(tags=["B2B Portal"])  # monte sur /api/v1/b2b par main.py
 
 
 def _company_or_404(db: Session, company_id: int):

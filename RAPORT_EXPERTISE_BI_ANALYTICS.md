@@ -1,5 +1,5 @@
 # 📊 RAPPORT D'EXPERTISE BUSINESS INTELLIGENCE & REPORTING (K-ANALYTICS BI)
-## 🗓️ Mise à Jour : Septembre 2026 — état non certifié
+## 🗓️ Mise à Jour : Septembre 2026  état non certifié
 
 > Les rapports BI nécessitent une validation des sources, des agrégations et des performances sur données réelles. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 

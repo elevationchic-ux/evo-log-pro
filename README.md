@@ -1,7 +1,7 @@
 ﻿# EVO-LOG SaaS - KAMLOG EM-ERP
 
 **Version:** 2.0  
-**Statut:** Développement avancé — staging requis avant production  
+**Statut:** Développement avancé  staging requis avant production  
 **Dernière mise à jour:** 19 septembre 2026  
 **État vérifié:** [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md)
 

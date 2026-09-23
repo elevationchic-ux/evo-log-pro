@@ -238,7 +238,7 @@ export default function SaisieTicketCarburantPage() {
                     <option value="TotalEnergies Bonabéri (Douala)">TotalEnergies Bonabéri</option>
                     <option value="Tradex Port Kribi">Tradex Port Kribi</option>
                     <option value="Tradex Bassa (Douala)">Tradex Bassa Douala</option>
-                    <option value="Ola Energy Bafoussam">Ola Energy Bafoussam</option>
+                    <option value="Ola Energy limbé">Ola Energy limbé</option>
                     <option value="Cuve Interne Siège LPC SA">Cuve Interne Entreprise</option>
                   </select>
                 </div>

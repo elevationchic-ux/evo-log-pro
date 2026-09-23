@@ -186,6 +186,7 @@ class Reglement(Base):
     __tablename__ = "reglements"
     
     id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     numero_reglement = Column(String(50), unique=True, nullable=False, index=True)
     facture_id = Column(Integer, ForeignKey('factures.id'))
     date_reglement = Column(Date, nullable=False)
@@ -229,8 +230,14 @@ class TVADeclarable(Base):
 
 
 class RetenueSource(Base):
-    """Withholding tax"""
-    __tablename__ = "retenues_source"
+    """Withholding tax (volet OHADA -- declaration simplifiee)
+
+    Table propre `retenues_source_ohada` : la table `retenues_source` est
+    occupee par RetenueSourceCameroun (fiscalite locale, colonnes NOT NULL
+    differentes). Le partage precedent faisait echouer tout insert OHADA
+    (NOT NULL sur beneficiaire/company_id cotes Cameroun).
+    """
+    __tablename__ = "retenues_source_ohada"
     
     id = Column(Integer, primary_key=True, index=True)
     numero_retenu = Column(String(50), unique=True, nullable=False, index=True)

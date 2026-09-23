@@ -101,7 +101,7 @@ export default function ComptabiliteOhadaChartAccounts() {
         })));
       }
     } catch {
-      setError('Chargement API échoué — affichage du référentiel SYSCOHADA standard.');
+      setError('Chargement API échoué  affichage du référentiel SYSCOHADA standard.');
     } finally {
       setLoading(false);
     }

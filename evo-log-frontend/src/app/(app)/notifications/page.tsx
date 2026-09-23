@@ -25,7 +25,7 @@ export default function NotificationsPage() {
     setLoading(true);
     try {
       const [resNotifs, resTpls, resCamp] = await Promise.allSettled([
-        apiClient.get('/api/v1/notifications/notifications', { params: { limit: 50 } }),
+        apiClient.get('/api/v1/notifications/', { params: { limit: 50 } }),
         apiClient.get('/api/v1/notifications/templates', { params: { limit: 20 } }),
         apiClient.get('/api/v1/notifications/campagnes', { params: { limit: 10 } })
       ]);
@@ -46,7 +46,7 @@ export default function NotificationsPage() {
 
   const handleCreateNotif = async () => {
     try {
-      await apiClient.post('/api/v1/notifications/notifications', {
+      await apiClient.post('/api/v1/notifications/', {
         ...newNotif,
         destinataire_id: parseInt(newNotif.destinataire_id) || 1,
       });
@@ -57,7 +57,7 @@ export default function NotificationsPage() {
 
   const handleEnvoyer = async (id: number) => {
     try {
-      await apiClient.put(`/api/v1/notifications/notifications/${id}/envoyer`);
+      await apiClient.put(`/api/v1/notifications/${id}/envoyer`);
       fetchData();
     } catch (err) { console.error('Erreur envoi:', err); }
   };
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Bell className="w-3.5 h-3.5" /> Notifications Multi-Canal — Email, SMS, WhatsApp, Push, In-App
+            <Bell className="w-3.5 h-3.5" /> Notifications Multi-Canal  Email, SMS, WhatsApp, Push, In-App
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">Centre de Notifications & Campagnes</h1>
           <p className="text-xs text-slate-400 mt-1">Gestion des notifications internes, alertes opérationnelles, campagnes email/SMS massives et préférences utilisateurs.</p>

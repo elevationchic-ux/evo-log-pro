@@ -1,5 +1,5 @@
 # 🏛️ RAPPORT D'EXPERTISE : TRANSIT, DOUANE CEMAC & CAMCIS
-## 🗓️ Mise à Jour : Septembre 2026 — état non certifié
+## 🗓️ Mise à Jour : Septembre 2026  état non certifié
 
 > Les intégrations douanières externes et la couverture de production restent à tester avec des systèmes réels. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 
@@ -62,9 +62,9 @@ Le module **Transit & Douane CEMAC** couvre la totalité du cycle de dédouaneme
 ## 🆕 AMÉLIORATIONS UX/UI (SEPTEMBRE 2026)
 
 ### TermDefinition Active
-- **DUM** : "*Déclaration Unique de Marchandises — Document officiel soumis en douane.*"
-- **BAE** : "*Bon à Enlever — Autorisation de retirer la marchandise du port.*"
-- **CAMCIS** : "*Cameroon Customs Information System — Plateforme nationale de dédouanement.*"
+- **DUM** : "*Déclaration Unique de Marchandises  Document officiel soumis en douane.*"
+- **BAE** : "*Bon à Enlever  Autorisation de retirer la marchandise du port.*"
+- **CAMCIS** : "*Cameroon Customs Information System  Plateforme nationale de dédouanement.*"
 
 ### Portail Déclarant Enrichi
 - Centre d'aide `?` disponible pour le guide de jalonnement physique quai.
@@ -77,4 +77,4 @@ Le module **Transit & Douane CEMAC** couvre la totalité du cycle de dédouaneme
 
 ---
 
-*Rapport certifié conforme — EVO-LOG ERP Transit & Douane CEMAC — Septembre 2026*
+*Rapport certifié conforme  EVO-LOG ERP Transit & Douane CEMAC  Septembre 2026*

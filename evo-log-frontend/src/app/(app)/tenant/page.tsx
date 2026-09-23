@@ -77,7 +77,7 @@ export default function TenantPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Building2 className="w-3.5 h-3.5" /> Multi-Tenant — Gestion des Sociétés Clientes & Abonnements SaaS
+            <Building2 className="w-3.5 h-3.5" /> Multi-Tenant  Gestion des Sociétés Clientes & Abonnements SaaS
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">Gestion Multi-Tenant & Sociétés</h1>
           <p className="text-xs text-slate-400 mt-1">Administration des tenants SaaS, plans d'abonnement, activation/suspension de sociétés et personnalisation des portails B2B.</p>
@@ -105,7 +105,7 @@ export default function TenantPage() {
               <span className="text-xs font-semibold text-slate-400">{s.label}</span>
               <s.icon className={`w-4 h-4 ${s.color}`} />
             </div>
-            <p className={`text-2xl font-black mt-2 ${s.color}`}>{loading ? '—' : s.value}</p>
+            <p className={`text-2xl font-black mt-2 ${s.color}`}>{loading ? '' : s.value}</p>
           </div>
         ))}
       </div>
@@ -126,7 +126,7 @@ export default function TenantPage() {
             ].map(f => (
               <div key={f.label}>
                 <span className="text-[11px] font-semibold text-slate-500 block">{f.label}</span>
-                <span className="text-slate-100 font-bold">{f.value || '—'}</span>
+                <span className="text-slate-100 font-bold">{f.value || ''}</span>
               </div>
             ))}
           </div>

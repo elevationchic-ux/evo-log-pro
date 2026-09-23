@@ -25,13 +25,32 @@ from app.services.notifications_service import (
     SMSNotificationService, WhatsAppNotificationService, PushNotificationService,
     NotificationsReportingService
 )
-from app.models.notifications import Notification, TemplateNotification, CampagneNotification
+from app.models.notifications import (
+    Notification, TemplateNotification, CampagneNotification, PreferenceNotification
+)
 
 router = APIRouter(tags=["Notifications"])
 
 
 # ============ NOTIFICATIONS ============
-@router.post("/notifications", response_model=NotificationResponse, status_code=status.HTTP_201_CREATED)
+# Routes relatives : main.py monte ce router sur /api/v1/notifications
+# (les anciens chemins /notifications/... creaient un double prefix).
+@router.get("/", response_model=List[NotificationResponse])
+def lister_notifications(
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """List latest notifications"""
+    return (
+        db.query(Notification)
+        .order_by(Notification.id.desc())
+        .limit(min(limit, 200))
+        .all()
+    )
+
+
+@router.post("/", response_model=NotificationResponse, status_code=status.HTTP_201_CREATED)
 def creer_notification(
     notification: NotificationCreate,
     db: Session = Depends(get_db),
@@ -44,7 +63,7 @@ def creer_notification(
     )
 
 
-@router.put("/notifications/{notification_id}/envoyer", response_model=NotificationResponse)
+@router.put("/{notification_id}/envoyer", response_model=NotificationResponse)
 def envoyer_notification(
     notification_id: int,
     db: Session = Depends(get_db),
@@ -54,7 +73,7 @@ def envoyer_notification(
     return NotificationService.envoyer_notification(db, notification_id)
 
 
-@router.put("/notifications/{notification_id}", response_model=NotificationResponse)
+@router.put("/{notification_id}", response_model=NotificationResponse)
 def mettre_a_jour_notification(
     notification_id: int,
     notification: NotificationUpdate,
@@ -75,6 +94,16 @@ def mettre_a_jour_notification(
 
 
 # ============ TEMPLATES ============
+@router.get("/templates", response_model=List[TemplateNotificationResponse])
+def lister_templates(
+    limit: int = 20,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """List notification templates"""
+    return db.query(TemplateNotification).limit(min(limit, 200)).all()
+
+
 @router.post("/templates", response_model=TemplateNotificationResponse, status_code=status.HTTP_201_CREATED)
 def creer_template(
     template: TemplateNotificationCreate,
@@ -143,6 +172,16 @@ def mettre_a_jour_preference(
 
 
 # ============ CAMPAGNES ============
+@router.get("/campagnes", response_model=List[CampagneNotificationResponse])
+def lister_campagnes(
+    limit: int = 10,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """List notification campaigns"""
+    return db.query(CampagneNotification).limit(min(limit, 200)).all()
+
+
 @router.post("/campagnes", response_model=CampagneNotificationResponse, status_code=status.HTTP_201_CREATED)
 def creer_campagne(
     campagne: CampagneNotificationCreate,

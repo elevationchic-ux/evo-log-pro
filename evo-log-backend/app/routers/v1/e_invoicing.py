@@ -7,6 +7,7 @@ import hashlib
 
 from app.database import get_db
 from app.utils.tenant import get_current_tenant_context, TenantContext, require_module_access
+from app.core.not_implemented import not_implemented
 
 router = APIRouter()
 
@@ -23,28 +24,20 @@ def sign_normalized_e_invoice(
     context: TenantContext = Depends(get_current_tenant_context)
 ):
     """
-    Generate normalized tax hash and QR Code payload compliant with 
-    Direction Générale des Impôts (DGI Cameroun) e-invoicing standards.
+    Signature electronique normalisee DGI : 501 (un simple SHA-256 local ne vaut
+    pas une signature qualifiee conforme DGI).
     """
-    raw_payload = f"{payload.invoice_number}|{payload.client_niu}|{payload.total_ttc}|{context.organization_id}|{datetime.utcnow().strftime('%Y%m%d%H%M')}"
-    dgi_fiscal_hash = hashlib.sha256(raw_payload.encode('utf-8')).hexdigest().upper()
-    qr_payload = f"https://dgi.impots.cm/verify?hash={dgi_fiscal_hash[:32]}"
-
-    return {
-        "status": "success",
-        "compliance_standard": "DGI Cameroun Code Général des Impôts Art. 21",
-        "invoice_number": payload.invoice_number,
-        "dgi_fiscal_hash": dgi_fiscal_hash,
-        "qr_code_payload": qr_payload,
-        "signed_at": datetime.utcnow().isoformat()
-    }
+    not_implemented(
+        "Signature de facture electronique normalisee (DGI Cameroun)",
+        "un reel service de signature qualifiee / d'horodatage et l'integration "
+        "API DGI (le hash SHA-256 local n'a aucune valeur fiscale opposable)",
+    )
 
 @router.get("/verify/{fiscal_hash}")
 def verify_e_invoice(fiscal_hash: str):
-    """Public verification endpoint for DGI fiscal signature."""
-    return {
-        "status": "VALID",
-        "fiscal_hash": fiscal_hash,
-        "verified_at": datetime.utcnow().isoformat(),
-        "issuer": "EVO-LOG SaaS Platform • Code Axis Digital Cameroun"
-    }
+    """Verification de facture : 501 (renvoyait VALID pour n'importe quel hash)."""
+    not_implemented(
+        "Verification publique d'une signature fiscale",
+        "un registre verifiable des hashes emis (la reponse renvoyait systemati-"
+        "quement VALID, ce qui est faux et dangereux)",
+    )

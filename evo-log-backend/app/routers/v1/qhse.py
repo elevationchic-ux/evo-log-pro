@@ -31,7 +31,7 @@ from app.services.qhse_service import (
 )
 from app.models.qhse import AnalyseRisque, PlanPrevention, AccidentTravail, NormeCertification, HACCPPlan
 
-router = APIRouter(prefix="/qhse", tags=["QHSE"])
+router = APIRouter(tags=["QHSE"])  # monte sur /api/v1/qhse par main.py (pas de double prefix)
 
 
 # ============ ANALYSES RISQUES ============

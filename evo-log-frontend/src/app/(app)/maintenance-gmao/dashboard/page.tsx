@@ -34,7 +34,7 @@ export default function MaintenanceGMAODashboardPage() {
     { label: 'Flotte Disponible', value: `${fleet.filter(f => f.statut === 'BON ÉTAT').length}/${fleet.length}`, icon: Truck, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
     { label: 'OT Ouverts', value: correctiveOrders.length, icon: Wrench, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
     { label: 'PM Planifiés (30j)', value: preventivePlans.length, icon: Calendar, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-    { label: 'TCO Global', value: '—', icon: TrendingDown, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
+    { label: 'TCO Global', value: '', icon: TrendingDown, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
   ];
 
   return (

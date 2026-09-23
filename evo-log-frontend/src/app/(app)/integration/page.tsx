@@ -58,7 +58,7 @@ export default function IntegrationPage() {
     },
     {
       name: 'e-GUCE Cameroun',
-      description: 'Guichet Unique de Commerce Extérieur — Formalités pré-dédouanement',
+      description: 'Guichet Unique de Commerce Extérieur  Formalités pré-dédouanement',
       dossiers: guichetUnique.length,
       color: 'text-blue-400',
       bgColor: 'bg-blue-500/10 border-blue-500/30',
@@ -66,7 +66,7 @@ export default function IntegrationPage() {
     },
     {
       name: 'PCS Port Community',
-      description: 'Port Community System — Échange données entre acteurs portuaires PAD/PAK',
+      description: 'Port Community System  Échange données entre acteurs portuaires PAD/PAK',
       dossiers: pcs.length,
       color: 'text-purple-400',
       bgColor: 'bg-purple-500/10 border-purple-500/30',
@@ -87,7 +87,7 @@ export default function IntegrationPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Plug className="w-3.5 h-3.5" /> Intégrations Systèmes Cameroun — CAMCIS, GUCE, Sydonia, PCS, BEAC
+            <Plug className="w-3.5 h-3.5" /> Intégrations Systèmes Cameroun  CAMCIS, GUCE, Sydonia, PCS, BEAC
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">Passerelles & Intégrations Système</h1>
           <p className="text-xs text-slate-400 mt-1">Connecteurs temps-réel vers Sydonia World DGD, e-GUCE, PCS PAD/PAK, BEAC/XEAC et banques commerciales.</p>
@@ -111,7 +111,7 @@ export default function IntegrationPage() {
             </div>
             <p className="text-xs text-slate-400 mb-3">{s.description}</p>
             <div className="flex items-center justify-between">
-              <span className={`text-2xl font-black ${s.color}`}>{loading ? '—' : s.dossiers}</span>
+              <span className={`text-2xl font-black ${s.color}`}>{loading ? '' : s.dossiers}</span>
               <span className="text-[10px] text-slate-500">dossiers liés</span>
             </div>
           </div>

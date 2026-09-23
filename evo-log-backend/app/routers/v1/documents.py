@@ -29,11 +29,11 @@ from app.services.documents_service import (
 )
 from app.models.documents import Document, Dossier, TemplateDocument
 
-router = APIRouter(prefix="/documents", tags=["Documents"])
+router = APIRouter(tags=["Documents"])  # monte sur /api/v1/documents par main.py; routes relatives au prefix
 
 
 # ============ DOCUMENTS ============
-@router.post("/documents", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
 def creer_document(
     document: DocumentCreate,
     db: Session = Depends(get_db),
@@ -47,7 +47,7 @@ def creer_document(
     )
 
 
-@router.post("/documents/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
 def uploader_document(
     dossier_id: int,
     type_document: str,
@@ -70,7 +70,7 @@ def uploader_document(
     )
 
 
-@router.put("/documents/{document_id}/valider", response_model=DocumentResponse)
+@router.put("/{document_id}/valider", response_model=DocumentResponse)
 def valider_document(
     document_id: int,
     db: Session = Depends(get_db),
@@ -80,7 +80,7 @@ def valider_document(
     return DocumentService.valider_document(db, document_id)
 
 
-@router.put("/documents/{document_id}", response_model=DocumentResponse)
+@router.put("/{document_id}", response_model=DocumentResponse)
 def mettre_a_jour_document(
     document_id: int,
     document: DocumentUpdate,

@@ -114,7 +114,7 @@ export default function LoginPage() {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center text-white font-sans select-none overflow-hidden bg-[#020c1b]">
-      
+
       {/* 1. REAL BACKGROUND IMAGE: Cargo Ship Port of Douala */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <img
@@ -204,7 +204,7 @@ export default function LoginPage() {
 
           {/* Main CADC center Branding */}
           <div className="relative z-10 flex flex-col items-center text-center my-auto max-w-3xl px-4">
-            
+
             {/* Center Ship Emblem with dual rotating rings and pulse halo */}
             <div className="relative mb-6 w-28 h-28 flex items-center justify-center">
               <div
@@ -313,7 +313,7 @@ export default function LoginPage() {
 
       {/* 3. LOGIN INTERFACE CARD */}
       <div className="relative z-10 w-full max-w-[460px] mx-4 animate-in fade-in zoom-in-95 duration-500">
-        
+
         {/* Brand header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 rounded-2xl shadow-2xl shadow-amber-500/30 mb-3 border border-yellow-200">
@@ -432,7 +432,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-            <span>Douala Port • Kribi • Bafoussam</span>
+            <span>Douala Port • Kribi • limbé</span>
             <Link href="/forgot-password" className="text-amber-400 hover:underline font-semibold">
               Assistance Connexion
             </Link>

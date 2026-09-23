@@ -574,8 +574,10 @@ def _legacy_plan_solde_update(db: Session, compte_id: int, debit: float = 0.0, c
     compte = db.query(PlanComptableOHADA).filter(PlanComptableOHADA.id == compte_id).first()
     if not compte:
         raise ValueError("Compte non trouvé")
-    compte.solde_debit = (compte.solde_debit or 0) + debit
-    compte.solde_credit = (compte.solde_credit or 0) + credit
+    # Colonnes Numeric -> Decimal : conversion explicite (Decimal + float leve un TypeError).
+    from decimal import Decimal as _Decimal
+    compte.solde_debit = (compte.solde_debit or _Decimal(0)) + _Decimal(str(debit))
+    compte.solde_credit = (compte.solde_credit or _Decimal(0)) + _Decimal(str(credit))
     db.commit()
     db.refresh(compte)
     return compte
@@ -688,6 +690,8 @@ ReglementService.creer_paiement = staticmethod(_legacy_paiement_creer)
 def _legacy_tva_calculer(db: Session, numero_tva: str, base_imposable: float, taux: float,
                         date: date):
     montant_tva = base_imposable * (taux / 100)
+    # Colonnes reelles de TVADeclarable : tva_collectee / tva_deductible / tva_a_payer
+    # (l'ancien code passait montant_tva et taux, inexistants -> TypeError au runtime).
     declaration = TVADeclarable(
         numero_declaration=numero_tva,
         periode=date.strftime("%Y-%m"),
@@ -696,13 +700,10 @@ def _legacy_tva_calculer(db: Session, numero_tva: str, base_imposable: float, ta
         base_imposable=base_imposable,
         tva_collectee=montant_tva,
         tva_deductible=0,
-        montant_tva=montant_tva,
+        tva_a_payer=montant_tva,
         devise="XAF",
-        statut="due",
+        statut=StatutTaxe.DUE,
     )
-    declaration.base_imposable = base_imposable
-    declaration.taux = taux
-    declaration.montant_tva = montant_tva
     db.add(declaration)
     db.commit()
     db.refresh(declaration)
@@ -715,19 +716,18 @@ TVADeclarableService.calculer_tva = staticmethod(_legacy_tva_calculer)
 def _legacy_retenue_calculer(db: Session, numero_retenu: str, base_imposable: float, taux: float,
                             date: date):
     montant_retenu = base_imposable * (taux / 100)
+    # Colonnes reelles de RetenueSource : numero_retenu / date_retenu / taux_retenu /
+    # montant_retenu (l'ancien code utilisait numero_retenue, date_retenue... -> TypeError).
     retenue = RetenueSource(
-        numero_retenue=numero_retenu,
-        periode=date.strftime("%Y-%m"),
-        date_retenue=date,
+        numero_retenu=numero_retenu,
+        date_retenu=date,
+        type_retenu="ARS",
+        taux_retenu=taux,
         base_imposable=base_imposable,
-        taux_retenue=taux,
-        montant_retenue=montant_retenu,
+        montant_retenu=montant_retenu,
         devise="XAF",
-        statut="due",
+        statut=StatutTaxe.DUE,
     )
-    retenue.base_imposable = base_imposable
-    retenue.taux = taux
-    retenue.montant_retenu = montant_retenu
     db.add(retenue)
     db.commit()
     db.refresh(retenue)
@@ -735,3 +735,5 @@ def _legacy_retenue_calculer(db: Session, numero_retenu: str, base_imposable: fl
 
 
 RetenueSourceService.calculer_retenu_source = staticmethod(_legacy_retenue_calculer)
+# Alias historique : calcul de la retenue a la source exposee sur TaxeService.
+TaxeService.calculer_retenu_source = staticmethod(_legacy_retenue_calculer)

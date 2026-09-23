@@ -78,7 +78,10 @@ class KPIService:
         if not kpi:
             raise ValueError("KPI non trouvé")
         
-        valeur_precedente = kpi.derniere_valeur or 0
+        # Colonnes Numeric -> Decimal cote SQLAlchemy : sans conversion, la
+        # 2e mise a jour d'un KPI plantait (float - Decimal -> TypeError).
+        valeur_precedente = float(kpi.derniere_valeur or 0)
+        derniere_valeur = float(derniere_valeur)
         variation = ((derniere_valeur - valeur_precedente) / valeur_precedente * 100) if valeur_precedente > 0 else 0
         
         if variation > 0:

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, Search, CheckCircle2, Clock, DollarSign, X } from 'lucide-react';
 import { toast } from 'sonner';
+import PageNonConnectee from '@/components/shared/PageNonConnectee';
 
 export default function FinanceRequisitionsPage() {
   const [mounted, setMounted] = useState(false);
@@ -45,6 +46,7 @@ export default function FinanceRequisitionsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto animate-in fade-in duration-500 text-slate-100">
+      <PageNonConnectee module="Demandes d'achat" message="Liste de démonstration stockée en mémoire navigateur : les demandes créées ici ne sont pas enregistrées en base." />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
         <div>

@@ -1,5 +1,5 @@
 # 🚢 RAPPORT D'EXPERTISE : ACCONAGE PORTUAIRE & QUAI (TOS)
-## 🗓️ Mise à Jour : Septembre 2026 — 100% Opérationnel & Zéro Mock
+## 🗓️ Mise à Jour : Septembre 2026  100% Opérationnel & Zéro Mock
 
 ---
 
@@ -68,4 +68,4 @@ GET  /api/v1/port-operations/yard            → État occupation terre-plein
 
 ---
 
-*Rapport certifié conforme — EVO-LOG ERP Acconage Portuaire — Septembre 2026*
+*Rapport certifié conforme  EVO-LOG ERP Acconage Portuaire  Septembre 2026*

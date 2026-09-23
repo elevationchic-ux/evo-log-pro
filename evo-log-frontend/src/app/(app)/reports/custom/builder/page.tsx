@@ -271,7 +271,7 @@ export default function CustomReportBuilderPage() {
                           .filter(c => selectedCols.includes(c.id))
                           .map(c => (
                             <td key={c.id} className="px-4 py-3">
-                              {String(row[c.id] || '—')}
+                              {String(row[c.id] || '')}
                             </td>
                           ))}
                       </tr>

@@ -7,6 +7,7 @@ import hashlib
 
 from app.database import get_db
 from app.utils.tenant import get_current_tenant_context, TenantContext
+from app.core.not_implemented import not_implemented
 
 router = APIRouter()
 
@@ -20,41 +21,18 @@ GENESIS_HASH = "0000000000000000000000000000000000000000000000000000000000000000
 
 @router.get("/ledger")
 def get_blockchain_ledger(context: TenantContext = Depends(get_current_tenant_context)):
-    """Retrieve immutable cryptographic audit ledger blocks."""
-    block1_data = f"1|STOCK_MOVEMENT|MV-2026-0045|RELEASE|{GENESIS_HASH}"
-    block1_hash = hashlib.sha256(block1_data.encode('utf-8')).hexdigest()
-
-    return {
-        "status": "success",
-        "organization_id": context.organization_id,
-        "chain_height": 1,
-        "blocks": [
-            {
-                "block_index": 1,
-                "previous_hash": GENESIS_HASH,
-                "current_hash": block1_hash,
-                "entity_type": "STOCK_MOVEMENT",
-                "entity_id": "MV-2026-0045",
-                "action": "RELEASE",
-                "timestamp": datetime.utcnow().isoformat()
-            }
-        ]
-    }
+    """Registre blockchain immuable : aucune chaine persistante n'est branchée."""
+    not_implemented(
+        "Ledger blockchain (lecture des blocs)",
+        "un backend de registre append-only persistant (table blocks + chainage "
+        "SHA-256 réél), inexistant a ce jour",
+    )
 
 @router.post("/record-event", status_code=status.HTTP_201_CREATED)
 def record_blockchain_event(payload: BlockRecordSchema, context: TenantContext = Depends(get_current_tenant_context)):
-    """Append a new cryptographic hash block to the tenant's audit trail ledger."""
-    block_index = 2
-    raw_str = f"{block_index}|{payload.entity_type}|{payload.entity_id}|{payload.action}|{payload.payload_hash}"
-    block_hash = hashlib.sha256(raw_str.encode('utf-8')).hexdigest()
-
-    return {
-        "status": "mined",
-        "block": {
-            "block_index": block_index,
-            "current_hash": block_hash,
-            "entity_type": payload.entity_type,
-            "entity_id": payload.entity_id,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    }
+    """Ajout d'un bloc : non implémenté (pas de persistance de chaine réelle)."""
+    not_implemented(
+        "Enregistrement d'un evenement blockchain",
+        "un service de minage/chainage persistant et un stockage des blocs, "
+        "inexistants a ce jour",
+    )

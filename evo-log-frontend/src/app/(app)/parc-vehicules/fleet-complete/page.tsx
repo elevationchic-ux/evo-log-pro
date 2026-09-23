@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Truck, 
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
-  RefreshCw, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Clock, 
+import {
+  Truck,
+  Plus,
+  Search,
+  Filter,
+  Download,
+  RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
+  Clock,
   Wrench,
   ChevronRight,
   Shield,
@@ -103,7 +103,7 @@ export default function ParcFleetCompletePage() {
   };
 
   const filteredVehicles = vehicles.filter(v => {
-    const matchesSearch = 
+    const matchesSearch =
       v.immatriculation.toLowerCase().includes(searchTerm.toLowerCase()) ||
       v.numeroParc.toLowerCase().includes(searchTerm.toLowerCase()) ||
       v.marque.toLowerCase().includes(searchTerm.toLowerCase());
@@ -223,12 +223,11 @@ export default function ParcFleetCompletePage() {
                   <span className="font-mono text-xs font-bold text-on-surface-variant block">{v.numeroParc}</span>
                   <h3 className="font-bold text-lg font-mono text-primary">{v.immatriculation}</h3>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                  v.statut === 'DISPONIBLE' ? 'bg-emerald-500/10 text-emerald-600' :
-                  v.statut === 'EN_MISSION' ? 'bg-blue-500/10 text-blue-600' :
-                  v.statut === 'EN_MAINTENANCE' ? 'bg-amber-500/10 text-amber-600' :
-                  'bg-red-500/10 text-red-600'
-                }`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${v.statut === 'DISPONIBLE' ? 'bg-emerald-500/10 text-emerald-600' :
+                    v.statut === 'EN_MISSION' ? 'bg-blue-500/10 text-blue-600' :
+                      v.statut === 'EN_MAINTENANCE' ? 'bg-amber-500/10 text-amber-600' :
+                        'bg-red-500/10 text-red-600'
+                  }`}>
                   {v.statut}
                 </span>
               </div>
@@ -378,7 +377,7 @@ export default function ParcFleetCompletePage() {
                   >
                     <option value="Douala Port">Douala Port (Base DIT)</option>
                     <option value="Kribi Port">Kribi Port (Base KMT)</option>
-                    <option value="Bafoussam">Bafoussam Hub</option>
+                    <option value="limbé">limbé Hub</option>
                     <option value="Yaoundé">Yaoundé Gare MAD</option>
                   </select>
                 </div>

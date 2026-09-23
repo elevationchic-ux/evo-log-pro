@@ -180,7 +180,7 @@ export default function FinanceOhadaSuppliers() {
             Dettes Fournisseurs &amp; Balance Âgée
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Contrôle factures (401), DPO et ordonnancement décaissements — Réf. {today}
+            Contrôle factures (401), DPO et ordonnancement décaissements  Réf. {today}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -190,7 +190,7 @@ export default function FinanceOhadaSuppliers() {
           <button onClick={exportCSV} disabled={filtered.length === 0} className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl flex items-center gap-2 border border-slate-700 transition-all">
             <Download className="w-4 h-4 text-emerald-400" /> CSV
           </button>
-          <button onClick={() => toast.info('Ordonnancement groupé — disponible après validation DFC')} className="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-500/25 transition-all">
+          <button onClick={() => toast.info('Ordonnancement groupé  disponible après validation DFC')} className="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-500/25 transition-all">
             <CreditCard className="w-4 h-4" /> Ordonnancer Règlements
           </button>
         </div>
@@ -211,7 +211,7 @@ export default function FinanceOhadaSuppliers() {
             sub: `${data.length} fournisseurs`, color: 'text-slate-100',
           },
           {
-            label: 'DPO Moyen', value: loading ? null : `${dpo?.dpo_moyen?.toFixed(0) ?? '—'} jours`,
+            label: 'DPO Moyen', value: loading ? null : `${dpo?.dpo_moyen?.toFixed(0) ?? ''} jours`,
             sub: dpo ? `${dpo.variation_vs_mois_precedent > 0 ? '+' : ''}${dpo.variation_vs_mois_precedent?.toFixed(1)}j vs N-1` : 'N/D',
             color: 'text-blue-400',
           },
@@ -221,7 +221,7 @@ export default function FinanceOhadaSuppliers() {
           },
           {
             label: 'À Payer Cette Semaine', value: loading ? null : `${(dpo?.montant_a_payer_semaine ?? 0).toLocaleString('fr-FR')} XAF`,
-            sub: dpo?.fournisseur_semaine ?? '—', color: 'text-emerald-400',
+            sub: dpo?.fournisseur_semaine ?? '', color: 'text-emerald-400',
           },
         ].map((kpi, i) => (
           <div key={i} className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
@@ -322,10 +322,10 @@ export default function FinanceOhadaSuppliers() {
                       <td className="py-3.5 px-4 text-amber-400 font-bold">{item.compte_401}</td>
                       <td className="py-3.5 px-4 text-slate-400">{item.categorie}</td>
                       <td className="py-3.5 px-4 text-right font-bold text-slate-100">{item.total_du.toLocaleString('fr-FR')}</td>
-                      <td className="py-3.5 px-4 text-right text-emerald-400">{item.non_echu > 0 ? item.non_echu.toLocaleString('fr-FR') : '—'}</td>
-                      <td className="py-3.5 px-4 text-right text-amber-400">{item.echu_1_30 > 0 ? item.echu_1_30.toLocaleString('fr-FR') : '—'}</td>
-                      <td className="py-3.5 px-4 text-right text-orange-400">{item.echu_31_60 > 0 ? item.echu_31_60.toLocaleString('fr-FR') : '—'}</td>
-                      <td className="py-3.5 px-4 text-right font-bold text-red-400">{item.echu_plus_60 > 0 ? item.echu_plus_60.toLocaleString('fr-FR') : '—'}</td>
+                      <td className="py-3.5 px-4 text-right text-emerald-400">{item.non_echu > 0 ? item.non_echu.toLocaleString('fr-FR') : ''}</td>
+                      <td className="py-3.5 px-4 text-right text-amber-400">{item.echu_1_30 > 0 ? item.echu_1_30.toLocaleString('fr-FR') : ''}</td>
+                      <td className="py-3.5 px-4 text-right text-orange-400">{item.echu_31_60 > 0 ? item.echu_31_60.toLocaleString('fr-FR') : ''}</td>
+                      <td className="py-3.5 px-4 text-right font-bold text-red-400">{item.echu_plus_60 > 0 ? item.echu_plus_60.toLocaleString('fr-FR') : ''}</td>
                       <td className="py-3.5 px-4 text-center">
                         <AgingBar non_echu={item.non_echu} d30={item.echu_1_30} d60={item.echu_31_60} d60p={item.echu_plus_60} />
                       </td>
@@ -370,7 +370,7 @@ export default function FinanceOhadaSuppliers() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-black text-slate-100">Initier un Règlement</h3>
-                <p className="text-xs text-slate-400 font-mono mt-1">{payModal.fournisseur.compte_401} — {payModal.fournisseur.fournisseur_nom}</p>
+                <p className="text-xs text-slate-400 font-mono mt-1">{payModal.fournisseur.compte_401}  {payModal.fournisseur.fournisseur_nom}</p>
               </div>
               <button onClick={() => setPayModal({ fournisseur: null, open: false })} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400">
                 <X className="w-5 h-5" />

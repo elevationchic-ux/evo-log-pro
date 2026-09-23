@@ -27,7 +27,7 @@ def initialiser_roles_systeme(
     return {"message": "Système roles initialisés avec succès"}
 
 
-@router.post("/roles", response_model=RoleResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=RoleResponse, status_code=status.HTTP_201_CREATED)
 def creer_role(
     role: RoleCreate,
     db: Session = Depends(get_db),
@@ -49,7 +49,7 @@ def creer_role(
     )
 
 
-@router.get("/roles", response_model=List[RoleResponse])
+@router.get("/", response_model=List[RoleResponse])
 def lister_roles(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -65,7 +65,7 @@ def lister_roles(
         return db.query(Role).filter(Role.company_id == None).all()
 
 
-@router.put("/roles/{role_id}/modules", response_model=RoleResponse)
+@router.put("/{role_id}/modules", response_model=RoleResponse)
 def mettre_a_jour_modules_role(
     role_id: int,
     modules_allowed: List[str],

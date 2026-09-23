@@ -115,13 +115,11 @@ class ContratFiscal(Base):
 
 
 class RetenueSourceCameroun(Base):
-    """Retenue à la source - Cameroon (fiscalité locale, utilise la même table que RetenueSource OHADA)"""
+    """Retenue à la source - Cameroon (fiscalité locale)"""
     __tablename__ = "retenues_source"
-    __table_args__ = {'extend_existing': True}
-    # PAS index=True ici: la table est deja declaree par RetenueSource
-    # (finance_ohada) et redeclarer l'index creerait un doublon
-    # 'ix_retenues_source_id' qui fait echouer create_all (Postgres et
-    # SQLite partagent les noms d'index au niveau du schema).
+    # Table propre a ce modele depuis que le volet OHADA a ete separe dans
+    # `retenues_source_ohada` (cf. migration 013). L'index ix_retenues_source_id
+    # est cree par la migration 008, d'ou l'absence d'index=True ici.
     id = Column(Integer, primary_key=True)
 
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=False)

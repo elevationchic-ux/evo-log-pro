@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import PageNonConnectee from "@/components/shared/PageNonConnectee";
 import {
   Anchor,
   ArrowLeft,
@@ -100,6 +101,7 @@ export default function StevedoringOperationsPage() {
 
   return (
     <div className="p-6 space-y-6 bg-slate-950 text-slate-100 min-h-screen">
+      <PageNonConnectee module="Manutention portuaire" message="Écran de démonstration : les escales et tâches affichées ne proviennent pas de la base de données." />
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-4">
         <div className="flex items-center gap-3">

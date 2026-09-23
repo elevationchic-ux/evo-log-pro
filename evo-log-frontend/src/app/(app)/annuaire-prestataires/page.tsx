@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Building, Search, ShieldCheck, Star, Phone, Mail, Clock, 
-  MapPin, Plus, Send, CheckCircle2, Award, Truck, 
+import {
+  Building, Search, ShieldCheck, Star, Phone, Mail, Clock,
+  MapPin, Plus, Send, CheckCircle2, Award, Truck,
   DollarSign, X, Shield, RefreshCw, ShoppingCart,
   Wrench, ChevronRight, AlertOctagon,
   FileCheck2, Compass
@@ -87,7 +87,7 @@ const VILLES = [
   { id: 'Kribi', label: 'Kribi (Port PAK en Eau Profonde)' },
   { id: 'Yaounde', label: 'Yaoundé (Corridor Centre)' },
   { id: 'Ngaoundere', label: 'Ngaoundéré (Corridor Tchad)' },
-  { id: 'Bafoussam', label: 'Bafoussam (Hinterland Ouest)' }
+  { id: 'limbé', label: 'limbé (Hinterland Ouest)' }
 ];
 
 const SPECIALITES_PANNE = [
@@ -160,7 +160,7 @@ export default function AnnuairePrestatairesPage() {
     ['ACHATS', 'DIRECTEUR_TRANSPORT', 'CHEF_PARC', 'ADMIN', 'DAF', 'CHEF_COMPTABLE', 'EXPLOITATION'].includes(r)
   );
 
-  // Fetch from FastAPI backend — NO mock fallback
+  // Fetch from FastAPI backend  NO mock fallback
   const fetchPrestataires = async () => {
     setIsLoading(true);
     try {
@@ -186,7 +186,7 @@ export default function AnnuairePrestatairesPage() {
 
   // Filtered list
   const filteredPrestataires = prestataires.filter(p => {
-    const matchesSearch = 
+    const matchesSearch =
       p.raison_sociale.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.sigle && p.sigle.toLowerCase().includes(searchQuery.toLowerCase())) ||
       p.specialite.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -345,7 +345,7 @@ export default function AnnuairePrestatairesPage() {
 
   return (
     <div className="min-h-screen p-4 sm:p-8 space-y-6 text-white font-sans">
-      
+
       {/* Top Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
@@ -450,11 +450,10 @@ export default function AnnuairePrestatairesPage() {
       <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab('annuaire')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'annuaire'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'annuaire'
               ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
+            }`}
         >
           <Building className="w-4 h-4" />
           Tous les Partenaires B2B ({filteredPrestataires.length})
@@ -462,11 +461,10 @@ export default function AnnuairePrestatairesPage() {
 
         <button
           onClick={() => setActiveTab('garages')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'garages'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'garages'
               ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
+            }`}
         >
           <Wrench className="w-4 h-4" />
           Garages & Pannes 24/7 ({garagesPrestataires.length})
@@ -474,11 +472,10 @@ export default function AnnuairePrestatairesPage() {
 
         <button
           onClick={() => setActiveTab('vehicules')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'vehicules'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'vehicules'
               ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
+            }`}
         >
           <Truck className="w-4 h-4" />
           Flottes & Véhicules Disponibles ({transporteursAvecVehicules.length})
@@ -486,11 +483,10 @@ export default function AnnuairePrestatairesPage() {
 
         <button
           onClick={() => setActiveTab('cotations')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'cotations'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'cotations'
               ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
+            }`}
         >
           <ShoppingCart className="w-4 h-4" />
           Demandes de Cotations ({cotations.length})
@@ -498,11 +494,10 @@ export default function AnnuairePrestatairesPage() {
 
         <button
           onClick={() => setActiveTab('conformite')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'conformite'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'conformite'
               ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
+            }`}
         >
           <ShieldCheck className="w-4 h-4" />
           Conformité & Agréments Portuaires
@@ -563,11 +558,10 @@ export default function AnnuairePrestatairesPage() {
                 <button
                   key={spec.id}
                   onClick={() => setSelectedSpecialite(spec.id)}
-                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
-                    selectedSpecialite === spec.id
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${selectedSpecialite === spec.id
                       ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                       : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200'
-                  }`}
+                    }`}
                 >
                   {spec.label}
                 </button>
@@ -1107,7 +1101,7 @@ export default function AnnuairePrestatairesPage() {
                 <ShoppingCart className="w-5 h-5 text-amber-400" />
                 <h3 className="text-base font-bold text-white">Demande de Cotation / Devis</h3>
               </div>
-              <button 
+              <button
                 onClick={() => setIsRfqModalOpen(false)}
                 className="text-slate-400 hover:text-white p-1"
               >
@@ -1223,7 +1217,7 @@ export default function AnnuairePrestatairesPage() {
                 <Building className="w-5 h-5 text-amber-400" />
                 <h3 className="text-base font-bold text-white">Homologuer un Partenaire / Garage / Transporteur</h3>
               </div>
-              <button 
+              <button
                 onClick={() => setIsNewPrestataireModalOpen(false)}
                 className="text-slate-400 hover:text-white p-1"
               >
@@ -1247,11 +1241,10 @@ export default function AnnuairePrestatairesPage() {
                         type="button"
                         key={cat.id}
                         onClick={() => setNewTypeEntite(cat.id as any)}
-                        className={`p-2.5 rounded-xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all ${
-                          newTypeEntite === cat.id
+                        className={`p-2.5 rounded-xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all ${newTypeEntite === cat.id
                             ? 'bg-amber-500/20 border-amber-500 text-amber-300'
                             : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                        }`}
+                          }`}
                       >
                         <Icon className="w-4 h-4" />
                         <span className="text-center text-[11px]">{cat.label}</span>
@@ -1310,7 +1303,7 @@ export default function AnnuairePrestatairesPage() {
                     <option value="Kribi">Kribi (Port PAK)</option>
                     <option value="Yaounde">Yaoundé</option>
                     <option value="Ngaoundere">Ngaoundéré</option>
-                    <option value="Bafoussam">Bafoussam</option>
+                    <option value="limbé">limbé</option>
                   </select>
                 </div>
               </div>

@@ -1,26 +1,117 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  DollarSign, TrendingUp, TrendingDown, CreditCard, BarChart3,
-  ArrowUpRight, ArrowDownRight, Building2, RefreshCw, Plus,
-  Calendar, FileText, Banknote, AlertCircle, CheckCircle2, Eye
+  DollarSign, TrendingUp, ArrowUpRight, ArrowDownRight, Building2,
+  BarChart3, Plus, FileText, Banknote, AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { financeAPI } from '@/lib/api-client';
+
+interface FinanceKpis {
+  chiffre_affaires: number;
+  total_factures: number;
+  total_encaisse: number;
+  montant_impaye: number;
+  taux_recouvrement: number;
+  creances_douteuses: number;
+  tresorerie_disponible: number;
+}
+
+interface AgeeRow {
+  client: string;
+  en_cours: number;
+  j60: number;
+  j90: number;
+  statut: 'OK' | 'RISQUE' | 'CRITIQUE';
+}
+
+interface JournalRow {
+  date: string;
+  libelle: string;
+  compte: string;
+  statut: string;
+  montant: number;
+  type: 'RECETTE' | 'DEPENSE';
+}
+
+const fmtM = (n: number) => (n / 1_000_000).toFixed(1);
 
 export default function FinanceOverviewPage() {
-  const [selectedPeriod, setSelectedPeriod] = useState('AOUT_2026');
+  const [kpis, setKpis] = useState<FinanceKpis | null>(null);
+  const [balanceAgee, setBalanceAgee] = useState<AgeeRow[]>([]);
+  const [recentEntries, setRecentEntries] = useState<JournalRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
 
-  const cashflow: { tresorerieDisponible: number; entreesMois: number; sortiesMois: number; soldeNet: number; banques: Array<any> } = { tresorerieDisponible: 0, entreesMois: 0, sortiesMois: 0, soldeNet: 0, banques: [] };
-  const balanceAgee: Array<any> = [];
-  const recentEntries: Array<any> = [];
-  const budgetLines: Array<any> = [];
+  const load = useCallback(async () => {
+    setLoading(true);
+    setErreur(null);
+    try {
+      const [kpisRes, facturesRes, encaissementsRes] = await Promise.all([
+        financeAPI.getKpis(),
+        financeAPI.getFactures(),
+        financeAPI.getEncaissements(),
+      ]);
+      setKpis(kpisRes.data as FinanceKpis);
+
+      const factures: any[] = Array.isArray(facturesRes.data) ? facturesRes.data : [];
+      const encaissements: any[] = Array.isArray(encaissementsRes.data) ? encaissementsRes.data : [];
+
+      // ── Balance âgée : agrégation réelle par client, buckets d'ancienneté ──
+      const now = Date.now();
+      const byClient = new Map<string, AgeeRow>();
+      for (const f of factures) {
+        const impaye = Number(f.montant_ttc || 0); // approx: payé retranché globalement ci-dessous
+        if (['payee', 'annulee', 'brouillon'].includes(String(f.statut))) continue;
+        const echeance = f.date_echeance ? new Date(f.date_echeance).getTime() : now;
+        const jours = Math.max(0, Math.floor((now - echeance) / 86_400_000));
+        const nom = f.client_nom || `Client #${f.client_id ?? '?'}`;
+        const row = byClient.get(nom) || { client: nom, en_cours: 0, j60: 0, j90: 0, statut: 'OK' };
+        if (jours > 90) row.j90 += impaye;
+        else if (jours > 30) row.j60 += impaye;
+        else row.en_cours += impaye;
+        byClient.set(nom, row);
+      }
+      const rows = Array.from(byClient.values()).map((r) => ({
+        ...r,
+        statut: (r.j90 > 0 ? 'CRITIQUE' : r.j60 > 0 ? 'RISQUE' : 'OK') as AgeeRow['statut'],
+      })).sort((a, b) => (b.j90 + b.j60 + b.en_cours) - (a.j90 + a.j60 + a.en_cours));
+      setBalanceAgee(rows);
+
+      // ── Journal de trésorerie récent : encaissements réels ──
+      setRecentEntries(
+        encaissements.slice(0, 12).map((p: any) => ({
+          date: p.date_paiement ? new Date(p.date_paiement).toLocaleDateString('fr-FR') : '—',
+          libelle: `Encaissement facture #${p.facture_id ?? '?'}`,
+          compte: p.mode_paiement || 'banque',
+          statut: p.statut || 'confirme',
+          montant: Number(p.montant || 0),
+          type: 'RECETTE' as const,
+        }))
+      );
+    } catch (e) {
+      setErreur('Données financières indisponibles (backend injoignable ou non initialisé).');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   const statusColors: Record<string, string> = {
     OK: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
     RISQUE: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
     CRITIQUE: 'bg-red-500/10 text-red-400 border-red-500/30',
   };
+
+  const k = kpis;
+  const cashKpis = [
+    { label: 'Trésorerie Globale', value: k ? fmtM(k.tresorerie_disponible) : '0.0', sub: 'Comptes de classe 5 (banque/caisse)', icon: Banknote, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
+    { label: 'Encaissé (cumul)', value: k ? fmtM(k.total_encaisse) : '0.0', sub: 'Règlements clients perçus', icon: ArrowUpRight, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+    { label: 'Impayés', value: k ? fmtM(k.montant_impaye) : '0.0', sub: 'Facturé non réglé', icon: ArrowDownRight, color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
+    { label: 'Taux Recouvrement', value: k ? `${k.taux_recouvrement}%` : '0%', sub: `CA facturé: ${k ? fmtM(k.chiffre_affaires) : '0.0'} M XAF`, icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -30,32 +121,27 @@ export default function FinanceOverviewPage() {
           <h1 className="text-2xl font-black text-white flex items-center gap-2">
             <DollarSign className="w-6 h-6 text-amber-400" /> Finance & Trésorerie OHADA
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">Cash flow · Balance âgée · Rapprochements bancaires · Budget vs Réalisé · Journaux SYSCOHADA</p>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Données réelles agrégées depuis la base (factures, encaissements, plan comptable)
+          </p>
         </div>
         <div className="flex gap-2">
-          <select
-            value={selectedPeriod}
-            onChange={e => setSelectedPeriod(e.target.value)}
-            className="h-9 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-          >
-            <option value="AOUT_2026">Août 2026</option>
-            <option value="JUIL_2026">Juillet 2026</option>
-            <option value="JUIN_2026">Juin 2026</option>
-          </select>
-          <button onClick={() => toast.info('Saisie écriture comptable')} className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-lg">
+          <button onClick={load} className="px-3 py-2 border border-slate-700 rounded-xl text-xs text-slate-300 hover:bg-slate-800">Actualiser</button>
+          <button onClick={() => toast.info('Saisie écriture comptable : utilisez le module Comptabilité OHADA')} className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-lg">
             <Plus className="w-4 h-4" /> Écriture Comptable
           </button>
         </div>
       </div>
 
+      {erreur && (
+        <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs rounded-xl px-4 py-3">
+          <AlertCircle className="w-4 h-4" /> {erreur}
+        </div>
+      )}
+
       {/* Cash Flow KPIs */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-        {[
-          { label: 'Trésorerie Globale', value: (cashflow.tresorerieDisponible / 1000000).toFixed(1) + ' M', sub: '3 comptes bancaires CEMAC', icon: Banknote, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
-          { label: 'Entrées du Mois', value: (cashflow.entreesMois / 1000000).toFixed(1) + ' M', sub: 'Clients & produits financiers', icon: ArrowUpRight, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
-          { label: 'Sorties du Mois', value: (cashflow.sortiesMois / 1000000).toFixed(1) + ' M', sub: 'Charges exploitation & admin', icon: ArrowDownRight, color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
-          { label: 'Solde Net Mensuel', value: '+' + (cashflow.soldeNet / 1000000).toFixed(1) + ' M', sub: 'XAF (FCFA)', icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-        ].map((kpi, i) => {
+        {cashKpis.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
             <div key={i} className={`${kpi.bg} border rounded-2xl p-4 shadow-lg`}>
@@ -63,33 +149,11 @@ export default function FinanceOverviewPage() {
                 <Icon className={`w-4 h-4 ${kpi.color}`} />
                 <span className="text-xs text-slate-400 truncate">{kpi.label}</span>
               </div>
-              <div className={`text-2xl font-black font-mono ${kpi.color}`}>{kpi.value} XAF</div>
+              <div className={`text-2xl font-black font-mono ${kpi.color}`}>{loading ? '…' : kpi.value} XAF</div>
               <div className="text-[11px] text-slate-500 mt-0.5">{kpi.sub}</div>
             </div>
           );
         })}
-      </div>
-
-      {/* Bank Accounts */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl">
-        <h2 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2">
-          <Building2 className="w-4 h-4 text-blue-400" /> Comptes Bancaires Domiciliés
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {cashflow.banques.map((bk, i) => (
-            <div key={i} className="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-              <div className="text-xs font-bold text-slate-200 mb-0.5">{bk.nom}</div>
-              <div className="text-[11px] font-mono text-slate-500 mb-2">{bk.compte}</div>
-              <div className="text-xl font-black text-white font-mono">{(bk.solde / 1000000).toFixed(2)} M XAF</div>
-              <div className={`text-[11px] font-mono mt-0.5 ${bk.variation > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                {bk.variation > 0 ? '↑' : '↓'} {Math.abs(bk.variation)}% vs mois dernier
-              </div>
-              <button onClick={() => toast.info(`Relevé bancaire ${bk.nom}`)} className="mt-2 text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-1">
-                Voir relevé <ArrowUpRight className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -99,7 +163,7 @@ export default function FinanceOverviewPage() {
             <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-400" /> Balance Âgée Clients
             </h2>
-            <button onClick={() => toast.info('Export balance âgée XLS')} className="text-xs text-amber-400 hover:text-amber-300">Export XLS</button>
+            <button onClick={() => toast.info('Export XLS à brancher sur le module reporting')} className="text-xs text-amber-400 hover:text-amber-300">Export XLS</button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-[11px]">
@@ -113,6 +177,9 @@ export default function FinanceOverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
+                {balanceAgee.length === 0 && (
+                  <tr><td colSpan={5} className="px-3 py-6 text-center text-slate-500">{loading ? 'Chargement…' : 'Aucune facture impayée'}</td></tr>
+                )}
                 {balanceAgee.map((row, i) => (
                   <tr key={i} className="hover:bg-slate-800/30">
                     <td className="px-3 py-2.5 font-medium text-slate-300">{row.client}</td>
@@ -129,28 +196,15 @@ export default function FinanceOverviewPage() {
           </div>
         </div>
 
-        {/* Budget vs Réalisé */}
+        {/* Comptes bancaires (classe 5) */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl">
           <h2 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-purple-400" /> Budget vs Réalisé (Août 2026)
+            <Building2 className="w-4 h-4 text-blue-400" /> Trésorerie par compte bancaire
           </h2>
-          <div className="space-y-4">
-            {budgetLines.map((line, i) => (
-              <div key={i}>
-                <div className="flex justify-between text-[11px] mb-1">
-                  <span className="text-slate-400">{line.poste}</span>
-                  <span className={`font-mono font-bold ${line.pct > 90 ? 'text-red-400' : line.pct > 75 ? 'text-amber-400' : 'text-emerald-400'}`}>{line.pct.toFixed(1)}%</span>
-                </div>
-                <div className="bg-slate-800 rounded-full h-2 overflow-hidden">
-                  <div className={`h-full ${line.color} rounded-full`} style={{ width: `${Math.min(line.pct, 100)}%` }}></div>
-                </div>
-                <div className="flex justify-between text-[10px] mt-0.5">
-                  <span className="text-slate-500 font-mono">Réalisé: {(line.realise / 1000000).toFixed(2)} M</span>
-                  <span className="text-slate-600 font-mono">Budget: {(line.budget / 1000000).toFixed(2)} M XAF</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="text-[11px] text-slate-500">
+            Total classe 5 : {k ? fmtM(k.tresorerie_disponible) : '0.0'} M XAF (agrégé depuis le plan comptable).
+            Le détail par compte bancaire nécessite l&apos;activation des sous-comptes 5xx.
+          </p>
         </div>
       </div>
 
@@ -162,6 +216,9 @@ export default function FinanceOverviewPage() {
           </h2>
         </div>
         <div className="divide-y divide-slate-800/60">
+          {recentEntries.length === 0 && (
+            <div className="px-4 py-6 text-center text-slate-500 text-[11px]">{loading ? 'Chargement…' : 'Aucun encaissement enregistré'}</div>
+          )}
           {recentEntries.map((entry, i) => (
             <div key={i} className="px-4 py-3 flex items-center gap-4 hover:bg-slate-800/20 transition-colors">
               <div className="text-[11px] font-mono text-slate-500 w-12 shrink-0">{entry.date}</div>

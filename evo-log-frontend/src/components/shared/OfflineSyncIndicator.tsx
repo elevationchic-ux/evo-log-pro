@@ -89,7 +89,7 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
   const getStatusText = () => {
     if (!isOnline) {
       return pendingCount > 0
-        ? `Hors ligne — ${pendingCount} en file`
+        ? `Hors ligne  ${pendingCount} en file`
         : 'Hors ligne';
     }
     if (isSyncing) return 'Synchronisation…';

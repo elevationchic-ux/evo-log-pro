@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  UserCheck, Users, Calendar, Clock, ClipboardList, Shield, 
-  CheckCircle2, XCircle, AlertTriangle, Search, Filter, Plus, 
-  Phone, Mail, MapPin, ChevronRight, Check, X, ShieldAlert, 
+import {
+  UserCheck, Users, Calendar, Clock, ClipboardList, Shield,
+  CheckCircle2, XCircle, AlertTriangle, Search, Filter, Plus,
+  Phone, Mail, MapPin, ChevronRight, Check, X, ShieldAlert,
   RefreshCw, Briefcase, Award, Radio, FileText, Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/components/shared/AuthProvider';
@@ -154,7 +154,7 @@ const INITIAL_CONGES: DemandeCongeN1[] = [
     date_debut: '2026-05-02',
     date_fin: '2026-05-05',
     jours_ouvrables: 4,
-    motif: 'Cérémonie familiale traditionnelle à Bafoussam.',
+    motif: 'Cérémonie familiale traditionnelle à limbé.',
     statut: 'EN_ATTENTE',
     date_demande: '2026-09-03T16:45:00Z'
   }
@@ -320,7 +320,7 @@ export default function ChefPersonnelPage() {
   // RBAC Permission Check
   const userRoles = (user?.roles || []).map(r => r.toUpperCase());
   const isSuperUser = (user as any)?.is_superuser;
-  const isAuthorized = isSuperUser || userRoles.some(r => 
+  const isAuthorized = isSuperUser || userRoles.some(r =>
     ['CHEF_PERSONNEL', 'RH', 'ADMIN', 'SUPER_ADMIN'].includes(r)
   );
 
@@ -389,7 +389,7 @@ export default function ChefPersonnelPage() {
           commentaire: decisionComment
         })
       });
-    } catch {}
+    } catch { }
 
     setConges(conges.map(c => {
       if (c.id === selectedCongeForDecision.id) {
@@ -479,7 +479,7 @@ export default function ChefPersonnelPage() {
 
   const filteredEffectifs = effectifs.filter(a => {
     const matchesRole = roleFilter === 'ALL' || a.role === roleFilter;
-    const matchesSearch = 
+    const matchesSearch =
       a.full_name.toLowerCase().includes(searchFilter.toLowerCase()) ||
       a.username.toLowerCase().includes(searchFilter.toLowerCase()) ||
       a.agency_name.toLowerCase().includes(searchFilter.toLowerCase());
@@ -490,7 +490,7 @@ export default function ChefPersonnelPage() {
 
   return (
     <div className="min-h-screen p-4 sm:p-8 space-y-6 text-white font-sans">
-      
+
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
@@ -590,11 +590,10 @@ export default function ChefPersonnelPage() {
       <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setActiveTab('effectifs')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${
-            activeTab === 'effectifs'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${activeTab === 'effectifs'
               ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
+            }`}
         >
           <Users className="w-4 h-4" />
           Effectifs Supervisés ({effectifs.length})
@@ -602,11 +601,10 @@ export default function ChefPersonnelPage() {
 
         <button
           onClick={() => setActiveTab('conges')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 relative ${
-            activeTab === 'conges'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 relative ${activeTab === 'conges'
               ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
+            }`}
         >
           <Calendar className="w-4 h-4" />
           Validation Congés N+1
@@ -619,11 +617,10 @@ export default function ChefPersonnelPage() {
 
         <button
           onClick={() => setActiveTab('plannings')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${
-            activeTab === 'plannings'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${activeTab === 'plannings'
               ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
+            }`}
         >
           <Clock className="w-4 h-4" />
           Plannings & Gardes 24/7 ({plannings.length})
@@ -631,11 +628,10 @@ export default function ChefPersonnelPage() {
 
         <button
           onClick={() => setActiveTab('pointages')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${
-            activeTab === 'pointages'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${activeTab === 'pointages'
               ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
+            }`}
         >
           <ClipboardList className="w-4 h-4" />
           Pointages & Vacations ({pointages.length})
@@ -643,11 +639,10 @@ export default function ChefPersonnelPage() {
 
         <button
           onClick={() => setActiveTab('dotations')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${
-            activeTab === 'dotations'
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${activeTab === 'dotations'
               ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
+            }`}
         >
           <Shield className="w-4 h-4" />
           Dotations EPI & Matériel ({dotations.length})
@@ -674,11 +669,10 @@ export default function ChefPersonnelPage() {
                 <button
                   key={r}
                   onClick={() => setRoleFilter(r)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                    roleFilter === r
+                  className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${roleFilter === r
                       ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                       : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200'
-                  }`}
+                    }`}
                 >
                   {r === 'ALL' ? 'Tous les Postes' : r.replace('_', ' ')}
                 </button>
@@ -760,13 +754,12 @@ export default function ChefPersonnelPage() {
                     <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-800 text-slate-300 font-mono">
                       {cg.employe_role}
                     </span>
-                    <span className={`px-2 py-0.5 text-[10px] font-black rounded-full ${
-                      cg.statut === 'APPROUVE'
+                    <span className={`px-2 py-0.5 text-[10px] font-black rounded-full ${cg.statut === 'APPROUVE'
                         ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                         : cg.statut === 'REJETE'
-                        ? 'bg-red-500/15 text-red-400 border border-red-500/30'
-                        : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-                    }`}>
+                          ? 'bg-red-500/15 text-red-400 border border-red-500/30'
+                          : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                      }`}>
                       {cg.statut}
                     </span>
                   </div>
@@ -1026,9 +1019,8 @@ export default function ChefPersonnelPage() {
                 </button>
                 <button
                   type="submit"
-                  className={`px-5 py-2 font-black rounded-xl text-xs flex items-center gap-1.5 text-slate-950 ${
-                    decisionAction === 'APPROUVER' ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-red-400 hover:bg-red-300'
-                  }`}
+                  className={`px-5 py-2 font-black rounded-xl text-xs flex items-center gap-1.5 text-slate-950 ${decisionAction === 'APPROUVER' ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-red-400 hover:bg-red-300'
+                    }`}
                 >
                   Confirmer la Décision
                 </button>

@@ -18,7 +18,7 @@ from app.services.finance_avance_service import (
     TrésorerieService, GestionCreancesService, GestionDettesService, BudgetPrevisionsService
 )
 
-router = APIRouter(prefix="/finance-avance", tags=["Finance Avancée"])
+router = APIRouter(tags=["Finance Avancée"])  # monte sur /api/v1/finance-avance par main.py
 
 
 # ============ TRÉSORERIE ============

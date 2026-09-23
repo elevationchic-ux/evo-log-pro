@@ -13,6 +13,90 @@ from app.models.magasin import Stock, MouvementStock, Entrepot
 router = APIRouter()
 
 
+@router.get("/kpis")
+async def get_magasin_kpis(db: Session = Depends(get_db)):
+    """KPIs magasin agreges depuis la base (filtr tenant via filtre ORM global).
+
+    Valeur stock = somme(quantite_disponible * prix_unitaire). Sans donnees,
+    renvoie 0 reel : aucune valeur inventee.
+    """
+    from sqlalchemy import func
+
+    nb_articles = db.query(func.count(Stock.id)).scalar() or 0
+    valeur_stock = float(
+        db.query(
+            func.sum(Stock.quantite_disponible * Stock.prix_unitaire)
+        ).scalar()
+        or 0.0
+    )
+    # Articles sous leur seuil minimum (alerte reappro)
+    nb_alertes_min = (
+        db.query(func.count(Stock.id))
+        .filter(
+            Stock.quantite_minimum != None,  # noqa: E711
+            Stock.quantite_disponible <= Stock.quantite_minimum,
+        )
+        .scalar()
+        or 0
+    )
+    nb_entrepots = db.query(func.count(Entrepot.id)).scalar() or 0
+    mouvements_jour = (
+        db.query(func.count(MouvementStock.id))
+        .filter(func.date(MouvementStock.date_mouvement) == datetime.utcnow().date())
+        .scalar()
+        or 0
+    )
+
+    return {
+        "nb_articles": nb_articles,
+        "valeur_stock": round(valeur_stock, 2),
+        "nb_alertes_min": nb_alertes_min,
+        "nb_entrepots": nb_entrepots,
+        "mouvements_jour": mouvements_jour,
+        "source": "stocks/mouvements_stocks",
+    }
+
+
+@router.get("/entrepots/occupation")
+async def get_entrepots_occupation(db: Session = Depends(get_db)):
+    """Taux d'occupation par entrepot, calcule sur les stockages reels.
+
+    Occupation = surface/utilisation inconnue en base -> on retourne a la place
+    le nombre d'articles et la valeur stockee par entrepot (donnees reelles),
+    et occupancy=None si aucune capacite n'est enregistree.
+    """
+    from sqlalchemy import func
+
+    entrepots = db.query(Entrepot).limit(50).all()
+    resultats = []
+    for ent in entrepots:
+        nb = (
+            db.query(func.count(Stock.id))
+            .filter(Stock.entrepot_id == ent.id)
+            .scalar()
+            or 0
+        )
+        valeur = float(
+            db.query(func.sum(Stock.quantite_disponible * Stock.prix_unitaire))
+            .filter(Stock.entrepot_id == ent.id)
+            .scalar()
+            or 0.0
+        )
+        capacite = getattr(ent, "capacite", None)
+        occupation = None
+        if capacite:
+            occupation = round(min(100.0, (valeur / float(capacite)) * 100), 1)
+        resultats.append({
+            "entrepot_id": ent.id,
+            "zone": f"{ent.code} ({ent.nom})",
+            "nb_articles": nb,
+            "valeur_stockee": round(valeur, 2),
+            "occupancy": occupation,
+        })
+    return {"source": "entrepots/stocks", "zones": resultats}
+
+
+
 @router.get("/stocks", response_model=List[StockResponse])
 async def get_all_stocks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """Get all stock items"""

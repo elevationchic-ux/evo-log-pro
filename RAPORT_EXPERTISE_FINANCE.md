@@ -1,5 +1,5 @@
 # 💰 RAPPORT D'EXPERTISE FINANCE & TRÉSORERIE - NIVEAU ERP DAF (CERTIFIÉ 100%)
-## 🗓️ Mise à Jour : Septembre 2026 — Version Finale Certifiée & Zéro Mock
+## 🗓️ Mise à Jour : Septembre 2026  Version Finale Certifiée & Zéro Mock
 
 ---
 

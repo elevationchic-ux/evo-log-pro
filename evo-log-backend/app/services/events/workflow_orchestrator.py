@@ -1,5 +1,5 @@
 """
-Workflow Orchestrator — Cross-Module Data Transfer Pipeline for EVO-LOG ERP.
+Workflow Orchestrator  Cross-Module Data Transfer Pipeline for EVO-LOG ERP.
 
 Implements the full Cameroon logistics chain:
     Navire/Escale ➜ Quai/Acconage ➜ Douane/Transit ➜ WMS/Magasin
@@ -11,13 +11,13 @@ Fully multi-tenant: every handler receives company_id and scopes all
 DB writes to that tenant.
 
 Event catalog:
-  • navire.escale_arrivee         — Ship docked: trigger operational checklist
-  • douane.bae_valide             — Customs BAE validated: unlock WMS + spawn TMS order
-  • transport.livraison_epod      — ePOD confirmed: close mission, calc demurrage, invoice
-  • transport.panne_vehicule      — Breakdown reported: spawn GMAO work-order
-  • magasin.stock_alerte          — Stock below minimum: send alert + optional PO draft
-  • finance.facture_emise         — Invoice issued: post accounting entry
-  • acconage.operation_terminee   — Stevedoring op done: update container status
+  • navire.escale_arrivee          Ship docked: trigger operational checklist
+  • douane.bae_valide              Customs BAE validated: unlock WMS + spawn TMS order
+  • transport.livraison_epod       ePOD confirmed: close mission, calc demurrage, invoice
+  • transport.panne_vehicule       Breakdown reported: spawn GMAO work-order
+  • magasin.stock_alerte           Stock below minimum: send alert + optional PO draft
+  • finance.facture_emise          Invoice issued: post accounting entry
+  • acconage.operation_terminee    Stevedoring op done: update container status
 """
 
 import asyncio
@@ -31,7 +31,7 @@ from app.core.database import SessionLocal
 logger = logging.getLogger(__name__)
 
 # ─────────────────────────────────────────────
-# Haversine — nearest garage for breakdown handler
+# Haversine  nearest garage for breakdown handler
 # ─────────────────────────────────────────────
 
 def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -44,7 +44,7 @@ def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 # ─────────────────────────────────────────────
-# HANDLER 1 — Escale arrivée ➜ Opérations quai
+# HANDLER 1  Escale arrivée ➜ Opérations quai
 # ─────────────────────────────────────────────
 
 async def on_navire_escale_arrivee(company_id: int, data: dict):
@@ -85,7 +85,7 @@ async def on_navire_escale_arrivee(company_id: int, data: dict):
 
 
 # ─────────────────────────────────────────────
-# HANDLER 2 — BAE validé ➜ WMS + TMS
+# HANDLER 2  BAE validé ➜ WMS + TMS
 # ─────────────────────────────────────────────
 
 async def on_douane_bae_valide(company_id: int, data: dict):
@@ -142,7 +142,7 @@ async def on_douane_bae_valide(company_id: int, data: dict):
                 data={
                     "dossier_ref": dossier_ref,
                     "conteneur_ids": conteneur_ids,
-                    "message": f"BAE validé — OrdreTransport créé pour dossier {dossier_ref}",
+                    "message": f"BAE validé  OrdreTransport créé pour dossier {dossier_ref}",
                 },
                 target_departments=["transport", "magasin"],
             )
@@ -153,7 +153,7 @@ async def on_douane_bae_valide(company_id: int, data: dict):
 
 
 # ─────────────────────────────────────────────
-# HANDLER 3 — ePOD validée ➜ Clôture mission + Facture auto
+# HANDLER 3  ePOD validée ➜ Clôture mission + Facture auto
 # ─────────────────────────────────────────────
 
 async def on_livraison_epod_validee(company_id: int, data: dict):
@@ -213,7 +213,7 @@ async def on_livraison_epod_validee(company_id: int, data: dict):
                 )
                 db.add(facture)
                 db.commit()
-                logger.info(f"[Orchestrator] Facture {ref} créée (TVA 19.25%) — tenant {company_id}")
+                logger.info(f"[Orchestrator] Facture {ref} créée (TVA 19.25%)  tenant {company_id}")
             except Exception as fac_err:
                 logger.warning(f"[Orchestrator] Invoice creation skipped: {fac_err}")
 
@@ -226,7 +226,7 @@ async def on_livraison_epod_validee(company_id: int, data: dict):
                     "client_id": client_id,
                     "montant_ttc": montant_ttc if montant_ht else 0,
                     "demurrage_deadline": demurrage_limit,
-                    "message": f"ePOD validée — Facture auto-créée, retour conteneur avant {demurrage_limit}",
+                    "message": f"ePOD validée  Facture auto-créée, retour conteneur avant {demurrage_limit}",
                 },
                 target_departments=["finance", "transport", "commercial"],
             )
@@ -237,14 +237,14 @@ async def on_livraison_epod_validee(company_id: int, data: dict):
 
 
 # ─────────────────────────────────────────────
-# HANDLER 4 — Panne véhicule ➜ OT GMAO + Garage
+# HANDLER 4  Panne véhicule ➜ OT GMAO + Garage
 # ─────────────────────────────────────────────
 
 # Cameroon reference garages with GPS coords (extendable via DB)
 _CAMEROON_GARAGES = [
     {"nom": "Garage Central Douala", "lat": 4.0511, "lon": 9.7679, "tel": "+237 699 000 001"},
     {"nom": "Atelier Yaoundé Nord",  "lat": 3.8480, "lon": 11.5021, "tel": "+237 699 000 002"},
-    {"nom": "Garage Bafoussam",       "lat": 5.4737, "lon": 10.4179, "tel": "+237 699 000 003"},
+    {"nom": "Garage limbé",       "lat": 5.4737, "lon": 10.4179, "tel": "+237 699 000 003"},
     {"nom": "Atelier Limbe",          "lat": 4.0159, "lon": 9.2132,  "tel": "+237 699 000 004"},
     {"nom": "Garage Ngaoundéré",      "lat": 7.3299, "lon": 13.5819, "tel": "+237 699 000 005"},
 ]
@@ -274,7 +274,7 @@ async def on_panne_vehicule_signalee(company_id: int, data: dict):
                 key=lambda g: _haversine_km(lat, lon, g["lat"], g["lon"])
             )
             dist = _haversine_km(lat, lon, nearest["lat"], nearest["lon"])
-            garage_info = f"{nearest['nom']} ({dist:.1f} km) — {nearest['tel']}"
+            garage_info = f"{nearest['nom']} ({dist:.1f} km)  {nearest['tel']}"
         except Exception:
             pass
 
@@ -297,7 +297,7 @@ async def on_panne_vehicule_signalee(company_id: int, data: dict):
                 )
                 db.add(ot)
                 db.commit()
-                logger.info(f"[Orchestrator] OT GMAO {ot_ref} créé — véhicule {vehicule_id} (tenant {company_id})")
+                logger.info(f"[Orchestrator] OT GMAO {ot_ref} créé  véhicule {vehicule_id} (tenant {company_id})")
             except Exception as ot_err:
                 logger.warning(f"[Orchestrator] OT GMAO skipped: {ot_err}")
 
@@ -309,7 +309,7 @@ async def on_panne_vehicule_signalee(company_id: int, data: dict):
                     "conducteur": conducteur,
                     "description": description_panne,
                     "garage_proche": garage_info,
-                    "message": f"🚨 Panne véhicule signalée — OT GMAO créé — {garage_info}",
+                    "message": f"🚨 Panne véhicule signalée  OT GMAO créé  {garage_info}",
                 },
                 target_departments=["maintenance", "transport", "direction"],
             )
@@ -320,7 +320,7 @@ async def on_panne_vehicule_signalee(company_id: int, data: dict):
 
 
 # ─────────────────────────────────────────────
-# HANDLER 5 — Stock alerte ➜ Notification + Commande draft
+# HANDLER 5  Stock alerte ➜ Notification + Commande draft
 # ─────────────────────────────────────────────
 
 async def on_stock_alerte(company_id: int, data: dict):
@@ -338,7 +338,7 @@ async def on_stock_alerte(company_id: int, data: dict):
     quantite_minimum = data.get("quantite_minimum", 0)
 
     logger.warning(
-        f"[Orchestrator] ALERTE STOCK — {code_article} ({designation}): "
+        f"[Orchestrator] ALERTE STOCK  {code_article} ({designation}): "
         f"qté={quantite_actuelle} < min={quantite_minimum} (tenant {company_id})"
     )
 
@@ -351,14 +351,14 @@ async def on_stock_alerte(company_id: int, data: dict):
             "designation": designation,
             "quantite_actuelle": quantite_actuelle,
             "quantite_minimum": quantite_minimum,
-            "message": f"⚠️ Stock critique: {designation} ({code_article}) — qté {quantite_actuelle}/{quantite_minimum}",
+            "message": f"⚠️ Stock critique: {designation} ({code_article})  qté {quantite_actuelle}/{quantite_minimum}",
         },
         target_departments=["magasin", "achat", "direction"],
     )
 
 
 # ─────────────────────────────────────────────
-# HANDLER 6 — Facture émise ➜ Écriture comptable auto
+# HANDLER 6  Facture émise ➜ Écriture comptable auto
 # ─────────────────────────────────────────────
 
 async def on_finance_facture_emise(company_id: int, data: dict):
@@ -404,7 +404,7 @@ async def on_finance_facture_emise(company_id: int, data: dict):
                     db.commit()
                     logger.info(f"[Orchestrator] Écriture comptable créée pour facture {numero_facture} (tenant {company_id})")
                 else:
-                    logger.warning(f"[Orchestrator] Comptes non configurés pour tenant {company_id} — écriture ignorée")
+                    logger.warning(f"[Orchestrator] Comptes non configurés pour tenant {company_id}  écriture ignorée")
             except Exception as ec_err:
                 logger.warning(f"[Orchestrator] Écriture comptable skipped: {ec_err}")
 
@@ -426,7 +426,7 @@ async def on_finance_facture_emise(company_id: int, data: dict):
 
 
 # ─────────────────────────────────────────────
-# HANDLER 7 — Opération acconage terminée ➜ Conteneur mis à jour
+# HANDLER 7  Opération acconage terminée ➜ Conteneur mis à jour
 # ─────────────────────────────────────────────
 
 async def on_acconage_operation_terminee(company_id: int, data: dict):
@@ -465,14 +465,14 @@ async def on_acconage_operation_terminee(company_id: int, data: dict):
         data={
             "conteneur_ids": conteneur_ids,
             "escale_ref": escale_ref,
-            "message": f"Opération acconage terminée — {len(conteneur_ids)} conteneur(s) disponibles en magasin",
+            "message": f"Opération acconage terminée  {len(conteneur_ids)} conteneur(s) disponibles en magasin",
         },
         target_departments=["magasin", "transit", "douane"],
     )
 
 
 # ─────────────────────────────────────────────
-# REGISTRATION — Wire all handlers to event bus
+# REGISTRATION  Wire all handlers to event bus
 # ─────────────────────────────────────────────
 
 def register_all_handlers():

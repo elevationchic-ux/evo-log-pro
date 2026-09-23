@@ -6,6 +6,7 @@ from datetime import datetime
 
 from app.database import get_db
 from app.utils.tenant import get_current_tenant_context, TenantContext
+from app.core.not_implemented import not_implemented
 
 router = APIRouter()
 
@@ -18,34 +19,18 @@ class FreightOfferSchema(BaseModel):
 
 @router.get("/offers")
 def list_freight_offers():
-    """Retrieve public/partner carrier freight exchange offers."""
-    return {
-        "status": "success",
-        "offers": [
-            {
-                "id": "FRT-OFF-001",
-                "origin": "Port de Douala Quai 10",
-                "destination": "N'Djamena Tchad",
-                "cargo_type": "Conteneur 40ft HC",
-                "weight_tons": 28.5,
-                "offered_price_xaf": 2800000.0,
-                "publisher_name": "EVO-LOG Transports SARL",
-                "status": "AVAILABLE",
-                "created_at": datetime.utcnow().isoformat()
-            }
-        ]
-    }
+    """Offres de fret : 501 (offre inventee, aucune table d'change de fret)."""
+    not_implemented(
+        "Listage des offres de fret (bourse fret)",
+        "une table persistante des offres publiees par les transporteurs "
+        "(l'offre retournee etait fabrique)",
+    )
 
 @router.post("/offers", status_code=status.HTTP_201_CREATED)
 def publish_freight_offer(payload: FreightOfferSchema, context: TenantContext = Depends(get_current_tenant_context)):
-    return {
-        "status": "success",
-        "message": "Freight offer published on Freight Exchange platform.",
-        "offer": {
-            "id": f"FRT-OFF-{datetime.utcnow().strftime('%M%S')}",
-            "organization_id": context.organization_id,
-            **payload.dict(),
-            "status": "AVAILABLE",
-            "created_at": datetime.utcnow().isoformat()
-        }
-    }
+    """Publication d'offre : 501 (ne persistait rien, faux succes)."""
+    not_implemented(
+        "Publication d'une offre de fret",
+        "une table d'offres de fret pour reellement publier la ligne "
+        "(l'ID retourne etait un simple horodatage)",
+    )

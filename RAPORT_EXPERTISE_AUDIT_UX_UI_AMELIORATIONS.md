@@ -205,8 +205,8 @@ L'ERP **EVO-LOG** dispose déjà d'un moteur exceptionnel, robuste et sans la mo
 ## 8. CERTIFICATION DE DÉPLOIEMENT & VALIDATION TECHNIQUE (100% IMPLÉMENTÉ ✅)
 
 > **Statut au 14 Septembre 2026 : Toutes les recommandations ont été intégralement développées, intégrées et validées.**  
-> **Build Next.js : `Exit code 0` — 323 routes compilées sans erreur**  
-> **Backend FastAPI : `Exit code 0` — 117 endpoints opérationnels**  
+> **Build Next.js : `Exit code 0`  323 routes compilées sans erreur**  
+> **Backend FastAPI : `Exit code 0`  117 endpoints opérationnels**  
 > **TypeScript Strict : 0 erreur**
 
 ### 📦 Composants Créés & Déployés

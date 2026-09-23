@@ -63,7 +63,7 @@ export default function MagasinAvancePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Package className="w-3.5 h-3.5" /> WMS Avancé — FEFO, Réservations, Kits, Inventaire Tournant
+            <Package className="w-3.5 h-3.5" /> WMS Avancé  FEFO, Réservations, Kits, Inventaire Tournant
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">Magasin Avancé & Gestion des Stocks</h1>
           <p className="text-xs text-slate-400 mt-1">Gestion FEFO (First Expired First Out), réservations de lots, assemblage de kits et transferts inter-emplacements.</p>
@@ -135,7 +135,7 @@ export default function MagasinAvancePage() {
         <div className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
           <div className="p-5 border-b border-slate-800 flex items-center gap-3">
             <ShieldAlert className="w-5 h-5 text-rose-400" />
-            <h2 className="text-base font-black text-white">Lots Critiques (FEFO — Péremption &lt; 30j)</h2>
+            <h2 className="text-base font-black text-white">Lots Critiques (FEFO  Péremption &lt; 30j)</h2>
           </div>
           {loading ? (
             <div className="p-8 text-center text-slate-400"><RefreshCw className="w-5 h-5 animate-spin text-purple-400 mx-auto mb-2" /></div>
@@ -146,7 +146,7 @@ export default function MagasinAvancePage() {
               {peremptionsCritiques.slice(0, 8).map((p: any) => (
                 <div key={p.id} className="p-4 flex items-center justify-between hover:bg-slate-800/40 transition-colors">
                   <div>
-                    <span className="text-sm font-bold text-white">Lot #{p.id} — Article {p.article_id}</span>
+                    <span className="text-sm font-bold text-white">Lot #{p.id}  Article {p.article_id}</span>
                     <p className="text-xs text-slate-400 mt-0.5">Qté: {p.quantite} • Expiration: {p.date_expiration ? new Date(p.date_expiration).toLocaleDateString('fr-FR') : '-'}</p>
                   </div>
                   <span className="px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30">Critique</span>
@@ -171,7 +171,7 @@ export default function MagasinAvancePage() {
               {reservations.slice(0, 8).map((r: any) => (
                 <div key={r.id} className="p-4 flex items-center justify-between hover:bg-slate-800/40 transition-colors">
                   <div>
-                    <span className="text-sm font-bold text-white">Art. #{r.article_id} — {r.quantite} unités</span>
+                    <span className="text-sm font-bold text-white">Art. #{r.article_id}  {r.quantite} unités</span>
                     <p className="text-xs text-slate-400 mt-0.5">{r.motif || 'Sans motif'} • Expire: {r.expiration ? new Date(r.expiration).toLocaleDateString('fr-FR') : '-'}</p>
                   </div>
                   <button onClick={() => handleLiberer(r.id)} className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold transition-all">

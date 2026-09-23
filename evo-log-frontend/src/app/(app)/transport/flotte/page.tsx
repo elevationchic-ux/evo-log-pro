@@ -30,10 +30,10 @@ export default function TransportFlottePage() {
       />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Parc Total" value="—" subtitle="Données indisponibles" icon={<span className="material-symbols-outlined text-2xl">directions_car</span>} color="blue" />
-        <KPICard title="En Service" value="—" subtitle="Données indisponibles" icon={<span className="material-symbols-outlined text-2xl">check_circle</span>} color="emerald" />
-        <KPICard title="En Maintenance" value="—" subtitle="Données indisponibles" icon={<span className="material-symbols-outlined text-2xl">build</span>} color="amber" />
-        <KPICard title="Kilométrage Moyen" value="—" subtitle="Données indisponibles" icon={<span className="material-symbols-outlined text-2xl">speed</span>} color="blue" />
+        <KPICard title="Parc Total" value="" subtitle="Données indisponibles" icon={<span className="material-symbols-outlined text-2xl">directions_car</span>} color="blue" />
+        <KPICard title="En Service" value="" subtitle="Données indisponibles" icon={<span className="material-symbols-outlined text-2xl">check_circle</span>} color="emerald" />
+        <KPICard title="En Maintenance" value="" subtitle="Données indisponibles" icon={<span className="material-symbols-outlined text-2xl">build</span>} color="amber" />
+        <KPICard title="Kilométrage Moyen" value="" subtitle="Données indisponibles" icon={<span className="material-symbols-outlined text-2xl">speed</span>} color="blue" />
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

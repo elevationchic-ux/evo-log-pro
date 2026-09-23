@@ -1,5 +1,5 @@
 """
-WebSocket Router — Multi-Tenant, Zero-Leakage, Heartbeat-enabled.
+WebSocket Router  Multi-Tenant, Zero-Leakage, Heartbeat-enabled.
 
 Security model:
   • Every connection MUST supply company_id + user_id query params (or JWT token).
@@ -9,9 +9,9 @@ Security model:
   • Graceful cleanup on disconnect or ping timeout.
 
 Endpoints:
-  /ws/events       — General tenant event stream (all departments)
-  /ws/missions     — TMS real-time mission tracking
-  /ws/notifications — User-level notification channel
+  /ws/events        General tenant event stream (all departments)
+  /ws/missions      TMS real-time mission tracking
+  /ws/notifications  User-level notification channel
 """
 
 import asyncio
@@ -68,7 +68,7 @@ async def _heartbeat_loop(websocket: WebSocket, company_id: int, user_id: str, d
                 "timestamp": datetime.utcnow().isoformat(),
             })
         except Exception:
-            # Connection is dead — remove from event bus
+            # Connection is dead  remove from event bus
             event_service.remove_connection(company_id, user_id, websocket, department)
             break
 
@@ -78,7 +78,7 @@ async def _handle_client_message(websocket: WebSocket, company_id: int, user_id:
     msg_type = data.get("type", "")
 
     if msg_type == "pong":
-        # Client responded to heartbeat — connection is alive
+        # Client responded to heartbeat  connection is alive
         pass
 
     elif msg_type == "subscribe_department":
@@ -114,14 +114,14 @@ async def _handle_client_message(websocket: WebSocket, company_id: int, user_id:
 
 
 # ─────────────────────────────────────────────
-# /ws/events — General tenant event stream
+# /ws/events  General tenant event stream
 # ─────────────────────────────────────────────
 
 @router.websocket("/events")
 async def websocket_events(
     websocket: WebSocket,
-    company_id: int = Query(..., description="Tenant company ID — REQUIRED"),
-    user_id: str = Query(..., description="Authenticated user ID — REQUIRED"),
+    company_id: int = Query(..., description="Tenant company ID  REQUIRED"),
+    user_id: str = Query(..., description="Authenticated user ID  REQUIRED"),
     department: Optional[str] = Query(None, description="Optional department filter"),
     token: str = Query(..., description="JWT access token"),
 ):
@@ -134,7 +134,7 @@ async def websocket_events(
 
     # Register connection in the tenant-scoped event bus
     event_service.add_connection(company_id, user_id, websocket, department)
-    logger.info(f"[WS] Client connected — company={company_id}, user={user_id}, dept={department}")
+    logger.info(f"[WS] Client connected  company={company_id}, user={user_id}, dept={department}")
 
     # Start heartbeat background task
     hb_task = asyncio.create_task(
@@ -162,34 +162,34 @@ async def websocket_events(
                 except json.JSONDecodeError:
                     await websocket.send_json({"type": "error", "message": "Invalid JSON"})
             except asyncio.TimeoutError:
-                # No message for 60s — send a server-side ping
+                # No message for 60s  send a server-side ping
                 await websocket.send_json({
                     "type": "ping",
                     "timestamp": datetime.utcnow().isoformat(),
                 })
 
     except WebSocketDisconnect:
-        logger.info(f"[WS] Client disconnected — company={company_id}, user={user_id}")
+        logger.info(f"[WS] Client disconnected  company={company_id}, user={user_id}")
     except Exception as e:
-        logger.warning(f"[WS] Unexpected error — company={company_id}, user={user_id}: {e}")
+        logger.warning(f"[WS] Unexpected error  company={company_id}, user={user_id}: {e}")
     finally:
         hb_task.cancel()
         event_service.remove_connection(company_id, user_id, websocket, department)
 
 
 # ─────────────────────────────────────────────
-# /ws/missions — TMS real-time mission tracking
+# /ws/missions  TMS real-time mission tracking
 # ─────────────────────────────────────────────
 
 @router.websocket("/missions")
 async def websocket_missions(
     websocket: WebSocket,
-    company_id: int = Query(..., description="Tenant company ID — REQUIRED"),
-    user_id: str = Query(..., description="Authenticated user ID — REQUIRED"),
+    company_id: int = Query(..., description="Tenant company ID  REQUIRED"),
+    user_id: str = Query(..., description="Authenticated user ID  REQUIRED"),
     token: str = Query(...),
 ):
     """
-    Real-time TMS mission tracking — tenant-scoped.
+    Real-time TMS mission tracking  tenant-scoped.
     Automatically filters mission events to the caller's company.
     """
     user = _authenticate_websocket(token, company_id, user_id)
@@ -225,27 +225,27 @@ async def websocket_missions(
                 })
 
     except WebSocketDisconnect:
-        logger.info(f"[WS/missions] Client disconnected — company={company_id}, user={user_id}")
+        logger.info(f"[WS/missions] Client disconnected  company={company_id}, user={user_id}")
     except Exception as e:
-        logger.warning(f"[WS/missions] Error — company={company_id}, user={user_id}: {e}")
+        logger.warning(f"[WS/missions] Error  company={company_id}, user={user_id}: {e}")
     finally:
         hb_task.cancel()
         event_service.remove_connection(company_id, user_id, websocket, "transport")
 
 
 # ─────────────────────────────────────────────
-# /ws/notifications — User-level notifications
+# /ws/notifications  User-level notifications
 # ─────────────────────────────────────────────
 
 @router.websocket("/notifications")
 async def websocket_notifications(
     websocket: WebSocket,
-    company_id: int = Query(..., description="Tenant company ID — REQUIRED"),
-    user_id: str = Query(..., description="Authenticated user ID — REQUIRED"),
+    company_id: int = Query(..., description="Tenant company ID  REQUIRED"),
+    user_id: str = Query(..., description="Authenticated user ID  REQUIRED"),
     token: str = Query(...),
 ):
     """
-    Personal notification channel — delivers events targeted to a specific user.
+    Personal notification channel  delivers events targeted to a specific user.
     """
     _authenticate_websocket(token, company_id, user_id)
     await websocket.accept()
@@ -280,9 +280,9 @@ async def websocket_notifications(
                 })
 
     except WebSocketDisconnect:
-        logger.info(f"[WS/notifications] Disconnected — user={user_id}, company={company_id}")
+        logger.info(f"[WS/notifications] Disconnected  user={user_id}, company={company_id}")
     except Exception as e:
-        logger.warning(f"[WS/notifications] Error — user={user_id}: {e}")
+        logger.warning(f"[WS/notifications] Error  user={user_id}: {e}")
     finally:
         hb_task.cancel()
         event_service.remove_connection(company_id, user_id, websocket)

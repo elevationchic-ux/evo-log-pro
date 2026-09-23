@@ -167,22 +167,58 @@ async def obtenir_tco_flotte():
 # ============ KPIS TRANSPORT ============
 @router.get("/kpis")
 async def get_transport_kpis(db: Session = Depends(get_db)):
-    """KPIs consolidés de la flotte et des opérations de transport"""
+    """KPIs consolidés de la flotte et des opérations de transport.
+
+    Filtres alignés sur les enums réels du modèle (CamionStatus, MissionStatus) :
+    les anciennes comparisons sur 'disponible'/'en_mission'/'termine' faisaient
+    planter l'endpoint (AttributeError) ou comptaient toujours 0.
+    """
     from sqlalchemy import func
+    from app.models.transport import CamionStatus, MissionStatus
+
     total_camions = db.query(func.count(Camion.id)).scalar() or 0
-    camions_dispos = db.query(func.count(Camion.id)).filter(Camion.statut == "disponible").scalar() or 0
-    camions_en_mission = db.query(func.count(Camion.id)).filter(Camion.statut == "en_mission").scalar() or 0
+    camions_actifs = (
+        db.query(func.count(Camion.id))
+        .filter(Camion.status == CamionStatus.ACTIVE)
+        .scalar() or 0
+    )
+    camions_en_maintenance = (
+        db.query(func.count(Camion.id))
+        .filter(Camion.status == CamionStatus.IN_MAINTENANCE)
+        .scalar() or 0
+    )
+
+    # Camions affectés à une mission en cours (disponibles = actifs non affectés)
+    camions_en_mission_rows = (
+        db.query(Mission.camion_id)
+        .filter(Mission.statut == MissionStatus.EN_COURS, Mission.camion_id != None)  # noqa: E711
+        .distinct()
+        .all()
+    )
+    camions_en_mission = len({r[0] for r in camions_en_mission_rows})
+    camions_dispos = max(0, camions_actifs - camions_en_mission)
+
     total_chauffeurs = db.query(func.count(Conducteur.id)).scalar() or 0
     total_missions = db.query(func.count(Mission.id)).scalar() or 0
-    missions_en_cours = db.query(func.count(Mission.id)).filter(Mission.statut == "en_cours").scalar() or 0
-    missions_terminees = db.query(func.count(Mission.id)).filter(Mission.statut == "termine").scalar() or 0
+    missions_en_cours = (
+        db.query(func.count(Mission.id))
+        .filter(Mission.statut == MissionStatus.EN_COURS)
+        .scalar() or 0
+    )
+    missions_terminees = (
+        db.query(func.count(Mission.id))
+        .filter(Mission.statut == MissionStatus.TERMINEE)
+        .scalar() or 0
+    )
 
-    taux_dispo = round((camions_dispos / total_camions * 100), 1) if total_camions > 0 else 100.0
+    taux_dispo = round((camions_dispos / total_camions * 100), 1) if total_camions > 0 else 0.0
 
     return {
         "vehicules_total": total_camions,
-        "vehicules_actifs": camions_en_mission if camions_en_mission > 0 else (total_camions - camions_dispos),
+        "vehicules_actifs": camions_actifs,
         "camions_disponibles": camions_dispos,
+        "camions_en_mission": camions_en_mission,
+        "camions_en_maintenance": camions_en_maintenance,
         "taux_disponibilite": taux_dispo,
         "chauffeurs_total": total_chauffeurs,
         "missions_total": total_missions,

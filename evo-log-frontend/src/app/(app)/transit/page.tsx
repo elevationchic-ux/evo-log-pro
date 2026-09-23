@@ -125,13 +125,13 @@ export default function TransitPage() {
                   <tr key={item.id || idx} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-100 flex items-center gap-2 font-mono">
                       <FileCheck className="w-4 h-4 text-blue-400" />
-                      {item.reference_declaration || '—'}
+                      {item.reference_declaration || ''}
                     </td>
                     <td className="px-6 py-4 font-semibold text-slate-200">
                       {item.type_declaration || 'IM4_MISE_A_CONSOMMATION'}
                     </td>
                     <td className="px-6 py-4 text-right font-mono font-bold text-blue-400">
-                      {item.valeur_caf_xaf == null ? '—' : Number(item.valeur_caf_xaf).toLocaleString()} XAF
+                      {item.valeur_caf_xaf == null ? '' : Number(item.valeur_caf_xaf).toLocaleString()} XAF
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">

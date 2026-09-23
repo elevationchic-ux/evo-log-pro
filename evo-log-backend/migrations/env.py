@@ -21,6 +21,14 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 target_metadata = Base.metadata
 
+# DATABASE_URL (Railway, Docker, local) prime sur la valeur encodee dans
+# alembic.ini : sans ca, `alembic upgrade head` applique les migrations a la
+# base SQLite du depot meme quand la vraie base est Postgres ailleurs.
+database_url = os.environ.get("DATABASE_URL")
+if database_url:
+    # set_main_option passe par l'interpolation ConfigParser : echapper les %.
+    config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")

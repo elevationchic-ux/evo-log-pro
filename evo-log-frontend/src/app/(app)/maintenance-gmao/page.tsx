@@ -80,7 +80,7 @@ export default function MaintenanceGMAOPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Wrench className="w-3.5 h-3.5" /> GMAO — Gestion de Maintenance Assistée par Ordinateur
+            <Wrench className="w-3.5 h-3.5" /> GMAO  Gestion de Maintenance Assistée par Ordinateur
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">Maintenance & Équipements Portuaires</h1>
           <p className="text-xs text-slate-400 mt-1">Ordres de travaux préventifs et correctifs, plannings, calibrations et suivi des pièces de rechange.</p>

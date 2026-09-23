@@ -2,7 +2,7 @@
 
 **Date:** 19 septembre 2026  
 **Version:** 2.0  
-**Statut:** DÉVELOPPEMENT AVANCÉ — NON CERTIFIÉ PRODUCTION ⚠️
+**Statut:** DÉVELOPPEMENT AVANCÉ  NON CERTIFIÉ PRODUCTION ⚠️
 
 > Ce document est aligné sur [ETAT_REEL_2026-09-19.md](../ETAT_REEL_2026-09-19.md). Les anciens pourcentages et affirmations de complétude sont historiques et ne remplacent pas des tests reproductibles.
 
@@ -242,4 +242,4 @@ docker-compose up -d --build
 
 ---
 
-**Version 2.0 — sous-modules annoncés, production non certifiée** ⚠️
+**Version 2.0  sous-modules annoncés, production non certifiée** ⚠️

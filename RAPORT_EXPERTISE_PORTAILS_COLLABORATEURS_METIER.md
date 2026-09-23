@@ -1,5 +1,5 @@
 # 🤝 RAPPORT D'EXPERTISE : 8 PORTAILS COLLABORATEURS MÉTIER & HUB CENTRALISÉ
-## 🗓️ Mise à Jour : Septembre 2026 — Intégration UX/UI & Optimisations Terrain
+## 🗓️ Mise à Jour : Septembre 2026  Intégration UX/UI & Optimisations Terrain
 
 > Les chiffres et formulations de raccordement total sont historiques. Les portails nécessitent une validation API, tenant, accessibilité et charge avant toute certification. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 
@@ -142,7 +142,7 @@ T-Code : KCST_FLD → /portail-declarant
 
 ## 🦺 6. PORTAIL QHSE & SÉCURITÉ (`/portail-qhse`)
 
-**Rôles** : Universel — Tous les collaborateurs peuvent signaler un danger
+**Rôles** : Universel  Tous les collaborateurs peuvent signaler un danger
 
 ### Fonctionnalités
 | Module | Description | API Backend |
@@ -179,7 +179,7 @@ T-Code : KSAL_CRM → /portail-commercial
 
 ## 👤 8. PORTAIL SALARIÉ RH (`/portail-employe`)
 
-**Rôles** : Universel — Tous les salariés
+**Rôles** : Universel  Tous les salariés
 
 ### Fonctionnalités
 | Module | Description | API Backend |
@@ -211,4 +211,4 @@ Quatre composants ont été développés et intégrés suite à l'audit ergonomi
 
 ---
 
-*Rapport historique — Septembre 2026 — validation globale encore requise*
+*Rapport historique  Septembre 2026  validation globale encore requise*

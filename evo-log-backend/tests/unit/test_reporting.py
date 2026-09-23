@@ -62,13 +62,25 @@ class TestKPIService:
             objectif=500000000.0
         )
         
+        # Le service calcule la tendance depuis la valeur precedente : la
+        # premiere mise a jour (0 -> 500M) est "stable", la baisse ne se
+        # mesure qu'au deuxieme passage (500M -> 450M).
+        kpi_ref = KPIService.mettre_a_jour_valeur(
+            db=db,
+            kpi_id=kpi.id,
+            derniere_valeur=500000000.0
+        )
+        assert kpi_ref.tendance == "stable"
+
         kpi_maj = KPIService.mettre_a_jour_valeur(
             db=db,
             kpi_id=kpi.id,
             derniere_valeur=450000000.0
         )
         assert kpi_maj.derniere_valeur == 450000000.0
+        assert kpi_maj.valeur_precedente == 500000000.0
         assert kpi_maj.tendance == "baisse"
+        assert kpi_maj.variation_pourcentage == pytest.approx(-10.0)
 
 
 class TestRapportService:

@@ -32,9 +32,9 @@ export default function B2BPortalLayout({ children }: { children: React.ReactNod
     id: user?.companyId ?? null,
     name: user?.fullName || 'Société active',
     logo: '⚓',
-    code: user?.companyId ? `COMPANY-${user.companyId}` : '—',
-    hotline: '—',
-    email: user?.email || '—'
+    code: user?.companyId ? `COMPANY-${user.companyId}` : '',
+    hotline: '',
+    email: user?.email || ''
   };
 
   const [searchQuery, setSearchQuery] = useState('');

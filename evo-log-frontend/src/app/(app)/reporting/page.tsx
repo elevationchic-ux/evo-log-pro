@@ -57,7 +57,7 @@ export default function ReportingPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <BarChart2 className="w-3.5 h-3.5" /> Business Intelligence & Rapports OHADA — Direction Générale
+            <BarChart2 className="w-3.5 h-3.5" /> Business Intelligence & Rapports OHADA  Direction Générale
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">Reporting & Tableaux de Bord Exécutifs</h1>
           <p className="text-xs text-slate-400 mt-1">KPIs financiers OHADA, rapports douaniers, indicateurs de performance portuaire et exports réglementaires DGD/BEAC.</p>
@@ -82,7 +82,7 @@ export default function ReportingPage() {
                 <m.icon className={`w-4 h-4 ${m.color}`} />
               </div>
               <p className={`text-xl font-black mt-2 ${m.color}`}>
-                {loading ? '—' : m.format(rapportExecutif[m.key])}
+                {loading ? '' : m.format(rapportExecutif[m.key])}
               </p>
             </div>
           ))}

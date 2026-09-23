@@ -76,22 +76,22 @@ export default function TransportControlPage() {
   const missions = Array.isArray(missionsData) && missionsData.length > 0
     ? missionsData.map((m: any) => ({
         id: m.reference || `TR-${m.id || '2026'}`,
-        vehicle: m.immatriculation || m.camion || '—',
-        driver: m.conducteur || '—',
-        client: m.client || '—',
-        origin: m.origine || '—',
-        destination: m.destination || '—',
-        status: m.statut || '—',
-        eta: m.eta || '—',
+        vehicle: m.immatriculation || m.camion || '',
+        driver: m.conducteur || '',
+        client: m.client || '',
+        origin: m.origine || '',
+        destination: m.destination || '',
+        status: m.statut || '',
+        eta: m.eta || '',
         progress: m.progression ?? 0
       }))
     : defaultMissions;
 
   const kpis = [
-    { title: 'Véhicules Flotte', value: String(tcoData?.flotte_totale_vehicules ?? '—'), subtitle: 'Tracteurs & Plateaux', icon: <span className="material-symbols-outlined text-2xl">local_shipping</span>, color: 'blue' as const },
+    { title: 'Véhicules Flotte', value: String(tcoData?.flotte_totale_vehicules ?? ''), subtitle: 'Tracteurs & Plateaux', icon: <span className="material-symbols-outlined text-2xl">local_shipping</span>, color: 'blue' as const },
     { title: 'Missions Actives', value: String(missions.length), subtitle: 'En cours d\'acheminement', icon: <span className="material-symbols-outlined text-2xl">route</span>, color: 'emerald' as const, trend: { value: 12, isPositive: true } },
-    { title: 'Corridors CEMAC', value: corridorsData?.total_camions_en_transit == null ? '—' : `${corridorsData.total_camions_en_transit} convois`, subtitle: "Douala - N'Djamena & Bangui", icon: <span className="material-symbols-outlined text-2xl">public</span>, color: 'amber' as const },
-    { title: 'TCO Moyen Flotte', value: tcoData?.cout_global_moyen_km_xaf == null ? '—' : `${tcoData.cout_global_moyen_km_xaf} XAF`, subtitle: 'Coût au km parcouru', icon: <span className="material-symbols-outlined text-2xl">paid</span>, color: 'violet' as const },
+    { title: 'Corridors CEMAC', value: corridorsData?.total_camions_en_transit == null ? '' : `${corridorsData.total_camions_en_transit} convois`, subtitle: "Douala - N'Djamena & Bangui", icon: <span className="material-symbols-outlined text-2xl">public</span>, color: 'amber' as const },
+    { title: 'TCO Moyen Flotte', value: tcoData?.cout_global_moyen_km_xaf == null ? '' : `${tcoData.cout_global_moyen_km_xaf} XAF`, subtitle: 'Coût au km parcouru', icon: <span className="material-symbols-outlined text-2xl">paid</span>, color: 'violet' as const },
   ];
 
   const columns = [

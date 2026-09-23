@@ -27,7 +27,7 @@ from app.services.acconage_service import (
 )
 from app.models.acconage import Navire, Escale, Grue, Remorqueur, Conteneur
 
-router = APIRouter(prefix="/acconage", tags=["Acconage"])
+router = APIRouter(tags=["Acconage"])  # monte sur /api/v1/acconage-avance par main.py
 
 
 # ============ NAVIRES ============

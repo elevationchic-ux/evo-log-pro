@@ -1,5 +1,5 @@
 # 📊 SYNTHÈSE GLOBALE DES EXPERTISES & ÉCOSYSTÈME COMPLET EVO-LOG
-## 🗓️ Mise à Jour : Septembre 2026 — synthèse non certifiante
+## 🗓️ Mise à Jour : Septembre 2026  synthèse non certifiante
 
 > Cette synthèse regroupe des analyses historiques. Elle ne certifie pas la complétude opérationnelle, l'absence globale de mocks ou la production. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 
@@ -11,12 +11,12 @@ Cette synthèse recense les composants annoncés de la plateforme ERP/SaaS **EVO
 
 | Indicateur | Valeur Certifiée |
 |:---|:---|
-| **Routes Frontend Next.js** | **323 pages** — Build `Exit code 0`, 0 erreur TypeScript |
-| **Endpoints FastAPI Backend** | **117 routes REST** — Chargement propre `Exit code 0` |
+| **Routes Frontend Next.js** | **323 pages**  Build `Exit code 0`, 0 erreur TypeScript |
+| **Endpoints FastAPI Backend** | **117 routes REST**  Chargement propre `Exit code 0` |
 | **Architecture** | **Absence globale de mocks non démontrée** |
 | **Portails Collaborateurs** | **8 espaces métiers + 1 Hub centralisé** déployés |
 | **Nouveaux Composants UX** | **4 composants shared** créés (glossaire, aide, breadcrumb, sécurité) |
-| **Domaines Fonctionnels** | **18 modules annoncés** — complétude globale non certifiée |
+| **Domaines Fonctionnels** | **18 modules annoncés**  complétude globale non certifiée |
 
 ---
 
@@ -43,18 +43,18 @@ Cette synthèse recense les composants annoncés de la plateforme ERP/SaaS **EVO
 | **17** | **Communication & Visioconférence** | Chat/WebRTC présents, multi-worker et fournisseurs externes à valider | **À valider** | Slack / Microsoft Teams |
 | **18** | **8 Portails Collaborateurs Métier** | Pages présentes, raccordement global et tests à valider | **À valider** | Workday Self-Service |
 
-### 🏆 Moyenne Globale : non calculée — preuves homogènes insuffisantes
+### 🏆 Moyenne Globale : non calculée  preuves homogènes insuffisantes
 
 ---
 
-## 🎨 ENRICHISSEMENT UX/UI — AMÉLIORATIONS IMPLÉMENTÉES (SEPTEMBRE 2026)
+## 🎨 ENRICHISSEMENT UX/UI  AMÉLIORATIONS IMPLÉMENTÉES (SEPTEMBRE 2026)
 
 Suite à l'audit impartial Novice vs Expert ERP, **4 nouveaux composants shared** ont été créés et intégrés :
 
 | Composant | Rôle | Impact |
 |:---|:---|:---|
 | `TermDefinition.tsx` | Infobulles sur 22 sigles métier (BAPLIE, DUM, FEFO, TCO…) | Accessibilité Novice |
-| `HelpAndShortcutsModal.tsx` | Centre d'Aide (`?`/`F1`) — glossaire, raccourcis, guide débutant | Accessibilité & Productivité |
+| `HelpAndShortcutsModal.tsx` | Centre d'Aide (`?`/`F1`)  glossaire, raccourcis, guide débutant | Accessibilité & Productivité |
 | `AppBreadcrumb.tsx` | Fil d'Ariane dynamique avec labels français | Orientation Spatiale |
 | `DestructiveConfirmModal.tsx` | Garde-fou légal pour scellements OHADA | Sécurité Comptable |
 
@@ -100,9 +100,9 @@ Suite à l'audit impartial Novice vs Expert ERP, **4 nouveaux composants shared*
 1. **Zéro Donnée Factice** : Toutes les métriques, graphiques et tableaux sont alimentés par PostgreSQL via FastAPI.
 2. **Conformité CEMAC / OHADA** : SYSCOHADA révisé, TEC CEMAC, CAMCIS Cameroun, IRPP/CNPS.
 3. **Résilience & Robustesse** : 323 routes pré-rendues, isolation multi-tenant, piste d'audit SHA-256 immuable.
-4. **Ergonomie Certifiée** : Audit UX/UI double (Novice + Expert ERP) appliqué intégralement — bld exit 0.
+4. **Ergonomie Certifiée** : Audit UX/UI double (Novice + Expert ERP) appliqué intégralement  bld exit 0.
 
 ---
 
-*Document certifié conforme à la version de production EVO-LOG ERP — Septembre 2026.*
+*Document certifié conforme à la version de production EVO-LOG ERP  Septembre 2026.*
 *Synthèse historique • 323 routes annoncées • validation globale des APIs et portails encore requise*

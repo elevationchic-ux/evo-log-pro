@@ -1,36 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from pydantic import BaseModel, Field
-from typing import List, Optional
-from datetime import datetime
-
-from app.database import get_db
+from fastapi import APIRouter, Depends
 from app.utils.tenant import get_current_tenant_context, TenantContext
+from app.core.not_implemented import not_implemented
 
 router = APIRouter()
 
+# Classement "gamification" conducteurs : les scores (Kamga 98/95, Nguema
+# 94/91...) et badges etaient inventes en dur. Aucune table de scores eco-conduite
+# ni de badges n'existe, et aucun flux telematique n'alimente ces note. La route
+# renvoie explicitement 501 au lieu d'un faux succes.
+
+
 @router.get("/driver-scores")
 def get_driver_gamification_scores(context: TenantContext = Depends(get_current_tenant_context)):
-    """Retrieve driver eco-driving, safety scores, and earned badges."""
-    return {
-        "status": "success",
-        "organization_id": context.organization_id,
-        "leaderboard": [
-            {
-                "rank": 1,
-                "driver_name": "Monsieur Kamga",
-                "safety_score": 98,
-                "eco_driving_score": 95,
-                "punctuality_rate": "99.2%",
-                "badges": ["AS_DU_VOLANT", "ZERO_INCIDENT_2026", "ECO_CHAMPION"]
-            },
-            {
-                "rank": 2,
-                "driver_name": "Nguema Joseph",
-                "safety_score": 94,
-                "eco_driving_score": 91,
-                "punctuality_rate": "97.5%",
-                "badges": ["ZERO_INCIDENT_2026", "EXPERT_AXE_LOURD"]
-            }
-        ]
-    }
+    """Scores conducteurs : 501 (classement fabrique, aucune donnee telematique)."""
+    not_implemented(
+        "Classement gamification des conducteurs (scores et badges)",
+        "une ingestion telematique reelle par vehicule (eco-conduite, freinages, "
+        "ponctualite) et des agregations persistees par conducteur "
+        "(les scores et badges retournes etaient codes en dur)",
+    )

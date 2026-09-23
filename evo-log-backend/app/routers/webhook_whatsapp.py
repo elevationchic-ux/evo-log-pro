@@ -5,7 +5,9 @@ import os
 import logging
 from datetime import datetime
 
-router = APIRouter(prefix="/api/v1/whatsapp", tags=["WhatsApp Business"])
+# Pas de prefix interne : les routes portent leur chemin complet pour eviter
+# tout double prefix au include (main.py monte ce router sans prefix).
+router = APIRouter(tags=["WhatsApp Business"])
 logger = logging.getLogger(__name__)
 
 WHATSAPP_VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN", "evo-log-whatsapp-verify-token-2026")
@@ -15,7 +17,9 @@ class SendWhatsAppMessageSchema(BaseModel):
     template_name: str = Field("mission_assigned", example="mission_assigned")
     parameters: List[str] = Field(..., example=["OT-2026-089", "Douala Port", "Yaoundé Depot"])
 
-@router.get("/webhook")
+# Meta verifie le webhook en GET sur l'URL exacte /api/v1/webhooks/whatsapp
+# (appelee par la page ChatOps du frontend).
+@router.get("/api/v1/webhooks/whatsapp")
 def verify_whatsapp_webhook(
     hub_mode: Optional[str] = Query(None, alias="hub.mode"),
     hub_challenge: Optional[str] = Query(None, alias="hub.challenge"),
@@ -30,7 +34,7 @@ def verify_whatsapp_webhook(
     
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Verification token mismatch")
 
-@router.post("/webhook")
+@router.post("/api/v1/webhooks/whatsapp")
 async def receive_whatsapp_notification(request: Request):
     """
     Receive incoming messages and status callbacks from WhatsApp Business Cloud API.
@@ -65,7 +69,7 @@ async def receive_whatsapp_notification(request: Request):
         "messages": processed_messages
     }
 
-@router.post("/send")
+@router.post("/api/v1/whatsapp/send")
 def send_whatsapp_template_message(payload: SendWhatsAppMessageSchema):
     """
     Send outbound WhatsApp Business notification (Transport orders, delivery updates, alert notifications).

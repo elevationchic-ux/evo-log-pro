@@ -53,7 +53,7 @@ def _build_engine():
         return engine
 
     else:
-        # PostgreSQL / other dialects — full production pool
+        # PostgreSQL / other dialects  full production pool
         logger.info("DATABASE: Using PostgreSQL engine with QueuePool (production)")
         return create_engine(
             DATABASE_URL,
@@ -70,7 +70,7 @@ def _build_engine():
 # Singleton engine
 engine = _build_engine()
 
-# Session factory — autoflush=False to avoid premature DB writes mid-request
+# Session factory  autoflush=False to avoid premature DB writes mid-request
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Base class for all ORM models
@@ -79,7 +79,7 @@ Base = declarative_base()
 
 def get_db():
     """
-    FastAPI dependency — yields a database session scoped to a single HTTP request.
+    FastAPI dependency  yields a database session scoped to a single HTTP request.
     Always closes the session (and returns it to the pool) even on error.
     """
     db = SessionLocal()

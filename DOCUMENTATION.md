@@ -2,7 +2,7 @@
 
 **Date:** 19 septembre 2026  
 **Version:** 2.0  
-**Statut:** Développement avancé — staging requis ⚠️  
+**Statut:** Développement avancé  staging requis ⚠️  
 **État de référence:** [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md)
 
 ---
@@ -268,4 +268,4 @@ Contient :
 
 ---
 
-**Version 2.0 — sous-modules présents, production non certifiée** ⚠️
+**Version 2.0  sous-modules présents, production non certifiée** ⚠️

@@ -17,6 +17,10 @@ depends_on = None
 
 
 def upgrade():
+    # Garde "table existante" : conteneurs est deja cree par 005 dans la
+    # chaine. Sans la garde, le rejouage sur base vierge echoue sur
+    # "table conteneurs already exists".
+    _existing_tables = set(sa.inspect(op.get_bind()).get_table_names())
     # ========== CAMEROON PORTS ==========
     
     # Ports Cameroun
@@ -553,34 +557,39 @@ def upgrade():
     # ========== CONTAINER LIFECYCLE ==========
     
     # Conteneurs
-    op.create_table(
-        'conteneurs',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('numero', sa.String(length=20), nullable=False),
-        sa.Column('type_conteneur', sa.String(length=50), nullable=False),
-        sa.Column('taille_pieds', sa.Integer(), nullable=False),
-        sa.Column('etat', sa.String(length=20), default='clean'),
-        sa.Column('proprietaire', sa.String(length=100)),
-        sa.Column('compagnie', sa.String(length=100)),
-        sa.Column('date_fabrication', sa.Date()),
-        sa.Column('date_derniere_inspection', sa.Date()),
-        sa.Column('prochaine_inspection', sa.Date()),
-        sa.Column('tare_kg', sa.Float()),
-        sa.Column('max_payload_kg', sa.Float()),
-        sa.Column('volume_m3', sa.Float()),
-        sa.Column('temperature_c', sa.Float()),
-        sa.Column('est_hazardous', sa.Boolean(), default='false'),
-        sa.Column('classe_hazard', sa.String(length=20)),
-        sa.Column('notes', sa.Text()),
-        sa.Column('photo_avant', sa.String(length=255)),
-        sa.Column('photo_apres', sa.String(length=255)),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('numero')
-    )
-    op.create_index(op.f('ix_conteneurs_id'), 'conteneurs', ['id'], unique=False)
-    op.create_index(op.f('ix_conteneurs_numero'), 'conteneurs', ['numero'], unique=True)
+    # 005 a deja cree conteneurs (et le modele ORM acconage.Conteneur
+    # correspond a la definition de 005, pas a celle-ci). Sur une base neuve
+    # on saute cette re-declaration pour rester aligne sur create_all(); les
+    # tables 007 qui pointent vers conteneurs.id restent valides.
+    if 'conteneurs' not in _existing_tables:
+        op.create_table(
+            'conteneurs',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('numero', sa.String(length=20), nullable=False),
+            sa.Column('type_conteneur', sa.String(length=50), nullable=False),
+            sa.Column('taille_pieds', sa.Integer(), nullable=False),
+            sa.Column('etat', sa.String(length=20), default='clean'),
+            sa.Column('proprietaire', sa.String(length=100)),
+            sa.Column('compagnie', sa.String(length=100)),
+            sa.Column('date_fabrication', sa.Date()),
+            sa.Column('date_derniere_inspection', sa.Date()),
+            sa.Column('prochaine_inspection', sa.Date()),
+            sa.Column('tare_kg', sa.Float()),
+            sa.Column('max_payload_kg', sa.Float()),
+            sa.Column('volume_m3', sa.Float()),
+            sa.Column('temperature_c', sa.Float()),
+            sa.Column('est_hazardous', sa.Boolean(), default='false'),
+            sa.Column('classe_hazard', sa.String(length=20)),
+            sa.Column('notes', sa.Text()),
+            sa.Column('photo_avant', sa.String(length=255)),
+            sa.Column('photo_apres', sa.String(length=255)),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+            sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('numero')
+        )
+        op.create_index(op.f('ix_conteneurs_id'), 'conteneurs', ['id'], unique=False)
+        op.create_index(op.f('ix_conteneurs_numero'), 'conteneurs', ['numero'], unique=True)
     
     # Cycle Conteneur
     op.create_table(

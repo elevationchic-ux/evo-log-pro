@@ -1,5 +1,5 @@
 # 🛡️ RAPPORT D'EXPERTISE QUALITÉ, HYGIÈNE, SÉCURITÉ & ENVIRONNEMENT (K-QHSE)
-## 🗓️ Mise à Jour : Septembre 2026 — état non certifié
+## 🗓️ Mise à Jour : Septembre 2026  état non certifié
 
 > La production et l'absence globale de mocks ne sont pas certifiées sans tests d'intégration et de sécurité. Voir [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md).
 

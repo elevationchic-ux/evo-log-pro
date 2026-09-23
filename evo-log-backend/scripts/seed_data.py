@@ -151,7 +151,7 @@ def seed_agencies(db: Session):
     agencies = [
         Agency(code="HQ", name="Siège Douala Port", city="Douala", is_headquarters=True, organization_id=lpc_org.id if lpc_org else None),
         Agency(code="KRI", name="Agence Port Kribi", city="Kribi", is_headquarters=False, organization_id=lpc_org.id if lpc_org else None),
-        Agency(code="BAO", name="Agence Bafoussam Ouest", city="Bafoussam", is_headquarters=False, organization_id=lpc_org.id if lpc_org else None),
+        Agency(code="BAO", name="Agence limbé Ouest", city="limbé", is_headquarters=False, organization_id=lpc_org.id if lpc_org else None),
         Agency(code="TCL-HQ", name="Siège TCL Kribi", city="Kribi", is_headquarters=True, organization_id=tcl_org.id if tcl_org else None),
         Agency(code="TCL-DLA", name="Bureau Liaison Douala", city="Douala", is_headquarters=False, organization_id=tcl_org.id if tcl_org else None),
     ]
@@ -160,7 +160,7 @@ def seed_agencies(db: Session):
         if not db.query(Agency).filter(Agency.code == agency.code).first():
             db.add(agency)
     db.commit()
-    print("✓ Agencies seeded (Douala HQ, Kribi, Bafoussam, Kribi TCL)")
+    print("✓ Agencies seeded (Douala HQ, Kribi, limbé, Kribi TCL)")
 
 
 def seed_roles(db: Session):
@@ -644,7 +644,7 @@ def seed_magasin_data(db: Session):
     entrepots = [
         {"code": "MAG-DLA-01", "nom": "Magasin Sous-Douane Quai 14", "ville": "Douala", "capacite": 12000},
         {"code": "MAG-KRI-01", "nom": "Terminal Conteneurs Kribi Port", "ville": "Kribi", "capacite": 25000},
-        {"code": "MAG-BAO-01", "nom": "Entrepôt Distribution Ouest", "ville": "Bafoussam", "capacite": 6000},
+        {"code": "MAG-BAO-01", "nom": "Entrepôt Distribution Ouest", "ville": "limbé", "capacite": 6000},
     ]
 
     for e in entrepots:
@@ -800,7 +800,7 @@ def seed_chat_data(db: Session):
 
 
 def seed_prestataires_data(db: Session):
-    """Seed certified subcontractors & providers (Douala, Kribi, Bafoussam)"""
+    """Seed certified subcontractors & providers (Douala, Kribi, limbé)"""
     lpc = db.query(Company).filter(Company.code == "LPC").first()
     if not lpc:
         return
@@ -950,19 +950,19 @@ def seed_prestataires_data(db: Session):
             "company_id": lpc.id,
             "code": "PREST-WO-06",
             "raison_sociale": "Ouest Transit & Logistique Hauts Plateaux",
-            "sigle": "OTL Bafoussam",
+            "sigle": "OTL limbé",
             "specialite": "DOUANE_TRANSIT",
             "tax_id": "M082000192341O",
             "rccm": "RC/BFM/2020/B/0219",
             "agrement_portuaire": "DGD-GUCE-AGR-2021-312",
             "est_homologue": True,
             "statut_agrement": "VALIDE",
-            "ville": "Bafoussam",
+            "ville": "limbé",
             "zone_portuaire": "Hub Régional Ouest & Dépôt Douanier",
-            "adresse": "Avenue Principale Marché A, Bafoussam",
+            "adresse": "Avenue Principale Marché A, limbé",
             "contact_nom": "Fabrice Kamga",
             "contact_telephone": "+237 233 44 20 18",
-            "contact_email": "bafoussam@otl-transit.cm",
+            "contact_email": "limbé@otl-transit.cm",
             "telephone_astreinte_24h": "+237 696 33 44 55",
             "note_globale": 4.5,
             "nb_missions_realisees": 73,
@@ -982,7 +982,7 @@ def seed_prestataires_data(db: Session):
             db.add(Prestataire(**p))
 
     db.commit()
-    print("✓ Certified Subcontractors & B2B Providers seeded (Douala, Kribi, Bafoussam)")
+    print("✓ Certified Subcontractors & B2B Providers seeded (Douala, Kribi, limbé)")
 
 
 def seed_chef_personnel_data(db: Session):
@@ -1158,7 +1158,7 @@ def seed_chef_personnel_data(db: Session):
             "date_debut": date(2026, 5, 2),
             "date_fin": date(2026, 5, 5),
             "nombre_jours": 4,
-            "motif": "Cérémonie familiale traditionnelle à Bafoussam.",
+            "motif": "Cérémonie familiale traditionnelle à limbé.",
             "statut": StatutConge.EN_ATTENTE
         }
     ]

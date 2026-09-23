@@ -19,6 +19,13 @@ depends_on = None
 def upgrade():
     # Check if using PostgreSQL or SQLite
     dialect = op.get_context().dialect.name
+    # Garde "table existante" (meme pattern que 011_tenant_scope_roots) :
+    # cette revision est un snapshot monolithique qui re-declare des tables
+    # deja crenees en amont (factures par 002, ecritures_comptables par 003).
+    # Sans la garde, le rejouage complet sur base vierge echoue sur
+    # "table ... already exists". Les blocs concernes sont sautes si la table
+    # est presente ; les donnees existantes ne sont jamais touchees.
+    _existing_tables = set(sa.inspect(op.get_bind()).get_table_names())
     
     # ========== ACCONAGE TABLES ==========
     
@@ -136,31 +143,32 @@ def upgrade():
     op.create_index(op.f('ix_amarages_id'), 'amarages', ['id'], unique=False)
     
     # Containers
-    op.create_table(
-        'conteneurs',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('numero', sa.String(length=20), nullable=False),
-        sa.Column('type_conteneur', sa.String(length=20), nullable=True),
-        sa.Column('statut', sa.String(length=20), nullable=True),
-        sa.Column('tare_weight', sa.Float(), nullable=True),
-        sa.Column('gross_weight', sa.Float(), nullable=True),
-        sa.Column('net_weight', sa.Float(), nullable=True),
-        sa.Column('navire_id', sa.Integer(), nullable=True),
-        sa.Column('proprietaire', sa.String(length=100), nullable=True),
-        sa.Column('scelle', sa.String(length=50), nullable=True),
-        sa.Column('date_scelle', sa.Date(), nullable=True),
-        sa.Column('inspection_phasanitaire', sa.Boolean(), nullable=True, server_default='false'),
-        sa.Column('date_inspection', sa.Date(), nullable=True),
-        sa.Column('certificat_origine', sa.String(length=255), nullable=True),
-        sa.Column('notes', sa.Text(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['navire_id'], ['navires.id'], ),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('numero')
-    )
-    op.create_index(op.f('ix_conteneurs_id'), 'conteneurs', ['id'], unique=False)
-    op.create_index(op.f('ix_conteneurs_numero'), 'conteneurs', ['numero'], unique=True)
+    if 'conteneurs' not in _existing_tables:
+        op.create_table(
+            'conteneurs',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('numero', sa.String(length=20), nullable=False),
+            sa.Column('type_conteneur', sa.String(length=20), nullable=True),
+            sa.Column('statut', sa.String(length=20), nullable=True),
+            sa.Column('tare_weight', sa.Float(), nullable=True),
+            sa.Column('gross_weight', sa.Float(), nullable=True),
+            sa.Column('net_weight', sa.Float(), nullable=True),
+            sa.Column('navire_id', sa.Integer(), nullable=True),
+            sa.Column('proprietaire', sa.String(length=100), nullable=True),
+            sa.Column('scelle', sa.String(length=50), nullable=True),
+            sa.Column('date_scelle', sa.Date(), nullable=True),
+            sa.Column('inspection_phasanitaire', sa.Boolean(), nullable=True, server_default='false'),
+            sa.Column('date_inspection', sa.Date(), nullable=True),
+            sa.Column('certificat_origine', sa.String(length=255), nullable=True),
+            sa.Column('notes', sa.Text(), nullable=True),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+            sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+            sa.ForeignKeyConstraint(['navire_id'], ['navires.id'], ),
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('numero')
+        )
+        op.create_index(op.f('ix_conteneurs_id'), 'conteneurs', ['id'], unique=False)
+        op.create_index(op.f('ix_conteneurs_numero'), 'conteneurs', ['numero'], unique=True)
     
     # Bill of Lading
     op.create_table(
@@ -551,36 +559,37 @@ def upgrade():
     op.create_index(op.f('ix_plan_comptable_ohada_numero_compte'), 'plan_comptable_ohada', ['numero_compte'], unique=True)
     
     # Ecritures Comptables
-    op.create_table(
-        'ecritures_comptables',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('numero_ecriture', sa.String(length=50), nullable=False),
-        sa.Column('date_ecriture', sa.Date(), nullable=False),
-        sa.Column('numero_piece', sa.String(length=50), nullable=True),
-        sa.Column('libelle', sa.String(length=500), nullable=False),
-        sa.Column('compte_id', sa.Integer(), nullable=True),
-        sa.Column('tiers_id', sa.Integer(), nullable=True),
-        sa.Column('debit', sa.Numeric(precision=15, scale=2), nullable=True, server_default='0'),
-        sa.Column('credit', sa.Numeric(precision=15, scale=2), nullable=True, server_default='0'),
-        sa.Column('devise', sa.String(length=3), nullable=True, server_default='XAF'),
-        sa.Column('reference_document', sa.String(length=100), nullable=True),
-        sa.Column('type_document', sa.String(length=50), nullable=True),
-        sa.Column('periode', sa.String(length=50), nullable=True),
-        sa.Column('journal', sa.String(length=50), nullable=True),
-        sa.Column('valider', sa.Boolean(), nullable=True, server_default='false'),
-        sa.Column('valide_par', sa.String(length=100), nullable=True),
-        sa.Column('date_validation', sa.Date(), nullable=True),
-        sa.Column('exercice_id', sa.Integer(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['compte_id'], ['plan_comptable_ohada.id'], ),
-        sa.ForeignKeyConstraint(['exercice_id'], ['exercices_comptables.id'], ),
-        sa.ForeignKeyConstraint(['tiers_id'], ['tiers.id'], ),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('numero_ecriture')
-    )
-    op.create_index(op.f('ix_ecritures_comptables_id'), 'ecritures_comptables', ['id'], unique=False)
-    op.create_index(op.f('ix_ecritures_comptables_numero_ecriture'), 'ecritures_comptables', ['numero_ecriture'], unique=True)
+    if 'ecritures_comptables' not in _existing_tables:
+        op.create_table(
+            'ecritures_comptables',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('numero_ecriture', sa.String(length=50), nullable=False),
+            sa.Column('date_ecriture', sa.Date(), nullable=False),
+            sa.Column('numero_piece', sa.String(length=50), nullable=True),
+            sa.Column('libelle', sa.String(length=500), nullable=False),
+            sa.Column('compte_id', sa.Integer(), nullable=True),
+            sa.Column('tiers_id', sa.Integer(), nullable=True),
+            sa.Column('debit', sa.Numeric(precision=15, scale=2), nullable=True, server_default='0'),
+            sa.Column('credit', sa.Numeric(precision=15, scale=2), nullable=True, server_default='0'),
+            sa.Column('devise', sa.String(length=3), nullable=True, server_default='XAF'),
+            sa.Column('reference_document', sa.String(length=100), nullable=True),
+            sa.Column('type_document', sa.String(length=50), nullable=True),
+            sa.Column('periode', sa.String(length=50), nullable=True),
+            sa.Column('journal', sa.String(length=50), nullable=True),
+            sa.Column('valider', sa.Boolean(), nullable=True, server_default='false'),
+            sa.Column('valide_par', sa.String(length=100), nullable=True),
+            sa.Column('date_validation', sa.Date(), nullable=True),
+            sa.Column('exercice_id', sa.Integer(), nullable=True),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+            sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+            sa.ForeignKeyConstraint(['compte_id'], ['plan_comptable_ohada.id'], ),
+            sa.ForeignKeyConstraint(['exercice_id'], ['exercices_comptables.id'], ),
+            sa.ForeignKeyConstraint(['tiers_id'], ['tiers.id'], ),
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('numero_ecriture')
+        )
+        op.create_index(op.f('ix_ecritures_comptables_id'), 'ecritures_comptables', ['id'], unique=False)
+        op.create_index(op.f('ix_ecritures_comptables_numero_ecriture'), 'ecritures_comptables', ['numero_ecriture'], unique=True)
     
     # Exercices Comptables
     op.create_table(
@@ -607,36 +616,37 @@ def upgrade():
     op.create_index(op.f('ix_exercices_comptables_numero_exercice'), 'exercices_comptables', ['numero_exercice'], unique=True)
     
     # Factures
-    op.create_table(
-        'factures',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('numero_facture', sa.String(length=50), nullable=False),
-        sa.Column('client_id', sa.Integer(), nullable=True),
-        sa.Column('type_facture', sa.String(length=20), nullable=True),
-        sa.Column('date_emission', sa.Date(), nullable=False),
-        sa.Column('date_echeance', sa.Date(), nullable=True),
-        sa.Column('date_paiement', sa.Date(), nullable=True),
-        sa.Column('montant_ht', sa.Numeric(precision=15, scale=2), nullable=False),
-        sa.Column('taux_tva', sa.Float(), nullable=True, server_default='19.25'),
-        sa.Column('montant_tva', sa.Numeric(precision=15, scale=2), nullable=True, server_default='0'),
-        sa.Column('montant_ttc', sa.Numeric(precision=15, scale=2), nullable=False),
-        sa.Column('devise', sa.String(length=3), nullable=True, server_default='XAF'),
-        sa.Column('statut', sa.String(length=20), nullable=True, server_default='brouillon'),
-        sa.Column('conditions_paiement', sa.String(length=50), nullable=True),
-        sa.Column('notes', sa.Text(), nullable=True),
-        sa.Column('reglement_partiel', sa.Numeric(precision=15, scale=2), nullable=True, server_default='0'),
-        sa.Column('solde_restant', sa.Numeric(precision=15, scale=2), nullable=True),
-        sa.Column('comptabilise', sa.Boolean(), nullable=True, server_default='false'),
-        sa.Column('ecriture_id', sa.Integer(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['client_id'], ['tiers.id'], ),
-        sa.ForeignKeyConstraint(['ecriture_id'], ['ecritures_comptables.id'], ),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('numero_facture')
-    )
-    op.create_index(op.f('ix_factures_id'), 'factures', ['id'], unique=False)
-    op.create_index(op.f('ix_factures_numero_facture'), 'factures', ['numero_facture'], unique=True)
+    if 'factures' not in _existing_tables:
+        op.create_table(
+            'factures',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('numero_facture', sa.String(length=50), nullable=False),
+            sa.Column('client_id', sa.Integer(), nullable=True),
+            sa.Column('type_facture', sa.String(length=20), nullable=True),
+            sa.Column('date_emission', sa.Date(), nullable=False),
+            sa.Column('date_echeance', sa.Date(), nullable=True),
+            sa.Column('date_paiement', sa.Date(), nullable=True),
+            sa.Column('montant_ht', sa.Numeric(precision=15, scale=2), nullable=False),
+            sa.Column('taux_tva', sa.Float(), nullable=True, server_default='19.25'),
+            sa.Column('montant_tva', sa.Numeric(precision=15, scale=2), nullable=True, server_default='0'),
+            sa.Column('montant_ttc', sa.Numeric(precision=15, scale=2), nullable=False),
+            sa.Column('devise', sa.String(length=3), nullable=True, server_default='XAF'),
+            sa.Column('statut', sa.String(length=20), nullable=True, server_default='brouillon'),
+            sa.Column('conditions_paiement', sa.String(length=50), nullable=True),
+            sa.Column('notes', sa.Text(), nullable=True),
+            sa.Column('reglement_partiel', sa.Numeric(precision=15, scale=2), nullable=True, server_default='0'),
+            sa.Column('solde_restant', sa.Numeric(precision=15, scale=2), nullable=True),
+            sa.Column('comptabilise', sa.Boolean(), nullable=True, server_default='false'),
+            sa.Column('ecriture_id', sa.Integer(), nullable=True),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+            sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+            sa.ForeignKeyConstraint(['client_id'], ['tiers.id'], ),
+            sa.ForeignKeyConstraint(['ecriture_id'], ['ecritures_comptables.id'], ),
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('numero_facture')
+        )
+        op.create_index(op.f('ix_factures_id'), 'factures', ['id'], unique=False)
+        op.create_index(op.f('ix_factures_numero_facture'), 'factures', ['numero_facture'], unique=True)
     
     # TVA Declarable
     op.create_table(

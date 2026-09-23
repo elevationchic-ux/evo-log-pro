@@ -89,14 +89,14 @@ export default function RealCustomsPage() {
   const getCircuitBadge = (c: string) => {
     switch (c) {
       case 'VERT':
-        return { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/40', icon: CheckCircle2, label: 'Circuit VERT — BAE Immédiat' };
+        return { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/40', icon: CheckCircle2, label: 'Circuit VERT  BAE Immédiat' };
       case 'BLEU':
-        return { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/40', icon: CheckCircle2, label: 'Circuit BLEU — Audit a posteriori' };
+        return { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/40', icon: CheckCircle2, label: 'Circuit BLEU  Audit a posteriori' };
       case 'JAUNE':
-        return { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/40', icon: AlertTriangle, label: 'Circuit JAUNE — Examen Documentaire' };
+        return { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/40', icon: AlertTriangle, label: 'Circuit JAUNE  Examen Documentaire' };
       case 'ROUGE':
       default:
-        return { bg: 'bg-rose-500/20', text: 'text-rose-400', border: 'border-rose-500/40', icon: XCircle, label: 'Circuit ROUGE — Scanner & Visite Physique' };
+        return { bg: 'bg-rose-500/20', text: 'text-rose-400', border: 'border-rose-500/40', icon: XCircle, label: 'Circuit ROUGE  Scanner & Visite Physique' };
     }
   };
 

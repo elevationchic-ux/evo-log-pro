@@ -32,7 +32,10 @@ from app.services.finance_service import (
 )
 from app.models.finance_ohada import PlanComptableOHADA, EcritureComptableNew as EcritureComptable, ExerciceComptable, FactureNew as Facture, RetenueSource
 
-router = APIRouter(prefix="/finance", tags=["Finance"])
+# Pas de prefix ici : main.py monte deja ce routeur sur /api/v1/finance
+# (et /api/finance pour l'alias deprecie). Un prefix double creait des routes
+# /api/v1/finance/finance/... injoignables depuis le frontend.
+router = APIRouter(tags=["Finance"])
 
 
 # ============ PLAN COMPTABLE OHADA ============
@@ -521,35 +524,121 @@ def rapport_fiscal(
 
 
 # ============ KPIS & ANALYTICS ============
+@router.get("/factures")
+def list_factures(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Liste des factures d'exploitation du tenant courant (lecture reelle en base)."""
+    from app.models.finance import Facture as FactureSimple
+
+    factures = (
+        db.query(FactureSimple)
+        .order_by(FactureSimple.date_emission.desc(), FactureSimple.id.desc())
+        .limit(500)
+        .all()
+    )
+    return [
+        {
+            "id": f.id,
+            "numero_facture": f.numero_facture,
+            "client_id": f.client_id,
+            "client_nom": (f.client.name if f.client else None),
+            "date_emission": f.date_emission.isoformat() if f.date_emission else None,
+            "date_echeance": f.date_echeance.isoformat() if f.date_echeance else None,
+            "montant_ht": float(f.montant_ht or 0),
+            "montant_tva": float(f.montant_tva or 0),
+            "montant_ttc": float(f.montant_ttc or 0),
+            "statut": (f.statut.value if hasattr(f.statut, "value") else str(f.statut)),
+        }
+        for f in factures
+    ]
+
+
+@router.get("/encaissements")
+def list_encaissements(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Liste des reglements/encaissements du tenant courant (table paiements)."""
+    from app.models.finance import Paiement
+
+    paiements = (
+        db.query(Paiement)
+        .order_by(Paiement.date_paiement.desc(), Paiement.id.desc())
+        .limit(500)
+        .all()
+    )
+    return [
+        {
+            "id": p.id,
+            "facture_id": p.facture_id,
+            "montant": float(p.montant or 0),
+            "date_paiement": p.date_paiement.isoformat() if p.date_paiement else None,
+            "mode_paiement": p.mode_paiement,
+            "reference": p.reference,
+            "statut": (p.statut.value if hasattr(p.statut, "value") else str(p.statut)),
+        }
+        for p in paiements
+    ]
+
+
 @router.get("/kpis")
 def get_finance_kpis(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """KPIs financiers consolidés pour les tableaux de bord"""
+    """KPIs financiers consolidés pour les tableaux de bord.
+
+    100% agrégé depuis la base (filtrée par le tenant courant via le filtre
+    ORM global). Aucune valeur par défaut inventée : sans écritures, les KPI
+    retournent 0, ce qui reflète l'état réel du dossier.
+    """
     from sqlalchemy import func
-    from app.models.finance import Facture as FactureSimple, Paiement
+    from datetime import timedelta
+    from app.models.finance import Facture as FactureSimple, Paiement, Compte, FactureStatus
     from app.models.finance_ohada import FactureNew
 
-    # Tente de requêter FactureNew, sinon FactureSimple
-    ca_ohada = db.query(func.sum(FactureNew.montant_ttc)).scalar()
-    ca_simple = db.query(func.sum(FactureSimple.montant_ttc)).scalar()
-    chiffre_affaires = float(ca_ohada or ca_simple or 284500000.0)
+    # Chiffre d'affaires : cumuls réels des deux modèles de factures.
+    ca_ohada = float(db.query(func.sum(FactureNew.montant_ttc)).scalar() or 0.0)
+    ca_simple = float(db.query(func.sum(FactureSimple.montant_ttc)).scalar() or 0.0)
+    chiffre_affaires = ca_ohada + ca_simple
 
-    total_factures = (db.query(func.count(FactureNew.id)).scalar() or 0) + (db.query(func.count(FactureSimple.id)).scalar() or 0)
-    total_paiements = db.query(func.sum(Paiement.montant)).scalar() or 0.0
+    total_factures = (
+        (db.query(func.count(FactureNew.id)).scalar() or 0)
+        + (db.query(func.count(FactureSimple.id)).scalar() or 0)
+    )
+    total_encaisse = float(db.query(func.sum(Paiement.montant)).scalar() or 0.0)
 
-    impayes = max(0.0, chiffre_affaires - float(total_paiements))
-    taux_recouvrement = round((float(total_paiements) / chiffre_affaires * 100), 1) if chiffre_affaires > 0 else 92.5
+    impayes = max(0.0, chiffre_affaires - total_encaisse)
+    taux_recouvrement = round((total_encaisse / chiffre_affaires * 100), 1) if chiffre_affaires > 0 else 0.0
+
+    # Trésorerie disponible : solde cumulé des comptes de classe 5 (banque/caisse).
+    tresorerie_disponible = float(
+        db.query(func.sum(Compte.solde)).filter(Compte.numero_compte.like("5%")).scalar() or 0.0
+    )
+
+    # Créances douteuses : factures simples impayées échues depuis plus de 90 jours.
+    seuil = date.today() - timedelta(days=90)
+    creances_douteuses = float(
+        db.query(func.sum(FactureSimple.montant_ttc))
+        .filter(
+            FactureSimple.date_echeance < seuil,
+            FactureSimple.statut.notin_([
+                FactureStatus.PAYEE, FactureStatus.ANNULEE, FactureStatus.BROUILLON
+            ]),
+        )
+        .scalar() or 0.0
+    )
 
     return {
         "chiffre_affaires": chiffre_affaires,
-        "total_factures": max(total_factures, 142),
-        "total_encaisse": float(total_paiements),
+        "total_factures": total_factures,
+        "total_encaisse": total_encaisse,
         "montant_impaye": impayes,
         "taux_recouvrement": taux_recouvrement,
-        "creances_douteuses": 12500000.0,
-        "tresorerie_disponible": 95400000.0
+        "creances_douteuses": creances_douteuses,
+        "tresorerie_disponible": tresorerie_disponible,
     }
 
 
@@ -558,31 +647,40 @@ def get_finance_chart_data(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Séries temporelles pour les graphiques de performance financière et fret"""
+    """Séries temporelles de chiffre d'affaires, agrégées par mois réel.
+
+    Basé sur les factures d'exploitation (Facture) : le CA mensuel (en millions
+    de XAF) est calculé depuis les pièces saisies, sans série codée en dur.
+    """
+    from app.models.finance import Facture as FactureSimple
+
+    rows = db.query(FactureSimple.date_emission, FactureSimple.montant_ttc).all()
+
+    monthly: dict[str, float] = {}
+    for d, montant in rows:
+        if not d:
+            continue
+        key = f"{d.year:04d}-{d.month:02d}"
+        monthly[key] = monthly.get(key, 0.0) + float(montant or 0.0)
+
+    # 12 derniers mois, dans l'ordre chronologique.
+    today = date.today()
+    series = []
+    for offset in range(11, -1, -1):
+        y = today.year
+        m = today.month - offset
+        while m <= 0:
+            m += 12
+            y -= 1
+        key = f"{y:04d}-{m:02d}"
+        series.append({
+            "month": key,
+            "revenue": round(monthly.get(key, 0.0) / 1_000_000.0, 2),
+        })
+
     return {
-        "week": [
-            {"day": "Lun", "revenue": 38.5, "fretTons": 1200},
-            {"day": "Mar", "revenue": 42.0, "fretTons": 1450},
-            {"day": "Mer", "revenue": 45.2, "fretTons": 1600},
-            {"day": "Jeu", "revenue": 41.8, "fretTons": 1380},
-            {"day": "Ven", "revenue": 52.4, "fretTons": 1900},
-            {"day": "Sam", "revenue": 34.6, "fretTons": 1100},
-            {"day": "Dim", "revenue": 30.0, "fretTons": 950}
-        ],
-        "month": [
-            {"day": "Sem 1", "revenue": 185.0, "fretTons": 5200},
-            {"day": "Sem 2", "revenue": 210.5, "fretTons": 6100},
-            {"day": "Sem 3", "revenue": 245.8, "fretTons": 7400},
-            {"day": "Sem 4", "revenue": 284.5, "fretTons": 8900}
-        ],
-        "year": [
-            {"day": "Jan", "revenue": 620, "fretTons": 18000},
-            {"day": "Fév", "revenue": 710, "fretTons": 21000},
-            {"day": "Mar", "revenue": 840, "fretTons": 25000},
-            {"day": "Avr", "revenue": 790, "fretTons": 23500},
-            {"day": "Mai", "revenue": 920, "fretTons": 28000},
-            {"day": "Juin", "revenue": 1050, "fretTons": 31000},
-            {"day": "Juil", "revenue": 1180, "fretTons": 34500}
-        ]
+        "source": "factures",
+        "currency_unit": "M XAF",
+        "months": series,
     }
 

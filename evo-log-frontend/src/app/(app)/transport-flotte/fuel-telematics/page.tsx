@@ -68,7 +68,7 @@ export default function TransportFlotteFuelTelematics() {
         <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Consommation Moyenne Flotte</div>
           <div className="text-2xl font-black text-slate-100 font-mono">
-            — <span className="text-xs text-slate-400 font-normal">L / 100 km</span>
+             <span className="text-xs text-slate-400 font-normal">L / 100 km</span>
           </div>
           <div className="text-[11px] text-emerald-400 mt-2">Conforme aux standards constructeurs</div>
         </div>
@@ -76,7 +76,7 @@ export default function TransportFlotteFuelTelematics() {
         <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Carburant Consommé (Août 2026)</div>
           <div className="text-2xl font-black text-blue-400 font-mono">
-            — <span className="text-xs font-normal">Litres</span>
+             <span className="text-xs font-normal">Litres</span>
           </div>
           <div className="text-[11px] text-slate-400 mt-2">Gasoil TotalEnergies</div>
         </div>
@@ -84,7 +84,7 @@ export default function TransportFlotteFuelTelematics() {
         <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Alertes Vols / Chutes Sondes</div>
           <div className="text-2xl font-black text-red-400 font-mono">
-            — <span className="text-xs font-normal text-slate-400">incident</span>
+             <span className="text-xs font-normal text-slate-400">incident</span>
           </div>
           <div className="text-[11px] text-red-300/80 mt-2 flex items-center gap-1">
             <AlertTriangle className="w-3.5 h-3.5" /> Aucune alerte persistée disponible

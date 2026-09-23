@@ -30,6 +30,7 @@ class OrdreTransport(Base):
     __tablename__ = "ordres_transport"
     
     id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     numero_ot = Column(String(50), unique=True, nullable=False, index=True)
     client_id = Column(Integer, ForeignKey('tiers.id'))
     transporteur_id = Column(Integer, ForeignKey('tiers.id'))

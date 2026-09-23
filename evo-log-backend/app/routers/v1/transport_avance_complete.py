@@ -20,7 +20,7 @@ from app.services.transport_avance_service import (
 )
 from app.models.transport_avance import Dispatch, Arret, POD, DocumentPOD
 
-router = APIRouter(prefix="/transport-avance", tags=["Transport Avancé"])
+router = APIRouter(tags=["Transport Avancé"])  # monte sur /api/v1/transport-avance-complete par main.py
 
 
 # ============ DISPATCH INTELLIGENT ============
