@@ -73,24 +73,24 @@ export const authOptions: NextAuthOptions = {
       }
       return token
     },
-    async session({ session, token }) {
-      (session as any).accessToken = token.accessToken as string
-      (session as any).refreshToken = token.refreshToken as string
+    async session({ session, token }: any) {
+      session.accessToken = token.accessToken as string;
+      session.refreshToken = token.refreshToken as string;
       if (session.user) {
-        // AuthProvider lit session.user.accessToken  injecter sur user ET session
-        (session.user as any).accessToken = (token as any).accessToken
-        ;(session.user as any).refreshToken = (token as any).refreshToken
-        (session.user as any).roles = (token as any).roles || []
-        ;(session.user as any).company_id = (token as any).companyId
-        ;(session.user as any).modules_allowed = (token as any).modulesAllowed || []
-        ;(session.user as any).permissions = (token as any).permissions || []
-        ;(session.user as any).shared_modules = (token as any).sharedModules || []
-        ;(session.user as any).role_level = (token as any).roleLevel ?? 3
-        ;(session.user as any).department_id = (token as any).departmentId ?? null
-        ;(session.user as any).is_superuser = !!(token as any).isSuperuser
-        ;(session.user as any).must_change_password = !!(token as any).mustChangePassword
+        // AuthProvider lit session.user.accessToken : injecter sur user ET session
+        session.user.accessToken = token.accessToken;
+        session.user.refreshToken = token.refreshToken;
+        session.user.roles = token.roles || [];
+        session.user.company_id = token.companyId;
+        session.user.modules_allowed = token.modulesAllowed || [];
+        session.user.permissions = token.permissions || [];
+        session.user.shared_modules = token.sharedModules || [];
+        session.user.role_level = token.roleLevel ?? 3;
+        session.user.department_id = token.departmentId ?? null;
+        session.user.is_superuser = !!token.isSuperuser;
+        session.user.must_change_password = !!token.mustChangePassword;
       }
-      return session
+      return session;
     },
   },
   pages: {
