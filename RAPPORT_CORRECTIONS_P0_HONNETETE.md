@@ -10,7 +10,7 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app` | ✅ EXIT=0 |
-| `python -m pytest tests` (suite complète, batches 2 à 8 inclus) | ✅ **384 passed** (chaîne documentaire close par liens saisis + redevances portuaires à données réelles + dossier marchandise + numérotation légale + moteur douanier unifié + import tarif CEMAC) |
+| `python -m pytest tests` (suite complète, batches 2 à 9 inclus) | ✅ **393 passed, 2 xfailed** (IRGM/CNPS sur service réel + chaîne documentaire close + redevances portuaires réelles + numérotation légale + moteur douanier unifié + import tarif CEMAC) |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1082 routes OpenAPI) |
 | `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
 
@@ -269,6 +269,35 @@ suite complète `python -m pytest tests` → **384 passed, 0 failed** (1 103 s).
 ➡️ Les 4 étapes ne sont plus « Structurellement impossibles » : dès que l'opérateur **saisit le lien**
 sur la ligne, le document apparaît dans le dossier ; tant qu'il n'est pas saisi, l'étape est
 `absent` (et non un faux `reel`). La chaîne est fermée **par la donnée réelle, jamais par une déduction**.
+
+---
+
+## 11. Batch 9  Tests fiscaux : suppression des tautologies (P1 #5)
+
+**Problème** : `tests/test_calculs_metiers.py` (278 lignes) définissait **5 formules
+parallèles locales** (IRGM, CNPS, TEC, FIFO/FEFO, TCO) et testait **ces formules contre
+elles-mêmes** sans JAMAIS importer ni appeler le code applicatif. Pire, les valeurs
+étaient **incohérentes avec les services réels** :
+
+| Domaine | Ce que le test tautologique inventait | Ce que le service réel utilise |
+|---|---|---|
+| IRGM | Barème 0/11/16,5/25/35% à 62k/310k/620k/1,035M | `PaieOHADAService.calculer_irmg()` : 0/10/15/20/25/30% à 50k/100k/200k/500k/1M |
+| CNPS | Part salariale 2,8%, patronale 17,2%, plafond 750k | `TAUX_CNPS_PENSION` 4,2% + `TAUX_CNPS_ACCIDENTS` 0,5% = 4,7%, **sans plafond** |
+| TEC | Redevance informatique 0,35%, pas d'OHADA, pas de précompte IS | `calculer_liquidation()` : RI 0,45%, OHADA 0,05%, précompte IS 2,2% |
+| FEFO/TCO | `sorted()` et `sum()` locaux | Service réel non fonctionnel (colonne inexistante / mock) |
+
+➡️ **Ces 20 tests passaient mais ne vérifiaient RIEN sur le code en production.** Un bug dans `calculer_irmg` ou un changement de taux CNPS n'aurait JAMAIS été détecté.
+
+| Fichier | Ce qui a été fait |
+|---|---|
+| `tests/test_calculs_metiers.py` (réécrit, 144 lignes) | **Suppression de toutes les formules parallèles.** 13 tests IRGM appellent directement `PaieOHADAService.calculer_irmg()` et vérifient 5 paliers + boundaries + progressivité. 5 tests CNPS vérifient les **constantes réelles** du service (4,2%/0,5%, pas de plafond). 1 test TEC pointe vers `test_taxation_douaniere.py` (smoke check : RI 0,45% et non 0,35%). 2 xfail `strict=True` : FEFO (service référence `Stock.article_id` inexistant) et TCO (service retourne un mock codé en dur). |
+
+**Vérification batch 9** : suite complète `python -m pytest tests` → **393 passed, 2 xfailed, 0 failed** (858 s).
+
+➡️ Les tests IRGM/CNPS sont désormais un **contrat de non-régression sur le VRAI barème** :
+si un développeur modifie `calculer_irmg()` ou change un taux CNPS sans mise à jour
+légale, le test **échoue**. Le FEFO et le TCO sont explicitement marqués comme des
+P1-gap (xfail strict = si le service est réparé sans activer le test, pytest le signale).
 
 ---
 

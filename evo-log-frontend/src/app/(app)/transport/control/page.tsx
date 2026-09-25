@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { transportAPI } from '@/lib/api-client';
-import { KPICard, StatCard, Card, CardHeader, CardContent, DataTable, StatusBadge, StatusBadges, PageHeader } from '@/components/ui';
+import { KPICard, StatCard, Card, CardHeader, CardContent, DataTable, StatusBadge, PageHeader } from '@/components/ui';
 import { toast } from 'sonner';
 
 export default function TransportControlPage() {
@@ -56,6 +56,37 @@ export default function TransportControlPage() {
     enabled: mounted,
   });
 
+  // Flotte et chauffeurs reels : MissionResponse n'expose que camion_id /
+  // conducteur_id (schemas/transport.py MissionBase). Sans ces jointures, les
+  // colonnes Vehicule et Chauffeur ne pouvaient rien afficher : l'ancien code
+  // lisait m.immatriculation / m.conducteur / m.client, champs qui n'existent
+  // dans aucun schema.
+  const { data: camionsData } = useQuery({
+    queryKey: ['transport-camions'],
+    queryFn: async () => {
+      try {
+        const res = await transportAPI.getCamions();
+        return res.data?.items || res.data || [];
+      } catch (e) {
+        return [];
+      }
+    },
+    enabled: mounted,
+  });
+
+  const { data: chauffeursData } = useQuery({
+    queryKey: ['transport-chauffeurs'],
+    queryFn: async () => {
+      try {
+        const res = await transportAPI.getChauffeurs();
+        return res.data?.items || res.data || [];
+      } catch (e) {
+        return [];
+      }
+    },
+    enabled: mounted,
+  });
+
   // VRP Optimization mutation
   const vrpMutation = useMutation({
     mutationFn: async () => {
@@ -71,19 +102,26 @@ export default function TransportControlPage() {
     }
   });
 
+  const immatriculations = new Map((camionsData || []).map((c: any) => [c.id, c.immatriculation]));
+  const nomsChauffeurs = new Map((chauffeursData || []).map((d: any) => [d.id, `${d.nom || ''} ${d.prenom || ''}`.trim()]));
+
   const defaultMissions: Array<any> = [];
 
   const missions = Array.isArray(missionsData) && missionsData.length > 0
     ? missionsData.map((m: any) => ({
         id: m.reference || `TR-${m.id || '2026'}`,
-        vehicle: m.immatriculation || m.camion || '',
-        driver: m.conducteur || '',
-        client: m.client || '',
-        origin: m.origine || '',
-        destination: m.destination || '',
+        // Jointures reelles par cles etrangeres ; pas de champ invente.
+        vehicle: immatriculations.get(m.camion_id) || '',
+        driver: nomsChauffeurs.get(m.conducteur_id) || '',
+        client: m.client_id ? `Client #${m.client_id}` : '',
+        // MissionResponse expose point_depart / point_arrivee (pas origine / destination).
+        origin: m.point_depart || '',
+        destination: m.point_arrivee || '',
         status: m.statut || '',
-        eta: m.eta || '',
-        progress: m.progression ?? 0
+        // Pas de champ `eta` dans le contrat : l'heure de fin prevue est le seul
+        // repere reel disponible.
+        eta: m.date_fin_prevue ? new Date(m.date_fin_prevue).toLocaleDateString('fr-FR') : '',
+        distance_km: m.distance_km ?? null
       }))
     : defaultMissions;
 
@@ -105,13 +143,18 @@ export default function TransportControlPage() {
       key: 'status', 
       header: 'Statut',
       render: (item: any) => {
-        const statusMap: Record<string, any> = {
-          EN_ROUTE: StatusBadges.Transport.EN_ROUTE,
-          CHARGEMENT: StatusBadges.Transport.CHARGEMENT,
-          LIVRÉ: StatusBadges.Transport.LIVRÉ,
-          ATTENTE: StatusBadges.Transport.ATTENTE,
+        // Cles = valeurs reelles de MissionStatus (minuscules, sans accent).
+        // L'ancien statusMap testait EN_ROUTE / CHARGEMENT / LIVRE / ATTENTE :
+        // aucune mission ne porte ces valeurs, chaque ligne tombait donc dans
+        // le fallback avec le code technique brut comme libelle.
+        const parStatut: Record<string, React.ReactElement> = {
+          planifiee: <StatusBadge label="Planifiée" variant="pending" icon />,
+          en_cours: <StatusBadge label="En Route" variant="transit" icon pulse />,
+          terminee: <StatusBadge label="Terminée" variant="delivered" icon />,
+          annulee: <StatusBadge label="Annulée" variant="error" icon />,
+          en_retard: <StatusBadge label="En Retard" variant="error" icon pulse />,
         };
-        return statusMap[item.status] || <StatusBadge label={item.status} />;
+        return parStatut[item.status] || <StatusBadge label={item.status || '—'} />;
       }
     },
     { key: 'eta', header: 'ETA', sortable: true },
