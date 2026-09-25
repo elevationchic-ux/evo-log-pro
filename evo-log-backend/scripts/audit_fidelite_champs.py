@@ -49,16 +49,19 @@ METHODE_CLIENT = re.compile(
 )
 # `const [camions, setCamions] = useState(...)`
 ETAT = re.compile(r"const \[(\w+), (set\w+)\] = useState")
-# `camions.map((c) =>`, `data.filter(x =>` : collection iteree -> alias
+# `camions.map((c) =>`, `data.filter(x =>`, et surout `rows.map((c: any) =>` :
+# l'annotation de type est la norme dans ce frontend, l'omettre laissait la
+# moitie des alias non lies, donc le fichier entier non verifie.
 ITERATION = re.compile(
-    r"\b([A-Za-z_$][\w$]*)\s*\.\s*(?:map|filter|find|some|every|forEach)\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*[,)]"
+    r"\b([A-Za-z_$][\w$]*)\s*\.\s*(?:map|filter|find|some|every|forEach)\s*"
+    r"\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*(?::[^)]*)?[,)]"
 )
 # `rows.map((c) => ({ brand: c.marque, ... }))` : la page FABRIQUE un view-model.
 # Sans cette regle, l'outil signale `v.brand` comme champ invente alors que la
 # cle est definie deux cents lignes plus haut — c'etait le premier faux positif
 # produit par cet outil, sur `transport/flotte`.
 CONSTRUCTION = re.compile(
-    r"\.\s*(?:map)\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*\)?\s*=>\s*\(?\s*\{"
+    r"\.\s*map\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*(?::[^)]*)?\)?\s*=>\s*\(?\s*\{"
 )
 # Litteral compare a quelque chose qui porte le nom du champ :
 # `c.status === 'ACTIVE'`, `item.statut == "EN_COURS"`. Gabarit : le nom du
