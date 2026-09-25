@@ -185,7 +185,7 @@ def decoupage(corps):
     return morceaux
 
 
-def lien_donnees(contrat, index, texte):
+def lien_donnees(contrat, index, texte, trace=None):
     """variable d'etat -> set de noms de schemas qui la nourrissent.
 
     Deux motifs couverts, les deux reels dans ce code :
@@ -201,7 +201,7 @@ def lien_donnees(contrat, index, texte):
     savoir. Ces variables sont comptees a part : le silence reste distinguishable
     d'un « tout va bien ».
     """
-    vars_, sources, ambigus = {}, {}, set()
+    vars_, sources, ambigus, affectes = {}, {}, set(), {}
 
     def resoudre(expr):
         """(methode, path) depuis le texte d'un appel, ou None."""
@@ -266,6 +266,7 @@ def lien_donnees(contrat, index, texte):
             for local, si in sources.items():
                 if re.search(r"\b%s\b" % re.escape(local), amorce):
                     chemins |= si
+        affectes[nom] = sorted(chemins)
         if len(chemins) > 1:
             ambigus.add(nom)
             continue
@@ -279,6 +280,11 @@ def lien_donnees(contrat, index, texte):
             ambigus.add(nom)
             continue
         vars_[nom] = set(noms)
+        affectes[nom] = sorted(chemins)
+    if trace is not None:
+        # Diagnostic : par quelle porte chaque variable a ete accostee.
+        trace.update({"sources": sources, "affectes": affectes,
+                      "ambigus": sorted(ambigus)})
     return vars_, ambigus
 
 
