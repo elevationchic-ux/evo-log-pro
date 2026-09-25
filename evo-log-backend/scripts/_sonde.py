@@ -11,19 +11,14 @@ spec.loader.exec_module(afc)
 contrat = afc.charger_contrat()
 index = afc.index_client(afc.FRONT)
 
-for nom in ("transport/epod", "transport/flotte"):
+for nom in ("transport/epod", "transport/flotte", "transport/drivers"):
     cible = afc.FRONT / "app" / "(app)" / nom / "page.tsx"
     texte = cible.read_text(encoding="utf-8")
     print("=" * 70)
     print(nom)
-    print("  AFFECTATION trouvees :",
-          [(m.group(1), m.group(2)[:60]) for m in afc.AFFECTATION.finditer(texte)][:6])
-    vars_, ambigus = afc.lien_donnees(contrat, index, texte)
+    trace = {}
+    vars_, ambigus = afc.lien_donnees(contrat, index, texte, trace)
     print("  vars_   :", {k: sorted(v) for k, v in vars_.items()})
     print("  ambigus :", sorted(ambigus))
-    # detail des sources, c'est la que le ble est visible
-    import re as _re
-    sources = {}
-    for m in afc.AFFECTATION.finditer(texte):
-        pass
-    print("  ETAT    :", afc.ETAT.findall(texte)[:8])
+    print("  sources :", {k: sorted(v) for k, v in trace["sources"].items()})
+    print("  affectes:", {k: v for k, v in trace["affectes"].items()})
