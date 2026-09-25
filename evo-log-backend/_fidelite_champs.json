@@ -53,6 +53,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -109,6 +110,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -165,6 +167,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -221,6 +224,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -277,6 +281,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -333,6 +338,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -389,6 +395,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -445,6 +452,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -501,6 +509,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -557,6 +566,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -613,6 +623,7 @@
    "ville",
    "website"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
@@ -643,6 +654,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -673,6 +685,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -703,6 +716,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -742,6 +756,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -781,6 +796,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -811,6 +827,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -841,6 +858,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -871,6 +889,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -901,6 +920,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -931,6 +951,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -961,6 +982,7 @@
    "topic",
    "username"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chat\\page.tsx"
  },
  {
@@ -993,6 +1015,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chauffeur\\page.tsx"
  },
  {
@@ -1025,6 +1048,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\chauffeur\\page.tsx"
  },
  {
@@ -1057,6 +1081,37 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\chauffeur\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_ROUTE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\chauffeur\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "VALIDE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
   "fichier": "src\\app\\(app)\\chauffeur\\page.tsx"
  },
  {
@@ -1089,6 +1144,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
  },
  {
@@ -1121,6 +1177,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
  },
  {
@@ -1153,6 +1210,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
  },
  {
@@ -1185,6 +1243,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
  },
  {
@@ -1217,6 +1276,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
  },
  {
@@ -1249,6 +1309,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
  },
  {
@@ -1281,6 +1342,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
  },
  {
@@ -1313,6 +1375,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
  },
  {
@@ -1345,7 +1408,278 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_ROUTE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_CHARGEMENT",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "LIVRE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "LIVREE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "TERMINEE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": "terminee",
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "VALIDEE_NON_PAYEE",
+  "variable": "inv.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_ATTENTE",
+  "variable": "i.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "BROUILLON",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "PLANIFIE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "PAYEE",
+  "variable": "inv.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "PAYE_TOTAL",
+  "variable": "inv.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EMISE",
+  "variable": "inv.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "LIVREE",
+  "variable": "selectedMission.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_ATTENTE_AFFECTATION",
+  "variable": "selectedMission.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_ROUTE",
+  "variable": "selectedMission.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_CHARGEMENT",
+  "variable": "selectedMission.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "BROUILLON",
+  "variable": "selectedMission.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "ANNULEE",
+  "variable": "mission.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": "annulee",
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
  },
  {
   "variable": "doc",
@@ -1379,6 +1713,7 @@
    "version",
    "version_active"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\documents\\page.tsx"
  },
  {
@@ -1413,6 +1748,7 @@
    "version",
    "version_active"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\documents\\page.tsx"
  },
  {
@@ -1447,6 +1783,7 @@
    "version",
    "version_active"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\documents\\page.tsx"
  },
  {
@@ -1479,6 +1816,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
@@ -1511,6 +1849,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
@@ -1543,6 +1882,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
@@ -1575,6 +1915,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
@@ -1607,6 +1948,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
@@ -1639,6 +1981,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
@@ -1671,6 +2014,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
@@ -1703,6 +2047,7 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
@@ -1735,6 +2080,37 @@
    "type_mission",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_ROUTE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "LIVRE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
@@ -1764,6 +2140,7 @@
    "unite_mesure",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-magasinier\\page.tsx"
  },
  {
@@ -1793,6 +2170,7 @@
    "unite_mesure",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-magasinier\\page.tsx"
  },
  {
@@ -1822,6 +2200,7 @@
    "unite_mesure",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-magasinier\\page.tsx"
  },
  {
@@ -1851,6 +2230,7 @@
    "unite_mesure",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-magasinier\\page.tsx"
  },
  {
@@ -1880,6 +2260,7 @@
    "unite_mesure",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-magasinier\\page.tsx"
  },
  {
@@ -1909,6 +2290,7 @@
    "unite_mesure",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-magasinier\\page.tsx"
  },
  {
@@ -1923,6 +2305,7 @@
    "nombre_kpis",
    "poles"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\reports-bi\\executive-dashboard\\page.tsx"
  },
  {
@@ -1937,6 +2320,7 @@
    "nombre_kpis",
    "poles"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\reports-bi\\executive-dashboard\\page.tsx"
  },
  {
@@ -1951,6 +2335,7 @@
    "nombre_kpis",
    "poles"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\reports-bi\\executive-dashboard\\page.tsx"
  },
  {
@@ -1965,6 +2350,7 @@
    "nombre_kpis",
    "poles"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\reports-bi\\executive-dashboard\\page.tsx"
  },
  {
@@ -1979,6 +2365,7 @@
    "nombre_kpis",
    "poles"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\reports-bi\\executive-dashboard\\page.tsx"
  },
  {
@@ -1993,6 +2380,7 @@
    "nombre_kpis",
    "poles"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\reports-bi\\executive-dashboard\\page.tsx"
  },
  {
@@ -2007,6 +2395,7 @@
    "nombre_kpis",
    "poles"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\reports-bi\\executive-dashboard\\page.tsx"
  },
  {
@@ -2021,6 +2410,7 @@
    "nombre_kpis",
    "poles"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\reports-bi\\executive-dashboard\\page.tsx"
  },
  {
@@ -2035,6 +2425,7 @@
    "nombre_kpis",
    "poles"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\reports-bi\\executive-dashboard\\page.tsx"
  },
  {
@@ -2058,6 +2449,7 @@
    "statut",
    "type_conge"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\rh\\mon-espace\\page.tsx"
  },
  {
@@ -2081,7 +2473,53 @@
    "statut",
    "type_conge"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\rh\\mon-espace\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_ROUTE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\transport\\epod\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_CHARGEMENT",
+  "variable": "mission.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\transport\\epod\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "LIVRE",
+  "variable": "mission.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\transport\\epod\\page.tsx"
  },
  {
   "variable": "v",
@@ -2106,6 +2544,7 @@
    "status",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\transport\\flotte\\page.tsx"
  },
  {
@@ -2131,6 +2570,7 @@
    "status",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\transport\\flotte\\page.tsx"
  },
  {
@@ -2156,6 +2596,7 @@
    "status",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\transport\\flotte\\page.tsx"
  },
  {
@@ -2181,7 +2622,98 @@
    "status",
    "updated_at"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\transport\\flotte\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "PLANIFIE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\transport\\planning\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "BROUILLON",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\transport\\planning\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_ROUTE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\transport\\planning\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "EN_CHARGEMENT",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\transport\\planning\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "LIVRE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": null,
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\transport\\planning\\page.tsx"
+ },
+ {
+  "champ": "statut",
+  "literal": "TERMINEE",
+  "variable": "m.statut",
+  "admis": [
+   "annulee",
+   "en_cours",
+   "en_retard",
+   "planifiee",
+   "terminee"
+  ],
+  "jumeau": "terminee",
+  "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\transport\\planning\\page.tsx"
  },
  {
   "variable": "magasin",
@@ -2199,6 +2731,7 @@
    "total_articles",
    "valeur"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\components\\magasin\\StockFilter.tsx"
  },
  {
@@ -2217,6 +2750,7 @@
    "total_articles",
    "valeur"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\components\\magasin\\StockFilter.tsx"
  },
  {
@@ -2247,6 +2781,7 @@
    "type_mouvement",
    "valeur_totale"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\components\\magasin\\TransactionSearch.tsx"
  },
  {
@@ -2277,6 +2812,7 @@
    "type_mouvement",
    "valeur_totale"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\components\\magasin\\TransactionSearch.tsx"
  },
  {
@@ -2307,6 +2843,7 @@
    "type_mouvement",
    "valeur_totale"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\components\\magasin\\TransactionSearch.tsx"
  },
  {
@@ -2337,6 +2874,7 @@
    "type_mouvement",
    "valeur_totale"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\components\\magasin\\TransactionSearch.tsx"
  },
  {
@@ -2367,6 +2905,7 @@
    "type_mouvement",
    "valeur_totale"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\components\\magasin\\TransactionSearch.tsx"
  },
  {
@@ -2397,6 +2936,7 @@
    "type_mouvement",
    "valeur_totale"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\components\\magasin\\TransactionSearch.tsx"
  },
  {
@@ -2427,6 +2967,7 @@
    "type_mouvement",
    "valeur_totale"
   ],
+  "genre": "champ_inexistant",
   "fichier": "src\\components\\magasin\\TransactionSearch.tsx"
  }
 ]
