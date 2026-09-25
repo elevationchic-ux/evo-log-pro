@@ -21,15 +21,25 @@ export default function EPodPage() {
     const handleOnline = async () => {
       const pendingUpdates = JSON.parse(localStorage.getItem('pending_mission_updates') || '[]');
       if (pendingUpdates.length > 0) {
+        let echecs = 0;
         for (const update of pendingUpdates) {
           try {
             await transportAPI.updateStatut(update.missionId, update.statut);
           } catch (e) {
+            echecs += 1;
             console.error('Failed to sync', e);
           }
         }
-        localStorage.removeItem('pending_mission_updates');
-        toast.success("Synchronisation hors-ligne terminée.");
+        // Ne pas promettre « synchronisation terminees » quand chaque appel a
+        // echoue : le pilote croirait ses preuves de livraison transmises.
+        if (echecs === 0) {
+          localStorage.removeItem('pending_mission_updates');
+          toast.success("Synchronisation hors-ligne terminée.");
+        } else {
+          toast.error(
+            `${echecs} mise(s) à jour sur ${pendingUpdates.length} n'ont pas pu être envoyées. Réessayez.`
+          );
+        }
       }
     };
     window.addEventListener('online', handleOnline);
@@ -40,7 +50,12 @@ export default function EPodPage() {
     try {
       setLoading(true);
       const res = await transportAPI.getMissions();
-      const activeMissions = res.data?.filter((m: any) => m.statut === 'EN_ROUTE' || m.statut === 'EN_CHARGEMENT') || [];
+      // MissionStatus (enum reel, valeurs minuscules) : planifiee | en_cours |
+      // terminee | annulee | en_retard. L'ecran testait 'EN_ROUTE' et
+      // 'EN_CHARGEMENT', deux valeurs qu'aucune mission ne peut porter : la
+      // liste etait toujours vide et le PATCH /statut repondait 422
+      // (MissionUpdate.statut est typé MissionStatus, Pydantic rejette).
+      const activeMissions = res.data?.filter((m: any) => m.statut === 'en_cours') || [];
       if (activeMissions.length > 0) {
         setMission(activeMissions[0]); // Prendre la première mission active
       } else {
@@ -64,7 +79,7 @@ export default function EPodPage() {
         localStorage.setItem('pending_mission_updates', JSON.stringify(pendingUpdates));
         setMission({ ...mission, statut: newStatus });
         toast.warning("Réseau indisponible. Mise à jour enregistrée hors-ligne.");
-        if (newStatus === 'LIVRE') {
+        if (newStatus === 'terminee') {
           setStatusUpdated(true);
           setTimeout(() => setStatusUpdated(false), 3000);
         }
@@ -73,7 +88,7 @@ export default function EPodPage() {
       
       await transportAPI.updateStatut(mission.id, newStatus);
       setMission({ ...mission, statut: newStatus });
-      if (newStatus === 'LIVRE') {
+      if (newStatus === 'terminee') {
         setStatusUpdated(true);
         setTimeout(() => setStatusUpdated(false), 3000);
       }
@@ -140,7 +155,7 @@ export default function EPodPage() {
             <div className="text-right">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">DATE</p>
               <p className="text-sm font-bold text-slate-300">
-                {format(new Date(mission.date_chargement_prevue || Date.now()), 'dd/MM/yyyy')}
+                {format(new Date(mission.date_debut_prevue || Date.now()), 'dd/MM/yyyy')}
               </p>
             </div>
           </div>
@@ -208,11 +223,12 @@ export default function EPodPage() {
       </div>
 
       {/* Floating Action Button (POD) */}
-      {mission.statut !== 'LIVRE' && (
+      {/* Cycle reel d'une mission : planifiee -> en_cours -> terminee. */}
+      {mission.statut !== 'terminee' && (
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900/80 backdrop-blur-md border-t border-slate-700 z-50">
-          {mission.statut === 'EN_CHARGEMENT' ? (
+          {mission.statut === 'planifiee' ? (
             <button 
-              onClick={() => handleUpdateStatus('EN_ROUTE')}
+              onClick={() => handleUpdateStatus('en_cours')}
               disabled={actionLoading}
               className="w-full py-4 bg-amber-500 text-white rounded-2xl font-black text-lg shadow-lg shadow-amber-500/30 hover:bg-amber-600 active:scale-95 transition-all flex items-center justify-center gap-3"
             >
@@ -221,7 +237,7 @@ export default function EPodPage() {
             </button>
           ) : (
             <button 
-              onClick={() => handleUpdateStatus('LIVRE')}
+              onClick={() => handleUpdateStatus('terminee')}
               disabled={actionLoading}
               className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black text-lg shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 active:scale-95 transition-all flex items-center justify-center gap-3"
             >
