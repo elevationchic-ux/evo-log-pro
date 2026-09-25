@@ -10,7 +10,7 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app` | ✅ EXIT=0 |
-| `python -m pytest tests` (suite complète, batches 2 à 7 inclus) | ✅ **374 passed** (redevances portuaires à données réelles + dossier marchandise + numérotation légale + moteur douanier unifié + import tarif CEMAC) |
+| `python -m pytest tests` (suite complète, batches 2 à 8 inclus) | ✅ **384 passed** (chaîne documentaire close par liens saisis + redevances portuaires à données réelles + dossier marchandise + numérotation légale + moteur douanier unifié + import tarif CEMAC) |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1082 routes OpenAPI) |
 | `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
 
@@ -233,6 +233,42 @@ Une exécution antérieure avait affiché 3 échecs dans `tests/unit/test_audit_
 depuis (isolation, combinaisons ciblées, suite complète), avec le même code. Le décompte de ce
 run anormal (373 collectés) ne correspondait pas non plus à l'état final du disque (374) 
 signature d'un run effectué pendant que des fichiers étaient encore en cours d'écriture.
+
+---
+
+## 10. Batch 8  Chaîne documentaire close par liens saisis (P1 : fin des 4 étapes « non liciables »)
+
+**Problème** : la vue consolidée du dossier de marchandise (batch 6) affichait honnêtement
+4 étapes en `non_liciable_en_base` — **déclaration douanière, magasin sous douane, mission de
+livraison, facture** — faute de tout chemin les rattachant au conteneur/B/L de l'ancre. Ces tables
+(`declarations_douaniere_avance`, `declarations_entrepot`, `missions`, `factures_ohada`) ne
+portaient **aucune colonne** `conteneur_id` / `escale_id` / `numero_bl` : le chaînon manquant était
+structurel, pas logique.
+
+| Fichier | Ce qui a été fait |
+|---|---|
+| `migrations/versions/024_add_chaine_documentaire_links.py` (nouveau) | Ajout de colonnes **nullables** `conteneur_id` (FK→`conteneurs`), `escale_id` (FK→`escales`) et/ou `numero_bl` sur les 4 tables, + index `ix_<table>_<col>`. **Idempotent** (garde `sa.inspect`), `batch_alter_table` pour SQLite, FK créée seulement si la table parente existe. `downgrade` supprime d'abord les index puis les colonnes (sinon la recréation SQLite échoue sur « no such column »). |
+| `app/models/transit_avance.py`, `magasin_douane.py`, `transport.py`, `finance_ohada.py` | Colonnes ORM correspondantes ajoutées aux 4 modèles (`conteneur_id`, `escale_id`, `numero_bl` selon la table). |
+| `app/schemas/transit_avance.py`, `magasin_douane.py`, `transport.py` | Champs `Optional` ajoutés aux `*Base` → propagés aux Create/Response : les API acceptent désormais les liens à la saisie. |
+| `app/routers/v1/auto_invoicing.py` | La création de facture propagate `conteneur_id`/`escale_id` depuis le corps vers `FactureNew` (au lieu de les ignorer silencieusement). |
+| `app/services/dossier_marchandise.py` | La boucle codée en dur « 8-11. étapes NON LICIEES » est **remplacée par `_aval()`** : chaque étape interroge réellement sa table par `conteneur_id = ancre` **OU** `numero_bl ∈ B/L` **OU** `escale_id ∈ escales`. Renvoie `reel` si des lignes existent, `absent` sinon. **Aucun lien deviné** par proximité de date, client ou montant. |
+
+**Régression corrigée au passage** : `transport.py` déclarait des doublons
+(`/missions/chauffeur/{id}`, `/missions/client/{id}`, `/chauffeurs/{id}`, `/chauffeurs/{id}/documents`)
+qui, `transport.router` étant monté **avant** `transport_exploitation.router` sur le même préfixe,
+**masquaient** les versions riches de ce dernier (objet `origine`/`camion`/`chauffeur` imbriqué,
+`statut` dérivé, dossier de pièces en tableau nu). Doublons supprimés, commentaire NOTE laissé pour
+empêcher toute réintroduction.
+
+| `tests/unit/test_chaine_documentaire.py` (nouveau) | 5 tests : idempotence + aller-retour de la migration 024, facture reliée par `escale_id` visible dans le dossier, mission reliée par `numero_bl` visible, API mission accepte `conteneur_id` à la création, API facture accepte `escale_id`. |
+| `tests/unit/test_dossier_marchandise.py` | Assertions mises à jour (`non_liciable_en_base` → `absent` pour les étapes sans lien saisi) + 2 tests : chaîne aval entièrement fermée par liens saisis, et **négatif** (une mission d'un autre conteneur n'apparaît jamais). |
+
+**Vérification batch 8** : `test_transport_exploitation.py` → **34 passed** (régression levée) ;
+suite complète `python -m pytest tests` → **384 passed, 0 failed** (1 103 s).
+
+➡️ Les 4 étapes ne sont plus « Structurellement impossibles » : dès que l'opérateur **saisit le lien**
+sur la ligne, le document apparaît dans le dossier ; tant qu'il n'est pas saisi, l'étape est
+`absent` (et non un faux `reel`). La chaîne est fermée **par la donnée réelle, jamais par une déduction**.
 
 ---
 

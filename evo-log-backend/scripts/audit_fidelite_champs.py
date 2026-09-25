@@ -203,12 +203,21 @@ def formes_locales(texte):
     """
     formes = {}
     for m in CONSTRUCTION.finditer(texte):
-        cle = m.group(1)
         acc = texte.find("{", m.end() - 1)
         bloc = corps_litteral(texte, acc) if acc >= 0 else ""
         cles = set(re.findall(r"(?:^|[{,])\s*([A-Za-z_$][\w$]*)\s*:", bloc))
-        if cles:
-            formes.setdefault(cle, set()).update(cles)
+        if not cles:
+            continue
+        # A QUI appartient l'objet construit ? Pas au parametre du map (`c` est
+        # la source, elle cote sur le contrat) : a la variable d'etat que le
+        # `set...(` enveloppant alimente, donc aux alias qui parcourent cette
+        # variable. Attribuer au parametre ne filtrait rien du tout.
+        amont = texte[max(0, m.start() - 600):m.start()]
+        ports = set()
+        for sm in re.finditer(r"\bset([A-Z]\w*)\s*\(", amont):
+            ports.add(sm.group(1)[0].lower() + sm.group(1)[1:])
+        for nom in ports:
+            formes.setdefault(nom, set()).update(cles)
     return formes
 
 
@@ -252,6 +261,11 @@ def analyser(contrat, index, texte):
     alias = {}
     for _ in range(2):  # une passe de propagation suffit pour `x = foo.filter(...)`
         for iteree, nom in ITERATION.findall(texte):
+            # La forme locale voyage avec la donnee : `vehicles` porte les cles
+            # construites, `v` en herite en le parcourant.
+            heritees = formes.get(iteree)
+            if heritees:
+                formes.setdefault(nom, set()).update(heritees)
             if iteree in vars_ and vars_[iteree]:
                 alias.setdefault(nom, set()).update(vars_[iteree])
             elif iteree in alias:
