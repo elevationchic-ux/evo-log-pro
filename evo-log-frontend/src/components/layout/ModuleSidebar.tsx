@@ -4,7 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { getFilteredNavigationForUser, ModuleNavConfig } from "@/config/navigationRegistry";
+import { NAVIGATION_REGISTRY, ModuleNavConfig } from "@/config/navigationRegistry";
+import { localizeTitle, localizeSubLabel } from "@/config/navI18n";
+import { useSettings } from "@/components/layout/SettingsProvider";
 import {
   LayoutDashboard,
   Truck,
@@ -69,6 +71,7 @@ export default function ModuleSidebar({
 }: ModuleSidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { language } = useSettings();
 
   // Access Warning Modal State
   const [deniedModalItem, setDeniedModalItem] = useState<{ label: string; key: string } | null>(null);
@@ -79,8 +82,10 @@ export default function ModuleSidebar({
 
   const [expandedModule, setExpandedModule] = useState<string | null>(null);
 
-  // Obtention de la navigation dynamique filtrée selon le rôle RBAC de l'utilisateur
-  const filteredNav: ModuleNavConfig[] = getFilteredNavigationForUser(session?.user as any);
+  // Tous les modules sont visibles partout (exigence produit). La restriction
+  // d'accès réelle est appliquée côté API à chaque requête ; les modules hors
+  // profil restent affichés mais grisés/cadenassés via checkModuleAccess.
+  const filteredNav: ModuleNavConfig[] = Object.values(NAVIGATION_REGISTRY);
 
   const checkModuleAccess = (itemKey: string): boolean => {
     if (isAdmin) return true;
@@ -106,12 +111,12 @@ export default function ModuleSidebar({
             <div>
               <span className="font-black text-slate-100 tracking-wider text-sm block">EVO-LOG SaaS</span>
               <span className="text-[10px] text-slate-400 font-mono block">
-                {isAdmin ? "Accès Admin Total" : `Profil : ${userRoles[0] || 'Utilisateur'}`}
+                {isAdmin ? (language === 'en' ? 'Full Admin Access' : 'Accès Admin Total') : `${language === 'en' ? 'Profile' : 'Profil'} : ${userRoles[0] || (language === 'en' ? 'User' : 'Utilisateur')}`}
               </span>
             </div>
           </div>
 
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white">
+          <button onClick={onClose} className="p-2 min-w-11 min-h-11 text-slate-400 hover:text-white" aria-label="Fermer le menu">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -119,14 +124,16 @@ export default function ModuleSidebar({
         <div className="flex items-center h-9 px-3 border-b border-slate-800 shrink-0 gap-2">
           {!isCollapsed && (
             <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider truncate flex-1">
-              {isAdmin ? "Accès Admin Total" : `Profil : ${userRoles[0] || 'Utilisateur'}`}
+              {isAdmin ? (language === 'en' ? 'Full Admin Access' : 'Accès Admin Total') : `${language === 'en' ? 'Profile' : 'Profil'} : ${userRoles[0] || (language === 'en' ? 'User' : 'Utilisateur')}`}
             </span>
           )}
           {onToggle && (
             <button
               onClick={onToggle}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ml-auto"
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ml-auto"
               title={isCollapsed ? "Déplier la Sidebar" : "Rétracter la Sidebar"}
+              aria-label={isCollapsed ? "Déplier la barre latérale" : "Rétracter la barre latérale"}
+              aria-expanded={!isCollapsed}
             >
               {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
             </button>
@@ -141,6 +148,7 @@ export default function ModuleSidebar({
           const isActive = pathname.startsWith(rootPathPrefix);
           const isAllowed = checkModuleAccess(item.key);
           const Icon = item.icon;
+          const title = localizeTitle(item, language);
           const subItems = item.subModules || [];
           const isAccordionOpen = expandedModule === item.key || (isActive && expandedModule === null);
 
@@ -148,15 +156,15 @@ export default function ModuleSidebar({
             return (
               <div
                 key={item.path}
-                onClick={() => setDeniedModalItem({ label: item.title, key: item.key })}
-                title={`Module ${item.title} non inclus dans votre profil. Cliquez pour voir les détails.`}
-                className={`flex items-center gap-3 py-2.5 rounded-xl text-sm font-semibold opacity-40 bg-slate-950/40 border border-slate-850 text-slate-500 cursor-not-allowed transition-all hover:opacity-65 hover:bg-slate-950/70 ${
+                onClick={() => setDeniedModalItem({ label: title, key: item.key })}
+                title={language === 'en' ? `Module ${title} is not included in your profile. Click for details.` : `Module ${title} non inclus dans votre profil. Cliquez pour voir les détails.`}
+                className={`flex items-center gap-3 py-2.5 rounded-xl text-sm font-semibold opacity-40 bg-slate-950/40 border border-slate-800 text-slate-500 cursor-not-allowed transition-all hover:opacity-65 hover:bg-slate-950/70 ${
                   isCollapsed ? "px-2 justify-center" : "px-3"
                 }`}
               >
-                <Icon className="w-5 h-5 shrink-0 text-slate-600" />
+                <Icon className="w-5 h-5 shrink-0 text-slate-400" />
                 {!isCollapsed && (
-                  <span className="truncate flex-1 text-slate-500 line-through decoration-slate-600">{item.title}</span>
+                  <span className="truncate flex-1 text-slate-500 line-through decoration-slate-600">{title}</span>
                 )}
                 {!isCollapsed && (
                   <Lock className="w-3.5 h-3.5 text-amber-500/80 shrink-0" />
@@ -170,19 +178,20 @@ export default function ModuleSidebar({
               <div className="flex items-center">
                 <Link
                   href={item.path}
-                  title={isCollapsed ? item.title : undefined}
+                  title={title}
                   onClick={() => isMobile && onClose && onClose()}
-                  className={`flex-1 flex items-center gap-3 py-2.5 rounded-xl text-sm font-semibold transition-all group ${
+                  className={`flex-1 min-w-0 flex items-center gap-3 py-2.5 rounded-xl text-sm font-semibold transition-all group border ${
                     isCollapsed ? "px-2 justify-center" : "px-3"
                   } ${
                     isActive
-                      ? "bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 shadow-sm"
-                      : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/60"
+                      ? "shadow-sm"
+                      : "border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-800/60"
                   }`}
+                  style={isActive ? { backgroundColor: `${item.color}20`, color: item.color, borderColor: `${item.color}50` } : undefined}
                 >
-                  <Icon className={`w-5 h-5 shrink-0 transition-colors ${isActive ? "text-indigo-400" : "text-slate-400 group-hover:text-slate-200"}`} />
+                  <Icon className={`w-5 h-5 shrink-0 transition-colors ${isActive ? "" : "text-slate-400 group-hover:text-slate-200"}`} style={isActive ? { color: item.color } : undefined} />
                   {!isCollapsed && (
-                    <span className="truncate flex-1">{item.title}</span>
+                    <span className="truncate min-w-0 flex-1">{title}</span>
                   )}
                 </Link>
 
@@ -190,16 +199,16 @@ export default function ModuleSidebar({
                   <button
                     onClick={() => toggleAccordion(item.key)}
                     className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800/80 transition-transform"
-                    title={`Voir les ${subItems.length} sous-modules de ${item.title}`}
+                    title={language === 'en' ? `View the ${subItems.length} sub-modules of ${title}` : `Voir les ${subItems.length} sous-modules de ${title}`}
                   >
-                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isAccordionOpen ? "rotate-90 text-indigo-400" : ""}`} />
+                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isAccordionOpen ? "rotate-90" : ""}`} style={isAccordionOpen ? { color: item.color } : undefined} />
                   </button>
                 )}
               </div>
 
               {/* Accordéon Sous-modules */}
               {!isCollapsed && subItems.length > 0 && isAccordionOpen && (
-                <div className="pl-8 pr-2 py-1 space-y-1 border-l-2 border-slate-800 ml-4 animate-in slide-in-from-top-1 duration-150">
+                <div className="pl-8 pr-2 py-1 space-y-1 border-l-2 ml-4 animate-in slide-in-from-top-1 duration-150" style={{ borderColor: `${item.color}40` }}>
                   {subItems.map((sub) => {
                     const isSubActive = pathname === sub.path;
                     const SubIcon = sub.icon;
@@ -207,16 +216,18 @@ export default function ModuleSidebar({
                       <Link
                         key={sub.path}
                         href={sub.path}
+                        title={localizeSubLabel(sub.label, language)}
                         onClick={() => isMobile && onClose && onClose()}
-                        className={`flex items-center justify-between py-1.5 px-2.5 text-xs rounded-lg transition-colors truncate group ${
+                        className={`flex min-w-0 items-center justify-between py-1.5 px-2.5 text-xs rounded-lg transition-colors group border ${
                           isSubActive
-                            ? "bg-indigo-600/30 text-indigo-300 font-bold border border-indigo-500/40"
-                            : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 font-medium"
+                            ? "font-bold"
+                            : "border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 font-medium"
                         }`}
+                        style={isSubActive ? { backgroundColor: `${item.color}30`, color: `${item.color}dd`, borderColor: `${item.color}60` } : undefined}
                       >
-                        <div className="flex items-center gap-2 truncate">
+                        <div className="flex min-w-0 items-center gap-2">
                           {SubIcon && <SubIcon className="w-3.5 h-3.5 shrink-0 opacity-70 group-hover:opacity-100" />}
-                          <span className="truncate">{sub.label}</span>
+                          <span className="truncate min-w-0">{localizeSubLabel(sub.label, language)}</span>
                         </div>
                         {sub.badge && (
                           <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 border border-slate-700 shrink-0">
@@ -268,7 +279,7 @@ export default function ModuleSidebar({
               <p className="text-xs text-slate-300 leading-relaxed font-medium bg-slate-950 p-3 rounded-2xl border border-slate-800">
                 Accès restreint : Votre profil <b className="text-amber-400">[{userRoles.join(", ") || "Utilisateur"}]</b> n'est pas autorisé à accéder au module <b className="text-white">[{deniedModalItem.label}]</b>. Veuillez contacter l'Admin CADC.
               </p>
-              <div className="p-3 bg-slate-950/80 border border-slate-850 rounded-xl text-left text-xs font-mono text-slate-400 space-y-1">
+              <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl text-left text-xs font-mono text-slate-400 space-y-1">
                 <div>• Code module : <span className="text-amber-400">{deniedModalItem.key}</span></div>
                 <div>• Vos modules autorisés : <span className="text-slate-200">{userModules.length > 0 ? userModules.join(", ") : "Aucun"}</span></div>
               </div>

@@ -28,13 +28,36 @@ export default function TransportBLPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [formData, setFormData] = useState({
-    mission_ref: 'TRN-2026-0042',
-    client_destinataire: 'Société Camerounaise de Distribution',
-    adresse_livraison: 'Zone Industrielle de Bassa, Douala',
-    chauffeur: 'Pierre Martin (Chauffeur Lourd)',
-    camion: 'LT 912 AB',
-    nombre_colis: 45,
+    mission_ref: '',
+    client_destinataire: '',
+    adresse_livraison: '',
+    chauffeur: '',
+    camion: '',
+    nombre_colis: 0,
   });
+
+  const handlePrintBL = (b: BonLivraison) => {
+    const win = window.open('', '_blank', 'width=800,height=600');
+    if (!win) { toast.error('Impression impossible : la fenêtre d\'impression a été bloquée par le navigateur.'); return; }
+    win.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><title>${b.numero_bl}</title>
+      <style>body{font-family:Arial,sans-serif;padding:32px;color:#0f172a}h1{font-size:20px;margin:0 0 4px}table{width:100%;border-collapse:collapse;margin-top:16px}td,th{border:1px solid #cbd5e1;padding:8px;text-align:left;font-size:13px}th{background:#f1f5f9}</style>
+      </head><body>
+      <h1>Bon de Livraison  ${b.numero_bl}</h1>
+      <table><tbody>
+        <tr><th>Réf. mission</th><td>${b.mission_ref || ''}</td></tr>
+        <tr><th>Client destinataire</th><td>${b.client_destinataire || ''}</td></tr>
+        <tr><th>Adresse de livraison</th><td>${b.adresse_livraison || ''}</td></tr>
+        <tr><th>Chauffeur</th><td>${b.chauffeur || ''}</td></tr>
+        <tr><th>Véhicule</th><td>${b.camion || ''}</td></tr>
+        <tr><th>Nombre de colis</th><td>${b.nombre_colis}</td></tr>
+        <tr><th>Date de livraison</th><td>${b.date_livraison || ''}</td></tr>
+        <tr><th>Signature</th><td>${b.heure_signature || 'Non signé'}</td></tr>
+        <tr><th>Statut</th><td>${b.statut}</td></tr>
+      </tbody></table>
+      <script>window.print()</script>
+      </body></html>`);
+    win.document.close();
+  };
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +75,7 @@ export default function TransportBLPage() {
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 pb-24 text-slate-100">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-slate-400">
-        <Link href="/transport-flotte" className="hover:text-blue-400 flex items-center gap-1">
+        <Link href="/transport-flotte/control-tower" className="hover:text-blue-400 flex items-center gap-1">
           <ArrowLeft className="w-3.5 h-3.5" /> Transport & Flotte
         </Link>
         <span>/</span>
@@ -109,7 +132,7 @@ export default function TransportBLPage() {
 
         {filtered.length === 0 ? (
           <div className="py-16 text-center bg-slate-950/40 rounded-xl border border-dashed border-slate-800">
-            <FileCheck className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+            <FileCheck className="w-12 h-12 text-slate-400 mx-auto mb-3" />
             <h3 className="text-base font-semibold text-white">Aucun bon de livraison enregistré</h3>
             <p className="text-sm text-slate-400 max-w-md mx-auto mt-1 mb-4">
               Votre structure n'a pas encore émis de bon de livraison de transport.
@@ -157,19 +180,19 @@ export default function TransportBLPage() {
                       {b.nombre_colis} colis
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                        b.statut === 'LIVRE_SIGNE'
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${b.statut === 'LIVRE_SIGNE'
                           ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                           : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                      }`}>
+                        }`}>
                         {b.statut}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <button
-                        onClick={() => alert(`Impression du Bon de Livraison officiel : ${b.numero_bl}`)}
+                        onClick={() => handlePrintBL(b)}
                         className="p-1.5 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition"
                         title="Imprimer BL"
+                        aria-label="Imprimer le bon de livraison"
                       >
                         <Printer className="w-4 h-4" />
                       </button>

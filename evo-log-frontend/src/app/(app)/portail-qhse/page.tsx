@@ -127,7 +127,7 @@ export default function PortailQHSEPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-900 rounded-2xl border border-slate-700">
         {[
           { id: 'flash', label: 'Signalement Flash Danger (30s)', icon: AlertTriangle },
           { id: 'checklists', label: 'Contrôle Port des EPI', icon: ShieldCheck },
@@ -142,15 +142,15 @@ export default function PortailQHSEPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
                 isActive
-                  ? 'bg-white text-slate-900 shadow-md border border-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                  ? 'bg-slate-900 text-slate-200 shadow-md border border-slate-700'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/10'
               }`}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
               {tab.count !== undefined && (
                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono ${
-                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-700 text-slate-300'
                 }`}>
                   {tab.count}
                 </span>
@@ -162,9 +162,9 @@ export default function PortailQHSEPage() {
 
       {/* Onglet 1 : Signalement Flash */}
       {activeTab === 'flash' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
-          <div className="pb-4 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
+          <div className="pb-4 border-b border-slate-700">
+            <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-600" /> Remontée Flash d'un Danger ou Presqu'Accident
             </h2>
             <p className="text-xs text-slate-500">
@@ -174,23 +174,23 @@ export default function PortailQHSEPage() {
 
           <form onSubmit={handleCreateFlash} className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Titre Court de la Situation</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Titre Court de la Situation</label>
               <input
                 type="text"
                 required
                 value={flashForm.titre}
                 onChange={(e) => setFlashForm({ ...flashForm, titre: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Type de Signalement</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Type de Signalement</label>
                 <select
                   value={flashForm.type_incident}
                   onChange={(e) => setFlashForm({ ...flashForm, type_incident: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
                 >
                   <option value="SITUATION_DANGEREUSE">Situation Dangereuse (Obstacle, Fuite)</option>
                   <option value="PRESQU_ACCIDENT">Presqu'Accident (Near-Miss évité de justesse)</option>
@@ -201,11 +201,11 @@ export default function PortailQHSEPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Degré de Gravité</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Degré de Gravité</label>
                 <select
                   value={flashForm.severite}
                   onChange={(e) => setFlashForm({ ...flashForm, severite: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none font-bold"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none font-bold"
                 >
                   <option value="BASSE">Faible (Risque mineur)</option>
                   <option value="MOYENNE">Moyenne (Action requise sous 24h)</option>
@@ -216,23 +216,23 @@ export default function PortailQHSEPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Lieu Exact / Quai / Entrepôt</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Lieu Exact / Quai / Entrepôt</label>
               <input
                 type="text"
                 required
                 value={flashForm.lieu}
                 onChange={(e) => setFlashForm({ ...flashForm, lieu: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Description / Constats</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Description / Constats</label>
               <textarea
                 rows={3}
                 value={flashForm.description}
                 onChange={(e) => setFlashForm({ ...flashForm, description: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
               />
             </div>
 
@@ -250,9 +250,9 @@ export default function PortailQHSEPage() {
 
       {/* Onglet 2 : Contrôle EPI */}
       {activeTab === 'checklists' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
-          <div className="pb-4 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
+          <div className="pb-4 border-b border-slate-700">
+            <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-600" /> Auto-Contrôle Port des Équipements de Protection
             </h2>
             <p className="text-xs text-slate-500">
@@ -273,8 +273,8 @@ export default function PortailQHSEPage() {
                 key={item.key}
                 className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${
                   epiChecklist[item.key as keyof typeof epiChecklist]
-                    ? 'bg-emerald-50/70 border-emerald-300'
-                    : 'bg-slate-50 border-slate-200'
+                    ? 'bg-emerald-50/70 border-emerald-500/50'
+                    : 'bg-slate-800 border-slate-700'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -284,10 +284,10 @@ export default function PortailQHSEPage() {
                     onChange={(e) => setEpiChecklist({ ...epiChecklist, [item.key]: e.target.checked })}
                     className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"
                   />
-                  <span className="text-xs font-bold text-slate-800">{item.label}</span>
+                  <span className="text-xs font-bold text-slate-200">{item.label}</span>
                 </div>
                 <span className={`text-[10px] font-bold ${
-                  epiChecklist[item.key as keyof typeof epiChecklist] ? 'text-emerald-700' : 'text-slate-400'
+                  epiChecklist[item.key as keyof typeof epiChecklist] ? 'text-emerald-300' : 'text-slate-400'
                 }`}>
                   {epiChecklist[item.key as keyof typeof epiChecklist] ? 'Conforme' : 'Non porté'}
                 </span>
@@ -306,10 +306,10 @@ export default function PortailQHSEPage() {
 
       {/* Onglet 3 : Fiches FDS / IMDG */}
       {activeTab === 'fds' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-sm">
-          <div className="pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 shadow-sm">
+          <div className="pb-4 border-b border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-indigo-600" /> Répertoire d’Urgence Fiches de Sécurité (FDS)
               </h2>
               <p className="text-xs text-slate-500">
@@ -324,23 +324,23 @@ export default function PortailQHSEPage() {
                 placeholder="Rechercher code UN, nom..."
                 value={fdsSearch}
                 onChange={(e) => setFdsSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredFds.map((item, idx) => (
-              <div key={idx} className="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-2">
+              <div key={idx} className="p-5 rounded-2xl border border-slate-700 bg-slate-800 space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-xs font-black px-2.5 py-0.5 rounded bg-amber-100 text-amber-900">
+                  <span className="font-mono text-xs font-black px-2.5 py-0.5 rounded bg-amber-500/15 text-amber-200">
                     {item.code}
                   </span>
                   <span className="text-[10px] font-bold text-slate-500 uppercase">{item.classe}</span>
                 </div>
-                <h3 className="text-sm font-bold text-slate-900">{item.nom}</h3>
-                <p className="text-xs text-slate-600 leading-relaxed bg-white p-3 rounded-xl border border-slate-200/80">
-                  <strong className="text-rose-700">Consignes immédiates :</strong> {item.consignes}
+                <h3 className="text-sm font-bold text-slate-200">{item.nom}</h3>
+                <p className="text-xs text-slate-400 leading-relaxed bg-slate-900 p-3 rounded-xl border border-slate-700/80">
+                  <strong className="text-rose-300">Consignes immédiates :</strong> {item.consignes}
                 </p>
               </div>
             ))}
@@ -358,42 +358,42 @@ export default function PortailQHSEPage() {
               <p className="text-xs text-emerald-100">Consécutifs sans accident avec arrêt de travail</p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-1">
+            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-700 shadow-sm space-y-1">
               <span className="text-xs font-bold text-slate-500 uppercase">Signalements Enregistrés</span>
-              <div className="text-3xl font-black text-slate-900">{incidents.length}</div>
+              <div className="text-3xl font-black text-slate-200">{incidents.length}</div>
               <p className="text-xs text-slate-500">Remontées actives dans le système</p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-1">
+            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-700 shadow-sm space-y-1">
               <span className="text-xs font-bold text-indigo-600 uppercase">Taux de Traitement</span>
               <div className="text-3xl font-black text-indigo-600">96.4 %</div>
               <p className="text-xs text-slate-500">Situations sécurisées sous 48h</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-            <div className="p-4 border-b border-slate-100">
-              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+          <div className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-slate-700">
+              <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
                 Derniers Événements Sécurité Enregistrés ({incidents.length})
               </h2>
             </div>
 
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-800">
               {incidents.length === 0 ? (
                 <div className="p-8 text-center text-slate-500 text-xs">
                   Aucun incident récent signalé.
                 </div>
               ) : (
                 incidents.map((inc) => (
-                  <div key={inc.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80">
+                  <div key={inc.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-800/80">
                     <div>
-                      <div className="text-xs font-bold text-slate-900">{inc.titre}</div>
+                      <div className="text-xs font-bold text-slate-200">{inc.titre}</div>
                       <div className="text-[11px] text-slate-500">Lieu : {inc.lieu} • Type : {inc.type_incident}</div>
                     </div>
                     <div>
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        inc.severite === 'CRITIQUE' ? 'bg-rose-100 text-rose-800' :
-                        inc.severite === 'HAUTE' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
+                        inc.severite === 'CRITIQUE' ? 'bg-rose-500/15 text-rose-300' :
+                        inc.severite === 'HAUTE' ? 'bg-amber-500/15 text-amber-300' : 'bg-blue-500/15 text-blue-300'
                       }`}>
                         {inc.severite}
                       </span>

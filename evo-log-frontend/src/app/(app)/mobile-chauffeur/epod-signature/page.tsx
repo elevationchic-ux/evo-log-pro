@@ -137,7 +137,7 @@ export default function MobileChauffeurEPODPage() {
               onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw}
             />
           </div>
-          {!signed && <p className="text-[10px] text-slate-600 mt-1 text-center">← Faites signer le réceptionnaire ici</p>}
+          {!signed && <p className="text-[10px] text-slate-400 mt-1 text-center">← Faites signer le réceptionnaire ici</p>}
           {signed && <p className="text-[10px] text-emerald-400 mt-1 text-center flex items-center justify-center gap-1"><CheckCircle2 className="w-3 h-3" /> Signature enregistrée</p>}
         </div>
 

@@ -51,6 +51,39 @@ const config: Config = {
         outline:                  hsl('--outline'),
         'outline-variant':        hsl('--outline-variant'),
 
+        // ── Alias sémantiques style shadcn, mappés sur les tokens M3 ─────────
+        // Les pages héritées utilisent bg-card / text-foreground / bg-muted /
+        // border-border… Sans ces alias, elles rendaient des classes mortes
+        // (fonds transparents, textes invisibles) → cause directe des
+        // incohérences visuelles. Ils pointent désormais sur la même charte.
+        border:                 hsl('--outline'),
+        input:                  hsl('--outline-variant'),
+        ring:                   hsl('--primary'),
+        foreground:             hsl('--on-background'),
+        card: {
+          DEFAULT:              hsl('--surface'),
+          foreground:           hsl('--on-surface'),
+        },
+        popover: {
+          DEFAULT:              hsl('--surface'),
+          foreground:           hsl('--on-surface'),
+        },
+        'primary-foreground':   hsl('--on-primary'),
+        'secondary-foreground': hsl('--on-secondary'),
+        muted: {
+          DEFAULT:              hsl('--surface-container'),
+          foreground:           hsl('--on-surface-variant'),
+        },
+        accent: {
+          DEFAULT:              hsl('--surface-container-high'),
+          foreground:           hsl('--on-surface'),
+        },
+        'accent-foreground':    hsl('--on-surface'),
+        destructive: {
+          DEFAULT:              hsl('--error'),
+          foreground:           hsl('--on-error'),
+        },
+
         // ── EVO-LOG brand ────────────────────────────────────────────────────
         'EVO-LOG-primary':        hsl('--EVO-LOG-primary'),
 

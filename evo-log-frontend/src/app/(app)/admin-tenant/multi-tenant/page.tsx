@@ -347,7 +347,7 @@ export default function AdminTenantMultiTenant() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-16 text-center text-slate-400">
-                    <Building2 className="w-12 h-12 mx-auto mb-3 text-slate-600" />
+                    <Building2 className="w-12 h-12 mx-auto mb-3 text-slate-400" />
                     <p className="font-sans font-semibold text-slate-300 text-sm">Aucune entreprise provisionnée</p>
                     <p className="text-xs mt-1 font-sans">Cliquez sur "Nouvel Onboarding" pour créer le premier tenant.</p>
                     <button
@@ -371,7 +371,7 @@ export default function AdminTenantMultiTenant() {
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
                           {t.logo_url ? (
-                            <img src={t.logo_url} alt={t.nom} className="w-8 h-8 rounded-lg object-contain bg-white p-0.5 border border-slate-700" />
+                            <img src={t.logo_url} alt={t.nom} className="w-8 h-8 rounded-lg object-contain bg-slate-900 p-0.5 border border-slate-700" />
                           ) : (
                             <div className="w-8 h-8 rounded-lg bg-slate-700 text-slate-200 flex items-center justify-center font-black text-[10px]">
                               {(t.sigle || t.code || '?').slice(0, 3).toUpperCase()}

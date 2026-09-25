@@ -4,7 +4,7 @@ export { KPICard } from './KPICard';
 export { DataTable } from './DataTable';
 export { StatusBadge, StatusBadges } from './StatusBadge';
 export { PageHeader } from './PageHeader';
-export { ModuleLayout } from './ModuleLayout';
+// ModuleLayout : la primitive de page canonique vit dans components/layout/ModuleLayout
 export { StatCard } from './StatCard';
 export { Card, CardHeader, CardContent, CardFooter } from './Card';
 

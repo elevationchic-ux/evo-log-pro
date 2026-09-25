@@ -70,6 +70,8 @@ export interface CotationItem {
   prestataire_nom?: string;
 }
 
+// Listes de configuration d'interface (options des filtres), non des données métier.
+// audit-allow:fake_data
 const SPECIALITES = [
   { id: 'ALL', label: 'Toutes les Spécialités' },
   { id: 'GARAGE_MECANIQUE', label: 'Garages & Réparation PL' },
@@ -103,6 +105,13 @@ const SPECIALITES_PANNE = [
 export default function AnnuairePrestatairesPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'annuaire' | 'garages' | 'vehicules' | 'cotations' | 'conformite'>('annuaire');
+
+  // Deep-link depuis la navigation : /annuaire-prestataires?tab=... ouvre l'onglet demande.
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('tab');
+    const allowed = ['annuaire', 'garages', 'vehicules', 'cotations', 'conformite'];
+    if (t && (allowed as string[]).includes(t)) setActiveTab(t as typeof activeTab);
+  }, []);
 
   // Data state - loaded exclusively from API
   const [prestataires, setPrestataires] = useState<PrestataireItem[]>([]);
@@ -601,7 +610,7 @@ export default function AnnuairePrestatairesPage() {
                           <img
                             src={prestataire.logo_url}
                             alt={prestataire.raison_sociale}
-                            className="w-12 h-12 object-contain rounded-xl border border-slate-700 bg-white p-1"
+                            className="w-12 h-12 object-contain rounded-xl border border-slate-700 bg-slate-900 p-1"
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-amber-400 font-black text-sm">
@@ -892,7 +901,7 @@ export default function AnnuairePrestatairesPage() {
                         <img
                           src={t.logo_url}
                           alt={t.raison_sociale}
-                          className="w-10 h-10 object-contain rounded-xl border border-slate-700 bg-white p-1"
+                          className="w-10 h-10 object-contain rounded-xl border border-slate-700 bg-slate-900 p-1"
                         />
                       )}
                     </div>
@@ -1059,7 +1068,7 @@ export default function AnnuairePrestatairesPage() {
                     <tr key={p.id} className="hover:bg-slate-800/30">
                       <td className="py-3.5 px-4 font-bold text-white font-sans flex items-center gap-2">
                         {p.logo_url ? (
-                          <img src={p.logo_url} alt="" className="w-6 h-6 object-contain rounded bg-white p-0.5" />
+                          <img src={p.logo_url} alt="" className="w-6 h-6 object-contain rounded bg-slate-900 p-0.5" />
                         ) : (
                           <Building className="w-4 h-4 text-amber-400" />
                         )}

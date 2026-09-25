@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Toaster } from 'sonner';
@@ -12,12 +12,29 @@ import CommandPalette from '@/components/layout/CommandPalette';
 import { useModuleTheme } from '@/hooks/useModuleTheme';
 import KeyboardShortcutHandler from '@/components/shared/KeyboardShortcutHandler';
 
+/* ════════════════════════════════════════════════════════════════════
+   Échelle z-index de l'ERP (à respecter partout) :
+   - contenu page        : auto
+   - sidebar desktop     : z-30 (sticky, sous le header)
+   - header global       : z-40 (sticky, ModuleHeader)
+   - backdrop mobile     : z-55
+   - drawer mobile /
+     panneau notifications : z-60
+   - modales applicatives: z-100
+   - modale session expirée : z-9999
+   Hauteur du header : variable CSS --app-header-h, mesurée en temps
+   réel (le header contient une sous-barre breadcrumbs + onglets qui le
+   rendent plus haut que 64 px ; les anciennes valeurs codées top-16 /
+   calc(100vh-64px) causaient les superpositions).
+   ════════════════════════════════════════════════════════════════════ */
+
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const { currentModule } = useModuleTheme();
 
+  const rootRef = useRef<HTMLDivElement>(null);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -34,6 +51,20 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     mq.addEventListener('change', sync);
     return () => mq.removeEventListener('change', sync);
   }, []);
+
+  /* Mesure réelle de la hauteur du header (barre principale + sous-barre
+     breadcrumbs/onglets) → expose --app-header-h pour la sidebar sticky. */
+  useEffect(() => {
+    const header = rootRef.current?.querySelector('header');
+    if (!header) return;
+    const apply = () => {
+      document.documentElement.style.setProperty('--app-header-h', `${Math.round(header.getBoundingClientRect().height)}px`);
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(header);
+    return () => ro.disconnect();
+  }, [status]);
 
   /* Prevent body scroll when mobile drawer open */
   useEffect(() => {
@@ -64,10 +95,13 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const sidebarWidth = isSidebarCollapsed ? '72px' : '260px';
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 overflow-x-hidden">
+    <div
+      ref={rootRef}
+      className="flex min-h-dvh flex-col bg-background text-on-background overflow-x-clip"
+    >
       <Toaster position="top-right" richColors />
 
-      {/* Sticky Header */}
+      {/* Sticky header (z-40, mesuré → --app-header-h) */}
       <ModuleHeader
         currentModule={currentModule as any}
         onMenuClick={() => {
@@ -80,22 +114,25 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
       />
 
       {/* Body: sidebar + main */}
-      <div className="relative flex flex-1 min-h-[calc(100vh-64px)]">
+      <div className="relative flex flex-1 min-h-[calc(100dvh-var(--app-header-h,64px))]">
 
-        {/* Mobile backdrop */}
+        {/* Mobile backdrop (z-55) */}
         {isMobileViewport && isMobileSidebarOpen && (
           <div
-            className="fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm"
             onClick={() => setIsMobileSidebarOpen(false)}
+            aria-hidden="true"
           />
         )}
 
-        {/* Sidebar */}
+        {/* Sidebar desktop : sticky sous le header via --app-header-h (z-30) */}
         <div
           className="flex-shrink-0 transition-[width] duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
           style={isMobileViewport ? { width: 0, overflow: 'visible' } : { width: sidebarWidth }}
         >
-          <div className={`${isMobileViewport ? '' : 'sticky top-16 h-[calc(100vh-64px)]'}`}>
+          <div
+            className={`${isMobileViewport ? '' : 'sticky z-30 top-[var(--app-header-h,64px)] h-[calc(100dvh-var(--app-header-h,64px))]'}`}
+          >
             <ModuleSidebar
               isCollapsed={isSidebarCollapsed}
               isMobile={isMobileViewport}
@@ -107,7 +144,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Main content */}
-        <main className="min-w-0 flex-1 overflow-x-hidden px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6">
+        <main className="min-w-0 flex-1 overflow-x-clip px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6">
           <div className="mx-auto w-full max-w-7xl">
             {children}
           </div>
@@ -116,10 +153,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Orbital navigation bubble */}
       <SubModuleOrbitalBubble />
-      
+
       {/* Command palette */}
       <CommandPalette />
-      
+
       {/* Keyboard shortcuts */}
       <KeyboardShortcutHandler />
     </div>

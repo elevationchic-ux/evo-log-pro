@@ -74,6 +74,12 @@ class User(Base):
     b2b_portal = relationship("B2BPortal")
     agency = relationship("Agency", back_populates="users")
     organization = relationship("Organization", back_populates="users")
+    accreditations = relationship(
+        "Accreditation",
+        foreign_keys="Accreditation.user_id",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
     # audit_logs = relationship("AuditLog", back_populates="user")
 
 
@@ -98,18 +104,48 @@ class Role(Base):
 
 
 class Permission(Base):
-    """Permission model for fine-grained access control"""
+    """Permission atomique : ``module.sous_module.action``.
+
+    ``code`` est la representation canonique exploitee par le moteur
+    d'autorisation :mod:`app.core.permissions`. Exemples :
+
+        "comptabilite.journal.read"   action lecture sur le sous-module journal
+        "comptabilite.*.read"         lecture de tous les sous-modules du module
+        "*"                           wildcard total (reserve SuperAdmin)
+
+    Les colonnes ``domaine`` / ``module`` / ``sub_module`` / ``action`` sont
+    derivees du ``code`` pour construire l'arborescence du catalogue cote UI.
+    ``resource`` est conserve par compatibilite historique (= ``sub_module``).
+    """
     __tablename__ = "permissions"
-    
+
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), unique=True, nullable=False)
+    code = Column(String(150), unique=True, index=True, nullable=False)
+    name = Column(String(150), unique=True, nullable=False)  # = code (retro-compat)
     description = Column(Text)
-    resource = Column(String(50))  # e.g., "users", "missions", "factures"
-    action = Column(String(50))    # e.g., "create", "read", "update", "delete"
+    domaine = Column(String(50), index=True)     # ex: "finance"
+    module = Column(String(50), index=True)       # ex: "comptabilite"
+    sub_module = Column(String(80))               # ex: "journal" ou "*"
+    action = Column(String(50))                   # ex: "read" / "create" / "*"
+    resource = Column(String(50))                 # alias legacy de sub_module
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+
     # Relationships
     roles = relationship("Role", secondary=role_permissions, back_populates="permissions")
+
+    @staticmethod
+    def parse_code(code: str):
+        """Decompose un ``code`` en (domaine=None, module, sub_module, action).
+
+        Le domaine n'est pas portee par le code ; il est resolve par le
+        catalogue. Retourne (module, sub_module, action) avec tolerances pour
+        les codes partiels de type ``module`` ou ``module.*``.
+        """
+        parts = (code or "").split(".")
+        module = parts[0] if len(parts) > 0 else "*"
+        sub_module = parts[1] if len(parts) > 1 else "*"
+        action = parts[2] if len(parts) > 2 else "*"
+        return module, sub_module, action
 
 
 # Backward compatibility aliases for Kamlog modules

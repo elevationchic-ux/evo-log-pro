@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn, getSession } from 'next-auth/react';
+import { apiClient } from '@/lib/api-client';
 import { Sparkles, Ship, Lock, User as UserIcon, ArrowRight, ShieldCheck, KeyRound, AlertTriangle, CheckCircle2, Radio, Compass, Anchor, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
@@ -21,7 +22,6 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [expiryWarning, setExpiryWarning] = useState<string | null>(null);
 
   // Password change modal
   const [mustChangePassword, setMustChangePassword] = useState(false);
@@ -64,13 +64,13 @@ export default function LoginPage() {
       const roles: string[] = (session?.user as any)?.roles || [];
       setPendingRoles(roles);
 
-      if (password === 'admin123') {
+      // La regle vient du backend (users.must_change_password), pas d'une
+      // comparaison cote client sur le mot de passe saisi.
+      if ((session?.user as any)?.must_change_password) {
         setMustChangePassword(true);
         setIsLoading(false);
         return;
       }
-
-      setExpiryWarning('⚠️ Votre mot de passe expire dans 14 jours (Renouvellement trimestriel obligatoire).');
 
       setTimeout(() => {
         if (roles.includes('CHAUFFEUR')) {
@@ -95,7 +95,7 @@ export default function LoginPage() {
     }
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError(null);
 
@@ -103,6 +103,22 @@ export default function LoginPage() {
     if (newPassword.length < 8) { setPasswordError('Minimum 8 caractères requis.'); return; }
     if (!/[A-Za-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) { setPasswordError('Le mot de passe doit contenir au moins une lettre et un chiffre.'); return; }
     if (newPassword !== confirmPassword) { setPasswordError('Les mots de passe ne correspondent pas.'); return; }
+
+    // Enregistrement REEL côté backend (/auth/change-password) : le gate
+    // must_change_password est sinon rouvert à chaque connexion.
+    try {
+      const session = await getSession();
+      const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
+      await apiClient.post(
+        '/auth/change-password',
+        { current_password: password, new_password: newPassword },
+        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
+      );
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+      setPasswordError(typeof detail === 'string' ? detail : 'Le serveur a refusé le changement de mot de passe.');
+      return;
+    }
 
     setPasswordSuccess(true);
     setTimeout(() => {
@@ -222,7 +238,7 @@ export default function LoginPage() {
                   animation: 'pulseHalo 2s ease-in-out infinite',
                 }}
               />
-              <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 via-yellow-500 to-amber-400 flex items-center justify-center shadow-2xl shadow-amber-500/50 border border-yellow-200">
+              <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 via-yellow-500 to-amber-400 flex items-center justify-center shadow-2xl shadow-amber-500/50 border border-yellow-500/40">
                 <Ship className="w-9 h-9 text-slate-950 drop-shadow-md" />
               </div>
             </div>
@@ -316,7 +332,7 @@ export default function LoginPage() {
 
         {/* Brand header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 rounded-2xl shadow-2xl shadow-amber-500/30 mb-3 border border-yellow-200">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 rounded-2xl shadow-2xl shadow-amber-500/30 mb-3 border border-yellow-500/40">
             <Ship className="w-8 h-8 text-slate-950 drop-shadow" />
           </div>
           <div>
@@ -338,13 +354,6 @@ export default function LoginPage() {
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">Identifiants opérationnels fournis par l&apos;administrateur.</p>
           </div>
-
-          {expiryWarning && (
-            <div className="mb-4 p-3 bg-amber-500/15 border border-amber-500/40 rounded-xl text-amber-300 text-xs font-semibold flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
-              <span>{expiryWarning}</span>
-            </div>
-          )}
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div>

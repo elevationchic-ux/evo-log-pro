@@ -22,7 +22,7 @@ import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const { user } = useAuth()
-  const { theme, setTheme, language, setLanguage } = useSettings()
+  const { language, setLanguage } = useSettings()
 
   const [fullName, setFullName] = useState(user?.fullName || 'Utilisateur ERP')
   const [email, setEmail] = useState(user?.email || 'user@evo-log.cm')
@@ -211,18 +211,13 @@ export default function SettingsPage() {
               <Palette className="w-4 h-4 text-amber-400" /> Préférences d'Affichage & Système
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
+                {/* Identité sombre unique : le thème clair est désactivé, seule la langue est configurable. */}
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Thème Visuel</label>
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value as any)}
-                  className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500"
-                >
-                  <option value="dark">🌙 Thème Sombre Optimal (Recommandé)</option>
-                  <option value="light">☀️ Thème Clair Haute Lisibilité</option>
-                  <option value="system">💻 Préférence Système</option>
-                </select>
+                <div className="w-full h-10 px-3 flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white">
+                  <Palette className="w-4 h-4 text-amber-400" /> 🌙 Thème Sombre Optimal (identité unique)
+                </div>
               </div>
 
               <div>

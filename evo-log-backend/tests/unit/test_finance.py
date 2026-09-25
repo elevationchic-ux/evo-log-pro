@@ -91,7 +91,9 @@ class TestFactureService:
         assert facture.numero_facture == "F-2026-001"
         assert facture.montant_ht == 100000.0
         assert facture.montant_ttc == 119250.0
-        assert facture.statut == "non_payee"
+        # Une facture creee sans emission explicite reste un brouillon :
+        # elle ne devient opposable qu'apres l'emission (statut "emise").
+        assert facture.statut == "brouillon"
     
     def test_ajouter_ligne_facture(self, db: Session):
         """Test adding invoice line"""
@@ -115,7 +117,9 @@ class TestFactureService:
             prix_unitaire=10000.0,
             montant_ht=100000.0
         )
-        assert ligne.article == "Services logistiques"
+        # L'alias herite "article" est desormais mappe sur designation : la
+        # colonne article n'existait pas en base, la valeur etait perdue.
+        assert ligne.designation == "Services logistiques"
         assert ligne.quantite == 10
         assert ligne.montant_ht == 100000.0
 

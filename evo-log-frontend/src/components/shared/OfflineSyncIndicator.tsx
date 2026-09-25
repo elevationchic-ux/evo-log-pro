@@ -68,6 +68,14 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
   const pendingCount = operations.filter((op) => op.status === 'PENDING' || op.status === 'SYNCING').length;
   const failedCount = operations.filter((op) => op.status === 'FAILED').length;
 
+  // Rien a signaler = rien affiche : la puce verte « En ligne » permanente
+  // contredisait les autres badges et volait de la place sur mobile. La
+  // pastille n'apparait que pour une information reelle (hors ligne, ops en
+  // attente de synchro, erreur de synchro).
+  if (isOnline && pendingCount === 0 && failedCount === 0 && !showPanel) {
+    return null;
+  }
+
   const handleManualSync = async () => {
     if (!isOnline || isSyncing) return;
     setIsSyncing(true);

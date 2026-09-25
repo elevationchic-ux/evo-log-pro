@@ -33,6 +33,21 @@ router = APIRouter(tags=["Documents"])  # monte sur /api/v1/documents par main.p
 
 
 # ============ DOCUMENTS ============
+@router.get("/", response_model=List[DocumentResponse])
+def lister_documents(
+    dossier_id: int = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Lister les documents reellement persistes (table Document)."""
+    q = db.query(Document)
+    if dossier_id is not None:
+        q = q.filter(Document.dossier_id == dossier_id)
+    return q.order_by(Document.id.desc()).offset(skip).limit(limit).all()
+
+
 @router.post("/", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
 def creer_document(
     document: DocumentCreate,

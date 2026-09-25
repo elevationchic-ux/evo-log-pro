@@ -180,7 +180,7 @@ export default function KFinanceBillingInvoicing() {
                   </tr>
 
                   {/* Row 2 */}
-                  <tr className="hover:bg-surface-container-high transition-colors bg-[#F9FAFB] group">
+                  <tr className="hover:bg-surface-container-high transition-colors bg-surface-container-low group">
                     <td className="py-2 px-md text-center"><input className="rounded border-outline-variant text-primary focus:ring-primary bg-surface h-4 w-4" type="checkbox" /></td>
                     <td className="py-2 px-md font-medium text-primary cursor-pointer hover:underline">FAC-2023-1045</td>
                     <td className="py-2 px-md">
@@ -226,7 +226,7 @@ export default function KFinanceBillingInvoicing() {
                   </tr>
 
                   {/* Row 4 */}
-                  <tr className="hover:bg-surface-container-high transition-colors bg-[#F9FAFB] group">
+                  <tr className="hover:bg-surface-container-high transition-colors bg-surface-container-low group">
                     <td className="py-2 px-md text-center"><input className="rounded border-outline-variant text-primary focus:ring-primary bg-surface h-4 w-4" type="checkbox" /></td>
                     <td className="py-2 px-md font-medium text-primary cursor-pointer hover:underline">FAC-2023-1052</td>
                     <td className="py-2 px-md">

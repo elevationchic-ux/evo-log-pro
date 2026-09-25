@@ -958,3 +958,101 @@ def obtenir_competences_employe(
 ):
     """Get all employee skills"""
     return CompetenceService.obtenir_competences_employe(db, employe_id)
+
+
+# ============================================================================
+# 👥 EMPLOYES (annuaire du personnel, scope entreprise)
+# ============================================================================
+def _employee_scope_company_id(user: User) -> Optional[int]:
+    """None => all companies (super admin). Otherwise the caller's company."""
+    return None if user.is_superuser else user.company_id
+
+
+def _employee_dict(u: User) -> Dict[str, Any]:
+    return {
+        "id": u.id,
+        "username": u.username,
+        "email": u.email,
+        "full_name": u.full_name or u.username,
+        "phone": u.phone,
+        "is_active": u.is_active,
+        "role_level": u.role_level,
+        "role": get_user_role_label(u),
+        "company_id": u.company_id,
+        "department_id": u.department_id,
+        "department": (u.department.nom if getattr(u, "department", None) else None),
+        "avatar_url": u.avatar_url,
+        "language": u.language,
+        "timezone": u.timezone,
+        "last_login": u.last_login.isoformat() if u.last_login else None,
+        "created_at": u.created_at.isoformat() if u.created_at else None,
+    }
+
+
+@router.get("/employes/me")
+def employe_actuel(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user),
+):
+    """Profil du collaborateur connecte."""
+    return _employee_dict(current_user)
+
+
+@router.get("/employes")
+def lister_employes(
+    search: Optional[str] = None,
+    department_id: Optional[int] = None,
+    include_inactive: bool = False,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user),
+):
+    """Annuaire du personnel, strictement limite a l'entreprise du demandeur."""
+    query = db.query(User)
+    scope = _employee_scope_company_id(current_user)
+    if scope is not None:
+        query = query.filter(User.company_id == scope)
+    if not include_inactive:
+        query = query.filter(User.is_active.is_(True))
+    if department_id is not None:
+        query = query.filter(User.department_id == department_id)
+    if search:
+        s = f"%{search.strip()}%"
+        query = query.filter(or_(User.username.ilike(s), User.email.ilike(s), User.full_name.ilike(s)))
+    total = query.count()
+    users = query.order_by(User.full_name.asc().nullslast()).offset(skip).limit(limit).all()
+    return {"items": [_employee_dict(u) for u in users], "total": total}
+
+
+@router.get("/employes/{employe_id}")
+def detail_employe(
+    employe_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user),
+):
+    """Fiche d'un employe (scope entreprise respecte)."""
+    emp = db.query(User).filter(User.id == employe_id).first()
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employe introuvable")
+    scope = _employee_scope_company_id(current_user)
+    if scope is not None and emp.company_id != scope:
+        raise HTTPException(status_code=403, detail="Employe hors de votre entreprise")
+    return _employee_dict(emp)
+
+
+@router.post("/employes/import-excel", status_code=status.HTTP_202_ACCEPTED)
+def import_employes_excel(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user),
+):
+    """Import massif d'employes depuis Excel  non implemente cote serveur.
+
+    Reponse honnete 202 ``pending`` (aucune donnee inventee) tant que l'import
+    n'est pas branche, pour que l'ecran n'affiche pas une erreur 404/500.
+    """
+    return {
+        "accepted": False,
+        "pending": True,
+        "message": "L'import Excel des employes n'est pas encore actif cote serveur.",
+    }

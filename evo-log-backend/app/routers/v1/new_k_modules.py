@@ -117,41 +117,42 @@ def create_fuel_sensor(payload: FuelSensorCreate):
 class RequeteCalculDouane(BaseModel):
     valeur_caf_xaf: float
     origine_produit: Optional[str] = "CEMAC"  # CEMAC, ZLECAF, HORS_ZONE
-    categorie_tarifaire_tec: Optional[int] = 2  # 0:5% 1:10% 2:20% 3:30%
+    categorie_tarifaire_tec: Optional[int] = 2  # 0:0% 1:5% 2:10% 3:20% (TEC CEMAC)
 
 
 @router.post("/transit/calculateur-taxe-cemac")
 def calculer_taxes_douanieres(payload: RequeteCalculDouane):
     """Calcul deterministe des droits/taxes CEMAC a partir de la valeur CAF.
 
-    Simulation tarifaire (ne persiste rien) : a confirmer avec les taux SYDONIA
-    en vigueur avant usage officiel.
+    Délégué au moteur UNIQUE ``app.services.taxation_douaniere`` (partagé avec
+    transit, transit-avance et integration-cameroun). Simulation tarifaire (ne
+    persiste rien) : a confirmer avec les taux SYDONIA en vigueur avant usage
+    officiel.
     """
-    valeur_caf = payload.valeur_caf_xaf
-    taux_dd = (
-        0.0
-        if payload.origine_produit in ["CEMAC", "ZLECAF"]
-        else [0.05, 0.10, 0.20, 0.30][min(payload.categorie_tarifaire_tec, 3)]
-    )
-    droit_douane = valeur_caf * taux_dd
-    taxe_communautaire_cci = valeur_caf * 0.004  # 0.4% CCI CEMAC
-    prelevement_ohada = valeur_caf * 0.0005       # 0.05% OHADA
-    redevance_informatique = 15000.0              # Redevance fixe SYDONIA / CAMCIS
-    assiette_tva = valeur_caf + droit_douane
-    tva = assiette_tva * 0.1925                    # 19.25% TVA Cameroun
-    total = (
-        droit_douane + taxe_communautaire_cci + prelevement_ohada
-        + redevance_informatique + tva
+    from app.services.taxation_douaniere import calculer_liquidation
+
+    liq = calculer_liquidation(
+        valeur_en_douane=payload.valeur_caf_xaf,
+        categorie_tec=payload.categorie_tarifaire_tec,
+        origine=payload.origine_produit,
     )
     return {
-        "valeur_caf_xaf": valeur_caf,
-        "droit_douane_xaf": droit_douane,
-        "cci_cemac_xaf": taxe_communautaire_cci,
-        "ohada_xaf": prelevement_ohada,
-        "redevance_sydonia_xaf": redevance_informatique,
-        "tva_19_25_xaf": tva,
-        "total_liquidation_douane_xaf": total,
-        "exemption_zlecaf_appliquee": payload.origine_produit in ["CEMAC", "ZLECAF"],
+        "valeur_caf_xaf": liq["valeur_en_douane_xaf"],
+        "categorie_tarifaire_tec": payload.categorie_tarifaire_tec,
+        "origine_produit": payload.origine_produit,
+        "droit_douane_xaf": liq["droit_douane_dd"],
+        "redevance_informatique_xaf": liq["redevance_informatique"],
+        "cci_cemac_xaf": liq["cci_cemac"],
+        "ohada_xaf": liq["prelevement_ohada"],
+        "base_tva_xaf": liq["base_tva"],
+        "tva_19_25_xaf": liq["tva_1925"],
+        "precompte_is_xaf": liq["precompte_is"],
+        "total_liquidation_douane_xaf": liq["total_a_liquider_xaf"],
+        "exemption_zlecaf_appliquee": (payload.origine_produit or "").upper()
+        in ("CEMAC", "ZLECAF", "UEAC"),
+        "source_taux": liq["source_taux"],
+        "simulation": liq["simulation"],
+        "note": liq["note"],
     }
 
 

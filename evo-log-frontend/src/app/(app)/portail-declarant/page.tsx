@@ -122,7 +122,7 @@ export default function PortailDeclarantPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-900 rounded-2xl border border-slate-700">
         {[
           { id: 'dossiers', label: 'Mes Dossiers Port & Douane', icon: FileText, count: dossiers.length },
           { id: 'jalonnement', label: 'Jalons & Visite Conjointe', icon: CheckCircle2 },
@@ -139,15 +139,15 @@ export default function PortailDeclarantPage() {
                 isActive
                   ? tab.danger
                     ? 'bg-rose-600 text-white shadow-md'
-                    : 'bg-white text-slate-900 shadow-md border border-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                    : 'bg-slate-900 text-slate-200 shadow-md border border-slate-700'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/10'
               }`}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
               {tab.count !== undefined && (
                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono ${
-                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-700 text-slate-300'
                 }`}>
                   {tab.count}
                 </span>
@@ -161,12 +161,12 @@ export default function PortailDeclarantPage() {
       {activeTab === 'dossiers' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 space-y-3">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
               <Clock className="w-4 h-4 text-indigo-600" /> Dossiers Assignés ({dossiers.length})
             </h2>
 
             {dossiers.length === 0 ? (
-              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-xs text-slate-500">
+              <div className="p-8 text-center bg-slate-900 rounded-2xl border border-slate-700 text-xs text-slate-500">
                 Aucun dossier en cours.
               </div>
             ) : (
@@ -177,18 +177,18 @@ export default function PortailDeclarantPage() {
                   className={`p-4 rounded-2xl border cursor-pointer transition-all ${
                     selectedDossier?.id === d.id
                       ? 'bg-indigo-50/70 border-indigo-400 shadow-md'
-                      : 'bg-white border-slate-200 hover:border-slate-300'
+                      : 'bg-slate-900 border-slate-700 hover:border-slate-600'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-xs font-mono font-black text-slate-900">
+                    <span className="text-xs font-mono font-black text-slate-200">
                       #{d.numero_dossier || d.reference || `TR-${d.id}`}
                     </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300">
                       {d.statut}
                     </span>
                   </div>
-                  <div className="text-xs font-semibold text-slate-800">{d.client_nom || 'Importateur Industriel'}</div>
+                  <div className="text-xs font-semibold text-slate-200">{d.client_nom || 'Importateur Industriel'}</div>
                   <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-rose-500" /> {d.bureau_douane || 'Port de Douala (Sydonia)'}
                   </div>
@@ -199,11 +199,11 @@ export default function PortailDeclarantPage() {
 
           <div className="lg:col-span-2">
             {selectedDossier ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+              <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-700 gap-2">
                   <div>
-                    <span className="text-xs font-mono text-indigo-700 font-bold">Dossier de Transit Actif</span>
-                    <h2 className="text-xl font-black text-slate-900">
+                    <span className="text-xs font-mono text-indigo-300 font-bold">Dossier de Transit Actif</span>
+                    <h2 className="text-xl font-black text-slate-200">
                       #{selectedDossier.numero_dossier || selectedDossier.reference || `TR-${selectedDossier.id}`}
                     </h2>
                     <p className="text-xs text-slate-500">Client : {selectedDossier.client_nom || 'Client Partenaire'}</p>
@@ -218,21 +218,21 @@ export default function PortailDeclarantPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
+                  <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-1.5">
                     <span className="font-bold text-slate-500 uppercase">Bureau & Régime Douanier</span>
-                    <p className="font-bold text-slate-900">{selectedDossier.bureau_douane || 'Douala Port Terminal Conteneurs'}</p>
-                    <p className="text-slate-600">Régime : <strong>{selectedDossier.type_regime || 'Mise à la consommation (IM4)'}</strong></p>
+                    <p className="font-bold text-slate-200">{selectedDossier.bureau_douane || 'Douala Port Terminal Conteneurs'}</p>
+                    <p className="text-slate-400">Régime : <strong>{selectedDossier.type_regime || 'Mise à la consommation (IM4)'}</strong></p>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
+                  <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-1.5">
                     <span className="font-bold text-slate-500 uppercase">Marchandise & Cargaison</span>
-                    <p className="font-bold text-slate-900">{selectedDossier.marchandise || 'Matériel de Construction & Équipements'}</p>
-                    <p className="text-slate-600">Statut actuel : <strong className="text-indigo-600">{selectedDossier.statut}</strong></p>
+                    <p className="font-bold text-slate-200">{selectedDossier.marchandise || 'Matériel de Construction & Équipements'}</p>
+                    <p className="text-slate-400">Statut actuel : <strong className="text-indigo-600">{selectedDossier.statut}</strong></p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-xs text-slate-500">
+              <div className="p-12 text-center bg-slate-900 rounded-2xl border border-slate-700 text-xs text-slate-500">
                 Sélectionnez un dossier de transit.
               </div>
             )}
@@ -242,9 +242,9 @@ export default function PortailDeclarantPage() {
 
       {/* Onglet 2 : Jalonnement Physique */}
       {activeTab === 'jalonnement' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
-          <div className="pb-4 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
+          <div className="pb-4 border-b border-slate-700">
+            <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-indigo-600" /> Jalonnement des Étapes Physiques au Port
             </h2>
             <p className="text-xs text-slate-500">
@@ -268,20 +268,20 @@ export default function PortailDeclarantPage() {
                   key={step.key}
                   onClick={() => handleToggleJalon(step.key as keyof typeof jalons)}
                   className={`p-4 rounded-xl border flex items-center justify-between gap-4 cursor-pointer transition-all ${
-                    checked ? 'bg-emerald-50 border-emerald-300' : 'bg-slate-50 border-slate-200 hover:bg-slate-100/80'
+                    checked ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-slate-800 border-slate-700 hover:bg-slate-800/80'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                      checked ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
+                      checked ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-400'
                     }`}>
                       <Check className="w-4 h-4" />
                     </div>
-                    <span className={`text-xs font-bold ${checked ? 'text-slate-900' : 'text-slate-600'}`}>
+                    <span className={`text-xs font-bold ${checked ? 'text-slate-200' : 'text-slate-400'}`}>
                       {step.label}
                     </span>
                   </div>
-                  <span className={`text-[10px] font-bold ${checked ? 'text-emerald-700' : 'text-slate-400'}`}>
+                  <span className={`text-[10px] font-bold ${checked ? 'text-emerald-300' : 'text-slate-400'}`}>
                     {checked ? 'Validé' : 'En attente'}
                   </span>
                 </div>
@@ -293,9 +293,9 @@ export default function PortailDeclarantPage() {
 
       {/* Onglet 3 : Téléversement BAE & Quittances */}
       {activeTab === 'documents' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
-          <div className="pb-4 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
+          <div className="pb-4 border-b border-slate-700">
+            <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
               <Upload className="w-5 h-5 text-indigo-600" /> Téléversement des Justificatifs Terrain
             </h2>
             <p className="text-xs text-slate-500">
@@ -305,8 +305,8 @@ export default function PortailDeclarantPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Type de Document</label>
-              <select className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+              <label className="text-xs font-bold text-slate-300 block mb-1">Type de Document</label>
+              <select className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
                 <option>Bon à Enlever (BAE) Douane</option>
                 <option>Quittance de Règlement Droits et Taxes</option>
                 <option>Procès-Verbal de Visite Conjointe</option>
@@ -315,9 +315,9 @@ export default function PortailDeclarantPage() {
               </select>
             </div>
 
-            <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center bg-slate-50 hover:bg-slate-100/60 cursor-pointer transition-colors">
+            <div className="border-2 border-dashed border-slate-600 rounded-2xl p-8 text-center bg-slate-800 hover:bg-slate-800/60 cursor-pointer transition-colors">
               <Camera className="w-10 h-10 text-indigo-500 mx-auto mb-2" />
-              <p className="text-xs font-bold text-slate-800">Prendre une photo ou sélectionner un fichier</p>
+              <p className="text-xs font-bold text-slate-200">Prendre une photo ou sélectionner un fichier</p>
               <p className="text-[11px] text-slate-500 mt-1">JPEG, PNG ou PDF (Max 15 Mo)</p>
             </div>
 
@@ -333,18 +333,18 @@ export default function PortailDeclarantPage() {
 
       {/* Onglet 4 : Litige / Blocage Douane */}
       {activeTab === 'litige' && (
-        <div className="bg-white rounded-2xl border border-rose-200 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
-          <div className="pb-4 border-b border-rose-100 flex items-center justify-between">
+        <div className="bg-slate-900 rounded-2xl border border-rose-500/40 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
+          <div className="pb-4 border-b border-rose-500/30 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-rose-900 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-rose-200 flex items-center gap-2">
                 <AlertOctagon className="w-5 h-5 text-rose-600" /> Déclaration d’un Litige ou Blocage Douanier
               </h2>
-              <p className="text-xs text-rose-700">
+              <p className="text-xs text-rose-300">
                 Alertez immédiatement la direction et le chef de service transit en cas de litige inspecteur.
               </p>
             </div>
             {litigeSent && (
-              <span className="px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-bold">
+              <span className="px-3 py-1 rounded-full bg-rose-500/15 text-rose-300 text-xs font-bold">
                 Litige transmis
               </span>
             )}
@@ -352,11 +352,11 @@ export default function PortailDeclarantPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Type de Contestation</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Type de Contestation</label>
               <select
                 value={litigeType}
                 onChange={(e) => setLitigeType(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
               >
                 <option value="CONTESTATION_VALEUR">Contestation de la valeur transactionnelle (Redressement)</option>
                 <option value="ESPECE_TARIFAIRE">Contestation du code SH / Espèce tarifaire</option>
@@ -367,13 +367,13 @@ export default function PortailDeclarantPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Détails de l’objection formulée par la douane</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Détails de l’objection formulée par la douane</label>
               <textarea
                 rows={3}
                 placeholder="Précisez les exigences de l’inspecteur, les montants réclamés ou la notification de redressement..."
                 value={litigeDesc}
                 onChange={(e) => setLitigeDesc(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
               />
             </div>
 

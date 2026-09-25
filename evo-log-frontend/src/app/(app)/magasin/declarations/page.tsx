@@ -43,7 +43,7 @@ export default function DeclarationsPage() {
         {/* Header */}
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-200 flex items-center gap-3">
               <Ship className="w-8 h-8 text-blue-600" />
               Déclarations Marchandises
             </h1>
@@ -59,7 +59,7 @@ export default function DeclarationsPage() {
         </div>
 
         {/* Search */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+        <div className="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-700 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input 
@@ -67,15 +67,15 @@ export default function DeclarationsPage() {
               placeholder="Rechercher (BL, Code Article, Client)..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none bg-slate-50"
+              className="w-full pl-9 pr-4 py-2 border border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none bg-slate-800"
             />
           </div>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-700 overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/80 border-b border-slate-100 text-xs uppercase font-bold text-slate-500">
+            <thead className="bg-slate-800/80 border-b border-slate-700 text-xs uppercase font-bold text-slate-500">
               <tr>
                 <th className="px-6 py-4">BL & Navire</th>
                 <th className="px-6 py-4">Client</th>
@@ -83,7 +83,7 @@ export default function DeclarationsPage() {
                 <th className="px-6 py-4">Statut</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-800">
               {loading ? (
                 <tr><td colSpan={4} className="px-6 py-12"><CardSkeletonLoader /></td></tr>
               ) : filteredDeclarations.length === 0 ? (
@@ -93,12 +93,12 @@ export default function DeclarationsPage() {
                   </td>
                 </tr>
               ) : filteredDeclarations.map((decl) => (
-                <tr key={decl.id} className="hover:bg-slate-50/50 transition-colors">
+                <tr key={decl.id} className="hover:bg-slate-800/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="font-mono font-black text-blue-600 flex items-center gap-2">
                       {decl.numero_bl}
                       {decl.numero_bl_externe && (
-                        <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded uppercase font-bold">EXT: {decl.numero_bl_externe}</span>
+                        <span className="text-[10px] bg-slate-900 text-slate-500 px-1.5 py-0.5 rounded uppercase font-bold">EXT: {decl.numero_bl_externe}</span>
                       )}
                     </div>
                     <div className="text-xs text-slate-500 flex items-center gap-1 mt-1 font-bold">
@@ -107,19 +107,19 @@ export default function DeclarationsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="font-bold text-slate-900">{decl.client?.nom} {decl.client?.prenom}</div>
+                    <div className="font-bold text-slate-200">{decl.client?.nom} {decl.client?.prenom}</div>
                     <div className="text-xs text-slate-500">{decl.client?.raison_sociale}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-start gap-2">
                       <Package className="w-4 h-4 text-slate-400 mt-0.5" />
                       <div>
-                        <div className="font-bold text-slate-800">
+                        <div className="font-bold text-slate-200">
                           Code: <span className="text-blue-600 font-mono">{decl.code_article}</span>
                         </div>
                         {decl.lignes && decl.lignes[0] && (
-                          <div className="text-sm font-medium text-slate-600 mt-1">
-                            Qté totale : <strong className="text-slate-900">{parseFloat(decl.lignes[0].quantite_declaree)} {decl.lignes[0].unite_mesure}</strong>
+                          <div className="text-sm font-medium text-slate-400 mt-1">
+                            Qté totale : <strong className="text-slate-200">{parseFloat(decl.lignes[0].quantite_declaree)} {decl.lignes[0].unite_mesure}</strong>
                           </div>
                         )}
                       </div>
@@ -127,7 +127,7 @@ export default function DeclarationsPage() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
-                      decl.statut === 'VALIDEE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                      decl.statut === 'VALIDEE' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
                     }`}>
                       {decl.statut}
                     </span>
@@ -258,31 +258,31 @@ function DeclarationModal({ onClose, onSuccess }: { onClose: () => void, onSucce
 
   const InputField = ({ label, field, type = "text", required = false, placeholder = "" }: { label: string, field: keyof typeof formData, type?: string, required?: boolean, placeholder?: string }) => (
     <div>
-      <label className="block text-sm font-bold text-slate-700 mb-1">{label} {required && '*'}</label>
+      <label className="block text-sm font-bold text-slate-300 mb-1">{label} {required && '*'}</label>
       <input 
         type={type} 
         required={required}
         value={formData[field]}
         onChange={e => setFormData({...formData, [field]: e.target.value})}
         placeholder={placeholder}
-        className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+        className="w-full px-4 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
       />
     </div>
   )
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
-        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+      <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
+        <div className="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
+          <h2 className="text-xl font-bold text-slate-200 flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600" />
             Nouvelle Déclaration (Connaissement)
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><span className="material-symbols-outlined">close</span></button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-400"><span className="material-symbols-outlined">close</span></button>
         </div>
         
         {/* Tabs */}
-        <div className="flex border-b border-slate-200 px-6 pt-4 gap-6 bg-slate-50">
+        <div className="flex border-b border-slate-700 px-6 pt-4 gap-6 bg-slate-800">
           {[
             { id: 'ident', label: 'Identification' },
             { id: 'navire', label: 'Navire & Ports' },
@@ -293,7 +293,7 @@ function DeclarationModal({ onClose, onSuccess }: { onClose: () => void, onSucce
               key={t.id}
               type="button"
               onClick={() => setActiveTab(t.id as any)}
-              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
             >
               {t.label}
             </button>
@@ -308,12 +308,12 @@ function DeclarationModal({ onClose, onSuccess }: { onClose: () => void, onSucce
               <InputField label="Numéro BL Interne" field="numero_bl" required placeholder="Ex: BL-2026-001" />
               <InputField label="Numéro BL Externe (Vrai BL)" field="numero_bl_externe" placeholder="Ex: MAEU123456789" />
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Client Propriétaire *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-1">Client Propriétaire *</label>
                 <select 
                   required
                   value={formData.client_id}
                   onChange={e => setFormData({...formData, client_id: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
                 >
                   <option value="">Sélectionner un client...</option>
                   {clients.map(c => (
@@ -341,10 +341,10 @@ function DeclarationModal({ onClose, onSuccess }: { onClose: () => void, onSucce
 
           {/* TAB 3 : MARCHANDISE */}
           <div className={activeTab === 'marchandise' ? 'block' : 'hidden'}>
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 mb-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1">Code Article (7 chiffres) *</label>
+                  <label className="block text-sm font-bold text-slate-300 mb-1">Code Article (7 chiffres) *</label>
                   <input 
                     type="text" 
                     required
@@ -353,23 +353,23 @@ function DeclarationModal({ onClose, onSuccess }: { onClose: () => void, onSucce
                     value={formData.code_article}
                     onChange={e => setFormData({...formData, code_article: e.target.value.replace(/\D/g, '')})}
                     placeholder="Saisissez le code numérique..."
-                    className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-mono text-sm bg-white"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-mono text-sm bg-slate-900"
                   />
                   {articleError && <p className="text-red-500 text-xs mt-1 font-bold">{articleError}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1">
+                  <label className="block text-sm font-bold text-slate-300 mb-1">
                     Quantité {articleInfo ? `(en ${articleInfo.unite_mesure})` : ''} *
                   </label>
                   <input 
                     type="number" step="0.001" required disabled={!articleInfo}
                     value={formData.quantite_declaree}
                     onChange={e => setFormData({...formData, quantite_declaree: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-300 outline-none disabled:bg-slate-100 text-sm font-bold"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-600 outline-none disabled:bg-slate-900 text-sm font-bold"
                   />
                 </div>
                 <div className="col-span-2">
-                  <div className="bg-white p-2 rounded-lg border border-slate-200 text-sm flex items-center">
+                  <div className="bg-slate-900 p-2 rounded-lg border border-slate-700 text-sm flex items-center">
                     {articleInfo ? (
                       <span><span className="font-bold text-emerald-600 mr-2">Produit reconnu:</span> {articleInfo.nom}</span>
                     ) : (
@@ -388,8 +388,8 @@ function DeclarationModal({ onClose, onSuccess }: { onClose: () => void, onSucce
               <InputField label="Type Emballage" field="type_emballage" placeholder="Ex: Sacs de 50kg" />
             </div>
 
-            <div className="mt-6 border-t border-slate-100 pt-4">
-              <h4 className="text-sm font-bold text-slate-800 mb-4">Informations de Lot (Vrac / Sacs)</h4>
+            <div className="mt-6 border-t border-slate-700 pt-4">
+              <h4 className="text-sm font-bold text-slate-200 mb-4">Informations de Lot (Vrac / Sacs)</h4>
               <div className="grid grid-cols-3 gap-4">
                 <InputField label="Numéro de Lot" field="numero_lot" placeholder="Ex: L-2026-001" />
                 <InputField label="Date de Fabrication" field="date_fabrication" type="date" />
@@ -397,11 +397,11 @@ function DeclarationModal({ onClose, onSuccess }: { onClose: () => void, onSucce
               </div>
             </div>
             <div className="mt-4">
-              <label className="block text-sm font-bold text-slate-700 mb-1">Description Détaillée</label>
+              <label className="block text-sm font-bold text-slate-300 mb-1">Description Détaillée</label>
               <textarea 
                 value={formData.description_marchandises}
                 onChange={e => setFormData({...formData, description_marchandises: e.target.value})}
-                className="w-full px-4 py-2 rounded-xl border border-slate-300 outline-none text-sm h-20 resize-none"
+                className="w-full px-4 py-2 rounded-xl border border-slate-600 outline-none text-sm h-20 resize-none"
                 placeholder="Description telle qu'écrite sur le BL..."
               />
             </div>
@@ -415,11 +415,11 @@ function DeclarationModal({ onClose, onSuccess }: { onClose: () => void, onSucce
               <InputField label="Notify Party" field="notify_party" />
               
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Mode de Fret</label>
+                <label className="block text-sm font-bold text-slate-300 mb-1">Mode de Fret</label>
                 <select 
                   value={formData.mode_fret}
                   onChange={e => setFormData({...formData, mode_fret: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-300 outline-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-600 outline-none text-sm"
                 >
                   <option value="">Non spécifié</option>
                   <option value="PREPAID">Prepaid</option>
@@ -431,12 +431,12 @@ function DeclarationModal({ onClose, onSuccess }: { onClose: () => void, onSucce
             </div>
           </div>
 
-          <div className="flex justify-between items-center mt-8 pt-4 border-t border-slate-100">
+          <div className="flex justify-between items-center mt-8 pt-4 border-t border-slate-700">
             <div className="text-xs text-slate-400">
               * Champs obligatoires
             </div>
             <div className="flex gap-3">
-              <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors">Annuler</button>
+              <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-400 hover:bg-slate-800 transition-colors">Annuler</button>
               <button 
                 type="submit" 
                 disabled={!articleInfo}

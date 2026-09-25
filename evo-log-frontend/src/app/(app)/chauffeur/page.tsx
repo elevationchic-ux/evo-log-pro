@@ -53,7 +53,7 @@ export default function ChauffeurPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-800 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -61,8 +61,8 @@ export default function ChauffeurPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center gap-3">
+      <div className="min-h-screen bg-slate-800 p-4">
+        <div className="bg-red-500/10 text-red-600 p-4 rounded-xl flex items-center gap-3">
           <AlertTriangle className="w-5 h-5" />
           <p>{error}</p>
         </div>
@@ -71,7 +71,7 @@ export default function ChauffeurPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-slate-800 pb-20">
       {/* Header Mobile */}
       <div className="bg-blue-600 text-white p-6 rounded-b-3xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -90,64 +90,64 @@ export default function ChauffeurPage() {
       {/* Main Content */}
       <div className="p-4 mt-2 space-y-4">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-semibold text-gray-900">Missions en cours</h2>
-          <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">
+          <h2 className="text-lg font-semibold text-slate-100">Missions en cours</h2>
+          <span className="bg-blue-500/15 text-blue-300 text-xs font-bold px-2.5 py-1 rounded-full">
             {missions.length} active(s)
           </span>
         </div>
 
         {missions.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-100">
-            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-slate-900 rounded-2xl p-8 text-center shadow-sm border border-slate-700">
+            <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-gray-900 font-medium mb-1">Aucune mission</h3>
-            <p className="text-sm text-gray-500">Vous n'avez pas de livraison en attente pour le moment.</p>
+            <h3 className="text-slate-100 font-medium mb-1">Aucune mission</h3>
+            <p className="text-sm text-slate-400">Vous n'avez pas de livraison en attente pour le moment.</p>
           </div>
         ) : (
           missions.map((mission) => (
-            <div key={mission.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div key={mission.id} className="bg-slate-900 rounded-2xl shadow-sm border border-slate-700 overflow-hidden">
               <div className="p-4 border-b border-gray-50">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                    <span className="p-2 bg-blue-500/10 text-blue-600 rounded-lg">
                       <Truck className="w-5 h-5" />
                     </span>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium">{mission.reference || `Mission #${mission.id}`}</p>
-                      <p className="text-sm font-bold text-gray-900">{mission.merchandise || 'Fret Divers'}</p>
+                      <p className="text-xs text-slate-400 font-medium">{mission.reference || `Mission #${mission.id}`}</p>
+                      <p className="text-sm font-bold text-slate-100">{mission.merchandise || 'Fret Divers'}</p>
                     </div>
                   </div>
-                  <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-md">
+                  <span className="bg-yellow-500/15 text-yellow-300 text-xs font-semibold px-2 py-1 rounded-md">
                     En route
                   </span>
                 </div>
 
                 <div className="space-y-3 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent">
                   <div className="relative flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center z-10">
+                    <div className="w-5 h-5 rounded-full bg-slate-900 border-2 border-slate-600 flex items-center justify-center z-10">
                       <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500 uppercase">Origine</p>
-                      <p className="text-sm font-medium text-gray-900">{mission.origin || 'Dépôt Douala'}</p>
+                      <p className="text-xs text-slate-400 uppercase">Origine</p>
+                      <p className="text-sm font-medium text-slate-100">{mission.origin || 'Dépôt Douala'}</p>
                     </div>
                   </div>
                   <div className="relative flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-white border-2 border-blue-500 flex items-center justify-center z-10">
+                    <div className="w-5 h-5 rounded-full bg-slate-900 border-2 border-blue-500 flex items-center justify-center z-10">
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                     </div>
                     <div className="flex-1">
                       <p className="text-xs text-blue-500 uppercase">Destination</p>
-                      <p className="text-sm font-medium text-gray-900">{mission.destination || 'Client Final'}</p>
+                      <p className="text-sm font-medium text-slate-100">{mission.destination || 'Client Final'}</p>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="p-4 bg-gray-50/50 flex gap-3">
+              <div className="p-4 bg-slate-800/50 flex gap-3">
                 <button 
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 border border-slate-700 text-slate-200 rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors"
                   onClick={() => toast.success("Ouvre le GPS (Google Maps)")}
                 >
                   <Navigation className="w-4 h-4" />

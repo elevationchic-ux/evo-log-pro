@@ -222,6 +222,15 @@ Pour assurer la sécurité industrielle et la confidentialité des données, l'a
 | **DIRECTEUR TRANSPORT** | Tour de Contrôle, LiveMap, TCO Flotte | Tous portails transport | Supervision globale de la flotte et dispatching |
 | **SUPER ADMIN / ADMIN** | **Accès Total aux 323 Routes & 117 APIs** | L'ensemble des 8 portails + Admin SaaS | Gouvernance globale, gestion des licences et audits |
 
+> **Affinage par permissions granulaires (aligné code au 25/09/2026).** La matrice
+> ci-dessus décrit le périmètre par rôle (`modules_allowed`). Depuis la migration
+> `020_rbac_granulaire_accreditations`, l'accès est en outre restreint par un moteur de
+> permissions `module.sous_module.action` (`require_perm`), une **visibilité
+> hiérarchique** (`visible_user_ids`), des **accréditations** nominatives datées et des
+> **espaces communs** par entreprise. `require_perm` est appliqué aux domaines cœur
+> (comptabilité avancée, magasin) ; les niveaux 0/1 bypassent la granularité et tout le
+> reste retombe sur `modules_allowed` (non-régression). Détail : [`docs/RBAC_ACCREDITATIONS.md`](docs/RBAC_ACCREDITATIONS.md).
+
 ---
 
 ## 8. CARTOGRAPHIE EXHAUSTIVE DES 18 MODULES & RÉPERTOIRE DES ROUTES

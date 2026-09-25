@@ -41,3 +41,7 @@ Thumbs.db
 
 # Backups
 *.bak
+
+# Local logs (never commit)
+*.log
+logs/

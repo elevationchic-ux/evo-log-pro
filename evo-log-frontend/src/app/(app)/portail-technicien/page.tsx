@@ -134,7 +134,7 @@ export default function PortailTechnicienPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-900 rounded-2xl border border-slate-700">
         {[
           { id: 'ot', label: 'Mes Ordres de Travail (OT)', icon: ClipboardList, count: workOrders.length },
           { id: 'rapport', label: 'Saisir Rapport d’Intervention', icon: Save },
@@ -149,15 +149,15 @@ export default function PortailTechnicienPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
                 isActive
-                  ? 'bg-white text-slate-900 shadow-md border border-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                  ? 'bg-slate-900 text-slate-200 shadow-md border border-slate-700'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/10'
               }`}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
               {tab.count !== undefined && (
                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono ${
-                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-700 text-slate-300'
                 }`}>
                   {tab.count}
                 </span>
@@ -171,12 +171,12 @@ export default function PortailTechnicienPage() {
       {activeTab === 'ot' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 space-y-3">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
               <Wrench className="w-4 h-4 text-purple-600" /> Vos Interventions ({workOrders.length})
             </h2>
 
             {workOrders.length === 0 ? (
-              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-xs text-slate-500">
+              <div className="p-8 text-center bg-slate-900 rounded-2xl border border-slate-700 text-xs text-slate-500">
                 Aucun ordre de travail assigné.
               </div>
             ) : (
@@ -187,20 +187,20 @@ export default function PortailTechnicienPage() {
                   className={`p-4 rounded-2xl border cursor-pointer transition-all ${
                     selectedOT?.id === ot.id
                       ? 'bg-purple-50/70 border-purple-400 shadow-md'
-                      : 'bg-white border-slate-200 hover:border-slate-300'
+                      : 'bg-slate-900 border-slate-700 hover:border-slate-600'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-xs font-mono font-black text-slate-900">
+                    <span className="text-xs font-mono font-black text-slate-200">
                       #{ot.numero_ot || `OT-${ot.id}`}
                     </span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      ot.type_maintenance === 'CURATIF' ? 'bg-rose-100 text-rose-800' : 'bg-blue-100 text-blue-800'
+                      ot.type_maintenance === 'CURATIF' ? 'bg-rose-500/15 text-rose-300' : 'bg-blue-500/15 text-blue-300'
                     }`}>
                       {ot.type_maintenance}
                     </span>
                   </div>
-                  <div className="text-xs font-bold text-slate-800">{ot.titre}</div>
+                  <div className="text-xs font-bold text-slate-200">{ot.titre}</div>
                   <div className="text-[11px] text-slate-500 mt-1">
                     Équipement : {ot.equipement_nom || ot.immatriculation || 'Tracteur Flotte'}
                   </div>
@@ -211,11 +211,11 @@ export default function PortailTechnicienPage() {
 
           <div className="lg:col-span-2">
             {selectedOT ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+              <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-700 gap-2">
                   <div>
-                    <span className="text-xs font-mono text-purple-700 font-bold">Ordre de Travail Sélectionné</span>
-                    <h2 className="text-xl font-black text-slate-900">{selectedOT.titre}</h2>
+                    <span className="text-xs font-mono text-purple-300 font-bold">Ordre de Travail Sélectionné</span>
+                    <h2 className="text-xl font-black text-slate-200">{selectedOT.titre}</h2>
                     <p className="text-xs text-slate-500">N° #{selectedOT.numero_ot || `OT-${selectedOT.id}`}</p>
                   </div>
                   <button
@@ -227,21 +227,21 @@ export default function PortailTechnicienPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
+                  <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-1.5">
                     <span className="font-bold text-slate-500 uppercase">Détails Véhicule / Équipement</span>
-                    <p className="font-bold text-slate-900">{selectedOT.equipement_nom || selectedOT.immatriculation || 'Tracteur Routier'}</p>
-                    <p className="text-slate-600">Priorité : <strong className="text-rose-600">{selectedOT.priorite}</strong></p>
-                    <p className="text-slate-600">Statut : <strong>{selectedOT.statut}</strong></p>
+                    <p className="font-bold text-slate-200">{selectedOT.equipement_nom || selectedOT.immatriculation || 'Tracteur Routier'}</p>
+                    <p className="text-slate-400">Priorité : <strong className="text-rose-600">{selectedOT.priorite}</strong></p>
+                    <p className="text-slate-400">Statut : <strong>{selectedOT.statut}</strong></p>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
+                  <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-1.5">
                     <span className="font-bold text-slate-500 uppercase">Consignes d’Intervention</span>
-                    <p className="text-slate-700 leading-relaxed">{selectedOT.description || 'Contrôle complet et révision'}</p>
+                    <p className="text-slate-300 leading-relaxed">{selectedOT.description || 'Contrôle complet et révision'}</p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-xs text-slate-500">
+              <div className="p-12 text-center bg-slate-900 rounded-2xl border border-slate-700 text-xs text-slate-500">
                 Sélectionnez un ordre de travail pour afficher ses détails.
               </div>
             )}
@@ -251,9 +251,9 @@ export default function PortailTechnicienPage() {
 
       {/* Onglet 2 : Rapport d'Intervention */}
       {activeTab === 'rapport' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
-          <div className="pb-4 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
+          <div className="pb-4 border-b border-slate-700">
+            <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
               <Save className="w-5 h-5 text-purple-600" /> Saisie du Compte-Rendu d’Intervention
             </h2>
             <p className="text-xs text-slate-500">
@@ -263,34 +263,34 @@ export default function PortailTechnicienPage() {
 
           <form onSubmit={handleSubmitRapport} className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">OT Concerne</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">OT Concerne</label>
               <input
                 type="text"
                 disabled
                 value={selectedOT ? `#${selectedOT.numero_ot || selectedOT.id} - ${selectedOT.titre}` : 'Aucun OT sélectionné'}
-                className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-600 font-semibold"
+                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-400 font-semibold"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Temps Passé (Heures)</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Temps Passé (Heures)</label>
                 <input
                   type="number"
                   step="0.5"
                   required
                   value={rapportForm.duree_heures}
                   onChange={(e) => setRapportForm({ ...rapportForm, duree_heures: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 outline-none font-mono"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-purple-500 outline-none font-mono"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Statut Final</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Statut Final</label>
                 <select
                   value={rapportForm.statut_final}
                   onChange={(e) => setRapportForm({ ...rapportForm, statut_final: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-purple-500 outline-none"
                 >
                   <option value="TERMINE">Intervention Terminée (Opérationnel)</option>
                   <option value="EN_ATTENTE_PIECES">En Attente de Pièces de Rechange</option>
@@ -300,32 +300,32 @@ export default function PortailTechnicienPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Diagnostic Réalisé</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Diagnostic Réalisé</label>
               <textarea
                 rows={2}
                 value={rapportForm.diagnostic}
                 onChange={(e) => setRapportForm({ ...rapportForm, diagnostic: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-purple-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Détail des Travaux Effectués</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Détail des Travaux Effectués</label>
               <textarea
                 rows={3}
                 value={rapportForm.travaux_effectues}
                 onChange={(e) => setRapportForm({ ...rapportForm, travaux_effectues: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-purple-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Pièces Consommées</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Pièces Consommées</label>
               <input
                 type="text"
                 value={rapportForm.pieces_utilisees}
                 onChange={(e) => setRapportForm({ ...rapportForm, pieces_utilisees: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-purple-500 outline-none"
               />
             </div>
 
@@ -342,9 +342,9 @@ export default function PortailTechnicienPage() {
 
       {/* Onglet 3 : Demande Pièces Magasin */}
       {activeTab === 'pieces' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
-          <div className="pb-4 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
+          <div className="pb-4 border-b border-slate-700">
+            <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
               <Package className="w-5 h-5 text-indigo-600" /> Demande de Pièces au Magasin
             </h2>
             <p className="text-xs text-slate-500">
@@ -354,35 +354,35 @@ export default function PortailTechnicienPage() {
 
           <form onSubmit={handleDemandePieces} className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Désignation / Référence Pièce</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Désignation / Référence Pièce</label>
               <input
                 type="text"
                 required
                 placeholder="Ex: Filtre à gazole, Courroie alternateur..."
                 value={piecesForm.article}
                 onChange={(e) => setPiecesForm({ ...piecesForm, article: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Quantité Souhaitée</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Quantité Souhaitée</label>
                 <input
                   type="number"
                   required
                   value={piecesForm.quantite}
                   onChange={(e) => setPiecesForm({ ...piecesForm, quantite: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Degré d'Urgence</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Degré d'Urgence</label>
                 <select
                   value={piecesForm.urgence}
                   onChange={(e) => setPiecesForm({ ...piecesForm, urgence: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
                 >
                   <option value="NORMAL">Normal (Stock magasin)</option>
                   <option value="URGENT">Urgent (Camion immobilisé)</option>
@@ -392,13 +392,13 @@ export default function PortailTechnicienPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Véhicule / Équipement Destinataire</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Véhicule / Équipement Destinataire</label>
               <input
                 type="text"
                 placeholder="Ex: LT-TRUCK-889"
                 value={piecesForm.equipement}
                 onChange={(e) => setPiecesForm({ ...piecesForm, equipement: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
               />
             </div>
 
@@ -414,28 +414,28 @@ export default function PortailTechnicienPage() {
 
       {/* Onglet 4 : Parc Équipements */}
       {activeTab === 'equipements' && (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
               Parc des Véhicules & Équipements GMAO ({equipments.length})
             </h2>
           </div>
 
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-800">
             {equipments.length === 0 ? (
               <div className="p-8 text-center text-slate-500 text-xs">
                 Aucun équipement enregistré.
               </div>
             ) : (
               equipments.map((eq) => (
-                <div key={eq.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80">
+                <div key={eq.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-800/80">
                   <div>
-                    <div className="text-xs font-bold text-slate-900">{eq.nom || eq.immatriculation || `Équipement #${eq.id}`}</div>
+                    <div className="text-xs font-bold text-slate-200">{eq.nom || eq.immatriculation || `Équipement #${eq.id}`}</div>
                     <div className="text-[11px] text-slate-500">Catégorie : {eq.categorie || 'Poids Lourd'} • Marque : {eq.marque || 'Renault / Mercedes'}</div>
                   </div>
                   <div className="text-right">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                      eq.statut === 'OPERATIONNEL' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                      eq.statut === 'OPERATIONNEL' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
                     }`}>
                       {eq.statut || 'EN SERVICE'}
                     </span>

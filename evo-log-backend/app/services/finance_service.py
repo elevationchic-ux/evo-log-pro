@@ -1,6 +1,7 @@
 """Finance service - OHADA accounting and financial management for Cameroon/CEMAC"""
 from datetime import datetime, date, timedelta
 from typing import List, Optional, Dict, Any
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from app.models.finance_ohada import (
@@ -132,28 +133,57 @@ class FactureService:
     @staticmethod
     def creer_facture(
         db: Session,
-        numero_facture: str,
-        client_id: int,
-        type_facture: str,
-        date_emission: date,
-        montant_ht: float,
-        taux_tva: float
+        numero_facture: Optional[str] = None,
+        client_id: int = None,
+        type_facture: str = "vente",
+        date_emission: date = None,
+        montant_ht: float = None,
+        taux_tva: float = 19.25,
+        # --- aliases de l'ancienne signature (appels existants) ---
+        date_facture: date = None,
+        date_echeance: date = None,
+        montant_tva: float = None,
+        montant_ttc: float = None,
+        statut: Optional[str] = None,
     ) -> Facture:
-        """Create invoice"""
-        montant_tva = montant_ht * (taux_tva / 100)
-        montant_ttc = montant_ht + montant_tva
-        
+        """Create invoice.
+
+        Numerotation : si `numero_facture` est absent, la sequence LEGALE
+        continue est utilisee (FAC-ANNEE-0001, exigence DGI). Un numero
+        manuel n'est accepte que s'il est conforme (sequente) : sinon, les
+        avoirs/prestations prennent leur propre prefixe automatique.
+
+        Totaux : montants TVA/TTC calcules reellement depuis HT x taux si
+        non fournis  jamais inventes.
+        """
+        from app.utils.numerotation import prochaine_reference
+
+        date_emission = date_emission or date_facture or date.today()
+
+        type_piece = "AVOIR" if (type_facture or "").lower() in ("avoir", "credit_note", "note_credit") else "FACTURE"
+        if not numero_facture:
+            numero_facture = prochaine_reference(
+                db, type_piece, date_reference=date_emission
+            )
+
+        if montant_tva is None:
+            montant_tva = round((montant_ht or 0) * (float(taux_tva or 0) / 100), 2)
+        if montant_ttc is None:
+            montant_ttc = round((montant_ht or 0) + montant_tva, 2)
+
         facture = Facture(
             numero_facture=numero_facture,
             client_id=client_id,
             type_facture=type_facture,
             date_emission=date_emission,
+            date_echeance=date_echeance,
             montant_ht=montant_ht,
             taux_tva=taux_tva,
             montant_tva=montant_tva,
             montant_ttc=montant_ttc,
             devise="XAF",
-            solde_restant=montant_ttc
+            solde_restant=montant_ttc,
+            statut=statut or "brouillon",
         )
         db.add(facture)
         db.commit()
@@ -164,22 +194,40 @@ class FactureService:
     def ajouter_ligne_facture(
         db: Session,
         facture_id: int,
-        article_id: int,
-        designation: str,
-        quantite: float,
-        prix_unitaire_ht: float,
-        taux_tva: float
+        article_id: Optional[int] = None,
+        designation: Optional[str] = None,
+        quantite: float = None,
+        prix_unitaire_ht: float = None,
+        taux_tva: float = 19.25,
+        # --- alias de l'ancienne signature ---
+        article: Optional[str] = None,
+        prix_unitaire: Optional[float] = None,
+        montant_ht: Optional[float] = None,
+        unite: Optional[str] = None,
     ) -> LigneFacture:
-        """Add line to invoice"""
-        montant_ht = quantite * prix_unitaire_ht
-        montant_tva = montant_ht * (taux_tva / 100)
-        montant_ttc = montant_ht + montant_tva
-        
+        """Add line to invoice.
+
+        designation/article : meme champ (l'ancien appelait la designation
+        "article"). Les totaux sont recalcules depuis quantite x PU, jamais
+        repris d'un montant passes en dur.
+        """
+        designation = designation or article
+        if not designation:
+            raise HTTPException(status_code=400, detail="Designation de la ligne obligatoire.")
+        prix_unitaire_ht = prix_unitaire_ht if prix_unitaire_ht is not None else prix_unitaire
+        if quantite is None or prix_unitaire_ht is None:
+            raise HTTPException(status_code=400, detail="Quantite et prix unitaire obligatoires.")
+
+        montant_ht = round(quantite * prix_unitaire_ht, 2)
+        montant_tva = round(montant_ht * (float(taux_tva or 0) / 100), 2)
+        montant_ttc = round(montant_ht + montant_tva, 2)
+
         ligne = LigneFacture(
             facture_id=facture_id,
             article_id=article_id,
             designation=designation,
             quantite=quantite,
+            unite=unite,
             prix_unitaire_ht=prix_unitaire_ht,
             montant_ht=montant_ht,
             taux_tva=taux_tva,
@@ -613,56 +661,10 @@ def _legacy_ecriture_creer(db: Session, numero_ecriture: str, date_ecriture: dat
 EcritureComptableService.creer_ecriture = staticmethod(_legacy_ecriture_creer)
 
 
-def _legacy_facture_creer(db: Session, numero_facture: str, client_id: int, date_facture: date,
-                         date_echeance: date, montant_ht: float, taux_tva: float,
-                         montant_tva: float, montant_ttc: float) -> Facture:
-    facture = Facture(
-        numero_facture=numero_facture,
-        client_id=client_id,
-        type_facture="vente",
-        date_emission=date_facture,
-        date_echeance=date_echeance,
-        montant_ht=montant_ht,
-        taux_tva=taux_tva,
-        montant_tva=montant_tva,
-        montant_ttc=montant_ttc,
-        devise="XAF",
-        solde_restant=montant_ttc,
-        statut="non_payee",
-    )
-    db.add(facture)
-    db.commit()
-    db.refresh(facture)
-    return facture
-
-
-FactureService.creer_facture = staticmethod(_legacy_facture_creer)
-
-
-def _legacy_ligne_facture_ajouter(db: Session, facture_id: int, article: str, quantite: float,
-                                prix_unitaire: float, montant_ht: float) -> LigneFacture:
-    ligne = LigneFacture(
-        facture_id=facture_id,
-        article_id=1,
-        designation=article,
-        quantite=quantite,
-        prix_unitaire_ht=prix_unitaire,
-        montant_ht=montant_ht,
-        taux_tva=0,
-        montant_tva=0,
-        montant_ttc=montant_ht,
-        devise="XAF",
-    )
-    ligne.article = article
-    ligne.quantite = quantite
-    ligne.montant_ht = montant_ht
-    db.add(ligne)
-    db.commit()
-    db.refresh(ligne)
-    return ligne
-
-
-FactureService.ajouter_ligne_facture = staticmethod(_legacy_ligne_facture_ajouter)
+# creer_facture / ajouter_ligne_facture : l'app "legacy" qui écrasait ces deux
+# méthodes avec une signature incompatible cassait en réalité le routeur
+# POST /finance/factures (7 arguments passés, 9 attendus -> TypeError).
+# La version unique ci-dessus accepte les deux formes ; plus de patch ici.
 
 
 def _legacy_paiement_creer(db: Session, numero_paiement: str, facture_id: int, date_paiement: date,

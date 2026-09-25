@@ -104,6 +104,13 @@ export default function PortailEmployePage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'bulletins' | 'calendrier' | 'conges' | 'documents' | 'profil'>('bulletins');
 
+  // Deep-link depuis la navigation : /portail-employe?tab=... ouvre l'onglet demande.
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('tab');
+    const allowed = ['bulletins', 'calendrier', 'conges', 'documents', 'profil'];
+    if (t && (allowed as string[]).includes(t)) setActiveTab(t as typeof activeTab);
+  }, []);
+
   // API State
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [bulletins, setBulletins] = useState<BulletinPaie[]>([]);

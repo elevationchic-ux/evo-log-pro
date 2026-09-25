@@ -21,7 +21,7 @@ export default function WmsSlotsPage() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Magasin: Cartographie WMS</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-100">Magasin: Cartographie WMS</h1>
           <p className="text-muted-foreground mt-1">
             Gérez les emplacements physiques (Allées, Racks, Niveaux) et le "Directed Put-away".
           </p>
@@ -103,7 +103,7 @@ export default function WmsSlotsPage() {
                     <TableCell>{slot.level}</TableCell>
                     <TableCell>
                       {slot.currentWeight} / {slot.maxWeight}
-                      <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                      <div className="w-full bg-slate-700 rounded-full h-1.5 mt-1">
                         <div 
                           className={`h-1.5 rounded-full ${slot.currentWeight / slot.maxWeight > 0.9 ? 'bg-red-500' : 'bg-blue-500'}`} 
                           style={{ width: `${(slot.currentWeight / slot.maxWeight) * 100}%` }}

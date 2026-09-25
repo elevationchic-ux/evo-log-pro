@@ -87,9 +87,9 @@ const EMPTY: DashboardData = {
 }
 
 const fmtM = (v: Num, unit = 'M') =>
-  v === null ? '—' : `${(v / 1_000_000).toFixed(1)}${unit}`
+  v === null ? '' : `${(v / 1_000_000).toFixed(1)}${unit}`
 
-const fmtInt = (v: Num) => (v === null ? '—' : v.toLocaleString('fr-FR'))
+const fmtInt = (v: Num) => (v === null ? '' : v.toLocaleString('fr-FR'))
 
 export default function GlobalDashboard() {
   const router = useRouter()
@@ -97,7 +97,7 @@ export default function GlobalDashboard() {
   const [tcode, setTcode] = useState('')
   const [loading, setLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
-  const [lastSync, setLastSync] = useState<string>('—')
+  const [lastSync, setLastSync] = useState<string>('')
   const [loadError, setLoadError] = useState(false)
 
   const [data, setData] = useState<DashboardData>(EMPTY)
@@ -164,7 +164,7 @@ export default function GlobalDashboard() {
         items.push({
           id: `F-${f.id}`,
           type: 'FACTURE',
-          text: `Facture ${f.numero || `#${f.id}`} — ${f.client_nom || 'client inconnu'} (${fmtM(Number(f.montant_ttc), ' M FCFA')})`,
+          text: `Facture ${f.numero || `#${f.id}`}  ${f.client_nom || 'client inconnu'} (${fmtM(Number(f.montant_ttc), ' M FCFA')})`,
           date: f.date_emission || f.created_at || ''
         })
       }
@@ -212,7 +212,7 @@ export default function GlobalDashboard() {
   const kpiCards: { label: string; value: string; icon: typeof Truck; color: string; bg: string; border: string }[] = [
     { label: "Chiffre d'Affaires (FCFA)", value: fmtM(data.chiffreAffaires), icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
     { label: 'Missions en Cours', value: fmtInt(data.missionsEnCours), icon: Truck, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30' },
-    { label: 'Véhicules Actifs', value: data.vehiculesActifs === null ? '—' : `${data.vehiculesActifs} / ${data.vehiculesTotal ?? 0}`, icon: Radio, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30' },
+    { label: 'Véhicules Actifs', value: data.vehiculesActifs === null ? '' : `${data.vehiculesActifs} / ${data.vehiculesTotal ?? 0}`, icon: Radio, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30' },
     { label: 'Valeur Stock (FCFA)', value: fmtM(data.valeurStock), icon: Package, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/30' },
     { label: 'Stock sous Minimum', value: fmtInt(data.alertesStock), icon: AlertTriangle, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/30' },
     { label: 'Mouvements du Jour', value: fmtInt(data.mouvementsJour), icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/30' }
@@ -292,7 +292,7 @@ export default function GlobalDashboard() {
 
       {/* 📊 Enterprise Charts & Ops */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Chart — données réelles 12 mois */}
+        {/* Revenue Chart  données réelles 12 mois */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -306,8 +306,8 @@ export default function GlobalDashboard() {
               <AreaChart data={revenueMonths}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -322,14 +322,14 @@ export default function GlobalDashboard() {
             </ResponsiveContainer>
           ) : (
             <div className="h-[250px] flex flex-col items-center justify-center text-center gap-2 border border-dashed border-slate-800 rounded-2xl">
-              <BarChart3 className="w-8 h-8 text-slate-600" />
+              <BarChart3 className="w-8 h-8 text-slate-400" />
               <p className="text-sm font-bold text-slate-300">Aucune facture enregistrée</p>
               <p className="text-xs text-slate-500 max-w-xs">Le graphique se construit à partir des émissions de factures réelles de votre organisation.</p>
             </div>
           )}
         </div>
 
-        {/* Fleet & Warehouse — agrégats réels */}
+        {/* Fleet & Warehouse  agrégats réels */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <Radio className="w-5 h-5 text-indigo-400" /> Flotte & Entrepôts
@@ -376,7 +376,7 @@ export default function GlobalDashboard() {
                 </div>
               ) : (
                 <p className="text-xs text-slate-500 border border-dashed border-slate-800 rounded-xl p-3">
-                  Aucun entrepot enregistre — la carte se remplit des entrepots et stocks reels de votre organisation.
+                  Aucun entrepot enregistre  la carte se remplit des entrepots et stocks reels de votre organisation.
                 </p>
               )}
             </div>
@@ -422,7 +422,7 @@ export default function GlobalDashboard() {
         </div>
       </div>
 
-      {/* 📡 Last document activity — issu des écritures réelles */}
+      {/* 📡 Last document activity  issu des écritures réelles */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
         <h2 className="text-lg font-bold text-white flex items-center gap-2 pb-3 border-b border-slate-800">
           <Clock className="w-5 h-5 text-emerald-400" /> Derniers Documents Financiers (factures & encaissements)
@@ -446,7 +446,7 @@ export default function GlobalDashboard() {
           </div>
         ) : (
           <div className="py-8 flex flex-col items-center justify-center text-center gap-2 border border-dashed border-slate-800 rounded-2xl">
-            <Warehouse className="w-8 h-8 text-slate-600" />
+            <Warehouse className="w-8 h-8 text-slate-400" />
             <p className="text-sm font-bold text-slate-300">Aucun document financier enregistré</p>
             <p className="text-xs text-slate-500 max-w-md">
               Ce flux affiche les dernières factures émises et encaissements enregistrés dans la base.{' '}

@@ -43,9 +43,12 @@ async def create_escale(escale_data: EscaleCreate, db: Session = Depends(get_db)
     import random
     import string
     
-    numero_escale = f"ESC-{datetime.now().strftime('%Y%m%d')}-{''.join(random.choices(string.ascii_uppercase + string.digits, k=6))}"
+    data = escale_data.model_dump()
+    numero_escale = data.pop("numero_escale", None) or (
+        f"ESC-{datetime.now().strftime('%Y%m%d')}-{''.join(random.choices(string.ascii_uppercase + string.digits, k=6))}"
+    )
     
-    db_escale = Escale(numero_escale=numero_escale, **escale_data.model_dump())
+    db_escale = Escale(numero_escale=numero_escale, **data)
     db.add(db_escale)
     db.commit()
     db.refresh(db_escale)
@@ -79,6 +82,27 @@ async def create_operation_acconage(operation_data: OperationAcconageCreate, db:
     db.commit()
     db.refresh(db_operation)
     return db_operation
+
+
+# ============ DOSSIER UNIQUE DE MARCHANDISE (vue consolidee honnete) ============
+@router.get("/dossier-marchandise")
+async def dossier_marchandise(
+    numero_conteneur: str = None,
+    numero_bl: str = None,
+    db: Session = Depends(get_db),
+):
+    """Fiche consolidee d'une marchandise le long de la chaine portuaire.
+
+    Cle d'entree : un numero de conteneur OU un numero de connaissement (B/L).
+    Retourne, pour chaque etape, UNIQUEMENT ce qui est reellement relie (cle
+    etrangere ou numero physique). Les etapes que le schema ne relie pas au
+    conteneur sont signalees 'non_liciable_en_base' : rien n'est invente.
+    """
+    from app.services.dossier_marchandise import consigner_dossier_marchandise
+
+    return consigner_dossier_marchandise(
+        db, numero_conteneur=numero_conteneur, numero_bl=numero_bl
+    )
 
 
 # ============ BAPLIE EDI & TOS STOWAGE 3D ============
@@ -117,18 +141,32 @@ async def assigner_emplacement_terre_plein(payload: dict):
 
 # ============ FACTURATION DROITS DE QUAI PAD / PAK ============
 @router.get("/facturation-quai/{escale_id}")
-async def calculer_redevances_quai(escale_id: int, port_code: str = "PAD"):
-    """Calculate official PAD / PAK port dues, wharfage and stevedoring invoice"""
+async def calculer_redevances_quai(
+    escale_id: int, port_code: str = "PAD", db: Session = Depends(get_db)
+):
+    """Estimation des redevances portuaires PAD/PAK d'une escale relle.
+
+    Quantities are derived from the actual port call and prices from the official
+    TarifPortuaire table. If the official tariffs are not loaded, the service
+    answers 501 rather than inventing rates. Nothing is certified here.
+    """
     from app.services.acconage_service import PortAdvancedTOSService
-    return PortAdvancedTOSService.calculate_port_dues_cemac(escale_id, port_code)
+    return PortAdvancedTOSService.calculate_port_dues_cemac(db, escale_id, port_code)
 
 
 @router.post("/facturation-quai/{escale_id}/generer-facture")
 async def generer_facture_quai(escale_id: int, payload: dict = None, db: Session = Depends(get_db)):
-    """Issue certified armateur invoice for port dues and berthing fees"""
+    """Prepare a DRAFT port-dues invoice for an armateur (no fake certification).
+
+    Honesty fix: the previous version stamped statut_facturation='GENEREE_VALIDEE'
+    on an invoice computed from hardcoded rates and fabricated container counts.
+    It now returns the honest estimation draft only; certification/validation must
+    come from a real, signed emission step, never simulated here.
+    """
     from app.services.acconage_service import PortAdvancedTOSService
     port_code = (payload or {}).get("port_code", "PAD")
-    facture = PortAdvancedTOSService.calculate_port_dues_cemac(escale_id, port_code)
-    facture["statut_facturation"] = "GENEREE_VALIDEE"
-    facture["date_validation"] = datetime.utcnow().isoformat()
+    facture = PortAdvancedTOSService.calculate_port_dues_cemac(db, escale_id, port_code)
+    facture["note"] = (
+        "Brouillon d'estimation. Non certifie : aucune emission signee n'a eu lieu."
+    )
     return facture

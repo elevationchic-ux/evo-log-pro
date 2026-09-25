@@ -53,29 +53,29 @@ export function OperationCancel() {
   return (
     <Card className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Annulation d'Opération</h2>
-        <p className="text-gray-600">
+        <h2 className="text-2xl font-bold text-slate-100 mb-2">Annulation d'Opération</h2>
+        <p className="text-slate-400">
           Annulez une opération en saisissant son numéro d'OT (Opération Trace)
         </p>
       </div>
 
       {result === 'success' && (
-        <Alert className="mb-4 bg-green-50 border-green-200">
+        <Alert className="mb-4 bg-green-500/10 border-green-500/40">
           <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">{message}</AlertDescription>
+          <AlertDescription className="text-green-300">{message}</AlertDescription>
         </Alert>
       )}
 
       {result === 'error' && (
-        <Alert className="mb-4 bg-red-50 border-red-200">
+        <Alert className="mb-4 bg-red-500/10 border-red-500/40">
           <XCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">{message}</AlertDescription>
+          <AlertDescription className="text-red-300">{message}</AlertDescription>
         </Alert>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="numeroOt" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="numeroOt" className="block text-sm font-medium text-slate-200 mb-2">
             Numéro d'OT
           </label>
           <Input
@@ -88,13 +88,13 @@ export function OperationCancel() {
             pattern="[0-9]{9}"
             title="Le numéro d'OT doit contenir 9 chiffres"
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             Numéro unique de 9 chiffres généré lors de l'opération
           </p>
         </div>
 
         <div>
-          <label htmlFor="annulePar" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="annulePar" className="block text-sm font-medium text-slate-200 mb-2">
             Annulé par
           </label>
           <Input
@@ -107,9 +107,9 @@ export function OperationCancel() {
           />
         </div>
 
-        <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/40 rounded-lg">
           <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-yellow-800">
+          <div className="text-sm text-yellow-300">
             <p className="font-semibold mb-1">Attention</p>
             <p>
               L'annulation d'une opération est irréversible. Assurez-vous d'avoir le bon numéro d'OT avant de confirmer.

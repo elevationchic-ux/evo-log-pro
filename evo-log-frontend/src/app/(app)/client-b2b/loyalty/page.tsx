@@ -1,20 +1,23 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Award, 
-  Plus, 
-  Search, 
-  Filter, 
-  Star, 
-  CheckCircle2, 
-  Percent, 
-  TrendingUp, 
-  Gift, 
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Award,
+  Plus,
+  Search,
+  Filter,
+  Star,
+  CheckCircle2,
+  Percent,
+  TrendingUp,
+  Gift,
   Building2,
   RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiClient } from '@/lib/api-client';
+
+const REGISTRY = 'programme-fidelite';
 
 interface LoyaltyAccount {
   id: string;
@@ -42,17 +45,62 @@ export default function ClientB2bLoyaltyPage() {
     gestionnaireDedie: 'Service Grands Comptes CADC'
   });
 
-  const handleCreateLoyalty = (e: React.FormEvent) => {
+  const loadAccounts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await apiClient.get(`/api/v1/registres/${REGISTRY}`);
+      const list = Array.isArray(res?.data) ? res.data : (res?.data?.items || []);
+      setAccounts(list.map((e: any) => {
+        const p = e.payload || {};
+        return {
+          id: String(e.id),
+          clientNom: p.clientNom || e.reference || '',
+          palier: (p.palier || 'STANDARD') as LoyaltyAccount['palier'],
+          volumesCumulesTeu: p.volumesCumulesTeu || 0,
+          tauxRistourneRfa: p.tauxRistourneRfa || 0,
+          joursFranchiseOfferts: p.joursFranchiseOfferts || 0,
+          gestionnaireDedie: p.gestionnaireDedie || '',
+          statut: (e.statut || 'ACTIF') as LoyaltyAccount['statut'],
+        };
+      }));
+    } catch {
+      setAccounts([]);
+      toast.error('Erreur réseau  chargement des comptes fidélité impossible.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadAccounts(); }, [loadAccounts]);
+
+  const handleCreateLoyalty = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.clientNom) {
       toast.error('Veuillez renseigner le nom du client.');
       return;
     }
 
-    toast.error('La gestion des programmes de fidélité n’est pas encore reliée à un service backend persistant.');
+    try {
+      await apiClient.post(`/api/v1/registres/${REGISTRY}`, {
+        reference: form.clientNom,
+        statut: 'ACTIF',
+        clientNom: form.clientNom,
+        palier: form.palier,
+        volumesCumulesTeu: form.volumesCumulesTeu,
+        tauxRistourneRfa: form.tauxRistourneRfa,
+        joursFranchiseOfferts: form.joursFranchiseOfferts,
+        gestionnaireDedie: form.gestionnaireDedie,
+      });
+      toast.success(`Compte fidélité configuré pour ${form.clientNom}.`);
+      setShowAddModal(false);
+      setForm({ clientNom: '', palier: 'GOLD', volumesCumulesTeu: 250, tauxRistourneRfa: 3.5, joursFranchiseOfferts: 5, gestionnaireDedie: 'Service Grands Comptes CADC' });
+      loadAccounts();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Erreur  compte fidélité non enregistré.');
+    }
   };
 
-  const filteredAccounts = accounts.filter(a => 
+  const filteredAccounts = accounts.filter(a =>
     a.clientNom.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -130,12 +178,11 @@ export default function ClientB2bLoyaltyPage() {
                   <tr key={a.id} className="hover:bg-surface-container transition-colors">
                     <td className="p-3 pl-5 font-bold text-on-surface">{a.clientNom}</td>
                     <td className="p-3">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        a.palier === 'PLATINUM' ? 'bg-purple-500/10 text-purple-600' :
-                        a.palier === 'GOLD' ? 'bg-amber-500/10 text-amber-600' :
-                        a.palier === 'SILVER' ? 'bg-slate-500/10 text-slate-600' :
-                        'bg-surface-container text-on-surface-variant'
-                      }`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${a.palier === 'PLATINUM' ? 'bg-purple-500/10 text-purple-600' :
+                          a.palier === 'GOLD' ? 'bg-amber-500/10 text-amber-600' :
+                            a.palier === 'SILVER' ? 'bg-slate-500/10 text-slate-400' :
+                              'bg-surface-container text-on-surface-variant'
+                        }`}>
                         {a.palier}
                       </span>
                     </td>

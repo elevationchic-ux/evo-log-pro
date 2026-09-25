@@ -1,82 +1,209 @@
 'use client';
 
-import { KPICard, StatCard, Card, CardHeader, CardContent, DataTable, StatusBadge, StatusBadges, PageHeader } from '@/components/ui';
+import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import {
+  KPICard, Card, CardHeader, CardContent, DataTable, StatusBadge, StatusBadges, PageHeader,
+} from '@/components/ui';
+import { magasinAPI, receptionMag3API } from '@/lib/api-client';
+import { useSettings } from '@/components/layout/SettingsProvider';
+
+interface ReceptionRow {
+  id: number;
+  numero_bon: string;
+  zone: string;
+  colis: number;
+  statut: string;
+  date: string;
+}
+
+interface OccupationZone {
+  zone: string;
+  nb_articles: number;
+  valeur_stockee: number;
+  occupancy: number | null;
+}
 
 export default function MagasinDashboardPage() {
-  const receptions: Array<any> = [];
+  const { language } = useSettings();
+  const lang = language === 'en' ? 'en' : 'fr';
+  const t = (fr: string, en: string) => (lang === 'en' ? en : fr);
+
+  const [kpis, setKpis] = useState<any>(null);
+  const [loadingKpis, setLoadingKpis] = useState(true);
+  const [receptions, setReceptions] = useState<ReceptionRow[]>([]);
+  const [loadingRec, setLoadingRec] = useState(true);
+  const [occupation, setOccupation] = useState<OccupationZone[]>([]);
+
+  const load = useCallback(async () => {
+    setLoadingKpis(true);
+    setLoadingRec(true);
+    try {
+      const [k, r, o] = await Promise.all([
+        magasinAPI.getKpis().catch(() => null),
+        receptionMag3API.getAll({ limit: 20 }).catch(() => null),
+        magasinAPI.getEntrepotsOccupation().catch(() => null),
+      ]);
+      setKpis(k?.data ?? null);
+      const rows = r?.data?.items ?? [];
+      setReceptions(
+        rows.map((x: any) => ({
+          id: x.id,
+          numero_bon: x.numero_bon || ``,
+          zone: x.entrepot_nom || '',
+          colis: Number(x.nombre_lignes ?? 0),
+          statut: x.statut || '',
+          date: x.date_reception ? new Date(x.date_reception).toLocaleDateString(lang === 'en' ? 'en-GB' : 'fr-FR') : '',
+        }))
+      );
+      const zones = o?.data?.zones ?? [];
+      setOccupation(zones);
+    } finally {
+      setLoadingKpis(false);
+      setLoadingRec(false);
+    }
+  }, [lang]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const columns = [
-    { key: 'id', header: 'N° Réception', sortable: true },
-    { key: 'reference', header: 'Référence BL', sortable: true },
-    { key: 'supplier', header: 'Fournisseur', sortable: true },
-    { key: 'items', header: 'Colis', sortable: true },
-    { key: 'status', header: 'Statut', render: (item: any) => (StatusBadges.Magasin as any)[item.status] || <StatusBadge label={item.status} /> },
-    { key: 'date', header: 'Date', sortable: true },
-    { key: 'warehouse', header: 'Zone' },
+    { key: 'numero_bon', header: t('N° Réception', 'Receipt No.'), sortable: true },
+    { key: 'zone', header: t('Entrepôt', 'Warehouse'), sortable: true },
+    { key: 'colis', header: t('Lignes', 'Lines'), sortable: true },
+    {
+      key: 'statut',
+      header: t('Statut', 'Status'),
+      render: (item: any) =>
+        (StatusBadges.Magasin as any)[item.statut] || <StatusBadge label={item.statut} />,
+    },
+    { key: 'date', header: t('Date', 'Date'), sortable: true },
   ];
 
   return (
     <div className="space-y-6">
-      <PageHeader 
+      <PageHeader
         title="📦 K-Magasin WMS"
-        description="Gestion d'entrepôt, réception, stockage, préparation commandes"
-        breadcrumbs={[{ label: 'Magasin' }]}
+        description={t(
+          "Gestion d'entrepôt, réception, stockage, préparation commandes",
+          'Warehouse management, receiving, storage, order picking'
+        )}
+        breadcrumbs={[{ label: t('Magasin', 'Warehouse') }]}
         actions={
-          <button className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:opacity-90 flex items-center gap-2">
+          <Link
+            href="/magasin/mouvement-de-stock-manuel"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:opacity-90 flex items-center gap-2"
+          >
             <span className="material-symbols-outlined text-[18px]">add</span>
-            Nouvelle Réception
-          </button>
+            {t('Nouvelle Réception', 'New Receipt')}
+          </Link>
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Articles en Stock" value="12,847" subtitle="Articles différents" icon={<span className="material-symbols-outlined text-2xl">inventory_2</span>} color="blue" />
-        <KPICard title="Mouvements Jour" value="247" subtitle="Entrées/Sorties" icon={<span className="material-symbols-outlined text-2xl">swap_horiz</span>} color="emerald" trend={{ value: 18, isPositive: true }} />
-        <KPICard title="Taux de Service" value="96%" subtitle="OTIF" icon={<span className="material-symbols-outlined text-2xl">verified</span>} color="blue" trend={{ value: 2, isPositive: true }} />
-        <KPICard title="Alertes Stock" value="23" subtitle="Seuil bas" icon={<span className="material-symbols-outlined text-2xl">warning</span>} color="amber" trend={{ value: 5, isPositive: false }} />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Réceptions Jour" value="12" change={8} color="success" icon={<span className="material-symbols-outlined">move_to_inbox</span>} />
-        <StatCard label="Expéditions Jour" value="18" change={12} color="primary" icon={<span className="material-symbols-outlined">outbox</span>} />
-        <StatCard label="Taux Occupation" value="78%" change={3} color="warning" icon={<span className="material-symbols-outlined">pie_chart</span>} />
-        <StatCard label="Précision Picking" value="99.2%" change={0.5} color="info" icon={<span className="material-symbols-outlined">checklist</span>} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <KPICard
+          title={t('Articles en Stock', 'Items in Stock')}
+          value={kpis?.nb_articles ?? '0'}
+          subtitle={t('Base stocks réelle', 'Live stock base')}
+          icon={<span className="material-symbols-outlined text-2xl">inventory_2</span>}
+          color="blue"
+          loading={loadingKpis}
+        />
+        <KPICard
+          title={t('Mouvements Jour', 'Movements Today')}
+          value={kpis?.mouvements_jour ?? '0'}
+          subtitle={t('Mouvements persistés', 'Persisted movements')}
+          icon={<span className="material-symbols-outlined text-2xl">swap_horiz</span>}
+          color="emerald"
+          loading={loadingKpis}
+        />
+        <KPICard
+          title={t('Valeur du Stock', 'Stock Value')}
+          value={kpis ? `${Number(kpis.valeur_stock).toLocaleString(lang === 'en' ? 'en-US' : 'fr-FR')} FCFA` : '0'}
+          subtitle={t('Valorisation WMS', 'WMS valuation')}
+          icon={<span className="material-symbols-outlined text-2xl">payments</span>}
+          color="violet"
+          loading={loadingKpis}
+        />
+        <KPICard
+          title={t('Alertes Stock', 'Stock Alerts')}
+          value={kpis?.nb_alertes_min ?? '0'}
+          subtitle={t('Sous seuil minimum', 'Below minimum')}
+          icon={<span className="material-symbols-outlined text-2xl">warning</span>}
+          color="amber"
+          loading={loadingKpis}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader title="Réceptions du Jour" subtitle="Historique des dernières réceptions" icon={<span className="material-symbols-outlined text-xl">inbox</span>} action={<button className="text-sm text-primary hover:underline">Voir tout</button>} />
+            <CardHeader
+              title={t('Réceptions récentes', 'Recent receipts')}
+              subtitle={t('Historique des dernières réceptions', 'Latest receipt history')}
+              icon={<span className="material-symbols-outlined text-xl">inbox</span>}
+              action={
+                <Link href="/magasin/stocks" className="text-sm text-primary hover:underline">
+                  {t('Voir tout', 'View all')}
+                </Link>
+              }
+            />
             <CardContent>
-              <DataTable data={receptions} columns={columns} keyField="id" />
+              <DataTable data={receptions} columns={columns} keyField="id" loading={loadingRec} />
+              {!loadingRec && receptions.length === 0 && (
+                <p className="mt-3 rounded-lg bg-slate-500/10 p-3 text-sm text-slate-500">
+                  {t(
+                    'Aucune réception enregistrée pour le moment.',
+                    'No receipt recorded yet.'
+                  )}
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
 
         <div className="space-y-6">
           <Card>
-            <CardHeader title="Occupation Entrepôt" icon={<span className="material-symbols-outlined text-xl">warehouse</span>} />
+            <CardHeader
+              title={t('Occupation Entrepôt', 'Warehouse Occupancy')}
+              icon={<span className="material-symbols-outlined text-xl">warehouse</span>}
+            />
             <CardContent>
-              <div className="space-y-4">
-                {['Zone A (Conteneurs)', 'Zone B (Palette)', 'Zone C (Marchandises)', 'Zone D (Dangerux)'].map((zone, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between text-sm mb-1"><span>{zone}</span><span className="font-medium">{65 + i * 10}%</span></div>
-                    <div className="h-2 bg-surface-container rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: `${65 + i * 10}%` }} />
+              {occupation.length === 0 ? (
+                <div className="rounded-lg bg-slate-500/10 p-3 text-sm text-slate-500">
+                  {t('Aucun entrepôt enregistré.', 'No warehouse registered.')}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {occupation.map((z, i) => (
+                    <div key={i} className="flex items-center justify-between text-sm">
+                      <span className="truncate text-slate-300 dark:text-slate-200">{z.zone}</span>
+                      <span className="ml-2 shrink-0 font-mono text-xs text-slate-500">
+                        {z.occupancy != null
+                          ? `${z.occupancy}%`
+                          : t(`${z.nb_articles} art.`, `${z.nb_articles} items`)}
+                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader title="Alertes Importantes" icon={<span className="material-symbols-outlined text-xl text-red-500">notifications</span>} />
+            <CardHeader
+              title={t('Alertes Importantes', 'Key Alerts')}
+              icon={<span className="material-symbols-outlined text-xl text-red-500">notifications</span>}
+            />
             <CardContent>
-              <div className="space-y-3">
-                <div className="p-3 rounded border border-red-200 bg-red-500/5"><p className="font-medium text-sm">Stock critique</p><p className="text-xs text-on-surface-variant">Pièces détachées X-450 - 3 unités</p></div>
-                <div className="p-3 rounded border border-amber-200 bg-amber-500/5"><p className="font-medium text-sm"> Péremption proche</p><p className="text-xs text-on-surface-variant">12 articles &lt; 30 jours</p></div>
-                <div className="p-3 rounded border border-blue-200 bg-blue-500/5"><p className="font-medium text-sm">Réception prévue</p><p className="text-xs text-on-surface-variant">SABC - 14h00</p></div>
+              <div className="rounded-lg bg-slate-500/10 p-3 text-sm text-slate-500">
+                {kpis && kpis.nb_alertes_min > 0
+                  ? t(
+                    `${kpis.nb_alertes_min} article(s) sous le seuil minimum.`,
+                    `${kpis.nb_alertes_min} item(s) below minimum threshold.`
+                  )
+                  : t('Aucune alerte de seuil actif.', 'No active threshold alerts.')}
               </div>
             </CardContent>
           </Card>

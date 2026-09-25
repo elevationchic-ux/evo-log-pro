@@ -14,12 +14,13 @@ router = APIRouter()
 
 
 @router.post("/taxation/simuler", response_model=TaxationResultResponse, summary="Simuler la liquidation des droits et taxes en douane")
-def simuler_taxation(payload: SimulationTaxationRequest):
+def simuler_taxation(payload: SimulationTaxationRequest, db: Session = Depends(get_db)):
     """Calcule le Droit de Douane (TEC CEMAC), TVA 19.25%, Redevance informatique et précompte IS."""
     return TaxationDouaniereService.calculer_droits_et_taxes(
         valeur_cif_xaf=payload.valeur_cif_xaf,
         code_sh=payload.code_sh,
-        regime=payload.regime
+        regime=payload.regime,
+        db=db,
     )
 
 

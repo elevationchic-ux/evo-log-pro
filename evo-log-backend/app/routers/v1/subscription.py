@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta
+import hmac
+import hashlib
+import json
 
 from app.database import get_db
 from app.models.organization import Organization
@@ -84,7 +87,13 @@ def upgrade_subscription(
     context: TenantContext = Depends(get_current_tenant_context),
     db: Session = Depends(get_db)
 ):
-    """Self-service upgrade or renewal of SaaS subscription plan."""
+    """Self-service upgrade or renewal of SaaS subscription plan.
+
+    Réservé à l'administrateur du tenant (contexte tenant authentifié).
+    Le changement de plan est facturé via la facturation périodique EVO-LOG ;
+    les activations déclenchées par paiement Mobile Money passent uniquement
+    par /webhook/mobile-money (signature HMAC vérifiée).
+    """
     org = context.organization
     if not org:
         raise HTTPException(status_code=400, detail="No active Organization tenant context.")
@@ -115,13 +124,66 @@ def upgrade_subscription(
 
 @router.post("/webhook/mobile-money")
 async def mobile_money_webhook(request: Request, db: Session = Depends(get_db)):
-    """Webhook listener for Orange Money & MTN Mobile Money payment confirmations."""
-    data = await request.json()
-    # Process payment notification and activate organization subscription
+    """Webhook listener for Orange Money & MTN Mobile Money payment confirmations.
+
+    SÉCURITÉ (2026-09 correction) : l'ancien code activait un abonnement sur
+    simple POST {"status":"SUCCESS"} sans vérifier l'origine de la demande.
+    Désormais :
+    1. Fail-closed : sans secret configuré, le webhook refuse tout (503).
+    2. Signature HMAC-SHA256 du corps brut, comparée en temps constant.
+    3. Le montant notifié doit correspondre au prix catalogue du plan visé.
+    """
+    from app.core.config import settings
+
+    secret = settings.MOBILE_MONEY_WEBHOOK_SECRET
+    if not secret:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "Webhook de paiement désactivé : MOBILE_MONEY_WEBHOOK_SECRET non "
+                "configuré. Aucune activation d'abonnement ne sera traitée sans "
+                "vérification de signature."
+            ),
+        )
+
+    body = await request.body()
+    provided_sig = (
+        request.headers.get("X-Momo-Signature")
+        or request.headers.get("X-Provider-Signature")
+        or ""
+    )
+    expected_sig = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+    if not provided_sig or not hmac.compare_digest(provided_sig.lower(), expected_sig):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Signature du webhook absente ou invalide.",
+        )
+
+    try:
+        data = json.loads(body)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Corps du webhook illisible (JSON attendu).")
+
     status_payment = data.get("status", "SUCCESS")
     org_code = data.get("org_code")
-    
+
     if status_payment == "SUCCESS" and org_code:
+        # Contrôler le montant notifié contre le catalogue : on n'active pas
+        # ENTERPRISE pour le prix du FREE_TRIAL.
+        plan = data.get("plan")
+        montant = data.get("montant_xaf")
+        if plan not in PLANS_CATALOG:
+            raise HTTPException(status_code=400, detail=f"Plan inconnu dans la notification : {plan!r}")
+        prix_attendu = PLANS_CATALOG[plan]["price_xaf_monthly"]
+        if montant is None or float(montant) < float(prix_attendu):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Montant notifié ({montant}) inférieur au prix catalogue du "
+                    f"plan {plan} ({prix_attendu} XAF/mois). Activation refusée."
+                ),
+            )
+
         org = db.query(Organization).filter(Organization.code == org_code).first()
         if org:
             org.status = "ACTIVE"

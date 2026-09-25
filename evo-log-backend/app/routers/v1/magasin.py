@@ -7,6 +7,8 @@ from typing import List
 from datetime import datetime
 
 from app.core.database import get_db
+from app.core.permissions import require_perm
+from app.models.user import User
 from app.schemas.magasin import StockCreate, StockUpdate, StockResponse, MouvementStockCreate, MouvementStockResponse, EntrepotCreate, EntrepotResponse
 from app.models.magasin import Stock, MouvementStock, Entrepot
 
@@ -14,7 +16,7 @@ router = APIRouter()
 
 
 @router.get("/kpis")
-async def get_magasin_kpis(db: Session = Depends(get_db)):
+async def get_magasin_kpis(db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.read"))):
     """KPIs magasin agreges depuis la base (filtr tenant via filtre ORM global).
 
     Valeur stock = somme(quantite_disponible * prix_unitaire). Sans donnees,
@@ -58,7 +60,7 @@ async def get_magasin_kpis(db: Session = Depends(get_db)):
 
 
 @router.get("/entrepots/occupation")
-async def get_entrepots_occupation(db: Session = Depends(get_db)):
+async def get_entrepots_occupation(db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.read"))):
     """Taux d'occupation par entrepot, calcule sur les stockages reels.
 
     Occupation = surface/utilisation inconnue en base -> on retourne a la place
@@ -98,14 +100,14 @@ async def get_entrepots_occupation(db: Session = Depends(get_db)):
 
 
 @router.get("/stocks", response_model=List[StockResponse])
-async def get_all_stocks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def get_all_stocks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.read"))):
     """Get all stock items"""
     stocks = db.query(Stock).offset(skip).limit(limit).all()
     return stocks
 
 
 @router.post("/stocks", response_model=StockResponse, status_code=status.HTTP_201_CREATED)
-async def create_stock(stock_data: StockCreate, db: Session = Depends(get_db)):
+async def create_stock(stock_data: StockCreate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.modify"))):
     """Create a new stock item"""
     if db.query(Stock).filter(Stock.code_article == stock_data.code_article).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Article code already exists")
@@ -118,7 +120,7 @@ async def create_stock(stock_data: StockCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/mouvements", response_model=MouvementStockResponse, status_code=status.HTTP_201_CREATED)
-async def create_mouvement_stock(mouvement_data: MouvementStockCreate, db: Session = Depends(get_db)):
+async def create_mouvement_stock(mouvement_data: MouvementStockCreate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.mouvement.create"))):
     """Create a stock movement"""
     import random
     import string
@@ -134,20 +136,20 @@ async def create_mouvement_stock(mouvement_data: MouvementStockCreate, db: Sessi
 
 @router.get("", response_model=List[StockResponse])
 @router.get("/", response_model=List[StockResponse])
-async def list_stocks_root(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def list_stocks_root(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.read"))):
     """List all stock items from root endpoint"""
     return db.query(Stock).offset(skip).limit(limit).all()
 
 
 @router.get("/entrepots", response_model=List[EntrepotResponse])
-async def get_all_entrepots(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def get_all_entrepots(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.read"))):
     """Get all warehouses"""
     entrepots = db.query(Entrepot).offset(skip).limit(limit).all()
     return entrepots
 
 
 @router.post("/entrepots", response_model=EntrepotResponse, status_code=status.HTTP_201_CREATED)
-async def create_entrepot(entrepot_data: EntrepotCreate, db: Session = Depends(get_db)):
+async def create_entrepot(entrepot_data: EntrepotCreate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.inventaire.approve"))):
     """Create a new warehouse"""
     if db.query(Entrepot).filter(Entrepot.code == entrepot_data.code).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Warehouse code already exists")
@@ -161,7 +163,7 @@ async def create_entrepot(entrepot_data: EntrepotCreate, db: Session = Depends(g
 
 # ============ WMS CROSS-DOCKING & RF TERMINAL ============
 @router.post("/cross-docking")
-async def executer_cross_docking(payload: dict):
+async def executer_cross_docking(payload: dict, current_user: User = Depends(require_perm("magasin.picking.create"))):
     """Execute direct quai-to-truck cross-docking"""
     from app.services.magasin_wms_avance_service import CrossDockingService
     manifeste_ref = payload.get("manifeste_ref", "MAN-2026-001")
@@ -171,7 +173,7 @@ async def executer_cross_docking(payload: dict):
 
 
 @router.post("/rf-scan")
-async def scanner_code_barres_rf(payload: dict):
+async def scanner_code_barres_rf(payload: dict, current_user: User = Depends(require_perm("magasin.picking.create"))):
     """Scan barcode / QR code with RF handheld terminal"""
     from app.services.magasin_wms_avance_service import RadioFrequencePDAService
     code = payload.get("code_scanne", "ART-1002")
@@ -180,7 +182,7 @@ async def scanner_code_barres_rf(payload: dict):
 
 
 @router.get("/reapprovisionnement/rop")
-async def calculer_seuil_rop(article_code: str = "ART-REF-01"):
+async def calculer_seuil_rop(article_code: str = "ART-REF-01", current_user: User = Depends(require_perm("magasin.stock.read"))):
     """Calculate safety stock and Reorder Point (Wilson ROP)"""
     from app.services.magasin_wms_avance_service import ReapprovisionnementService
     return ReapprovisionnementService.calculer_rop_et_stocks_securite(article_code)

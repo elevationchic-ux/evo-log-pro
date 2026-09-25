@@ -68,7 +68,7 @@ export default function StocksPage() {
       key: 'quantite_udb',
       header: 'Quantité UDB',
       cell: (row: Stock) => (
-        <div className="text-gray-600">
+        <div className="text-slate-400">
           {(row.quantite_udb || 0).toLocaleString()} UDB
         </div>
       )
@@ -106,8 +106,8 @@ export default function StocksPage() {
       <div className="container mx-auto p-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Stocks</h1>
-            <p className="text-gray-600 mt-1">Vérification et gestion des stocks avec filtres avancés</p>
+            <h1 className="text-3xl font-bold text-slate-100">Stocks</h1>
+            <p className="text-slate-400 mt-1">Vérification et gestion des stocks avec filtres avancés</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="w-32 h-20">
@@ -121,7 +121,7 @@ export default function StocksPage() {
         </div>
 
         {showFilters && (
-          <div className="mb-6 rounded-lg bg-gray-50 p-4">
+          <div className="mb-6 rounded-lg bg-slate-800 p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <label className="mb-1 flex items-center gap-2 text-sm font-medium">

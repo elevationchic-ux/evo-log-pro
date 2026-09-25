@@ -2,6 +2,8 @@
 
 Ce document contient les instructions et commandes de référence pour l'utilisation des assistants de code sur le dépôt **EVO-LOG SaaS**.
 
+**Dernière mise à jour :** 25 septembre 2026 (aligné code au 25/09/2026)  ajout du moteur de permissions granulaires RBAC / accréditations / espaces communs.
+
 ---
 
 ## 🛠️ Commandes Fréquentes
@@ -34,7 +36,7 @@ Ce document contient les instructions et commandes de référence pour l'utilisa
 ### Monolithe Modulaire Découplé
 - **Frontend** : Next.js 14 (App Router), Vanilla CSS Design System, Icônes PWA 3D Métalliques (`512x512`, `192x192`, `apple-touch-icon.png`, `favicon.ico`).
 - **Backend** : FastAPI 0.115, SQLAlchemy 2.0, PostgreSQL (ou SQLite dev local), Alembic, Celery, Redis, WeasyPrint.
-- **Rôles & RBAC** : Rôles stricts (`ADMIN`, `MAGASINIER`, `DISPATCHER`, `QHSE`, `FINANCIER`, `DOUANE`, `PARC`, `AUDITOR`) avec contrôle dynamique `modules_allowed`.
+- **Rôles & RBAC** : Rôles (SUPER_ADMIN, ADMIN entreprise, chefs de département, rôles métier typés seedés par la migration `020_rbac_granulaire_accreditations`) + **moteur de permissions granulaires** `app/core/permissions.py` (codes `module.sous_module.action`, dépendance `require_perm`, `visible_user_ids`), avec **fallback** sur le contrôle dynamique `modules_allowed` quand aucune permission granulaire n'est seedée. Accréditations datées (`/api/v1/accreditations`) et espaces communs par entreprise (`SharedAccess`). Détails : `docs/RBAC_ACCREDITATIONS.md`.
 
 ### Organisation Backend (`EVO-LOG-backend`)
 - `app/main.py` : Point d'entrée FastAPI, middleware d'audit, SlowAPI rate limiting, `safe_include_router()` pour l'enregistrement résilient des 22+ routeurs.

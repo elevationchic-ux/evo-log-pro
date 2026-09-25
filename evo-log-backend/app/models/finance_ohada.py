@@ -132,6 +132,10 @@ class FactureNew(Base):
     id = Column(Integer, primary_key=True, index=True)
     numero_facture = Column(String(50), unique=True, nullable=False, index=True)
     client_id = Column(Integer, ForeignKey('tiers.id'))
+    # Rattachement a la chaine documentaire (migration 024) : facture emise
+    # pour un conteneur et/ou une escale (manutention, magasinage, transport).
+    conteneur_id = Column(Integer, ForeignKey('conteneurs.id'), index=True)
+    escale_id = Column(Integer, ForeignKey('escales.id'), index=True)
     type_facture = Column(String(20))  # "vente", "achat", "avoir", "prestation"
     date_emission = Column(Date, nullable=False)
     date_echeance = Column(Date)

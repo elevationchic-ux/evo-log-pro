@@ -130,7 +130,8 @@ class ExerciceComptableResponse(ExerciceComptableBase):
 
 # Facture schemas
 class FactureBase(BaseModel):
-    numero_facture: str
+    # Absent -> sequence legale continue attribuee par le serveur (DGI).
+    numero_facture: Optional[str] = None
     client_id: int
     type_facture: str
     date_emission: date

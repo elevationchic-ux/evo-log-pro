@@ -88,11 +88,13 @@ Les espaces les plus visibles du frontend sont deja presents:
 
 - `ARCHITECTURE.md`: architecture actuelle du monolithe modulaire
 - `API_DOCUMENTATION.md`: cartographie des prefixes API exposes
+- `RBAC_ACCREDITATIONS.md`: permissions granulaires, visibilite hierarchique, accreditations et espaces communs
 - `DEPLOYMENT.md`: execution locale et deploiement VPS
 - `RAILWAY_DEPLOYMENT.md`: configuration Railway/Vercel
 - `STATUT_GLOBAL_PROJET.md`: synthese de l'etat reel et des manques
 - `TESTING_CHECKLIST.md`: checklist de verification et commandes de test
 - `TODO.md`: backlog restant
+- `archive/`: rapports d'expertise historiques (instantanes dates), conserves pour tracer l'historique mais **ne reflétant pas l'etat courant**
 
 ## Ce qui manque encore
 

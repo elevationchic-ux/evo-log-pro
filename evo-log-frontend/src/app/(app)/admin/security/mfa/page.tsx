@@ -138,7 +138,7 @@ export default function MfaConfigurationPage() {
                     <label className="flex items-start gap-md p-sm hover:bg-surface-container transition-colors rounded cursor-pointer border border-transparent hover:border-outline-variant">
                       <div className="relative inline-flex items-center cursor-pointer mt-1">
                         <input checked className="sr-only peer" type="checkbox" value=""/>
-                        <div className="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                        <div className="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-900 after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
                       </div>
                       <div>
                         <div className="font-label-md text-label-md text-on-surface">Require MFA for T-Code execution</div>
@@ -148,7 +148,7 @@ export default function MfaConfigurationPage() {
                     <label className="flex items-start gap-md p-sm hover:bg-surface-container transition-colors rounded cursor-pointer border border-transparent hover:border-outline-variant">
                       <div className="relative inline-flex items-center cursor-pointer mt-1">
                         <input className="sr-only peer" type="checkbox" value=""/>
-                        <div className="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                        <div className="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-900 after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
                       </div>
                       <div>
                         <div className="font-label-md text-label-md text-on-surface">Remember this device</div>

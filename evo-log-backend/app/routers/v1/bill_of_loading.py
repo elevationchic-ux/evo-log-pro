@@ -264,23 +264,40 @@ async def validate_bill_of_loading(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Valide officiellement le BSC auprès du Conseil National des Chargeurs du Cameroun (CNCC)"""
+    """
+    Marque le BSC comme validé en enregistrant la référence CNCC ÉMISE HORS LIGNE.
+
+    EVO-LOG ne communique pas avec le CNCC : aucune validation n'est effectuée
+    ici et aucune référence n'est inventée. Le déclarant saisit le numéro de
+    visa que le CNCC a réellement délivré (anti-fraude : sans l'ancien code,
+    un BSC non visé ne peut plus afficher « validé par le CNCC »).
+    """
     bsc = db.query(BSC).filter(BSC.id == id).first()
     if not bsc:
         raise HTTPException(status_code=404, detail=f"Connaissement BSC #{id} non trouvé")
 
-    ref = reference_cncc or f"CNCC-VAL-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    if not reference_cncc or not reference_cncc.strip():
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "reference_cncc obligatoire : EVO-LOG ne valide pas les BSC à la place "
+                "du CNCC et n'invente aucune référence. Saisissez le numéro de visa CNCC "
+                "réellement émis pour ce connaissement."
+            ),
+        )
+
     bsc.statut = "valide"
-    bsc.reference_cncc = ref
+    bsc.reference_cncc = reference_cncc.strip()
     bsc.date_validation = date.today()
     bsc.updated_at = datetime.utcnow()
 
     db.commit()
     return {
-        "message": "BSC validé avec succès par le CNCC",
+        "message": "BSC marqué comme validé : référence CNCC saisie manuellement (aucun échange avec le CNCC)",
         "id": bsc.id,
-        "reference_cncc": ref,
-        "statut": bsc.statut
+        "reference_cncc": bsc.reference_cncc,
+        "statut": bsc.statut,
+        "validation_automatique_cncc": False
     }
 
 

@@ -10,7 +10,7 @@ import { transportAPI } from '@/lib/api-client';
 const MapControlTower = dynamic(() => import('@/components/transport/MapControlTower'), { 
   ssr: false,
   loading: () => (
-    <div className="w-full h-full bg-slate-100 rounded-2xl animate-pulse flex items-center justify-center">
+    <div className="w-full h-full bg-slate-900 rounded-2xl animate-pulse flex items-center justify-center">
       <p className="text-slate-400 font-bold flex items-center gap-2">
         <Map className="w-5 h-5 animate-spin" />
         Initialisation de la tour de contrôle...
@@ -48,9 +48,20 @@ export default function GPSControlTowerPage() {
     (m.camion_immatriculation && m.camion_immatriculation.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const enMouvement = camions.filter(c => c.statut === 'EN_ROUTE' || c.statut === 'MISSION').length;
-  const enArret = camions.filter(c => c.statut === 'DISPONIBLE').length;
-  const horsLigne = camions.filter(c => c.statut === 'EN_MAINTENANCE' || !c.actif).length;
+  // CamionResponse expose `status` (valeurs reelles de l'enum CamionStatus :
+  // active / in_maintenance / out_of_service / reserved) et non `statut`.
+  // Les trois compteurs ci-dessous testaient `c.statut` contre EN_ROUTE,
+  // DISPONIBLE, EN_MAINTENANCE et `!c.actif` : aucune de ces cles n'existe,
+  // donc « En Mouvement » et « En Arret » restaient a 0 pendant que
+  // « Hors Ligne » avalait 100 % de la flotte. Le passage en mission se lit
+  // sur les missions reellement en cours, via la cle etrangere camion_id.
+  const camionsEnMission = new Set(
+    missions.filter(m => m.statut === 'en_cours' && m.camion_id != null)
+      .map(m => m.camion_id)
+  );
+  const enMouvement = camions.filter(c => camionsEnMission.has(c.id)).length;
+  const enArret = camions.filter(c => c.status === 'active' && !camionsEnMission.has(c.id)).length;
+  const horsLigne = camions.filter(c => c.status === 'in_maintenance' || c.status === 'out_of_service').length;
 
   const total = enMouvement + enArret + horsLigne || 1;
   const pctMouvement = Math.round((enMouvement / total) * 100);
@@ -64,7 +75,7 @@ export default function GPSControlTowerPage() {
         {/* Header Compact */}
         <div className="flex justify-between items-center mb-4 shrink-0">
           <div>
-            <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+            <h1 className="text-2xl font-black text-slate-200 flex items-center gap-2">
               <Map className="w-6 h-6 text-blue-600" />
               Tour de Contrôle GPS
             </h1>
@@ -79,10 +90,10 @@ export default function GPSControlTowerPage() {
                 placeholder="Rechercher OT, Camion..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 outline-none w-64"
+                className="pl-9 pr-4 py-2 border border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 outline-none w-64"
               />
             </div>
-            <div className="bg-emerald-50 text-emerald-600 px-3 py-2 rounded-xl text-sm font-bold flex items-center gap-2 border border-emerald-100 shadow-sm">
+            <div className="bg-emerald-500/10 text-emerald-600 px-3 py-2 rounded-xl text-sm font-bold flex items-center gap-2 border border-emerald-500/30 shadow-sm">
               <Activity className="w-4 h-4" />
               Système En Ligne
             </div>
@@ -90,37 +101,37 @@ export default function GPSControlTowerPage() {
         </div>
 
         {/* Map Container */}
-        <div className="flex-1 rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative z-0">
+        <div className="flex-1 rounded-2xl shadow-sm border border-slate-700 overflow-hidden relative z-0">
           {loading ? (
-            <div className="h-full w-full bg-slate-100 animate-pulse flex items-center justify-center">Chargement de la carte...</div>
+            <div className="h-full w-full bg-slate-900 animate-pulse flex items-center justify-center">Chargement de la carte...</div>
           ) : (
             <MapControlTower vehicles={filteredMissions} />
           )}
           
           {/* Overlay Stats Card */}
-          <div className="absolute top-4 right-4 z-[400] w-72 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-100">
-            <h3 className="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">
+          <div className="absolute top-4 right-4 z-[400] w-72 bg-slate-900/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-700">
+            <h3 className="font-bold text-slate-200 mb-3 text-sm flex items-center gap-2">
               <MapPin className="w-4 h-4 text-blue-600" />
               Statut Flotte ({camions.length} Véhicules)
             </h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-semibold text-slate-500">En Mouvement</span>
+                <span className="text-xs font-semibold text-slate-500">En mission</span>
                 <span className="text-sm font-black text-emerald-600">{enMouvement}</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5"><div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${pctMouvement}%` }}></div></div>
+              <div className="w-full bg-slate-900 rounded-full h-1.5"><div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${pctMouvement}%` }}></div></div>
               
               <div className="flex justify-between items-center">
                 <span className="text-xs font-semibold text-slate-500">En Arrêt / Quai</span>
                 <span className="text-sm font-black text-amber-600">{enArret}</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5"><div className="bg-amber-500 h-1.5 rounded-full" style={{ width: `${pctArret}%` }}></div></div>
+              <div className="w-full bg-slate-900 rounded-full h-1.5"><div className="bg-amber-500 h-1.5 rounded-full" style={{ width: `${pctArret}%` }}></div></div>
               
               <div className="flex justify-between items-center">
                 <span className="text-xs font-semibold text-slate-500">Hors Ligne / Maintenance</span>
                 <span className="text-sm font-black text-red-600">{horsLigne}</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5"><div className="bg-red-500 h-1.5 rounded-full" style={{ width: `${pctHorsLigne}%` }}></div></div>
+              <div className="w-full bg-slate-900 rounded-full h-1.5"><div className="bg-red-500 h-1.5 rounded-full" style={{ width: `${pctHorsLigne}%` }}></div></div>
             </div>
           </div>
         </div>

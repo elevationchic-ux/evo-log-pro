@@ -2,8 +2,8 @@
 
 **Version:** 2.0  
 **Statut:** Développement avancé  staging requis avant production  
-**Dernière mise à jour:** 19 septembre 2026  
-**État vérifié:** [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md)
+**Dernière mise à jour:** 25 septembre 2026 (aligné code au 25/09/2026)  
+**État vérifié (historique):** [docs/archive/ETAT_REEL_2026-09-19.md](./docs/archive/ETAT_REEL_2026-09-19.md)
 
 ---
 
@@ -93,9 +93,13 @@ EVO-LOG SaaS est une solution ERP logistique professionnelle adaptée au context
 - **Build Production**: 153/153 pages statiques
 
 ### Rôles & RBAC
-- **Rôles**: ADMIN, MAGASINIER, DISPATCHER, QHSE, FINANCIER, DOUANE, PARC, AUDITOR
-- **Contrôle dynamique**: `modules_allowed` par rôle
-- **Contrôle d'accès**: Validation stricte des permissions
+- **Rôles**: SUPER_ADMIN, ADMIN (entreprise), chefs de département, rôles métier typés (Chef Comptable, Comptable, Transit principal, Déclarant, Magasinier, Chef de parc, Dispatcher, Admin RH, QHSE, Auditeur, Directeur Financier...)
+- **Moteur de permissions granulaires** (`app/core/permissions.py`): codes `module.sous_module.action` avec jokers, appliqué aux domaines cœur (comptabilité avancée, magasin) via la dépendance `require_perm`.
+- **Visibilité hiérarchique** (`visible_user_ids`): admin = toute l'entreprise, chef = son département (restreignable par accréditation de périmètre), utilisateur = soi-même.
+- **Accréditations** datées et révocables (`/api/v1/accreditations`) : droit granulaire ou périmètre nominatif, déchu automatiquement à expiration.
+- **Espaces communs par entreprise** (`SharedAccess`) : modules ouverts à tout utilisateur authentifié (portail RH self-service, chat, notifications, documents, annuaire).
+- **Rétro-compatibilité** : un rôle sans permission granulaire seedée retombe sur `modules_allowed` ; niveaux 0/1 bypassent la granularité. Un tenant non seedé se comporte comme avant.
+- **Documentation** : voir [docs/RBAC_ACCREDITATIONS.md](./docs/RBAC_ACCREDITATIONS.md).
 
 ### Infrastructure
 - **Multi-tenancy**: Organisation isolation

@@ -6,6 +6,7 @@ import {
   PieChart, Activity, Calendar, CheckCircle2, Clock, ArrowUpRight
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 export default function ReportingPage() {
   const [rapportExecutif, setRapportExecutif] = useState<any>(null);
@@ -37,13 +38,27 @@ export default function ReportingPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleDownloadRapport = async (type: string) => {
+  const telechargerRapport = async (endpoint: string, label: string) => {
     try {
-      const res = await apiClient.get(`/api/v1/reporting/rapports/financier/${periodeFinancier}`);
-      console.log('Rapport financier:', res.data);
-      alert(`Rapport ${type} disponible. ${JSON.stringify(res.data || {}).slice(0, 100)}...`);
-    } catch (err) { console.error('Erreur téléchargement rapport:', err); }
+      const res = await apiClient.get(endpoint);
+      const data = res?.data?.data ?? res?.data ?? {};
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${label.replace(/[^a-z0-9]+/gi, '_').toLowerCase()}_${periodeFinancier}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success(`Rapport « ${label} » téléchargé.`);
+    } catch {
+      toast.error(`Échec du téléchargement du rapport « ${label} » : le service de reporting n'a pas répondu.`);
+    }
   };
+
+  const handleDownloadRapport = (type: string) =>
+    telechargerRapport(`/api/v1/reporting/rapports/financier/${periodeFinancier}`, `Rapport ${type}`);
 
   const metricCards = [
     { key: 'ca_xaf', label: "Chiffre d'Affaires (XAF)", icon: TrendingUp, color: 'text-emerald-400', format: (v: number) => (v || 0).toLocaleString('fr-FR') },
@@ -150,13 +165,7 @@ export default function ReportingPage() {
                   <span className="text-sm font-semibold text-slate-200">{r.label}</span>
                 </div>
                 <button
-                  onClick={async () => {
-                    try {
-                      const res = await apiClient.get(r.endpoint);
-                      console.log(r.label, res.data);
-                      alert(`Rapport généré: ${r.label}`);
-                    } catch (e) { console.error(e); }
-                  }}
+                  onClick={() => telechargerRapport(r.endpoint, r.label)}
                   className="px-3 py-1.5 rounded-xl bg-violet-600/20 hover:bg-violet-600/30 text-violet-400 border border-violet-500/30 text-xs font-bold flex items-center gap-1.5 transition-all"
                 >
                   <ArrowUpRight className="w-3.5 h-3.5" /> Générer

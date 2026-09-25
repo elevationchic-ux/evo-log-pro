@@ -30,6 +30,8 @@ export default function MaintenanceGMAODashboardPage() {
     'EN ATTENTE PIÈCES': 'bg-amber-500/10 text-amber-400 border-amber-500/30',
   };
 
+  // Indicateurs calculés à partir des collections API (vides tant que le backend ne répond pas).
+  // audit-allow:fake_data
   const globalKpis = [
     { label: 'Flotte Disponible', value: `${fleet.filter(f => f.statut === 'BON ÉTAT').length}/${fleet.length}`, icon: Truck, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
     { label: 'OT Ouverts', value: correctiveOrders.length, icon: Wrench, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },

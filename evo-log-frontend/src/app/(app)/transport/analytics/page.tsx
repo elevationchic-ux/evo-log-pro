@@ -30,7 +30,7 @@ export default function AnalyticsPage() {
         
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-slate-900 flex items-center gap-3">
+          <h1 className="text-3xl font-black text-slate-200 flex items-center gap-3">
             <PieChart className="w-8 h-8 text-blue-600" />
             EVO-Analytics (Business Intelligence)
           </h1>
@@ -39,20 +39,20 @@ export default function AnalyticsPage() {
 
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-700">
             <div className="flex justify-between items-start">
               <h3 className="text-sm font-bold text-slate-500 uppercase">Chiffre d'Affaires</h3>
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><DollarSign className="w-5 h-5"/></div>
+              <div className="p-2 bg-blue-500/10 text-blue-600 rounded-lg"><DollarSign className="w-5 h-5"/></div>
             </div>
-            <p className="text-3xl font-black text-slate-800 mt-4 font-mono">19.5M</p>
+            <p className="text-3xl font-black text-slate-200 mt-4 font-mono">19.5M</p>
             <p className="text-sm text-emerald-600 font-bold mt-2 flex items-center gap-1"><TrendingUp className="w-4 h-4"/> +14.5%</p>
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-700">
             <div className="flex justify-between items-start">
               <h3 className="text-sm font-bold text-slate-500 uppercase">DÃ©penses OpÃ©rationnelles</h3>
-              <div className="p-2 bg-rose-50 text-rose-600 rounded-lg"><Activity className="w-5 h-5"/></div>
+              <div className="p-2 bg-rose-500/10 text-rose-600 rounded-lg"><Activity className="w-5 h-5"/></div>
             </div>
-            <p className="text-3xl font-black text-slate-800 mt-4 font-mono">12.3M</p>
+            <p className="text-3xl font-black text-slate-200 mt-4 font-mono">12.3M</p>
             <p className="text-sm text-rose-600 font-bold mt-2 flex items-center gap-1"><TrendingUp className="w-4 h-4"/> +5.2%</p>
           </div>
         </div>
@@ -61,11 +61,11 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Evolution CA vs Depenses */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-800 mb-6">Ã‰volution CA vs DÃ©penses</h3>
+          <div className="bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-700">
+            <h3 className="text-lg font-bold text-slate-200 mb-6">Ã‰volution CA vs DÃ©penses</h3>
             <div className="h-80 w-full">
               {loading ? (
-                <div className="h-full w-full bg-slate-50 rounded-xl animate-pulse"></div>
+                <div className="h-full w-full bg-slate-800 rounded-xl animate-pulse"></div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -93,11 +93,11 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Marges par mois */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-800 mb-6">Marge Nette (BÃ©nÃ©fice)</h3>
+          <div className="bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-700">
+            <h3 className="text-lg font-bold text-slate-200 mb-6">Marge Nette (BÃ©nÃ©fice)</h3>
             <div className="h-80 w-full">
               {loading ? (
-                <div className="h-full w-full bg-slate-50 rounded-xl animate-pulse"></div>
+                <div className="h-full w-full bg-slate-800 rounded-xl animate-pulse"></div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>

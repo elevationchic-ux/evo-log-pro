@@ -1,0 +1,1 @@
+{"error":true,"message":"Internal server error","status_code":500,"path":"/api/v1/auth/login","method":"POST"}

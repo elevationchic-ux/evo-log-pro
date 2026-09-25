@@ -14,6 +14,8 @@ import {
   LayoutDashboard, Layers, Grid, FileCheck, ShoppingCart, RotateCcw,
   ArrowRightLeft, Bot, CheckCircle2
 } from 'lucide-react';
+import { getModulePalette } from './modulePalette';
+import { MODULE_TITLES_EN } from './navI18n';
 
 export interface SubModuleItem {
   label: string;
@@ -31,6 +33,7 @@ export interface SubModuleItem {
 export interface ModuleNavConfig {
   key: string;
   title: string;
+  titleEn?: string;
   path: string;
   icon: any;
   color: string;
@@ -952,7 +955,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       },
       {
         label: 'Abonnements & Licences Globales',
-        path: '/admin-saas/subscriptions',
+        path: '/admin/subscriptions',
         icon: Tag,
         badge: 'Plans',
         tcode: 'KSAAS_SUB',
@@ -962,7 +965,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       },
       {
         label: 'Infrastructure, Quotas & API Gateway',
-        path: '/admin-saas/infrastructure',
+        path: '/admin/audit/system-health',
         icon: Zap,
         badge: 'Infra',
         tcode: 'KSAAS_INF',
@@ -972,7 +975,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       },
       {
         label: 'Logs d Audit & Sécurité Plateforme',
-        path: '/admin-saas/audit',
+        path: '/admin/audit',
         icon: ShieldAlert,
         badge: 'Audit',
         tcode: 'KSAAS_AUD',
@@ -1010,7 +1013,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       },
       {
         label: 'Agences & Sites Opérationnels',
-        path: '/admin-tenant/agencies',
+        path: '/admin/agencies',
         icon: Building,
         badge: 'Agences',
         tcode: 'KADM_AGC',
@@ -1046,6 +1049,36 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         tcode: 'KADM_SET',
         description: 'Paramètres régionaux, devises XAF et notifications internes',
         businessProcess: 'Paramétrage local',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN']
+      },
+      {
+        label: 'Rôles & Permissions Granulaires',
+        path: '/admin/configuration-des-roles-rbac',
+        icon: ShieldAlert,
+        badge: 'RBAC',
+        tcode: 'KADM_RLS',
+        description: 'Arbre des permissions par module, sous-module et action, et visibilité hiérarchique par rôle',
+        businessProcess: 'Gouvernance des accès',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN']
+      },
+      {
+        label: 'Accréditations & Habilitations',
+        path: '/admin/accreditations',
+        icon: UserCheck,
+        badge: 'Habilitations',
+        tcode: 'KADM_ACC',
+        description: 'Octroi de droits granulaires et de périmètres de visibilité nominatifs, datés et révocables',
+        businessProcess: 'Gouvernance des accès',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN']
+      },
+      {
+        label: 'Espaces Communs par Entreprise',
+        path: '/admin/espaces-communs',
+        icon: Globe,
+        badge: 'Communs',
+        tcode: 'KADM_COM',
+        description: 'Modules ouverts à tous les collaborateurs authentifiés (portail RH self-service, messagerie interne)',
+        businessProcess: 'Gouvernance des accès',
         requiredRoles: ['ADMIN', 'SUPER_ADMIN']
       }
     ]
@@ -1458,6 +1491,20 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
 };
 
 /**
+ * Normalisation couleur : chaque module majeur hérite d'UNE couleur unique
+ * depuis la palette canonique (modulePalette). Garantit la cohérence entre
+ * registry, sidebar, dropdown, palette de commandes et bulle orbitale, et
+ * supprime toute collision de teinte entre modules.
+ */
+for (const mod of Object.values(NAVIGATION_REGISTRY)) {
+  const pal = getModulePalette(mod.key);
+  mod.color = pal.hex;
+  mod.glow = pal.glow;
+  mod.titleEn = MODULE_TITLES_EN[mod.key];
+  mod.bgGradient = pal.bgGradient;
+}
+
+/**
  * Fonction d'orchestration RBAC Senior
  * Filtre dynamiquement les modules et sous-modules selon les rôles et permissions de l'utilisateur.
  */
@@ -1466,6 +1513,7 @@ export function getFilteredNavigationForUser(
     roles?: string[];
     modulesAllowed?: string[];
     permissions?: string[];
+    sharedModules?: string[];
   } | null
 ): ModuleNavConfig[] {
   if (!user) return Object.values(NAVIGATION_REGISTRY);
@@ -1476,6 +1524,30 @@ export function getFilteredNavigationForUser(
   const isSupportStaff = userRoles.some(r => ['SECRETAIRE', 'GARDIEN', 'AGENT_ENTRETIEN', 'SUPPORT_IT'].includes(r));
   const userModules = (user.modulesAllowed || []).map(m => m.toLowerCase());
   const userPermissions = user.permissions || [];
+  const sharedModules = (user.sharedModules || []).map(m => String(m).toLowerCase());
+
+  // Correspondance clé de navigation -> module du catalogue de permissions.
+  // Un module est accordé par le RBAC granulaire si l'utilisateur porte au moins
+  // une permission effective sous ce module. Additif : cela NE RETIRE jamais un
+  // accès déjà accordé par les rôles (requiredRoles restent la valeur par défaut).
+  const NAV_TO_PERM_MODULE: Record<string, string[]> = {
+    'comptabilite-avance': ['comptabilite', 'tresorerie', 'facturation', 'fiscalite', 'immobilisations'],
+    'finance': ['comptabilite', 'tresorerie', 'facturation', 'fiscalite'],
+    'transport': ['transport', 'parc', 'gps'],
+    'magasin': ['magasin'],
+    'transit': ['transit', 'acconage'],
+    'rh': ['rh', 'paie', 'conges'],
+    'achats': ['achats', 'fournisseurs', 'cotations'],
+  };
+  const hasGranularAccessTo = (moduleKey: string): boolean => {
+    if (userPermissions.length === 0) return false;
+    // Module commun partagé par l'entreprise -> visible pour tout collaborateur.
+    if (sharedModules.includes(moduleKey.toLowerCase())) return true;
+    const permModules = NAV_TO_PERM_MODULE[moduleKey] || [moduleKey];
+    return userPermissions.some(code =>
+      permModules.some(pm => String(code).toLowerCase().startsWith(pm + '.'))
+    );
+  };
 
   return Object.values(NAVIGATION_REGISTRY).map(moduleConfig => {
     // 1. SUPER ADMIN: A accès exclusif à la plateforme SaaS et aux modules de supervision
@@ -1519,7 +1591,8 @@ export function getFilteredNavigationForUser(
       moduleConfig.key === 'portail-frais' ||
       moduleConfig.key === 'portail-qhse';
 
-    const isModuleAllowed = isUniversalPortal || hasRoleAccess || hasModuleAccess;
+    const isModuleAllowed =
+      isUniversalPortal || hasRoleAccess || hasModuleAccess || hasGranularAccessTo(moduleConfig.key);
 
     if (!isModuleAllowed) return null;
 

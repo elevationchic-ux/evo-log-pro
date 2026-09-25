@@ -159,7 +159,7 @@ export default function ClientProfilePage() {
       <div className="min-h-[80vh] py-12">
         <div className="flex flex-col items-center justify-center">
           <Loader2 className="w-16 h-16 text-primary animate-spin" />
-          <p className="mt-4 text-slate-600">Chargement du profil...</p>
+          <p className="mt-4 text-slate-400">Chargement du profil...</p>
         </div>
       </div>
     );
@@ -186,24 +186,24 @@ export default function ClientProfilePage() {
     <div className="min-h-[80vh] py-12">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">
+        <h1 className="text-3xl font-bold text-slate-200 mb-2">
           Mon Profil
         </h1>
-        <p className="text-slate-600">
+        <p className="text-slate-400">
           Gérez vos informations personnelles et professionnelles
         </p>
       </div>
 
       {/* Success/Error Messages */}
       {successMessage && (
-        <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded">
+        <div className="mb-6 p-4 bg-green-500/10 border-l-4 border-green-500 rounded">
           <CheckCircle2 className="w-4 h-4 text-green-600 mr-2" />
           <span>{successMessage}</span>
         </div>
       )}
 
       {error && editing === false && (
-        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+        <div className="mb-6 p-4 bg-red-500/10 border-l-4 border-red-500 rounded">
           <AlertCircle className="w-4 h-4 text-red-600 mr-2" />
           <span>{error}</span>
         </div>
@@ -215,7 +215,7 @@ export default function ClientProfilePage() {
         <div className="lg:col-span-2">
           <div className="space-y-6">
             {/* Profile Header */}
-            <div className="flex items-center gap-4 p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+            <div className="flex items-center gap-4 p-6 bg-slate-900 rounded-xl shadow-sm border border-slate-700">
               {!profile?.image ? (
                 <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center">
                   {profile?.prenom?.[0]?.toUpperCase()}{profile?.nom?.[0]?.toUpperCase()}
@@ -228,7 +228,7 @@ export default function ClientProfilePage() {
                 />
               )}
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className="text-xl font-bold text-slate-200">
                   {profile?.prenom} {profile?.nom || ''}
                 </h2>
                 <p className="text-slate-500">{profile?.email}</p>
@@ -243,15 +243,15 @@ export default function ClientProfilePage() {
             {/* Profile Info Cards */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Personal Info */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6">
+                <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
                   <User className="w-5 h-5" /> Informations Personnelles
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3 text-sm">
                     <CreditCard className="w-4 h-4 mt-1 text-slate-400 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-slate-700">Nom complet</p>
+                      <p className="font-medium text-slate-300">Nom complet</p>
                       <p className="text-slate-500">
                         {profile?.prenom} {profile?.nom || ''}
                       </p>
@@ -260,14 +260,14 @@ export default function ClientProfilePage() {
                   <div className="flex items-start gap-3 text-sm">
                     <Mail className="w-4 h-4 mt-1 text-slate-400 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-slate-700">Email</p>
+                      <p className="font-medium text-slate-300">Email</p>
                       <p className="text-slate-500 break-all">{profile?.email}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Phone className="w-4 h-4 mt-1 text-slate-400 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-slate-700">Téléphone</p>
+                      <p className="font-medium text-slate-300">Téléphone</p>
                       <p className="text-slate-500">{profile?.telephone || 'Non renseigné'}</p>
                     </div>
                   </div>
@@ -275,22 +275,22 @@ export default function ClientProfilePage() {
               </div>
 
               {/* Company Info */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6">
+                <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
                   <Building className="w-5 h-5" /> Informations Entreprise
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3 text-sm">
                     <Building className="w-4 h-4 mt-1 text-slate-400 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-slate-700">Raison Sociale</p>
+                      <p className="font-medium text-slate-300">Raison Sociale</p>
                       <p className="text-slate-500">{profile?.nom || 'Non renseigné'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <MapPin className="w-4 h-4 mt-1 text-slate-400 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-slate-700">Adresse</p>
+                      <p className="font-medium text-slate-300">Adresse</p>
                       <p className="text-slate-500 break-all">
                         {profile?.adresse}, {profile?.ville}, {profile?.pays} {profile?.codePostal}
                       </p>
@@ -299,28 +299,28 @@ export default function ClientProfilePage() {
                   <div className="flex items-start gap-3 text-sm">
                     <CreditCard className="w-4 h-4 mt-1 text-slate-400 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-slate-700">RCCM</p>
+                      <p className="font-medium text-slate-300">RCCM</p>
                       <p className="text-slate-500">{profile?.RCCM || 'Non renseigné'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <CreditCard className="w-4 h-4 mt-1 text-slate-400 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-slate-700">NIU</p>
+                      <p className="font-medium text-slate-300">NIU</p>
                       <p className="text-slate-500">{profile?.NIU || 'Non renseigné'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Zap className="w-4 h-4 mt-1 text-slate-400 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-slate-700">Secteur d'Activité</p>
+                      <p className="font-medium text-slate-300">Secteur d'Activité</p>
                       <p className="text-slate-500">{profile?.secteurActivite || 'Non renseigné'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Calendar className="w-4 h-4 mt-1 text-slate-400 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-slate-700">Date d'Enregistrement</p>
+                      <p className="font-medium text-slate-300">Date d'Enregistrement</p>
                       <p className="text-slate-500">
                         {profile?.dateCreation ? new Date(profile.dateCreation).toLocaleDateString('fr-FR') : 'Non renseigné'}
                       </p>
@@ -334,8 +334,8 @@ export default function ClientProfilePage() {
 
         {/* Edit Profile Form */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+          <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6">
+            <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
               {editing ? <Save className="w-5 h-5" /> : <Edit className="w-5 h-5" />}
               {editing ? 'Enregistrer les modifications' : 'Modifier le profil'}
             </h3>
@@ -352,7 +352,7 @@ export default function ClientProfilePage() {
             {editing && (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Raison Sociale <span className="text-destructive">*</span>
                   </label>
                   <input
@@ -366,7 +366,7 @@ export default function ClientProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Prénom
                   </label>
                   <input
@@ -379,7 +379,7 @@ export default function ClientProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Email <span className="text-destructive">*</span>
                   </label>
                   <input
@@ -393,7 +393,7 @@ export default function ClientProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Téléphone
                   </label>
                   <input
@@ -406,7 +406,7 @@ export default function ClientProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Adresse
                   </label>
                   <textarea
@@ -420,7 +420,7 @@ export default function ClientProfilePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                         Ville
                       </label>
                       <input
@@ -432,7 +432,7 @@ export default function ClientProfilePage() {
                       />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Code Postal
                     </label>
                     <input
@@ -446,7 +446,7 @@ export default function ClientProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Pays
                   </label>
                   <input
@@ -460,7 +460,7 @@ export default function ClientProfilePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       RCCM
                     </label>
                     <input
@@ -472,7 +472,7 @@ export default function ClientProfilePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       NIU
                     </label>
                     <input
@@ -487,7 +487,7 @@ export default function ClientProfilePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Statut Juridique
                     </label>
                     <input
@@ -499,7 +499,7 @@ export default function ClientProfilePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Secteur d'Activité
                     </label>
                     <input

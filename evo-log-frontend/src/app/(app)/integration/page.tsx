@@ -129,7 +129,7 @@ export default function IntegrationPage() {
           <div className="p-12 text-center text-slate-400"><RefreshCw className="w-6 h-6 animate-spin text-rose-400 mx-auto mb-2" /></div>
         ) : integrations.length === 0 ? (
           <div className="p-12 text-center text-slate-400">
-            <Plug className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+            <Plug className="w-10 h-10 text-slate-400 mx-auto mb-2" />
             <p className="font-bold text-white">Aucune intégration configurée</p>
             <p className="text-xs text-slate-500 mt-1">Configurez les connecteurs depuis le panneau administrateur.</p>
           </div>

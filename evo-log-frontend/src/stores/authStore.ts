@@ -10,6 +10,14 @@ interface User {
   role: string
   roles: string[]
   is_active: boolean
+  // RBAC granulaire (miroir de la charge utile de connexion backend)
+  permissions?: string[]
+  shared_modules?: string[]
+  modules_allowed?: string[]
+  role_level?: number
+  company_id?: number | null
+  department_id?: number | null
+  is_superuser?: boolean
 }
 
 interface AuthState {

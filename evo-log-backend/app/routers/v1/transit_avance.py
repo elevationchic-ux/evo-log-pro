@@ -186,8 +186,12 @@ def creer_nomenclature(
 ):
     """Create CEMAC TARIC nomenclature entry"""
     n = NomenclatureCEMAC(**nomenclature.model_dump())
-    n.date_effet = date.today()
+    n.date_effet = n.date_effet or date.today()
     n.statut = "actif"
+    # Provenance : une saisie manuelle est tracee comme telle (distincte d'un
+    # import du tarif officiel), pour ne jamais masquer l'origine d'un taux.
+    if not (n.source_reference or "").strip():
+        n.source_reference = f"saisie manuelle ({getattr(current_user, 'username', 'inconnu')})"
     db.add(n)
     db.commit()
     db.refresh(n)
@@ -213,6 +217,58 @@ def calculer_droits(
 ):
     """Calculate customs duties based on HS code"""
     return NomenclatureCEMACService.calculer_droits(db, code_hs, valeur_declaree)
+
+
+@router.get("/nomenclature-cemac", response_model=List[NomenclatureCEMACResponse])
+def lister_nomenclature(
+    search: str | None = None,
+    limite: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Liste des positions tarifaires CEMAC chargees (recherche par code SH)."""
+    q = db.query(NomenclatureCEMAC)
+    if search:
+        q = q.filter(NomenclatureCEMAC.code_hs.like(f"{search}%"))
+    return q.order_by(NomenclatureCEMAC.code_hs).limit(min(limite, 500)).all()
+
+
+@router.put("/nomenclature-cemac/{code_hs}", response_model=NomenclatureCEMACResponse)
+def corriger_nomenclature(
+    code_hs: str,
+    modifications: NomenclatureCEMACUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Corriger le taux d'une position SH, en tracant la reference officielle.
+
+    La provenance est obligatoire a l'ecrit : une modification de taux sans
+    `source_reference` identifiee est refusee (400) - on ne reecrit pas un tarif
+    sans dire d'ou vient la nouvelle valeur.
+    """
+    if modifications.taux_dd is None and modifications.taux_tva is None:
+        raise HTTPException(status_code=400, detail="Aucun taux a modifier fourni")
+    if not (modifications.source_reference or "").strip():
+        raise HTTPException(
+            status_code=400,
+            detail="source_reference officielle requise pour modifier un taux",
+        )
+
+    entry = db.query(NomenclatureCEMAC).filter(
+        NomenclatureCEMAC.code_hs == code_hs
+    ).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail=f"Position SH {code_hs} inconnue")
+
+    for champ in ("taux_dd", "taux_tva", "restrictions", "statut",
+                  "date_effet", "date_fin_effet", "source_reference"):
+        valeur = getattr(modifications, champ, None)
+        if valeur is not None:
+            setattr(entry, champ, valeur)
+    entry.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(entry)
+    return entry
 
 
 # ============ DECLARATIONS DOUANIERES ============

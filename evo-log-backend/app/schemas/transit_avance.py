@@ -179,6 +179,9 @@ class NomenclatureCEMACBase(BaseModel):
     unite: Optional[str] = None
     pays_origine: Optional[str] = None
     restrictions: Optional[str] = None
+    # Provenance obligatoire a l'ecrit : un taux doit tracer sa source officielle.
+    date_fin_effet: Optional[date] = None
+    source_reference: Optional[str] = None
 
 
 class NomenclatureCEMACCreate(NomenclatureCEMACBase):
@@ -190,6 +193,9 @@ class NomenclatureCEMACUpdate(BaseModel):
     taux_tva: Optional[float] = None
     restrictions: Optional[str] = None
     statut: Optional[str] = None
+    date_effet: Optional[date] = None
+    date_fin_effet: Optional[date] = None
+    source_reference: Optional[str] = None
 
 
 class NomenclatureCEMACResponse(NomenclatureCEMACBase):
@@ -211,6 +217,10 @@ class DeclarationDouaniereAvanceBase(BaseModel):
     bureau_douane_id: int
     valeur_declaree: float
     code_hs: str
+    # Rattachement chaine documentaire (migration 024) : optionnel, jamais devine.
+    conteneur_id: Optional[int] = None
+    escale_id: Optional[int] = None
+    numero_bl: Optional[str] = None
 
 
 class DeclarationDouaniereAvanceCreate(DeclarationDouaniereAvanceBase):

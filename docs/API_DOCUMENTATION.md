@@ -39,6 +39,9 @@ Pour les schémas OpenAPI interactifs, la validation des contrats Pydantic et l'
 | `/api/notifications` | Notifications Web | Notifications temps réel pour les utilisateurs |
 | `/api/transactions` | Journal Comptable | Audit des mouvements transactionnels et journaux de stock |
 | `/api/gateway` | Inter-Modules | Passerelles et échanges de données entre modules métiers |
+| `/api/v1/rbac` | RBAC granulaire | Catalogue de permissions, rôles & grants, permissions d'un rôle (GET/PUT), `/permissions/check` |
+| `/api/v1/accreditations` | Accréditations | Habilitations nominatives datées (`permission` / `scope`), gestion admin + `mes-accreditations` |
+| `/api/v1/shared-access` | Espaces communs | Modules communs par entreprise (`GET`, `POST`, `DELETE`, `/initialiser`) |
 
 ---
 
@@ -54,3 +57,9 @@ Pour les schémas OpenAPI interactifs, la validation des contrats Pydantic et l'
 | `DOUANE` | `/douane` | `/api/transport/goods-declarations`, `/api/tiers`, `/api/documents` |
 | `PARC` | `/parc` | `/api/parc`, `/api/transport`, `/api/documents` |
 | `AUDITOR` | `/reports` | `/api/transactions`, `/api/alerts`, `/api/admin` (Lecture seule) |
+
+> **Au-delà des préfixes.** Depuis la migration `020_rbac_granulaire_accreditations`,
+> l'accès est affiné par **permissions granulaires** `module.sous_module.action`
+> (`require_perm`) et par **visibilité hiérarchique** (`visible_user_ids`). La matrice
+> ci-dessus reste le niveau grossier `modules_allowed` (fallback). Détail complet :
+> [`RBAC_ACCREDITATIONS.md`](./RBAC_ACCREDITATIONS.md).

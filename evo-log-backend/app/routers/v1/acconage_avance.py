@@ -25,7 +25,7 @@ from app.services.acconage_service import (
     ConnaissementService, PackingListService, ManifesteService, SurestarieService,
     THCService, NettoyageCaleService, AcconageReportingService
 )
-from app.models.acconage import Navire, Escale, Grue, Remorqueur, Conteneur
+from app.models.acconage import Navire, Escale, Grue, Remorqueur, Conteneur, Manifeste
 
 router = APIRouter(tags=["Acconage"])  # monte sur /api/v1/acconage-avance par main.py
 
@@ -68,14 +68,64 @@ def obtenir_navire(
 
 
 # ============ ESCALES ============
+@router.get("/escales")
+def lister_escales(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """List port calls with resolved ship name"""
+    escales = db.query(Escale).order_by(Escale.id.desc()).offset(skip).limit(min(limit, 500)).all()
+    result = []
+    for e in escales:
+        navire = db.query(Navire).filter(Navire.id == e.navire_id).first() if e.navire_id else None
+        result.append({
+            "id": e.id,
+            "numero_escale": e.numero_escale,
+            "navire_nom": navire.nom if navire else None,
+            "navire_id": e.navire_id,
+            "poste_quai": e.poste_quai,
+            "date_arrivee_estimee": e.date_arrivee_prevue.isoformat() if e.date_arrivee_prevue else None,
+            "date_depart_estimee": e.date_depart_prevue.isoformat() if e.date_depart_prevue else None,
+            "date_arrivee_reelle": e.date_arrivee_reelle.isoformat() if e.date_arrivee_reelle else None,
+            "date_depart_reelle": e.date_depart_reelle.isoformat() if e.date_depart_reelle else None,
+            "statut": e.statut.value if e.statut is not None else "PROGRAMMEE",
+            "nombre_conteneurs": e.nombre_conteneurs,
+            "marchandise": e.marchandise,
+            "tonnage": float(e.tonnage) if e.tonnage is not None else None,
+            "agent": e.agent,
+            "notes": e.notes,
+        })
+    return result
+
+
 @router.post("/escales", response_model=EscaleResponse, status_code=status.HTTP_201_CREATED)
 def creer_escale(
     escale: EscaleCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Create port call/berth"""
-    e = Escale(**escale.model_dump())
+    """Create port call/berth (resolves or registers the ship by name)"""
+    import random
+    import string
+
+    data = escale.model_dump()
+    navire_nom = data.pop("navire_nom", None)
+    numero = data.pop("numero_escale", None)
+
+    if not data.get("navire_id") and navire_nom:
+        navire = db.query(Navire).filter(Navire.nom.ilike(navire_nom.strip())).first()
+        if not navire:
+            navire = Navire(nom=navire_nom.strip())
+            db.add(navire)
+            db.flush()
+        data["navire_id"] = navire.id
+
+    if not numero:
+        numero = f"ESC-{datetime.now().strftime('%Y%m%d')}-{''.join(random.choices(string.ascii_uppercase + string.digits, k=6))}"
+
+    e = Escale(numero_escale=numero, **data)
     db.add(e)
     db.commit()
     db.refresh(e)
@@ -333,6 +383,37 @@ def creer_packing_list(
 
 
 # ============ MANIFESTES ============
+@router.get("/manifestes")
+def lister_manifestes(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """List cargo manifests"""
+    manifestes = db.query(Manifeste).order_by(Manifeste.id.desc()).offset(skip).limit(min(limit, 500)).all()
+    return [
+        {
+            "id": m.id,
+            "numero_manifeste": m.numero_manifeste,
+            "type_manifeste": m.type_manifeste,
+            "navire": m.navire,
+            "voyage": m.voyage,
+            "port_provenance": m.port_provenance,
+            "port_destination": m.port_destination,
+            "date_depart": m.date_depart.isoformat() if m.date_depart else None,
+            "nombre_conteneurs": m.nombre_conteneurs,
+            "tonnage_total": float(m.tonnage_total) if m.tonnage_total is not None else None,
+            "valeur_marchandise": float(m.valeur_marchandise) if m.valeur_marchandise is not None else None,
+            "devise": m.devise,
+            "conforme": bool(m.conforme),
+            "observations": m.observations,
+            "date_enregistrement": m.created_at.isoformat() if m.created_at else None,
+        }
+        for m in manifestes
+    ]
+
+
 @router.post("/manifestes", response_model=ManifesteResponse, status_code=status.HTTP_201_CREATED)
 def creer_manifeste(
     manifeste: ManifesteCreate,

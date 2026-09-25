@@ -7,10 +7,18 @@ Service Portail B2B Client EVO-LOG
 - Tracking conteneur ISO 6346 & B/L avec décompte franchise surestaries
 - Passerelle de paiement en ligne (Mobile Money MTN/Orange, CB Visa/Mastercard)
 - Gestion des alertes multi-canaux (SMS, WhatsApp, Email)
+
+ATTENTION (2026-09) : les listes de dossiers/factures/retours ci-dessous sont
+des JEU DE DONNÉES DE DÉMONSTRATION, non branchées (le routeur /b2b-portal
+renvoie 501). Ne jamais les exposer telles quelles : elles enfreignent la
+politique zéro-mock du projet. À remplacer par des requêtes réelles avant
+réactivation du portail.
 """
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 import random
+
+from app.core.not_implemented import not_implemented
 
 
 class B2BPortalService:
@@ -249,26 +257,19 @@ class B2BPortalService:
 
     @staticmethod
     def process_checkout_payment(payload: Dict[str, Any]) -> Dict[str, Any]:
-        """Paiement en ligne sécurisé (MTN/Orange MoMo, Carte Bancaire, Virement)."""
-        facture_id = payload.get("facture_id", "FAC-2026-0284")
-        mode = payload.get("mode_paiement", "MOMO_MTN")
-        montant = payload.get("montant_xaf", 5783625)
-        telephone = payload.get("telephone", "+237 6 70 00 00 00")
+        """
+        Paiement en ligne (MTN/Orange MoMo, CB, Virement).
 
-        tx_id = f"PAY-{mode[:4]}-{datetime.now().strftime('%Y%m%d%H%M%S')}-{random.randint(100, 999)}"
-
-        return {
-            "transaction_id": tx_id,
-            "facture_id": facture_id,
-            "montant_paye_xaf": montant,
-            "mode_paiement": mode,
-            "telephone_ou_compte": telephone,
-            "statut_paiement": "SUCCES_VALIDE",
-            "date_reglement": datetime.now().isoformat(),
-            "quittance_recu_url": f"/receipts/{tx_id}.pdf",
-            "bon_de_sortie_debloque": True,
-            "message": f"Paiement de {montant:,} XAF validé avec succès. Quittance officielle émise et Bon de Sortie débloqué automatiquement."
-        }
+        501 (2026-09 correction) : l'ancien code renvoyait « SUCCES_VALIDE »,
+        émettait une quittance et débloquait le Bon de Sortie sans aucun
+        appel fournisseur ni persistance  marchandise libérée sans
+        encaissement réel. Réactiver uniquement avec le connecteur MoMo.
+        """
+        not_implemented(
+            "Paiement en ligne B2B (checkout)",
+            "connecteur MTN MoMo / Orange Money / CB avec callback signé, "
+            "vérification du montant dû en base et règlement persisté",
+        )
 
     @staticmethod
     def get_notification_preferences(client_id: int) -> Dict[str, Any]:

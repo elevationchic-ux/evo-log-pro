@@ -29,7 +29,7 @@ export default function GpsTrackingPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/api/v1/gps-tracking');
+      const res = await apiClient.get('/api/v1/gps-tracking/positions');
       if (res.data) {
         const list = Array.isArray(res.data) ? res.data : (res.data.items || []);
         setPositions(list);

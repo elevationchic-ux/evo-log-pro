@@ -88,6 +88,13 @@ async def create_conducteur(conducteur_data: ConducteurCreate, db: Session = Dep
     return db_conducteur
 
 
+# NOTE /chauffeurs/{id} et /chauffeurs/{id}/documents : ces routes sont SERVES
+# par app/routers/v1/transport_exploitation.py (fiche complete avec statut
+# d'derive, dossier de pieces en tableau nu  contrat des pages frontend et
+# des tests de la Tranche D). transport.router etant monte AVANT exploitation,
+# toute redeclaration ici masquerait la version riche : ne pas reintroduire.
+
+
 @router.get("/missions", response_model=List[MissionResponse])
 async def get_all_missions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """Get all missions"""

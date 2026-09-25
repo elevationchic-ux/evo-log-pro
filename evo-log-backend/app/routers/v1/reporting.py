@@ -27,6 +27,62 @@ from app.models.reporting import DashboardExecutif, KPI, Rapport, Export, Tablea
 router = APIRouter(tags=["Reporting"])
 
 
+# ============ LECTURE (list) ============
+@router.get("/rapports", response_model=List[RapportResponse])
+def lister_rapports(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Lister les modèles de rapports réellement enregistrés."""
+    return db.query(Rapport).order_by(Rapport.id.desc()).offset(skip).limit(limit).all()
+
+
+@router.get("/dashboards", response_model=List[DashboardExecutifResponse])
+def lister_dashboards(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Lister les dashboards réellement enregistrés."""
+    return db.query(DashboardExecutif).order_by(DashboardExecutif.id.desc()).offset(skip).limit(limit).all()
+
+
+@router.get("/kpis", response_model=List[KPIResponse])
+def lister_kpis(
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Lister les KPI réellement enregistrés."""
+    return db.query(KPI).order_by(KPI.id.desc()).offset(skip).limit(limit).all()
+
+
+@router.get("/exports", response_model=List[ExportResponse])
+def lister_exports(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Lister les exports réellement enregistrés."""
+    return db.query(Export).order_by(Export.id.desc()).offset(skip).limit(limit).all()
+
+
+@router.get("/tableaux-bord", response_model=List[TableauBordOperationnelResponse])
+def lister_tableaux_bord(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Lister les tableaux de bord opérationnels réellement enregistrés."""
+    return db.query(TableauBordOperationnel).order_by(TableauBordOperationnel.id.desc()).offset(skip).limit(limit).all()
+
+
 # ============ DASHBOARDS EXECUTIFS ============
 @router.post("/dashboards", response_model=DashboardExecutifResponse, status_code=status.HTTP_201_CREATED)
 def creer_dashboard(
@@ -256,3 +312,33 @@ def rapport_douanier(
 ):
     """Generate customs report"""
     return ReportingReportingService.rapport_douanier(db, periode)
+
+
+# ============ RAPPORT UNITE (lecture / suppression) ============
+# Enregistre apres les routes statiques (/rapports/executif etc.) pour eviter
+# que {rapport_id} n'intercepte les chemins fixes.
+@router.get("/rapports/{rapport_id}", response_model=RapportResponse)
+def recuperer_rapport(
+    rapport_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    r = db.query(Rapport).filter(Rapport.id == rapport_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Rapport non trouvé")
+    return r
+
+
+@router.delete("/rapports/{rapport_id}", status_code=status.HTTP_200_OK)
+def supprimer_rapport(
+    rapport_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Supprimer un modèle de rapport enregistré."""
+    r = db.query(Rapport).filter(Rapport.id == rapport_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Rapport non trouvé")
+    db.delete(r)
+    db.commit()
+    return {"message": "Rapport supprimé", "id": rapport_id}

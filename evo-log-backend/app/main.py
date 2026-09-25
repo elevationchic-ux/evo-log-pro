@@ -311,19 +311,35 @@ def safe_include_router(router, **kwargs):
     """Include required routers; startup must fail on registration errors."""
     app.include_router(router, **kwargs)
 
-from app.routers.v1 import auth, tiers, transport, finance, parc, documents, alerts, magasin, gateway, transactions, master_data, admin, admin_agency, suppliers, notifications, bill_of_loading, purchase, incidents, public_api, rh, acconage, transit, maintenance, qhse, goods_declaration, removal_slip, reception_mag3, chat, prestataires, chef_personnel
+from app.routers.v1 import auth, tiers, transport, transport_exploitation, finance, parc, parc_purchase_store, customer_support_fleet, documents, alerts, magasin, magasin_store, magasin_stock, magasin_analytics, gateway, transactions, master_data, admin, admin_agency, suppliers, notifications, bill_of_loading, purchase, incidents, public_api, rh, acconage, transit, maintenance, qhse, goods_declaration, removal_slip, reception_mag3, chat, prestataires, chef_personnel
 
 safe_include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
+
+# Pont de compatibilite : endpoints reels (chemins absolus) enregistres tot
+# pour gagner les courses d'ordre de routage (ex. balances/verification).
+try:
+    from app.routers.v1 import gap_bridges
+    safe_include_router(gap_bridges.router, tags=["Compatibilite Frontend"])
+except ImportError as e:
+    # Le module existe dans le dépôt : un échec d'import est une régression,
+    # pas une option. Échec au démarrage plutôt que 404 silencieux côté client.
+    logger.critical(f"Gap bridges router failed to load: {e}")
+    raise
 safe_include_router(chat.router, prefix="/api/v1/chat", tags=["Collaboration Chat"])
 safe_include_router(prestataires.router, prefix="/api/v1/prestataires", tags=["Annuaire Prestataires"])
 safe_include_router(chef_personnel.router, prefix="/api/v1/chef-personnel", tags=["Chef du Personnel"])
 safe_include_router(tiers.router, prefix="/api/v1/tiers", tags=["Tiers"])
 safe_include_router(transport.router, prefix="/api/v1/transport", tags=["Transport"])
+safe_include_router(transport_exploitation.router, prefix="/api/v1/transport", tags=["Transport Exploitation Flotte"])
 safe_include_router(finance.router, prefix="/api/v1/finance", tags=["Finance"])
 safe_include_router(parc.router, prefix="/api/v1/parc", tags=["Parc"])
+safe_include_router(parc_purchase_store.parc_router, prefix="/api/v1/parc", tags=["Parc Zones & Gate"])
 safe_include_router(documents.router, prefix="/api/v1/documents", tags=["Documents"])
 safe_include_router(alerts.router, prefix="/api/v1/alerts", tags=["Alerts"])
 safe_include_router(magasin.router, prefix="/api/v1/magasin", tags=["EVO-Magasin"])
+safe_include_router(magasin_store.router, prefix="/api/v1/magasin", tags=["EVO-Magasin WMS"])
+safe_include_router(magasin_stock.router, prefix="/api/v1/magasin", tags=["EVO-Magasin Stocks"])
+safe_include_router(magasin_analytics.router, prefix="/api/v1/magasin", tags=["EVO-Magasin Analytics"])
 safe_include_router(gateway.router, prefix="/api/v1/gateway", tags=["Gateway"])
 safe_include_router(transactions.router, prefix="/api/v1/transactions", tags=["Transactions"])
 safe_include_router(goods_declaration.router, prefix="/api/v1/transport/goods-declarations", tags=["Goods Declaration"])
@@ -336,6 +352,10 @@ safe_include_router(suppliers.router, prefix="/api/v1/suppliers", tags=["Supplie
 safe_include_router(notifications.router, prefix="/api/v1/notifications", tags=["Notifications"])
 safe_include_router(bill_of_loading.router, prefix="/api/v1/bill-of-loading", tags=["Bill of Loading"])
 safe_include_router(purchase.router, prefix="/api/v1/purchase", tags=["Achats"])
+safe_include_router(parc_purchase_store.requisition_router, prefix="/api/v1/purchase", tags=["Achats - Requisitions"])
+safe_include_router(customer_support_fleet.fleet_router, prefix="/api/v1/fleet", tags=["Fleet"])
+safe_include_router(customer_support_fleet.customer_router, prefix="/api/v1/customers", tags=["Customers CRM"])
+safe_include_router(customer_support_fleet.support_router, prefix="/api/v1/support", tags=["Support"])
 safe_include_router(incidents.router, prefix="/api/v1/incidents", tags=["Incidents"])
 safe_include_router(public_api.router, prefix="/api/v1/public", tags=["Public API"])
 safe_include_router(rh.router, prefix="/api/v1/rh", tags=["Ressources Humaines"])
@@ -375,7 +395,19 @@ try:
     from app.routers.v1 import frais_missions
     safe_include_router(frais_missions.router, prefix="/api/v1", tags=["Notes de Frais & Avances Missions"])
 except ImportError as e:
-    logger.warning(f"Advanced modules not yet implemented: {e}")
+    # Ces modules font partie du dépôt et du contrat d'API : un ImportError
+    # signe une casse (renommage, syntaxe, dépendance) -> démarrage impossible.
+    logger.critical(f"Advanced modules failed to load: {e}")
+    raise
+
+# Habilitations avancees : accreditations + acces partages (modules communs).
+try:
+    from app.routers.v1 import accreditations
+    safe_include_router(accreditations.router, prefix="/api/v1/accreditations", tags=["Accreditations"])
+    safe_include_router(accreditations.shared_router, prefix="/api/v1/shared-access", tags=["Acces partages (modules communs)"])
+except ImportError as e:
+    logger.critical(f"Accreditations router failed to load: {e}")
+    raise
 
 # New Version 2.0 Modules
 try:
@@ -392,7 +424,8 @@ try:
     safe_include_router(container_lifecycle.router, prefix="/api/v1/container-lifecycle", tags=["Container Lifecycle"])
     safe_include_router(partner_api.router, prefix="/api/v1/partner-api", tags=["Partner API"])
 except ImportError as e:
-    logger.warning(f"Version 2.0 modules not yet implemented: {e}")
+    logger.critical(f"Version 2.0 modules failed to load: {e}")
+    raise
 
 # Cameroon/CEMAC Specific Modules
 try:
@@ -402,7 +435,11 @@ try:
     safe_include_router(paiement_local.router, prefix="/api/v1/paiement-local", tags=["Local Payments"])
     safe_include_router(fiscalite_cameroun.router, prefix="/api/v1/fiscalite-cameroun", tags=["Cameroon Taxation"])
 except ImportError as e:
-    logger.warning(f"Cameroon/CEMAC modules not yet implemented: {e}")
+    # Paysage réglementaire central du produit : ces routes doivent TOUJOURS
+    # être déclarées. Mieux vaut un déploiement qui échoue qu'un SaaS camerounais
+    # sans fiscalité ni paiement local, silencieusement amputé.
+    logger.critical(f"Cameroon/CEMAC modules failed to load: {e}")
+    raise
 
 # WebSocket and additional routers
 try:
@@ -414,7 +451,8 @@ try:
     safe_include_router(webhook_whatsapp.router, tags=["Webhook WhatsApp"])  # routes auto-porteuses (pas de double prefix)
     safe_include_router(telematics.router, prefix="/api/v1/telematics", tags=["Telematics"])
 except ImportError as e:
-    logger.warning(f"Additional routers not yet implemented: {e}")
+    logger.critical(f"Additional routers failed to load: {e}")
+    raise
 
 # Fused Kamlog Extended Modules (Superadmin, Onboarding, Subscription, CRM, GED, E-Invoicing, AI, Digital Twin, etc.)
 try:
@@ -459,6 +497,13 @@ safe_include_router(alerts.router, prefix="/api/alerts", tags=["Alerts - DEPRECA
 safe_include_router(magasin.router, prefix="/api/magasin", tags=["EVO-Magasin - DEPRECATED"])
 safe_include_router(gateway.router, prefix="/api/gateway", tags=["Gateway - DEPRECATED"])
 safe_include_router(transactions.router, prefix="/api/transactions", tags=["Transactions - DEPRECATED"])
+
+# Pending-modules fallback  MUST be included last so every real route above
+# keeps precedence. It only answers requests that would otherwise 404 on the
+# business API surface, degrading them to an honest empty/pending envelope
+# instead of a dead screen. See app/routers/v1/pending_modules.py.
+from app.routers.v1 import pending_modules
+safe_include_router(pending_modules.router)
 
 @app.get('/api/health')
 async def health_check():

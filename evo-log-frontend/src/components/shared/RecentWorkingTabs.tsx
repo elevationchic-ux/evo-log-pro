@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useI18n } from '@/hooks/useI18n';
 
 interface WorkingTab {
   path: string;
@@ -58,6 +59,7 @@ function getTabInfo(path: string): { label: string; icon: string } {
 export function RecentWorkingTabs() {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useI18n();
   const [tabs, setTabs] = useState<WorkingTab[]>([]);
 
   // Load from sessionStorage
@@ -121,12 +123,12 @@ export function RecentWorkingTabs() {
 
   return (
     <nav
-      aria-label="Onglets de travail récents"
-      className="hidden md:flex items-center gap-1.5 px-4 py-1.5 bg-surface-container-low/40 border-b border-outline/50 overflow-x-auto text-[12px] select-none scrollbar-none"
+      aria-label={t.shell.recentTabsAria}
+      className="hidden md:flex items-center gap-1.5 px-4 py-1.5 bg-surface-container-low border-b border-outline overflow-x-auto text-[12px] select-none scrollbar-none"
     >
       <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/70 shrink-0 mr-1 flex items-center gap-1">
         <span className="material-symbols-outlined text-[13px]">tab</span>
-        Récents :
+        {t.shell.recentTabs}
       </span>
 
       <div className="flex items-center gap-1">
@@ -157,8 +159,8 @@ export function RecentWorkingTabs() {
                 type="button"
                 onClick={(e) => handleClose(e, tab.path)}
                 className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-surface-container hover:text-error transition-all"
-                title="Fermer cet onglet"
-                aria-label={`Fermer ${tab.label}`}
+                title={t.shell.closeTab}
+                aria-label={`${t.shell.closeTab}`}
               >
                 <span className="material-symbols-outlined text-[12px] block">close</span>
               </button>

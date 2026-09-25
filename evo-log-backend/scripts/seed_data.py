@@ -740,7 +740,7 @@ def seed_chat_data(db: Session):
             "sender_id": it_u.id if it_u else 1,
             "recipient_id": None,
             "channel_type": "forum",
-            "content": "💻 SUPPORT TECHNIQUE : La passerelle SYDONIA+ douane et le module de pesée pont-bascule sont opérationnels à 100%. N'hésitez pas à m'écrire en message direct en cas de blocage poste.",
+            "content": "💻 SUPPORT TECHNIQUE : Rappel honnête  la passerelle SYDONIA+ et la pesée pont-bascule sont des modules EN ATTENTE d'intégration réelle (les endpoints concernés renvoient 501). Les saisies douanières et de pesée restent possibles manuellement.",
             "sender_name_snapshot": "Alain Mbida",
             "sender_role_snapshot": "Technicien Support IT",
             "is_read": True

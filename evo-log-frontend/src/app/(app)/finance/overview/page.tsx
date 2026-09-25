@@ -3,10 +3,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   DollarSign, TrendingUp, ArrowUpRight, ArrowDownRight, Building2,
-  BarChart3, Plus, FileText, Banknote, AlertCircle
+  Plus, FileText, Banknote, AlertCircle
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import { financeAPI } from '@/lib/api-client';
+import { useSettings } from '@/components/layout/SettingsProvider';
 
 interface FinanceKpis {
   chiffre_affaires: number;
@@ -38,6 +39,10 @@ interface JournalRow {
 const fmtM = (n: number) => (n / 1_000_000).toFixed(1);
 
 export default function FinanceOverviewPage() {
+  const router = useRouter();
+  const { language } = useSettings();
+  const lang = language === 'en' ? 'en' : 'fr';
+  const t = (fr: string, en: string) => (lang === 'en' ? en : fr);
   const [kpis, setKpis] = useState<FinanceKpis | null>(null);
   const [balanceAgee, setBalanceAgee] = useState<AgeeRow[]>([]);
   const [recentEntries, setRecentEntries] = useState<JournalRow[]>([]);
@@ -82,7 +87,7 @@ export default function FinanceOverviewPage() {
       // ── Journal de trésorerie récent : encaissements réels ──
       setRecentEntries(
         encaissements.slice(0, 12).map((p: any) => ({
-          date: p.date_paiement ? new Date(p.date_paiement).toLocaleDateString('fr-FR') : '—',
+          date: p.date_paiement ? new Date(p.date_paiement).toLocaleDateString('fr-FR') : '',
           libelle: `Encaissement facture #${p.facture_id ?? '?'}`,
           compte: p.mode_paiement || 'banque',
           statut: p.statut || 'confirme',
@@ -91,7 +96,7 @@ export default function FinanceOverviewPage() {
         }))
       );
     } catch (e) {
-      setErreur('Données financières indisponibles (backend injoignable ou non initialisé).');
+      setErreur('Les données financières n\'ont pas pu être chargées. Vérifiez votre connexion et réessayez.');
     } finally {
       setLoading(false);
     }
@@ -126,9 +131,9 @@ export default function FinanceOverviewPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button onClick={load} className="px-3 py-2 border border-slate-700 rounded-xl text-xs text-slate-300 hover:bg-slate-800">Actualiser</button>
-          <button onClick={() => toast.info('Saisie écriture comptable : utilisez le module Comptabilité OHADA')} className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-lg">
-            <Plus className="w-4 h-4" /> Écriture Comptable
+          <button onClick={load} className="px-3 py-2 border border-slate-700 rounded-xl text-xs text-slate-300 hover:bg-slate-800">{t('Actualiser', 'Refresh')}</button>
+          <button onClick={() => router.push('/comptabilite-ohada/journal')} className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-lg">
+            <Plus className="w-4 h-4" /> {t('Écriture Comptable', 'Accounting Entry')}
           </button>
         </div>
       </div>
@@ -163,7 +168,7 @@ export default function FinanceOverviewPage() {
             <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-400" /> Balance Âgée Clients
             </h2>
-            <button onClick={() => toast.info('Export XLS à brancher sur le module reporting')} className="text-xs text-amber-400 hover:text-amber-300">Export XLS</button>
+            <button onClick={() => router.push('/reports-bi/data-export')} className="text-xs text-amber-400 hover:text-amber-300">{t('Export XLS', 'Export XLS')}</button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-[11px]">
@@ -202,8 +207,10 @@ export default function FinanceOverviewPage() {
             <Building2 className="w-4 h-4 text-blue-400" /> Trésorerie par compte bancaire
           </h2>
           <p className="text-[11px] text-slate-500">
-            Total classe 5 : {k ? fmtM(k.tresorerie_disponible) : '0.0'} M XAF (agrégé depuis le plan comptable).
-            Le détail par compte bancaire nécessite l&apos;activation des sous-comptes 5xx.
+            {t(
+              `Total classe 5 : ${k ? fmtM(k.tresorerie_disponible) : '0.0'} M XAF, agrégé depuis le plan comptable OHADA.`,
+              `Class-5 total: ${k ? fmtM(k.tresorerie_disponible) : '0.0'} M XAF, aggregated from the OHADA chart of accounts.`
+            )}
           </p>
         </div>
       </div>

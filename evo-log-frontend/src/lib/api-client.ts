@@ -1,4 +1,4 @@
-// src/lib/api-client.ts  Client API TypeScript EVO-LOG — SOURCE UNIQUE DE VÉRITÉ
+// src/lib/api-client.ts  Client API TypeScript EVO-LOG  SOURCE UNIQUE DE VÉRITÉ
 // Toutes les pages doivent passer par ce client (apiClient ou les services *API exportés ici).
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
@@ -37,7 +37,19 @@ export function setAuthToken(token: string | null) {
   _authToken = token;
 }
 
-// Intercepteur REQUEST — injecte le Bearer token (session NextAuth ou localStorage)
+/** Token courant (mémoire, puis localStorage)  pour les appels fetch hors axios
+ *  (ex. synchronisation offline). Side navigateur uniquement. */
+export function getAccessToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return _authToken || localStorage.getItem('access_token');
+}
+
+/** Base de l'API (même source de vérité que apiClient). */
+export function getApiBaseUrl(): string {
+  return BASE_URL;
+}
+
+// Intercepteur REQUEST  injecte le Bearer token (session NextAuth ou localStorage)
 // et normalise les URLs d'API vers le préfixe versionné /api/v1.
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -59,10 +71,10 @@ apiClient.interceptors.request.use(
 // Intercepteur RESPONSE
 // IMPORTANT: ne déclencher le logout automatique QUE pour les endpoints d'auth;
 // les appels de données peuvent légitimement retourner 401 quand le backend distant
-// est temporairement indisponible — le refresh est tenté une fois avant de renoncer.
+// est temporairement indisponible  le refresh est tenté une fois avant de renoncer.
 let _refreshInFlight: Promise<boolean> | null = null;
 
-async function tryRefreshToken(): Promise<boolean> {
+export async function tryRefreshToken(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   const refreshToken = localStorage.getItem('refresh_token');
   if (!refreshToken) return false;
@@ -124,6 +136,30 @@ export const adminAPI = {
   getSystemHealth: () => apiClient.get('/api/admin/system-health'),
 };
 
+/** RBAC granulaire : catalogue de permissions, rôles effectifs, accréditations
+ *  et modules communs (acces partages) par entreprise. */
+export const rbacAPI = {
+  getPermissionCatalog: () => apiClient.get('/api/rbac/permissions/catalog'),
+  listRolesWithPermissions: () => apiClient.get('/api/rbac/roles'),
+  getRolePermissions: (roleId: number) => apiClient.get(`/api/rbac/roles/${roleId}/permissions`),
+  setRolePermissions: (roleId: number, codes: string[]) =>
+    apiClient.put(`/api/rbac/roles/${roleId}/permissions`, { codes }),
+  checkPermission: (data: { user_id: number; tenant_id?: number; permission_code: string }) =>
+    apiClient.post('/api/rbac/permissions/check', data),
+  listAccreditations: (params?: Record<string, unknown>) => apiClient.get('/api/accreditations/', { params }),
+  myAccreditations: () => apiClient.get('/api/accreditations/mes-accreditations'),
+  createAccreditation: (data: any, companyId?: number) =>
+    apiClient.post('/api/accreditations/', data, { params: companyId ? { company_id: companyId } : {} }),
+  updateAccreditation: (id: number, data: any) => apiClient.put(`/api/accreditations/${id}`, data),
+  deleteAccreditation: (id: number) => apiClient.delete(`/api/accreditations/${id}`),
+  listSharedAccess: (params?: Record<string, unknown>) => apiClient.get('/api/shared-access/', { params }),
+  setSharedAccess: (data: { module_key: string; libelle?: string; autorise_tous_utilisateurs: boolean }, companyId?: number) =>
+    apiClient.post('/api/shared-access/', data, { params: companyId ? { company_id: companyId } : {} }),
+  deleteSharedAccess: (id: number) => apiClient.delete(`/api/shared-access/${id}`),
+  seedSharedAccess: (companyId?: number) =>
+    apiClient.post('/api/shared-access/initialiser', null, { params: companyId ? { company_id: companyId } : {} }),
+};
+
 // ─── Service Auth & Sécurité Compte ──────────────────────────────────────────
 export const authAPI = {
   login: (data: { username: string; password: string }) =>
@@ -182,8 +218,12 @@ export const transportAPI = {
     apiClient.post('/api/transport/chauffeurs', data),
   genererBL: (missionId: number) =>
     apiClient.post(`/api/documents/bl`, { mission_id: missionId }),
-  getFuel: () =>
-    apiClient.get('/api/transport/fuel'),
+  getFuel: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/transport/fuel', { params }),
+  getTicketsCarburant: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/transport/carburant/tickets', { params }),
+  createTicketCarburant: (data: unknown) =>
+    apiClient.post('/api/transport/carburant/tickets', data),
   getKPIs: () =>
     apiClient.get('/api/transport/kpis'),
   getKpis: () =>
@@ -234,9 +274,9 @@ export const financeAPI = {
   getPayroll: () =>
     apiClient.get('/api/finance/payroll/drivers'),
   getChartOfAccounts: (params?: Record<string, unknown>) =>
-    apiClient.get('/api/finance/chart-accounts', { params }),
+    apiClient.get('/api/finance/plan-comptable', { params }),
   createChartAccount: (data: unknown) =>
-    apiClient.post('/api/finance/chart-accounts', data),
+    apiClient.post('/api/finance/plan-comptable', data),
 };
 
 // â”€â”€â”€ Service Purchases (K-Achats) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -324,15 +364,15 @@ export const suppliersAPI = {
 // â”€â”€â”€ Service Master Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const masterDataAPI = {
   getArticles: (params?: Record<string, unknown>) =>
-    apiClient.get('/api/master-data/articles', { params }),
+    apiClient.get('/api/magasin/articles', { params }),
   getArticle: (id: number) =>
-    apiClient.get(`/api/master-data/articles/${id}`),
+    apiClient.get(`/api/magasin/articles/${id}`),
   createArticle: (data: unknown) =>
-    apiClient.post('/api/master-data/articles', data),
+    apiClient.post('/api/magasin/articles', data),
   updateArticle: (id: number, data: unknown) =>
-    apiClient.put(`/api/master-data/articles/${id}`, data),
+    apiClient.put(`/api/magasin/articles/${id}`, data),
   deleteArticle: (id: number) =>
-    apiClient.delete(`/api/master-data/articles/${id}`),
+    apiClient.delete(`/api/magasin/articles/${id}`),
   getTiers: (params?: Record<string, unknown>) =>
     apiClient.get('/api/tiers', { params }),
   getTier: (id: number) =>
@@ -389,9 +429,9 @@ export const magasinAPI = {
   deleteClient: (id: number) =>
     apiClient.delete(`/api/magasin/clients/${id}`),
   getReceptions: (params?: Record<string, unknown>) =>
-    apiClient.get('/api/magasin/receptions', { params }),
+    apiClient.get('/api/magasin-avance/receptions', { params }),
   createReception: async (data: any) => {
-    const response = await apiClient.post('/api/magasin/receptions', data)
+    const response = await apiClient.post('/api/magasin-avance/receptions', data)
     return response.data
   },
   createRemovalSlip: async (data: any) => {
@@ -401,15 +441,15 @@ export const magasinAPI = {
   createReceptionMag3: (data: unknown) =>
     apiClient.post('/api/magasin/receptions-mag3', data),
   getDeclarations: (params?: Record<string, unknown>) =>
-    apiClient.get('/api/magasin/declarations', { params }),
+    apiClient.get('/api/magasin-douane/declarations', { params }),
   getDeclaration: (id: number) =>
-    apiClient.get(`/api/magasin/declarations/${id}`),
+    apiClient.get(`/api/magasin-douane/declarations/${id}`),
   getDeclarationReceptionsSummary: (id: number) =>
     apiClient.get(`/api/magasin/declarations/${id}/receptions-summary`),
   getDeclarationReceptionsHistory: (id: number) =>
     apiClient.get(`/api/magasin/declarations/${id}/receptions-history`),
   completeReception: (data: unknown) =>
-    apiClient.post('/api/magasin/receptions', data),
+    apiClient.post('/api/magasin-avance/receptions', data),
   getCommandes: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin/commandes', { params }),
   getHistory: (params?: Record<string, unknown>) =>
@@ -438,7 +478,7 @@ export const magasinAPI = {
   getArticleByCode: (code: string) =>
     apiClient.get(`/api/magasin/articles/by-code/${code}`),
   createDeclaration: (data: any) =>
-    apiClient.post('/api/magasin/declarations', data),
+    apiClient.post('/api/magasin-douane/declarations', data),
   // New BandeLivraison endpoints
   getBandes: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin/bandes-livraison', { params }),
@@ -452,7 +492,7 @@ export const magasinAPI = {
     apiClient.put(`/api/magasin/bandes-livraison/${id}`, data),
   // Special endpoints
   createBandeFromOrdreTransfert: (otId: number, prepare_par: string) =>
-    apiClient.post(`/api/magasin/bandes-livraison/from-ordre-transfert/${otId}`, { prepare_par }),
+    apiClient.post(`/api/magasin/bandes-livraison/from-ordre-transfert/${otId}`, null, { params: { prepare_par } }),
   getBandeByOrdreTransfert: (otId: number) =>
     apiClient.get(`/api/magasin/bandes-livraison/ordre-transfert/${otId}`),
   // Predictive endpoint
@@ -524,9 +564,10 @@ export const rhAPI = {
   getMyProfile: () => apiClient.get('/api/rh/employes/me'),
   getConges: (params?: Record<string, unknown>) => apiClient.get('/api/rh/conges', { params }),
   createConge: (data: unknown) => apiClient.post('/api/rh/conges', data),
-  updateCongeStatut: (id: number, statut: string) => apiClient.patch(`/api/rh/conges/${id}/statut`, { statut }),
-  getPaie: (params?: Record<string, unknown>) => apiClient.get('/api/rh/paie', { params }),
-  createFichePaie: (data: unknown) => apiClient.post('/api/rh/paie', data),
+  updateCongeStatut: (id: number, statut: string) =>
+    apiClient.post(`/api/rh/conges/${id}/${statut.toUpperCase() === 'APPROUVE' ? 'approuver' : 'rejeter'}`),
+  getPaie: (params?: Record<string, unknown>) => apiClient.get('/api/rh/paie/bulletin', { params }),
+  createFichePaie: (data: unknown) => apiClient.post('/api/rh/paie/bulletin', data),
   importEmployesExcel: (data: FormData) => apiClient.post('/api/rh/employes/import-excel', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
@@ -569,8 +610,8 @@ export const chatCollabAPI = {
 
 // ─── Service Gateway ───────────────────────────────────────────────
 export const gatewayAPI = {
-  getPasserellesEnAttente: () => apiClient.get('/api/passerelles/en-attente').then(r => r.data),
-  getPasserelles: () => apiClient.get('/api/passerelles').then(r => r.data),
+  getPasserellesEnAttente: () => apiClient.get('/api/v1/gateway', { params: { statut: 'en_attente' } }).then(r => r.data),
+  getPasserelles: () => apiClient.get('/api/v1/gateway').then(r => r.data),
   getAll: (params?: Record<string, unknown>) => apiClient.get('/api/v1/gateway', { params }),
   getStats: () => apiClient.get('/api/v1/gateway/stats'),
   getById: (id: number) => apiClient.get(`/api/v1/gateway/${id}`),
@@ -581,7 +622,7 @@ export const gatewayAPI = {
 };
 
 export const aiAPI = {
-  sendMessage: (message: string) => apiClient.post('/api/ai/chat', { message })
+  sendMessage: (message: string) => apiClient.post('/api/v1/ai/assistant/chat', { message })
 };
 
 // â”€â”€â”€ Service Accostage (Acconage) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -601,11 +642,11 @@ export const acconageAPI = {
 
 // ─── Service Transit ────────────────────────────────
 export const transitAPI = {
-  getTransits: (params?: Record<string, unknown>) => apiClient.get('/api/v1/transit', { params }),
-  getTransit: (id: number) => apiClient.get(`/api/v1/transit/${id}`),
-  createTransit: (data: unknown) => apiClient.post('/api/v1/transit', data),
-  updateTransit: (id: number, data: unknown) => apiClient.put(`/api/v1/transit/${id}`, data),
-  deleteTransit: (id: number) => apiClient.delete(`/api/v1/transit/${id}`)
+  getTransits: (params?: Record<string, unknown>) => apiClient.get('/api/v1/transit/dossiers', { params }),
+  getTransit: (id: number) => apiClient.get(`/api/v1/transit-avance/dossiers/${id}`),
+  createTransit: (data: unknown) => apiClient.post('/api/v1/transit-avance/dossiers', data),
+  updateTransit: (id: number, data: unknown) => apiClient.put(`/api/v1/transit-avance/dossiers/${id}`, data),
+  deleteTransit: (id: number) => apiClient.delete(`/api/v1/transit-avance/dossiers/${id}`)
 };
 
 // â”€â”€â”€ Service Maintenance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -638,37 +679,37 @@ export const qhseAPI = {
 
 // ─── Service Cotations & Tarification ──────────────────────────────────────────
 export const cotationsAPI = {
-  getCotations: () => apiClient.get('/api/v1/cotations'),
-  createCotation: (data: unknown) => apiClient.post('/api/v1/cotations', data),
+  getCotations: () => apiClient.get('/api/v1/k-modules/cotations'),
+  createCotation: (data: unknown) => apiClient.post('/api/v1/k-modules/cotations', data),
 };
 
 // ─── Service Tracking & e-POD ──────────────────────────────────────────
 export const trackingAPI = {
-  getEpods: () => apiClient.get('/api/v1/tracking/epod'),
-  createEpod: (data: unknown) => apiClient.post('/api/v1/tracking/epod', data),
+  getEpods: () => apiClient.get('/api/v1/k-modules/tracking/epod'),
+  createEpod: (data: unknown) => apiClient.post('/api/v1/k-modules/tracking/epod', data),
 };
 
 // ─── Service FuelGuard Anti-Fraude ──────────────────────────────────────────
 export const fuelGuardAPI = {
-  getSensors: () => apiClient.get('/api/v1/fuel-guard/sensors'),
-  createSensor: (data: unknown) => apiClient.post('/api/v1/fuel-guard/sensors', data),
+  getSensors: () => apiClient.get('/api/v1/k-modules/fuel-guard/sensors'),
+  createSensor: (data: unknown) => apiClient.post('/api/v1/k-modules/fuel-guard/sensors', data),
 };
 
 // ─── Service Procurement & Achats ──────────────────────────────────────────
 export const procurementAPI = {
-  getOrders: () => apiClient.get('/api/v1/procurement/orders'),
-  createOrder: (data: unknown) => apiClient.post('/api/v1/procurement/orders', data),
+  getOrders: () => apiClient.get('/api/v1/k-modules/procurement/orders'),
+  createOrder: (data: unknown) => apiClient.post('/api/v1/k-modules/procurement/orders', data),
 };
 
 // ─── Service Compliance & Réglementation ──────────────────────────────────────────
 export const complianceAPI = {
-  getAudits: () => apiClient.get('/api/v1/compliance/audits'),
-  createAudit: (data: unknown) => apiClient.post('/api/v1/compliance/audits', data),
+  getAudits: () => apiClient.get('/api/v1/k-modules/compliance/audits'),
+  createAudit: (data: unknown) => apiClient.post('/api/v1/k-modules/compliance/audits', data),
 };
 
 // ─── Service BI & Analytics Executive ──────────────────────────────────────────
 export const biAnalyticsAPI = {
-  getSummary: () => apiClient.get('/api/v1/bi-analytics/executive-summary'),
+  getSummary: () => apiClient.get('/api/v1/k-modules/bi-analytics/executive-summary'),
 };
 
 // ─── Service Support & Litiges ──────────────────────────────────────────

@@ -1,9 +1,9 @@
 # Documentation Technique EVO-LOG SaaS
 
-**Date:** 19 septembre 2026  
+**Date:** 25 septembre 2026 (aligné code au 25/09/2026)  
 **Version:** 2.0  
 **Statut:** Développement avancé  staging requis ⚠️  
-**État de référence:** [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md)
+**État de référence (historique):** [docs/archive/ETAT_REEL_2026-09-19.md](./docs/archive/ETAT_REEL_2026-09-19.md)
 
 ---
 
@@ -67,9 +67,12 @@ Solution ERP logistique professionnelle adaptée au contexte camerounais et CEMA
 - **Build Production**: 153/153 pages statiques
 
 ### Rôles & RBAC
-- **Rôles**: ADMIN, MAGASINIER, DISPATCHER, QHSE, FINANCIER, DOUANE, PARC, AUDITOR
-- **Contrôle dynamique**: `modules_allowed` par rôle
-- **Contrôle d'accès**: Validation stricte des permissions
+- **Rôles**: SUPER_ADMIN, ADMIN (entreprise), chefs de département, rôles métier typés seedés par la migration `020_rbac_granulaire_accreditations`
+- **Moteur de permissions granulaires** (`app/core/permissions.py`) : codes `module.sous_module.action` + jokers, dépendance `require_perm`, appliqué aux domaines cœur (comptabilité avancée, magasin)
+- **Contrôle dynamique legacy** : `modules_allowed` par rôle (fallback quand aucune permission granulaire seedée)
+- **Visibilité hiérarchique** (`visible_user_ids`), **accréditations** datées, **espaces communs** par entreprise (`SharedAccess`)
+- **Contrôle d'accès** : validation serveur stricte + garde front (`PermissionGuard`, `useCan`)
+- **Détails** : [docs/RBAC_ACCREDITATIONS.md](./docs/RBAC_ACCREDITATIONS.md)
 
 ### Multi-tenancy
 - **Isolation complète** : `organization_id` sur tous les modèles

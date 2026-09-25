@@ -110,7 +110,7 @@ export default function B2BCotationsPage() {
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black ${step >= s.n ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-500'}`}>{s.n}</span>
               {s.label}
             </div>
-            {idx < 2 && <ArrowRight className="w-4 h-4 text-slate-700 shrink-0" />}
+            {idx < 2 && <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />}
           </React.Fragment>
         ))}
       </div>

@@ -178,7 +178,7 @@ export default function AdminTenantUsersRbac() {
                     >
                       {u.isActive
                         ? <CheckCircle2 className="w-5 h-5 text-emerald-400 mx-auto" />
-                        : <XCircle className="w-5 h-5 text-slate-600 mx-auto" />
+                        : <XCircle className="w-5 h-5 text-slate-400 mx-auto" />
                       }
                     </button>
                   </td>

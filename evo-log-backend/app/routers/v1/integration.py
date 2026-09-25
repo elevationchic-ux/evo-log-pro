@@ -25,9 +25,47 @@ from app.services.integration_service import (
     PCSService, IntegrationBanqueService, IntegrationAssureurService, IntegrationTransitaireService,
     SynchronisationService, IntegrationReportingService
 )
-from app.models.integration import Integration, SYDONIAPlus, GuichetUnique, PCS, IntegrationBanque, IntegrationAssureur, IntegrationTransitaire
+from app.models.integration import (
+    Integration, SYDONIAPlus, GuichetUnique, PCS, IntegrationBanque,
+    IntegrationAssureur, IntegrationTransitaire, RequeteIntegration, Synchronisation,
+)
 
 router = APIRouter(tags=["Integration"])
+
+
+# ============ LECTURE (list) ============
+@router.get("/integrations", response_model=List[IntegrationResponse])
+def lister_integrations(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Lister les intégrations réellement enregistrées."""
+    return db.query(Integration).order_by(Integration.id.desc()).offset(skip).limit(limit).all()
+
+
+@router.get("/requetes", response_model=List[RequeteIntegrationResponse])
+def lister_requetes(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Journal des requêtes d'intégration réellement enregistrées (flux EDI)."""
+    return db.query(RequeteIntegration).order_by(RequeteIntegration.id.desc()).offset(skip).limit(limit).all()
+
+
+@router.get("/synchronisations", response_model=List[SynchronisationResponse])
+def lister_synchronisations(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Lister les synchronisations réellement enregistrées."""
+    return db.query(Synchronisation).order_by(Synchronisation.id.desc()).offset(skip).limit(limit).all()
+
 
 
 # ============ INTEGRATIONS ============

@@ -228,7 +228,7 @@ export default function SuiviDossiersPortailB2B() {
                       ? 'bg-slate-950/40 border-emerald-500/20 text-slate-300'
                       : step.statut === 'IN_PROGRESS'
                       ? 'bg-violet-950/20 border-violet-500/40 text-slate-100 shadow-md shadow-violet-950/50'
-                      : 'bg-slate-950/20 border-slate-800/60 text-slate-600'
+                      : 'bg-slate-950/20 border-slate-800/60 text-slate-400'
                   }`}
                 >
                   <div
@@ -237,7 +237,7 @@ export default function SuiviDossiersPortailB2B() {
                         ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
                         : step.statut === 'IN_PROGRESS'
                         ? 'bg-violet-600 text-white animate-pulse'
-                        : 'bg-slate-800 text-slate-600'
+                        : 'bg-slate-800 text-slate-400'
                     }`}
                   >
                     {step.statut === 'DONE' ? '✓' : index + 1}

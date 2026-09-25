@@ -64,6 +64,16 @@ export default function EnterpriseChatPage() {
   // Active view: 'thematic' | 'meeting' | 'direct'
   const [activeTab, setActiveTab] = useState<'thematic' | 'meeting' | 'direct'>('thematic');
 
+  // Deep-link depuis la navigation : /chat?tab=... ouvre la vue demande.
+  // 'forum' (Grand Forum) est un alias de la vue thematique par defaut.
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('tab');
+    const map: Record<string, typeof activeTab> = {
+      thematic: 'thematic', meeting: 'meeting', direct: 'direct', forum: 'thematic',
+    };
+    if (t && map[t]) setActiveTab(map[t]);
+  }, []);
+
   // Rooms & Direct states
   const [rooms, setRooms] = useState<MeetingRoom[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<MeetingRoom | null>(null);
@@ -634,7 +644,7 @@ export default function EnterpriseChatPage() {
 
                 {meetingRooms.length === 0 && (
                   <div className="p-6 text-center text-slate-500 text-xs space-y-3">
-                    <Users className="w-8 h-8 mx-auto text-slate-600" />
+                    <Users className="w-8 h-8 mx-auto text-slate-400" />
                     <p>Aucun salon de réunion créé.</p>
                     <button
                       onClick={() => setIsCreateModalOpen(true)}
@@ -761,7 +771,7 @@ export default function EnterpriseChatPage() {
                     <div className="flex items-center gap-2 mb-1 px-1">
                       <span className="text-[11px] font-bold text-slate-300">{m.sender_name}</span>
                       <span className="text-[10px] text-slate-500">{m.sender_role}</span>
-                      <span className="text-[10px] text-slate-600">
+                      <span className="text-[10px] text-slate-400">
                         {new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -790,7 +800,7 @@ export default function EnterpriseChatPage() {
                       <span className="text-[10px] text-cyan-400 font-mono bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20">
                         {m.sender_role}
                       </span>
-                      <span className="text-[10px] text-slate-600">
+                      <span className="text-[10px] text-slate-400">
                         {new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>

@@ -1,8 +1,11 @@
 """QHSE router - Quality, Health, Safety, Environment management"""
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime, date
+import random
+import string
 
 from app.core.database import get_db
 from app.core.security import get_current_user
@@ -29,9 +32,30 @@ from app.services.qhse_service import (
     AuditQualiteService, HACCPPlanService, PointCritiqueCCPService, EnregistrementHACCPService,
     FormationQHSEService, IndicateurQHSEService, QHSEReportingService
 )
-from app.models.qhse import AnalyseRisque, PlanPrevention, AccidentTravail, NormeCertification, HACCPPlan
+from app.models.qhse import (
+    AnalyseRisque, PlanPrevention, AccidentTravail, NormeCertification, HACCPPlan,
+    AuditQualite, InvestigationAccident, FormationQHSE,
+)
+from app.models.gap_bridge import RegistreEntry
 
 router = APIRouter(tags=["QHSE"])  # monte sur /api/v1/qhse par main.py (pas de double prefix)
+
+
+def _gen_numero(prefix: str) -> str:
+    return f"{prefix}-{datetime.now().strftime('%Y%m%d')}-{''.join(random.choices(string.ascii_uppercase + string.digits, k=4))}"
+
+
+def _registre_dict(e: RegistreEntry) -> dict:
+    base = {
+        "id": e.id,
+        "reference": e.reference,
+        "statut": e.statut,
+        "created_by": e.created_by,
+        "created_at": e.created_at.isoformat() if e.created_at else None,
+    }
+    if isinstance(e.payload, dict):
+        base.update(e.payload)
+    return base
 
 
 # ============ ANALYSES RISQUES ============
@@ -173,6 +197,31 @@ def mettre_a_jour_epi(
 
 
 # ============ ACCIDENTS TRAVAIL ============
+@router.get("/accidents")
+def lister_accidents(
+    skip: int = 0, limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Registre reel des accidents du travail declares (persistance SQLAlchemy)."""
+    rows = db.query(AccidentTravail).order_by(desc(AccidentTravail.id)).offset(skip).limit(limit).all()
+    data = [
+        {
+            "id": a.id, "numero_accident": a.numero_accident,
+            "employe_id": a.employe_id,
+            "date_accident": a.date_accident.isoformat() if a.date_accident else None,
+            "lieu": a.lieu, "type_accident": a.type_accident,
+            "description": a.description, "gravite": a.gravite,
+            "arret_travail": a.arret_travail or 0,
+            "hospitalisation": bool(a.hospitalisation),
+            "statut": a.statut.value if hasattr(a.statut, "value") else str(a.statut),
+            "declarant": a.declarant,
+            "created_at": a.created_at.isoformat() if a.created_at else None,
+        } for a in rows
+    ]
+    return {"data": data, "items": data, "total": len(data)}
+
+
 @router.post("/accidents", response_model=AccidentTravailResponse, status_code=status.HTTP_201_CREATED)
 def declarer_accident(
     accident: AccidentTravailCreate,
@@ -180,10 +229,24 @@ def declarer_accident(
     current_user: User = Depends(get_current_user)
 ):
     """Declare work accident"""
-    return AccidentTravailService.declarer_accident(
-        db, accident.numero_accident, accident.employe_id, accident.date_accident,
-        accident.lieu, accident.type_accident, accident.description, accident.gravite
+    created = AccidentTravailService.declarer_accident(
+        db, accident.numero_accident or _gen_numero("ACC"), accident.employe_id,
+        accident.date_accident, accident.lieu, accident.type_accident,
+        accident.description, accident.gravite
     )
+    # Persistance complete du formulaire reel (sinon ces champs resteraient nuls)
+    for field in ("partie_corps", "temoin1", "temoin2", "premier_secours",
+                  "hospitalisation", "duree_hospitalisation", "arret_travail", "photos"):
+        value = getattr(accident, field, None)
+        if value not in (None, "", 0, False):
+            setattr(created, field, value)
+    if not created.declarant:
+        created.declarant = getattr(current_user, "full_name", None) or getattr(current_user, "username", None)
+    if not created.date_declaration:
+        created.date_declaration = date.today()
+    db.commit()
+    db.refresh(created)
+    return created
 
 
 @router.put("/accidents/{accident_id}", response_model=AccidentTravailResponse)
@@ -207,6 +270,31 @@ def mettre_a_jour_accident(
 
 
 # ============ INVESTIGATIONS ACCIDENTS ============
+@router.get("/investigations")
+def lister_investigations(
+    skip: int = 0, limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Registre reel des enquetes / plans d'actions correctives (CAPA)."""
+    rows = db.query(InvestigationAccident).order_by(desc(InvestigationAccident.id)).offset(skip).limit(limit).all()
+    data = [
+        {
+            "id": i.id, "accident_id": i.accident_id,
+            "numero_investigation": i.numero_investigation,
+            "date_investigation": i.date_investigation.isoformat() if i.date_investigation else None,
+            "investigateur": i.investigateur,
+            "causes_directes": i.causes_directes, "causes_indirectes": i.causes_indirectes,
+            "causes_racines": i.causes_racines,
+            "mesures_correctives": i.mesures_correctives, "mesures_preventives": i.mesures_preventives,
+            "delai_mise_oeuvre": i.delai_mise_oeuvre, "responsable_suivi": i.responsable_suivi,
+            "statut": i.statut, "conclusions": i.conclusions,
+            "created_at": i.created_at.isoformat() if i.created_at else None,
+        } for i in rows
+    ]
+    return {"data": data, "items": data, "total": len(data)}
+
+
 @router.post("/investigations", response_model=InvestigationAccidentResponse, status_code=status.HTTP_201_CREATED)
 def creer_investigation(
     investigation: InvestigationAccidentCreate,
@@ -214,10 +302,20 @@ def creer_investigation(
     current_user: User = Depends(get_current_user)
 ):
     """Create accident investigation"""
-    return InvestigationAccidentService.creer_investigation(
-        db, investigation.accident_id, investigation.numero_investigation,
+    created = InvestigationAccidentService.creer_investigation(
+        db, investigation.accident_id,
+        investigation.numero_investigation or _gen_numero("INV"),
         investigation.date_investigation, investigation.investigateur
     )
+    for field in ("temoins", "causes_directes", "causes_indirectes", "causes_racines",
+                  "mesures_correctives", "mesures_preventives", "delai_mise_oeuvre",
+                  "responsable_suivi"):
+        value = getattr(investigation, field, None)
+        if value not in (None, "", 0):
+            setattr(created, field, value)
+    db.commit()
+    db.refresh(created)
+    return created
 
 
 @router.put("/investigations/{investigation_id}", response_model=InvestigationAccidentResponse)
@@ -499,32 +597,162 @@ def rapport_securite(
     return QHSEReportingService.rapport_securite(db, annee)
 
 
+# ============ LISTES REELLES (formations, audits, certifications) ============
+@router.get("/formations")
+def lister_formations_qhse(
+    skip: int = 0, limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    rows = db.query(FormationQHSE).order_by(desc(FormationQHSE.id)).offset(skip).limit(limit).all()
+    data = [
+        {
+            "id": f.id, "numero_formation": f.numero_formation,
+            "type_formation": f.type_formation, "titre": f.titre,
+            "formateur": f.formateur, "lieu": f.lieu,
+            "date_debut": f.date_debut.isoformat() if f.date_debut else None,
+            "date_fin": f.date_fin.isoformat() if f.date_fin else None,
+            "duree_heures": f.duree_heures, "statut": f.statut,
+            "description": f.description,
+        } for f in rows
+    ]
+    return {"data": data, "items": data, "total": len(data)}
+
+
+@router.get("/audits")
+def lister_audits_qhse(
+    skip: int = 0, limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    rows = db.query(AuditQualite).order_by(desc(AuditQualite.id)).offset(skip).limit(limit).all()
+    data = [
+        {
+            "id": a.id, "numero_audit": a.numero_audit,
+            "certification_id": a.certification_id, "type_audit": a.type_audit,
+            "auditeur": a.auditeur,
+            "date_debut": a.date_debut.isoformat() if a.date_debut else None,
+            "date_fin": a.date_fin.isoformat() if a.date_fin else None,
+            "statut": a.statut, "scope": a.scope,
+            "non_conformites": a.non_conformites, "conclusion": a.conclusion,
+        } for a in rows
+    ]
+    return {"data": data, "items": data, "total": len(data)}
+
+
+@router.get("/certifications")
+def lister_certifications_qhse(
+    skip: int = 0, limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    rows = db.query(NormeCertification).order_by(desc(NormeCertification.id)).offset(skip).limit(limit).all()
+    data = [
+        {
+            "id": c.id, "numero_certificat": c.numero_certificat,
+            "norme": c.norme.value if hasattr(c.norme, "value") else str(c.norme),
+            "organisme": c.organisme,
+            "date_obtention": c.date_obtention.isoformat() if c.date_obtention else None,
+            "date_expiration": c.date_expiration.isoformat() if c.date_expiration else None,
+            "statut": c.statut, "scope": c.scope,
+            "resultat_audit": c.resultat_audit,
+        } for c in rows
+    ]
+    return {"data": data, "items": data, "total": len(data)}
+
+
+# ============ REGISTRE INSPECTIONS QHSE (persistance reelle) ============
+QHSE_REGISTRY = "qhse-inspections"
+
+
 @router.get("")
 @router.get("/")
-def lister_enregistrements_qhse_root():
-    """List summary QHSE records and audits for frontend dashboard"""
-    return [
-        {
-            "id": 1,
-            "type": "INSPECTION_SECURITE",
-            "zone": "Poste à Quai 14 PAD",
-            "statut": "CONFORME",
-            "score_conformite": 94,
-            "inspecteur": "Officier ISPS Mbarga",
-            "date": "2026-03-10",
-            "observations": "EPI complets dockers, balisage conforme"
-        },
-        {
-            "id": 2,
-            "type": "PERMIS_DE_FEU",
-            "zone": "Atelier Réparation Conteneurs",
-            "statut": "APPROUVE",
-            "score_conformite": 100,
-            "inspecteur": "Chef Sécurité Portuaire",
-            "date": "2026-03-11",
-            "observations": "Soudure sur paroi conteneur 40ft validée"
-        }
-    ]
+def lister_enregistrements_qhse_root(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Liste des rapports d'inspection QHSE reellement enregistres par la structure."""
+    q = db.query(RegistreEntry).filter(RegistreEntry.registry == QHSE_REGISTRY)
+    cid = getattr(current_user, "company_id", None)
+    if cid is not None:
+        q = q.filter(RegistreEntry.company_id.in_([cid, None]))
+    rows = q.order_by(desc(RegistreEntry.id)).limit(300).all()
+    return [_registre_dict(e) for e in rows]
+
+
+@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def creer_enregistrement_qhse_root(
+    payload: dict = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Enregistre un rapport d'inspection / signalement QHSE (donnees reelles du formulaire)."""
+    entry = RegistreEntry(
+        company_id=getattr(current_user, "company_id", None),
+        registry=QHSE_REGISTRY,
+        reference=payload.pop("reference", None) or _gen_numero("QHS"),
+        statut=payload.pop("statut", None) or "ENREISTRE",
+        payload=payload,
+        created_by=getattr(current_user, "username", None),
+    )
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return _registre_dict(entry)
+
+
+@router.get("/{record_id}")
+def lire_enregistrement_qhse(
+    record_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    e = db.query(RegistreEntry).filter(
+        RegistreEntry.id == record_id, RegistreEntry.registry == QHSE_REGISTRY
+    ).first()
+    if not e:
+        raise HTTPException(status_code=404, detail="Enregistrement QHSE introuvable")
+    return _registre_dict(e)
+
+
+@router.put("/{record_id}")
+def modifier_enregistrement_qhse(
+    record_id: int,
+    payload: dict = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    e = db.query(RegistreEntry).filter(
+        RegistreEntry.id == record_id, RegistreEntry.registry == QHSE_REGISTRY
+    ).first()
+    if not e:
+        raise HTTPException(status_code=404, detail="Enregistrement QHSE introuvable")
+    if "reference" in payload:
+        e.reference = payload.pop("reference")
+    if "statut" in payload:
+        e.statut = payload.pop("statut")
+    merged = dict(e.payload or {})
+    merged.update(payload)
+    e.payload = merged
+    db.commit()
+    db.refresh(e)
+    return _registre_dict(e)
+
+
+@router.delete("/{record_id}", status_code=status.HTTP_204_NO_CONTENT)
+def supprimer_enregistrement_qhse(
+    record_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    e = db.query(RegistreEntry).filter(
+        RegistreEntry.id == record_id, RegistreEntry.registry == QHSE_REGISTRY
+    ).first()
+    if not e:
+        raise HTTPException(status_code=404, detail="Enregistrement QHSE introuvable")
+    db.delete(e)
+    db.commit()
 
 
 # ============ PERMIS DE TRAVAIL DÉMATÉRIALISÉS ============

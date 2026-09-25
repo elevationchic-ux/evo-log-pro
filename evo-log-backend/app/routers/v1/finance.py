@@ -167,7 +167,12 @@ def creer_facture(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Create invoice"""
+    """Créer une facture.
+
+    Numéro absent -> séquence légale continue FAC-ANNEE-000X (exigence DGI) ;
+    le numéro saisi manuellement n'est accepté que s'il est unique (contrainte
+    base).
+    """
     return FactureService.creer_facture(
         db, facture.numero_facture, facture.client_id, facture.type_facture,
         facture.date_emission, facture.montant_ht, facture.taux_tva
@@ -206,6 +211,46 @@ def mettre_a_jour_facture(
     db.commit()
     db.refresh(f)
     return f
+
+
+@router.get("/factures/{facture_id}/pdf")
+def telecharger_facture_pdf(
+    facture_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Télécharger la facture au format PDF (mentions DGI/OHADA incluses).
+
+    Retourne un HTTP 501 honnête si la chaîne de génération PDF (WeasyPrint +
+    Pango/Cairo) n'est pas disponible dans l'environnement courant  jamais un
+    faux PDF ni du HTML déguisé.
+    """
+    from fastapi import Response
+    from app.models.tiers import Tiers
+    from app.models.tenant import Company
+    from app.utils.pdf_generator import generer_pdf, montant_en_lettres
+
+    f = db.query(Facture).filter(Facture.id == facture_id).first()
+    if not f:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+
+    client = db.query(Tiers).filter(Tiers.id == f.client_id).first() if f.client_id else None
+    company = db.query(Company).filter(Company.id == current_user.company_id).first() \
+        if getattr(current_user, "company_id", None) else None
+
+    pdf = generer_pdf("facture.html.j2", {
+        "facture": f,
+        "client": client,
+        "company": company,
+        "lignes": f.lignes_facture or [],
+        "taux_tva": float(f.taux_tva or 0),
+        "montant_en_lettres": montant_en_lettres(f.montant_ttc, f.devise or "XAF"),
+    })
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="facture-{f.numero_facture}.pdf"'},
+    )
 
 
 # ============ REGLEMENTS ============

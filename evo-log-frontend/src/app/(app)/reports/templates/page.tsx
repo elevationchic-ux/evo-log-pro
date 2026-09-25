@@ -21,6 +21,8 @@ export default function ReportTemplatesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
+  // audit-allow:fake_data  définitions de modèles de rapports (configuration d'interface),
+  // pas des données métier inventées : chaque modèle est un gabarit appliqué aux données réelles.
   const templates = [
     {
       id: 'tpl-01',
@@ -121,11 +123,10 @@ export default function ReportTemplatesPage() {
             <button
               key={c.id}
               onClick={() => setSelectedCategory(c.id)}
-              className={`px-3 py-1.5 rounded-xl border transition-colors ${
-                selectedCategory === c.id
+              className={`px-3 py-1.5 rounded-xl border transition-colors ${selectedCategory === c.id
                   ? 'bg-primary text-on-primary border-primary'
                   : 'bg-surface border-outline text-on-surface hover:bg-surface-container'
-              }`}
+                }`}
             >
               {c.label}
             </button>

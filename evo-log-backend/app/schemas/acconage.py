@@ -36,8 +36,8 @@ class NavireResponse(NavireBase):
 
 # Escale schemas
 class EscaleBase(BaseModel):
-    navire_id: int
-    port_id: int
+    navire_id: Optional[int] = None
+    port_id: Optional[int] = None
     poste_quai: Optional[str] = None
     date_arrivee_prevue: Optional[datetime] = None
     date_arrivee_reelle: Optional[datetime] = None
@@ -51,7 +51,9 @@ class EscaleBase(BaseModel):
 
 
 class EscaleCreate(EscaleBase):
-    numero_escale: str
+    numero_escale: Optional[str] = None
+    # Permet de référencer le navire par son nom: le navire est créé s'il est inconnu
+    navire_nom: Optional[str] = None
 
 
 class EscaleUpdate(BaseModel):
@@ -340,7 +342,13 @@ class ManifesteBase(BaseModel):
 
 
 class ManifesteCreate(ManifesteBase):
-    pass
+    # Champs secondaires optionnels à la création: renseignés ensuite via la mise à jour
+    escale_id: Optional[int] = None
+    type_manifeste: Optional[str] = "import"
+    voyage: Optional[str] = None
+    port_destination: Optional[str] = None
+    tonnage_total: Optional[float] = None
+    valeur_marchandise: Optional[float] = None
 
 
 class ManifesteUpdate(BaseModel):

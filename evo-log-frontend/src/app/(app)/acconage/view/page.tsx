@@ -157,8 +157,8 @@ export default function AcconageViewPage() {
           </h2>
           <div className="space-y-2 text-xs">
             {[
-              { label: 'N° Escale', value: operation.numero_escale || `ESC-${operation.id}` },
-              { label: "Type d'Opération", value: operation.type_operation || 'Déchargement / Chargement' },
+              { label: 'N° Escale', value: operation.numero_escale || 'Non renseigné' },
+              { label: "Type d'Opération", value: operation.type_operation || 'Non renseigné' },
               { label: 'Conteneurs 20ft', value: operation.nb_20ft || 0 },
               { label: 'Conteneurs 40ft', value: operation.nb_40ft || 0 },
               { label: 'Total TEU', value: `${operation.nombre_conteneurs || 0} TEU` },
@@ -179,12 +179,12 @@ export default function AcconageViewPage() {
           </h2>
           <div className="space-y-2 text-xs">
             {[
-              { label: 'Grues Portiques Affectées', value: operation.grues || 'Portique STS 01 & STS 02' },
-              { label: 'Équipes de Dockers', value: operation.equipes || '2 Shifts (24h/24)' },
-              { label: 'Cadence Moyenne', value: operation.cadence ? `${operation.cadence} mvts/h` : '22 mouvements/heure' },
-              { label: 'Remorquage & Pilotage', value: operation.remorquage || 'Effectué par PAD Harbour' },
-              { label: 'Date Arrivée Quai (ETA/ATA)', value: operation.date_arrivee || 'Conforme au plan de tirage' },
-              { label: 'Date Départ Prévue (ETD)', value: operation.date_depart || 'Selon avancement shifts' },
+              { label: 'Grues Portiques Affectées', value: operation.grues || 'Non renseignées' },
+              { label: 'Équipes de Dockers', value: operation.equipes || 'Non renseignées' },
+              { label: 'Cadence Moyenne', value: operation.cadence ? `${operation.cadence} mvts/h` : 'Non mesurée' },
+              { label: 'Remorquage & Pilotage', value: operation.remorquage || 'Non renseigné' },
+              { label: 'Date Arrivée Quai (ETA/ATA)', value: operation.date_arrivee || 'Non renseignée' },
+              { label: 'Date Départ Prévue (ETD)', value: operation.date_depart || 'Non renseignée' },
             ].map(row => (
               <div key={row.label} className="flex justify-between py-1 border-b border-outline/30">
                 <span className="text-on-surface-variant">{row.label} :</span>
@@ -199,7 +199,7 @@ export default function AcconageViewPage() {
       <div className="pt-4 border-t border-outline">
         <AcconageTemporaryDockersManager
           escaleId={operation.id}
-          escaleNumero={operation.numero_escale || `ESC-${operation.id}`}
+          escaleNumero={operation.numero_escale || `Escale #${operation.id}`}
           escaleStatut={operation.statut || 'EN_COURS'}
           navireNom={operation.nom_navire}
         />

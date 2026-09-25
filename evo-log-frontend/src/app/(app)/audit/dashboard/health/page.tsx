@@ -28,19 +28,19 @@ interface AuditEvent {
 // ── Service Status Indicator ────────────────────────────────────────────────────
 function ServiceStatus({ name, status, latency, icon }: { name: string; status: 'online' | 'degraded' | 'offline'; latency?: string; icon: React.ReactNode }) {
   const statusConfig = {
-    online: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'En ligne', pulse: true },
-    degraded: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', label: 'Dégradé', pulse: true },
-    offline: { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500', label: 'Hors ligne', pulse: false },
+    online: { bg: 'bg-emerald-500/10', text: 'text-emerald-300', dot: 'bg-emerald-500', label: 'En ligne', pulse: true },
+    degraded: { bg: 'bg-amber-500/10', text: 'text-amber-300', dot: 'bg-amber-500', label: 'Dégradé', pulse: true },
+    offline: { bg: 'bg-red-500/10', text: 'text-red-300', dot: 'bg-red-500', label: 'Hors ligne', pulse: false },
   }
   const config = statusConfig[status]
   return (
-    <div className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all group">
+    <div className="flex items-center justify-between p-4 rounded-xl bg-slate-900 border border-slate-700 hover:border-slate-700 hover:shadow-sm transition-all group">
       <div className="flex items-center gap-3">
         <div className={`p-2 rounded-lg ${config.bg}`}>
           {icon}
         </div>
         <div>
-          <p className="text-sm font-semibold text-slate-800">{name}</p>
+          <p className="text-sm font-semibold text-slate-200">{name}</p>
           {latency && <p className="text-xs text-slate-400">{latency}</p>}
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function AuditHealthDashboard() {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-200 tracking-tight flex items-center gap-2">
             <Activity className="text-emerald-600 w-7 h-7" />
             Santé Système & Audit
           </h1>
@@ -154,7 +154,7 @@ export default function AuditHealthDashboard() {
           <button
             onClick={fetchData}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-400 bg-slate-900 border border-slate-700 rounded-lg hover:bg-slate-800 hover:border-slate-600 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             Rafraîchir
@@ -164,35 +164,35 @@ export default function AuditHealthDashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-24 h-24 bg-emerald-50 rounded-bl-full -z-0 transition-transform group-hover:scale-110" />
+        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden group">
+          <div className="absolute right-0 top-0 w-24 h-24 bg-emerald-500/10 rounded-bl-full -z-0 transition-transform group-hover:scale-110" />
           <div className="relative z-10">
             <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 bg-emerald-100 text-emerald-600 rounded-xl">
+              <div className="p-2.5 bg-emerald-500/15 text-emerald-600 rounded-xl">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <span className="text-xs font-bold px-2 py-1 bg-emerald-50 text-emerald-700 rounded-full">Normal</span>
+              <span className="text-xs font-bold px-2 py-1 bg-emerald-500/10 text-emerald-300 rounded-full">Normal</span>
             </div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Statut Global</p>
-            <h2 className="text-2xl font-black text-slate-800">
+            <h2 className="text-2xl font-black text-slate-200">
               {apiOnline ? '100%' : ''} <span className="text-sm font-bold text-slate-500">Opérationnel</span>
             </h2>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-0 transition-transform group-hover:scale-110" />
+        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden group">
+          <div className="absolute right-0 top-0 w-24 h-24 bg-blue-500/10 rounded-bl-full -z-0 transition-transform group-hover:scale-110" />
           <div className="relative z-10">
             <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 bg-blue-100 text-blue-600 rounded-xl">
+              <div className="p-2.5 bg-blue-500/15 text-blue-600 rounded-xl">
                 <Cpu className="w-6 h-6" />
               </div>
-              <span className="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-700 rounded-full">
+              <span className="text-xs font-bold px-2 py-1 bg-slate-900 text-slate-300 rounded-full">
                 {health ? `${Math.round(health.cpuUsage)}%` : ''}
               </span>
             </div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Charge Serveur (CPU)</p>
-            <h2 className="text-2xl font-black text-slate-800">
+            <h2 className="text-2xl font-black text-slate-200">
               {health ? `${Math.round(health.cpuUsage)}%` : ''}{' '}
               <span className="text-sm font-bold text-slate-500">
                 {health && health.cpuUsage < 50 ? 'Faible' : health && health.cpuUsage < 80 ? 'Moyenne' : 'Élevée'}
@@ -201,38 +201,38 @@ export default function AuditHealthDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-24 h-24 bg-purple-50 rounded-bl-full -z-0 transition-transform group-hover:scale-110" />
+        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden group">
+          <div className="absolute right-0 top-0 w-24 h-24 bg-purple-500/10 rounded-bl-full -z-0 transition-transform group-hover:scale-110" />
           <div className="relative z-10">
             <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 bg-purple-100 text-purple-600 rounded-xl">
+              <div className="p-2.5 bg-purple-500/15 text-purple-600 rounded-xl">
                 <Users className="w-6 h-6" />
               </div>
-              <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 bg-green-50 text-green-700 rounded-full">
+              <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 bg-green-500/10 text-green-300 rounded-full">
                 <ArrowUpRight className="w-3 h-3" /> Live
               </span>
             </div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Connexions Actives</p>
-            <h2 className="text-2xl font-black text-slate-800">
+            <h2 className="text-2xl font-black text-slate-200">
               {health ? health.activeConnections : ''}{' '}
               <span className="text-sm font-bold text-slate-500">Sessions</span>
             </h2>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-24 h-24 bg-amber-50 rounded-bl-full -z-0 transition-transform group-hover:scale-110" />
+        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden group">
+          <div className="absolute right-0 top-0 w-24 h-24 bg-amber-500/10 rounded-bl-full -z-0 transition-transform group-hover:scale-110" />
           <div className="relative z-10">
             <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 bg-amber-100 text-amber-600 rounded-xl">
+              <div className="p-2.5 bg-amber-500/15 text-amber-600 rounded-xl">
                 <AlertTriangle className="w-6 h-6" />
               </div>
-              <span className="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-700 rounded-full">
+              <span className="text-xs font-bold px-2 py-1 bg-slate-900 text-slate-300 rounded-full">
                 {health ? `${Math.round(health.memoryUsage)}%` : ''} RAM
               </span>
             </div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Mémoire Utilisée</p>
-            <h2 className="text-2xl font-black text-slate-800">
+            <h2 className="text-2xl font-black text-slate-200">
               {health ? `${Math.round(health.memoryUsage)}%` : ''}{' '}
               <span className="text-sm font-bold text-slate-500">
                 {health && health.memoryUsage < 60 ? 'Normal' : 'Attention'}
@@ -245,9 +245,9 @@ export default function AuditHealthDashboard() {
       {/* Services Status Panel + Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Services Status */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-sm">
           <div className="mb-5">
-            <h3 className="text-lg font-bold text-slate-800">État des Services</h3>
+            <h3 className="text-lg font-bold text-slate-200">État des Services</h3>
             <p className="text-sm text-slate-500">Supervision infrastructure</p>
           </div>
           <div className="space-y-3">
@@ -273,9 +273,9 @@ export default function AuditHealthDashboard() {
         </div>
 
         {/* Availability Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 flex flex-col h-[380px]">
+        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-sm lg:col-span-2 flex flex-col h-[380px]">
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-slate-800">Disponibilité des Services (24h)</h3>
+            <h3 className="text-lg font-bold text-slate-200">Disponibilité des Services (24h)</h3>
             <p className="text-sm text-slate-500">Temps de réponse et SLA</p>
           </div>
           <div className="flex-1 w-full min-h-0">
@@ -302,10 +302,10 @@ export default function AuditHealthDashboard() {
       </div>
 
       {/* Recent Events  connected to real audit logs */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-sm">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-slate-800">Événements Récents</h3>
+            <h3 className="text-lg font-bold text-slate-200">Événements Récents</h3>
             <p className="text-sm text-slate-500">Journal système (Auto-refresh 30s)</p>
           </div>
           <span className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
@@ -330,10 +330,10 @@ export default function AuditHealthDashboard() {
             const user = log.admin || log.username || 'Système'
 
             return (
-              <div key={log.id || idx} className="flex items-start gap-3 p-3.5 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+              <div key={log.id || idx} className="flex items-start gap-3 p-3.5 rounded-xl hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-700">
                 <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${dotColor}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 truncate">{eventText}</p>
+                  <p className="text-sm font-medium text-slate-200 truncate">{eventText}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <p className="text-xs text-slate-400">{timeText}</p>
                     {user !== 'Système' && (
@@ -345,7 +345,7 @@ export default function AuditHealthDashboard() {
                   </div>
                 </div>
                 {log.target && (
-                  <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md font-mono shrink-0">
+                  <span className="text-xs px-2 py-0.5 bg-slate-900 text-slate-500 rounded-md font-mono shrink-0">
                     {log.target}
                   </span>
                 )}

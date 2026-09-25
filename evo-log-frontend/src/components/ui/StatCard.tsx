@@ -12,12 +12,12 @@ interface StatCardProps {
 }
 
 const colorMap = {
-  default: 'from-slate-500/10 to-slate-600/5 border-slate-200 dark:border-slate-700',
-  primary: 'from-indigo-500/10 to-indigo-600/5 border-indigo-200 dark:border-indigo-800',
-  success: 'from-emerald-500/10 to-emerald-600/5 border-emerald-200 dark:border-emerald-800',
-  warning: 'from-amber-500/10 to-amber-600/5 border-amber-200 dark:border-amber-800',
-  danger: 'from-red-500/10 to-red-600/5 border-red-200 dark:border-red-800',
-  info: 'from-blue-500/10 to-blue-600/5 border-blue-200 dark:border-blue-800',
+  default: 'from-slate-500/10 to-slate-600/5 border-slate-700 dark:border-slate-700',
+  primary: 'from-indigo-500/10 to-indigo-600/5 border-indigo-500/40 dark:border-indigo-800',
+  success: 'from-emerald-500/10 to-emerald-600/5 border-emerald-500/40 dark:border-emerald-800',
+  warning: 'from-amber-500/10 to-amber-600/5 border-amber-500/40 dark:border-amber-800',
+  danger: 'from-red-500/10 to-red-600/5 border-red-500/40 dark:border-red-800',
+  info: 'from-blue-500/10 to-blue-600/5 border-blue-500/40 dark:border-blue-800',
 };
 
 const iconColorMap = {

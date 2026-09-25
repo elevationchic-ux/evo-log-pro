@@ -1,12 +1,13 @@
 ﻿"use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminAPI } from "../../../../../lib/api-client";
+import { adminAPI, rbacAPI } from "../../../../../lib/api-client";
 import {
   Users, Plus, Search, Edit, Trash2, Shield, CheckCircle,
   XCircle, Eye, Filter, RefreshCw, Mail, Phone,
-  UserCheck, UserX, ChevronDown
+  UserCheck, UserX, ChevronDown, BadgeCheck
 } from "lucide-react";
 
 interface UserEntry {
@@ -54,6 +55,22 @@ export default function UserManagementPage() {
     queryKey: ["admin-users", search],
     queryFn: async () => (await adminAPI.getUsers({ search: search || undefined, limit: 500 })).data,
   });
+  // Accréditations granulaires de l'entreprise, agrégées par utilisateur.
+  const { data: accreditations = [] } = useQuery({
+    queryKey: ["admin-accreditations"],
+    queryFn: async () => (await rbacAPI.listAccreditations()).data || [],
+  });
+  const accreditationsByUser = React.useMemo(() => {
+    const map = new Map<number, { actif: number; total: number }>();
+    for (const a of (Array.isArray(accreditations) ? accreditations : [])) {
+      const uid = Number(a.user_id);
+      const cur = map.get(uid) || { actif: 0, total: 0 };
+      cur.total += 1;
+      if ((a.statut || "actif") === "actif") cur.actif += 1;
+      map.set(uid, cur);
+    }
+    return map;
+  }, [accreditations]);
   const users: UserEntry[] = apiUsers.map((user: any) => {
     const [prenom = "", ...nomParts] = String(user.full_name || user.username || "").split(" ");
     return {
@@ -146,7 +163,7 @@ export default function UserManagementPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/40 border-b border-border">
               <tr>
-                {["Utilisateur", "Email", "Rôle", "Département", "Dernière Connexion", "Statut", "Actions"].map(h => (
+                {["Utilisateur", "Email", "Rôle", "Département", "Accréditations", "Dernière Connexion", "Statut", "Actions"].map(h => (
                   <th key={h} className="px-4 py-3 text-left font-semibold text-muted-foreground text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -154,6 +171,7 @@ export default function UserManagementPage() {
             <tbody className="divide-y divide-border">
               {filtered.map(user => {
                 const roleCfg = roleColors[user.role] || "text-slate-400 bg-slate-400/10 border-slate-400/30";
+                const acc = accreditationsByUser.get(user.id);
                 return (
                   <tr key={user.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3">
@@ -172,6 +190,15 @@ export default function UserManagementPage() {
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${roleCfg}`}>{user.role}</span>
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{user.departement}</td>
+                    <td className="px-4 py-3">
+                      {acc ? (
+                        <Link href="/admin/accreditations" title={`${acc.actif} accréditation(s) active(s) sur ${acc.total}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border text-emerald-400 bg-emerald-400/10 border-emerald-400/30 hover:bg-emerald-400/20 transition-colors">
+                          <BadgeCheck size={12} />{acc.actif}
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-muted-foreground/60"></span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{timeAgo(user.derniere_connexion)}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${user.statut === "ACTIF" ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/30" : "text-amber-400 bg-amber-400/10 border-amber-400/30"}`}>

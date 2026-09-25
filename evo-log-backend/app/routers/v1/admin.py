@@ -14,9 +14,23 @@ from app.core.database import get_db
 from app.models.user import User, Role, user_roles
 from app.models.tenant import Company
 from app.models.audit import AuditLog
-from app.core.security import get_password_hash, verify_password, get_current_user
+from app.core.security import get_password_hash, verify_password, get_current_user, validate_password_strength
+from app.utils.rbac import (
+    require_company_admin, require_superadmin, _is_superadmin,
+)
 
 router = APIRouter()
+
+
+def _get_scoped_user(db: Session, current_user: User, user_id: int) -> User:
+    """Load a target user enforcing tenancy: an Admin Entreprise may only touch
+    users of its own company; a Super Admin may touch anyone."""
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouve")
+    if not _is_superadmin(current_user) and target.company_id != current_user.company_id:
+        raise HTTPException(status_code=403, detail="Utilisateur hors de votre entreprise")
+    return target
 
 STANDARD_ROLES = [
     {"name": "SUPER_ADMIN", "label": "Super Administrateur SaaS", "level": 0, "desc": "Gouvernance globale multi-tenant et infrastructure"},
@@ -104,7 +118,7 @@ def get_users(
 def create_user(
     payload: Dict[str, Any],
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_company_admin),
 ):
     """Create a new user account with hashed password and role assignment"""
     username = payload.get("username") or payload.get("email", "").split("@")[0]
@@ -123,9 +137,19 @@ def create_user(
     if not current_user.is_superuser and company_id != current_user.company_id:
         raise HTTPException(status_code=403, detail="Accès à une autre société interdit")
 
+    # Anti privilege-escalation: only a Super Admin may mint another Super Admin.
+    wants_superuser = role_name.upper() == "SUPER_ADMIN"
+    if wants_superuser and not _is_superadmin(current_user):
+        raise HTTPException(status_code=403, detail="Seul un Super Admin peut creer un Super Admin")
+
     existing = db.query(User).filter(or_(User.email == email, User.username == username)).first()
     if existing:
         raise HTTPException(status_code=400, detail=f"Un utilisateur avec cet email ({email}) ou nom d'utilisateur existe déjà")
+
+    try:
+        validate_password_strength(password, username)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
     hashed_pw = get_password_hash(password)
 
@@ -162,11 +186,14 @@ def create_user(
 
 
 @router.put("/users/{user_id}")
-def update_user(user_id: int, payload: Dict[str, Any], db: Session = Depends(get_db)):
-    """Update user information and roles"""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+def update_user(
+    user_id: int,
+    payload: Dict[str, Any],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_company_admin),
+):
+    """Update user information and roles (company-scoped)."""
+    user = _get_scoped_user(db, current_user, user_id)
 
     if "full_name" in payload:
         user.full_name = payload["full_name"]
@@ -177,10 +204,15 @@ def update_user(user_id: int, payload: Dict[str, Any], db: Session = Depends(get
     if "is_active" in payload:
         user.is_active = bool(payload["is_active"])
     if "company_id" in payload:
+        # Only a Super Admin may move a user between companies.
+        if not _is_superadmin(current_user):
+            raise HTTPException(status_code=403, detail="Changement de societe reserve au Super Admin")
         user.company_id = payload["company_id"]
 
     if "role" in payload:
         role_name = payload["role"]
+        if role_name.upper() == "SUPER_ADMIN" and not _is_superadmin(current_user):
+            raise HTTPException(status_code=403, detail="Promotion au role SUPER_ADMIN reservee au Super Admin")
         db_role = db.query(Role).filter(Role.name == role_name).first()
         if db_role:
             user.roles = [db_role]
@@ -191,11 +223,14 @@ def update_user(user_id: int, payload: Dict[str, Any], db: Session = Depends(get
 
 
 @router.patch("/users/{user_id}/status")
-def toggle_user_status(user_id: int, payload: Optional[Dict[str, Any]] = None, db: Session = Depends(get_db)):
-    """Toggle user active / locked status"""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+def toggle_user_status(
+    user_id: int,
+    payload: Optional[Dict[str, Any]] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_company_admin),
+):
+    """Toggle user active / locked status (company-scoped)."""
+    user = _get_scoped_user(db, current_user, user_id)
 
     if payload and "is_active" in payload:
         user.is_active = bool(payload["is_active"])
@@ -208,14 +243,21 @@ def toggle_user_status(user_id: int, payload: Optional[Dict[str, Any]] = None, d
 
 
 @router.post("/users/{user_id}/reset-password")
-def reset_user_password(user_id: int, payload: Dict[str, Any], db: Session = Depends(get_db)):
-    """Reset password for a user account"""
+def reset_user_password(
+    user_id: int,
+    payload: Dict[str, Any],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_company_admin),
+):
+    """Reset password for a user account (company-scoped)."""
     new_pw = payload.get("new_password")
     if not new_pw:
         raise HTTPException(status_code=422, detail="Le nouveau mot de passe est requis")
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    user = _get_scoped_user(db, current_user, user_id)
+    try:
+        validate_password_strength(new_pw, user.username)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
     user.hashed_password = get_password_hash(new_pw)
     user.must_change_password = True

@@ -71,7 +71,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
   const fetchDockers = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get(`/api/v1/acconage/escales/${escaleId}/dockers-temporaires`);
+      const res = await apiClient.get(`/api/v1/acconage-avance/escales/${escaleId}/dockers-temporaires`);
       const data = res.data?.dockers || res.data || [];
       setDockers(Array.isArray(data) ? data : []);
     } catch {
@@ -98,10 +98,10 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
     setSubmitting(true);
     try {
       if (editingDocker) {
-        await apiClient.put(`/api/v1/acconage/dockers-temporaires/${editingDocker.id}`, form);
+        await apiClient.put(`/api/v1/acconage-avance/dockers-temporaires/${editingDocker.id}`, form);
         toast.success('Docker temporaire mis à jour.');
       } else {
-        await apiClient.post(`/api/v1/acconage/escales/${escaleId}/dockers-temporaires`, {
+        await apiClient.post(`/api/v1/acconage-avance/escales/${escaleId}/dockers-temporaires`, {
           ...form, escale_id: escaleId
         });
         toast.success(`${form.prenom} ${form.nom} affecté(e) au ${form.shift.replace('_', ' ')}.`);
@@ -120,7 +120,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
   const handleDelete = async (docker: DockerTemporaire) => {
     if (!confirm(`Retirer ${docker.prenom} ${docker.nom} de l'escale ?`)) return;
     try {
-      await apiClient.delete(`/api/v1/acconage/dockers-temporaires/${docker.id}`);
+      await apiClient.delete(`/api/v1/acconage-avance/dockers-temporaires/${docker.id}`);
       toast.success('Docker retiré de l\'escale.');
       fetchDockers();
     } catch {
@@ -130,7 +130,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
 
   const handleToggleEPI = async (docker: DockerTemporaire) => {
     try {
-      await apiClient.put(`/api/v1/acconage/dockers-temporaires/${docker.id}`, {
+      await apiClient.put(`/api/v1/acconage-avance/dockers-temporaires/${docker.id}`, {
         epi_fourni: !docker.epi_fourni
       });
       fetchDockers();
@@ -139,7 +139,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
 
   const handleToggleBriefing = async (docker: DockerTemporaire) => {
     try {
-      await apiClient.put(`/api/v1/acconage/dockers-temporaires/${docker.id}`, {
+      await apiClient.put(`/api/v1/acconage-avance/dockers-temporaires/${docker.id}`, {
         briefing_securite_fait: !docker.briefing_securite_fait
       });
       fetchDockers();
@@ -149,7 +149,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
   const handleVacationIncrement = async (docker: DockerTemporaire, delta: number) => {
     const newCount = Math.max(0, (docker.nb_vacations || 0) + delta);
     try {
-      await apiClient.put(`/api/v1/acconage/dockers-temporaires/${docker.id}`, {
+      await apiClient.put(`/api/v1/acconage-avance/dockers-temporaires/${docker.id}`, {
         nb_vacations: newCount,
         montant_total: newCount * docker.taux_journalier
       });
@@ -203,7 +203,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
 
       {/* Escale Closed Banner */}
       {isClosed && (
-        <div className="flex items-center gap-3 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-700">
+        <div className="flex items-center gap-3 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-300">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>
             <strong>Escale clôturée.</strong> Les accréditations de tous les dockers temporaires sont automatiquement expirées.
@@ -331,7 +331,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
                         </button>
                         <button
                           onClick={() => handleDelete(docker)}
-                          className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-500"
+                          className="p-1.5 rounded-lg border border-rose-500/40 hover:bg-rose-500/10 text-rose-500"
                           title="Retirer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -360,7 +360,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
               </button>
             </div>
 
-            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-700">
+            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300">
               <AlertTriangle className="w-3.5 h-3.5 inline mr-1.5" />
               L'accès de ce docker expirera automatiquement à la clôture de l'escale <strong>{escaleNumero}</strong>.
             </div>

@@ -342,6 +342,7 @@ class RapportExecutifResponse(BaseModel):
     kpis: list
     nombre_kpis: int
     k_par_type: dict
+    poles: list = []
 
 
 class RapportFinancierResponse(BaseModel):

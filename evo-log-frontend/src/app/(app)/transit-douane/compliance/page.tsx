@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import {
-  ShieldCheck, Plus, Search, Filter, Download, CheckCircle2,
-  AlertTriangle, Globe, FileBadge, Building, RefreshCw
+  ShieldCheck, Search, CheckCircle2,
+  AlertTriangle, Inbox, RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiClient } from '@/lib/api-client';
 
 interface GuceComplianceDoc {
   id: string;
@@ -17,15 +18,26 @@ interface GuceComplianceDoc {
   issuingAuthority: string;
 }
 
-const COMPLIANCE_DOCS: GuceComplianceDoc[] = [
-  { id: '1', referenceGuce: 'GUCE-2026-PHY-0994', documentType: 'CERTIFICAT_PHYTOSANITAIRE', importer: 'SABC Boissons', issueDate: '26/08/2026', status: 'VALIDE', issuingAuthority: 'Ministère de l Agriculture (MINADER)' },
-  { id: '2', referenceGuce: 'GUCE-2026-CO-0112', documentType: 'CERTIFICAT_ORIGINE_CEMAC', importer: 'TOTAL Cameroun', issueDate: '25/08/2026', status: 'VALIDE', issuingAuthority: 'Chambre de Commerce (CCIMA)' },
-  { id: '3', referenceGuce: 'GUCE-2026-SGS-4481', documentType: 'ATTESTATION_SGS_COTECNIA', importer: 'CIMENCAM', issueDate: '24/08/2026', status: 'EN_INSPECTION', issuingAuthority: 'SGS Cameroun S.A.' },
-];
-
 export default function TransitDouaneCompliance() {
-  const [docs] = useState<GuceComplianceDoc[]>(COMPLIANCE_DOCS);
+  // Aucun document n'est inventé : la liste est alimentée par l'API GUCE (le backend
+  // n'expose pas encore de point de lecture → état vide explicite).
+  const [docs, setDocs] = useState<GuceComplianceDoc[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await apiClient.get('/api/v1/transit-douane/guce/documents');
+      const rows = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
+      setDocs(rows);
+      toast.success(`${rows.length} document(s) GUCE récupéré(s).`);
+    } catch {
+      toast.error('Synchronisation impossible : le service backend GUCE n\'est pas joignable.');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const filtered = docs.filter(d =>
     d.referenceGuce.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -57,16 +69,30 @@ export default function TransitDouaneCompliance() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => toast.success('Synchronisation API Guichet Unique effectuée')}
-            className="px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-teal-500 text-white font-black text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
+            onClick={handleSync}
+            disabled={syncing}
+            className="px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-teal-500 text-white font-black text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-cyan-500/25 transition-all cursor-pointer disabled:opacity-50"
           >
-            <RefreshCw className="w-4 h-4" /> Synchroniser GUCE
+            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} /> Synchroniser GUCE
           </button>
         </div>
       </div>
 
       {/* Table Documents Conformité */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+        {filtered.length === 0 ? (
+          <div className="py-16 text-center">
+            <Inbox className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+            <h3 className="text-base font-semibold text-slate-100">
+              {docs.length === 0 ? 'Aucun document de conformité chargé' : 'Aucun document ne correspond à la recherche'}
+            </h3>
+            <p className="text-sm text-slate-400 max-w-md mx-auto mt-1">
+              {docs.length === 0
+                ? 'Utilisez « Synchroniser GUCE » pour récupérer les certificats depuis le Guichet Unique. Aucun document n\'est affiché tant qu\'il n\'a pas été renvoyé par l\'API.'
+                : 'Affinez votre recherche (référence GUCE, importateur ou autorité émettrice).'}
+            </p>
+          </div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
@@ -101,6 +127,7 @@ export default function TransitDouaneCompliance() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
     </div>
   );

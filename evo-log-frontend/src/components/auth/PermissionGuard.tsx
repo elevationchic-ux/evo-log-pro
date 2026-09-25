@@ -3,10 +3,13 @@
 import React from 'react';
 import { useSession } from 'next-auth/react';
 import { canAccessTCode } from '@/utils/tcodeLookup';
+import { hasPermission, hasGranularPermissions } from '@/lib/permissions';
 import { AlertTriangle, Lock } from 'lucide-react';
 
 interface PermissionGuardProps {
   permission?: string;
+  /** Code granulaire module.sous_module.action (moteur RBAC effectif). */
+  code?: string;
   requiredRoles?: string[];
   tcode?: string;
   children: React.ReactNode;
@@ -16,6 +19,7 @@ interface PermissionGuardProps {
 
 export function PermissionGuard({
   permission,
+  code,
   requiredRoles,
   tcode,
   children,
@@ -28,7 +32,18 @@ export function PermissionGuard({
   const userPermissions: string[] = user?.permissions || [];
 
   // Super Admin a accès absolu
-  if (userRoles.includes('SUPER_ADMIN')) {
+  if (userRoles.includes('SUPER_ADMIN') || user?.is_superuser) {
+    return <>{children}</>;
+  }
+
+  // 0. Vérification granulaire par code (RBAC effectif). Si l'utilisateur porte
+  //    des permissions granulaires seedées, le code tranche ; sinon on laisse la
+  //    main aux vérifications historiques ci-dessous (non-régression).
+  if (code && hasGranularPermissions(user)) {
+    if (!hasPermission(user, code)) {
+      if (fallback) return <>{fallback}</>;
+      return null;
+    }
     return <>{children}</>;
   }
 

@@ -1,10 +1,10 @@
 # Statut Global du Projet - EVO-LOG SaaS
 
-**Date:** 19 septembre 2026  
+**Date:** 25 septembre 2026 (aligné code au 25/09/2026)  
 **Version:** 2.0  
 **Statut:** DÉVELOPPEMENT AVANCÉ  NON CERTIFIÉ PRODUCTION ⚠️
 
-> Ce document est aligné sur [ETAT_REEL_2026-09-19.md](../ETAT_REEL_2026-09-19.md). Les anciens pourcentages et affirmations de complétude sont historiques et ne remplacent pas des tests reproductibles.
+> Ce document était aligné sur l'instantané historique [docs/archive/ETAT_REEL_2026-09-19.md](./archive/ETAT_REEL_2026-09-19.md). Les anciens pourcentages et affirmations de complétude sont historiques et ne remplacent pas des tests reproductibles.
 
 ---
 
@@ -50,7 +50,7 @@ EVO-LOG SaaS est une solution ERP logistique professionnelle adaptée au context
 
 #### Gestion des Ressources
 - ✅ **RH** - Complètement fonctionnel
-- ✅ **Accreditation Management** - Complètement fonctionnel (Nouveau)
+- ✅ **Accreditation Management** - Modèle d'accréditations granulaires daté et révocable opérationnel (`/api/v1/accreditations`, UI `admin/accreditations`) ; à valider en staging
 - ✅ **Shift Planning** - Complètement fonctionnel (Nouveau)
 - ✅ **Performance Management** - Complètement fonctionnel (Nouveau)
 
@@ -110,7 +110,7 @@ EVO-LOG SaaS est une solution ERP logistique professionnelle adaptée au context
 
 ### Multi-tenancy
 - ⚠️ **Isolation partiellement démontrée** : le contexte tenant et plusieurs routeurs sont protégés, mais l'exhaustivité de tous les modèles et routeurs n'est pas prouvée
-- ✅ **RBAC** : Rôles et permissions dynamiques
+- ✅ **RBAC** : rôles + **moteur de permissions granulaires** `app/core/permissions.py` (`require_perm`, `visible_user_ids`, accréditations, espaces communs)  **appliqué sur les domaines cœur** (comptabilité avancée, magasin) ; le reste des routes reste sur `modules_allowed` (fallback), sans régression
 - ✅ **Modules autorisés** : Configuration par entreprise
 - ⚠️ **Isolation données** : contrôles présents sur plusieurs parcours, tests inter-entreprises systématiques encore requis
 

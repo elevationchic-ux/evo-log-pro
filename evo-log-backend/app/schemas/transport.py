@@ -73,6 +73,11 @@ class ConducteurBase(BaseModel):
 class ConducteurCreate(ConducteurBase):
     """Schema for driver creation"""
     date_embauche: Optional[datetime] = None
+    # Dossier administratif (Tranche D) : pieces lues par /chauffeurs/{id}/documents.
+    date_naissance: Optional[datetime] = None
+    categorie_permis: Optional[str] = None
+    numero_cnps: Optional[str] = None
+    expiration_visite_medicale: Optional[datetime] = None
 
 
 class ConducteurUpdate(BaseModel):
@@ -84,6 +89,10 @@ class ConducteurUpdate(BaseModel):
     adresse: Optional[str] = None
     date_expiration_permis: Optional[datetime] = None
     is_active: Optional[bool] = None
+    date_naissance: Optional[datetime] = None
+    categorie_permis: Optional[str] = None
+    numero_cnps: Optional[str] = None
+    expiration_visite_medicale: Optional[datetime] = None
 
 
 class ConducteurResponse(ConducteurBase):
@@ -112,6 +121,9 @@ class MissionBase(BaseModel):
     camion_id: Optional[int] = None
     conducteur_id: Optional[int] = None
     client_id: Optional[int] = None
+    # Rattachement chaine documentaire (migration 024) : optionnel, jamais devine.
+    conteneur_id: Optional[int] = None
+    numero_bl: Optional[str] = None
     type_mission: Optional[str] = None
     statut: MissionStatus = MissionStatus.PLANIFIEE
     point_depart: Optional[str] = None

@@ -6,32 +6,32 @@ export default function AcconageAvanceDashboard() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">🏗️ Acconage Avancé</h1>
-        <p className="text-gray-600">Système de gestion pour 🏗️ Acconage Avancé</p>
+        <h1 className="text-2xl font-bold text-slate-100">🏗️ Acconage Avancé</h1>
+        <p className="text-slate-400">Système de gestion pour 🏗️ Acconage Avancé</p>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
+      <div className="bg-slate-900 p-6 rounded-lg shadow border border-slate-700">
         <h2 className="text-lg font-semibold mb-4">Fonctionnalités Acconage Avance</h2>
         <div className="space-y-3">
           <div className="flex items-start gap-3">
             <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2"></div>
             <div>
               <h3 className="font-medium">Fonctionnalité principale</h3>
-              <p className="text-sm text-gray-600">Description de la fonctionnalité principale du module</p>
+              <p className="text-sm text-slate-400">Description de la fonctionnalité principale du module</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2"></div>
             <div>
               <h3 className="font-medium">Gestion avancée</h3>
-              <p className="text-sm text-gray-600">Outils de gestion et optimisation</p>
+              <p className="text-sm text-slate-400">Outils de gestion et optimisation</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2"></div>
             <div>
               <h3 className="font-medium">Rapports et analytics</h3>
-              <p className="text-sm text-gray-600">Statistiques et tableaux de bord</p>
+              <p className="text-sm text-slate-400">Statistiques et tableaux de bord</p>
             </div>
           </div>
         </div>

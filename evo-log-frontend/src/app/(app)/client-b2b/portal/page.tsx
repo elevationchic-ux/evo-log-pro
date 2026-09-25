@@ -1,21 +1,25 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Globe, 
-  Plus, 
-  Search, 
-  Filter, 
-  UserCheck, 
-  Key, 
-  Lock, 
-  Mail, 
-  ShieldCheck, 
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Globe,
+  Plus,
+  Search,
+  Filter,
+  UserCheck,
+  Key,
+  Lock,
+  Mail,
+  ShieldCheck,
   RefreshCw,
   Building2,
-  ExternalLink
+  ExternalLink,
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiClient } from '@/lib/api-client';
+
+const REGISTRY = 'acces-portail-b2b';
 
 interface B2BPortalUser {
   id: string;
@@ -42,17 +46,62 @@ export default function ClientB2bPortalPage() {
     autoriserDepotReclamations: true
   });
 
-  const handleInviteSubmit = (e: React.FormEvent) => {
+  const loadPortalUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await apiClient.get(`/api/v1/registres/${REGISTRY}`);
+      const list = Array.isArray(res?.data) ? res.data : (res?.data?.items || []);
+      setPortalUsers(list.map((e: any) => {
+        const p = e.payload || {};
+        return {
+          id: String(e.id),
+          nomEntreprise: p.nomEntreprise || e.reference || '',
+          contactEmail: p.contactEmail || '',
+          nomContact: p.nomContact || '',
+          statut: (e.statut as B2BPortalUser['statut']) || 'EN_ATTENTE_ACTIVATION',
+          dossiersSuivis: p.dossiersSuivis || 0,
+          dateInvitation: p.dateInvitation || e.created_at || '',
+          dernierAcces: p.dernierAcces || '',
+        };
+      }));
+    } catch {
+      setPortalUsers([]);
+      toast.error('Erreur réseau  chargement des accès portail impossible.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadPortalUsers(); }, [loadPortalUsers]);
+
+  const handleInviteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteForm.nomEntreprise || !inviteForm.contactEmail) {
       toast.error('Veuillez renseigner la raison sociale et l\'email du contact.');
       return;
     }
 
-    toast.error('Invitation indisponible : aucune API persistante de gestion des utilisateurs B2B n’est configurée.');
+    try {
+      await apiClient.post(`/api/v1/registres/${REGISTRY}`, {
+        reference: inviteForm.nomEntreprise,
+        statut: 'EN_ATTENTE_ACTIVATION',
+        nomEntreprise: inviteForm.nomEntreprise,
+        nomContact: inviteForm.nomContact,
+        contactEmail: inviteForm.contactEmail,
+        autoriserTelechargementBl: inviteForm.autoriserTelechargementBl,
+        autoriserDepotReclamations: inviteForm.autoriserDepotReclamations,
+        dateInvitation: new Date().toISOString().split('T')[0],
+      });
+      toast.success(`Invitation créée pour ${inviteForm.nomEntreprise}.`);
+      setShowInviteModal(false);
+      setInviteForm({ nomEntreprise: '', nomContact: '', contactEmail: '', autoriserTelechargementBl: true, autoriserDepotReclamations: true });
+      loadPortalUsers();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Erreur  invitation non enregistrée.');
+    }
   };
 
-  const filteredUsers = portalUsers.filter(u => 
+  const filteredUsers = portalUsers.filter(u =>
     u.nomEntreprise.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.contactEmail.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -140,12 +189,12 @@ export default function ClientB2bPortalPage() {
                       </span>
                     </td>
                     <td className="p-3 text-right pr-5">
-                      <button
-                        onClick={() => toast.error('La réinitialisation doit être effectuée par le service d’authentification backend.')}
+                      <a
+                        href={`mailto:${u.contactEmail}?subject=Renouvellement%20d%27acc%C3%A8s%20portail&body=Bonjour%2C%0A%0AVoici%20vos%20identifiants%20d%27acc%C3%A8s%20au%20portail%20client.`}
                         className="text-xs font-semibold text-primary hover:underline"
                       >
                         Renvoyer Accès
-                      </button>
+                      </a>
                     </td>
                   </tr>
                 ))}

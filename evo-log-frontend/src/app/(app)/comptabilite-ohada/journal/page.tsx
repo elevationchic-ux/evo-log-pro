@@ -82,8 +82,8 @@ export default function ComptabiliteOhadaJournal() {
   const filteredEntries = entries.filter(e => {
     const matchJournal = selectedJournal === 'ALL' || e.journal === selectedJournal;
     const matchSearch = e.piece.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        e.compte.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        e.libelle.toLowerCase().includes(searchQuery.toLowerCase());
+      e.compte.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.libelle.toLowerCase().includes(searchQuery.toLowerCase());
     return matchJournal && matchSearch;
   });
 
@@ -121,10 +121,10 @@ export default function ComptabiliteOhadaJournal() {
         toast.success(`Écriture enregistrée au journal ${newJournal}`);
         fetchEntries();
       } else {
-        toast.error('L’écriture n’a pas été enregistrée par le service comptable.');
+        toast.error('Erreur serveur  écriture non enregistrée.');
       }
     } catch {
-      toast.error('Le service comptable est indisponible ; aucune écriture n’a été créée.');
+      toast.error('Erreur réseau  écriture non enregistrée.');
     }
 
     setShowNewModal(false);
@@ -237,11 +237,10 @@ export default function ComptabiliteOhadaJournal() {
           <button
             key={tab.key}
             onClick={() => setSelectedJournal(tab.key)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
-              selectedJournal === tab.key
+            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${selectedJournal === tab.key
                 ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
                 : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
-            }`}
+              }`}
           >
             {tab.label}
           </button>
@@ -264,9 +263,8 @@ export default function ComptabiliteOhadaJournal() {
         <div className="flex items-center gap-4 text-xs font-mono">
           <span className="text-slate-400">Total Débit : <b className="text-emerald-400">{totalDebit.toLocaleString()} XAF</b></span>
           <span className="text-slate-400">Total Crédit : <b className="text-blue-400">{totalCredit.toLocaleString()} XAF</b></span>
-          <span className={`px-2.5 py-1 rounded-full font-bold flex items-center gap-1 ${
-            isBalanced ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-          }`}>
+          <span className={`px-2.5 py-1 rounded-full font-bold flex items-center gap-1 ${isBalanced ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+            }`}>
             {isBalanced ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
             {isBalanced ? 'Équilibré (D=C)' : 'Déséquilibre Détecté'}
           </span>
@@ -304,7 +302,7 @@ export default function ComptabiliteOhadaJournal() {
               {filteredEntries.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="py-12 text-center text-slate-500">
-                    <BookOpen className="w-10 h-10 mx-auto mb-2 text-slate-600" />
+                    <BookOpen className="w-10 h-10 mx-auto mb-2 text-slate-400" />
                     Aucune écriture enregistrée pour ce journal. Cliquez sur &quot;Saisir Écriture&quot; pour débuter.
                   </td>
                 </tr>
@@ -314,9 +312,8 @@ export default function ComptabiliteOhadaJournal() {
                   return (
                     <tr
                       key={entry.id}
-                      className={`hover:bg-slate-800/40 transition-colors ${
-                        isSelected ? 'bg-violet-950/20' : ''
-                      }`}
+                      className={`hover:bg-slate-800/40 transition-colors ${isSelected ? 'bg-violet-950/20' : ''
+                        }`}
                     >
                       <td className="py-3 px-4 print:hidden">
                         <input
@@ -347,7 +344,7 @@ export default function ComptabiliteOhadaJournal() {
                             {entry.lettrage}
                           </span>
                         ) : (
-                          <span className="text-slate-600 text-[10px]">-</span>
+                          <span className="text-slate-400 text-[10px]">-</span>
                         )}
                       </td>
                     </tr>

@@ -1,16 +1,18 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { getModuleIcon, getModuleName } from '../../config/moduleColors'
+import { NAVIGATION_REGISTRY } from '../../config/navigationRegistry'
+import { localizeTitle, localizeSubLabel } from '../../config/navI18n'
 import { ModuleType } from './ModuleSidebar'
 import { useModuleTheme } from '../../hooks/useModuleTheme'
 import { getRouteFromTCode, canAccessTCode, TCODE_MAP } from '@/utils/tcodeLookup'
 import { useAuth } from './AuthProvider'
-import { useSettings, ThemePreference } from './SettingsProvider'
+import { useSettings } from './SettingsProvider'
 import { useI18n } from '@/hooks/useI18n'
 import { toast } from 'sonner'
-import { useTheme } from 'next-themes'
+import { apiClient } from '@/lib/api-client'
 import { HelpAndShortcutsModal } from '@/components/shared/HelpAndShortcutsModal'
 import { AppBreadcrumb } from '@/components/shared/AppBreadcrumb'
 import { RecentWorkingTabs } from '@/components/shared/RecentWorkingTabs'
@@ -39,6 +41,7 @@ type ModuleHeaderProps = {
 export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) {
   const { theme } = useModuleTheme()
   const router = useRouter()
+  const pathname = usePathname()
   const t = useI18n()
 
   const [searchValue, setSearchValue] = useState('')
@@ -62,40 +65,48 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
   const notificationIdRef = useRef(0)
 
   const { soundEnabled, toggleSound, showSoundBadge, triggerSoundBadge, language, setLanguage } = useSettings()
-  const { theme: uiTheme, setTheme } = useTheme()
 
   const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false)
-  const [selectedAgency, setSelectedAgency] = useState('Douala, CMR')
+  const [openNavKey, setOpenNavKey] = useState<string | null>(null)
+  const [selectedAgency, setSelectedAgency] = useState('')
   const [isAgencyMenuOpen, setIsAgencyMenuOpen] = useState(false)
   const [minutesLeft, setMinutesLeft] = useState<number | null>(null)
   const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false)
 
-  const AGENCIES = [
-    { id: 'DLA', name: 'Douala, CMR', icon: 'domain' },
-    { id: 'ABJ', name: 'Abidjan, CIV', icon: 'domain' },
-    { id: 'DKR', name: 'Dakar, SEN', icon: 'domain' },
-  ]
+  // Agences REELLES du tenant (table agencies via /admin/agencies). Aucune
+  // agence inventee : le selecteur n'apparait que si des agences existent.
+  const [agencies, setAgencies] = useState<{ id: number; code: string; name: string }[]>([])
+  useEffect(() => {
+    apiClient.get('/api/v1/admin/agencies', { params: { is_active: true, limit: 50 } })
+      .then((res: any) => {
+        const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? [])
+        const list = items.map((a: any) => ({ id: a.id, code: a.code || String(a.id), name: [a.name, a.city].filter(Boolean).join(', ') }))
+        setAgencies(list)
+        if (list.length > 0) {
+          const saved = typeof window !== 'undefined' ? window.localStorage.getItem('evolog_active_agency') : null
+          const match = list.find((a: any) => a.name === saved)
+          setSelectedAgency(match ? match.name : list[0].name)
+        }
+      })
+      .catch(() => setAgencies([]))
+  }, [])
 
-  const MODULES_LIST: { id: ModuleType; label: string; icon: string; path: string }[] = [
-    { id: 'transport', label: 'K-Transport / Flotte', icon: 'local_shipping', path: '/transport/control' },
-    { id: 'finance', label: 'K-Finance / Comptabilité', icon: 'account_balance', path: '/finance/overview' },
-    { id: 'magasin', label: 'K-Magasin / Entrepôt', icon: 'warehouse', path: '/magasin/dashboard' },
-    { id: 'parc', label: 'K-Parc / Yard', icon: 'directions_car', path: '/parc/zones' },
-    { id: 'acconage', label: 'K-Acconage / Quai', icon: 'anchor', path: '/acconage' },
-    { id: 'qhse', label: 'K-QHSE / Sécurité', icon: 'shield', path: '/qhse' },
-    { id: 'transit', label: 'K-Transit / Douane', icon: 'public', path: '/transit' },
-    { id: 'maintenance', label: 'K-Maintenance / Atelier', icon: 'build', path: '/maintenance' },
-    { id: 'cotations', label: 'K-Cotation / Devis', icon: 'local_offer', path: '/cotations' },
-    { id: 'tracking', label: 'K-Tracking / e-POD', icon: 'sensors', path: '/tracking' },
-    { id: 'fuel-guard', label: 'K-FuelGuard / Télémétrie', icon: 'local_gas_station', path: '/fuel-guard' },
-    { id: 'procurement', label: 'K-Procurement / Achats', icon: 'shopping_cart', path: '/procurement' },
-    { id: 'compliance', label: 'K-Compliance / Douane', icon: 'gavel', path: '/compliance' },
-    { id: 'bi', label: 'K-Analytics BI Executive', icon: 'analytics', path: '/bi' },
-    { id: 'master-data', label: 'Données Maîtres', icon: 'hub', path: '/master-data/tiers' },
-    { id: 'rh', label: 'Ressources Humaines', icon: 'groups', path: '/rh/dashboard' },
-    { id: 'client-portal', label: 'Portail Client B2B', icon: 'language', path: '/client-portal' },
-    { id: 'admin', label: 'Administration', icon: 'admin_panel_settings', path: '/admin/user-management/listing' },
-  ]
+  const AGENCIES = agencies.map(a => ({ id: a.code, name: a.name, icon: 'domain' }))
+
+  // Source de vérité unique : TOUS les modules et sous-modules de la registry.
+  const NAV_TREE = Object.values(NAVIGATION_REGISTRY).map((m) => ({
+    key: m.key,
+    label: localizeTitle(m, language),
+    path: m.path,
+    icon: m.icon,
+    color: m.color,
+    subModules: m.subModules,
+  }))
+  const isModuleActive = (path: string) => {
+    const seg = path.split('/')[1]
+    if (!seg) return false
+    return pathname === `/${seg}` || pathname.startsWith(`/${seg}/`)
+  }
 
 
 
@@ -127,11 +138,6 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
   const reconnectAttemptsRef = useRef(0)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const socketRef = useRef<WebSocket | null>(null)
-
-  const cycleTheme = () => {
-    const themes = ['light', 'dark', 'system']
-    setTheme(themes[(themes.indexOf(uiTheme || 'system') + 1) % themes.length])
-  }
 
   const connect = useCallback(() => {
     let wsUrl = process.env.NEXT_PUBLIC_WS_URL
@@ -239,8 +245,8 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
           Zone 2: T-Code search bar
           Zone 3: Actions (agency, theme, lang, sound, notifs, profile, logout)
           ════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-40 h-16 border-b border-outline bg-surface/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/85">
-        <div className="flex h-full items-center gap-2 px-3 sm:px-4 lg:px-5">
+      <header className="sticky top-0 z-40 border-b border-outline bg-surface shadow-sm">
+        <div className="flex h-16 items-center gap-2 px-3 sm:px-4 lg:px-5">
 
           {/* ── Zone 1: Identity ── */}
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -248,8 +254,8 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
             <button
               onClick={onMenuClick}
               className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-outline bg-surface-container-low text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
-              aria-label="Rétracter/Ouvrir le menu"
-              title="Activer/Rétracter la Sidebar"
+              aria-label={t.shell.toggleMenu}
+              title={t.shell.toggleMenu}
             >
               <span className="material-symbols-outlined text-[20px]">menu</span>
             </button>
@@ -279,23 +285,63 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
               {isModuleMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-[45]" onClick={() => setIsModuleMenuOpen(false)} />
-                  <div className="absolute top-full left-0 z-50 mt-1.5 w-64 overflow-hidden rounded-xl border border-outline bg-surface shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute top-full left-0 z-50 mt-1.5 w-[20rem] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-outline bg-surface shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="border-b border-outline bg-surface-container-low px-4 py-2.5">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Changer de module</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t.shell.switchModule}</span>
                     </div>
-                    <div className="py-1">
-                      {MODULES_LIST.map((m) => (
-                        <button
-                          key={m.id}
-                          role="option"
-                          aria-selected={currentModule === m.id}
-                          onClick={() => { setIsModuleMenuOpen(false); router.push(m.path) }}
-                          className={`w-full flex items-center gap-3 border-l-[3px] px-4 py-2.5 text-left text-sm transition-colors hover:bg-surface-container-low ${currentModule === m.id ? 'border-primary bg-surface-container-low font-semibold text-primary' : 'border-transparent text-on-surface'}`}
-                        >
-                          <span className={`material-symbols-outlined text-[18px] ${currentModule === m.id ? 'text-primary' : 'text-on-surface-variant'}`}>{m.icon}</span>
-                          {m.label}
-                        </button>
-                      ))}
+                    <div className="max-h-[70vh] overflow-y-auto py-1">
+                      {NAV_TREE.map((m) => {
+                        const Icon = m.icon
+                        const active = isModuleActive(m.path)
+                        const expanded = openNavKey === m.key
+                        return (
+                          <div key={m.key}>
+                            <div className={`flex items-center border-l-[3px] ${active ? 'bg-surface-container-low' : 'border-transparent'}`} style={active ? { borderLeftColor: m.color } : undefined}>
+                              <button
+                                role="option"
+                                aria-selected={active}
+                                onClick={() => { setIsModuleMenuOpen(false); router.push(m.path) }}
+                                className="flex min-w-0 flex-1 items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors hover:bg-surface-container-low"
+                              >
+                                <span className="shrink-0" style={{ color: active ? m.color : undefined }}>
+                                  <Icon className="h-[18px] w-[18px]" />
+                                </span>
+                                <span className={`truncate ${active ? 'font-semibold' : ''}`} style={{ color: active ? m.color : undefined }}>{m.label}</span>
+                              </button>
+                              {m.subModules.length > 0 && (
+                                <button
+                                  onClick={() => setOpenNavKey(expanded ? null : m.key)}
+                                  className="mr-2 shrink-0 rounded-md p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                                  aria-label={`${t.shell.showSubModules}: ${m.label}`}
+                                  aria-expanded={expanded}
+                                >
+                                  <span className={`material-symbols-outlined block text-[16px] transition-transform ${expanded ? 'rotate-90' : ''}`}>chevron_right</span>
+                                </button>
+                              )}
+                            </div>
+                            {expanded && (
+                              <div className="pb-1">
+                                {m.subModules.map((s) => {
+                                  const SubIcon = s.icon
+                                  const subActive = pathname === s.path
+                                  const subClass = 'flex w-full items-center gap-2.5 py-1.5 pl-9 pr-3 text-left text-[13px] transition-colors hover:bg-surface-container-low ' + (subActive ? 'font-semibold' : 'text-on-surface-variant')
+                                  return (
+                                    <button
+                                      key={m.key + ':' + s.path}
+                                      onClick={() => { setIsModuleMenuOpen(false); router.push(s.path) }}
+                                      className={subClass}
+                                      style={subActive ? { color: m.color } : undefined}
+                                    >
+                                      {SubIcon && <SubIcon className="h-3.5 w-3.5 shrink-0 opacity-70" />}
+                                      <span className="truncate">{localizeSubLabel(s.label, language)}</span>
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 </>
@@ -303,8 +349,9 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
             </div>
           </div>
 
-          {/* ── Zone 2: T-Code Search (flex-1 center) ── */}
-          <div className="min-w-0 flex-1 px-2 sm:px-4 lg:max-w-xl" role="search">
+          {/* ── Zone 2: T-Code Search (flex-1 center) ── masquee < sm : le
+              bouton recherche de la zone 3 ouvre la palette de commandes ── */}
+          <div className="hidden min-w-0 flex-1 px-2 sm:block sm:px-4 lg:max-w-xl" role="search">
             <div className="relative group">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant transition-colors group-focus-within:text-primary">
                 <span className="material-symbols-outlined text-[18px]">manage_search</span>
@@ -315,8 +362,8 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={`T-Code (ex: KM24)…`}
-                aria-label="Recherche par T-Code"
+                placeholder={t.shell.tcodePlaceholder}
+                aria-label={t.shell.tcodeAria}
                 className="block w-full rounded-lg border border-outline bg-surface-container-low py-2 pl-9 pr-14 text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
               />
               {/* Keyboard shortcut hint  hidden on very small screens */}
@@ -350,21 +397,28 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
           {/* ── Zone 3: Actions ── */}
           <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
 
-            {/* WS status  desktop only */}
-            {wsStatus !== 'connected' && (
+            {/* Recherche mobile : ouvre la palette de commandes (equivalent
+                du champ T-Code masque sous sm, meme source de navigation) */}
+            <button
+              onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }))}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface sm:hidden"
+              aria-label={t.shell.tcodeAria}
+              title={t.shell.tcodeAria}
+            >
+              <span className="material-symbols-outlined text-[20px]">manage_search</span>
+            </button>
+
+            {/* WS status : on affiche que l'etat transitoire de connexion.
+                Le temps reel qui echoue ne doit pas afficher un "HORS LIGNE"
+                rouge permanent en contradiction avec l'indicateur de connexion
+                reel (OfflineSyncIndicator) ; les tentatives continuent en
+                silence (backoff, max 3). */}
+            {wsStatus === 'connecting' && (
               <div className="hidden items-center gap-1.5 rounded-lg bg-surface-container px-2.5 py-1.5 md:flex">
-                <span className={`h-1.5 w-1.5 rounded-full ${wsStatus === 'connecting' ? 'bg-amber-500 animate-pulse' : 'bg-red-500'}`} />
+                <span className='h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse' />
                 <span className="text-[10px] font-bold uppercase text-on-surface-variant">
-                  {wsStatus === 'connecting' ? 'Sync…' : 'Off'}
+                  {t.shell.sync}
                 </span>
-                {wsStatus === 'disconnected' && (
-                  <button
-                    onClick={() => { if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current); socketRef.current?.close(); connect() }}
-                    className="text-[10px] font-bold text-primary hover:underline"
-                  >
-                    Retry
-                  </button>
-                )}
               </div>
             )}
 
@@ -376,8 +430,8 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
               </div>
             )}
 
-            {/* Agency selector  hidden on mobile */}
-            <div className="relative hidden md:block">
+            {/* Agency selector  hidden on mobile, hidden si aucune agence reelle */}
+            <div className={`relative ${AGENCIES.length === 0 ? 'hidden' : 'hidden md:block'}`}>
               <button
                 onClick={() => setIsAgencyMenuOpen(!isAgencyMenuOpen)}
                 className="flex items-center gap-1 rounded-lg border border-outline bg-surface-container-low px-2.5 py-1.5 text-[11px] font-semibold text-on-surface shadow-sm transition-colors hover:bg-surface-container"
@@ -394,7 +448,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                   <div className="fixed inset-0 z-[45]" onClick={() => setIsAgencyMenuOpen(false)} />
                   <div className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-outline bg-surface shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="flex items-center justify-between border-b border-outline bg-surface-container-low px-4 py-2.5">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Agence</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t.shell.agency}</span>
                       <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">Global</span>
                     </div>
                     <div className="py-1">
@@ -403,7 +457,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                           key={agency.id}
                           role="option"
                           aria-selected={selectedAgency === agency.name}
-                          onClick={() => { setSelectedAgency(agency.name); setIsAgencyMenuOpen(false); toast.success(`Agence → ${agency.name}`, { icon: '🏢' }) }}
+                          onClick={() => { setSelectedAgency(agency.name); window.localStorage.setItem('evolog_active_agency', agency.name); setIsAgencyMenuOpen(false); toast.success(`Agence → ${agency.name}`, { icon: '🏢' }) }}
                           className={`w-full flex items-center gap-3 border-l-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-surface-container-low ${selectedAgency === agency.name ? 'border-primary bg-surface-container-low font-semibold text-primary' : 'border-transparent text-on-surface'}`}
                         >
                           <span className={`material-symbols-outlined text-[16px] ${selectedAgency === agency.name ? 'text-primary' : 'text-on-surface-variant'}`}>{agency.icon}</span>
@@ -416,24 +470,26 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
               )}
             </div>
 
-            {/* Help & shortcuts modal button */}
+            {/* Help & shortcuts modal button (cache < sm : priorite aux
+                actions critiques sur petit ecran) */}
             <button
               onClick={() => setIsHelpModalOpen(true)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-on-surface-variant transition-colors hover:bg-primary/10 hover:text-primary"
-              title="Centre d'aide, glossaire et raccourcis clavier (Touche ? ou F1)"
-              aria-label="Centre d'aide et raccourcis"
+              className="hidden h-9 w-9 items-center justify-center rounded-xl text-on-surface-variant transition-colors hover:bg-primary/10 hover:text-primary sm:inline-flex"
+              title={t.shell.helpTitle}
+              aria-label={t.shell.helpAria}
             >
               <span className="material-symbols-outlined text-[20px]">help</span>
             </button>
 
-            {/* Offline Sync Indicator  visible for field agents on transit corridors */}
-            <OfflineSyncIndicator baseUrl={typeof window !== 'undefined' ? window.location.origin : ''} />
+            {/* Offline Sync Indicator  visible for field agents on transit corridors
+                (base d'API resolue par offlineSync via api-client, pas l'origine du front) */}
+            <OfflineSyncIndicator />
 
             {/* Notifications bell */}
             <button
               onClick={() => setIsDrawerOpen(true)}
               className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
-              aria-label={`Notifications (${unreadCount} non lues)`}
+              aria-label={`${t.shell.notificationsAria} (${unreadCount} ${t.shell.unread})`}
             >
               <span className="material-symbols-outlined text-[20px]">notifications</span>
               {unreadCount > 0 && (
@@ -454,8 +510,8 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                 aria-expanded={isProfileMenuOpen}
               >
                 <div className="hidden flex-col items-end text-right lg:flex">
-                  <p className="text-[13px] font-semibold leading-tight text-on-surface">{user?.fullName || 'Utilisateur'}</p>
-                  <p className="text-[10px] text-on-surface-variant font-medium">{selectedAgency.split(',')[0]}</p>
+                  <p className="text-[13px] font-semibold leading-tight text-on-surface">{user?.fullName || t.shell.user}</p>
+                  {selectedAgency && <p className="text-[10px] text-on-surface-variant font-medium">{selectedAgency.split(',')[0]}</p>}
                 </div>
                 <div className="relative h-8 w-8 rounded-xl bg-primary flex items-center justify-center text-on-primary text-xs font-black shadow-sm ring-2 ring-primary/20">
                   {user?.fullName?.charAt(0) || 'U'}
@@ -478,7 +534,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                           {user?.fullName?.charAt(0) || 'U'}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-bold text-sm text-on-surface truncate">{user?.fullName || 'Utilisateur'}</p>
+                          <p className="font-bold text-sm text-on-surface truncate">{user?.fullName || t.shell.user}</p>
                           <p className="text-[11px] text-on-surface-variant truncate">{user?.email}</p>
                           <span className="inline-flex items-center px-1.5 py-0.2 mt-1 rounded bg-primary/10 text-primary font-mono text-[9px] font-bold">
                             {user?.roles?.[0] || 'COLLABORATEUR'}
@@ -487,10 +543,11 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                       </div>
                     </div>
 
-                    {/* Agency Switcher */}
+                    {/* Agency Switcher (affiche seulement si agences reelles) */}
+                    {AGENCIES.length > 0 && (
                     <div className="p-3 space-y-1.5">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant px-1">
-                        Agence d'exploitation
+                        {t.shell.operatingAgency}
                       </span>
                       <div className="grid grid-cols-3 gap-1">
                         {AGENCIES.map((ag) => (
@@ -498,6 +555,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                             key={ag.id}
                             onClick={() => {
                               setSelectedAgency(ag.name);
+                              window.localStorage.setItem('evolog_active_agency', ag.name);
                               toast.success(`Agence active : ${ag.name}`, { icon: '🏢' });
                             }}
                             className={`px-2 py-1.5 rounded-lg text-center font-bold text-[11px] transition-colors ${
@@ -511,44 +569,17 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                         ))}
                       </div>
                     </div>
+                    )}
 
                     {/* Preferences: Theme, Language, Sound */}
                     <div className="p-3 space-y-2">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant px-1">
-                        Préférences de travail
+                        {t.shell.workPreferences}
                       </span>
-                      
-                      {/* Theme */}
-                      <div className="flex items-center justify-between px-1">
-                        <span className="text-on-surface text-xs font-medium">Thème :</span>
-                        <div className="inline-flex rounded-lg border border-outline bg-surface-container p-0.5">
-                          <button
-                            onClick={() => setTheme('light')}
-                            className={`p-1 rounded ${uiTheme === 'light' ? 'bg-surface text-primary shadow-xs' : 'text-on-surface-variant'}`}
-                            title="Clair"
-                          >
-                            <span className="material-symbols-outlined text-[15px]">light_mode</span>
-                          </button>
-                          <button
-                            onClick={() => setTheme('dark')}
-                            className={`p-1 rounded ${uiTheme === 'dark' ? 'bg-surface text-primary shadow-xs' : 'text-on-surface-variant'}`}
-                            title="Sombre"
-                          >
-                            <span className="material-symbols-outlined text-[15px]">dark_mode</span>
-                          </button>
-                          <button
-                            onClick={() => setTheme('system')}
-                            className={`p-1 rounded ${uiTheme === 'system' ? 'bg-surface text-primary shadow-xs' : 'text-on-surface-variant'}`}
-                            title="Système"
-                          >
-                            <span className="material-symbols-outlined text-[15px]">settings_brightness</span>
-                          </button>
-                        </div>
-                      </div>
 
                       {/* Language */}
                       <div className="flex items-center justify-between px-1">
-                        <span className="text-on-surface text-xs font-medium">Langue :</span>
+                        <span className="text-on-surface text-xs font-medium">{t.shell.language} :</span>
                         <button
                           onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
                           className="px-2 py-1 rounded-lg border border-outline bg-surface-container font-bold text-[11px] hover:bg-surface-container-high"
@@ -559,7 +590,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
 
                       {/* Sound */}
                       <div className="flex items-center justify-between px-1">
-                        <span className="text-on-surface text-xs font-medium">Alertes sonores :</span>
+                        <span className="text-on-surface text-xs font-medium">{t.shell.soundAlerts}</span>
                         <button
                           onClick={toggleSound}
                           className={`flex items-center gap-1 px-2 py-1 rounded-lg border border-outline text-[11px] font-bold ${
@@ -569,7 +600,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                           <span className="material-symbols-outlined text-[14px]">
                             {soundEnabled ? 'volume_up' : 'volume_off'}
                           </span>
-                          {soundEnabled ? 'Activé' : 'Coupé'}
+                          {soundEnabled ? t.shell.soundOn : t.shell.soundOff}
                         </button>
                       </div>
                     </div>
@@ -581,14 +612,14 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container text-left"
                       >
                         <span className="material-symbols-outlined text-[17px] text-primary">badge</span>
-                        <span>Mon Espace Collaborateur</span>
+                        <span>{t.shell.mySpace}</span>
                       </button>
                       <button
                         onClick={() => { setIsProfileMenuOpen(false); router.push('/security'); }}
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container text-left"
                       >
                         <span className="material-symbols-outlined text-[17px] text-primary">shield</span>
-                        <span>Sécurité du Compte & 2FA</span>
+                        <span>{t.shell.accountSecurity}</span>
                       </button>
                     </div>
 
@@ -599,7 +630,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-error hover:bg-error/10 text-left font-bold transition-colors"
                       >
                         <span className="material-symbols-outlined text-[17px]">logout</span>
-                        <span>Se déconnecter</span>
+                        <span>{t.shell.logout}</span>
                       </button>
                     </div>
 
@@ -610,8 +641,8 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
           </div>
         </div>
 
-        {/* Sub-bar: Dynamic Breadcrumb & Recent Working Tabs */}
-        <div className="hidden sm:flex items-center px-4 py-1 border-t border-outline/30 bg-surface-container-lowest/50">
+        {/* Sub-bar: Dynamic Breadcrumb & Recent Working Tabs (opaque, jamais translucide) */}
+        <div className="hidden sm:flex items-center px-4 py-1 border-t border-outline/40 bg-surface-container-lowest">
           <AppBreadcrumb />
         </div>
         <RecentWorkingTabs />

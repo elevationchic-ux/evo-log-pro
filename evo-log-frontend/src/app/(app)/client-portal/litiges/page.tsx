@@ -14,6 +14,7 @@ import {
   Search
 } from 'lucide-react';
 import { supportAPI } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 export default function ClientTicketPage() {
   const [incidents, setIncidents] = useState<any[]>([]);
@@ -53,6 +54,34 @@ export default function ClientTicketPage() {
     }
   };
 
+  const changerStatutLitige = async (incident: any, nouveauStatut: string, libelle: string) => {
+    try {
+      await supportAPI.updateIncident(incident.id, { statut: nouveauStatut });
+      setIncidents(prev => prev.map(i => (i.id === incident.id ? { ...i, statut: nouveauStatut } : i)));
+      toast.success(`Litige #${incident.id} : ${libelle}.`);
+    } catch {
+      toast.error(`Échec de la mise à jour du litige #${incident.id}. Vérifiez votre connexion et réessayez.`);
+    }
+  };
+
+  // Ajout d'un commentaire client : consigné de façon persistante dans le dossier du
+  // litige via l'API support réelle (PUT /api/v1/support/incidents/{id}).
+  const ajouterCommentaire = async (incident: any) => {
+    const texte = window.prompt('Votre commentaire :');
+    if (!texte || !texte.trim()) return;
+    const stamp = new Date().toLocaleString('fr-FR');
+    const base = incident.description || '';
+    const nouvelleDescription = `${base}${base ? '\n\n' : ''}[Commentaire client  ${stamp}]\n${texte.trim()}`;
+    try {
+      await supportAPI.updateIncident(incident.id, { description: nouvelleDescription });
+      setIncidents(prev => prev.map(i => (i.id === incident.id ? { ...i, description: nouvelleDescription } : i)));
+      setSelectedIncident((prev: any) => (prev && prev.id === incident.id ? { ...prev, description: nouvelleDescription } : prev));
+      toast.success(`Commentaire ajouté au litige #${incident.id}.`);
+    } catch {
+      toast.error(`Échec de l'ajout du commentaire au litige #${incident.id}. Vérifiez votre connexion et réessayez.`);
+    }
+  };
+
   const filteredIncidents = incidents.filter(incident => {
     if (filters.statut && incident.statut !== filters.statut) return false;
     if (filters.priorite && incident.priorite !== filters.priorite) return false;
@@ -87,10 +116,10 @@ export default function ClientTicketPage() {
       <div className="mb-8">
         <div className="flex justify-between items-start sm:items-center sm:justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            <h1 className="text-3xl font-bold text-white mb-2">
               Mes Litiges & Suivi
             </h1>
-            <p className="text-slate-600">
+            <p className="text-slate-400">
               Gérez vos réclamations, suivi des incidents et communication avec le support
             </p>
           </div>
@@ -115,7 +144,7 @@ export default function ClientTicketPage() {
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+        <div className="mb-6 p-4 bg-red-500/10 border-l-4 border-red-500 rounded">
           <AlertTriangle className="w-4 h-4 text-red-600 mr-2" />
           <span>{error}</span>
         </div>
@@ -123,13 +152,13 @@ export default function ClientTicketPage() {
 
       {/* Filters */}
       <div className="mb-6">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6">
+          <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
             <Search className="w-5 h-5" /> Filtres
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-400 mb-1">
                 Statut
               </label>
               <select
@@ -145,7 +174,7 @@ export default function ClientTicketPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-400 mb-1">
                 Priorité
               </label>
               <select
@@ -161,7 +190,7 @@ export default function ClientTicketPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-400 mb-1">
                 Date de Début
               </label>
               <input
@@ -172,7 +201,7 @@ export default function ClientTicketPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-400 mb-1">
                 Date de Fin
               </label>
               <input
@@ -183,7 +212,7 @@ export default function ClientTicketPage() {
               />
             </div>
             <div className="flex items-end">
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-400 mb-1">
                 Recherche
               </label>
               <input
@@ -199,9 +228,9 @@ export default function ClientTicketPage() {
       </div>
 
       {/* Incidents List */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-slate-800">
+      <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 overflow-hidden">
+        <div className="p-6 border-b border-slate-800 flex justify-between items-center">
+          <h3 className="text-lg font-bold text-slate-200">
             Liste des Litiges ({filteredIncidents.length} résultat{(filteredIncidents.length !== 1) ? 's' : ''})
           </h3>
           <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -223,7 +252,7 @@ export default function ClientTicketPage() {
         {loading && !incidents.length && (
           <div className="p-12 text-center">
             <RefreshCw className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
-            <p className="text-slate-600">Chargement des litiges...</p>
+            <p className="text-slate-400">Chargement des litiges...</p>
           </div>
         )}
 
@@ -238,9 +267,9 @@ export default function ClientTicketPage() {
         )}
 
         {!loading && incidents.length > 0 && (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-800">
             {sortedIncidents.map((incident) => (
-              <div key={incident.id} className="cursor-pointer hover:bg-slate-50 transition-colors">
+              <div key={incident.id} className="cursor-pointer hover:bg-slate-800/60 transition-colors">
                 {/* Incident Header */}
                 <div className="flex justify-between items-start px-6 py-4">
                   <div className="flex-1 min-w-0">
@@ -260,7 +289,7 @@ export default function ClientTicketPage() {
                         )}
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">{incident.titre}</p>
+                        <p className="font-medium text-slate-200">{incident.titre}</p>
                         <p className="text-sm text-slate-500 truncate">
                           {incident.description?.substring(0, 50)}...
                         </p>
@@ -270,9 +299,9 @@ export default function ClientTicketPage() {
                   <div className="flex items-center gap-3 text-sm">
                     <span className={
                       incident.statut === 'RESOLU' ? 'badge badge-success' :
-                      incident.statut === 'EN_COURS' ? 'badge badge-warning' :
-                      incident.statut === 'OUVERT' ? 'badge badge-info' :
-                      'badge badge-secondary'
+                        incident.statut === 'EN_COURS' ? 'badge badge-warning' :
+                          incident.statut === 'OUVERT' ? 'badge badge-info' :
+                            'badge badge-secondary'
                     }>
                       {incident.statut}
                     </span>
@@ -306,67 +335,67 @@ export default function ClientTicketPage() {
 
                 {/* Incident Details (expandable) */}
                 {selectedIncident?.id === incident.id && (
-                  <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
+                  <div className="px-6 py-4 bg-slate-800 border-t border-slate-700">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-slate-800">Informations Générales</h3>
+                        <h3 className="text-lg font-semibold text-slate-200">Informations Générales</h3>
                         <div className="space-y-2">
-                          <p className="text-sm font-medium text-slate-700">Numéro</p>
-                          <p className="font-mono text-slate-900">#{incident.id}</p>
+                          <p className="text-sm font-medium text-slate-400">Numéro</p>
+                          <p className="font-mono text-white">#{incident.id}</p>
                         </div>
                         <div className="space-y-2">
-                          <p className="text-sm font-medium text-slate-700">Titre</p>
+                          <p className="text-sm font-medium text-slate-400">Titre</p>
                           <p className="text-slate-500">{incident.titre}</p>
                         </div>
                         <div className="space-y-2">
-                          <p className="text-sm font-medium text-slate-700">Date de Création</p>
+                          <p className="text-sm font-medium text-slate-400">Date de Création</p>
                           <p className="text-slate-500">
                             {incident.dateCreation ? new Date(incident.dateCreation).toLocaleDateString('fr-FR') : 'Non définie'}
                           </p>
                         </div>
                         <div className="space-y-2">
-                          <p className="text-sm font-medium text-slate-700">Priorité</p>
+                          <p className="text-sm font-medium text-slate-400">Priorité</p>
                           <span className={
                             incident.priorite === 'URGENTE' ? 'badge badge-destructive' :
-                            incident.priorite === 'HAUTE' ? 'badge badge-warning' :
-                            incident.priorite === 'MOYENNE' ? 'badge badge-info' :
-                            'badge badge-secondary'
+                              incident.priorite === 'HAUTE' ? 'badge badge-warning' :
+                                incident.priorite === 'MOYENNE' ? 'badge badge-info' :
+                                  'badge badge-secondary'
                           }>
                             {incident.priorite}
                           </span>
                         </div>
                         <div className="space-y-2">
-                          <p className="text-sm font-medium text-slate-700">Statut</p>
+                          <p className="text-sm font-medium text-slate-400">Statut</p>
                           <span className={
                             incident.statut === 'RESOLU' ? 'badge badge-success' :
-                            incident.statut === 'EN_COURS' ? 'badge badge-warning' :
-                            incident.statut === 'OUVERT' ? 'badge badge-info' :
-                            incident.statut === 'FERME' ? 'badge badge-success' :
-                            'badge badge-secondary'
+                              incident.statut === 'EN_COURS' ? 'badge badge-warning' :
+                                incident.statut === 'OUVERT' ? 'badge badge-info' :
+                                  incident.statut === 'FERME' ? 'badge badge-success' :
+                                    'badge badge-secondary'
                           }>
                             {incident.statut}
                           </span>
                         </div>
                         <div className="space-y-2">
-                          <p className="text-sm font-medium text-slate-700">Auteur</p>
+                          <p className="text-sm font-medium text-slate-400">Auteur</p>
                           <p className="text-slate-500">{incident.auteur_nom || 'Non spécifié'}</p>
                         </div>
                       </div>
 
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-slate-800">Description</h3>
+                        <h3 className="text-lg font-semibold text-slate-200">Description</h3>
                         <p className="text-slate-500">
                           {incident.description}
                         </p>
                       </div>
 
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-slate-800">Historique et Suivi</h3>
+                        <h3 className="text-lg font-semibold text-slate-200">Historique et Suivi</h3>
                         {incident.historique && incident.historique.length > 0 ? (
                           <div className="space-y-3">
                             {incident.historique.map((histo: any, index: number) => (
-                              <div key={index} className="border-l-2 border-slate-200 pl-4 mb-4">
-                                <p className="text-sm font-medium text-slate-700">
+                              <div key={index} className="border-l-2 border-slate-700 pl-4 mb-4">
+                                <p className="text-sm font-medium text-slate-400">
                                   {histo.auteur || 'Utilisateur'} - {new Date(histo.date).toLocaleDateString('fr-FR')}
                                 </p>
                                 <p className="text-slate-500">{histo.action}</p>
@@ -382,23 +411,17 @@ export default function ClientTicketPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="mt-4 pt-3 border-t border-slate-200 flex flex-col sm:flex-row gap-3">
+                    <div className="mt-4 pt-3 border-t border-slate-700 flex flex-col sm:flex-row gap-3">
                       {incident.statut === 'OUVERT' && (
                         <>
                           <button
-                            onClick={() => {
-                              // In a real app, this would update status to EN_COURS
-                              alert(`Marquage du litige #${incident.id} comme EN COURS`);
-                            }}
+                            onClick={() => changerStatutLitige(incident, 'EN_COURS', 'traitement commencé')}
                             className="btn btn-sm btn-outline btn-warning flex-1"
                           >
                             Commencer le Traitement
                           </button>
                           <button
-                            onClick={() => {
-                              // In a real app, this would add a comment or update
-                              alert(`Ajout d'un commentaire au litige #${incident.id}`);
-                            }}
+                            onClick={() => ajouterCommentaire(incident)}
                             className="btn btn-sm btn-outline btn-info flex-1"
                           >
                             Ajouter un Commentaire
@@ -408,19 +431,13 @@ export default function ClientTicketPage() {
                       {incident.statut === 'EN_COURS' && (
                         <>
                           <button
-                            onClick={() => {
-                              // In a real app, this would resolve the incident
-                              alert(`Résolution du litige #${incident.id}`);
-                            }}
+                            onClick={() => changerStatutLitige(incident, 'RESOLU', 'résolu')}
                             className="btn btn-sm btn-outline btn-success flex-1"
                           >
                             Résoudre
                           </button>
                           <button
-                            onClick={() => {
-                              // In a real app, this would reopen or add comment
-                              alert(`Réouverture du litige #${incident.id}`);
-                            }}
+                            onClick={() => changerStatutLitige(incident, 'OUVERT', 'rouvert')}
                             className="btn btn-sm btn-outline btn-warning flex-1"
                           >
                             Rouvrir
@@ -429,10 +446,7 @@ export default function ClientTicketPage() {
                       )}
                       {(incident.statut === 'RESOLU' || incident.statut === 'FERME') && (
                         <button
-                          onClick={() => {
-                            // In a real app, this would reopen the incident
-                            alert(`Réouverture du litige #${incident.id}`);
-                          }}
+                          onClick={() => changerStatutLitige(incident, 'OUVERT', 'rouvert')}
                           className="btn btn-sm btn-outline btn-warning flex-1"
                         >
                           Réouvrir
@@ -450,13 +464,13 @@ export default function ClientTicketPage() {
       {/* Selected Incident Detail View */}
       {selectedIncident && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
+          <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-4xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">
+                <h2 className="text-2xl font-bold text-white">
                   Litige #{selectedIncident.id}
                 </h2>
-                <p className="text-slate-600">
+                <p className="text-slate-400">
                   Détails complets du litige
                 </p>
               </div>
@@ -475,65 +489,65 @@ export default function ClientTicketPage() {
               {/* Incident Info */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Informations Générales</h3>
+                  <h3 className="text-lg font-semibold text-slate-200">Informations Générales</h3>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Numéro</p>
-                    <p className="font-mono text-slate-900">#{selectedIncident.id}</p>
+                    <p className="text-sm font-medium text-slate-400">Numéro</p>
+                    <p className="font-mono text-white">#{selectedIncident.id}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Titre</p>
+                    <p className="text-sm font-medium text-slate-400">Titre</p>
                     <p className="text-slate-500">{selectedIncident.titre}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Date de Création</p>
+                    <p className="text-sm font-medium text-slate-400">Date de Création</p>
                     <p className="text-slate-500">
                       {selectedIncident.dateCreation ? new Date(selectedIncident.dateCreation).toLocaleDateString('fr-FR') : 'Non définie'}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Date de Mise à Jour</p>
+                    <p className="text-sm font-medium text-slate-400">Date de Mise à Jour</p>
                     <p className="text-slate-500">
                       {selectedIncident.dateModification ? new Date(selectedIncident.dateModification).toLocaleDateString('fr-FR') : 'Non définie'}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Priorité</p>
+                    <p className="text-sm font-medium text-slate-400">Priorité</p>
                     <span className={
                       selectedIncident.priorite === 'URGENTE' ? 'badge badge-destructive' :
-                      selectedIncident.priorite === 'HAUTE' ? 'badge badge-warning' :
-                      selectedIncident.priorite === 'MOYENNE' ? 'badge badge-info' :
-                      'badge badge-secondary'
+                        selectedIncident.priorite === 'HAUTE' ? 'badge badge-warning' :
+                          selectedIncident.priorite === 'MOYENNE' ? 'badge badge-info' :
+                            'badge badge-secondary'
                     }>
                       {selectedIncident.priorite}
                     </span>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Statut</p>
+                    <p className="text-sm font-medium text-slate-400">Statut</p>
                     <span className={
                       selectedIncident.statut === 'RESOLU' ? 'badge badge-success' :
-                      selectedIncident.statut === 'EN_COURS' ? 'badge badge-warning' :
-                      selectedIncident.statut === 'OUVERT' ? 'badge badge-info' :
-                      selectedIncident.statut === 'FERME' ? 'badge badge-success' :
-                      'badge badge-secondary'
+                        selectedIncident.statut === 'EN_COURS' ? 'badge badge-warning' :
+                          selectedIncident.statut === 'OUVERT' ? 'badge badge-info' :
+                            selectedIncident.statut === 'FERME' ? 'badge badge-success' :
+                              'badge badge-secondary'
                     }>
                       {selectedIncident.statut}
                     </span>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Auteur</p>
+                    <p className="text-sm font-medium text-slate-400">Auteur</p>
                     <p className="text-slate-500">{selectedIncident.auteur_nom || 'Non spécifié'}</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Description Détaillée</h3>
+                  <h3 className="text-lg font-semibold text-slate-200">Description Détaillée</h3>
                   <p className="text-slate-500">
                     {selectedIncident.description}
                   </p>
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Actions Requises</h3>
+                  <h3 className="text-lg font-semibold text-slate-200">Actions Requises</h3>
                   {selectedIncident.actions_requises && selectedIncident.actions_requises.length > 0 ? (
                     <ul className="list-disc list-inside space-y-2">
                       {selectedIncident.actions_requises.map((action: any, index: number) => (
@@ -550,17 +564,17 @@ export default function ClientTicketPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Historique Complet</h3>
+                  <h3 className="text-lg font-semibold text-slate-200">Historique Complet</h3>
                   {selectedIncident.historique && selectedIncident.historique.length > 0 ? (
                     <div className="space-y-3">
                       {selectedIncident.historique.map((histo: any, index: number) => (
-                        <div key={index} className="border-l-2 border-slate-200 pl-4 mb-4 last:mb-0">
+                        <div key={index} className="border-l-2 border-slate-700 pl-4 mb-4 last:mb-0">
                           <div className="flex items-start gap-3">
-                            <div className="w-3 h-3 bg-slate-200 rounded-full flex items-center justify-center">
+                            <div className="w-3 h-3 bg-slate-700 rounded-full flex items-center justify-center">
                               <Calendar className="w-4 h-4 text-slate-500" />
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-slate-700">
+                              <p className="text-sm font-medium text-slate-400">
                                 {histo.auteur || 'Utilisateur'} - {new Date(histo.date).toLocaleDateString('fr-FR')}
                               </p>
                               <p className="text-slate-500">{histo.action}</p>
@@ -578,8 +592,8 @@ export default function ClientTicketPage() {
               </div>
             </div>
           </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
   );
 }

@@ -44,21 +44,21 @@ export default function StockSearchPage() {
   const getStatutColor = (statut: string) => {
     switch (statut) {
       case 'NORMAL':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-500/15 text-green-300'
       case 'DECHIRE':
-        return 'bg-red-100 text-red-800'
+        return 'bg-red-500/15 text-red-300'
       case 'MOUILLE':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-blue-500/15 text-blue-300'
       case 'ENDOMMAGE':
-        return 'bg-orange-100 text-orange-800'
+        return 'bg-orange-500/15 text-orange-300'
       case 'PERIME':
-        return 'bg-purple-100 text-purple-800'
+        return 'bg-purple-500/15 text-purple-300'
       case 'EN_ATTENTE':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-yellow-500/15 text-yellow-300'
       case 'RESERVE':
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-slate-800 text-slate-100'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-slate-800 text-slate-100'
     }
   }
 
@@ -66,8 +66,8 @@ export default function StockSearchPage() {
     <ModuleLayout module="magasin">
       <div className="container mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Recherche Avancée de Stock</h1>
-          <p className="text-gray-600">Recherchez des stocks avec des filtres avancés</p>
+          <h1 className="text-3xl font-bold text-slate-100 mb-2">Recherche Avancée de Stock</h1>
+          <p className="text-slate-400">Recherchez des stocks avec des filtres avancés</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -80,11 +80,11 @@ export default function StockSearchPage() {
               <h2 className="text-xl font-semibold mb-4">Résultats</h2>
               
               {loading ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-slate-400">
                   Chargement...
                 </div>
               ) : results.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-slate-400">
                   Aucun résultat trouvé
                 </div>
               ) : (

@@ -28,7 +28,7 @@ export default function AuditOperationTrace() {
       key: 'timestamp',
       label: 'Date & Heure',
       render: (val: any) => (
-        <span className="text-sm font-medium text-slate-700">
+        <span className="text-sm font-medium text-slate-300">
           {new Date(val).toLocaleString()}
         </span>
       ),
@@ -38,7 +38,7 @@ export default function AuditOperationTrace() {
       label: 'Utilisateur',
       render: (val: any, row: any) => (
         <div>
-          <div className="font-semibold text-slate-900">{row.user?.username || val || 'Système'}</div>
+          <div className="font-semibold text-slate-200">{row.user?.username || val || 'Système'}</div>
           <div className="text-xs text-slate-500">{row.ip_address || '127.0.0.1'}</div>
         </div>
       ),
@@ -47,10 +47,10 @@ export default function AuditOperationTrace() {
       key: 'action',
       label: 'Action',
       render: (val: any) => {
-        let style = 'bg-slate-50 text-slate-700 ring-slate-600/20'
-        if (val?.includes('CREATE') || val?.includes('LOGIN')) style = 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
-        if (val?.includes('UPDATE') || val?.includes('MODIFIED')) style = 'bg-blue-50 text-blue-700 ring-blue-600/20'
-        if (val?.includes('DELETE') || val?.includes('FAILED')) style = 'bg-red-50 text-red-700 ring-red-600/20'
+        let style = 'bg-slate-800 text-slate-300 ring-slate-600/20'
+        if (val?.includes('CREATE') || val?.includes('LOGIN')) style = 'bg-emerald-500/10 text-emerald-300 ring-emerald-600/20'
+        if (val?.includes('UPDATE') || val?.includes('MODIFIED')) style = 'bg-blue-500/10 text-blue-300 ring-blue-600/20'
+        if (val?.includes('DELETE') || val?.includes('FAILED')) style = 'bg-red-500/10 text-red-300 ring-red-600/20'
 
         return (
           <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${style}`}>
@@ -63,7 +63,7 @@ export default function AuditOperationTrace() {
       key: 'resource',
       label: 'Ressource',
       render: (val: any) => (
-        <div className="text-sm text-slate-600 font-mono">
+        <div className="text-sm text-slate-400 font-mono">
           {val || 'N/A'}
         </div>
       )
@@ -81,7 +81,7 @@ export default function AuditOperationTrace() {
       key: 'status',
       label: 'Statut',
       render: (val: any, row: any) => (
-        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${row.status === 'ERROR' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>
+        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${row.status === 'ERROR' ? 'bg-red-500/10 text-red-300' : 'bg-emerald-500/10 text-emerald-300'}`}>
           {row.status === 'ERROR' ? <ShieldAlert className="w-3 h-3" /> : null}
           {row.status === 'ERROR' ? 'Échec' : 'Succès'}
         </span>
@@ -93,7 +93,7 @@ export default function AuditOperationTrace() {
     <GenericDataPage
       title="Traces d'Opérations (Audit Logs)"
       description="Historique immuable de toutes les actions système, modifications de données et tentatives d'accès."
-      icon={<History className="w-6 h-6 text-slate-600" />}
+      icon={<History className="w-6 h-6 text-slate-400" />}
       columns={columns}
       data={logs}
       isLoading={loading}

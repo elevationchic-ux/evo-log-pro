@@ -93,22 +93,22 @@ export default function B2BFeaturesPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Fonctionnalités B2B</h1>
-          <p className="text-gray-600 mt-1">Devis, chat support et API</p>
+          <h1 className="text-3xl font-bold text-slate-100">Fonctionnalités B2B</h1>
+          <p className="text-slate-400 mt-1">Devis, chat support et API</p>
         </div>
       </div>
 
       <div className="flex gap-2">
         <button
           onClick={() => setActiveTab('quotes')}
-          className={`px-4 py-2 rounded-lg ${activeTab === 'quotes' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+          className={`px-4 py-2 rounded-lg ${activeTab === 'quotes' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-200'}`}
         >
           <FileText className="w-4 h-4 inline mr-2" />
           Devis
         </button>
         <button
           onClick={() => setActiveTab('chat')}
-          className={`px-4 py-2 rounded-lg ${activeTab === 'chat' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+          className={`px-4 py-2 rounded-lg ${activeTab === 'chat' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-200'}`}
         >
           <MessageCircle className="w-4 h-4 inline mr-2" />
           Chat Support
@@ -118,7 +118,7 @@ export default function B2BFeaturesPage() {
       {activeTab === 'quotes' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Devis</h2>
+            <h2 className="text-lg font-semibold text-slate-100">Devis</h2>
             <button
               onClick={() => setIsQuoteModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -127,20 +127,20 @@ export default function B2BFeaturesPage() {
               Nouveau Devis
             </button>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 divide-y divide-gray-200">
+          <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 divide-y divide-slate-800">
             {quotes?.map((quote: any) => (
               <div key={quote.id} className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900">{quote.reference}</h3>
-                    <p className="text-sm text-gray-600">{quote.client_nom}</p>
+                    <h3 className="font-semibold text-slate-100">{quote.reference}</h3>
+                    <p className="text-sm text-slate-400">{quote.client_nom}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-gray-900">{Number(quote.montant_estime_xaf).toLocaleString('fr-FR')} FCFA</p>
+                    <p className="text-lg font-bold text-slate-100">{Number(quote.montant_estime_xaf).toLocaleString('fr-FR')} FCFA</p>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      quote.statut === 'accepte' ? 'bg-green-100 text-green-700' :
-                      quote.statut === 'refuse' ? 'bg-red-100 text-red-700' :
-                      'bg-yellow-100 text-yellow-700'
+                      quote.statut === 'accepte' ? 'bg-green-500/15 text-green-300' :
+                      quote.statut === 'refuse' ? 'bg-red-500/15 text-red-300' :
+                      'bg-yellow-500/15 text-yellow-300'
                     }`}>
                       {quote.statut}
                     </span>
@@ -153,10 +153,10 @@ export default function B2BFeaturesPage() {
       )}
 
       {activeTab === 'chat' && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Chat Support</h2>
-            <button className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+            <h2 className="text-lg font-semibold text-slate-100">Chat Support</h2>
+            <button className="flex items-center gap-2 px-3 py-1.5 text-sm border border-slate-600 rounded-lg hover:bg-slate-800">
               <RefreshCw className="w-4 h-4" />
               Actualiser
             </button>
@@ -169,7 +169,7 @@ export default function B2BFeaturesPage() {
               >
                 <div
                   className={`max-w-md p-3 rounded-lg ${
-                    msg.sender_id === user?.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'
+                    msg.sender_id === user?.id ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-100'
                   }`}
                 >
                   <p className="text-sm">{msg.content}</p>
@@ -185,7 +185,7 @@ export default function B2BFeaturesPage() {
               onChange={(e) => setChatMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="Écrivez votre message..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-3 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
             <button
               onClick={handleSendMessage}
@@ -199,69 +199,69 @@ export default function B2BFeaturesPage() {
 
       {isQuoteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+          <div className="bg-slate-900 rounded-lg shadow-xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Nouveau Devis</h2>
-              <button onClick={() => setIsQuoteModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <h2 className="text-xl font-semibold text-slate-100">Nouveau Devis</h2>
+              <button onClick={() => setIsQuoteModalOpen(false)} className="text-gray-400 hover:text-slate-400">
                 <CheckCircle className="w-6 h-6" />
               </button>
             </div>
             <form onSubmit={handleCreateQuote} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Numéro</label>
+                <label className="block text-sm font-medium text-slate-200 mb-1">Numéro</label>
                 <input
                   name="reference"
                   type="text"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-600 rounded-lg"
                   placeholder="DEV-2026-004"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                <label className="block text-sm font-medium text-slate-200 mb-1">Client</label>
                 <input
                   name="client_nom"
                   type="text"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-600 rounded-lg"
                   placeholder="Nom du client"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Origine</label>
+                <label className="block text-sm font-medium text-slate-200 mb-1">Origine</label>
                 <input
                   name="origine"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-600 rounded-lg"
                   placeholder="Douala"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
+                <label className="block text-sm font-medium text-slate-200 mb-1">Destination</label>
                 <input
                   name="destination"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-600 rounded-lg"
                   placeholder="Yaoundé"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nature du fret</label>
+                <label className="block text-sm font-medium text-slate-200 mb-1">Nature du fret</label>
                 <input
                   name="nature_fret"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-600 rounded-lg"
                   placeholder="Conteneur"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Montant estimé (FCFA)</label>
+                <label className="block text-sm font-medium text-slate-200 mb-1">Montant estimé (FCFA)</label>
                 <input
                   name="montant_estime_xaf"
                   type="number"
                   min="0"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-600 rounded-lg"
                   placeholder="1500000"
                 />
               </div>
@@ -269,7 +269,7 @@ export default function B2BFeaturesPage() {
                 <button
                   type="button"
                   onClick={() => setIsQuoteModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 border border-slate-600 rounded-lg hover:bg-slate-800"
                 >
                   Annuler
                 </button>

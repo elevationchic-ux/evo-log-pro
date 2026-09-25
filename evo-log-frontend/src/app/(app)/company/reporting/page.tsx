@@ -35,11 +35,11 @@ export default function B2BReportingPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Rapports Personnalisés</h1>
-          <p className="text-gray-600 mt-1">Rapports personnalisés pour votre entreprise</p>
+          <h1 className="text-3xl font-bold text-slate-100">Rapports Personnalisés</h1>
+          <p className="text-slate-400 mt-1">Rapports personnalisés pour votre entreprise</p>
         </div>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+          <button className="flex items-center gap-2 px-4 py-2 border border-slate-600 rounded-lg hover:bg-slate-800">
             <RefreshCw className="w-4 h-4" />
             Actualiser
           </button>
@@ -53,19 +53,19 @@ export default function B2BReportingPage() {
       <div className="flex gap-2">
         <button
           onClick={() => setReportType('activite')}
-          className={`px-4 py-2 rounded-lg ${reportType === 'activite' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+          className={`px-4 py-2 rounded-lg ${reportType === 'activite' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-200'}`}
         >
           Activité
         </button>
         <button
           onClick={() => setReportType('financier')}
-          className={`px-4 py-2 rounded-lg ${reportType === 'financier' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+          className={`px-4 py-2 rounded-lg ${reportType === 'financier' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-200'}`}
         >
           Financier
         </button>
         <button
           onClick={() => setReportType('operations')}
-          className={`px-4 py-2 rounded-lg ${reportType === 'operations' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+          className={`px-4 py-2 rounded-lg ${reportType === 'operations' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-200'}`}
         >
           Opérations
         </button>
@@ -75,38 +75,38 @@ export default function B2BReportingPage() {
         <>
           {/* KPIs */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Commandes</p>
-                  <p className="text-2xl font-bold text-gray-900">{report.kpis.commandes}</p>
+                  <p className="text-sm text-slate-400">Commandes</p>
+                  <p className="text-2xl font-bold text-slate-100">{report.kpis.commandes}</p>
                 </div>
                 <Package className="w-8 h-8 text-blue-600" />
               </div>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Livraisons</p>
-                  <p className="text-2xl font-bold text-gray-900">{report.kpis.livraisons}</p>
+                  <p className="text-sm text-slate-400">Livraisons</p>
+                  <p className="text-2xl font-bold text-slate-100">{report.kpis.livraisons}</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-green-600" />
               </div>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Chiffre d'Affaires</p>
-                  <p className="text-2xl font-bold text-gray-900">{(report.kpis.chiffre_affaires / 1000000).toFixed(1)}M FCFA</p>
+                  <p className="text-sm text-slate-400">Chiffre d'Affaires</p>
+                  <p className="text-2xl font-bold text-slate-100">{(report.kpis.chiffre_affaires / 1000000).toFixed(1)}M FCFA</p>
                 </div>
                 <DollarSign className="w-8 h-8 text-purple-600" />
               </div>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Litiges</p>
-                  <p className="text-2xl font-bold text-gray-900">{report.kpis.litiges}</p>
+                  <p className="text-sm text-slate-400">Litiges</p>
+                  <p className="text-2xl font-bold text-slate-100">{report.kpis.litiges}</p>
                 </div>
                 <AlertCircle className="w-8 h-8 text-red-600" />
               </div>
@@ -115,8 +115,8 @@ export default function B2BReportingPage() {
 
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Évolution Mensuelle</h3>
+            <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 p-6">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Évolution Mensuelle</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={report.graphiques.evolution_mensuelle}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -130,8 +130,8 @@ export default function B2BReportingPage() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition des Services</h3>
+            <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 p-6">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Répartition des Services</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -156,19 +156,19 @@ export default function B2BReportingPage() {
 
           {/* Financial KPIs */}
           {reportType === 'financier' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Indicateurs Financiers</h3>
+            <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 p-6">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Indicateurs Financiers</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <p className="text-sm text-gray-600">Marge</p>
+                <div className="p-4 bg-green-500/10 rounded-lg">
+                  <p className="text-sm text-slate-400">Marge</p>
                   <p className="text-2xl font-bold text-green-600">{(report.kpis.marge / 1000000).toFixed(1)}M FCFA</p>
                 </div>
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-gray-600">Dépenses</p>
+                <div className="p-4 bg-blue-500/10 rounded-lg">
+                  <p className="text-sm text-slate-400">Dépenses</p>
                   <p className="text-2xl font-bold text-blue-600">{(report.kpis.depenses / 1000000).toFixed(1)}M FCFA</p>
                 </div>
-                <div className="p-4 bg-red-50 rounded-lg">
-                  <p className="text-sm text-gray-600">Factures Impayées</p>
+                <div className="p-4 bg-red-500/10 rounded-lg">
+                  <p className="text-sm text-slate-400">Factures Impayées</p>
                   <p className="text-2xl font-bold text-red-600">{report.kpis.factures_impayees}</p>
                 </div>
               </div>

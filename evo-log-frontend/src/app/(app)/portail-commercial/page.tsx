@@ -138,7 +138,7 @@ export default function PortailCommercialPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-900 rounded-2xl border border-slate-700">
         {[
           { id: 'simulateur', label: 'Simulateur Cotation Express', icon: Calculator },
           { id: 'pipeline', label: 'Pipeline Commercial & Devis', icon: FileText, count: devisList.length },
@@ -153,15 +153,15 @@ export default function PortailCommercialPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
                 isActive
-                  ? 'bg-white text-slate-900 shadow-md border border-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                  ? 'bg-slate-900 text-slate-200 shadow-md border border-slate-700'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/10'
               }`}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
               {tab.count !== undefined && (
                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono ${
-                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-700 text-slate-300'
                 }`}>
                   {tab.count}
                 </span>
@@ -174,18 +174,18 @@ export default function PortailCommercialPage() {
       {/* Onglet 1 : Simulateur Cotation Express */}
       {activeTab === 'simulateur' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100">
+          <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-4 shadow-sm">
+            <h2 className="text-base font-bold text-slate-200 flex items-center gap-2 pb-3 border-b border-slate-700">
               <Calculator className="w-5 h-5 text-amber-600" /> Paramètres de l’Opération Logistique
             </h2>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Corridor Logistique</label>
+                <label className="font-bold text-slate-300 block mb-1">Corridor Logistique</label>
                 <select
                   value={simForm.corridor}
                   onChange={(e) => setSimForm({ ...simForm, corridor: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-amber-500 outline-none"
                 >
                   <option value="DOUALA_NDJAMENA">Douala → N’Djamena (Tchad) - Corridor 1 850 km</option>
                   <option value="DOUALA_BANGUI">Douala → Bangui (RCA) - Corridor 1 450 km</option>
@@ -196,11 +196,11 @@ export default function PortailCommercialPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Type de Conteneur / Fret</label>
+                  <label className="font-bold text-slate-300 block mb-1">Type de Conteneur / Fret</label>
                   <select
                     value={simForm.type_conteneur}
                     onChange={(e) => setSimForm({ ...simForm, type_conteneur: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-amber-500 outline-none"
                   >
                     <option value="40_DRY">Conteneur 40' Dry Standard</option>
                     <option value="20_DRY">Conteneur 20' Dry Standard</option>
@@ -210,39 +210,39 @@ export default function PortailCommercialPage() {
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Poids Brut (Tonnes)</label>
+                  <label className="font-bold text-slate-300 block mb-1">Poids Brut (Tonnes)</label>
                   <input
                     type="number"
                     value={simForm.poids_tonnes}
                     onChange={(e) => setSimForm({ ...simForm, poids_tonnes: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none font-mono"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-amber-500 outline-none font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Valeur Marchandise CAF (XAF)</label>
+                <label className="font-bold text-slate-300 block mb-1">Valeur Marchandise CAF (XAF)</label>
                 <input
                   type="number"
                   value={simForm.valeur_marchandise_xaf}
                   onChange={(e) => setSimForm({ ...simForm, valeur_marchandise_xaf: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none font-mono"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-amber-500 outline-none font-mono"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Marge Commerciale (%)</label>
+                  <label className="font-bold text-slate-300 block mb-1">Marge Commerciale (%)</label>
                   <input
                     type="number"
                     value={simForm.marge_commerciale_pct}
                     onChange={(e) => setSimForm({ ...simForm, marge_commerciale_pct: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none font-mono"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-amber-500 outline-none font-mono"
                   />
                 </div>
 
                 <div className="flex items-center pt-5">
-                  <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+                  <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-300">
                     <input
                       type="checkbox"
                       checked={simForm.inclure_assurance}
@@ -312,28 +312,28 @@ export default function PortailCommercialPage() {
 
       {/* Onglet 2 : Pipeline Commercial */}
       {activeTab === 'pipeline' && (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
               Vos Devis Émis & Négociations en Cours ({devisList.length})
             </h2>
           </div>
 
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-800">
             {devisList.length === 0 ? (
               <div className="p-8 text-center text-slate-500 text-xs">
                 Aucun devis récent dans le pipeline.
               </div>
             ) : (
               devisList.map((d) => (
-                <div key={d.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80">
+                <div key={d.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-800/80">
                   <div>
-                    <div className="text-xs font-bold text-slate-900">Devis #{d.reference || `DEV-${d.id}`}</div>
-                    <div className="text-[11px] text-slate-600">Client : {d.client_nom || 'Importateur CEMAC'}</div>
+                    <div className="text-xs font-bold text-slate-200">Devis #{d.reference || `DEV-${d.id}`}</div>
+                    <div className="text-[11px] text-slate-400">Client : {d.client_nom || 'Importateur CEMAC'}</div>
                     <div className="text-[10px] text-slate-400">Corridor : {d.corridor || 'Douala - N’Djamena'}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-mono font-bold text-slate-900">
+                    <div className="text-sm font-mono font-bold text-slate-200">
                       {d.montant_total ? d.montant_total.toLocaleString() : '4 850 000'} XAF
                     </div>
                     <span className="text-[10px] font-bold text-emerald-600">Offre transmise</span>
@@ -347,27 +347,27 @@ export default function PortailCommercialPage() {
 
       {/* Onglet 3 : Portefeuille Clients */}
       {activeTab === 'clients' && (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-slate-100">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-slate-700">
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
               Comptes & Importateurs Suivis ({clients.length})
             </h2>
           </div>
 
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-800">
             {clients.length === 0 ? (
               <div className="p-8 text-center text-slate-500 text-xs">
                 Aucun compte client assigné.
               </div>
             ) : (
               clients.map((c) => (
-                <div key={c.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80">
+                <div key={c.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-800/80">
                   <div>
-                    <div className="text-xs font-bold text-slate-900">{c.nom || c.raison_sociale || `Client #${c.id}`}</div>
+                    <div className="text-xs font-bold text-slate-200">{c.nom || c.raison_sociale || `Client #${c.id}`}</div>
                     <div className="text-[11px] text-slate-500">Ville : {c.ville || 'Douala'} • Téléphone : {c.telephone || '+237 6XX XX XX XX'}</div>
                   </div>
                   <div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300">
                       Compte Actif
                     </span>
                   </div>
@@ -388,13 +388,13 @@ export default function PortailCommercialPage() {
               <p className="text-xs font-bold opacity-80">Objectif mensuel : 50M XAF (97% atteint)</p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-1">
+            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-700 shadow-sm space-y-1">
               <span className="text-xs font-bold text-slate-500 uppercase">Commission Estimée</span>
               <div className="text-3xl font-black text-emerald-600">1 455 000 XAF</div>
               <p className="text-xs text-slate-500">Taux de commissionnement : 3%</p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-1">
+            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-700 shadow-sm space-y-1">
               <span className="text-xs font-bold text-indigo-600 uppercase">Contrats Signés</span>
               <div className="text-3xl font-black text-indigo-600">12 Dossiers</div>
               <p className="text-xs text-slate-500">Corridors Tchad et RCA</p>

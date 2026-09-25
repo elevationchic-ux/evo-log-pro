@@ -173,7 +173,7 @@ export default function TransportInternationalPage() {
           <div className="p-12 text-center text-slate-400"><RefreshCw className="w-6 h-6 animate-spin text-indigo-400 mx-auto mb-2" /></div>
         ) : ordres.length === 0 ? (
           <div className="p-12 text-center text-slate-400">
-            <Globe className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+            <Globe className="w-10 h-10 text-slate-400 mx-auto mb-2" />
             <p className="font-bold text-white">Aucun ordre de transport international</p>
             <p className="text-xs text-slate-500 mt-1">Créez le premier OTI pour commencer.</p>
           </div>

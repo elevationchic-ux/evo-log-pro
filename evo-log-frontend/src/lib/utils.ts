@@ -6,10 +6,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency: string = 'FCFA'): string {
+export function formatCurrency(amount: number, currency: string = 'XAF'): string {
+  // 'FCFA' n'est pas un code ISO valide (4 lettres) : Intl.NumberFormat levait
+  // un RangeError sur chaque appel par défaut. On le normalise en 'XAF', que
+  // fr-FR rend déjà « FCFA » à l'affichage.
+  const code = currency.toUpperCase() === 'FCFA' ? 'XAF' : currency;
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: currency,
+    currency: code,
+    maximumFractionDigits: code === 'XAF' ? 0 : 2,
   }).format(amount);
 }
 

@@ -5,7 +5,7 @@ from typing import List, Optional
 from datetime import date
 
 from app.core.database import get_db
-from app.core.auth import get_current_user
+from app.core.permissions import require_perm
 from app.models.user import User
 from app.schemas.comptabilite_avance import (
     JournalAuxiliaireCreate, JournalAuxiliaireUpdate, JournalAuxiliaireResponse,
@@ -38,7 +38,7 @@ router = APIRouter(tags=["Comptabilité Avancée"])  # monte sur /api/v1/comptab
 def creer_journal_auxiliaire(
     journal: JournalAuxiliaireCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.journal.create"))
 ):
     """Créer un journal auxiliaire"""
     from app.models.finance_ohada import TypeJournal
@@ -57,7 +57,7 @@ def creer_journal_auxiliaire(
 @router.get("/journaux", response_model=List[JournalAuxiliaireResponse])
 def lister_journaux(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.journal.read"))
 ):
     """Lister tous les journaux auxiliaires"""
     return db.query(JournalAuxiliaire).all()
@@ -67,7 +67,7 @@ def lister_journaux(
 def obtenir_journal(
     journal_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.journal.read"))
 ):
     """Obtenir un journal auxiliaire par ID"""
     journal = db.query(JournalAuxiliaire).filter(JournalAuxiliaire.id == journal_id).first()
@@ -81,7 +81,7 @@ def modifier_journal(
     journal_id: int,
     journal_update: JournalAuxiliaireUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.journal.modify"))
 ):
     """Modifier un journal auxiliaire"""
     journal = db.query(JournalAuxiliaire).filter(JournalAuxiliaire.id == journal_id).first()
@@ -99,7 +99,7 @@ def modifier_journal(
 @router.post("/journaux/initialiser", response_model=List[JournalAuxiliaireResponse])
 def initialiser_tous_les_journaux(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.journal.create"))
 ):
     """Initialiser tous les journaux auxiliaires standards"""
     return JournalAuxiliaireService.initialiser_tous_les_journaux(db)
@@ -112,7 +112,7 @@ def lettrage_automatique(
     compte_id: int,
     date_reference: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.lettrage.modify"))
 ):
     """Lettrage automatique des écritures d'un compte"""
     try:
@@ -126,7 +126,7 @@ def lettrage_automatique(
 def lettrage_manuel(
     request: LettrageManuelRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.lettrage.modify"))
 ):
     """Lettrage manuel d'écritures sélectionnées"""
     try:
@@ -148,7 +148,7 @@ def annuler_lettrage(
     lettrage_id: int,
     motif: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.lettrage.modify"))
 ):
     """Annuler un lettrage"""
     try:
@@ -162,7 +162,7 @@ def annuler_lettrage(
 def suggestion_lettrage(
     compte_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.lettrage.read"))
 ):
     """Suggérer des écritures à lettrer"""
     return LettrageService.suggestion_lettrage(db, compte_id)
@@ -172,7 +172,7 @@ def suggestion_lettrage(
 def lister_lettrages(
     compte_id: int = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.lettrage.read"))
 ):
     """Lister les lettrages"""
     query = db.query(Lettrage)
@@ -187,7 +187,7 @@ def lister_lettrages(
 def generer_grand_livre(
     request: GrandLivreGenerateRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.grand_livre.read"))
 ):
     """Générer le grand livre général pour une période"""
     lignes = GrandLivreService.generer_grand_livre_general(
@@ -205,7 +205,7 @@ def grand_livre_auxiliaire(
     date_debut: date,
     date_fin: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.grand_livre.read"))
 ):
     """Générer le grand livre auxiliaire pour un compte"""
     lignes = GrandLivreService.grand_livre_auxiliaire(db, compte_id, date_debut, date_fin)
@@ -217,7 +217,7 @@ def historique_compte(
     compte_id: int,
     periode: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.grand_livre.read"))
 ):
     """Obtenir l'historique complet d'un compte pour une période"""
     return GrandLivreService.historique_compte(db, compte_id, periode)
@@ -229,7 +229,7 @@ def historique_compte(
 def creer_balance_verification(
     request: BalanceVerificationCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.balance.read"))
 ):
     """Créer une balance de vérification"""
     balance = BalanceService.creer_balance_verification(
@@ -252,7 +252,7 @@ def creer_balance_verification(
 def obtenir_balance(
     balance_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.balance.read"))
 ):
     """Obtenir une balance de vérification par ID"""
     balance = db.query(BalanceVerification).filter(BalanceVerification.id == balance_id).first()
@@ -272,7 +272,7 @@ def balance_par_journal(
     journal_code: str,
     periode: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.balance.read"))
 ):
     """Balance par journal"""
     return BalanceService.balance_par_journal(db, journal_code, periode)
@@ -282,7 +282,7 @@ def balance_par_journal(
 def lister_balances(
     exercice_id: int = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.balance.read"))
 ):
     """Lister les balances de vérification"""
     query = db.query(BalanceVerification)
@@ -297,7 +297,7 @@ def lister_balances(
 def generer_bilan_ohada(
     request: BilanOHADADetailleCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
     """Générer le bilan OHADA détaillé"""
     bilan = EtatsFinanciersOHADAService.generer_bilan_ohada_detaille(
@@ -312,7 +312,7 @@ def generer_bilan_ohada(
 def obtenir_bilan(
     bilan_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
     """Obtenir un bilan OHADA par ID"""
     bilan = db.query(BilanOHADADetaille).filter(BilanOHADADetaille.id == bilan_id).first()
@@ -325,7 +325,7 @@ def obtenir_bilan(
 def generer_compte_resultat_ohada(
     request: CompteResultatOHADADetailleCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
     """Générer le compte de résultat OHADA détaillé"""
     compte_resultat = EtatsFinanciersOHADAService.generer_compte_resultat_ohada_detaille(
@@ -341,7 +341,7 @@ def generer_compte_resultat_ohada(
 def obtenir_compte_resultat(
     cr_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
     """Obtenir un compte de résultat OHADA par ID"""
     cr = db.query(CompteResultatOHADADetaille).filter(CompteResultatOHADADetaille.id == cr_id).first()
@@ -354,7 +354,7 @@ def obtenir_compte_resultat(
 def generer_tafire(
     request: TAFIRECreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
     """Générer le TAFIRE (Tableau Financier des Ressources et Emplois)"""
     tafire = EtatsFinanciersOHADAService.generer_tafire(
@@ -369,7 +369,7 @@ def generer_tafire(
 def obtenir_tafire(
     tafire_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
     """Obtenir un TAFIRE par ID"""
     tafire = db.query(TAFIRE).filter(TAFIRE.id == tafire_id).first()
@@ -382,7 +382,7 @@ def obtenir_tafire(
 def generer_annexes_ohada(
     request: AnnexesGenererRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
     """Générer les annexes OHADA"""
     annexes = EtatsFinanciersOHADAService.generer_annexes_ohada(
@@ -400,7 +400,7 @@ def generer_annexes_ohada(
 def obtenir_annexes(
     annexes_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
     """Obtenir les annexes OHADA par ID"""
     annexes = db.query(AnnexesOHADA).filter(AnnexesOHADA.id == annexes_id).first()
@@ -415,7 +415,7 @@ def obtenir_annexes(
 def cloture_mensuelle(
     request: ClotureMensuelleRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.approve"))
 ):
     """Clôture mensuelle des comptes de gestion"""
     try:
@@ -434,7 +434,7 @@ def cloture_mensuelle(
 def cloture_annuelle(
     request: ClotureAnnuelleRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.approve"))
 ):
     """Clôture annuelle complète"""
     try:
@@ -452,7 +452,7 @@ def cloture_annuelle(
 def report_a_nouveau(
     request: ReportANouveauRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.approve"))
 ):
     """Report à nouveau des soldes de bilan"""
     result = ClotureService.report_a_nouveau(
@@ -467,7 +467,7 @@ def report_a_nouveau(
 def affectation_resultat(
     request: AffectationResultatRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.approve"))
 ):
     """Affectation du résultat de l'exercice"""
     try:
@@ -492,7 +492,7 @@ def lister_ecritures(
     date_debut: Optional[date] = None,
     date_fin: Optional[date] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.journal.read"))
 ):
     """Lister les écritures comptables avec filtres multicritères"""
     from app.models.finance_ohada import EcritureComptableNew
@@ -512,7 +512,7 @@ def lister_ecritures(
 def creer_ecriture(
     data: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.journal.create"))
 ):
     """Créer une écriture comptable avec équilibre et date"""
     from app.models.finance_ohada import EcritureComptableNew

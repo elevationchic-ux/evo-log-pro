@@ -79,220 +79,28 @@ interface DotationItem {
   observations?: string;
 }
 
-// Fallback high-fidelity dataset
-const INITIAL_EFFECTIFS: EffectifAgent[] = [
-  {
-    id: 17,
-    username: 'gardien',
-    full_name: 'Moussa Bello',
-    email: 'gardien@evolog.cm',
-    telephone: '+237 699 12 34 56',
-    role: 'GARDIEN',
-    agency_name: 'Douala Port - Quai 14',
-    statut_presence: 'EN_POSTE',
-    quart_actuel: 'NUIT (19h-07h)',
-    dernier_pointage: 'Aujourd\'hui 18:45'
-  },
-  {
-    id: 16,
-    username: 'secretaire',
-    full_name: 'Amina Ngo Bell',
-    email: 'secretaire@evolog.cm',
-    telephone: '+237 677 45 88 90',
-    role: 'SECRETAIRE',
-    agency_name: 'Siège Social Douala Bonanjo',
-    statut_presence: 'EN_POSTE',
-    quart_actuel: 'STANDARD (08h-17h)',
-    dernier_pointage: 'Aujourd\'hui 07:50'
-  },
-  {
-    id: 18,
-    username: 'entretien',
-    full_name: 'Mama Jeanne Manga',
-    email: 'entretien@evolog.cm',
-    telephone: '+237 655 33 21 09',
-    role: 'AGENT_ENTRETIEN',
-    agency_name: 'Douala Port - Quai 14',
-    statut_presence: 'EN_POSTE',
-    quart_actuel: 'MATIN (06h-14h)',
-    dernier_pointage: 'Aujourd\'hui 05:50'
-  },
-  {
-    id: 19,
-    username: 'supportit',
-    full_name: 'Alain Mbida',
-    email: 'supportit@evolog.cm',
-    telephone: '+237 690 99 88 77',
-    role: 'SUPPORT_IT',
-    agency_name: 'Siège Social & Quai 14',
-    statut_presence: 'EN_POSTE',
-    quart_actuel: 'JOUR (07h-19h)',
-    dernier_pointage: 'Aujourd\'hui 07:10'
-  }
-];
+// Aucune donnée d'amorçage : les effectifs, congés, plannings, pointages et dotations
+// sont alimentés exclusivement par l'API /api/v1/chef-personnel/*. En l'absence de
+// réponse du backend, chaque onglet affiche un état vide explicite.
 
-const INITIAL_CONGES: DemandeCongeN1[] = [
-  {
-    id: 1,
-    employe_id: 16,
-    employe_nom: 'Amina Ngo Bell',
-    employe_role: 'SECRETAIRE',
-    type_conge: 'Congé Annuel Payé',
-    date_debut: '2026-04-14',
-    date_fin: '2026-04-21',
-    jours_ouvrables: 8,
-    motif: 'Congé annuel de détente premier semestre (reliquat acquis).',
-    statut: 'EN_ATTENTE',
-    date_demande: '2026-09-04T11:20:00Z'
-  },
-  {
-    id: 2,
-    employe_id: 17,
-    employe_nom: 'Moussa Bello',
-    employe_role: 'GARDIEN',
-    type_conge: 'Événement Familial',
-    date_debut: '2026-05-02',
-    date_fin: '2026-05-05',
-    jours_ouvrables: 4,
-    motif: 'Cérémonie familiale traditionnelle à limbé.',
-    statut: 'EN_ATTENTE',
-    date_demande: '2026-09-03T16:45:00Z'
-  }
-];
-
-const INITIAL_PLANNINGS: PlanningItem[] = [
-  {
-    id: 1,
-    employe_id: 17,
-    employe_nom: 'Moussa Bello',
-    employe_role: 'GARDIEN',
-    date_jour: '2026-09-06',
-    quart: 'NUIT (19h-07h)',
-    poste_assigne: 'Poste de Contrôle Accès Quai 14 & Camions',
-    statut: 'CONFIRME',
-    observations: 'Ronde renforcée toutes les 2h avec pointeau électronique.'
-  },
-  {
-    id: 2,
-    employe_id: 16,
-    employe_nom: 'Amina Ngo Bell',
-    employe_role: 'SECRETAIRE',
-    date_jour: '2026-09-06',
-    quart: 'STANDARD (08h-17h)',
-    poste_assigne: 'Accueil Principal Hall Siège & Badges Visiteurs',
-    statut: 'CONFIRME',
-    observations: 'Permanence téléphonique et gestion courrier DG.'
-  },
-  {
-    id: 3,
-    employe_id: 18,
-    employe_nom: 'Mama Jeanne Manga',
-    employe_role: 'AGENT_ENTRETIEN',
-    date_jour: '2026-09-06',
-    quart: 'MATIN (06h-14h)',
-    poste_assigne: 'Entrepôt Magasin Central & Blocs Sanitaires Quai',
-    statut: 'EN_POSTE',
-    observations: 'Nettoyage industriel pré-inspection QHSE.'
-  },
-  {
-    id: 4,
-    employe_id: 19,
-    employe_nom: 'Alain Mbida',
-    employe_role: 'SUPPORT_IT',
-    date_jour: '2026-09-06',
-    quart: 'JOUR (07h-19h)',
-    poste_assigne: 'Salle Serveurs & Assistance Postes Quai Portuaire',
-    statut: 'CONFIRME',
-    observations: 'Astreinte liaison satellite GUCE et scanners WMS.'
-  }
-];
-
-const INITIAL_POINTAGES: PointageItem[] = [
-  {
-    id: 1,
-    employe_id: 17,
-    employe_nom: 'Moussa Bello',
-    employe_role: 'GARDIEN',
-    date_pointage: '2026-09-06',
-    heure_arrivee: '18:45',
-    heure_depart: '07:05',
-    heures_effectives: 12.0,
-    droit_panier_nuit: true,
-    montant_panier: 4500,
-    est_valide: true,
-    remarques: 'Prise de poste ponctuelle. Panier de nuit validé OHADA.'
-  },
-  {
-    id: 2,
-    employe_id: 18,
-    employe_nom: 'Mama Jeanne Manga',
-    employe_role: 'AGENT_ENTRETIEN',
-    date_pointage: '2026-09-06',
-    heure_arrivee: '05:50',
-    heure_depart: '14:00',
-    heures_effectives: 8.0,
-    droit_panier_nuit: false,
-    montant_panier: 0,
-    est_valide: true,
-    remarques: 'Émargement biométrique conforme.'
-  }
-];
-
-const INITIAL_DOTATIONS: DotationItem[] = [
-  {
-    id: 1,
-    employe_id: 17,
-    employe_nom: 'Moussa Bello',
-    employe_role: 'GARDIEN',
-    designation: 'Gilet Haute Visibilité Fluo Réfléchissant ISPS Portuaire',
-    categorie: 'EPI',
-    date_remise: '2026-01-15',
-    date_renouvellement_prevue: '2026-07-15',
-    numero_serie: 'ISPS-DLA-G-401',
-    etat: 'BON',
-    est_restitue: false,
-    observations: 'Dotation sécurité obligatoire zone sous douane.'
-  },
-  {
-    id: 2,
-    employe_id: 17,
-    employe_nom: 'Moussa Bello',
-    employe_role: 'GARDIEN',
-    designation: 'Talkie-Walkie VHF Motorola Quai DP-4801',
-    categorie: 'COMMUNICATION',
-    date_remise: '2026-02-01',
-    date_renouvellement_prevue: '2027-02-01',
-    numero_serie: 'MOT-VHF-88210',
-    etat: 'NEUF',
-    est_restitue: false,
-    observations: 'Canal 16 veille sécurité et liaison capitainerie.'
-  },
-  {
-    id: 3,
-    employe_id: 18,
-    employe_nom: 'Mama Jeanne Manga',
-    employe_role: 'AGENT_ENTRETIEN',
-    designation: 'Chaussures de Sécurité Coquées S3 Antidérapantes',
-    categorie: 'EPI',
-    date_remise: '2026-01-20',
-    date_renouvellement_prevue: '2026-12-20',
-    numero_serie: 'RNG-S3-T39-012',
-    etat: 'BON',
-    est_restitue: false,
-    observations: 'Conforme normes anti-perforation sols mouillés.'
-  }
-];
 
 export default function ChefPersonnelPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'effectifs' | 'conges' | 'plannings' | 'pointages' | 'dotations'>('effectifs');
 
-  // Datasets
-  const [effectifs, setEffectifs] = useState<EffectifAgent[]>(INITIAL_EFFECTIFS);
-  const [conges, setConges] = useState<DemandeCongeN1[]>(INITIAL_CONGES);
-  const [plannings, setPlannings] = useState<PlanningItem[]>(INITIAL_PLANNINGS);
-  const [pointages, setPointages] = useState<PointageItem[]>(INITIAL_POINTAGES);
-  const [dotations, setDotations] = useState<DotationItem[]>(INITIAL_DOTATIONS);
+  // Deep-link depuis la navigation : /chef-personnel?tab=... ouvre l'onglet demande.
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('tab');
+    const allowed = ['effectifs', 'conges', 'plannings', 'pointages', 'dotations'];
+    if (t && (allowed as string[]).includes(t)) setActiveTab(t as typeof activeTab);
+  }, []);
+
+  // Datasets (alimentés par l'API, vides par défaut  aucune donnée seed)
+  const [effectifs, setEffectifs] = useState<EffectifAgent[]>([]);
+  const [conges, setConges] = useState<DemandeCongeN1[]>([]);
+  const [plannings, setPlannings] = useState<PlanningItem[]>([]);
+  const [pointages, setPointages] = useState<PointageItem[]>([]);
+  const [dotations, setDotations] = useState<DotationItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Filters
@@ -591,8 +399,8 @@ export default function ChefPersonnelPage() {
         <button
           onClick={() => setActiveTab('effectifs')}
           className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${activeTab === 'effectifs'
-              ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+            : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
         >
           <Users className="w-4 h-4" />
@@ -602,8 +410,8 @@ export default function ChefPersonnelPage() {
         <button
           onClick={() => setActiveTab('conges')}
           className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 relative ${activeTab === 'conges'
-              ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+            : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
         >
           <Calendar className="w-4 h-4" />
@@ -618,8 +426,8 @@ export default function ChefPersonnelPage() {
         <button
           onClick={() => setActiveTab('plannings')}
           className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${activeTab === 'plannings'
-              ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+            : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
         >
           <Clock className="w-4 h-4" />
@@ -629,8 +437,8 @@ export default function ChefPersonnelPage() {
         <button
           onClick={() => setActiveTab('pointages')}
           className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${activeTab === 'pointages'
-              ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+            : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
         >
           <ClipboardList className="w-4 h-4" />
@@ -640,8 +448,8 @@ export default function ChefPersonnelPage() {
         <button
           onClick={() => setActiveTab('dotations')}
           className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shrink-0 ${activeTab === 'dotations'
-              ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+            : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
         >
           <Shield className="w-4 h-4" />
@@ -665,13 +473,15 @@ export default function ChefPersonnelPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Filtres de rôle (configuration d'interface, pas des données métier) */}
+              {/* audit-allow:fake_data */}
               {['ALL', 'SECRETAIRE', 'GARDIEN', 'AGENT_ENTRETIEN', 'SUPPORT_IT'].map(r => (
                 <button
                   key={r}
                   onClick={() => setRoleFilter(r)}
                   className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${roleFilter === r
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                      : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                    : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200'
                     }`}
                 >
                   {r === 'ALL' ? 'Tous les Postes' : r.replace('_', ' ')}
@@ -681,6 +491,14 @@ export default function ChefPersonnelPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            {filteredEffectifs.length === 0 && (
+              <div className="md:col-span-2 xl:col-span-4 bg-slate-900/90 border border-dashed border-slate-800 rounded-2xl p-12 text-center">
+                <Users className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                <p className="text-sm text-slate-400">
+                  Aucun agent supervisé chargé depuis l'API. Utilisez « Rafraîchir » pour récupérer les effectifs du service backend RH.
+                </p>
+              </div>
+            )}
             {filteredEffectifs.map(agent => (
               <div
                 key={agent.id}
@@ -746,6 +564,12 @@ export default function ChefPersonnelPage() {
           </div>
 
           <div className="divide-y divide-slate-800">
+            {conges.length === 0 && (
+              <div className="py-12 text-center">
+                <Calendar className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                <p className="text-sm text-slate-400">Aucune demande de congé. Les demandes saisies par le personnel apparaîtront ici.</p>
+              </div>
+            )}
             {conges.map(cg => (
               <div key={cg.id} className="py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div className="space-y-1.5">
@@ -755,10 +579,10 @@ export default function ChefPersonnelPage() {
                       {cg.employe_role}
                     </span>
                     <span className={`px-2 py-0.5 text-[10px] font-black rounded-full ${cg.statut === 'APPROUVE'
-                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                        : cg.statut === 'REJETE'
-                          ? 'bg-red-500/15 text-red-400 border border-red-500/30'
-                          : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                      ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                      : cg.statut === 'REJETE'
+                        ? 'bg-red-500/15 text-red-400 border border-red-500/30'
+                        : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                       }`}>
                       {cg.statut}
                     </span>
@@ -839,6 +663,9 @@ export default function ChefPersonnelPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800 font-mono">
+                {plannings.length === 0 && (
+                  <tr><td colSpan={7} className="py-12 text-center text-slate-400 font-sans">Aucun planning de garde. Cliquez sur « Nouvelle Affectation » pour planifier un quart.</td></tr>
+                )}
                 {plannings.map(p => (
                   <tr key={p.id} className="hover:bg-slate-800/30">
                     <td className="py-3.5 px-4 text-amber-400">{p.date_jour}</td>
@@ -892,6 +719,9 @@ export default function ChefPersonnelPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800 font-mono">
+                {pointages.length === 0 && (
+                  <tr><td colSpan={8} className="py-12 text-center text-slate-400 font-sans">Aucun pointage enregistré pour la période. Les émargements remontent depuis la borne de pointage.</td></tr>
+                )}
                 {pointages.map(pt => (
                   <tr key={pt.id} className="hover:bg-slate-800/30">
                     <td className="py-3.5 px-4 text-slate-400">{pt.date_pointage}</td>
@@ -959,6 +789,9 @@ export default function ChefPersonnelPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800 font-mono">
+                {dotations.length === 0 && (
+                  <tr><td colSpan={7} className="py-12 text-center text-slate-400 font-sans">Aucune dotation enregistrée. Cliquez sur « Attribuer Matériel » pour doter un agent (EPI, radio, badge).</td></tr>
+                )}
                 {dotations.map(dt => (
                   <tr key={dt.id} className="hover:bg-slate-800/30">
                     <td className="py-3.5 px-4 font-bold text-white font-sans">{dt.employe_nom}</td>

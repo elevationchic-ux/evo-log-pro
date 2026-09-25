@@ -26,38 +26,38 @@ export default function MapControlTower({ vehicles = [] }: MapControlTowerProps)
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+    <div className="bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
+      <div className="p-4 border-b border-slate-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Radio className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">Tour de controle carte</h3>
+          <h3 className="font-semibold text-slate-100">Tour de controle carte</h3>
         </div>
-        <span className="text-sm text-gray-500">{vehicles.length} vehicules</span>
+        <span className="text-sm text-slate-400">{vehicles.length} vehicules</span>
       </div>
 
-      <div className="relative bg-blue-50" style={{ minHeight: 400 }}>
+      <div className="relative bg-blue-500/10" style={{ minHeight: 400 }}>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <MapPin className="w-16 h-16 text-blue-300 mx-auto mb-4" />
-            <p className="text-lg font-medium text-blue-700">Vue carte en cours de configuration</p>
+            <p className="text-lg font-medium text-blue-300">Vue carte en cours de configuration</p>
             <p className="text-sm text-blue-500 mt-1">Les donnees GPS en temps reel seront affichees ici</p>
           </div>
         </div>
       </div>
 
       {vehicles.length > 0 && (
-        <div className="p-4 border-t border-gray-200">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Vehicules actifs</h4>
+        <div className="p-4 border-t border-slate-700">
+          <h4 className="text-sm font-medium text-slate-200 mb-2">Vehicules actifs</h4>
           <div className="space-y-2 max-h-48 overflow-auto">
             {vehicles.map(v => (
               <button
                 key={v.id}
                 onClick={() => setSelectedVehicle(v)}
-                className={`w-full flex items-center justify-between p-2 rounded-lg text-left hover:bg-gray-50 ${selectedVehicle?.id === v.id ? 'bg-blue-50 border border-blue-200' : ''}`}
+                className={`w-full flex items-center justify-between p-2 rounded-lg text-left hover:bg-slate-800 ${selectedVehicle?.id === v.id ? 'bg-blue-500/10 border border-blue-500/40' : ''}`}
               >
                 <div className="flex items-center gap-2">
                   <Truck className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-700">{v.name}</span>
+                  <span className="text-sm font-medium text-slate-200">{v.name}</span>
                 </div>
                 <span className={`text-xs font-medium ${statusColors[v.status]}`}>{v.status}</span>
               </button>

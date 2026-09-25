@@ -193,41 +193,41 @@ export default function PortailFraisPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-1">
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-700 shadow-sm space-y-1">
           <span className="text-xs font-bold text-slate-500 uppercase">Total Frais Engagés</span>
-          <div className="text-xl font-black text-slate-900">
+          <div className="text-xl font-black text-slate-200">
             {stats.total_engage_xaf.toLocaleString()} XAF
           </div>
           <span className="text-[11px] text-slate-500">{stats.nb_frais_total} note(s) saisie(s)</span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-1">
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-700 shadow-sm space-y-1">
           <span className="text-xs font-bold text-emerald-600 uppercase">Frais Approuvés</span>
           <div className="text-xl font-black text-emerald-600">
             {stats.total_valide_xaf.toLocaleString()} XAF
           </div>
-          <span className="text-[11px] text-emerald-700">Validé pour remboursement</span>
+          <span className="text-[11px] text-emerald-300">Validé pour remboursement</span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-1">
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-700 shadow-sm space-y-1">
           <span className="text-xs font-bold text-amber-600 uppercase">En Attente Validation</span>
           <div className="text-xl font-black text-amber-600">
             {stats.total_en_attente_xaf.toLocaleString()} XAF
           </div>
-          <span className="text-[11px] text-amber-700">En cours de revue manager</span>
+          <span className="text-[11px] text-amber-300">En cours de revue manager</span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-1">
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-700 shadow-sm space-y-1">
           <span className="text-xs font-bold text-indigo-600 uppercase">Avances Accordées</span>
           <div className="text-xl font-black text-indigo-600">
             {stats.total_avances_accordees_xaf.toLocaleString()} XAF
           </div>
-          <span className="text-[11px] text-indigo-700">Solde net : {stats.solde_a_regulariser_xaf.toLocaleString()} XAF</span>
+          <span className="text-[11px] text-indigo-300">Solde net : {stats.solde_a_regulariser_xaf.toLocaleString()} XAF</span>
         </div>
       </div>
 
       {/* Onglets */}
-      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-900 rounded-2xl border border-slate-700">
         {[
           { id: 'frais', label: 'Mes Notes de Frais', icon: FileText, count: fraisList.length },
           { id: 'nouveau', label: '+ Nouvelle Dépense', icon: PlusCircle },
@@ -242,15 +242,15 @@ export default function PortailFraisPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
                 isActive
-                  ? 'bg-white text-slate-900 shadow-md border border-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                  ? 'bg-slate-900 text-slate-200 shadow-md border border-slate-700'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/10'
               }`}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
               {tab.count !== undefined && (
                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono ${
-                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-700 text-slate-300'
                 }`}>
                   {tab.count}
                 </span>
@@ -262,9 +262,9 @@ export default function PortailFraisPage() {
 
       {/* Onglet 1 : Mes Notes de Frais */}
       {activeTab === 'frais' && (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
               Historique de vos dépenses ({fraisList.length})
             </h2>
             <button
@@ -278,7 +278,7 @@ export default function PortailFraisPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <tr className="bg-slate-800 border-b border-slate-700 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   <th className="p-3.5">Date & Réf</th>
                   <th className="p-3.5">Mission / Objet</th>
                   <th className="p-3.5">Catégorie</th>
@@ -287,7 +287,7 @@ export default function PortailFraisPage() {
                   <th className="p-3.5">Statut</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
+              <tbody className="divide-y divide-slate-800 text-xs">
                 {fraisList.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="p-8 text-center text-slate-500">
@@ -296,32 +296,32 @@ export default function PortailFraisPage() {
                   </tr>
                 ) : (
                   fraisList.map((f) => (
-                    <tr key={f.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={f.id} className="hover:bg-slate-800/80 transition-colors">
                       <td className="p-3.5">
-                        <div className="font-bold text-slate-800">#{f.numero_recu || `FR-${f.id}`}</div>
+                        <div className="font-bold text-slate-200">#{f.numero_recu || `FR-${f.id}`}</div>
                         <div className="text-[10px] text-slate-400">
                           {f.created_at ? new Date(f.created_at).toLocaleDateString() : 'Aujourd’hui'}
                         </div>
                       </td>
-                      <td className="p-3.5 font-medium text-slate-900">
+                      <td className="p-3.5 font-medium text-slate-200">
                         {f.titre_mission || 'Mission générale'}
                       </td>
                       <td className="p-3.5">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-900 text-slate-300 border border-slate-700">
                           {f.type_frais}
                         </span>
                       </td>
-                      <td className="p-3.5 text-slate-600">
+                      <td className="p-3.5 text-slate-400">
                         <div>{f.fournisseur || 'Comptant'}</div>
                         <div className="text-[10px] text-slate-400">{f.ville_lieu || 'Cameroun'}</div>
                       </td>
-                      <td className="p-3.5 font-mono font-bold text-slate-900">
+                      <td className="p-3.5 font-mono font-bold text-slate-200">
                         {f.montant.toLocaleString()} {f.devise}
                       </td>
                       <td className="p-3.5">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                          f.statut === 'VALIDE' ? 'bg-emerald-100 text-emerald-800' :
-                          f.statut === 'REJETE' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
+                          f.statut === 'VALIDE' ? 'bg-emerald-500/15 text-emerald-300' :
+                          f.statut === 'REJETE' ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'
                         }`}>
                           {f.statut}
                         </span>
@@ -337,9 +337,9 @@ export default function PortailFraisPage() {
 
       {/* Onglet 2 : Nouvelle Dépense */}
       {activeTab === 'nouveau' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 max-w-2xl mx-auto shadow-sm space-y-6">
-          <div className="pb-4 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 max-w-2xl mx-auto shadow-sm space-y-6">
+          <div className="pb-4 border-b border-slate-700">
+            <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
               <PlusCircle className="w-5 h-5 text-emerald-600" /> Saisie d’une Note de Frais Terrain
             </h2>
             <p className="text-xs text-slate-500">
@@ -349,23 +349,23 @@ export default function PortailFraisPage() {
 
           <form onSubmit={handleCreateFrais} className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Mission / Contexte</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Mission / Contexte</label>
               <input
                 type="text"
                 required
                 value={formFrais.titre_mission}
                 onChange={(e) => setFormFrais({ ...formFrais, titre_mission: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Catégorie de Dépense</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Catégorie de Dépense</label>
                 <select
                   value={formFrais.type_frais}
                   onChange={(e) => setFormFrais({ ...formFrais, type_frais: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
                 >
                   <option value="PEAGE">Péages & Pesages Routiers</option>
                   <option value="CARBURANT">Carburant d’Appoint</option>
@@ -378,7 +378,7 @@ export default function PortailFraisPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Montant (XAF)</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Montant (XAF)</label>
                 <input
                   type="number"
                   inputMode="numeric"
@@ -386,54 +386,54 @@ export default function PortailFraisPage() {
                   placeholder="Ex: 25000"
                   value={formFrais.montant}
                   onChange={(e) => setFormFrais({ ...formFrais, montant: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Fournisseur / Établissement</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Fournisseur / Établissement</label>
                 <input
                   type="text"
                   placeholder="Ex: Hôtel de la Paix"
                   value={formFrais.fournisseur}
                   onChange={(e) => setFormFrais({ ...formFrais, fournisseur: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Ville / Localité</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Ville / Localité</label>
                 <input
                   type="text"
                   placeholder="Ex: Bertoua, Garoua-Boulaï"
                   value={formFrais.ville_lieu}
                   onChange={(e) => setFormFrais({ ...formFrais, ville_lieu: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">N° Reçu / Facturette</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">N° Reçu / Facturette</label>
               <input
                 type="text"
                 placeholder="Ex: FACT-88910"
                 value={formFrais.numero_recu}
                 onChange={(e) => setFormFrais({ ...formFrais, numero_recu: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Commentaire / Justification</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Commentaire / Justification</label>
               <textarea
                 rows={2}
                 placeholder="Précisez la raison de la dépense..."
                 value={formFrais.commentaire}
                 onChange={(e) => setFormFrais({ ...formFrais, commentaire: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
               />
             </div>
 
@@ -451,37 +451,37 @@ export default function PortailFraisPage() {
       {/* Onglet 3 : Demandes d'Avances */}
       {activeTab === 'avances' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+          <div className="lg:col-span-1 bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-4 shadow-sm">
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
               <Wallet className="w-4 h-4 text-indigo-600" /> Nouvelle Demande d’Avance
             </h3>
 
             <form onSubmit={handleCreateAvance} className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Titre de la Mission</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Titre de la Mission</label>
                 <input
                   type="text"
                   required
                   placeholder="Ex: Escorte convoi N'Djamena"
                   value={formAvance.titre_mission}
                   onChange={(e) => setFormAvance({ ...formAvance, titre_mission: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Corridor / Destination</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Corridor / Destination</label>
                 <input
                   type="text"
                   required
                   value={formAvance.corridor_destination}
                   onChange={(e) => setFormAvance({ ...formAvance, corridor_destination: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Montant Demandé (XAF)</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Montant Demandé (XAF)</label>
                 <input
                   type="number"
                   inputMode="numeric"
@@ -489,17 +489,17 @@ export default function PortailFraisPage() {
                   placeholder="Ex: 150000"
                   value={formAvance.montant_demande}
                   onChange={(e) => setFormAvance({ ...formAvance, montant_demande: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Motif / Prévisionnel</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Motif / Prévisionnel</label>
                 <textarea
                   rows={3}
                   value={formAvance.motif}
                   onChange={(e) => setFormAvance({ ...formAvance, motif: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
 
@@ -513,32 +513,32 @@ export default function PortailFraisPage() {
             </form>
           </div>
 
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-            <div className="p-4 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+          <div className="lg:col-span-2 bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-slate-700">
+              <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
                 Vos Demandes d’Avances ({avancesList.length})
               </h3>
             </div>
 
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-800">
               {avancesList.length === 0 ? (
                 <div className="p-8 text-center text-slate-500 text-xs">
                   Aucune demande d’avance enregistrée.
                 </div>
               ) : (
                 avancesList.map((a) => (
-                  <div key={a.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80">
+                  <div key={a.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-800/80">
                     <div className="space-y-1">
-                      <div className="text-xs font-bold text-slate-900">{a.titre_mission}</div>
+                      <div className="text-xs font-bold text-slate-200">{a.titre_mission}</div>
                       <div className="text-[11px] text-slate-500">Destination : {a.corridor_destination || 'Cameroun'}</div>
                       <div className="text-[10px] text-slate-400">{a.motif}</div>
                     </div>
                     <div className="text-right space-y-1">
-                      <div className="text-sm font-mono font-bold text-slate-900">
+                      <div className="text-sm font-mono font-bold text-slate-200">
                         {a.montant_demande.toLocaleString()} {a.devise}
                       </div>
                       <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        a.statut === 'ACCORDEE' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                        a.statut === 'ACCORDEE' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
                       }`}>
                         {a.statut}
                       </span>
@@ -553,9 +553,9 @@ export default function PortailFraisPage() {
 
       {/* Onglet 4 : Validation Manager & Comptabilité */}
       {activeTab === 'validation' && (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-slate-100">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-slate-700">
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
               <UserCheck className="w-4 h-4 text-indigo-600" /> Approbation Hiérarchique & Rapprochement Comptable
             </h2>
             <p className="text-xs text-slate-500">
@@ -563,28 +563,28 @@ export default function PortailFraisPage() {
             </p>
           </div>
 
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-800">
             {fraisList.filter(f => f.statut === 'SOUMIS').length === 0 ? (
               <div className="p-8 text-center text-slate-500 text-xs">
                 Aucune note de frais en attente de validation.
               </div>
             ) : (
               fraisList.filter(f => f.statut === 'SOUMIS').map((f) => (
-                <div key={f.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/80">
+                <div key={f.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-800/80">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900">#{f.numero_recu || `FR-${f.id}`}</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                      <span className="text-xs font-bold text-slate-200">#{f.numero_recu || `FR-${f.id}`}</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400">
                         {f.type_frais}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-700 font-medium">{f.titre_mission}</div>
+                    <div className="text-xs text-slate-300 font-medium">{f.titre_mission}</div>
                     <div className="text-[11px] text-slate-500">{f.fournisseur} • {f.ville_lieu}</div>
                   </div>
 
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <div className="text-sm font-mono font-bold text-slate-900">
+                      <div className="text-sm font-mono font-bold text-slate-200">
                         {f.montant.toLocaleString()} {f.devise}
                       </div>
                       <span className="text-[10px] text-amber-600 font-bold">À valider</span>

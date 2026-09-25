@@ -196,7 +196,7 @@ export default function PortailChauffeurPage() {
 
   const handleSendSos = async () => {
     try {
-      await apiClient.post('/api/v1/qhse/incidents', {
+      await apiClient.post('/api/v1/incidents', {
         titre: `[SOS CONDUCTEUR] ${sosType} - Camion ${selectedMission?.immatriculation || 'En route'}`,
         type_incident: sosType,
         severite: 'CRITIQUE',
@@ -245,7 +245,7 @@ export default function PortailChauffeurPage() {
       </div>
 
       {/* Barre d'onglets ergonomique */}
-      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+      <div className="flex overflow-x-auto gap-2 p-1.5 bg-slate-900 rounded-2xl border border-slate-700">
         {[
           { id: 'tournee', label: 'Ma Tournée', icon: Navigation, count: missions.length },
           { id: 'inspection', label: 'Inspection Véhicule', icon: ShieldCheck },
@@ -263,15 +263,15 @@ export default function PortailChauffeurPage() {
                 isActive
                   ? tab.danger
                     ? 'bg-rose-600 text-white shadow-md'
-                    : 'bg-white text-slate-900 shadow-md border border-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                    : 'bg-slate-900 text-slate-200 shadow-md border border-slate-700'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/10'
               }`}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
               {tab.count !== undefined && (
                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono ${
-                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                  isActive ? 'bg-slate-900 text-white' : 'bg-slate-700 text-slate-300'
                 }`}>
                   {tab.count}
                 </span>
@@ -286,19 +286,19 @@ export default function PortailChauffeurPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Liste des missions */}
           <div className="lg:col-span-1 space-y-3">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-600" /> Vos Missions du Jour ({missions.length})
             </h2>
 
             {loading ? (
-              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200">
+              <div className="p-8 text-center bg-slate-900 rounded-2xl border border-slate-700">
                 <RefreshCw className="w-6 h-6 animate-spin mx-auto text-amber-600 mb-2" />
                 <span className="text-xs text-slate-500">Chargement des missions...</span>
               </div>
             ) : missions.length === 0 ? (
-              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200">
+              <div className="p-8 text-center bg-slate-900 rounded-2xl border border-slate-700">
                 <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-                <p className="text-sm font-bold text-slate-800">Aucune mission en attente</p>
+                <p className="text-sm font-bold text-slate-200">Aucune mission en attente</p>
                 <p className="text-xs text-slate-500">Toutes vos livraisons sont à jour.</p>
               </div>
             ) : (
@@ -309,22 +309,22 @@ export default function PortailChauffeurPage() {
                   className={`p-4 rounded-2xl border cursor-pointer transition-all ${
                     selectedMission?.id === m.id
                       ? 'bg-amber-50/70 border-amber-400 shadow-md'
-                      : 'bg-white border-slate-200 hover:border-slate-300'
+                      : 'bg-slate-900 border-slate-700 hover:border-slate-600'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-mono font-black text-slate-800">
+                    <span className="text-xs font-mono font-black text-slate-200">
                       #{m.numero_ordre || m.reference || `MIS-${m.id}`}
                     </span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      m.statut === 'EN_ROUTE' ? 'bg-blue-100 text-blue-700' :
-                      m.statut === 'LIVRE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                      m.statut === 'EN_ROUTE' ? 'bg-blue-500/15 text-blue-300' :
+                      m.statut === 'LIVRE' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
                     }`}>
                       {m.statut}
                     </span>
                   </div>
 
-                  <div className="text-xs font-semibold text-slate-900 mb-1">
+                  <div className="text-xs font-semibold text-slate-200 mb-1">
                     {m.client_nom || 'Client Destinataire'}
                   </div>
 
@@ -340,11 +340,11 @@ export default function PortailChauffeurPage() {
           {/* Détails de la mission sélectionnée & Actions terrain */}
           <div className="lg:col-span-2">
             {selectedMission ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+              <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-700 gap-3">
                   <div>
-                    <span className="text-xs font-mono text-amber-700 font-bold">Mission Active</span>
-                    <h2 className="text-xl font-black text-slate-900">
+                    <span className="text-xs font-mono text-amber-300 font-bold">Mission Active</span>
+                    <h2 className="text-xl font-black text-slate-200">
                       #{selectedMission.numero_ordre || selectedMission.reference || `MIS-${selectedMission.id}`}
                     </h2>
                   </div>
@@ -373,13 +373,13 @@ export default function PortailChauffeurPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                  <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-2">
                     <span className="text-xs font-bold text-slate-500 uppercase">Itinéraire & Client</span>
-                    <p className="text-sm font-bold text-slate-900">{selectedMission.client_nom || 'Client Partenaire'}</p>
-                    <p className="text-xs text-slate-600 flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-slate-200">{selectedMission.client_nom || 'Client Partenaire'}</p>
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Origine : {selectedMission.origine || 'Port Autonome de Douala'}
                     </p>
-                    <p className="text-xs text-slate-600 flex items-center gap-1.5">
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-rose-600" /> Destination : {selectedMission.destination || 'Terminal Yaoundé'}
                     </p>
                     {selectedMission.telephone_client && (
@@ -392,24 +392,24 @@ export default function PortailChauffeurPage() {
                     )}
                   </div>
 
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                  <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-2">
                     <span className="text-xs font-bold text-slate-500 uppercase">Véhicule & Marchandise</span>
-                    <p className="text-sm font-bold text-slate-900">
+                    <p className="text-sm font-bold text-slate-200">
                       Immatriculation : {selectedMission.immatriculation || 'LT-TRUCK-889'}
                     </p>
-                    <p className="text-xs text-slate-600 flex items-center gap-1.5">
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5">
                       <Package className="w-3.5 h-3.5 text-indigo-600" /> Colis : {selectedMission.marchandise || 'Conteneur Dry 40ft'}
                     </p>
-                    <p className="text-xs text-slate-600 flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-slate-600" /> Poids : {selectedMission.poids_kg ? `${selectedMission.poids_kg} kg` : '24 500 kg'}
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-slate-400" /> Poids : {selectedMission.poids_kg ? `${selectedMission.poids_kg} kg` : '24 500 kg'}
                     </p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-12 text-center bg-white rounded-2xl border border-slate-200">
+              <div className="p-12 text-center bg-slate-900 rounded-2xl border border-slate-700">
                 <Navigation className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                <p className="text-sm font-bold text-slate-700">Sélectionnez une mission pour voir les détails</p>
+                <p className="text-sm font-bold text-slate-300">Sélectionnez une mission pour voir les détails</p>
               </div>
             )}
           </div>
@@ -418,10 +418,10 @@ export default function PortailChauffeurPage() {
 
       {/* Onglet 2 : Inspection Véhicule Début/Fin de Poste */}
       {activeTab === 'inspection' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-700">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-600" /> Checklist Sécurité & Contrôle Prise de Poste
               </h2>
               <p className="text-xs text-slate-500">
@@ -429,7 +429,7 @@ export default function PortailChauffeurPage() {
               </p>
             </div>
             {inspectionSubmitted && (
-              <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center gap-1.5">
+              <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-bold flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Inspection validée
               </span>
             )}
@@ -450,8 +450,8 @@ export default function PortailChauffeurPage() {
                 key={item.key}
                 className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
                   checklist[item.key as keyof typeof checklist]
-                    ? 'bg-emerald-50/60 border-emerald-300 text-slate-900'
-                    : 'bg-rose-50/60 border-rose-300 text-rose-900'
+                    ? 'bg-emerald-50/60 border-emerald-500/50 text-slate-200'
+                    : 'bg-rose-50/60 border-rose-500/50 text-rose-200'
                 }`}
               >
                 <input
@@ -481,9 +481,9 @@ export default function PortailChauffeurPage() {
 
       {/* Onglet 3 : Saisie Carburant Express */}
       {activeTab === 'carburant' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 max-w-2xl mx-auto">
-          <div className="pb-4 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 max-w-2xl mx-auto">
+          <div className="pb-4 border-b border-slate-700">
+            <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
               <Fuel className="w-5 h-5 text-amber-600" /> Saisie Express Plein Carburant
             </h2>
             <p className="text-xs text-slate-500">
@@ -494,30 +494,30 @@ export default function PortailChauffeurPage() {
           <form onSubmit={handleSubmitFuel} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Station-Service</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Station-Service</label>
                 <input
                   type="text"
                   required
                   value={fuelForm.station}
                   onChange={(e) => setFuelForm({ ...fuelForm, station: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">N° Ticket / Reçu</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">N° Ticket / Reçu</label>
                 <input
                   type="text"
                   required
                   value={fuelForm.numero_ticket}
                   onChange={(e) => setFuelForm({ ...fuelForm, numero_ticket: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Volume (Litres)</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Volume (Litres)</label>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -525,36 +525,36 @@ export default function PortailChauffeurPage() {
                   required
                   value={fuelForm.litrage}
                   onChange={(e) => setFuelForm({ ...fuelForm, litrage: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Prix / Litre (XAF)</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Prix / Litre (XAF)</label>
                 <input
                   type="number"
                   inputMode="numeric"
                   required
                   value={fuelForm.prix_litre}
                   onChange={(e) => setFuelForm({ ...fuelForm, prix_litre: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Compteur Km</label>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Compteur Km</label>
                 <input
                   type="number"
                   inputMode="numeric"
                   required
                   value={fuelForm.kilometrage}
                   onChange={(e) => setFuelForm({ ...fuelForm, kilometrage: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs">
-              <span className="font-bold text-amber-900">Total calculé :</span>
-              <span className="font-mono font-black text-amber-900 text-sm">
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/40 flex items-center justify-between text-xs">
+              <span className="font-bold text-amber-200">Total calculé :</span>
+              <span className="font-mono font-black text-amber-200 text-sm">
                 {((parseFloat(fuelForm.litrage) || 0) * (parseFloat(fuelForm.prix_litre) || 0)).toLocaleString()} XAF
               </span>
             </div>
@@ -572,9 +572,9 @@ export default function PortailChauffeurPage() {
 
       {/* Onglet 4 : Émargement ePOD Tactile */}
       {activeTab === 'epod' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 max-w-2xl mx-auto">
-          <div className="pb-4 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 max-w-2xl mx-auto">
+          <div className="pb-4 border-b border-slate-700">
+            <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
               <Edit3 className="w-5 h-5 text-indigo-600" /> Signature Électronique de Livraison (ePOD)
             </h2>
             <p className="text-xs text-slate-500">
@@ -584,30 +584,30 @@ export default function PortailChauffeurPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Nom du Réceptionnaire</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Nom du Réceptionnaire</label>
               <input
                 type="text"
                 placeholder="Ex: Jean-Paul MBIIDA"
                 value={receptionnaireNom}
                 onChange={(e) => setReceptionnaireNom(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Réserves éventuelles (si colis abîmé)</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Réserves éventuelles (si colis abîmé)</label>
               <textarea
                 rows={2}
                 placeholder="Indiquez les réserves ou 'Sans réserves'"
                 value={reserves}
                 onChange={(e) => setReserves(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-slate-700">Signature sur l’écran</label>
+                <label className="text-xs font-bold text-slate-300">Signature sur l’écran</label>
                 <button
                   type="button"
                   onClick={clearSignature}
@@ -617,7 +617,7 @@ export default function PortailChauffeurPage() {
                 </button>
               </div>
 
-              <div className="border-2 border-dashed border-slate-300 rounded-2xl p-1 bg-slate-50">
+              <div className="border-2 border-dashed border-slate-600 rounded-2xl p-1 bg-slate-800">
                 <canvas
                   ref={canvasRef}
                   width={500}
@@ -629,7 +629,7 @@ export default function PortailChauffeurPage() {
                   onTouchStart={startDrawing}
                   onTouchMove={draw}
                   onTouchEnd={stopDrawing}
-                  className="w-full h-44 touch-none cursor-crosshair bg-white rounded-xl"
+                  className="w-full h-44 touch-none cursor-crosshair bg-slate-900 rounded-xl"
                 />
               </div>
             </div>
@@ -648,18 +648,18 @@ export default function PortailChauffeurPage() {
 
       {/* Onglet 5 : SOS Incident & Litige Route */}
       {activeTab === 'sos' && (
-        <div className="bg-white rounded-2xl border border-rose-200 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
-          <div className="pb-4 border-b border-rose-100 flex items-center justify-between">
+        <div className="bg-slate-900 rounded-2xl border border-rose-500/40 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
+          <div className="pb-4 border-b border-rose-500/30 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-rose-900 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-rose-200 flex items-center gap-2">
                 <AlertOctagon className="w-5 h-5 text-rose-600" /> Déclenchement d’Alerte Terrain / SOS
               </h2>
-              <p className="text-xs text-rose-700">
+              <p className="text-xs text-rose-300">
                 Signale immédiatement un événement critique au poste de contrôle et à la direction.
               </p>
             </div>
             {sosSent && (
-              <span className="px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-bold">
+              <span className="px-3 py-1 rounded-full bg-rose-500/15 text-rose-300 text-xs font-bold">
                 Alerte transmise
               </span>
             )}
@@ -667,11 +667,11 @@ export default function PortailChauffeurPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Nature de l’Incident</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Nature de l’Incident</label>
               <select
                 value={sosType}
                 onChange={(e) => setSosType(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
               >
                 <option value="PANNE_MECANIQUE">Panne mécanique (Moteur / Boîte / Freinage)</option>
                 <option value="CREVAISON">Crevaison multiple / Éclatement pneu</option>
@@ -683,13 +683,13 @@ export default function PortailChauffeurPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Précisions sur la localisation et la situation</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Précisions sur la localisation et la situation</label>
               <textarea
                 rows={3}
                 placeholder="Ex: Arrêté au PK 145 entre Douala et Edéa. Fumée blanche au moteur. Besoin d'une dépanneuse."
                 value={sosComment}
                 onChange={(e) => setSosComment(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
               />
             </div>
 

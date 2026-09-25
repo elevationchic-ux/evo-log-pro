@@ -39,17 +39,63 @@ const tierSchema = z.object({
 
 type TierFormValues = z.infer<typeof tierSchema>
 
+// ── Passerelle metier <-> modele Tiers reel du backend (app/models/tiers.py) ──
+// La page raisonner en termes metiers camerounais (raison sociale, NIU, ...),
+// le backend stocke name/tax_id/city/... : mapping explicite, aucune donnee
+// inventee, tout ce qui est affiche provient d'une colonne reelle.
+const TYPE_TO_API: Record<string, string> = { client: 'client', supplier: 'fournisseur', partner: 'partenaire' }
+const TYPE_FROM_API: Record<string, string> = { client: 'client', fournisseur: 'supplier', partenaire: 'partner' }
+
+const _str = (v: any) => (v === undefined || v === null || v === '' ? undefined : v)
+
+function fromApiTier(t: any) {
+  const typeRaw = String(t.type || 'client').toLowerCase()
+  return {
+    ...t,
+    raison_sociale: t.name ?? t.raison_sociale ?? '',
+    sigle_ou_enseigne: t.sigle_ou_enseigne ?? t.legal_form ?? '',
+    type: TYPE_FROM_API[typeRaw] || typeRaw,
+    niu: t.tax_id ?? t.niu ?? '',
+    telephone: t.phone ?? t.telephone ?? '',
+    adresse_physique: t.address ?? t.adresse_physique ?? '',
+    ville: t.city ?? t.ville ?? '',
+    pays: t.country ?? t.pays ?? 'Cameroun',
+    limite_credit_maximum: Number(t.credit_limit ?? t.limite_credit_maximum ?? 0),
+    delai_paiement_jours: parseInt(String(t.payment_terms ?? '').replace(/\D/g, ''), 10) || 30,
+    statut: t.statut || (t.is_active === false ? 'BLOQUE' : 'ACTIF'),
+  }
+}
+
+function toApiTier(f: any, existing?: any) {
+  return {
+    // code : unique cote backend ; reutilise a la creation, jamais envoye en update
+    code: existing?.code || f.code || `T-${Date.now().toString(36).toUpperCase()}`.slice(0, 20),
+    type: TYPE_TO_API[f.type] || (f.type === 'fournisseur' || f.type === 'partenaire' ? f.type : 'client'),
+    name: f.raison_sociale || existing?.name || 'Sans nom',
+    legal_form: _str(f.sigle_ou_enseigne),
+    tax_id: _str(f.niu),
+    email: _str(f.email),
+    phone: _str(f.telephone),
+    address: _str(f.adresse_physique),
+    city: _str(f.ville),
+    country: f.pays || 'Cameroun',
+    is_active: String(f.statut || 'ACTIF').toUpperCase() !== 'BLOQUE',
+    credit_limit: Number(f.limite_credit_maximum || 0),
+    payment_terms: f.delai_paiement_jours != null ? `${Number(f.delai_paiement_jours)} jours` : undefined,
+  }
+}
+
 // ── KPI Card component ─────────────────────────────────────────────────────────
 function KpiCard({ label, value, icon, color }: { label: string; value: string | number; icon: React.ReactNode; color: string }) {
   return (
-    <div className={`bg-white rounded-2xl border border-gray-100 shadow-sm p-5 relative overflow-hidden group hover:shadow-md transition-all`}>
+    <div className={`bg-slate-900 rounded-2xl border border-slate-700 shadow-sm p-5 relative overflow-hidden group hover:shadow-md transition-all`}>
       <div className={`absolute right-0 top-0 w-20 h-20 ${color} rounded-bl-full -z-0 opacity-50 transition-transform group-hover:scale-110`} />
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-3">
           {icon}
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{label}</span>
         </div>
-        <p className="text-2xl font-black text-gray-900">{value}</p>
+        <p className="text-2xl font-black text-slate-100">{value}</p>
       </div>
     </div>
   )
@@ -79,7 +125,7 @@ function CreateTierModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
   })
 
   const mutation = useMutation({
-    mutationFn: (data: any) => tiersAPI.createTiers(data),
+    mutationFn: (data: any) => tiersAPI.createTiers(toApiTier(data)),
     onSuccess: () => {
       toast.success('Tier créé avec succès !')
       queryClient.invalidateQueries({ queryKey: ['tiers'] })
@@ -119,19 +165,19 @@ function CreateTierModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
     <>
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[60] animate-in fade-in duration-200" onClick={onClose} />
       <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col max-h-[90vh]">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-white shrink-0">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-outline bg-gradient-to-r from-emerald-500/10 to-transparent shrink-0">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-100 rounded-xl">
+              <div className="p-2 bg-emerald-500/15 rounded-xl">
                 <Building2 className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Nouveau Tier</h3>
-                <p className="text-sm text-gray-500">Ajouter un partenaire d'affaires</p>
+                <h3 className="text-lg font-bold text-slate-100">Nouveau Tier</h3>
+                <p className="text-sm text-slate-400">Ajouter un partenaire d'affaires</p>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 hover:text-gray-600 transition-colors">
+            <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl text-gray-400 hover:text-slate-400 transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -140,21 +186,21 @@ function CreateTierModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
           <form onSubmit={handleSubmit(onSubmit as any)} className="p-6 space-y-4 overflow-y-auto flex-1">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700">Raison Sociale *</label>
+                <label className="text-sm font-semibold text-slate-200">Raison Sociale *</label>
                 <input
                   type="text"
                   {...register('raison_sociale')}
-                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.raison_sociale ? 'border-red-500' : 'border-gray-200'} focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm`}
+                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.raison_sociale ? 'border-red-500' : 'border-slate-700'} focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm`}
                   placeholder="Ex: SABC Cameroun"
                 />
                 {errors.raison_sociale && <p className="text-xs text-red-500">{errors.raison_sociale.message}</p>}
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700">Sigle / Enseigne</label>
+                <label className="text-sm font-semibold text-slate-200">Sigle / Enseigne</label>
                 <input
                   type="text"
                   {...register('sigle_ou_enseigne')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
                   placeholder="Ex: SABC"
                 />
               </div>
@@ -162,21 +208,21 @@ function CreateTierModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700">NIU *</label>
+                <label className="text-sm font-semibold text-slate-200">NIU *</label>
                 <input
                   type="text"
                   {...register('niu')}
-                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.niu ? 'border-red-500' : 'border-gray-200'} focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm`}
+                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.niu ? 'border-red-500' : 'border-slate-700'} focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm`}
                   placeholder="Obligatoire"
                 />
                 {errors.niu && <p className="text-xs text-red-500">{errors.niu.message}</p>}
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700">RCCM</label>
+                <label className="text-sm font-semibold text-slate-200">RCCM</label>
                 <input
                   type="text"
                   {...register('rccm')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
                   placeholder="Ex: RC/DLA/..."
                 />
               </div>
@@ -184,18 +230,18 @@ function CreateTierModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Régime Fiscal</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Régime Fiscal</label>
                 <input
                   type="text"
                   {...register('regime_fiscal')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Type *</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Type *</label>
                 <select
                   {...register('type')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm bg-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm bg-slate-900"
                 >
                   <option value="client">Client</option>
                   <option value="supplier">Fournisseur</option>
@@ -206,76 +252,76 @@ function CreateTierModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Email</label>
                 <input
                   type="email"
                   {...register('email')}
-                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.email ? 'border-red-500' : 'border-gray-200'} focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm`}
+                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.email ? 'border-red-500' : 'border-slate-700'} focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm`}
                   placeholder="contact@entreprise.cm"
                 />
                 {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Téléphone</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Téléphone</label>
                 <input
                   type="tel"
                   {...register('telephone')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-gray-700">Adresse Physique</label>
+              <label className="text-sm font-semibold text-slate-200">Adresse Physique</label>
               <textarea
                 {...register('adresse_physique')}
-                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm h-16"
+                className="w-full px-4 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm h-16"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Ville</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Ville</label>
                 <input
                   type="text"
                   {...register('ville')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Pays</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Pays</label>
                 <input
                   type="text"
                   {...register('pays')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
                 />
               </div>
             </div>
 
             {/* Services Activés */}
-            <div className="space-y-2 border-t border-gray-100 pt-4">
+            <div className="space-y-2 border-t border-slate-700 pt-4">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Services à la Carte</label>
               <div className="grid grid-cols-2 gap-2">
-                <label className="flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-700">
+                <label className="flex items-center gap-2.5 p-2.5 bg-slate-800 hover:bg-slate-800/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-300">
                   <input type="checkbox" {...register('autorise_acconage')} className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" /> Acconage
                 </label>
-                <label className="flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-700">
+                <label className="flex items-center gap-2.5 p-2.5 bg-slate-800 hover:bg-slate-800/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-300">
                   <input type="checkbox" {...register('autorise_transit')} className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" /> Transit (Douane)
                 </label>
-                <label className="flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-700">
+                <label className="flex items-center gap-2.5 p-2.5 bg-slate-800 hover:bg-slate-800/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-300">
                   <input type="checkbox" {...register('autorise_parc_stockage')} className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" /> Parc & Stockage
                 </label>
-                <label className="flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-700">
+                <label className="flex items-center gap-2.5 p-2.5 bg-slate-800 hover:bg-slate-800/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-300">
                   <input type="checkbox" {...register('autorise_manutention')} className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" /> Manutention
                 </label>
-                <label className="flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-700">
+                <label className="flex items-center gap-2.5 p-2.5 bg-slate-800 hover:bg-slate-800/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-300">
                   <input type="checkbox" {...register('autorise_transport')} className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" /> Transport Routier
                 </label>
               </div>
             </div>
 
             {/* Paramètres Financiers */}
-            <div className="space-y-4 border-t border-gray-100 pt-4 pb-4">
+            <div className="space-y-4 border-t border-slate-700 pt-4 pb-4">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Paramètres SAP FI & Crédit</label>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -283,7 +329,7 @@ function CreateTierModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
                   <input
                     type="text"
                     {...register('compte_collectif_syscohada')}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm font-mono"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm font-mono"
                   />
                 </div>
                 <div className="space-y-1">
@@ -291,7 +337,7 @@ function CreateTierModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
                   <input
                     type="number"
                     {...register('delai_paiement_jours')}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
                   />
                 </div>
               </div>
@@ -300,17 +346,17 @@ function CreateTierModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
                 <input
                   type="number"
                   {...register('limite_credit_maximum')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm font-mono"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm font-mono"
                 />
               </div>
             </div>
 
             {/* Footer shrink */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 sticky bottom-0 bg-white">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-700 sticky bottom-0 bg-slate-900">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                className="px-5 py-2.5 text-sm font-medium text-slate-200 bg-slate-900 border border-slate-700 rounded-xl hover:bg-slate-800 transition-colors"
               >
                 Annuler
               </button>
@@ -367,7 +413,7 @@ function EditTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
   }, [tier, isOpen, reset])
 
   const mutation = useMutation({
-    mutationFn: (data: any) => tiersAPI.updateTiers(tier.id, data),
+    mutationFn: (data: any) => tiersAPI.updateTiers(tier.id, toApiTier(data, tier)),
     onSuccess: () => {
       toast.success('Modifications enregistrées !')
       queryClient.invalidateQueries({ queryKey: ['tiers'] })
@@ -400,19 +446,19 @@ function EditTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
     <>
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[60] animate-in fade-in duration-200" onClick={onClose} />
       <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col max-h-[90vh]">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-white shrink-0">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-outline bg-gradient-to-r from-emerald-500/10 to-transparent shrink-0">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-100 rounded-xl">
+              <div className="p-2 bg-emerald-500/15 rounded-xl">
                 <Building2 className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Modifier le Tier</h3>
-                <p className="text-sm text-gray-500">Mettre à jour le profil de {tier.raison_sociale}</p>
+                <h3 className="text-lg font-bold text-slate-100">Modifier le Tier</h3>
+                <p className="text-sm text-slate-400">Mettre à jour le profil de {tier.raison_sociale}</p>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 hover:text-gray-600 transition-colors">
+            <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl text-gray-400 hover:text-slate-400 transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -421,58 +467,58 @@ function EditTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
           <form onSubmit={handleSubmit(onSubmit as any)} className="p-6 space-y-4 overflow-y-auto flex-1">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700">Raison Sociale *</label>
+                <label className="text-sm font-semibold text-slate-200">Raison Sociale *</label>
                 <input
                   type="text"
                   {...register('raison_sociale')}
-                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.raison_sociale ? 'border-red-500' : 'border-gray-200'} focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm`}
+                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.raison_sociale ? 'border-red-500' : 'border-slate-700'} focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm`}
                 />
                 {errors.raison_sociale && <p className="text-xs text-red-500">{errors.raison_sociale.message}</p>}
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700">Sigle / Enseigne</label>
+                <label className="text-sm font-semibold text-slate-200">Sigle / Enseigne</label>
                 <input
                   type="text"
                   {...register('sigle_ou_enseigne')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700">NIU *</label>
+                <label className="text-sm font-semibold text-slate-200">NIU *</label>
                 <input
                   type="text"
                   {...register('niu')}
-                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.niu ? 'border-red-500' : 'border-gray-200'} focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm`}
+                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.niu ? 'border-red-500' : 'border-slate-700'} focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm`}
                 />
                 {errors.niu && <p className="text-xs text-red-500">{errors.niu.message}</p>}
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700">RCCM</label>
+                <label className="text-sm font-semibold text-slate-200">RCCM</label>
                 <input
                   type="text"
                   {...register('rccm')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Régime Fiscal</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Régime Fiscal</label>
                 <input
                   type="text"
                   {...register('regime_fiscal')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Statut Compte *</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Statut Compte *</label>
                 <select
                   {...register('statut')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm bg-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm bg-slate-900"
                 >
                   <option value="EN_ATTENTE_VALIDATION">En attente validation</option>
                   <option value="ACTIF">Actif</option>
@@ -483,75 +529,75 @@ function EditTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Email</label>
                 <input
                   type="email"
                   {...register('email')}
-                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.email ? 'border-red-500' : 'border-gray-200'} focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm`}
+                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.email ? 'border-red-500' : 'border-slate-700'} focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm`}
                 />
                 {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Téléphone</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Téléphone</label>
                 <input
                   type="tel"
                   {...register('telephone')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-gray-700">Adresse Physique</label>
+              <label className="text-sm font-semibold text-slate-200">Adresse Physique</label>
               <textarea
                 {...register('adresse_physique')}
-                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm h-16"
+                className="w-full px-4 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm h-16"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Ville</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Ville</label>
                 <input
                   type="text"
                   {...register('ville')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Pays</label>
+                <label className="block text-sm font-semibold text-slate-200 mb-1">Pays</label>
                 <input
                   type="text"
                   {...register('pays')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
                 />
               </div>
             </div>
 
             {/* Services Activés */}
-            <div className="space-y-2 border-t border-gray-100 pt-4">
+            <div className="space-y-2 border-t border-slate-700 pt-4">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Services à la Carte</label>
               <div className="grid grid-cols-2 gap-2">
-                <label className="flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-700">
+                <label className="flex items-center gap-2.5 p-2.5 bg-slate-800 hover:bg-slate-800/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-300">
                   <input type="checkbox" {...register('autorise_acconage')} className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" /> Acconage
                 </label>
-                <label className="flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-700">
+                <label className="flex items-center gap-2.5 p-2.5 bg-slate-800 hover:bg-slate-800/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-300">
                   <input type="checkbox" {...register('autorise_transit')} className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" /> Transit (Douane)
                 </label>
-                <label className="flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-700">
+                <label className="flex items-center gap-2.5 p-2.5 bg-slate-800 hover:bg-slate-800/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-300">
                   <input type="checkbox" {...register('autorise_parc_stockage')} className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" /> Parc & Stockage
                 </label>
-                <label className="flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-700">
+                <label className="flex items-center gap-2.5 p-2.5 bg-slate-800 hover:bg-slate-800/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-300">
                   <input type="checkbox" {...register('autorise_manutention')} className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" /> Manutention
                 </label>
-                <label className="flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-700">
+                <label className="flex items-center gap-2.5 p-2.5 bg-slate-800 hover:bg-slate-800/70 rounded-xl transition-colors cursor-pointer text-sm text-slate-300">
                   <input type="checkbox" {...register('autorise_transport')} className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" /> Transport Routier
                 </label>
               </div>
             </div>
 
             {/* Paramètres Financiers */}
-            <div className="space-y-4 border-t border-gray-100 pt-4 pb-4">
+            <div className="space-y-4 border-t border-slate-700 pt-4 pb-4">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Paramètres SAP FI & Crédit</label>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -559,7 +605,7 @@ function EditTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
                   <input
                     type="text"
                     {...register('compte_collectif_syscohada')}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm font-mono"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm font-mono"
                   />
                 </div>
                 <div className="space-y-1">
@@ -567,7 +613,7 @@ function EditTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
                   <input
                     type="number"
                     {...register('delai_paiement_jours')}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
                   />
                 </div>
               </div>
@@ -576,17 +622,17 @@ function EditTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
                 <input
                   type="number"
                   {...register('limite_credit_maximum')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm font-mono"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm font-mono"
                 />
               </div>
             </div>
 
             {/* Footer shrink */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 sticky bottom-0 bg-white">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-700 sticky bottom-0 bg-slate-900">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                className="px-5 py-2.5 text-sm font-medium text-slate-200 bg-slate-900 border border-slate-700 rounded-xl hover:bg-slate-800 transition-colors"
               >
                 Annuler
               </button>
@@ -623,19 +669,19 @@ function ViewTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
     <>
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[60] animate-in fade-in duration-200" onClick={onClose} />
       <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col max-h-[90vh]">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-white shrink-0">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-outline bg-gradient-to-r from-surface-container to-transparent shrink-0">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-slate-100 rounded-xl">
-                <Building2 className="w-5 h-5 text-slate-600" />
+              <div className="p-2 bg-slate-900 rounded-xl">
+                <Building2 className="w-5 h-5 text-slate-400" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">{tier.raison_sociale}</h3>
-                <p className="text-sm text-gray-500">Profil & Infos Financières du Tier</p>
+                <h3 className="text-lg font-bold text-slate-100">{tier.raison_sociale}</h3>
+                <p className="text-sm text-slate-400">Profil & Infos Financières du Tier</p>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 hover:text-gray-600 transition-colors">
+            <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl text-gray-400 hover:text-slate-400 transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -646,35 +692,35 @@ function ViewTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Code Tier</span>
-                <span className="text-sm text-slate-800 font-semibold">{tier.code_tiers || 'N/A'}</span>
+                <span className="text-sm text-slate-200 font-semibold">{tier.code_tiers || 'N/A'}</span>
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Type</span>
-                <span className="text-sm text-slate-800 font-semibold capitalize">{tier.type || 'Client'}</span>
+                <span className="text-sm text-slate-200 font-semibold capitalize">{tier.type || 'Client'}</span>
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">NIU (Fiscal)</span>
-                <span className="text-sm text-slate-800 font-medium">{tier.niu || ''}</span>
+                <span className="text-sm text-slate-200 font-medium">{tier.niu || ''}</span>
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Régime Fiscal</span>
-                <span className="text-sm text-slate-800 font-medium">{tier.regime_fiscal || 'Réel'}</span>
+                <span className="text-sm text-slate-200 font-medium">{tier.regime_fiscal || 'Réel'}</span>
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Téléphone</span>
-                <span className="text-sm text-slate-800 font-medium">{tier.telephone || ''}</span>
+                <span className="text-sm text-slate-200 font-medium">{tier.telephone || ''}</span>
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Email</span>
-                <span className="text-sm text-slate-800 font-medium break-all">{tier.email || ''}</span>
+                <span className="text-sm text-slate-200 font-medium break-all">{tier.email || ''}</span>
               </div>
             </div>
 
             {/* Localisation */}
-            <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-100">
+            <div className="bg-slate-800 p-4 rounded-xl space-y-2 border border-slate-700">
               <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Adresse & Localisation</h4>
-              <p className="text-sm text-slate-700">{tier.adresse_physique || tier.adresse || 'Aucune adresse enregistrée'}</p>
-              <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
+              <p className="text-sm text-slate-300">{tier.adresse_physique || tier.adresse || 'Aucune adresse enregistrée'}</p>
+              <div className="grid grid-cols-2 gap-2 text-sm text-slate-400">
                 <div>Ville : <strong>{tier.ville || 'Douala'}</strong></div>
                 <div>Pays : <strong>{tier.pays || 'Cameroun'}</strong></div>
               </div>
@@ -691,17 +737,17 @@ function ViewTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
                   { label: 'Manutention', active: tier.autorise_manutention },
                   { label: 'Transport', active: tier.autorise_transport },
                 ].map((srv) => (
-                  <div key={srv.label} className="flex items-center gap-2 p-2 rounded-lg border border-slate-100 bg-white shadow-sm text-sm">
+                  <div key={srv.label} className="flex items-center gap-2 p-2 rounded-lg border border-slate-700 bg-slate-900 shadow-sm text-sm">
                     <span className={`w-2.5 h-2.5 rounded-full ${srv.active ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]' : 'bg-slate-300'}`}></span>
-                    <span className={srv.active ? 'text-slate-800 font-medium' : 'text-slate-400 line-through'}>{srv.label}</span>
+                    <span className={srv.active ? 'text-slate-200 font-medium' : 'text-slate-400 line-through'}>{srv.label}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Volet Financier */}
-            <div className="border-t border-slate-100 pt-4 space-y-4">
-              <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <div className="border-t border-slate-700 pt-4 space-y-4">
+              <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-emerald-600" />
                 Limite & Encours Financier
               </h4>
@@ -711,22 +757,22 @@ function ViewTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
                   Chargement de l'encours...
                 </div>
               ) : encoursData ? (
-                <div className="space-y-3 bg-emerald-50/50 border border-emerald-100 p-4 rounded-xl">
+                <div className="space-y-3 bg-emerald-50/50 border border-emerald-500/30 p-4 rounded-xl">
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <span className="text-slate-500 block">Limite de crédit</span>
-                      <strong className="text-slate-800 font-mono text-base">{(encoursData.limite_credit_xaf || 0).toLocaleString()} FCFA</strong>
+                      <strong className="text-slate-200 font-mono text-base">{(encoursData.limite_credit_xaf || 0).toLocaleString()} FCFA</strong>
                     </div>
                     <div>
                       <span className="text-slate-500 block">Encours actuel</span>
-                      <strong className="text-slate-800 font-mono text-base">{(encoursData.encours_xaf || 0).toLocaleString()} FCFA</strong>
+                      <strong className="text-slate-200 font-mono text-base">{(encoursData.encours_xaf || 0).toLocaleString()} FCFA</strong>
                     </div>
                   </div>
 
                   {/* Progress bar */}
                   {encoursData.limite_credit_xaf > 0 && (
                     <div className="space-y-1">
-                      <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                      <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${
                             encoursData.bloque ? 'bg-red-500' : encoursData.alerte ? 'bg-amber-500' : 'bg-emerald-500'
@@ -744,22 +790,22 @@ function ViewTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
                   {/* Status Badges */}
                   <div className="flex gap-2 pt-1">
                     {encoursData.bloque ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-500/15 text-red-300 text-xs font-semibold">
                         <AlertCircle className="w-3.5 h-3.5" /> Compte Bloqué (Limite Dépassée)
                       </span>
                     ) : encoursData.alerte ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 text-xs font-semibold">
                         <AlertCircle className="w-3.5 h-3.5" /> Alerte Encours Élevé (&gt;90%)
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-semibold">
                         <CheckCircle className="w-3.5 h-3.5" /> Compte Sain
                       </span>
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="bg-slate-50 p-4 rounded-xl text-sm text-slate-600">
+                <div className="bg-slate-800 p-4 rounded-xl text-sm text-slate-400">
                   <div className="flex justify-between font-mono">
                     <span>Limite de crédit :</span>
                     <strong>{Number(tier.limite_credit_maximum || tier.limite_credit_xaf || 0).toLocaleString()} FCFA</strong>
@@ -774,10 +820,10 @@ function ViewTierModal({ isOpen, onClose, tier }: { isOpen: boolean; onClose: ()
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-100 bg-slate-50 flex gap-3 shrink-0">
+          <div className="px-6 py-4 border-t border-slate-700 bg-slate-800 flex gap-3 shrink-0">
             <button
               onClick={onClose}
-              className="w-full px-5 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm"
+              className="w-full px-5 py-2.5 text-sm font-semibold text-slate-300 bg-slate-900 border border-slate-700 rounded-xl hover:bg-slate-800 transition-all shadow-sm"
             >
               Fermer
             </button>
@@ -801,7 +847,11 @@ export default function MasterDataTiers() {
     queryKey: ['tiers'],
     queryFn: async () => {
       const res = await tiersAPI.getTiers()
-      return res.data || []
+      // Le backend repond soit par un tableau brut, soit par une enveloppe
+      // {items,total} : normaliser evite tout crash type "filter is not a function".
+      const d = res.data
+      const rows = Array.isArray(d) ? d : (d?.items ?? d?.results ?? [])
+      return rows.map(fromApiTier)
     }
   })
 
@@ -849,10 +899,10 @@ export default function MasterDataTiers() {
     </div>
   ) : (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <KpiCard label="Total Tiers" value={kpis.total} icon={<Users className="w-4 h-4 text-blue-600" />} color="bg-blue-50" />
-      <KpiCard label="Clients" value={kpis.clients} icon={<Briefcase className="w-4 h-4 text-emerald-600" />} color="bg-emerald-50" />
-      <KpiCard label="Fournisseurs" value={kpis.fournisseurs} icon={<Building2 className="w-4 h-4 text-amber-600" />} color="bg-amber-50" />
-      <KpiCard label="Crédit Total" value={`${kpis.totalCredit.toLocaleString()} FCFA`} icon={<CreditCard className="w-4 h-4 text-purple-600" />} color="bg-purple-50" />
+      <KpiCard label="Total Tiers" value={kpis.total} icon={<Users className="w-4 h-4 text-blue-600" />} color="bg-blue-500/10" />
+      <KpiCard label="Clients" value={kpis.clients} icon={<Briefcase className="w-4 h-4 text-emerald-600" />} color="bg-emerald-500/10" />
+      <KpiCard label="Fournisseurs" value={kpis.fournisseurs} icon={<Building2 className="w-4 h-4 text-amber-600" />} color="bg-amber-500/10" />
+      <KpiCard label="Crédit Total" value={`${kpis.totalCredit.toLocaleString()} FCFA`} icon={<CreditCard className="w-4 h-4 text-purple-600" />} color="bg-purple-500/10" />
     </div>
   )
 
@@ -861,7 +911,7 @@ export default function MasterDataTiers() {
       key: 'id',
       label: 'ID',
       render: (val: any) => (
-        <span className="font-mono text-xs px-2 py-1 bg-slate-100 rounded text-slate-600 font-medium">
+        <span className="font-mono text-xs px-2 py-1 bg-slate-900 rounded text-slate-400 font-medium">
           C-{String(val).padStart(4, '0')}
         </span>
       ),
@@ -871,7 +921,7 @@ export default function MasterDataTiers() {
       label: 'Tier',
       render: (val: any, row: any) => (
         <div>
-          <div className="font-semibold text-slate-900">{val || 'Sans nom'}</div>
+          <div className="font-semibold text-slate-200">{val || 'Sans nom'}</div>
           <div className="text-xs text-slate-500">{row.email || 'Aucun email'}</div>
         </div>
       ),
@@ -882,13 +932,13 @@ export default function MasterDataTiers() {
       render: (val: any) => {
         const typeStr = String(val || 'client').toLowerCase();
         const colors: Record<string, string> = {
-          client: 'bg-blue-50 text-blue-700 ring-blue-600/20',
-          supplier: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-          fournisseur: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-          partner: 'bg-purple-50 text-purple-700 ring-purple-600/20',
-          partenaire: 'bg-purple-50 text-purple-700 ring-purple-600/20',
+          client: 'bg-blue-500/10 text-blue-300 ring-blue-600/20',
+          supplier: 'bg-amber-500/10 text-amber-300 ring-amber-600/20',
+          fournisseur: 'bg-amber-500/10 text-amber-300 ring-amber-600/20',
+          partner: 'bg-purple-500/10 text-purple-300 ring-purple-600/20',
+          partenaire: 'bg-purple-500/10 text-purple-300 ring-purple-600/20',
         }
-        const style = colors[typeStr] || 'bg-slate-50 text-slate-700 ring-slate-600/20'
+        const style = colors[typeStr] || 'bg-slate-800 text-slate-300 ring-slate-600/20'
         return (
           <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${style}`}>
             {val ? String(val).charAt(0).toUpperCase() + String(val).slice(1) : 'Client'}
@@ -900,7 +950,7 @@ export default function MasterDataTiers() {
       key: 'ville',
       label: 'Localisation',
       render: (val: any, row: any) => (
-        <div className="text-sm text-slate-600">
+        <div className="text-sm text-slate-400">
           {val ? `${val}, ${row.pays || 'Cameroun'}` : 'Douala, Cameroun'}
         </div>
       )
@@ -911,7 +961,7 @@ export default function MasterDataTiers() {
       render: (val: any, row: any) => {
         const numVal = Number(val || row.limite_credit_xaf || 0)
         return (
-          <div className="text-sm font-medium text-slate-900 font-mono">
+          <div className="text-sm font-medium text-slate-200 font-mono">
             {numVal > 0 ? `${numVal.toLocaleString()} XAF` : '-'}
           </div>
         )
@@ -924,10 +974,10 @@ export default function MasterDataTiers() {
         const isActif = String(val).toUpperCase() === 'ACTIF'
         const isBloque = String(val).toUpperCase() === 'BLOQUE'
         const badgeColor = isActif 
-          ? 'bg-emerald-50 text-emerald-700' 
+          ? 'bg-emerald-500/10 text-emerald-300' 
           : isBloque 
-            ? 'bg-red-50 text-red-700' 
-            : 'bg-amber-50 text-amber-700'
+            ? 'bg-red-500/10 text-red-300' 
+            : 'bg-amber-500/10 text-amber-300'
         const dotColor = isActif 
           ? 'bg-emerald-600' 
           : isBloque 

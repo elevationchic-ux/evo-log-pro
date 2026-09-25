@@ -263,6 +263,21 @@ def mettre_a_jour_contrat_cadre(
 
 
 # ============ BONS DE COMMANDE ============
+@router.get("/bons-commande", response_model=List[BonCommandeResponse])
+def lister_bons_commande(
+    statut: str = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """List purchase orders"""
+    q = db.query(BonCommande)
+    if statut:
+        q = q.filter(BonCommande.statut == statut)
+    return q.order_by(BonCommande.id.desc()).offset(skip).limit(limit).all()
+
+
 @router.post("/bons-commande", response_model=BonCommandeResponse, status_code=status.HTTP_201_CREATED)
 def creer_bon_commande(
     bc: BonCommandeCreate,

@@ -1,7 +1,7 @@
 """Magasin Douane router - Warehouse under customs management"""
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from datetime import datetime, date
 
 from app.core.database import get_db
@@ -91,6 +91,37 @@ def rapport_entrepot(
 
 
 # ============ DECLARATIONS ENTREPOT ============
+@router.get("/declarations")
+def lister_declarations_entrepot(
+    skip: int = 0,
+    limit: int = Query(100, le=500),
+    statut: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """List warehouse declarations (traacabilite BL pour transferts)."""
+    q = db.query(DeclarationEntrepot)
+    if statut:
+        q = q.filter(DeclarationEntrepot.statut == statut)
+    total = q.count()
+    rows = q.order_by(DeclarationEntrepot.id.desc()).offset(skip).limit(limit).all()
+    return {
+        "items": [
+            {
+                "id": d.id,
+                "numero_declaration": d.numero_declaration,
+                "numero_bl": d.numero_bl,
+                "regime": d.regime.value if d.regime else None,
+                "statut": d.statut,
+                "date_declaration": d.date_declaration.isoformat() if d.date_declaration else None,
+            }
+            for d in rows
+        ],
+        "total": total,
+        "pending": False,
+    }
+
+
 @router.post("/declarations", response_model=DeclarationEntrepotResponse, status_code=status.HTTP_201_CREATED)
 def creer_declaration_entrepot(
     declaration: DeclarationEntrepotCreate,

@@ -15,6 +15,7 @@ import {
   Download
 } from 'lucide-react'
 import api from '@/lib/api'
+import { toast } from 'sonner'
 
 interface Fournisseur {
   id: number
@@ -63,7 +64,7 @@ export default function FournisseursPage() {
       setFournisseurs(prev => prev.filter(f => f.id !== id))
     } catch (error) {
       console.error('Error deleting fournisseur:', error)
-      alert('Erreur lors de la suppression')
+      toast.error('Erreur lors de la suppression du fournisseur.')
     }
   }
 
@@ -79,11 +80,11 @@ export default function FournisseursPage() {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
+          <div className="h-8 bg-slate-700 rounded w-1/3" />
+          <div className="h-4 bg-slate-700 rounded w-1/2" />
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
+              <div key={i} className="h-16 bg-slate-700 rounded" />
             ))}
           </div>
         </div>
@@ -97,12 +98,12 @@ export default function FournisseursPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-2 bg-blue-500/15 rounded-lg">
               <Building2 className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Fournisseurs</h1>
-              <p className="text-gray-600 text-sm">Gestion des fournisseurs et partenaires</p>
+              <h1 className="text-2xl font-bold text-slate-100">Fournisseurs</h1>
+              <p className="text-slate-400 text-sm">Gestion des fournisseurs et partenaires</p>
             </div>
           </div>
           <button
@@ -123,13 +124,13 @@ export default function FournisseursPage() {
               placeholder="Rechercher par nom, code ou email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Tous les types</option>
             <option value="transport">Transport</option>
@@ -138,7 +139,7 @@ export default function FournisseursPage() {
             <option value="magasin">Magasin</option>
             <option value="autre">Autre</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+          <button className="flex items-center gap-2 px-4 py-2 border border-slate-600 rounded-lg hover:bg-slate-800">
             <Download className="w-4 h-4" />
             Exporter
           </button>
@@ -146,34 +147,34 @@ export default function FournisseursPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-slate-900 rounded-lg shadow overflow-x-auto">
+        <table className="min-w-full divide-y divide-slate-800">
+          <thead className="bg-slate-800">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                 Code
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                 Nom
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                 Contact
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                 Type
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                 Statut
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-slate-900 divide-y divide-slate-800">
             {filteredFournisseurs.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
                   {searchTerm || filterType !== 'all' 
                     ? 'Aucun fournisseur trouvé pour ces critères'
                     : 'Aucun fournisseur enregistré. Cliquez sur "Nouveau fournisseur" pour commencer.'}
@@ -181,37 +182,37 @@ export default function FournisseursPage() {
               </tr>
             ) : (
               filteredFournisseurs.map((fournisseur) => (
-                <tr key={fournisseur.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <tr key={fournisseur.id} className="hover:bg-slate-800">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-100">
                     {fournisseur.code}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{fournisseur.nom}</div>
-                    <div className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <div className="text-sm font-medium text-slate-100">{fournisseur.nom}</div>
+                    <div className="text-sm text-slate-400 flex items-center gap-1 mt-1">
                       <MapPin className="w-3 h-3" />
                       {fournisseur.ville}, {fournisseur.pays}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 flex items-center gap-1">
+                    <div className="text-sm text-slate-100 flex items-center gap-1">
                       <Mail className="w-3 h-3" />
                       {fournisseur.email}
                     </div>
-                    <div className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <div className="text-sm text-slate-400 flex items-center gap-1 mt-1">
                       <Phone className="w-3 h-3" />
                       {fournisseur.telephone}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-500/15 text-blue-300">
                       {fournisseur.type}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       fournisseur.status === 'active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
+                        ? 'bg-green-500/15 text-green-300' 
+                        : 'bg-slate-800 text-slate-100'
                     }`}>
                       {fournisseur.status === 'active' ? 'Actif' : 'Inactif'}
                     </span>
@@ -222,13 +223,13 @@ export default function FournisseursPage() {
                         setEditingFournisseur(fournisseur)
                         setShowModal(true)
                       }}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      className="text-blue-600 hover:text-blue-200 mr-3"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(fournisseur.id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-600 hover:text-red-200"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -243,8 +244,8 @@ export default function FournisseursPage() {
       {/* Modal Fournisseur Réel */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4">
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="bg-slate-900 rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4">
+            <h2 className="text-xl font-bold text-slate-100">
               {editingFournisseur ? 'Modifier le Fournisseur' : 'Nouveau Fournisseur B2B'}
             </h2>
             <form onSubmit={async (e) => {
@@ -275,7 +276,7 @@ export default function FournisseursPage() {
             }} className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Code Fournisseur *</label>
+                  <label className="block font-semibold mb-1 text-slate-200">Code Fournisseur *</label>
                   <input
                     name="code"
                     required
@@ -284,7 +285,7 @@ export default function FournisseursPage() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Catégorie *</label>
+                  <label className="block font-semibold mb-1 text-slate-200">Catégorie *</label>
                   <select name="type" defaultValue={editingFournisseur?.type || 'Transporteur'} className="w-full px-3 py-2 border rounded-xl">
                     <option value="Transporteur">Transporteur Routier</option>
                     <option value="Transitaire">Transitaire Partenaire</option>
@@ -296,7 +297,7 @@ export default function FournisseursPage() {
               </div>
 
               <div>
-                <label className="block font-semibold mb-1 text-gray-700">Raison Sociale / Nom *</label>
+                <label className="block font-semibold mb-1 text-slate-200">Raison Sociale / Nom *</label>
                 <input
                   name="nom"
                   required
@@ -308,7 +309,7 @@ export default function FournisseursPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Téléphone</label>
+                  <label className="block font-semibold mb-1 text-slate-200">Téléphone</label>
                   <input
                     name="telephone"
                     defaultValue={editingFournisseur?.telephone || ''}
@@ -317,7 +318,7 @@ export default function FournisseursPage() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Email</label>
+                  <label className="block font-semibold mb-1 text-slate-200">Email</label>
                   <input
                     name="email"
                     type="email"
@@ -330,7 +331,7 @@ export default function FournisseursPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Ville</label>
+                  <label className="block font-semibold mb-1 text-slate-200">Ville</label>
                   <input
                     name="ville"
                     defaultValue={editingFournisseur?.ville || 'Douala'}
@@ -338,7 +339,7 @@ export default function FournisseursPage() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Adresse / Siège</label>
+                  <label className="block font-semibold mb-1 text-slate-200">Adresse / Siège</label>
                   <input
                     name="adresse"
                     defaultValue={editingFournisseur?.adresse || ''}
@@ -355,7 +356,7 @@ export default function FournisseursPage() {
                     setShowModal(false);
                     setEditingFournisseur(null);
                   }}
-                  className="px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 font-semibold"
+                  className="px-4 py-2 bg-slate-800 rounded-xl hover:bg-slate-700 font-semibold"
                 >
                   Annuler
                 </button>

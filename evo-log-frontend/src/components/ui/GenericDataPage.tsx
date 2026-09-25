@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { Search, Plus, Edit2, Trash2, Eye, Filter, Download, X, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Eye, Download, X, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TableSkeletonLoader } from '@/components/ui/Loaders';
 import { useI18n } from '@/hooks/useI18n';
-import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
 
 interface Column {
   key: string;
@@ -98,7 +97,7 @@ function DetailDrawer({
                     ? col.render(row[col.key], row)
                     : row[col.key] != null
                     ? String(row[col.key])
-                    : <span className="text-on-surface-variant italic opacity-50"></span>}
+                    : <span className="text-on-surface-variant italic opacity-50">Non renseigné</span>}
                 </span>
               </div>
               <div className="mx-3 border-b border-outline-variant group-last:border-0 opacity-50" />
@@ -122,19 +121,23 @@ function DetailDrawer({
 
 // ── CSV Export ──────────────────────────────────────────────────────────────────
 function exportToCSV(columns: Column[], data: any[], title: string) {
-  const header = columns.map((c) => c.label).join(',');
+  // Séparateur ';' : ouvrable directement dans Excel FR/Africain (le ',' casse les colonnes).
+  // BOM UTF-8 déjà présent pour les accents.
+  const sep = ';';
+  const escape = (str: string) =>
+    str.includes(sep) || str.includes(',') || str.includes('"') || str.includes('\n')
+      ? `"${str.replace(/"/g, '""')}"`
+      : str;
+  const header = columns.map((c) => escape(c.label)).join(sep);
   const rows = data.map((row) =>
     columns
       .map((c) => {
         const val = row[c.key];
-        const str = val != null ? String(val) : '';
-        return str.includes(',') || str.includes('"')
-          ? `"${str.replace(/"/g, '""')}"`
-          : str;
+        return escape(val != null ? String(val) : '');
       })
-      .join(',')
+      .join(sep)
   );
-  const csv = [header, ...rows].join('\n');
+  const csv = [header, ...rows].join('\r\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -170,19 +173,14 @@ export default function GenericDataPage({
   const [localSearchTerm, setLocalSearchTerm] = useState('');
   const [drawerRow, setDrawerRow] = useState<any | null>(null);
   const [localCurrentPage, setLocalCurrentPage] = useState(1);
-  const [comingSoonAction, setComingSoonAction] = useState<string | null>(null);
   
   const isServerSide = serverTotalPages !== undefined;
   const currentPage = isServerSide ? (serverCurrentPage || 1) : localCurrentPage;
 
   const addLabel = primaryActionLabel || t.common.new;
 
-  const handleAction = (actionFn: ((...args: any[]) => void) | undefined, fallbackName: string, ...args: any[]) => {
-    if (!actionFn || actionFn.toString().includes('console.log')) {
-      setComingSoonAction(fallbackName);
-    } else {
-      actionFn(...args);
-    }
+  const handleAction = (actionFn: ((...args: any[]) => void) | undefined, _fallbackName: string, ...args: any[]) => {
+    if (actionFn) actionFn(...args);
   };
 
   // Reset page on search or data change (client-side only)
@@ -243,7 +241,7 @@ export default function GenericDataPage({
     }
   }, [onExport, columns, filteredData, title]);
 
-  const hasRowActions = !!(onView || onEdit || onDelete || true);
+  const hasRowActions = !!(onView || onEdit || onDelete);
 
   return (
     <>
@@ -310,7 +308,7 @@ export default function GenericDataPage({
             )}
           </div>
 
-          {/* Filter info + Filter btn */}
+          {/* Info résultats (le bouton « Filtrer » sans action a été retiré : faux contrôle UI) */}
           <div className="flex items-center gap-2 shrink-0">
             {!isLoading && (
               <span className="text-sm text-on-surface-variant whitespace-nowrap">
@@ -321,10 +319,6 @@ export default function GenericDataPage({
                 )}
               </span>
             )}
-            <button className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-on-surface bg-surface-container-low border border-outline rounded-lg hover:bg-surface-container transition-colors">
-              <Filter className="w-4 h-4" />
-              <span className="hidden sm:inline">{t.common.filter}</span>
-            </button>
           </div>
         </div>
 
@@ -462,11 +456,14 @@ export default function GenericDataPage({
 
                       {hasRowActions && (
                         <td className="p-3.5 text-right pr-5">
-                          <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-all duration-150">
+                          {/* Actions toujours visibles : sur tablette/tactile il n'y a pas de
+                              hover, un opacity-0 rendrait les boutons inaccessibles. */}
+                          <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={(e) => { e.stopPropagation(); handleView(row); }}
-                              className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
+                              className="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                               title={t.common.view}
+                              aria-label={t.common.view}
                             >
                               <Eye className="w-4 h-4" />
                             </button>
@@ -476,8 +473,9 @@ export default function GenericDataPage({
                                   e.stopPropagation();
                                   handleAction(onEdit, 'Modification', row);
                                 }}
-                                className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors"
+                                className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors"
                                 title={t.common.edit}
+                                aria-label={t.common.edit}
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
@@ -488,8 +486,9 @@ export default function GenericDataPage({
                                   e.stopPropagation();
                                   handleAction(onDelete, 'Suppression', row);
                                 }}
-                                className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container/50 rounded-lg transition-colors"
+                                className="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/50 rounded-lg transition-colors"
                                 title={t.common.delete}
+                                aria-label={t.common.delete}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -596,13 +595,6 @@ export default function GenericDataPage({
           onClose={() => setDrawerRow(null)}
         />
       )}
-
-      {/* Coming Soon Modal */}
-      <ComingSoonModal 
-        isOpen={!!comingSoonAction} 
-        onClose={() => setComingSoonAction(null)} 
-        featureName={comingSoonAction || ''} 
-      />
     </>
   );
 }

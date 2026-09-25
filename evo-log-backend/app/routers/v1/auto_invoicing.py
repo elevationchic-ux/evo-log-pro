@@ -157,9 +157,14 @@ async def create_invoice(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Créer une facture OHADA"""
-    import uuid
-    numero = f"FAC-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8].upper()}"
+    """Créer une facture OHADA (numerotation legale sequencee, exigence DGI)."""
+    from app.utils.numerotation import prochaine_reference
+
+    type_facture = data.get("type_facture", "vente")
+    type_piece = "AVOIR" if type_facture.lower() in ("avoir", "credit_note", "note_credit") else "FACTURE"
+    numero = prochaine_reference(
+        db, type_piece, company_id=getattr(current_user, "company_id", None)
+    )
 
     montant_ht = float(data.get("montant_ht", 0))
     taux_tva = float(data.get("taux_tva", 19.25))
@@ -181,6 +186,9 @@ async def create_invoice(
         conditions_paiement=data.get("conditions_paiement"),
         notes=data.get("notes"),
         solde_restant=montant_ttc,
+        # Rattachement chaine documentaire (optionnel, jamais devine).
+        conteneur_id=data.get("conteneur_id"),
+        escale_id=data.get("escale_id"),
     )
     db.add(facture)
     db.commit()

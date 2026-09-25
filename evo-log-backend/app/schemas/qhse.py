@@ -174,8 +174,8 @@ class EPIRequisResponse(EPIRequisBase):
 
 # Accident Travail schemas
 class AccidentTravailBase(BaseModel):
-    numero_accident: str
-    employe_id: int
+    numero_accident: Optional[str] = None
+    employe_id: Optional[int] = None
     date_accident: datetime
     lieu: str
     type_accident: str
@@ -217,8 +217,8 @@ class AccidentTravailResponse(AccidentTravailBase):
     duree_hospitalisation: int
     arret_travail: int
     statut: str
-    declarant: str
-    date_declaration: date
+    declarant: Optional[str] = None
+    date_declaration: Optional[date] = None
     rapport_medical: Optional[str] = None
     photos: Optional[str] = None
     created_at: datetime
@@ -231,7 +231,7 @@ class AccidentTravailResponse(AccidentTravailBase):
 # Investigation Accident schemas
 class InvestigationAccidentBase(BaseModel):
     accident_id: int
-    numero_investigation: str
+    numero_investigation: Optional[str] = None
     date_investigation: date
     investigateur: str
 

@@ -87,15 +87,26 @@ export interface RetenueSource {
 }
 
 // Integration Cameroun API
+// NB : le backend FastAPI attend ces scalaires en paramètres de REQUÊTE (query),
+// pas dans le corps JSON  d'où l'usage de { params } au lieu du second argument de post().
 export const integrationCamerounApi = {
   // BSC
   creerBSC: async (data: {
-    navire: string
     numero_connaisse: string
-    nombre_conteneurs: number
-    poids_total: number
+    navire: string
+    port_chargement: string
+    port_dechargement: string
+    agent: string
+    importateur: string
+    poids_total?: number
+    valeur_fob?: number
   }) => {
-    const response = await api.post('/api/v1/integration-cameroun/bsc', data)
+    const response = await api.post('/api/v1/integration-cameroun/bsc', null, { params: data })
+    return response.data
+  },
+
+  listerBSC: async (params?: { skip?: number; limit?: number }) => {
+    const response = await api.get('/api/v1/integration-cameroun/bsc', { params })
     return response.data
   },
 
@@ -106,32 +117,62 @@ export const integrationCamerounApi = {
 
   // CSC
   demanderCSC: async (data: {
-    bsc_id: number
-    date_inspection: string
-    type_marchandise: string
+    numero_connaisse: string
+    navire: string
+    port_origine: string
+    port_destination: string
+    type_marchandise?: string
+    poids_brut_tonnes?: number
+    nombre_colis?: number
+    valeur_fob?: number
   }) => {
-    const response = await api.post('/api/v1/integration-cameroun/csc', data)
+    const response = await api.post('/api/v1/integration-cameroun/csc', null, { params: data })
+    return response.data
+  },
+
+  listerCSC: async (params?: { skip?: number; limit?: number }) => {
+    const response = await api.get('/api/v1/integration-cameroun/csc', { params })
     return response.data
   },
 
   // DUM
   creerDUM: async (data: {
-    navire: string
-    numero_connaisse: string
-    regime: string
-    valeur_cif: number
+    type_operation: string
+    regime_douanier: string
+    bureau_douane: string
+    declarant: string
+    importateur: string
+    marchandise: string
+    valeur_fob?: number
+    taux_change?: number
+    poids_brut?: number
+    nombre_colis?: number
   }) => {
-    const response = await api.post('/api/v1/integration-cameroun/dum', data)
+    const response = await api.post('/api/v1/integration-cameroun/dum', null, { params: data })
+    return response.data
+  },
+
+  listerDUM: async (params?: { skip?: number; limit?: number }) => {
+    const response = await api.get('/api/v1/integration-cameroun/dum', { params })
     return response.data
   },
 
   // APE
   creerAPE: async (data: {
-    navire: string
-    date_arrivee: string
-    nombre_conteneurs: number
+    importateur: string
+    montant_xaf: number
+    devise: string
+    banque: string
+    beneficiaire_etranger?: string
+    pays_beneficiaire?: string
+    objet_transfert?: string
   }) => {
-    const response = await api.post('/api/v1/integration-cameroun/ape', data)
+    const response = await api.post('/api/v1/integration-cameroun/ape', null, { params: data })
+    return response.data
+  },
+
+  listerAPE: async (params?: { skip?: number; limit?: number }) => {
+    const response = await api.get('/api/v1/integration-cameroun/ape', { params })
     return response.data
   },
 
@@ -144,10 +185,10 @@ export const integrationCamerounApi = {
   // Calculer Droits
   calculerDroits: async (data: {
     valeur_cif: number
-    poids: number
-    type_marchandise: string
+    taux_douane?: number
+    tva?: number
   }) => {
-    const response = await api.post('/api/v1/integration-cameroun/calculer-droits', data)
+    const response = await api.post('/api/v1/integration-cameroun/calculer-droits', null, { params: data })
     return response.data
   }
 }
@@ -216,6 +257,7 @@ export const paiementLocalApi = {
 }
 
 // Fiscalité Cameroun API
+// NB : scalaires attendus en paramètres de requête par FastAPI (voir commentaire plus haut).
 export const fiscaliteCamerounApi = {
   // Déclarations
   creerDeclaration: async (data: {
@@ -226,7 +268,7 @@ export const fiscaliteCamerounApi = {
     chiffre_affaires: number
     benefice: number
   }) => {
-    const response = await api.post('/api/v1/fiscalite-cameroun/declarations', data)
+    const response = await api.post('/api/v1/fiscalite-cameroun/declarations', null, { params: data })
     return response.data
   },
 
@@ -236,16 +278,20 @@ export const fiscaliteCamerounApi = {
   },
 
   validerDeclaration: async (declarationId: number, agentFiscal: string) => {
-    const response = await api.post(`/api/v1/fiscalite-cameroun/declarations/${declarationId}/valider`, {
-      agent_fiscal: agentFiscal
-    })
+    const response = await api.post(
+      `/api/v1/fiscalite-cameroun/declarations/${declarationId}/valider`,
+      null,
+      { params: { agent_fiscal: agentFiscal } }
+    )
     return response.data
   },
 
   payerDeclaration: async (declarationId: number, montant: number) => {
-    const response = await api.post(`/api/v1/fiscalite-cameroun/declarations/${declarationId}/payer`, {
-      montant
-    })
+    const response = await api.post(
+      `/api/v1/fiscalite-cameroun/declarations/${declarationId}/payer`,
+      null,
+      { params: { montant } }
+    )
     return response.data
   },
 
@@ -257,7 +303,7 @@ export const fiscaliteCamerounApi = {
     beneficiaire: string
     numero_contribuable: string
   }) => {
-    const response = await api.post('/api/v1/fiscalite-cameroun/retenues-source', data)
+    const response = await api.post('/api/v1/fiscalite-cameroun/retenues-source', null, { params: data })
     return response.data
   },
 
@@ -268,25 +314,29 @@ export const fiscaliteCamerounApi = {
 
   // OHADA
   calculerTVA: async (montantHt: number, tauxTva: number = 19.25) => {
-    const response = await api.post('/api/v1/fiscalite-cameroun/ohada/tva', {
-      montant_ht: montantHt,
-      taux_tva: tauxTva
-    })
+    const response = await api.post(
+      '/api/v1/fiscalite-cameroun/ohada/tva',
+      null,
+      { params: { montant_ht: montantHt, taux_tva: tauxTva } }
+    )
     return response.data
   },
 
   calculerCentimes: async (montant: number, taux: number = 10) => {
-    const response = await api.post('/api/v1/fiscalite-cameroun/ohada/centimes', {
-      montant,
-      taux
-    })
+    const response = await api.post(
+      '/api/v1/fiscalite-cameroun/ohada/centimes',
+      null,
+      { params: { montant, taux } }
+    )
     return response.data
   },
 
   calculerISMinimum: async (chiffreAffaires: number) => {
-    const response = await api.post('/api/v1/fiscalite-cameroun/ohada/is-minimum', {
-      chiffre_affaires: chiffreAffaires
-    })
+    const response = await api.post(
+      '/api/v1/fiscalite-cameroun/ohada/is-minimum',
+      null,
+      { params: { chiffre_affaires: chiffreAffaires } }
+    )
     return response.data
   },
 

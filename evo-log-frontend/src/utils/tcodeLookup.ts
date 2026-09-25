@@ -165,6 +165,8 @@ export const TCODE_MAP: Record<string, string> = {
   'KADM_USR': '/admin-tenant/users-rbac',
   'KADM_SET': '/admin-tenant/integrations',
   'KADM_RLS': '/admin/configuration-des-roles-rbac',
+  'KADM_ACC': '/admin/accreditations',
+  'KADM_COM': '/admin/espaces-communs',
   'KMD_TIERS': '/master-data/tiers',
   'KMD_ART': '/master-data/articles',
   'EVO-AD01': '/admin-tenant/dashboard',

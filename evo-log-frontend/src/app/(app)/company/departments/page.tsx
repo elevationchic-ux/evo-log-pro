@@ -39,8 +39,8 @@ export default function CompanyDepartmentsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des Départements</h1>
-          <p className="text-gray-600 mt-1">Organiser les départements de votre entreprise</p>
+          <h1 className="text-3xl font-bold text-slate-100">Gestion des Départements</h1>
+          <p className="text-slate-400 mt-1">Organiser les départements de votre entreprise</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
           <Plus className="w-4 h-4" />
@@ -48,26 +48,26 @@ export default function CompanyDepartmentsPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Départements ({departments?.length || 0})</h2>
+      <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 p-6">
+        <h2 className="text-lg font-semibold text-slate-100 mb-4">Départements ({departments?.length || 0})</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {departments?.map((dept: any) => (
-            <div key={dept.id} className="border border-gray-200 rounded-lg p-6">
+            <div key={dept.id} className="border border-slate-700 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-purple-100 rounded-lg">
+                  <div className="p-3 bg-purple-500/15 rounded-lg">
                     <Building2 className="w-6 h-6 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{dept.name}</h3>
-                    <p className="text-sm text-gray-600">Chef: {dept.manager}</p>
+                    <h3 className="font-semibold text-slate-100">{dept.name}</h3>
+                    <p className="text-sm text-slate-400">Chef: {dept.manager}</p>
                   </div>
                 </div>
-                <button className="p-2 hover:bg-gray-100 rounded-lg">
+                <button className="p-2 hover:bg-slate-800 rounded-lg">
                   <Layers className="w-5 h-5 text-gray-400" />
                 </button>
               </div>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-4 text-sm text-slate-400">
                 <div className="flex items-center gap-1">
                   <Users className="w-4 h-4" />
                   <span>{dept.users_count} utilisateurs</span>

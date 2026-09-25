@@ -16,6 +16,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { transportAPI } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 export default function ClientShipmentsPage() {
   const [missions, setMissions] = useState<any[]>([]);
@@ -56,17 +57,29 @@ export default function ClientShipmentsPage() {
     }
   };
 
-  const handleStatusChange = (missionId: number, newStatus: string) => {
-    // In a real app, this would open a modal or update via API
-    console.log(`Changing mission ${missionId} status to ${newStatus}`);
-    // For now, we'll just simulate
-    setMissions(prev =>
-      prev.map(m =>
-        m.id === missionId ? { ...m, statut: newStatus } : m
-      )
-    );
-    if (selectedMission?.id === missionId) {
-      setSelectedMission((prev: any) => prev ? { ...prev, statut: newStatus } : null);
+  const handleStatusChange = async (missionId: number, newStatus: string) => {
+    try {
+      await transportAPI.updateStatut(missionId, newStatus);
+      setMissions(prev =>
+        prev.map(m =>
+          m.id === missionId ? { ...m, statut: newStatus } : m
+        )
+      );
+      if (selectedMission?.id === missionId) {
+        setSelectedMission((prev: any) => prev ? { ...prev, statut: newStatus } : null);
+      }
+      toast.success(`Mission #${missionId} mise à jour : ${newStatus}.`);
+    } catch {
+      toast.error(`Échec de la mise à jour de la mission #${missionId} : le service transport n'a pas répondu.`);
+    }
+  };
+
+  const handleGenererBL = async (mission: any) => {
+    try {
+      await transportAPI.genererBL(mission.id);
+      toast.success(`Bon de Livraison généré pour la mission ${mission.reference}.`);
+    } catch {
+      toast.error('Génération du Bon de Livraison impossible : le service documentaire n\'a pas répondu.');
     }
   };
 
@@ -108,10 +121,10 @@ export default function ClientShipmentsPage() {
       <div className="mb-8">
         <div className="flex justify-between items-start sm:items-center sm:justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            <h1 className="text-3xl font-bold text-slate-200 mb-2">
               Mes Expéditions
             </h1>
-            <p className="text-slate-600">
+            <p className="text-slate-400">
               Suivez l'état de toutes vos expéditions en temps réel
             </p>
           </div>
@@ -134,7 +147,7 @@ export default function ClientShipmentsPage() {
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+        <div className="mb-6 p-4 bg-red-500/10 border-l-4 border-red-500 rounded">
           <AlertTriangle className="w-4 h-4 text-red-600 mr-2" />
           <span>{error}</span>
         </div>
@@ -142,13 +155,13 @@ export default function ClientShipmentsPage() {
 
       {/* Filters */}
       <div className="mb-6">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6">
+          <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
             <Search className="w-5 h-5" /> Filtres
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
                 Statut
               </label>
               <select
@@ -166,7 +179,7 @@ export default function ClientShipmentsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
                 Date de Début
               </label>
               <input
@@ -177,7 +190,7 @@ export default function ClientShipmentsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
                 Date de Fin
               </label>
               <input
@@ -188,7 +201,7 @@ export default function ClientShipmentsPage() {
               />
             </div>
             <div className="flex items-end">
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
                 Recherche
               </label>
               <input
@@ -206,37 +219,37 @@ export default function ClientShipmentsPage() {
       {/* Statistics */}
       <div className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
+          <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6 text-center">
             <div className="flex items-center justify-center mb-3">
               <Truck className="w-8 h-8 text-primary" />
             </div>
             <p className="text-sm font-medium text-slate-500">Total Expéditions</p>
-            <p className="text-2xl font-bold text-slate-900">{missions.length}</p>
+            <p className="text-2xl font-bold text-slate-200">{missions.length}</p>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
+          <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6 text-center">
             <div className="flex items-center justify-center mb-3">
               <CheckCircle2 className="w-8 h-8 text-success" />
             </div>
             <p className="text-sm font-medium text-slate-500">Livrées</p>
-            <p className="text-2xl font-bold text-slate-900">
+            <p className="text-2xl font-bold text-slate-200">
               {missions.filter(m => m.statut === 'LIVREE').length}
             </p>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
+          <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6 text-center">
             <div className="flex items-center justify-center mb-3">
               <MapPin className="w-8 h-8 text-warning" />
             </div>
             <p className="text-sm font-medium text-slate-500">En Cours</p>
-            <p className="text-2xl font-bold text-slate-900">
+            <p className="text-2xl font-bold text-slate-200">
               {missions.filter(m => ['EN_ROUTE', 'EN_CHARGEMENT'].includes(m.statut)).length}
             </p>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
+          <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6 text-center">
             <div className="flex items-center justify-center mb-3">
               <Calendar className="w-8 h-8 text-info" />
             </div>
             <p className="text-sm font-medium text-slate-500">À Venir</p>
-            <p className="text-2xl font-bold text-slate-900">
+            <p className="text-2xl font-bold text-slate-200">
               {missions.filter(m => m.statut === 'EN_ATTENTE_AFFECTATION').length}
             </p>
           </div>
@@ -244,9 +257,9 @@ export default function ClientShipmentsPage() {
       </div>
 
       {/* Missions List */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-slate-800">
+      <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 overflow-hidden">
+        <div className="p-6 border-b border-slate-700 flex justify-between items-center">
+          <h3 className="text-lg font-bold text-slate-200">
             Liste des Expéditions ({filteredMissions.length} résultat{(filteredMissions.length !== 1) ? 's' : ''})
           </h3>
           <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -268,7 +281,7 @@ export default function ClientShipmentsPage() {
         {loading && !missions.length && (
           <div className="p-12 text-center">
             <RefreshCw className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
-            <p className="text-slate-600">Chargement des expéditions...</p>
+            <p className="text-slate-400">Chargement des expéditions...</p>
           </div>
         )}
 
@@ -283,9 +296,9 @@ export default function ClientShipmentsPage() {
         )}
 
         {!loading && missions.length > 0 && (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-800">
             {sortedMissions.map((mission) => (
-              <div key={mission.id} className="cursor-pointer hover:bg-slate-50 transition-colors">
+              <div key={mission.id} className="cursor-pointer hover:bg-slate-800 transition-colors">
                 {/* Mission Header */}
                 <div className="flex justify-between items-start px-6 py-4">
                   <div className="flex-1 min-w-0">
@@ -311,7 +324,7 @@ export default function ClientShipmentsPage() {
                         )}
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">{mission.reference}</p>
+                        <p className="font-medium text-slate-200">{mission.reference}</p>
                         <p className="text-sm text-slate-500 truncate">
                           {mission.lieu_depart} → {mission.lieu_arrivee}
                         </p>
@@ -345,46 +358,46 @@ export default function ClientShipmentsPage() {
 
                 {/* Mission Details (expandable) */}
                 {expandedMissionId === mission.id.toString() && (
-                  <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
+                  <div className="px-6 py-4 bg-slate-800 border-t border-slate-700">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Date de Départ Prévue</p>
+                        <p className="text-sm font-medium text-slate-300">Date de Départ Prévue</p>
                         <p className="text-slate-500">
                           {mission.date_depart_prevue ? new Date(mission.date_depart_prevue).toLocaleDateString('fr-FR') : 'Non définie'}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Date d'Arrivée Prévue</p>
+                        <p className="text-sm font-medium text-slate-300">Date d'Arrivée Prévue</p>
                         <p className="text-slate-500">
                           {mission.date_arrivee_prevue ? new Date(mission.date_arrivee_prevue).toLocaleDateString('fr-FR') : 'Non définie'}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Chauffeur Assigné</p>
+                        <p className="text-sm font-medium text-slate-300">Chauffeur Assigné</p>
                         <p className="text-slate-500">
                           {mission.chauffeur_nom || 'Non assigné'}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Camion Assigné</p>
+                        <p className="text-sm font-medium text-slate-300">Camion Assigné</p>
                         <p className="text-slate-500">
                           {mission.camion_immatriculation || 'Non assigné'}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Type de Marchandise</p>
+                        <p className="text-sm font-medium text-slate-300">Type de Marchandise</p>
                         <p className="text-slate-500 capitalize">
                           {mission.nature_fret || 'Non spécifiée'}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Poids</p>
+                        <p className="text-sm font-medium text-slate-300">Poids</p>
                         <p className="text-slate-500">
                           {mission.poids_total ? `${mission.poids_total} kg` : 'Non spécifié'}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Volume</p>
+                        <p className="text-sm font-medium text-slate-300">Volume</p>
                         <p className="text-slate-500">
                           {mission.volume_total ? `${mission.volume_total} m³` : 'Non spécifié'}
                         </p>
@@ -392,7 +405,7 @@ export default function ClientShipmentsPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="mt-4 pt-3 border-t border-slate-200 flex flex-col sm:flex-row gap-3">
+                    <div className="mt-4 pt-3 border-t border-slate-700 flex flex-col sm:flex-row gap-3">
                       <button
                         onClick={() => handleStatusChange(mission.id, 'EN_ROUTE')}
                         disabled={mission.statut !== 'EN_ATTENTE_AFFECTATION'}
@@ -408,10 +421,7 @@ export default function ClientShipmentsPage() {
                         Marquer comme Livré
                       </button>
                       <button
-                        onClick={() => {
-                          // In a real app, this would open a modal for BL generation
-                          alert(`Génération du Bon de Livraison pour la mission ${mission.reference}`);
-                        }}
+                        onClick={() => handleGenererBL(mission)}
                         disabled={mission.statut !== 'LIVREE'}
                         className="btn btn-sm btn-outline btn-info flex-1"
                       >
@@ -429,13 +439,13 @@ export default function ClientShipmentsPage() {
       {/* Selected Mission Detail View */}
       {selectedMission && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
+          <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-4xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">
+                <h2 className="text-2xl font-bold text-slate-200">
                   Mission {selectedMission.reference}
                 </h2>
-                <p className="text-slate-600">
+                <p className="text-slate-400">
                   Détails complets de l'expédition
                 </p>
               </div>
@@ -454,13 +464,13 @@ export default function ClientShipmentsPage() {
               {/* Mission Info */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Informations Générales</h3>
+                  <h3 className="text-lg font-semibold text-slate-200">Informations Générales</h3>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Référence</p>
-                    <p className="font-mono text-slate-900">{selectedMission.reference}</p>
+                    <p className="text-sm font-medium text-slate-300">Référence</p>
+                    <p className="font-mono text-slate-200">{selectedMission.reference}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Statut</p>
+                    <p className="text-sm font-medium text-slate-300">Statut</p>
                     <span className={
                       selectedMission.statut === 'LIVREE' ? 'badge badge-success' :
                       selectedMission.statut === 'EN_ROUTE' ? 'badge badge-warning' :
@@ -473,7 +483,7 @@ export default function ClientShipmentsPage() {
                     </span>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Date de Création</p>
+                    <p className="text-sm font-medium text-slate-300">Date de Création</p>
                     <p className="text-slate-500">
                       {selectedMission.dateCreation ? new Date(selectedMission.dateCreation).toLocaleDateString('fr-FR') : 'Non définie'}
                     </p>
@@ -481,17 +491,17 @@ export default function ClientShipmentsPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Itinéraire</h3>
+                  <h3 className="text-lg font-semibold text-slate-200">Itinéraire</h3>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Départ</p>
+                    <p className="text-sm font-medium text-slate-300">Départ</p>
                     <p className="text-slate-500">{selectedMission.lieu_depart || 'Non défini'}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Arrivée</p>
+                    <p className="text-sm font-medium text-slate-300">Arrivée</p>
                     <p className="text-slate-500">{selectedMission.lieu_arrivee || 'Non défini'}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Distance Estimée</p>
+                    <p className="text-sm font-medium text-slate-300">Distance Estimée</p>
                     <p className="text-slate-500">
                       {selectedMission.distance_estimee ? `${selectedMission.distance_estimee} km` : 'Non définie'}
                     </p>
@@ -499,25 +509,25 @@ export default function ClientShipmentsPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Détails du Fret</h3>
+                  <h3 className="text-lg font-semibold text-slate-200">Détails du Fret</h3>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Nature du Fret</p>
+                    <p className="text-sm font-medium text-slate-300">Nature du Fret</p>
                     <p className="text-slate-500 capitalize">{selectedMission.nature_fret || 'Non spécifié'}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Poids Total</p>
+                    <p className="text-sm font-medium text-slate-300">Poids Total</p>
                     <p className="text-slate-500">
                       {selectedMission.poids_total ? `${selectedMission.poids_total} kg` : 'Non spécifié'}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Volume Total</p>
+                    <p className="text-sm font-medium text-slate-300">Volume Total</p>
                     <p className="text-slate-500">
                       {selectedMission.volume_total ? `${selectedMission.volume_total} m³` : 'Non spécifié'}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Nombre de Colis</p>
+                    <p className="text-sm font-medium text-slate-300">Nombre de Colis</p>
                     <p className="text-slate-500">{selectedMission.nombre_colis || 'Non spécifié'}</p>
                   </div>
                 </div>
@@ -525,18 +535,18 @@ export default function ClientShipmentsPage() {
 
               {/* Timeline */}
               <div className="lg:col-span-3">
-                <h3 className="text-lg font-semibold text-slate-800">Historique et Suivi</h3>
+                <h3 className="text-lg font-semibold text-slate-200">Historique et Suivi</h3>
                 <div className="space-y-4">
                   {/* Timeline items would go here */}
-                  <div className="border-l-2 border-slate-200 pl-4">
+                  <div className="border-l-2 border-slate-700 pl-4">
                     {/* Example timeline entry */}
-                    <div className="mb-4 pb-4 border-b border-slate-100 last:mb-0 last:pb-0 last:border-0">
+                    <div className="mb-4 pb-4 border-b border-slate-700 last:mb-0 last:pb-0 last:border-0">
                       <div className="flex items-start gap-3">
                         <div className="w-3 h-3 bg-success rounded-full flex items-center justify-center">
                           <CheckCircle2 className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="font-medium text-slate-800">Mission créée</p>
+                          <p className="font-medium text-slate-200">Mission créée</p>
                           <p className="text-sm text-slate-500">
                             {selectedMission.dateCreation ? new Date(selectedMission.dateCreation).toLocaleString('fr-FR') : ''}
                           </p>

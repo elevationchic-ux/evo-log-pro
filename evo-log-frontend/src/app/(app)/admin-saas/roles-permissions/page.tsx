@@ -291,7 +291,7 @@ export default function RolesPermissionsPage() {
                           {hasAccess ? (
                             <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto" />
                           ) : (
-                            <XCircle className="w-4 h-4 text-slate-600 mx-auto" />
+                            <XCircle className="w-4 h-4 text-slate-400 mx-auto" />
                           )}
                         </td>
                       );

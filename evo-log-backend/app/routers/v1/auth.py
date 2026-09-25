@@ -155,7 +155,7 @@ def _build_login_payload(user: User) -> dict:
 
     user_roles = [r.name for r in user.roles] if hasattr(user, "roles") and user.roles else []
 
-    # Calculate modules allowed
+    # Calcul des modules autorises (repli historique modules_allowed).
     allowed_modules = []
     if user.is_superuser or "SUPER_ADMIN" in user_roles:
         allowed_modules = [
@@ -171,6 +171,18 @@ def _build_login_payload(user: User) -> dict:
                 allowed_modules.extend(mods)
         allowed_modules = list(set(allowed_modules))
 
+    # Permissions granulaires effectives + modules communs a l'entreprise.
+    permissions: list = []
+    shared_modules: list = []
+    try:
+        from app.core.permissions import load_effective_permissions, _shared_module_keys
+        permissions = sorted(load_effective_permissions(user))
+        shared_modules = sorted(_shared_module_keys(user))
+    except Exception:
+        # Ne jamais faire echouer la connexion si la brique granulaire n'est
+        # pas encore en place (base non migree) : on retombe sur modules_allowed.
+        pass
+
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -179,10 +191,17 @@ def _build_login_payload(user: User) -> dict:
         "username": user.username,
         "email": user.email,
         "roles": user_roles,
+        "role_level": getattr(user, "role_level", 3),
+        "department_id": getattr(user, "department_id", None),
         "company_id": user.company_id,
         "company_name": user.company.nom if getattr(user, 'company', None) else None,
         "is_superuser": bool(user.is_superuser or "SUPER_ADMIN" in user_roles),
-        "modules_allowed": allowed_modules
+        "modules_allowed": allowed_modules,
+        "permissions": permissions,
+        "shared_modules": shared_modules,
+        # Le front n'invente jamais cette regle : c'est la source backend
+        # (colonne users.must_change_password) qui declenche le gate.
+        "must_change_password": bool(getattr(user, "must_change_password", False)),
     }
 
 

@@ -30,7 +30,7 @@ export function DataTable<T extends Record<string, any>>({
 }: DataTableProps<T>) {
   if (isLoading || loading) {
     return (
-      <div className="text-center py-12 text-gray-500 flex items-center justify-center gap-2">
+      <div className="text-center py-12 text-slate-400 flex items-center justify-center gap-2">
         <span className="material-symbols-outlined animate-spin">progress_activity</span>
         <span>Chargement...</span>
       </div>
@@ -38,7 +38,7 @@ export function DataTable<T extends Record<string, any>>({
   }
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-slate-400">
         <p>{emptyMessage}</p>
       </div>
     );
@@ -48,9 +48,9 @@ export function DataTable<T extends Record<string, any>>({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-200">
+          <tr className="border-b border-slate-700">
             {columns.map(col => (
-              <th key={col.key} className="text-left px-4 py-3 font-medium text-gray-600">{col.header}</th>
+              <th key={col.key} className="text-left px-4 py-3 font-medium text-slate-400">{col.header}</th>
             ))}
           </tr>
         </thead>
@@ -59,10 +59,10 @@ export function DataTable<T extends Record<string, any>>({
             <tr
               key={item[keyField] || idx}
               onClick={() => onRowClick?.(item)}
-              className={`border-b border-gray-100 ${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+              className={`border-b border-slate-700 ${onRowClick ? 'cursor-pointer hover:bg-slate-800' : ''}`}
             >
               {columns.map(col => (
-                <td key={col.key} className="px-4 py-3 text-gray-700">
+                <td key={col.key} className="px-4 py-3 text-slate-200">
                   {col.render ? col.render(item) : col.cell ? col.cell(item) : item[col.key]}
                 </td>
               ))}

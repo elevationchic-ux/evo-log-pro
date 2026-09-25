@@ -70,18 +70,18 @@ export default function MonEspaceRHPage() {
     <ModuleLayout module="rh">
       <div className="max-w-7xl mx-auto py-8 px-4">
         {/* En-tête du profil */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row items-center gap-6">
-          <div className="h-24 w-24 rounded-full bg-teal-100 flex items-center justify-center text-teal-600">
+        <div className="bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-700 mb-8 flex flex-col md:flex-row items-center gap-6">
+          <div className="h-24 w-24 rounded-full bg-teal-500/15 flex items-center justify-center text-teal-600">
             <UserCircle className="h-16 w-16" />
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h1 className="text-3xl font-black text-slate-800">{profile?.prenom} {profile?.nom}</h1>
+            <h1 className="text-3xl font-black text-slate-200">{profile?.prenom} {profile?.nom}</h1>
             <p className="text-lg text-slate-500 font-medium">{profile?.poste} • {profile?.departement}</p>
             <div className="flex flex-wrap gap-3 mt-4 justify-center md:justify-start">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-sm font-bold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-900 text-slate-400 rounded-lg text-sm font-bold">
                 <Badge className="w-4 h-4" /> {profile?.matricule}
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-sm font-bold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-600 rounded-lg text-sm font-bold">
                 <Briefcase className="w-4 h-4" /> {profile?.statut}
               </span>
             </div>
@@ -99,19 +99,19 @@ export default function MonEspaceRHPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Fiches de paie */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+          <div className="bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-700">
             <div className="flex items-center gap-3 mb-6">
               <FileText className="w-6 h-6 text-teal-600" />
-              <h2 className="text-xl font-bold text-slate-800">Mes Fiches de Paie</h2>
+              <h2 className="text-xl font-bold text-slate-200">Mes Fiches de Paie</h2>
             </div>
             <div className="space-y-4">
               {paies.length === 0 ? (
                 <p className="text-sm text-slate-500 py-4 text-center">Aucune fiche de paie générée.</p>
               ) : (
                 paies.map((p, idx) => (
-                  <div key={p.id || idx} className="p-4 rounded-xl border border-slate-100 hover:border-teal-200 bg-slate-50 transition-colors flex justify-between items-center">
+                  <div key={p.id || idx} className="p-4 rounded-xl border border-slate-700 hover:border-teal-500/40 bg-slate-800 transition-colors flex justify-between items-center">
                     <div>
-                      <p className="font-bold text-slate-700">Période : {p.periode}</p>
+                      <p className="font-bold text-slate-300">Période : {p.periode}</p>
                       <p className="text-sm text-slate-500">Net à payer : {Number(p.net_a_payer).toLocaleString()} FCFA</p>
                     </div>
                     <button className="text-teal-600 font-bold hover:underline text-sm">Visualiser</button>
@@ -122,22 +122,22 @@ export default function MonEspaceRHPage() {
           </div>
 
           {/* Mes Absences / Congés */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+          <div className="bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-700">
             <div className="flex items-center gap-3 mb-6">
               <CalendarDays className="w-6 h-6 text-amber-500" />
-              <h2 className="text-xl font-bold text-slate-800">Historique des Absences</h2>
+              <h2 className="text-xl font-bold text-slate-200">Historique des Absences</h2>
             </div>
             <div className="space-y-4">
               {conges.length === 0 ? (
                 <p className="text-sm text-slate-500 py-4 text-center">Aucune demande de congé enregistrée.</p>
               ) : (
                 conges.map((c, idx) => (
-                  <div key={c.id || idx} className="p-4 rounded-xl border border-slate-100 bg-white shadow-sm flex flex-col gap-2">
+                  <div key={c.id || idx} className="p-4 rounded-xl border border-slate-700 bg-slate-900 shadow-sm flex flex-col gap-2">
                     <div className="flex justify-between items-start">
-                      <span className="font-bold text-slate-700">Congé {c.type_conge}</span>
+                      <span className="font-bold text-slate-300">Congé {c.type_conge}</span>
                       <span className={`px-2 py-1 text-xs font-bold rounded ${
-                        c.statut === 'APPROUVE' ? 'bg-emerald-100 text-emerald-700' :
-                        c.statut === 'REFUSE' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'
+                        c.statut === 'APPROUVE' ? 'bg-emerald-500/15 text-emerald-300' :
+                        c.statut === 'REFUSE' ? 'bg-rose-500/15 text-rose-300' : 'bg-slate-900 text-slate-300'
                       }`}>{c.statut}</span>
                     </div>
                     <p className="text-sm text-slate-500">Du {new Date(c.date_debut).toLocaleDateString()} au {new Date(c.date_fin).toLocaleDateString()}</p>
@@ -152,14 +152,14 @@ export default function MonEspaceRHPage() {
         {/* Modal Demande Congé */}
         {showCongeModal && (
           <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-8 max-w-md w-full animate-in zoom-in-95">
-              <h2 className="text-2xl font-black text-slate-800 mb-6 flex items-center gap-2">
+            <div className="bg-slate-900 rounded-3xl p-8 max-w-md w-full animate-in zoom-in-95">
+              <h2 className="text-2xl font-black text-slate-200 mb-6 flex items-center gap-2">
                 <CalendarDays className="text-teal-600" /> Nouvelle demande
               </h2>
               <form onSubmit={submitConge} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Type d'absence</label>
-                  <select value={congeData.type_conge} onChange={e => setCongeData({...congeData, type_conge: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-teal-500">
+                  <label className="block text-sm font-bold text-slate-300 mb-2">Type d'absence</label>
+                  <select value={congeData.type_conge} onChange={e => setCongeData({...congeData, type_conge: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-teal-500">
                     <option value="ANNUEL">Congé Annuel</option>
                     <option value="MALADIE">Congé Maladie</option>
                     <option value="MATERNITE">Congé Maternité/Paternité</option>
@@ -168,20 +168,20 @@ export default function MonEspaceRHPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Date début</label>
-                    <input type="date" required value={congeData.date_debut} onChange={e => setCongeData({...congeData, date_debut: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-teal-500"/>
+                    <label className="block text-sm font-bold text-slate-300 mb-2">Date début</label>
+                    <input type="date" required value={congeData.date_debut} onChange={e => setCongeData({...congeData, date_debut: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-teal-500"/>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Date fin</label>
-                    <input type="date" required value={congeData.date_fin} onChange={e => setCongeData({...congeData, date_fin: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-teal-500"/>
+                    <label className="block text-sm font-bold text-slate-300 mb-2">Date fin</label>
+                    <input type="date" required value={congeData.date_fin} onChange={e => setCongeData({...congeData, date_fin: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-teal-500"/>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Motif (Optionnel)</label>
-                  <textarea value={congeData.motif} onChange={e => setCongeData({...congeData, motif: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-teal-500 h-24" placeholder="Précisez la raison si nécessaire..."/>
+                  <label className="block text-sm font-bold text-slate-300 mb-2">Motif (Optionnel)</label>
+                  <textarea value={congeData.motif} onChange={e => setCongeData({...congeData, motif: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-teal-500 h-24" placeholder="Précisez la raison si nécessaire..."/>
                 </div>
                 <div className="flex gap-4 pt-4">
-                  <button type="button" onClick={() => setShowCongeModal(false)} className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200">Annuler</button>
+                  <button type="button" onClick={() => setShowCongeModal(false)} className="flex-1 py-3 bg-slate-900 text-slate-300 font-bold rounded-xl hover:bg-slate-700">Annuler</button>
                   <button type="submit" className="flex-1 py-3 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 flex justify-center items-center gap-2">
                     <Send className="w-4 h-4" /> Envoyer
                   </button>

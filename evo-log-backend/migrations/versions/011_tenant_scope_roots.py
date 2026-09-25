@@ -1,24 +1,28 @@
 """isolation multi-tenant: company_id sur les racines transactionnelles
 
-Merge des deux tetes existantes (010_add_outbox_events +
-20260919_add_quote_company_scope) puis ajoute company_id (cle de cloisonnement
-usee par app.core.tenant_enforcement) + index aux documents metiers qui en
-etaient depourvus : tiers (=> clients/fournisseurs par heritage joined-table),
+Suit 20260919_add_quote_company_scope (lui-meme re-rattache a
+010_add_outbox_events) puis ajoute company_id (cle de cloisonnement usee par
+app.core.tenant_enforcement) + index aux documents metiers qui en etaient
+depourvus : tiers (=> clients/fournisseurs par heritage joined-table),
 dossiers_transit, vehicules, reglements, ordres_transport, bons_commande,
 bons_reception.
+
+La chaine est volontairement LINEAIRE (une seule tete, une seule base) : un
+point de fusion rendrait `alembic downgrade base` impossible a resoudre, alors
+que le rollback complet est verifie par tests/unit/test_migrations_chain.py.
 
 Idempotent : chaque colonne/index n'est cree que s'il manque, pour cohabiter
 avec Base.metadata.create_all() utilise sur les deploiements neufs.
 
 Revision ID: 011_tenant_scope_roots
-Revises: 010_add_outbox_events, 20260919_add_quote_company_scope
+Revises: 20260919_add_quote_company_scope
 """
 from alembic import op
 import sqlalchemy as sa
 
 
 revision = "011_tenant_scope_roots"
-down_revision = ("010_add_outbox_events", "20260919_add_quote_company_scope")
+down_revision = "20260919_add_quote_company_scope"
 branch_labels = None
 depends_on = None
 

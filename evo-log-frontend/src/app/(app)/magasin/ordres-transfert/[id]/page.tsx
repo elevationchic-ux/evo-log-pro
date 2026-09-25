@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { ModuleLayout } from '@/components/layout/ModuleLayout'
-import { ArrowRightLeft, Search, Plus, Calendar, Edit, FileText, CheckCircle2, Truck, Box, Package, Loader2, Megaphone, AlertTriangle } from 'lucide-react'
+import { ArrowRightLeft, Calendar, FileText, CheckCircle2, Megaphone, Package } from 'lucide-react'
 import { CardSkeletonLoader } from '@/components/ui/Loaders'
-import { magasinAPI, authAPI } from '@/lib/api-client'
+import { magasinAPI, authAPI, apiClient } from '@/lib/api-client'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -14,12 +14,23 @@ export default function OrdreTransfertDetailPage({ params }: { params: { id: str
   const [loading, setLoading] = useState(true)
   const [userName, setUserName] = useState<string>('')
   const [bandeAssociee, setBandeAssociee] = useState<any>(null)
-  const [checkingBande, setCheckingBande] = useState(false)
+  const [magasins, setMagasins] = useState<any[]>([])
+  const [article, setArticle] = useState<any>(null)
 
   useEffect(() => {
     fetchOt()
     fetchUserName()
+    // Referentiel magasins reel (resolucodes noms)
+    magasinAPI.getMagasins()
+      .then(res => {
+        const d = res.data
+        setMagasins(Array.isArray(d) ? d : (d?.items ?? []))
+      })
+      .catch(console.error)
   }, [])
+
+  const magasinNom = (id: number | null | undefined) =>
+    magasins.find((m: any) => m.id === id)?.nom || 'Non spécifié'
 
   const fetchOt = async () => {
     try {
@@ -34,6 +45,17 @@ export default function OrdreTransfertDetailPage({ params }: { params: { id: str
     }
   }
 
+  // Resoudre l'article reellement rattache a cet OT
+  useEffect(() => {
+    if (ot?.article_id) {
+      apiClient.get(`/api/magasin/articles/${ot.article_id}`)
+        .then((res: any) => setArticle(res.data || null))
+        .catch(() => setArticle(null))
+    } else {
+      setArticle(null)
+    }
+  }, [ot])
+
   const fetchUserName = async () => {
     try {
       const res = await authAPI.getMe()
@@ -46,15 +68,13 @@ export default function OrdreTransfertDetailPage({ params }: { params: { id: str
 
   const checkAssociatedBande = async () => {
     if (!otId) return
-    setCheckingBande(true)
     try {
       const res = await magasinAPI.getBandeByOrdreTransfert(otId)
-      setBandeAssociee(res.data || null)
+      // L'API reelle renvoie la liste des bandes derivees de cet OT
+      const list = Array.isArray(res.data) ? res.data : (res.data ? [res.data] : [])
+      setBandeAssociee(list[0] ?? null)
     } catch (error) {
-      // 404 means no bande associated
       setBandeAssociee(null)
-    } finally {
-      setCheckingBande(false)
     }
   }
 
@@ -74,7 +94,6 @@ export default function OrdreTransfertDetailPage({ params }: { params: { id: str
       const res = await magasinAPI.createBandeFromOrdreTransfert(otId, userName)
       toast.success('Bande de livraison générée avec succès')
       setBandeAssociee(res.data)
-      // Refetch OT to see updated status? Not needed.
     } catch (err: any) {
       console.error(err)
       toast.error(`Erreur: ${err.response?.data?.detail || 'Erreur inconnue'}`)
@@ -83,12 +102,11 @@ export default function OrdreTransfertDetailPage({ params }: { params: { id: str
 
   const handleValiderPaiement = async () => {
     if (!otId) return
-    if (!confirm('Êtes-vous sûr de vouloir valider le paiement et débloquer cet OT ?')) return
-    
+    if (!confirm('Êtes-vous sûr de vouloir valider le paiement de cet OT ?')) return
     try {
       await magasinAPI.validerPaiementOT(otId)
-      toast.success('Paiement validé. Génération du Bon d\'Enlèvement en cours...')
-      fetchOt() // Refresh to see new status
+      toast.success('Paiement validé')
+      fetchOt() // Rafraichir le statut reel
     } catch (err: any) {
       console.error(err)
       toast.error(`Erreur: ${err.response?.data?.detail || 'Erreur inconnue'}`)
@@ -107,18 +125,18 @@ export default function OrdreTransfertDetailPage({ params }: { params: { id: str
     )
   }
 
-  // Helper to get status badge class
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      BROUILLON: 'bg-slate-100 text-slate-700',
-      VALIDE: 'bg-blue-100 text-blue-700',
-      EN_TRANSIT: 'bg-purple-100 text-purple-700',
-      RECEPTIONNE: 'bg-emerald-100 text-emerald-700',
-      ANNULE: 'bg-red-100 text-red-700'
+      brouillon: 'bg-slate-900 text-slate-300',
+      valide: 'bg-blue-500/15 text-blue-300',
+      paye: 'bg-amber-500/15 text-amber-300',
+      expedie: 'bg-purple-500/15 text-purple-300',
+      receptionne: 'bg-emerald-500/15 text-emerald-300',
+      annule: 'bg-red-500/15 text-red-300'
     }
     return (
-      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${styles[status] || 'bg-slate-100 text-slate-700'}`}>
-        {status}
+      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${styles[status] || 'bg-slate-900 text-slate-300'}`}>
+        {(status || '').toUpperCase()}
       </span>
     )
   }
@@ -128,36 +146,25 @@ export default function OrdreTransfertDetailPage({ params }: { params: { id: str
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 animate-in fade-in duration-500">
 
         {/* Header */}
-        <div className="flex justify-between items-end mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-200 flex items-center gap-3">
               <ArrowRightLeft className="w-6 h-6 text-blue-600" />
               Ordre de Transfert #{ot.id}
             </h1>
-            <p className="text-sm text-slate-500 mt-1">Numéro: {ot.numero_ot}</p>
+            <p className="text-sm text-slate-500 mt-1">Référence: {ot.reference}</p>
           </div>
-          <div className="flex gap-2">
-            {ot.statut === 'BROUILLON' && (
+          <div className="flex flex-wrap gap-2">
+            {ot.statut === 'valide' && (
               <button
                 onClick={handleValiderPaiement}
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                Valider Paiement & Débloquer OT
+                Valider le paiement
               </button>
             )}
-            {ot.statut !== 'BROUILLON' && ot.statut !== 'ANNULE' && (
-              <a
-                href={`${process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-83b1.up.railway.app'}/documents/ot/${ot.numero_ot}_Bon_Enlevement.pdf`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all"
-              >
-                <FileText className="w-4 h-4" />
-                Télécharger Bon d'Enlèvement PDF
-              </a>
-            )}
-            {ot.statut === 'VALIDE' && !bandeAssociee && (
+            {['valide', 'paye', 'expedie'].includes(ot.statut) && !bandeAssociee && (
               <button
                 onClick={handleGenerateBande}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all"
@@ -167,80 +174,62 @@ export default function OrdreTransfertDetailPage({ params }: { params: { id: str
               </button>
             )}
             {bandeAssociee && (
-              <Link href={`/magasin/bandes-livraison/${bandeAssociee.id}`} className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 flex items-center gap-2">
+              <Link href={`/magasin/bandes-livraison/${bandeAssociee.id}`} className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 hover:bg-slate-700 flex items-center gap-2">
                 <Package className="w-4 h-4" />
                 Voir la Bande de Livraison associée
               </Link>
             )}
-            <Link href="/magasin/ordres-transfert" className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200">
+            <Link href="/magasin/ordres-transfert" className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 hover:bg-slate-700">
               Retour à la liste
             </Link>
           </div>
         </div>
 
         {/* Status Badge */}
-        <div className="mb-6 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {getStatusBadge(ot.statut).replace('span', '').trim()}">
-          {ot.statut}
+        <div className="mb-6">
+          {getStatusBadge(ot.statut)}
         </div>
 
         {/* Main Info */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-200 mb-4 flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600" />
             Informations Générales
           </h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            <div className="grid grid-cols-2 gap-6">
+          <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-700 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">Trajet</h3>
-                <p className="text-sm text-slate-500"><strong>Source:</strong> {ot.magasin_source?.nom || 'Non spécifié'}</p>
-                <p className="text-sm text-slate-500"><strong>Destination:</strong> {ot.magasin_destination?.nom || 'Non spécifié'}</p>
-                <p className="text-sm text-slate-500"><strong>Date prévue de transfert:</strong> {ot.date_transfert ? new Date(ot.date_transfert).toLocaleDateString() : 'Non définie'}</p>
+                <h3 className="text-lg font-bold text-slate-200 mb-3">Trajet</h3>
+                <p className="text-sm text-slate-500"><strong>Source:</strong> {magasinNom(ot.entrepot_source_id)}</p>
+                <p className="text-sm text-slate-500"><strong>Destination:</strong> {magasinNom(ot.entrepot_dest_id)}</p>
+                <p className="text-sm text-slate-500"><strong>Date de transfert:</strong> {ot.date_transfert ? new Date(ot.date_transfert).toLocaleDateString() : 'Non définie'}</p>
+                {ot.motif && (
+                  <p className="text-sm text-slate-500"><strong>Motif:</strong> {ot.motif}</p>
+                )}
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">Références & Dates</h3>
-                <p className="text-sm text-slate-500"><strong>Numéro OT:</strong> {ot.numero_ot}</p>
+                <h3 className="text-lg font-bold text-slate-200 mb-3">Références & Dates</h3>
+                <p className="text-sm text-slate-500"><strong>Référence:</strong> {ot.reference}</p>
                 <p className="text-sm text-slate-500"><strong>Date de création:</strong> {ot.created_at ? new Date(ot.created_at).toLocaleString() : 'Non disponible'}</p>
-                {ot.date_validation && (
-                  <p className="text-sm text-slate-500"><strong>Date de validation:</strong> {new Date(ot.date_validation).toLocaleString()}</p>
-                )}
-                {ot.date_expedition && (
-                  <p className="text-sm text-slate-500"><strong>Date d'expédition:</strong> {new Date(ot.date_expedition).toLocaleString()}</p>
-                )}
-                {ot.date_reception && (
-                  <p className="text-sm text-slate-500"><strong>Date de réception:</strong> {new Date(ot.date_reception).toLocaleString()}</p>
+                {ot.montant_paiement != null && (
+                  <p className="text-sm text-slate-500"><strong>Montant paiement:</strong> {Number(ot.montant_paiement).toLocaleString()} FCFA</p>
                 )}
               </div>
             </div>
-
-            {ot.declaration && (
-              <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                <h3 className="text-lg font-bold text-slate-900 mb-3">Déclaration Marchandises Associée</h3>
-                <p className="text-sm text-slate-500"><strong>BL:</strong> {ot.declaration?.numero_bl}</p>
-                <p className="text-sm text-slate-500"><strong>Client:</strong> {ot.declaration?.client?.nom} {ot.declaration?.client?.prenom}</p>
-                <Link
-                  href={`/magasin/declarations/${ot.declaration?.id}`}
-                  className="mt-2 inline-flex items-center text-sm text-blue-600 hover:underline"
-                >
-                  Voir la déclaration
-                  <ArrowRightLeft className="ml-2 h-4 w-4" />
-                </Link>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Articles */}
+        {/* Article */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Box className="w-5 h-5 text-blue-600" />
-            Articles à Transférer
+          <h2 className="text-xl font-bold text-slate-200 mb-4 flex items-center gap-2">
+            <Package className="w-5 h-5 text-blue-600" />
+            Article transféré
           </h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            {ot.lignes && ot.lignes.length > 0 ? (
+          <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-700 p-6">
+            {article ? (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200">
-                  <thead className="bg-slate-50">
+                <table className="min-w-full divide-y divide-slate-800">
+                  <thead className="bg-slate-800">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-500">Code Article</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-500">Désignation</th>
@@ -248,15 +237,13 @@ export default function OrdreTransfertDetailPage({ params }: { params: { id: str
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-500">Unité</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-slate-100">
-                    {ot.lignes.map((ligne: any) => (
-                      <tr key={ligne.id} className="hover:bg-slate-50">
-                        <td className="px-6 py-4 text-font-mono">{ligne.article?.code}</td>
-                        <td className="px-6 py-4">{ligne.article?.nom}</td>
-                        <td className="px-6 py-4">{parseFloat(ligne.quantite)}</td>
-                        <td className="px-6 py-4">{ligne.article?.unite_mesure}</td>
-                      </tr>
-                    ))}
+                  <tbody className="bg-slate-900 divide-y divide-slate-800">
+                    <tr className="hover:bg-slate-800">
+                      <td className="px-6 py-4 font-mono text-slate-200">{article.code}</td>
+                      <td className="px-6 py-4 text-slate-200">{article.designation}</td>
+                      <td className="px-6 py-4 text-slate-200">{ot.quantite != null ? Number(ot.quantite) : ''}</td>
+                      <td className="px-6 py-4 text-slate-200">{article.unite_mesure || ''}</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -266,33 +253,29 @@ export default function OrdreTransfertDetailPage({ params }: { params: { id: str
           </div>
         </div>
 
-        {/* Actions History (optional) */}
+        {/* Lifecycle */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-200 mb-4 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-blue-600" />
-            Historique des Actions
+            Cycle de vie
           </h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            <div className="space-y-3">
-              {ot.date_validation && (
-                <div className="flex justify-between items-center text-sm">
-                  <span>Validation</span>
-                  <span className="text-slate-500">{new Date(ot.date_validation).toLocaleString()}</span>
-                </div>
+          <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-700 p-6">
+            <ol className="space-y-2 text-sm">
+              <li className="flex justify-between items-center">
+                <span className="text-slate-300">Création (brouillon)</span>
+                <span className="text-slate-500">{ot.created_at ? new Date(ot.created_at).toLocaleString() : ''}</span>
+              </li>
+              <li className="flex justify-between items-center">
+                <span className="text-slate-300">Statut actuel</span>
+                <span>{getStatusBadge(ot.statut)}</span>
+              </li>
+              {ot.updated_at && (
+                <li className="flex justify-between items-center">
+                  <span className="text-slate-300">Dernière mise à jour</span>
+                  <span className="text-slate-500">{new Date(ot.updated_at).toLocaleString()}</span>
+                </li>
               )}
-              {ot.date_expedition && (
-                <div className="flex justify-between items-center text-sm">
-                  <span>Expédition</span>
-                  <span className="text-slate-500">{new Date(ot.date_expedition).toLocaleString()}</span>
-                </div>
-              )}
-              {ot.date_reception && (
-                <div className="flex justify-between items-center text-sm">
-                  <span>Réception</span>
-                  <span className="text-slate-500">{new Date(ot.date_reception).toLocaleString()}</span>
-                </div>
-              )}
-            </div>
+            </ol>
           </div>
         </div>
 

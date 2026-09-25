@@ -163,7 +163,7 @@ export default function RolePage() {
           <div className="p-12 text-center"><RefreshCw className="w-6 h-6 animate-spin text-red-400 mx-auto mb-2" /></div>
         ) : roles.length === 0 ? (
           <div className="p-12 text-center text-slate-400">
-            <Shield className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+            <Shield className="w-10 h-10 text-slate-400 mx-auto mb-2" />
             <p className="font-bold text-white">Aucun rôle configuré</p>
             <p className="text-xs text-slate-500 mt-1">Cliquez sur "Init Rôles Système" pour créer les rôles par défaut.</p>
           </div>
@@ -184,7 +184,7 @@ export default function RolePage() {
                   {(r.modules || []).map((m: string) => (
                     <span key={m} className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">{m}</span>
                   ))}
-                  {(!r.modules || r.modules.length === 0) && <span className="text-xs text-slate-600 italic">Aucun module assigné</span>}
+                  {(!r.modules || r.modules.length === 0) && <span className="text-xs text-slate-400 italic">Aucun module assigné</span>}
                 </div>
               </div>
             ))}

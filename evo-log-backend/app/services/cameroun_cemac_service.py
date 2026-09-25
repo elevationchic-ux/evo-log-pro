@@ -194,29 +194,40 @@ class SydoniaPlusIntegrationService:
     @staticmethod
     def calculer_droits_douane(
         valeur_caf: float,
-        taux_dd: float,  # Droits de douane (configured per HS code)
+        taux_dd: float,  # Droits de douane (fraction, ex 0.20) configures par code HS
         taux_tva: float,
         taux_autres_taxes: float = 0.0,
         config: CamerounConfig = None
     ) -> Dict[str, float]:
         """
-        Calculate customs duties according to Cameroon tariff schedule
-        Rates must be configured based on official tariff books
+        Calculate customs duties according to Cameroon tariff schedule.
+
+        Délégué au moteur UNIQUE (app.services.taxation_douaniere) pour que le
+        même conteneur donne le même montant que les autres écrans. Les taux
+        sont fournis explicitement par l'appelant (source "manuel").
         """
-        dd = valeur_caf * taux_dd
-        tva = (valeur_caf + dd) * taux_tva
-        autres_taxes = valeur_caf * taux_autres_taxes
-        total = valeur_caf + dd + tva + autres_taxes
-        
+        from app.services.taxation_douaniere import calculer_liquidation
+
+        liquidation = calculer_liquidation(
+            valeur_en_douane=valeur_caf,
+            taux_dd_explicite=taux_dd,
+            taux_tva_explicite=taux_tva,
+        )
+        # Alias de l'ancienne forme d'appel, pour les consommateurs historiques.
+        dd = liquidation["droit_douane_dd"]
+        tva = liquidation["tva_1925"]
+        autres_taxes = round(valeur_caf * taux_autres_taxes, 2)
+        total = round(liquidation["total_a_liquider_xaf"] + autres_taxes, 2)
         return {
-            "valeur_caf": valeur_caf,
-            "droits_douane": round(dd, 2),
+            "valeur_caf": round(valeur_caf, 2),
+            "droits_douane": dd,
             "taux_dd": taux_dd,
-            "tva": round(tva, 2),
+            "tva": tva,
             "taux_tva": taux_tva,
-            "autres_taxes": round(autres_taxes, 2),
-            "total": round(total, 2),
-            "devise": config.devise if config else "XAF"
+            "autres_taxes": autres_taxes,
+            "total": total,
+            "devise": config.devise if config else "XAF",
+            "detail": liquidation,
         }
 
 

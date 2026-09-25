@@ -1,587 +1,450 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
-  FileText,
-  Calendar,
-  CreditCard,
-  CheckCircle2,
-  AlertTriangle,
-  RefreshCw,
-  Search,
-  Menu,
-  ChevronDown,
-  ChevronUp,
-  TrendingUp,
-  PieChart
+  FileText, CreditCard, CheckCircle2, AlertTriangle, RefreshCw, Search,
+  Loader2, Send, Ban, Download, X
 } from 'lucide-react';
-import { financeAPI } from '@/lib/api-client';
+import { useRouter } from 'next/navigation';
+import { apiClient, financeAPI } from '@/lib/api-client';
+import { toast } from 'sonner';
+import { useSettings } from '@/components/layout/SettingsProvider';
+
+interface FactureRow {
+  id: number;
+  numero_facture: string;
+  client_nom: string | null;
+  date_emission: string | null;
+  date_echeance: string | null;
+  montant_ht: number;
+  montant_tva: number;
+  montant_ttc: number;
+  statut: string; // brouillon | emise | payee_partiellement | payee | annulee | retard
+}
+
+const STATUT_STYLE: Record<string, string> = {
+  brouillon: 'bg-slate-500/10 text-slate-300 border-slate-500/30',
+  emise: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  payee_partiellement: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  payee: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  retard: 'bg-red-500/10 text-red-400 border-red-500/20',
+  annulee: 'bg-slate-800 text-slate-500 border-slate-700 line-through',
+};
+
+const fmtXaf = (n: number | null | undefined, lang: string) =>
+  n == null ? '' : `${new Intl.NumberFormat(lang === 'en' ? 'en-US' : 'fr-FR').format(Math.round(n))} FCFA`;
+
+const fmtDate = (iso: string | null, lang: string) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(lang === 'en' ? 'en-GB' : 'fr-FR');
+};
 
 export default function ClientInvoicesPage() {
-  const [invoices, setInvoices] = useState<any[]>([]);
+  const { language } = useSettings();
+  const lang = language || 'fr';
+  const t = (fr: string, en: string) => (lang === 'en' ? en : fr);
+  const router = useRouter();
+
+  const STATUT_LABELS: Record<string, [string, string]> = {
+    brouillon: ['Brouillon', 'Draft'],
+    emise: ['Émise', 'Issued'],
+    payee_partiellement: ['Partiellement payée', 'Partially paid'],
+    payee: ['Payée', 'Paid'],
+    retard: ['En retard', 'Overdue'],
+    annulee: ['Annulée', 'Cancelled'],
+  };
+  const statutLabel = (s: string) => {
+    const pair = STATUT_LABELS[s];
+    return pair ? (lang === 'en' ? pair[1] : pair[0]) : s;
+  };
+
+  const [invoices, setInvoices] = useState<FactureRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
-  const [filters, setFilters] = useState({
-    statut: '',
-    dateDebut: '',
-    dateFin: '',
-    search: '',
-    minAmount: '',
-    maxAmount: ''
-  });
-  const [sortBy, setSortBy] = useState<{ field: string; direction: 'asc' | 'desc' }>({
-    field: 'dateCreation',
-    direction: 'desc'
-  });
-  const [expandedInvoiceId, setExpandedInvoiceId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [filterStatut, setFilterStatut] = useState('');
+  const [actionBusy, setActionBusy] = useState<number | null>(null);
+  const [payTarget, setPayTarget] = useState<FactureRow | null>(null);
+  const [payForm, setPayForm] = useState({ montant: '', mode_paiement: 'virement', reference_bancaire: '' });
+  const [paying, setPaying] = useState(false);
 
-  useEffect(() => {
-    loadInvoices();
-  }, []);
-
-  const loadInvoices = async () => {
+  const loadInvoices = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
-      const res = await financeAPI.getFactures({
-        limit: 100,
-        ...filters
-      });
-      setInvoices(res.data || res || []);
-    } catch (err) {
-      console.error('Failed to load invoices:', err);
-      setError('Impossible de charger les factures. Veuillez réessayer.');
+      const res = await financeAPI.getFactures({ limit: 200 });
+      const raw = Array.isArray(res.data) ? res.data : res.data?.items || [];
+      setInvoices(raw.map((f: any) => ({
+        id: f.id,
+        numero_facture: f.numero_facture || `FAC-${f.id}`,
+        client_nom: f.client_nom || null,
+        date_emission: f.date_emission || null,
+        date_echeance: f.date_echeance || null,
+        montant_ht: Number(f.montant_ht) || 0,
+        montant_tva: Number(f.montant_tva) || 0,
+        montant_ttc: Number(f.montant_ttc) || 0,
+        statut: String(f.statut || 'brouillon'),
+      })));
+    } catch {
+      setInvoices([]);
+      toast.error(t('Erreur réseau  chargement des factures impossible', 'Network error  could not load invoices'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [lang]);
 
-  const filteredInvoices = invoices.filter(invoice => {
-    if (filters.statut && invoice.status !== filters.statut) return false;
-    if (filters.search) {
-      const searchTerm = filters.search.toLowerCase();
+  useEffect(() => { loadInvoices(); }, [loadInvoices]);
+
+  const filtered = invoices.filter(f => {
+    if (filterStatut && f.statut !== filterStatut) return false;
+    if (search) {
+      const q = search.toLowerCase();
       return (
-        invoice.id?.toString().toLowerCase().includes(searchTerm) ||
-        (invoice.client_nom || '').toLowerCase().includes(searchTerm) ||
-        (invoice.reference || '').toLowerCase().includes(searchTerm)
+        f.numero_facture.toLowerCase().includes(q) ||
+        (f.client_nom || '').toLowerCase().includes(q)
       );
-    }
-    if (filters.minAmount && invoice.amount < parseFloat(filters.minAmount)) return false;
-    if (filters.maxAmount && invoice.amount > parseFloat(filters.maxAmount)) return false;
-    if (filters.dateDebut) {
-      const invoiceDate = new Date(invoice.dateCreation || invoice.date);
-      const filterDate = new Date(filters.dateDebut);
-      if (invoiceDate < filterDate) return false;
-    }
-    if (filters.dateFin) {
-      const invoiceDate = new Date(invoice.dateCreation || invoice.date);
-      const filterDate = new Date(filters.dateFin);
-      if (invoiceDate > filterDate) return false;
     }
     return true;
   });
 
-  const sortedInvoices = [...filteredInvoices].sort((a, b) => {
-    const fieldA = a[sortBy.field];
-    const fieldB = b[sortBy.field];
-
-    if (fieldA === undefined || fieldA === null) return 1;
-    if (fieldB === undefined || fieldB === null) return -1;
-
-    if (sortBy.direction === 'asc') {
-      return fieldA > fieldB ? 1 : -1;
-    } else {
-      return fieldA < fieldB ? 1 : -1;
+  const envoyerFacture = async (f: FactureRow) => {
+    setActionBusy(f.id);
+    try {
+      await apiClient.put(`/api/v1/finance/factures/${f.id}`, { statut: 'emise' });
+      toast.success(t(`${f.numero_facture} émise et visible du client`, `${f.numero_facture} issued and visible to the client`));
+      loadInvoices();
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+      toast.error(typeof detail === 'string' ? detail : t('Erreur réseau  envoi impossible', 'Network error  could not send'));
+    } finally {
+      setActionBusy(null);
     }
-  });
+  };
+
+  const annulerFacture = async (f: FactureRow) => {
+    if (!window.confirm(t(`Annuler la facture ${f.numero_facture} ? L'annulation est définitive et tracée.`, `Cancel invoice ${f.numero_facture}? Cancellation is final and logged.`))) return;
+    setActionBusy(f.id);
+    try {
+      await apiClient.put(`/api/v1/finance/factures/${f.id}`, { statut: 'annulee' });
+      toast.success(t(`${f.numero_facture} annulée`, `${f.numero_facture} cancelled`));
+      loadInvoices();
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+      toast.error(typeof detail === 'string' ? detail : t('Erreur réseau  annulation impossible', 'Network error  could not cancel'));
+    } finally {
+      setActionBusy(null);
+    }
+  };
+
+  const openPayModal = (f: FactureRow) => {
+    setPayTarget(f);
+    setPayForm({ montant: String(f.montant_ttc || ''), mode_paiement: 'virement', reference_bancaire: '' });
+  };
+
+  const reglerFacture = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!payTarget) return;
+    const montant = parseFloat(payForm.montant);
+    if (!montant || montant <= 0) {
+      toast.error(t('Montant du règlement invalide.', 'Invalid payment amount.'));
+      return;
+    }
+    setPaying(true);
+    try {
+      await apiClient.post('/api/v1/finance/reglements', {
+        numero_reglement: `REG-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(payTarget.id).padStart(4, '0')}`,
+        facture_id: payTarget.id,
+        date_reglement: new Date().toISOString().slice(0, 10),
+        montant,
+        mode_paiement: payForm.mode_paiement,
+        reference_bancaire: payForm.reference_bancaire || undefined,
+      });
+      toast.success(t(`Règlement de ${fmtXaf(montant, lang)} enregistré`, `Payment of ${fmtXaf(montant, lang)} recorded`));
+      setPayTarget(null);
+      loadInvoices();
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+      toast.error(typeof detail === 'string' ? detail : t('Erreur réseau  règlement non enregistré', 'Network error  payment not recorded'));
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const telechargerPDF = async (f: FactureRow) => {
+    try {
+      const res = await apiClient.get(`/api/v1/finance/factures/${f.id}/pdf`, { responseType: 'blob' });
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `facture-${f.numero_facture}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success(t('Facture téléchargée', 'Invoice downloaded'));
+    } catch {
+      // Génération serveur indisponible : repli honest sur impression des données réelles
+      const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, c =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+      const win = window.open('', '_blank', 'width=800,height=600');
+      if (!win) {
+        toast.error(t('Ouverture bloquée par le navigateur', 'Opening blocked by the browser'));
+        return;
+      }
+      win.document.write(`<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8" /><title>${esc(f.numero_facture)}</title>
+        <style>body{font-family:system-ui,Arial,sans-serif;padding:32px;color:#0f172a}h1{margin:0 0 4px}</style>
+        </head><body>
+        <h1>${t('Facture', 'Invoice')} ${esc(f.numero_facture)}</h1>
+        <p>${t('Client', 'Client')}: ${esc(f.client_nom || '')}<br/>${t('Émission', 'Issue date')}: ${fmtDate(f.date_emission, lang)}<br/>${t('Échéance', 'Due date')}: ${fmtDate(f.date_echeance, lang)}<br/>${t('Statut', 'Status')}: ${esc(statutLabel(f.statut))}</p>
+        <p>${t('Montant HT', 'Amount excl. tax')}: ${fmtXaf(f.montant_ht, lang)}<br/>${t('TVA', 'VAT')}: ${fmtXaf(f.montant_tva, lang)}<br/><strong>${t('Total TTC', 'Total incl. tax')}: ${fmtXaf(f.montant_ttc, lang)}</strong></p>
+        <script>window.print()</script>
+        </body></html>`);
+      win.document.close();
+    }
+  };
 
   return (
-    <div className="min-h-[80vh] py-12">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6 text-slate-100">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex justify-between items-start sm:items-center sm:justify-between flex-wrap gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-cyan-500/10 rounded-xl text-cyan-400 border border-cyan-500/20">
+            <FileText className="w-6 h-6" />
+          </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
-              Mes Factures
+            <h1 className="text-xl sm:text-2xl font-bold text-white">
+              {t('Facturation', 'Invoicing')}
             </h1>
-            <p className="text-slate-600">
-              Gérez et suivez l'état de toutes vos factures
+            <p className="text-sm text-slate-400">
+              {t('Émettez, envoyez et encaissez les factures clients', 'Issue, send and collect client invoices')}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSelectedInvoice(null)}
-              className="btn btn-primary btn-sm flex items-center gap-2"
-            >
-              <FileText className="w-4 h-4" /> Nouvelle Facture
-            </button>
-            <button
-              onClick={loadInvoices}
-              className="btn btn-outline btn-sm flex items-center gap-2"
-            >
-              <RefreshCw className="w-4 h-4" /> Actualiser
-            </button>
-          </div>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            onClick={() => router.push('/finance/invoicing/create')}
+            className="btn px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold flex items-center gap-2 transition-colors"
+          >
+            <FileText className="w-4 h-4" /> {t('Nouvelle Facture', 'New Invoice')}
+          </button>
+          <button
+            onClick={loadInvoices}
+            className="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-cyan-400 transition-colors"
+            title={t('Actualiser', 'Refresh')}
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
-          <AlertTriangle className="w-4 h-4 text-red-600 mr-2" />
-          <span>{error}</span>
-        </div>
-      )}
 
       {/* Filters */}
-      <div className="mb-6">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-            <Search className="w-5 h-5" /> Filtres
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Statut
-              </label>
-              <select
-                value={filters.statut}
-                onChange={(e) => setFilters(prev => ({ ...prev, statut: e.target.value }))}
-                className="select select-bordered w-full"
-              >
-                <option value="">Tous les statuts</option>
-                <option value="draft">Brouillon</option>
-                <option value="sent">Envoyée</option>
-                <option value="paid">Payée</option>
-                <option value="overdue">En Retard</option>
-                <option value="cancelled">Annulée</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Date de Début
-              </label>
-              <input
-                type="date"
-                value={filters.dateDebut}
-                onChange={(e) => setFilters(prev => ({ ...prev, dateDebut: e.target.value }))}
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Date de Fin
-              </label>
-              <input
-                type="date"
-                value={filters.dateFin}
-                onChange={(e) => setFilters(prev => ({ ...prev, dateFin: e.target.value }))}
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div className="flex items-end">
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Recherche
-              </label>
-              <input
-                type="text"
-                placeholder="Numéro, client, référence..."
-                value={filters.search}
-                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="input input-bordered w-full"
-              />
-            </div>
-          </div>
+      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 placeholder:text-slate-500"
+            placeholder={t('Rechercher n° de facture ou client...', 'Search invoice number or client...')}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         </div>
+        <select
+          value={filterStatut}
+          onChange={e => setFilterStatut(e.target.value)}
+          className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+        >
+          <option value="">{t('Tous les statuts', 'All statuses')}</option>
+          {Object.entries(STATUT_LABELS).map(([code, [fr, en]]) => (
+            <option key={code} value={code}>{lang === 'en' ? en : fr}</option>
+          ))}
+        </select>
       </div>
 
-      {/* Statistics */}
-      <div className="mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <FileText className="w-8 h-8 text-primary" />
-            </div>
-            <p className="text-sm font-medium text-slate-500">Total Factures</p>
-            <p className="text-2xl font-bold text-slate-900">{invoices.length}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <CheckCircle2 className="w-8 h-8 text-success" />
-            </div>
-            <p className="text-sm font-medium text-slate-500">Payées</p>
-            <p className="text-2xl font-bold text-slate-900">
-              {invoices.filter(i => i.status === 'paid').length}
-            </p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <TrendingUp className="w-8 h-8 text-success" />
-            </div>
-            <p className="text-sm font-medium text-slate-500">Montant Total</p>
-            <p className="text-2xl font-bold text-slate-900">
-              FCFA {invoices.reduce((sum, inv) => sum + (inv.amount || 0), 0).toLocaleString()}
-            </p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <PieChart className="w-8 h-8 text-info" />
-            </div>
-            <p className="text-sm font-medium text-slate-500">En Attente</p>
-            <p className="text-2xl font-bold text-slate-900">
-              {invoices.filter(i => ['sent', 'draft'].includes(i.status)).length}
-            </p>
-          </div>
+      {/* List */}
+      {loading ? (
+        <div className="py-16 flex items-center justify-center gap-2 text-slate-400 text-sm">
+          <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />
+          {t('Chargement des factures...', 'Loading invoices...')}
         </div>
-      </div>
-
-      {/* anys List */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-slate-800">
-            Liste des Factures ({filteredInvoices.length} résultat{(filteredInvoices.length !== 1) ? 's' : ''})
-          </h3>
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <span>Trier par :</span>
-            <select
-              value={sortBy.field}
-              onChange={(e) => setSortBy(prev => ({ ...prev, field: e.target.value }))}
-              className="select select-sm select-bordered"
-            >
-              <option value="dateCreation">Date (récent)</option>
-              <option value="dateCreation:asc">Date (ancien)</option>
-              <option value="id">Numéro</option>
-              <option value="amount">Montant</option>
-              <option value="status">Statut</option>
-            </select>
-          </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-12 text-center">
+          <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="font-semibold text-white">{t('Aucune facture', 'No invoice')}</h3>
+          <p className="text-sm text-slate-400 mt-1 max-w-md mx-auto">
+            {invoices.length === 0
+              ? t('Créez votre première facture client  elle sera émise avec TVA 19,25 % et numérotée en séquence légale.', 'Create your first client invoice  it will be issued with 19.25% VAT and legally sequenced.')
+              : t('Aucune facture ne correspond à la recherche ou au filtre.', 'No invoice matches the search or filter.')}
+          </p>
         </div>
-
-        {loading && !invoices.length && (
-          <div className="p-12 text-center">
-            <RefreshCw className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
-            <p className="text-slate-600">Chargement des factures...</p>
-          </div>
-        )}
-
-        {!loading && invoices.length === 0 && !error && (
-          <div className="p-12 text-center">
-            <FileText className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-            <p className="text-slate-500">Aucune facture trouvée</p>
-            <p className="text-slate-400 text-sm mt-2">
-              Aucune facture ne correspond aux filtres appliqués
-            </p>
-          </div>
-        )}
-
-        {!loading && invoices.length > 0 && (
-          <div className="divide-y divide-slate-100">
-            {sortedInvoices.map((invoice) => (
-              <div key={invoice.id} className="cursor-pointer hover:bg-slate-50 transition-colors">
-                {/* any Header */}
-                <div className="flex justify-between items-start px-6 py-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full">
-                        {invoice.status === 'paid' && (
-                          <CheckCircle2 className="w-4 h-4 text-success" />
-                        )}
-                        {invoice.status === 'overdue' && (
-                          <div className="w-3 h-3 border-2 border-destructive" />
-                        )}
-                        {invoice.status === 'sent' && (
-                          <div className="w-3 h-3 border-2 border-warning" />
-                        )}
-                        {invoice.status === 'draft' && (
-                          <div className="w-3 h-3 border-2 border-slate-400" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-800">Facture #{invoice.id}</p>
-                        <p className="text-sm text-slate-500 truncate">
-                          {invoice.reference || 'Facture standard'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <p className={
-                      invoice.status === 'paid' ? 'text-success font-medium' :
-                      invoice.status === 'overdue' ? 'text-destructive font-medium' :
-                      invoice.status === 'sent' ? 'text-warning font-medium' :
-                      'text-slate-500'
-                    }>
-                      {invoice.status === 'paid' && 'Payée'}
-                      {invoice.status === 'overdue' && 'En Retard'}
-                      {invoice.status === 'sent' && 'Envoyée'}
-                      {invoice.status === 'draft' && 'Brouillon'}
-                    </p>
-                    <p className="text-slate-500 text-right">
-                      FCFA {(invoice.amount || 0).toLocaleString()}
-                    </p>
-                    <button
-                      onClick={() => setExpandedInvoiceId(invoice.id.toString())}
-                      className="btn btn-ghost btn-sm p-1"
-                      aria-label="Développer/Réduire les détails"
-                    >
-                      {expandedInvoiceId === invoice.id.toString() ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
+      ) : (
+        <>
+          {/* Mobile cards */}
+          <div className="lg:hidden space-y-3">
+            {filtered.map(f => (
+              <div key={f.id} className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono font-bold text-cyan-400 text-sm">{f.numero_facture}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${STATUT_STYLE[f.statut] || 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                    {statutLabel(f.statut)}
+                  </span>
                 </div>
-
-                {/* any Details (expandable) */}
-                {expandedInvoiceId === invoice.id.toString() && (
-                  <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Date de Facturation</p>
-                        <p className="text-slate-500">
-                          {invoice.dateCreation ? new Date(invoice.dateCreation).toLocaleDateString('fr-FR') : 'Non définie'}
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Date d'Échéance</p>
-                        <p className="text-slate-500">
-                          {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('fr-FR') : 'Non définie'}
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Client</p>
-                        <p className="text-slate-500">{invoice.client_nom || 'Non spécifié'}</p>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Référence</p>
-                        <p className="text-slate-500 font-mono">{invoice.reference || 'N/A'}</p>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Mode de Paiement</p>
-                        <p className="text-slate-500">{invoice.mode_paiement || 'Non spécifié'}</p>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Bon de Commande Associé</p>
-                        <p className="text-slate-500">
-                          {invoice.bon_commande_ref || 'Aucun'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="mt-4 pt-3 border-t border-slate-200 flex flex-col sm:flex-row gap-3">
-                      {invoice.status !== 'paid' && (
-                        <button
-                          onClick={() => {
-                            // In a real app, this would open a payment modal
-                            alert(`Traitement du paiement pour la facture #${invoice.id}`);
-                          }}
-                          className="btn btn-sm btn-outline btn-success flex-1"
-                        >
-                          Effectuer Paiement
-                        </button>
-                      )}
-                      {invoice.status === 'paid' || invoice.status === 'sent' ? (
-                        <button
-                          onClick={() => {
-                            // In a real app, this would open a print/download modal
-                            alert(`Téléchargement de la facture #${invoice.id}`);
-                          }}
-                          className="btn btn-sm btn-outline btn-info flex-1"
-                        >
-                          Télécharger PDF
-                        </button>
-                      ) : null}
-                      {invoice.status === 'draft' ? (
-                        <>
-                          <button
-                            onClick={() => {
-                              // In a real app, this would send the invoice
-                              alert(`Envoi de la facture #${invoice.id} au client`);
-                            }}
-                            className="btn btn-sm btn-outline btn-warning flex-1"
-                          >
-                            Envoyer au Client
-                          </button>
-                          <button
-                            onClick={() => {
-                              // In a real app, this would delete the draft
-                              alert(`Suppression de la facture brouillon #${invoice.id}`);
-                            }}
-                            className="btn btn-sm btn-outline btn-destructive flex-1"
-                          >
-                            Supprimer
-                          </button>
-                        </>
-                      ) : null}
-                    </div>
-                  </div>
-                )}
+                <p className="text-xs text-slate-400">{f.client_nom || t('Client non spécifié', 'No client specified')} · {t('Échéance', 'Due')}: {fmtDate(f.date_echeance, lang)}</p>
+                <p className="text-base font-bold text-white font-mono">{fmtXaf(f.montant_ttc, lang)}</p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {f.statut === 'brouillon' && (
+                    <button onClick={() => envoyerFacture(f)} disabled={actionBusy === f.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold disabled:opacity-50">
+                      {actionBusy === f.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />} {t('Émettre', 'Issue')}
+                    </button>
+                  )}
+                  {['emise', 'retard', 'payee_partiellement'].includes(f.statut) && (
+                    <button onClick={() => openPayModal(f)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold">
+                      <CreditCard className="w-3 h-3" /> {t('Encaisser', 'Collect payment')}
+                    </button>
+                  )}
+                  {['brouillon', 'emise', 'retard'].includes(f.statut) && (
+                    <button onClick={() => annulerFacture(f)} disabled={actionBusy === f.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-[11px] font-bold disabled:opacity-50">
+                      <Ban className="w-3 h-3" /> {t('Annuler', 'Cancel')}
+                    </button>
+                  )}
+                  <button onClick={() => telechargerPDF(f)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-[11px] font-bold">
+                    <Download className="w-3 h-3" /> PDF
+                  </button>
+                </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
 
-      {/* Selected any Detail View */}
-      {selectedInvoice && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900">
-                  Facture #{selectedInvoice.id}
-                </h2>
-                <p className="text-slate-600">
-                  Détails complets de la facture
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedInvoice(null)}
-                className="btn btn-ghost btn-sm"
-                aria-label="Fermer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* any Info */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Informations Générales</h3>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Numéro de Facture</p>
-                    <p className="font-mono text-slate-900">#{selectedInvoice.id}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Référence</p>
-                    <p className="text-slate-500">{selectedInvoice.reference || 'N/A'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Date de Facturation</p>
-                    <p className="text-slate-500">
-                      {selectedInvoice.dateCreation ? new Date(selectedInvoice.dateCreation).toLocaleDateString('fr-FR') : 'Non définie'}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Date d'Échéance</p>
-                    <p className="text-slate-500">
-                      {selectedInvoice.dueDate ? new Date(selectedInvoice.dueDate).toLocaleDateString('fr-FR') : 'Non définie'}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Statut</p>
-                    <span className={
-                      selectedInvoice.status === 'paid' ? 'badge badge-success' :
-                      selectedInvoice.status === 'overdue' ? 'badge badge-destructive' :
-                      selectedInvoice.status === 'sent' ? 'badge badge-warning' :
-                      'badge badge-secondary'
-                    }>
-                      {selectedInvoice.status === 'paid' && 'Payée'}
-                      {selectedInvoice.status === 'overdue' && 'En Retard'}
-                      {selectedInvoice.status === 'sent' && 'Envoyée'}
-                      {selectedInvoice.status === 'draft' && 'Brouillon'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Montants</h3>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Montant HT</p>
-                    <p className="text-slate-500 font-mono">
-                      FCFA {(selectedInvoice.amount_ht || selectedInvoice.amount || 0).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">TVA (19.25%)</p>
-                    <p className="text-slate-500 font-mono">
-                      FCFA {((selectedInvoice.amount_ht || selectedInvoice.amount || 0) * 0.1925).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Montant TTC</p>
-                    <p className="text-2xl font-bold text-slate-900">
-                      FCFA {((selectedInvoice.amount_ttc || (selectedInvoice.amount || 0) * 1.1925) || 0).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-800">Informations Client</h3>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Nom du Client</p>
-                    <p className="text-slate-500">{selectedInvoice.client_nom || 'Non spécifié'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Adresse de Facturation</p>
-                    <p className="text-slate-500 break-all">
-                      {selectedInvoice.client_adresse || 'Non spécifiée'}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Contact</p>
-                    <p className="text-slate-500">
-                      {selectedInvoice.client_contact || 'Non spécifié'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Line Items */}
-              <div className="lg:col-span-3">
-                <h3 className="text-lg font-semibold text-slate-800">Détails des Lignes</h3>
-                {selectedInvoice.lignes && selectedInvoice.lignes.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                      <thead className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase">
-                        <tr>
-                          <th className="px-6 py-3">Description</th>
-                          <th className="px-6 py-3 text-center">Quantité</th>
-                          <th className="px-6 py-3 text-center">Prix Unitaire</th>
-                          <th className="px-6 py-3 text-right">Montant</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {selectedInvoice.lignes.map((ligne: any, index: number) => (
-                          <tr key={index} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-6 py-3">
-                              <p className="font-medium text-slate-800">{ligne.description}</p>
-                              {ligne.details && (
-                                <p className="text-sm text-slate-500">{ligne.details}</p>
-                              )}
-                            </td>
-                            <td className="px-6 py-3 text-center">
-                              <p className="text-slate-500">{ligne.quantite}</p>
-                            </td>
-                            <td className="px-6 py-3 text-center">
-                              <p className="text-slate-500 font-mono">
-                                FCFA {ligne.prix_unitaire?.toLocaleString() || '0'}
-                              </p>
-                            </td>
-                            <td className="px-6 py-3 text-right">
-                              <p className="text-slate-500 font-mono">
-                                FCFA {(ligne.quantite * ligne.prix_unitaire || 0).toLocaleString()}
-                              </p>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="p-8 text-center text-slate-500">
-                    Aucun détail de ligne disponible pour cette facture
-                  </div>
-                )}
-              </div>
+          {/* Desktop table */}
+          <div className="hidden lg:block bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-950 border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wide">
+                  <tr>
+                    <th className="px-4 py-3 text-left">{t('N° Facture', 'Invoice No')}</th>
+                    <th className="px-4 py-3 text-left">{t('Client', 'Client')}</th>
+                    <th className="px-4 py-3 text-left">{t('Émission', 'Issue Date')}</th>
+                    <th className="px-4 py-3 text-left">{t('Échéance', 'Due Date')}</th>
+                    <th className="px-4 py-3 text-right">{t('Montant HT', 'Amount excl. tax')}</th>
+                    <th className="px-4 py-3 text-right">{t('TVA', 'VAT')}</th>
+                    <th className="px-4 py-3 text-right">{t('Total TTC', 'Total incl. tax')}</th>
+                    <th className="px-4 py-3 text-center">{t('Statut', 'Status')}</th>
+                    <th className="px-4 py-3 text-center">{t('Actions', 'Actions')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                  {filtered.map(f => (
+                    <tr key={f.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-cyan-400 text-xs">{f.numero_facture}</td>
+                      <td className="px-4 py-3">{f.client_nom || ''}</td>
+                      <td className="px-4 py-3 text-xs">{fmtDate(f.date_emission, lang)}</td>
+                      <td className="px-4 py-3 text-xs">{fmtDate(f.date_echeance, lang)}</td>
+                      <td className="px-4 py-3 text-right font-mono text-xs">{fmtXaf(f.montant_ht, lang)}</td>
+                      <td className="px-4 py-3 text-right font-mono text-xs">{fmtXaf(f.montant_tva, lang)}</td>
+                      <td className="px-4 py-3 text-right font-mono text-xs font-bold text-white">{fmtXaf(f.montant_ttc, lang)}</td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold border ${STATUT_STYLE[f.statut] || 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                          {statutLabel(f.statut)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-1.5">
+                          {f.statut === 'brouillon' && (
+                            <button
+                              onClick={() => envoyerFacture(f)}
+                              disabled={actionBusy === f.id}
+                              title={t('Émettre et envoyer au client', 'Issue and send to client')}
+                              className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 disabled:opacity-50 transition-colors"
+                            >
+                              {actionBusy === f.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                            </button>
+                          )}
+                          {['emise', 'retard', 'payee_partiellement'].includes(f.statut) && (
+                            <button
+                              onClick={() => openPayModal(f)}
+                              title={t('Enregistrer un règlement', 'Record a payment')}
+                              className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+                            >
+                              <CreditCard className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          {['brouillon', 'emise', 'retard'].includes(f.statut) && (
+                            <button
+                              onClick={() => annulerFacture(f)}
+                              disabled={actionBusy === f.id}
+                              title={t('Annuler la facture (tracé)', 'Cancel invoice (logged)')}
+                              className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 disabled:opacity-50 transition-colors"
+                            >
+                              <Ban className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => telechargerPDF(f)}
+                            title={t('Télécharger le PDF', 'Download PDF')}
+                            className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 hover:border-cyan-500/50 transition-colors"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
+        </>
+      )}
+
+      {/* Paiement modal */}
+      {payTarget && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={reglerFacture} className="bg-slate-900 border border-emerald-500/30 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                {t(`Encaisser ${payTarget.numero_facture}`, `Collect ${payTarget.numero_facture}`)}
+              </h3>
+              <button type="button" onClick={() => setPayTarget(null)} className="text-slate-400 hover:text-white"><X size={18} /></button>
+            </div>
+            <p className="text-xs text-slate-400">
+              {t('Reste dû théorique', 'Theoretical outstanding')}: <span className="font-mono font-bold text-white">{fmtXaf(payTarget.montant_ttc, lang)}</span>
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Montant reçu (FCFA) *', 'Amount received (FCFA) *')}</label>
+                <input
+                  type="number" min="0" step="1"
+                  value={payForm.montant}
+                  onChange={e => setPayForm({ ...payForm, montant: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white font-mono focus:outline-none focus:border-emerald-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Mode de paiement', 'Payment method')}</label>
+                <select
+                  value={payForm.mode_paiement}
+                  onChange={e => setPayForm({ ...payForm, mode_paiement: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="virement">{t('Virement', 'Bank transfer')}</option>
+                  <option value="especes">{t('Espèces', 'Cash')}</option>
+                  <option value="cheque">{t('Chèque', 'Cheque')}</option>
+                  <option value="mobile_money">{t('Mobile Money', 'Mobile Money')}</option>
+                  <option value="carte">{t('Carte bancaire', 'Card')}</option>
+                </select>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Référence bancaire (facultatif)', 'Bank reference (optional)')}</label>
+                <input
+                  value={payForm.reference_bancaire}
+                  onChange={e => setPayForm({ ...payForm, reference_bancaire: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+            <button type="submit" disabled={paying} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl disabled:opacity-50 flex items-center justify-center gap-2">
+              {paying ? <Loader2 className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
+              {t('Enregistrer le règlement', 'Record payment')}
+            </button>
+          </form>
         </div>
       )}
     </div>

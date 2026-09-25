@@ -735,53 +735,161 @@ class PortAdvancedTOSService:
         }
 
     @staticmethod
-    def calculate_port_dues_cemac(escale_id: int, port_code: str = "PAD") -> Dict[str, Any]:
-        """Calculate official CEMAC Port Autonome (PAD/PAK) dues & stevedoring invoice"""
-        port_name = "Port Autonome de Douala (PAD)" if port_code == "PAD" else "Port Autonome de Kribi (PAK)"
-        
-        # Base official tariffs (XAF)
-        sejour_quai_taux = 185000  # par tranche 24h
-        droits_balisage = 425000   # taxe chenal
-        remorquage_forfait = 650000 # 2 remorqueurs entrée/sortie
-        pilotage_forfait = 280000   # pilote station
-        droits_quai_tc20 = 28000   # par conteneur 20ft
-        droits_quai_tc40 = 45000   # par conteneur 40ft
-        thc_20 = 85000             # THC manutention bord/terre 20ft
-        thc_40 = 135000            # THC manutention bord/terre 40ft
-        isps_security_tax = 125000 # taxe sûreté ISPS navire
+    def calculate_port_dues_cemac(
+        db: Session, escale_id: int, port_code: str = "PAD"
+    ) -> Dict[str, Any]:
+        """Facture les redevances portuaires (PAD/PAK) d'UNE escale reellement en base.
 
-        nb_tc20 = 45
-        nb_tc40 = 62
-        duree_escale_jours = 3
+        Correction d'honnetete (zero-mock) : l'ancienne version ignorait totalement
+        ``escale_id`` et recodait en dur 9 taux "officiels" ainsi que des quantites
+        inventees (45 TC20, 62 TC40, 3 jours) -- elle delivrait donc la MEMME
+        facture fantaisiste pour n'importe quelle escale. Desormais :
 
-        lignes = [
-            {"rubrique": "Droits d'Accès au Chenal & Balisage", "quantite": 1, "unite": "Escale", "pu_xaf": droits_balisage, "total_xaf": droits_balisage},
-            {"rubrique": "Redevance de Pilotage Maritime (Entrée/Sortie)", "quantite": 2, "unite": "Mouvements", "pu_xaf": pilotage_forfait / 2, "total_xaf": pilotage_forfait},
-            {"rubrique": "Remorquage Portuaire (Remorqueurs Quai)", "quantite": 2, "unite": "Mouvements", "pu_xaf": remorquage_forfait / 2, "total_xaf": remorquage_forfait},
-            {"rubrique": "Redevance de Stationnement à Quai (Poste 14)", "quantite": duree_escale_jours, "unite": "Jours", "pu_xaf": sejour_quai_taux, "total_xaf": sejour_quai_taux * duree_escale_jours},
-            {"rubrique": "Droits de Quai Portuaire Conteneurs 20ft", "quantite": nb_tc20, "unite": "TC 20'", "pu_xaf": droits_quai_tc20, "total_xaf": nb_tc20 * droits_quai_tc20},
-            {"rubrique": "Droits de Quai Portuaire Conteneurs 40ft", "quantite": nb_tc40, "unite": "TC 40'", "pu_xaf": droits_quai_tc40, "total_xaf": nb_tc40 * droits_quai_tc40},
-            {"rubrique": "THC Manutention Bord/Terre 20ft", "quantite": nb_tc20, "unite": "TC 20'", "pu_xaf": thc_20, "total_xaf": nb_tc20 * thc_20},
-            {"rubrique": "THC Manutention Bord/Terre 40ft", "quantite": nb_tc40, "unite": "TC 40'", "pu_xaf": thc_40, "total_xaf": nb_tc40 * thc_40},
-            {"rubrique": "Taxe Internationale de Sûreté Portuaire ISPS", "quantite": 1, "unite": "Forfait", "pu_xaf": isps_security_tax, "total_xaf": isps_security_tax},
+          • les QUANTITES sont derivees de l'escale relle : conteneurs rattaches via
+            les connaissements de l'escale, duree de stationnement calculee a partir
+            des dates reelles d'arrivee/depart ;
+          • les PRIX unitaires proviennent de la table des tarifs OFFICIELS
+            ``TarifPortuaire`` (lookup par ``code_tarif``). Si un tarif requis est
+            absent, reponse **501** avec la liste des codes a importer : aucun taux
+            n'est invente (mere politique que pour le tarif douanier CEMAC) ;
+          • aucun montant certifie : statut de brouillon d'estimation, jamais une
+            validation inventee.
+        """
+        from fastapi import HTTPException
+        from app.models.port_cameroun import TarifPortuaire
+
+        escale = db.query(Escale).filter(Escale.id == escale_id).first()
+        if escale is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Escale {escale_id} inconnue : aucun calcul de redevance n'est fabrique.",
+            )
+
+        port_name = (
+            "Port Autonome de Douala (PAD)" if port_code == "PAD"
+            else "Port Autonome de Kribi (PAK)"
+        )
+
+        # --- Quantites REELLES derivees de la base ------------------------
+        conteneurs = (
+            db.query(Conteneur)
+            .join(Connaissement, Connaissement.conteneur_id == Conteneur.id)
+            .filter(Connaissement.escale_id == escale_id)
+            .all()
+        )
+        nb_tc20 = nb_tc40 = nb_indetermines = 0
+        for c in conteneurs:
+            t = (c.type_conteneur or "").replace("'", "").lower()
+            if "20" in t:
+                nb_tc20 += 1
+            elif "40" in t or "45" in t:
+                nb_tc40 += 1
+            else:
+                nb_indetermines += 1
+
+        debut = escale.date_arrivee_reelle or escale.date_arrivee_prevue
+        fin = escale.date_depart_reelle or escale.date_depart_prevue
+        duree_jours = None
+        if debut is not None and fin is not None:
+            d0 = debut.date() if hasattr(debut, "date") else debut
+            d1 = fin.date() if hasattr(fin, "date") else fin
+            duree_jours = max(1, (d1 - d0).days + 1)
+
+        avertissements: List[str] = []
+        if not conteneurs:
+            avertissements.append(
+                "Aucun connaissement ne rattache de conteneur a cette escale : les "
+                "droits de quai et THC sont a zero (rien n'est suppose)."
+            )
+        if nb_indetermines:
+            avertissements.append(
+                f"{nb_indetermines} conteneur(s) de taille indeterminee non factures "
+                "(20/40 absent du type saisi)."
+            )
+
+        # --- Lignes : code tarif officiel + quantite reelle ----------------
+        plan = [
+            ("TPC-CHENAL", "Droits d'Acces au Chenal & Balisage", "Escale", 1),
+            ("TPC-PILOTAGE", "Redevance de Pilotage Maritime (Entree/Sortie)", "Mouvements", 2),
+            ("TPC-REMORQUAGE", "Remorquage Portuaire", "Mouvements", 2),
+            ("TPC-STATIONNEMENT", "Redevance de Stationnement a Quai", "Jours", duree_jours),
+            ("TPC-DROITQUAI20", "Droits de Quai Conteneurs 20ft", "TC 20'", nb_tc20),
+            ("TPC-DROITQUAI40", "Droits de Quai Conteneurs 40ft", "TC 40'", nb_tc40),
+            ("TPC-THC20", "THC Manutention Bord/Terre 20ft", "TC 20'", nb_tc20),
+            ("TPC-THC40", "THC Manutention Bord/Terre 40ft", "TC 40'", nb_tc40),
+            ("TPC-ISPS", "Taxe Internationale de Surete Portuaire ISPS", "Forfait", 1),
         ]
 
-        total_ht = sum(l["total_xaf"] for l in lignes)
-        tva_1925 = round(total_ht * 0.1925)
-        total_ttc = total_ht + tva_1925
+        tarifs_manquants: List[str] = []
+        lignes: List[Dict[str, Any]] = []
+        total_ht = 0.0
+        tva = 0.0
+        for code, rubrique, unite, quantite in plan:
+            if quantite is None:
+                avertissements.append(
+                    f"'{rubrique}' non facture : date d'arrivee ou de depart de "
+                    "l'escale non renseignee (duree impossible a etablir)."
+                )
+                continue
+            tarif = (
+                db.query(TarifPortuaire)
+                .filter(
+                    TarifPortuaire.code_tarif == code,
+                    TarifPortuaire.est_actif == True,  # noqa: E712
+                )
+                .first()
+            )
+            if tarif is None:
+                tarifs_manquants.append(code)
+                continue
+            pu = float(tarif.prix_unitaire)
+            ligne_total = round(pu * quantite, 2)
+            taux_tva = float(tarif.taux_tva) if tarif.taux_tva is not None else 19.25
+            total_ht += ligne_total
+            tva += ligne_total * (taux_tva / 100.0)
+            lignes.append({
+                "code_tarif": code,
+                "rubrique": rubrique,
+                "quantite": quantite,
+                "unite": unite,
+                "pu_xaf": pu,
+                "taux_tva": taux_tva,
+                "total_ht_xaf": ligne_total,
+                "source": (
+                    f"TarifPortuaire#{tarif.id} "
+                    f"({tarif.reference_reglementaire or 'reference reglementaire non renseignee'})"
+                ),
+            })
 
+        if tarifs_manquants:
+            raise HTTPException(
+                status_code=501,
+                detail=(
+                    "Tarifs portuaires OFFICIELS non importes pour : "
+                    + ", ".join(tarifs_manquants)
+                    + ". Saisissez-les via /api/v1/port-pricing (modele TarifPortuaire). "
+                    "Aucun taux n'est invente."
+                ),
+            )
+
+        tva = round(tva, 2)
+        total_ht = round(total_ht, 2)
         return {
             "escale_id": escale_id,
+            "numero_escale": escale.numero_escale,
             "port": port_name,
-            "reference_facture": f"FACT-PORT-{port_code}-{escale_id:04d}-{datetime.utcnow().strftime('%Y%m')}",
-            "date_emission": datetime.utcnow().strftime("%d/%m/%Y"),
+            "statut_facturation": "BROUILLON_ESTIMATION_NON_CERTIFIE",
             "devise": "XAF",
-            "statut_facturation": "EMISE_NON_REGLEE",
             "lignes": lignes,
             "total_ht_xaf": total_ht,
-            "tva_1925_xaf": tva_1925,
-            "total_ttc_xaf": total_ttc,
-            "reglement_exigible": "Armateur / Consignataire Maritime Agréé PAD"
+            "tva_xaf": tva,
+            "total_ttc_xaf": round(total_ht + tva, 2),
+            "reglement_exigible": "Armateur / Consignataire Maritime Agree",
+            "avertissements": avertissements,
+            "licence": (
+                "Quantites derivees de l'escale relle en base ; prix issus de la table "
+                "des tarifs officiels TarifPortuaire. Aucun taux et aucune quantite inventes."
+            ),
         }
 
 

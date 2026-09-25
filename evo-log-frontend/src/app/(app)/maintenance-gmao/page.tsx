@@ -176,7 +176,7 @@ export default function MaintenanceGMAOPage() {
           <div className="p-12 text-center text-slate-400"><RefreshCw className="w-6 h-6 animate-spin text-orange-400 mx-auto mb-2" /><span>Chargement depuis la base de données...</span></div>
         ) : ordres.length === 0 ? (
           <div className="p-12 text-center text-slate-400">
-            <Wrench className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+            <Wrench className="w-10 h-10 text-slate-400 mx-auto mb-2" />
             <p className="font-bold text-white">Aucun ordre de maintenance</p>
             <p className="text-xs mt-1 text-slate-500">Créez le premier ordre de travaux pour commencer.</p>
           </div>

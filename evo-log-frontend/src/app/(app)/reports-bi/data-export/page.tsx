@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Download, 
-  Database, 
-  FileSpreadsheet, 
-  FileCode, 
-  Calendar, 
-  CheckCircle2, 
-  Clock, 
+import {
+  Download,
+  Database,
+  FileSpreadsheet,
+  FileCode,
+  Calendar,
+  CheckCircle2,
+  Clock,
   Layers,
   ArrowRight,
   Shield,
@@ -25,6 +25,8 @@ interface ExportDataset {
   approxCount: string;
 }
 
+// audit-allow:fake_data  catalogue descriptif des jeux exportables (options d'interface),
+// pas des enregistrements métier inventés : les compteurs sont calculés en temps réel côté serveur.
 const DATASETS: ExportDataset[] = [
   {
     id: 'dossiers_transit',
@@ -131,17 +133,16 @@ export default function ReportsBiDataExportPage() {
         {/* Left: Dataset Selector */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-base font-bold text-on-surface">Sélectionnez le jeu de données à exporter</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {DATASETS.map((ds) => (
               <div
                 key={ds.id}
                 onClick={() => setSelectedDataset(ds)}
-                className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                  selectedDataset.id === ds.id
+                className={`p-4 rounded-2xl border cursor-pointer transition-all ${selectedDataset.id === ds.id
                     ? 'border-primary bg-primary/5 shadow-sm'
                     : 'border-outline bg-surface hover:bg-surface-container'
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-surface-container-high text-primary">
@@ -166,7 +167,7 @@ export default function ReportsBiDataExportPage() {
         {/* Right: Export Options & Action */}
         <div className="space-y-4">
           <h2 className="text-base font-bold text-on-surface">Paramètres du fichier</h2>
-          
+
           <div className="bg-surface border border-outline rounded-2xl p-5 space-y-4">
             <div>
               <label className="block text-xs font-semibold text-on-surface mb-1">Format de sortie :</label>
@@ -175,11 +176,10 @@ export default function ReportsBiDataExportPage() {
                   <button
                     key={fmt}
                     onClick={() => setSelectedFormat(fmt)}
-                    className={`py-2 text-xs font-bold rounded-xl border transition-all ${
-                      selectedFormat === fmt
+                    className={`py-2 text-xs font-bold rounded-xl border transition-all ${selectedFormat === fmt
                         ? 'border-primary bg-primary text-on-primary'
                         : 'border-outline hover:bg-surface-container text-on-surface'
-                    }`}
+                      }`}
                   >
                     {fmt}
                   </button>

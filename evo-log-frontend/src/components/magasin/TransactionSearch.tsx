@@ -111,14 +111,14 @@ export function TransactionSearch() {
                 key={transaction.code_transaction}
                 type="button"
                 onClick={() => handleSelect(transaction)}
-                className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b last:border-b-0 transition-colors"
+                className="w-full px-4 py-3 text-left hover:bg-slate-800 border-b last:border-b-0 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-slate-100">
                       {transaction.code_transaction} - {transaction.nom}
                     </div>
-                    <div className="text-sm text-gray-600">{transaction.description}</div>
+                    <div className="text-sm text-slate-400">{transaction.description}</div>
                   </div>
                   <ArrowRight className="h-4 w-4 text-gray-400" />
                 </div>
@@ -128,13 +128,13 @@ export function TransactionSearch() {
         )}
 
         {!loading && !error && showResults && filteredTransactions.length === 0 && (
-          <div className="text-center py-4 text-gray-500">
+          <div className="text-center py-4 text-slate-400">
             Aucune transaction trouvée pour "{searchTerm}"
           </div>
         )}
 
         {!loading && !error && !showResults && transactions.length === 0 && (
-          <div className="text-center py-4 text-gray-500">
+          <div className="text-center py-4 text-slate-400">
             Aucune transaction disponible
           </div>
         )}

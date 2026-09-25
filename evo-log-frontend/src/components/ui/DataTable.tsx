@@ -269,12 +269,12 @@ export function DataTable<T extends Record<string, any>>({
     return (
       <div className="erp-card overflow-hidden">
         <div className="animate-pulse">
-          <div className="h-12 bg-slate-100 dark:bg-slate-800 border-b border-outline" />
+          <div className="h-12 bg-slate-900 dark:bg-slate-800 border-b border-outline" />
           {[...Array(5)].map((_, i) => (
             <div key={i} className="h-16 border-b border-outline p-4">
               <div className="flex gap-4">
                 {[...Array(5)].map((_, j) => (
-                  <div key={j} className="h-4 flex-1 rounded bg-slate-100 dark:bg-slate-800" />
+                  <div key={j} className="h-4 flex-1 rounded bg-slate-900 dark:bg-slate-800" />
                 ))}
               </div>
             </div>

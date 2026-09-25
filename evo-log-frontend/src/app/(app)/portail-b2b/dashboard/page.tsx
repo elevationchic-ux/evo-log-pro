@@ -167,7 +167,7 @@ export default function PortailB2BDashboard() {
                         ? 'bg-emerald-500 text-white'
                         : step.statut === 'IN_PROGRESS'
                         ? 'bg-violet-600 text-white animate-pulse'
-                        : 'bg-slate-800 text-slate-600'
+                        : 'bg-slate-800 text-slate-400'
                     }`}
                   >
                     {step.statut === 'DONE' ? '✓' : i + 1}

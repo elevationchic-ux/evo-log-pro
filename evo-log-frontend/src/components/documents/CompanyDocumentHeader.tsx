@@ -73,7 +73,7 @@ export function CompanyDocumentHeader({
   const active = { ...company, ...companyOverride };
 
   return (
-    <div className="w-full border-b-2 border-slate-900 pb-4 mb-6 text-slate-900 font-sans print:border-black">
+    <div className="w-full border-b-2 border-slate-900 pb-4 mb-6 text-slate-200 font-sans print:border-black">
       {/* Top Header Row */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         {/* Left: Logo & Corporate Identity */}
@@ -82,7 +82,7 @@ export function CompanyDocumentHeader({
             <img
               src={active.logo_url}
               alt={active.raison_sociale}
-              className="w-20 h-20 object-contain rounded-xl border border-slate-200 bg-white p-1 shrink-0"
+              className="w-20 h-20 object-contain rounded-xl border border-slate-700 bg-slate-900 p-1 shrink-0"
             />
           ) : (
             <div className="w-20 h-20 rounded-xl bg-slate-900 text-white flex flex-col items-center justify-center font-black text-xl shrink-0 shadow-sm print:border print:border-black print:text-black print:bg-transparent">
@@ -95,17 +95,17 @@ export function CompanyDocumentHeader({
             <h1 className="text-base font-black uppercase tracking-tight text-slate-950 leading-tight">
               {active.raison_sociale}
             </h1>
-            <p className="text-[11px] text-slate-600 font-medium">
+            <p className="text-[11px] text-slate-400 font-medium">
               {active.forme_juridique} {active.capital_social ? `au capital de ${active.capital_social}` : ''}
             </p>
-            <div className="text-[10px] text-slate-600 space-y-0.5 pt-0.5">
+            <div className="text-[10px] text-slate-400 space-y-0.5 pt-0.5">
               <p>
-                <span className="font-semibold text-slate-800">NIF :</span> {active.nif} •{' '}
-                <span className="font-semibold text-slate-800">RCCM :</span> {active.rccm}
+                <span className="font-semibold text-slate-200">NIF :</span> {active.nif} •{' '}
+                <span className="font-semibold text-slate-200">RCCM :</span> {active.rccm}
               </p>
               {active.agrement_douane && (
                 <p>
-                  <span className="font-semibold text-slate-800">Agrément Douane :</span> {active.agrement_douane}
+                  <span className="font-semibold text-slate-200">Agrément Douane :</span> {active.agrement_douane}
                   {active.agrement_pad && ` • PAD : ${active.agrement_pad}`}
                 </p>
               )}
@@ -126,13 +126,13 @@ export function CompanyDocumentHeader({
             <h2 className="text-lg font-black text-slate-950 uppercase mt-1">
               {documentTitle}
             </h2>
-            <p className="font-mono text-sm font-bold text-cyan-800 print:text-black">
+            <p className="font-mono text-sm font-bold text-cyan-300 print:text-black">
               N° {documentNumber}
             </p>
           </div>
 
-          <div className="text-[10px] text-slate-600 mt-2 font-mono">
-            {documentDate && <p>Émis le : <span className="font-bold text-slate-900">{documentDate}</span></p>}
+          <div className="text-[10px] text-slate-400 mt-2 font-mono">
+            {documentDate && <p>Émis le : <span className="font-bold text-slate-200">{documentDate}</span></p>}
             {documentReference && <p>Réf. Interne : <span className="font-semibold">{documentReference}</span></p>}
           </div>
         </div>
@@ -143,8 +143,8 @@ export function CompanyDocumentHeader({
 
 export function CompanyDocumentFooter({ companyOverride }: { companyOverride?: Partial<CompanyInfo> }) {
   return (
-    <div className="w-full border-t border-slate-300 pt-3 mt-8 text-center text-[9px] text-slate-500 font-sans print:text-[8px] print:border-black">
-      <p className="font-semibold text-slate-700">
+    <div className="w-full border-t border-slate-600 pt-3 mt-8 text-center text-[9px] text-slate-500 font-sans print:text-[8px] print:border-black">
+      <p className="font-semibold text-slate-300">
         Document d'exploitation émis par le progiciel certifié EVO-LOG • Conforme réglementation CEMAC / OHADA
       </p>
       <p className="mt-0.5">

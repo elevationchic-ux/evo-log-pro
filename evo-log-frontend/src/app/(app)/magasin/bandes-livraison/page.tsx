@@ -35,7 +35,7 @@ export default function BandeLivraisonPage() {
         {/* Header */}
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-200 flex items-center gap-3">
               <Truck className="w-8 h-8 text-blue-600" />
               Bandes de Livraison
             </h1>
@@ -51,7 +51,7 @@ export default function BandeLivraisonPage() {
             </button>
             <button
               onClick={() => fetchBandres()}
-              className="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all"
+              className="bg-slate-700 hover:bg-slate-300 text-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all"
             >
               <Loader2 className="w-4 h-4" />
               Actualiser
@@ -60,7 +60,7 @@ export default function BandeLivraisonPage() {
         </div>
 
         {/* Search */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+        <div className="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-700 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -68,15 +68,15 @@ export default function BandeLivraisonPage() {
               placeholder="Rechercher (BL, Réf OT, Chauffeur, Véhicule)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none bg-slate-50"
+              className="w-full pl-9 pr-4 py-2 border border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none bg-slate-800"
             />
           </div>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-700 overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/80 border-b border-slate-100 text-xs uppercase font-bold text-slate-500">
+            <thead className="bg-slate-800/80 border-b border-slate-700 text-xs uppercase font-bold text-slate-500">
               <tr>
                 <th className="px-6 py-4">Référence Source</th>
                 <th className="px-6 py-4">Date Livraison</th>
@@ -85,7 +85,7 @@ export default function BandeLivraisonPage() {
                 <th className="px-6 py-4">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-800">
               {loading ? (
                 <tr><td colSpan={5} className="px-6 py-12"><CardSkeletonLoader /></td></tr>
               ) : filteredBandres.length === 0 ? (
@@ -109,13 +109,13 @@ export default function BandeLivraisonPage() {
                   <span className="text-slate-400 italic">Inconnu</span>
                 )
                 return (
-                  <tr key={bande.id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={bande.id} className="hover:bg-slate-800/50 transition-colors">
                     <td className="px-6 py-4">
                       {source}
                     </td>
                     <td className="px-6 py-4">
                       {bande.date_livraison ? (
-                        <span className="text-slate-600">{new Date(bande.date_livraison).toLocaleDateString()}</span>
+                        <span className="text-slate-400">{new Date(bande.date_livraison).toLocaleDateString()}</span>
                       ) : (
                         <span className="text-slate-400 italic">Non définie</span>
                       )}
@@ -136,10 +136,10 @@ export default function BandeLivraisonPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
-                        bande.statut === 'VALIDEE' ? 'bg-emerald-100 text-emerald-700' :
-                        bande.statut === 'EN_COURS' ? 'bg-blue-100 text-blue-700' :
-                        bande.statut === 'ANNULEE' ? 'bg-red-100 text-red-700' :
-                        'bg-amber-100 text-amber-700'
+                        bande.statut === 'VALIDEE' ? 'bg-emerald-500/15 text-emerald-300' :
+                        bande.statut === 'EN_COURS' ? 'bg-blue-500/15 text-blue-300' :
+                        bande.statut === 'ANNULEE' ? 'bg-red-500/15 text-red-300' :
+                        'bg-amber-500/15 text-amber-300'
                       }`}>
                         {bande.statut}
                       </span>
@@ -247,26 +247,26 @@ function BandeLivraisonModal({ onClose, onSuccess }: { onClose: () => void, onSu
 
   const InputField = ({ label, field, type = "text", required = false, placeholder = "" }: { label: string, field: keyof typeof formData, type?: string, required?: boolean, placeholder?: string }) => (
     <div>
-      <label className="block text-sm font-bold text-slate-700 mb-1">{label} {required && '*'}</label>
+      <label className="block text-sm font-bold text-slate-300 mb-1">{label} {required && '*'}</label>
       <input
         type={type}
         required={required}
         value={formData[field]}
         onChange={e => setFormData({...formData, [field]: e.target.value})}
         placeholder={placeholder}
-        className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+        className="w-full px-4 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
       />
     </div>
   )
 
   const SelectField = ({ label, field, options, required = false }: { label: string, field: keyof typeof formData, options: { value: string; label: string }[], required?: boolean }) => (
     <div>
-      <label className="block text-sm font-bold text-slate-700 mb-1">{label} {required && '*'}</label>
+      <label className="block text-sm font-bold text-slate-300 mb-1">{label} {required && '*'}</label>
       <select
         required={required}
         value={formData[field]}
         onChange={e => setFormData({...formData, [field]: e.target.value})}
-        className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+        className="w-full px-4 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
       >
         <option value="">Sélectionner une option...</option>
         {options.map(opt => (
@@ -278,17 +278,17 @@ function BandeLivraisonModal({ onClose, onSuccess }: { onClose: () => void, onSu
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
-        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+      <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
+        <div className="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
+          <h2 className="text-xl font-bold text-slate-200 flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600" />
             Nouvelle Bande de Livraison
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><span className="material-symbols-outlined">close</span></button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-400"><span className="material-symbols-outlined">close</span></button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-200 px-6 pt-4 gap-6 bg-slate-50">
+        <div className="flex border-b border-slate-700 px-6 pt-4 gap-6 bg-slate-800">
           {[
             { id: 'source', label: 'Source' },
             { id: 'transport', label: 'Transport & Livraison' }
@@ -297,7 +297,7 @@ function BandeLivraisonModal({ onClose, onSuccess }: { onClose: () => void, onSu
               key={t.id}
               type="button"
               onClick={() => setActiveTab(t.id as any)}
-              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
             >
               {t.label}
             </button>
@@ -310,12 +310,12 @@ function BandeLivraisonModal({ onClose, onSuccess }: { onClose: () => void, onSu
           <div className={activeTab === 'source' ? 'block' : 'hidden'}>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Type de Source *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-1">Type de Source *</label>
                 <select
                   required
                   value={formData.source_type}
                   onChange={e => setFormData({...formData, source_type: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
                 >
                   <option value="">Sélectionner le type...</option>
                   <option value="declaration">Déclaration Marchandises</option>
@@ -324,12 +324,12 @@ function BandeLivraisonModal({ onClose, onSuccess }: { onClose: () => void, onSu
               </div>
 
               <div className={formData.source_type === 'declaration' ? 'block' : 'hidden'}>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Déclaration *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-1">Déclaration *</label>
                 <select
                   required
                   value={formData.source_id}
                   onChange={e => setFormData({...formData, source_id: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
                 >
                   <option value="">Sélectionner une déclaration...</option>
                   {declarations.map(dec => (
@@ -341,12 +341,12 @@ function BandeLivraisonModal({ onClose, onSuccess }: { onClose: () => void, onSu
               </div>
 
               <div className={formData.source_type === 'ordre_transfert' ? 'block' : 'hidden'}>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Ordre de Transfert *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-1">Ordre de Transfert *</label>
                 <select
                   required
                   value={formData.source_id}
                   onChange={e => setFormData({...formData, source_id: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
                 >
                   <option value="">Sélectionner un ordre de transfert...</option>
                   {ordresTransfert.map(ot => (
@@ -366,33 +366,33 @@ function BandeLivraisonModal({ onClose, onSuccess }: { onClose: () => void, onSu
               <InputField label="Matricule du Véhicule" field="matricule_vehicule" placeholder="Ex: ABC-1234" />
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1">Signature Chauffeur (base64 ou URL)</label>
+                  <label className="block text-sm font-bold text-slate-300 mb-1">Signature Chauffeur (base64 ou URL)</label>
                   <InputField label="Signature Chauffeur" field="signature_chauffeur" placeholder="Données signature..." />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1">Signature Magasinier (base64 ou URL)</label>
+                  <label className="block text-sm font-bold text-slate-300 mb-1">Signature Magasinier (base64 ou URL)</label>
                   <InputField label="Signature Magasinier" field="signature_magasinier" placeholder="Données signature..." />
                 </div>
               </div>
               <InputField label="Signature Transporteur (base64 ou URL)" field="signature_transporteur" placeholder="Données signature..." />
               <div className="mt-4">
-                <label className="block text-sm font-bold text-slate-700 mb-1">Date de Livraison prévue</label>
+                <label className="block text-sm font-bold text-slate-300 mb-1">Date de Livraison prévue</label>
                 <input
                   type="date"
                   value={formData.date_livraison}
                   onChange={e => setFormData({...formData, date_livraison: e.target.value})}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex justify-between items-center mt-8 pt-4 border-t border-slate-100">
+          <div className="flex justify-between items-center mt-8 pt-4 border-t border-slate-700">
             <div className="text-xs text-slate-400">
               * Champs obligatoires
             </div>
             <div className="flex gap-3">
-              <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors">Annuler</button>
+              <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-400 hover:bg-slate-800 transition-colors">Annuler</button>
               <button
                 type="submit"
                 disabled={!formData.source_type || !formData.source_id}

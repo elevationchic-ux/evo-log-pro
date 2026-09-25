@@ -146,7 +146,7 @@ export default function MouvementDeStockManuelPage() {
           <h2 className="font-bold text-sm text-on-surface border-b border-outline pb-2">Transactions Liées</h2>
           <div className="space-y-1.5 text-xs">
             <Link
-              href="/magasin/receptions"
+              href="/magasin/reception-mag3"
               className="block px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container transition-colors font-medium"
             >
               📦 Réceptions Fournisseurs (MIGO)

@@ -467,15 +467,16 @@ class PaieService:
         salaire_brut += total_primes
         
         # Social contributions (CONFIGURATION REQUIRED - rates subject to change)
-        # CNPS: 7% employee, 11.5% employer (to be configured)
-        taux_cnps = 0.07  # Employee portion - MUST BE CONFIGURED
+        # CNPS: source unique = PaieOHADAService (plus de taux 7% divergent ici).
+        from app.services.rh_avance_service import PaieOHADAService
+        taux_cnps = PaieOHADAService.TAUX_CNPS_PENSION + PaieOHADAService.TAUX_CNPS_ACCIDENTS
         cotisation_cnps = salaire_brut * taux_cnps
         
-        # Tax on salary (CONFIGURATION REQUIRED)
-        # Cameroon uses progressive tax brackets - simplified here
-        # Actual calculation requires current tax tables
-        taux_impot = 0.02  # Placeholder - MUST BE CONFIGURED
-        impot_revenu = salaire_brut * taux_impot
+        # Tax on salary  barème progressif unique du backend (IRGM Cameroun),
+        # assiette = brut - cotisations salariales. L'ancien « 2% plat sur le
+        # brut » (placeholder) est supprimé : il sous-imposait tout le monde.
+        base_imposable = salaire_brut - cotisation_cnps
+        impot_revenu = PaieOHADAService.calculer_irmg(base_imposable)
         
         # Total deductions
         total_deductions = cotisation_cnps + impot_revenu

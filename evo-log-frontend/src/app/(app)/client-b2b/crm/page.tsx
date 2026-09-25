@@ -205,12 +205,12 @@ export default function ClientB2bCrmPage() {
 
               <div className="pt-2 border-t border-outline/50 flex justify-between items-center text-[11px] text-on-surface-variant">
                 <span>Dernier échange : <strong className="text-on-surface">{c.dernierEchange}</strong></span>
-                <button
-                  onClick={() => toast.error('Le journal d’appel n’est pas encore relié à un service CRM persistant.')}
+                <a
+                  href={`mailto:${c.email}`}
                   className="text-primary hover:underline font-bold"
                 >
                   Contacter
-                </button>
+                </a>
               </div>
             </div>
           ))}

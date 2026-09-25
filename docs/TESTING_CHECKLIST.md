@@ -11,6 +11,10 @@ Verifier le depot tel qu'il existe aujourd'hui, sans s'appuyer sur d'anciens che
 ```bash
 cd EVO-LOG-backend
 pytest
+# Moteur RBAC granulaire (permissions, accréditations, visibilité, espaces communs)
+pytest tests/unit/test_rbac_permissions_engine.py
+# Rejeu idempotent des migrations (chaîne linéaire, tête unique)
+alembic upgrade head
 ```
 
 ### Frontend
@@ -53,6 +57,8 @@ npx playwright test
 - `/admin/user-management/listing`
 - `/admin/user-management/create`
 - `/admin/configuration-des-roles-rbac`
+- `/admin/accreditations`
+- `/admin/espaces-communs`
 - `/admin/role-assignment`
 - `/admin/journal`
 - `/admin/audit/operation-trace`
@@ -134,6 +140,9 @@ npx playwright test
 - `tests/unit/test_magasin_service.py`
 - `tests/unit/test_parc_service.py`
 - `tests/unit/test_transport_service.py`
+- `tests/unit/test_rbac_permissions_engine.py` (moteur de permissions granulaires)
+- `tests/unit/test_tenant_console_rbac.py` (isolation tenant / garde `/api/v1/rbac`)
+- `tests/unit/test_migrations_chain.py` (chaîne de migrations, tête unique)
 
 ### Frontend
 

@@ -51,7 +51,7 @@ export default function TransportContainersDeclarationPage() {
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 pb-24 text-slate-100">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-slate-400">
-        <Link href="/transport-flotte" className="hover:text-blue-400 flex items-center gap-1">
+        <Link href="/transport-flotte/control-tower" className="hover:text-blue-400 flex items-center gap-1">
           <ArrowLeft className="w-3.5 h-3.5" /> Transport & Flotte
         </Link>
         <span>/</span>
@@ -104,7 +104,7 @@ export default function TransportContainersDeclarationPage() {
 
         {filtered.length === 0 ? (
           <div className="py-16 text-center bg-slate-950/40 rounded-xl border border-dashed border-slate-800">
-            <Box className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+            <Box className="w-12 h-12 text-slate-400 mx-auto mb-3" />
             <h3 className="text-base font-semibold text-white">Aucun constat EIR enregistré</h3>
             <p className="text-sm text-slate-400 max-w-md mx-auto mt-1 mb-4">
               Votre structure n'a pas encore saisi de bordereau d'interchange conteneur pour les sorties ou entrées de parc.

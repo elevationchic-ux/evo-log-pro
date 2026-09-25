@@ -50,13 +50,23 @@ Les 19 routeurs enregistrés avec vérification de sécurité `safe_include_rout
 17. `/api/suppliers` (Répertoire fournisseurs)
 18. `/api/notifications` (Notifications applicatives)
 19. `/api/purchase` (Procurement et demandes d'achat)
+20. `/api/v1/rbac` (RBAC multi-tenant : catalogue de permissions, rôles, permissions granulaires d'un rôle, vérification)
+21. `/api/v1/accreditations` (Accréditations nominatives datées + espaces communs `/api/v1/shared-access`)
+22. `/api/v1/comptabilite-avance`, `/api/v1/magasin` (domaines cœur sécurisés par `require_perm`)
 
 ---
 
 ## 🎨 Architecture Frontend & Système RBAC
 
-### Rôles & Autorisations (`modules_allowed`)
-Le composant `Sidebar` inspecte le rôle et le tableau `modules_allowed` de l'utilisateur connecté via NextAuth. Les modules non autorisés sont :
+### Rôles & Autorisations (`modules_allowed` + permissions granulaires)
+Le contrôle d'accès est **d'abord appliqué côté serveur** (`app/core/permissions.py`,
+`require_perm`, `visible_user_ids` ; voir `docs/RBAC_ACCREDITATIONS.md`). Côté
+frontend, la session NextAuth propage `permissions`, `shared_modules`, `role_level`,
+`department_id`. La `Sidebar` et `PermissionGuard` combinent :
+1. les **permissions granulaires effectives** (`module.sous_module.action`, hook `useCan`) quand elles existent ;
+2. à défaut, le tableau legacy `modules_allowed` (comportement historique inchangé).
+
+Les modules non autorisés sont :
 1. **Grisés visuellement** avec une opacité réduite.
 2. **Verrouillés par une icône de cadenas 🔒**.
 3. **Protégés par une modale d'accès restreint** lors de toute tentative de clic : *"Accès restreint : Votre profil [ROLE] n'est pas autorisé à accéder au module [MODULE]. Veuillez contacter l'Admin CADC."*

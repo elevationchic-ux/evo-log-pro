@@ -4,21 +4,16 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { api } from '@/lib/api-client'
 import { useI18n } from '@/hooks/useI18n'
-import { useSettings, ThemePreference } from '@/components/layout/SettingsProvider'
+import { useSettings } from '@/components/layout/SettingsProvider'
 
 export default function ForgotPasswordPage() {
   const t = useI18n()
-  const { theme: uiTheme, setTheme, language, setLanguage } = useSettings()
+  const { language, setLanguage } = useSettings()
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [submittedEmail, setSubmittedEmail] = useState('')
   const [emailInput, setEmailInput] = useState('')
   const [emailError, setEmailError] = useState('')
-
-  const cycleTheme = () => {
-    const themes: ThemePreference[] = ['light', 'dark', 'system']
-    setTheme(themes[(themes.indexOf(uiTheme) + 1) % themes.length])
-  }
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -50,9 +45,6 @@ export default function ForgotPasswordPage() {
         <button onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')} className="flex items-center gap-1 rounded border border-white/20 bg-white/10 px-2 py-1 text-[11px] font-bold uppercase text-white/70 backdrop-blur transition hover:bg-white/20">
           <span className="material-symbols-outlined text-[14px]">language</span>{language}
         </button>
-        <button onClick={cycleTheme} className="rounded border border-white/20 bg-white/10 p-1.5 text-white/70 backdrop-blur transition hover:bg-white/20">
-          <span className="material-symbols-outlined text-[16px]">{uiTheme === 'light' ? 'light_mode' : uiTheme === 'dark' ? 'dark_mode' : 'settings_brightness'}</span>
-        </button>
       </div>
 
       <div className="relative z-10 w-full max-w-[420px] mx-4">
@@ -64,17 +56,17 @@ export default function ForgotPasswordPage() {
           <p className="text-xs font-bold text-blue-300 uppercase tracking-[0.2em] mt-1">Operational Control Systems</p>
         </div>
 
-        <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-white/10 p-7">
+        <div className="bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-white/10 p-7">
           {isSuccess ? (
             <div className="text-center">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-green-500/15 dark:bg-green-900/30 flex items-center justify-center">
                   <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-[40px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                 </div>
               </div>
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">{t.auth.forgotSuccessTitle}</h2>
+              <h2 className="text-lg font-bold text-slate-200 dark:text-slate-100 mb-1">{t.auth.forgotSuccessTitle}</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{t.auth.forgotSuccessBody}</p>
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">{submittedEmail}</p>
+              <p className="text-sm font-semibold text-slate-300 dark:text-slate-200 mb-4">{submittedEmail}</p>
               <p className="text-xs text-slate-400 dark:text-slate-500 mb-6">{t.auth.forgotSpamNote}</p>
               <Link href="/login" className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition">
                 <span className="material-symbols-outlined text-[18px]">arrow_back</span>{t.auth.backToLogin}
@@ -83,7 +75,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <>
               <div className="mb-5">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t.auth.forgotTitle}</h2>
+                <h2 className="text-lg font-bold text-slate-200 dark:text-slate-100">{t.auth.forgotTitle}</h2>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{t.auth.forgotSubtitle}</p>
               </div>
               <form onSubmit={onSubmit} className="space-y-4">
@@ -92,14 +84,14 @@ export default function ForgotPasswordPage() {
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">alternate_email</span>
                     <input value={emailInput} onChange={(e) => { setEmailInput(e.target.value); if (emailError) setEmailError('') }} type="email" placeholder="user@EVO-LOG.com" disabled={isLoading}
-                      className="w-full h-11 pl-9 pr-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                      className="w-full h-11 pl-9 pr-3 bg-slate-800 dark:bg-slate-700 border border-slate-700 dark:border-slate-600 rounded-lg text-sm text-slate-200 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
                   </div>
                   {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
                 </div>
                 <button type="submit" disabled={isLoading} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 transition-all disabled:opacity-70">
                   {isLoading ? <><span className="material-symbols-outlined animate-spin text-[20px]">sync</span><span>{t.auth.forgotSending}</span></> : <><span>{t.auth.forgotCta}</span><span className="material-symbols-outlined text-[20px]">send</span></>}
                 </button>
-                <div className="text-center pt-2 border-t border-slate-100 dark:border-slate-700">
+                <div className="text-center pt-2 border-t border-slate-700 dark:border-slate-700">
                   <Link href="/login" className="text-sm text-blue-500 hover:underline inline-flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">arrow_back</span>{t.auth.backToLogin}
                   </Link>

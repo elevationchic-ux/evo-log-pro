@@ -1,224 +1,199 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { X, Layers, LayoutDashboard } from "lucide-react";
-import { NAVIGATION_REGISTRY, getFilteredNavigationForUser, ModuleNavConfig } from "@/config/navigationRegistry";
+import { X, Search, LayoutDashboard } from "lucide-react";
+import { NAVIGATION_REGISTRY, ModuleNavConfig } from "@/config/navigationRegistry";
+import { localizeTitle, localizeSubLabel } from "@/config/navI18n";
+import { useSettings } from "@/components/layout/SettingsProvider";
+import { useI18n } from "@/hooks/useI18n";
 
 export default function SubModuleOrbitalBubble() {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { language } = useSettings();
+  const t = useI18n();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 20, y: 180 }); // Distance relative du bord droit (px)
+  const [query, setQuery] = useState("");
+  const [position, setPosition] = useState({ x: 20, y: 180 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef<{ startX: number; startY: number; posX: number; posY: number }>({ startX: 0, startY: 0, posX: 0, posY: 0 });
 
-  // Navigation dynamique filtrée selon le profil RBAC de l'utilisateur
-  const filteredNav: ModuleNavConfig[] = getFilteredNavigationForUser(session?.user as any);
+  // TOUS les modules sont exposés dans la bulle flottante (exigence produit).
+  const filteredNav: ModuleNavConfig[] = Object.values(NAVIGATION_REGISTRY);
 
-  // Résolution intelligente du module actif à partir du pathname
-  let activeModuleKey = Object.keys(NAVIGATION_REGISTRY).find(k => k !== "dashboard" && pathname.startsWith(`/${k}`));
-  if (!activeModuleKey) {
-    if (pathname.startsWith('/dashboard') || pathname === '/') {
-      activeModuleKey = "dashboard";
-    } else if (pathname.startsWith('/master-data') || pathname.startsWith('/suppliers') || pathname.startsWith('/tiers')) {
-      activeModuleKey = "master-data";
-    } else if (pathname.startsWith('/security')) {
-      activeModuleKey = "qhse";
-    } else {
-      activeModuleKey = "magasin";
-    }
-  }
+  // Résolution du module actif à partir du pathname (pour colorer la bulle).
+  const activeModuleKey =
+    Object.keys(NAVIGATION_REGISTRY).find((k) => k !== "dashboard" && pathname.startsWith(`/${k}`)) ||
+    (pathname.startsWith("/dashboard") || pathname === "/" ? "dashboard" : filteredNav[0]?.key);
 
-  // Chercher le module correspondant dans la liste filtrée RBAC
-  const activeOrbit = filteredNav.find(m => m.key === activeModuleKey) || filteredNav[0] || NAVIGATION_REGISTRY.magasin;
+  const activeOrbit =
+    filteredNav.find((m) => m.key === activeModuleKey) || filteredNav[0] || NAVIGATION_REGISTRY.dashboard;
+  const MainIcon = activeOrbit.icon || LayoutDashboard;
 
-  // Gestion du Dragging (Souris & Touch)
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // Filtre de recherche : module et sous-modules dont le libellé/chemin correspond.
+  const q = query.trim().toLowerCase();
+  const visibleModules = useMemo(() => {
+    if (!q) return filteredNav;
+    return filteredNav
+      .map((m) => {
+        const moduleMatch = m.title.toLowerCase().includes(q) || (m.titleEn || '').toLowerCase().includes(q) || m.key.includes(q);
+        const subs = m.subModules.filter(
+          (s) => s.label.toLowerCase().includes(q) || localizeSubLabel(s.label, language).toLowerCase().includes(q) || s.path.toLowerCase().includes(q)
+        );
+        if (moduleMatch) return m;
+        if (subs.length) return { ...m, subModules: subs };
+        return null;
+      })
+      .filter(Boolean) as ModuleNavConfig[];
+  }, [filteredNav, q]);
+
+  const totalSubs = filteredNav.reduce((acc, m) => acc + m.subModules.length, 0);
+
+  // ── Drag FAB (souris + tactile) ──
+  const beginDrag = (clientX: number, clientY: number) => {
     setIsDragging(false);
-    dragStartRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      posX: position.x,
-      posY: position.y
-    };
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = dragStartRef.current.startX - moveEvent.clientX;
-      const deltaY = moveEvent.clientY - dragStartRef.current.startY;
-      if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
-        setIsDragging(true);
-      }
-      setPosition({
-        x: Math.max(10, Math.min(window.innerWidth - 70, dragStartRef.current.posX + deltaX)),
-        y: Math.max(80, Math.min(window.innerHeight - 80, dragStartRef.current.posY + deltaY))
-      });
-    };
-
-    const handleMouseUp = () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    dragStartRef.current = { startX: clientX, startY: clientY, posX: position.x, posY: position.y };
+  };
+  const moveDrag = (clientX: number, clientY: number) => {
+    const deltaX = dragStartRef.current.startX - clientX;
+    const deltaY = clientY - dragStartRef.current.startY;
+    if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) setIsDragging(true);
+    setPosition({
+      x: Math.max(10, Math.min(window.innerWidth - 70, dragStartRef.current.posX + deltaX)),
+      y: Math.max(80, Math.min(window.innerHeight - 80, dragStartRef.current.posY + deltaY)),
+    });
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    dragStartRef.current = {
-      startX: touch.clientX,
-      startY: touch.clientY,
-      posX: position.x,
-      posY: position.y
-    };
-
-    const handleTouchMove = (moveEvent: TouchEvent) => {
-      const moveTouch = moveEvent.touches[0];
-      const deltaX = dragStartRef.current.startX - moveTouch.clientX;
-      const deltaY = moveTouch.clientY - dragStartRef.current.startY;
-      if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
-        setIsDragging(true);
-      }
-      setPosition({
-        x: Math.max(10, Math.min(window.innerWidth - 70, dragStartRef.current.posX + deltaX)),
-        y: Math.max(80, Math.min(window.innerHeight - 80, dragStartRef.current.posY + deltaY))
-      });
-    };
-
-    const handleTouchEnd = () => {
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
-    };
-
-    window.addEventListener("touchmove", handleTouchMove);
-    window.addEventListener("touchend", handleTouchEnd);
+  const navigate = (path: string) => {
+    setIsOpen(false);
+    router.push(path);
   };
-
-  const MainIcon = activeOrbit.icon;
-  const itemsCount = activeOrbit.subModules.length;
-  // Calcul du rayon orbital dynamique selon le nombre de sous-modules (évite les chevauchements)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
-  const orbitRadius = isMobile
-    ? Math.max(130, Math.min(180, 110 + itemsCount * 5))
-    : Math.max(190, Math.min(260, 160 + itemsCount * 7));
 
   return (
     <>
-      {/* --- Bulle Flottante Déplaçable (Bord Droit) --- */}
+      {/* ── Bouton flottant déplaçable (bord droit) ── */}
       <div
         style={{ right: `${position.x}px`, top: `${position.y}px` }}
-        className="fixed z-[85] select-none cursor-grab active:cursor-grabbing transition-transform duration-100"
+        className="fixed z-[85] select-none cursor-grab active:cursor-grabbing"
       >
         <button
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-          onClick={() => {
-            if (!isDragging) {
-              setIsOpen(!isOpen);
-            }
-          }}
-          className={`relative group w-14 h-14 rounded-full bg-slate-900 border-2 flex items-center justify-center shadow-2xl transition-all hover:scale-110 active:scale-95 ${activeOrbit.glow}`}
+          onMouseDown={(e) => beginDrag(e.clientX, e.clientY)}
+          onMouseMove={(e) => isDragging && moveDrag(e.clientX, e.clientY)}
+          onMouseUp={() => window.setTimeout(() => setIsDragging(false), 0)}
+          onTouchStart={(e) => beginDrag(e.touches[0].clientX, e.touches[0].clientY)}
+          onTouchMove={(e) => isDragging && moveDrag(e.touches[0].clientX, e.touches[0].clientY)}
+          onTouchEnd={() => window.setTimeout(() => setIsDragging(false), 0)}
+          onClick={() => { if (!isDragging) setIsOpen((o) => !o); }}
+          className={`relative w-14 h-14 rounded-full bg-slate-900 border-2 flex items-center justify-center shadow-2xl transition-transform hover:scale-110 active:scale-95 ${activeOrbit.glow}`}
           style={{ borderColor: activeOrbit.color }}
-          title={`Ouvrir les ${itemsCount} sous-modules de ${activeOrbit.title}`}
+          aria-label={t.shell.bubbleTitle}
+          title={t.shell.bubbleTitle}
         >
-          {/* Glowing Aura Effect */}
-          <div
-            className={`absolute inset-0 rounded-full blur-md opacity-60 animate-pulse bg-gradient-to-tr ${activeOrbit.bgGradient}`}
-          />
-
-          {/* Icon and Badge */}
+          <div className={`absolute inset-0 rounded-full blur-md opacity-60 animate-pulse bg-gradient-to-tr ${activeOrbit.bgGradient}`} />
           <div className={`relative w-11 h-11 rounded-full bg-gradient-to-tr ${activeOrbit.bgGradient} flex items-center justify-center text-white shadow-inner`}>
-            {isOpen ? <X className="w-6 h-6 animate-in spin-in-90 duration-200" /> : <MainIcon className="w-6 h-6" />}
+            {isOpen ? <X className="w-6 h-6" /> : <MainIcon className="w-6 h-6" />}
           </div>
-
-          {/* Sub-module Count Badge */}
           <span className="absolute -top-1 -right-1 bg-slate-950 text-amber-400 font-black text-[10px] px-2 py-0.5 rounded-full border border-amber-500/50 shadow-md">
-            {itemsCount}
+            {filteredNav.length}
           </span>
         </button>
       </div>
 
-      {/* --- Overlay Modal Orbitale avec Animation 3D --- */}
+      {/* ── Panneau de navigation : tous modules + tous sous-modules ── */}
       {isOpen && (
-        <div className="fixed inset-0 z-[90] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          {/* Backdrop Click Closes */}
-          <div className="absolute inset-0" onClick={() => setIsOpen(false)} />
+        <div className="fixed inset-0 z-[90] bg-slate-950/90 backdrop-blur-md flex items-stretch sm:items-center justify-center animate-in fade-in duration-200">
+          <div className="absolute inset-0" onClick={() => setIsOpen(false)} aria-hidden="true" />
 
-          {/* Central Radial Container */}
-          <div
-            style={{ width: `${orbitRadius * 2 + 100}px`, height: `${orbitRadius * 2 + 100}px` }}
-            className="relative flex items-center justify-center pointer-events-none transition-all duration-300 max-w-[95vw] max-h-[95vh]"
-          >
-            {/* Pulsating Orbital Ring */}
-            <div
-              style={{ width: `${orbitRadius * 2}px`, height: `${orbitRadius * 2}px`, borderColor: `${activeOrbit.color}66` }}
-              className="absolute rounded-full border-2 border-dashed animate-spin-slow"
-            />
-
-            {/* Central Module Sphere */}
-            {(() => {
-              const MainIconComponent = activeOrbit.icon || LayoutDashboard;
-              return (
-                <div
-                  className="relative z-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-slate-900 border-4 flex flex-col items-center justify-center p-2 text-center shadow-2xl pointer-events-auto cursor-pointer group hover:scale-105 transition-all"
-                  style={{ borderColor: activeOrbit.color, boxShadow: `0 0 25px ${activeOrbit.color}40` }}
+          <div className="relative z-10 flex w-full h-full sm:h-auto sm:max-h-[88vh] sm:max-w-5xl sm:rounded-2xl bg-slate-900 border-0 sm:border sm:border-slate-800 shadow-2xl flex-col overflow-hidden">
+            {/* En-tête */}
+            <div className="shrink-0 border-b border-slate-800 bg-slate-900 px-4 py-3 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-sm font-black text-slate-100 truncate">{t.shell.bubbleTitle}</h2>
+                  <p className="text-[11px] text-slate-400">
+                    {filteredNav.length} {t.shell.modules} · {totalSubs} {t.shell.subModules}
+                  </p>
+                </div>
+                <button
                   onClick={() => setIsOpen(false)}
+                  className="shrink-0 rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                  aria-label={t.common.close}
                 >
-                  <div className={`w-12 h-12 rounded-full bg-gradient-to-tr ${activeOrbit.bgGradient} text-white flex items-center justify-center shadow-lg mb-1`}>
-                    <MainIconComponent className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-[11px] font-black text-slate-100 truncate w-full px-1">{activeOrbit.title}</span>
-                  <span className="text-[9px] font-bold" style={{ color: activeOrbit.color }}>Fermer ({itemsCount})</span>
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  autoFocus
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={t.shell.bubbleSearch}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-slate-600"
+                />
+              </div>
+            </div>
+
+            {/* Corps : liste défilante de tous les modules et de leurs sous-modules */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+              {visibleModules.length === 0 ? (
+                <div className="py-16 text-center text-sm text-slate-500">{t.common.noResultsFor} « {query} »</div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  {visibleModules.map((mod) => {
+                    const ModIcon = mod.icon || LayoutDashboard;
+                    const isActive = mod.key === activeModuleKey;
+                    return (
+                      <section
+                        key={mod.key}
+                        className={`rounded-xl border bg-slate-950/60 p-3 ${isActive ? "border-slate-600" : "border-slate-800"}`}
+                        style={isActive ? { borderColor: `${mod.color}80` } : undefined}
+                      >
+                        <button
+                          onClick={() => navigate(mod.path)}
+                          className="w-full flex items-center gap-3 mb-2 text-left group"
+                        >
+                          <span
+                            className={`shrink-0 w-9 h-9 rounded-lg bg-gradient-to-tr ${mod.bgGradient} text-white flex items-center justify-center shadow`}
+                          >
+                            <ModIcon className="w-5 h-5" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-[13px] font-bold text-slate-100 truncate group-hover:text-white">{localizeTitle(mod, language)}</span>
+                            <span className="block text-[10px] text-slate-500 truncate">{mod.subModules.length} {t.shell.subModules}</span>
+                          </span>
+                          <span className="shrink-0 h-2 w-2 rounded-full" style={{ backgroundColor: mod.color }} />
+                        </button>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                          {mod.subModules.map((sub) => {
+                            const SubIcon = sub.icon || LayoutDashboard;
+                            const subActive = pathname === sub.path;
+                            return (
+                              <button
+                                key={`${mod.key}:${sub.path}`}
+                                onClick={() => navigate(sub.path)}
+                                title={localizeSubLabel(sub.label, language)}
+                                className={`flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-left transition-colors ${
+                                  subActive
+                                    ? "bg-slate-800 border-slate-600 text-white"
+                                    : "bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 hover:border-slate-700"
+                                }`}
+                              >
+                                <SubIcon className="w-3.5 h-3.5 shrink-0" style={{ color: mod.color }} />
+                                <span className="text-[11px] font-medium truncate">{localizeSubLabel(sub.label, language)}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    );
+                  })}
                 </div>
-              );
-            })()}
-
-            {/* Orbiting Sub-Module Items */}
-            {activeOrbit.subModules.map((item, index) => {
-              const angle = (index / itemsCount) * 2 * Math.PI - Math.PI / 2;
-              const x = Math.cos(angle) * orbitRadius;
-              const y = Math.sin(angle) * orbitRadius;
-              const ItemIconComponent = item.icon || Layers;
-              const isActiveRoute = pathname === item.path;
-
-              return (
-                <div
-                  key={item.path}
-                  style={{ transform: `translate(${x}px, ${y}px)` }}
-                  className="absolute pointer-events-auto transition-transform duration-300"
-                >
-                  <button
-                    onClick={() => {
-                      setIsOpen(false);
-                      router.push(item.path);
-                    }}
-                    className={`flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl p-2 border shadow-lg transition-all duration-200 hover:scale-110 group ${
-                      isActiveRoute
-                        ? 'bg-slate-900 text-white border-blue-500 shadow-blue-500/30'
-                        : 'bg-slate-900/90 text-slate-200 border-slate-700/60 hover:bg-slate-800 hover:border-slate-500'
-                    }`}
-                  >
-                    <ItemIconComponent className={`w-5 h-5 mb-1 transition-colors ${isActiveRoute ? 'text-blue-400' : 'text-slate-300 group-hover:text-white'}`} />
-
-                    {/* Tooltip Label on Hover */}
-                    <div className="absolute -bottom-8 whitespace-nowrap bg-slate-950 text-slate-100 font-bold text-[10px] sm:text-xs px-2.5 py-1 rounded-xl border border-slate-800 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                      {item.label}
-                    </div>
-
-                    {/* Optional Badge */}
-                    {item.badge && (
-                      <span className="absolute -top-2 -right-1 bg-amber-500 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded-full border border-amber-300 shadow-sm">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                </div>
-              );
-            })}
+              )}
+            </div>
           </div>
         </div>
       )}

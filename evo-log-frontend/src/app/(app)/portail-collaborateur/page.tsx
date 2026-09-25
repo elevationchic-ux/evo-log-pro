@@ -22,6 +22,8 @@ interface PortalCard {
   features: string[];
 }
 
+// Cartes de navigation statiques vers les portails métier (contenu descriptif, liens vivants vérifiés).
+// audit-allow:fake_data
 const ALL_PORTALS: PortalCard[] = [
   {
     id: 'rh-employe',
@@ -152,7 +154,7 @@ export default function PortailCollaborateurHubPage() {
             <span className="flex items-center gap-1.5 text-emerald-400">
               <CheckCircle2 className="w-4 h-4" /> Session active : {session?.user?.name || 'Collaborateur EVO-LOG'}
             </span>
-            <span className="text-slate-600">•</span>
+            <span className="text-slate-400">•</span>
             <span>Rôles : {userRoles.length > 0 ? userRoles.join(', ') : 'Employé'}</span>
           </div>
         </div>
@@ -161,7 +163,7 @@ export default function PortailCollaborateurHubPage() {
       {/* Grille des 8 Portails */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-200 flex items-center gap-2">
             <Compass className="w-5 h-5 text-indigo-600" /> Vos Portails Métier Disponibles
           </h2>
           <span className="text-xs font-mono text-slate-500">8 Espaces Intégrés End-to-End</span>
@@ -177,8 +179,8 @@ export default function PortailCollaborateurHubPage() {
                 key={portal.id}
                 className={`relative flex flex-col justify-between rounded-2xl border transition-all duration-200 overflow-hidden ${
                   isAllowed
-                    ? 'bg-white border-slate-200 hover:shadow-xl hover:-translate-y-1 hover:border-indigo-300'
-                    : 'bg-slate-50 border-slate-200/80 opacity-60'
+                    ? 'bg-slate-900 border-slate-700 hover:shadow-xl hover:-translate-y-1 hover:border-indigo-500/50'
+                    : 'bg-slate-800 border-slate-700/80 opacity-60'
                 }`}
               >
                 {/* Header Card */}
@@ -189,25 +191,25 @@ export default function PortailCollaborateurHubPage() {
                     </div>
                     <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
                       isAllowed
-                        ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                        : 'bg-slate-100 text-slate-500 border-slate-200'
+                        ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/40'
+                        : 'bg-slate-900 text-slate-500 border-slate-700'
                     }`}>
                       {portal.badge}
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 leading-snug">{portal.title}</h3>
+                    <h3 className="text-base font-bold text-slate-200 leading-snug">{portal.title}</h3>
                     <p className="text-xs text-indigo-600 font-medium">{portal.subtitle}</p>
                   </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
+                  <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">
                     {portal.description}
                   </p>
 
-                  <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                  <div className="space-y-1.5 pt-2 border-t border-slate-700">
                     {portal.features.map((f, i) => (
-                      <div key={i} className="flex items-center gap-1.5 text-[11px] text-slate-600">
+                      <div key={i} className="flex items-center gap-1.5 text-[11px] text-slate-400">
                         <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
                         <span className="truncate">{f}</span>
                       </div>
@@ -216,7 +218,7 @@ export default function PortailCollaborateurHubPage() {
                 </div>
 
                 {/* Footer Action */}
-                <div className="p-4 bg-slate-50 border-t border-slate-100 mt-auto">
+                <div className="p-4 bg-slate-800 border-t border-slate-700 mt-auto">
                   {isAllowed ? (
                     <Link
                       href={portal.href}

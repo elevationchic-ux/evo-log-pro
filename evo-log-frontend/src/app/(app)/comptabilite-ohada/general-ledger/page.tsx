@@ -221,7 +221,7 @@ export default function ComptabiliteOhadaGeneralLedger() {
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-slate-500">
-                    <Layers className="w-10 h-10 mx-auto mb-2 text-slate-600" />
+                    <Layers className="w-10 h-10 mx-auto mb-2 text-slate-400" />
                     Aucun compte avec mouvements pour ce filtre. Saisissez des écritures au journal pour générer la balance.
                   </td>
                 </tr>

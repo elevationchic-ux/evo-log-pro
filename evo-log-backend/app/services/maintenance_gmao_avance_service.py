@@ -1,32 +1,88 @@
 """Maintenance GMAO Avancée Service - Maintenance Préventive, Ordres de Travail, MTBF/MTTR/TCO"""
-from datetime import datetime, date
+from datetime import datetime, date, timedelta, timezone
 from typing import List, Optional, Dict, Any
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 
 class MaintenancePreventiveService:
     """Planification automatique des ordres de travail préventifs par seuils km/heures"""
-    
+
+    SEUIL_KM = 10000
+    INTERVALLE_MOIS = 3
+
     @staticmethod
     def generer_ordres_preventifs(db: Session, vehicule_ids: List[int]) -> Dict[str, Any]:
-        ordres = []
+        """Cree reellement les OT preventifs en base quand les seuils sont atteints
+        (10 000 km ou 3 mois depuis le dernier preventif). Aucun ordre invente :
+        les vehicules encore sous seuil sont ignores et signales."""
+        from app.models.parc import Maintenance, Vehicule
+
+        now = datetime.now(timezone.utc)
+        cres = []
+        ignores = []
         for vid in vehicule_ids:
-            ordres.append({
-                "ordre_id": f"OT-PREV-{datetime.now().strftime('%Y%m%d')}-{vid:04d}",
+            veh = db.get(Vehicule, vid)
+            if not veh or not veh.is_active:
+                ignores.append({"vehicule_id": vid, "motif": "vehicule introuvable ou inactif"})
+                continue
+            dernier = (
+                db.query(Maintenance)
+                .options(joinedload(Maintenance.vehicule))
+                .filter(
+                    Maintenance.vehicule_id == vid,
+                    Maintenance.type_maintenance.ilike("%prevent%"),
+                )
+                .order_by(Maintenance.id.desc())
+                .first()
+            )
+            km_actuel = veh.kilometrage or 0
+            km_depuis = (km_actuel - (dernier.kilometrage or 0)) if dernier else km_actuel
+            mois_depuis = None
+            if dernier and dernier.date_debut:
+                ref = dernier.date_debut
+                if ref.tzinfo is None:
+                    ref = ref.replace(tzinfo=timezone.utc)
+                mois_depuis = (now - ref).days / 30.44
+            declencheur = None
+            if dernier is None:
+                declencheur = "aucun entretien preventif enregistre"
+            elif km_depuis >= MaintenancePreventiveService.SEUIL_KM:
+                declencheur = f"{km_depuis} km depuis le dernier preventif (seuil {MaintenancePreventiveService.SEUIL_KM})"
+            elif mois_depuis is not None and mois_depuis >= MaintenancePreventiveService.INTERVALLE_MOIS:
+                declencheur = f"{mois_depuis:.1f} mois depuis le dernier preventif (seuil {MaintenancePreventiveService.INTERVALLE_MOIS})"
+            if not declencheur:
+                ignores.append({
+                    "vehicule_id": vid,
+                    "immatriculation": veh.immatriculation,
+                    "motif": "sous les seuils kilometeriques et calendaires",
+                })
+                continue
+            ordre = Maintenance(
+                vehicule_id=vid,
+                type_maintenance="preventive",
+                date_debut=now,
+                kilometrage=km_actuel,
+                description=f"Revision preventive generee automatiquement - {declencheur}",
+                statut="planifie",
+                created_at=now,
+            )
+            db.add(ordre)
+            db.flush()
+            cres.append({
+                "ordre_id": f"OT-{ordre.id:05d}",
                 "vehicule_id": vid,
+                "immatriculation": veh.immatriculation,
                 "type": "PREVENTIF",
-                "operations": [
-                    "Vidange huile moteur (10W40) + filtre",
-                    "Contrôle pression pneumatiques Bridgestone/Michelin",
-                    "Vérification freins et plaquettes",
-                    "Graissage cardan et croisillons"
-                ],
-                "seuil_km": 10000,
-                "intervalle_mois": 3,
                 "statut": "PLANIFIE",
-                "date_planifiee": datetime.now().isoformat()
+                "motif": declencheur,
+                "date_planifiee": now.isoformat(),
             })
-        return {"ordres_generes": len(ordres), "ordres": ordres}
+        db.commit()
+        return {
+            "ordres_generes": len(cres),
+            "ordres": cres,
+            "vehicules_ignores": ignores,
+        }
 
 
 class AnalyticsMaintenanceService:

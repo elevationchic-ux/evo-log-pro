@@ -172,7 +172,7 @@ export default function TenantPage() {
           <div className="p-12 text-center"><RefreshCw className="w-6 h-6 animate-spin text-emerald-400 mx-auto mb-2" /></div>
         ) : companies.length === 0 ? (
           <div className="p-12 text-center text-slate-400">
-            <Building2 className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+            <Building2 className="w-10 h-10 text-slate-400 mx-auto mb-2" />
             <p className="font-bold text-white">Aucune société cliente enregistrée</p>
           </div>
         ) : (

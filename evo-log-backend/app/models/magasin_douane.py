@@ -62,6 +62,9 @@ class DeclarationEntrepot(Base):
     numero_declaration = Column(String(50), unique=True, nullable=False, index=True)
     entrepot_id = Column(Integer, ForeignKey('entrepots_douane.id'))
     dossier_transit_id = Column(Integer, ForeignKey('dossiers_transit.id'))
+    # Rattachement a l'etape portuaire (chaine documentaire, migration 024).
+    conteneur_id = Column(Integer, ForeignKey('conteneurs.id'), index=True)
+    numero_bl = Column(String(50), index=True)
     regime = Column(Enum(RegimeEntrepot))
     date_declaration = Column(Date)
     date_acceptation = Column(Date)

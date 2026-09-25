@@ -39,10 +39,10 @@ export function KPICard({
     return (
       <div className="erp-card p-6 animate-pulse">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-slate-200 dark:bg-slate-700" />
+          <div className="h-12 w-12 rounded-lg bg-slate-700 dark:bg-slate-700" />
           <div className="flex-1">
-            <div className="h-4 w-24 rounded bg-slate-200 dark:bg-slate-700 mb-2" />
-            <div className="h-8 w-16 rounded bg-slate-200 dark:bg-slate-700" />
+            <div className="h-4 w-24 rounded bg-slate-700 dark:bg-slate-700 mb-2" />
+            <div className="h-8 w-16 rounded bg-slate-700 dark:bg-slate-700" />
           </div>
         </div>
       </div>

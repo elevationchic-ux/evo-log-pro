@@ -209,7 +209,7 @@ export default function AdminSaasUsersPage() {
                     </div>
                     {u.phone && (
                       <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                        <Phone className="w-3 h-3 text-slate-600" />
+                        <Phone className="w-3 h-3 text-slate-400" />
                         <span>{u.phone}</span>
                       </div>
                     )}

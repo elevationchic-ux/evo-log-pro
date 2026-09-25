@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
-from app.models.douane_cameroun import DUM, BV
+from app.models.douane_cameroun import DUM, BV, TauxReferenceBEAC
 
 router = APIRouter()
 
@@ -157,17 +157,45 @@ async def create_goods_declaration(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Enregistre une nouvelle déclaration de marchandises DUM avec liquidation fiscale prédictive"""
+    """Enregistre une nouvelle déclaration de marchandises DUM avec liquidation fiscale prédictive.
+
+    La liquidation est calculée LOCALEMENT (estimation) : le document n'est ni
+    déposé ni acquitté auprès de la DGD/SYDONIA  aucune référence SYDONIA
+    n'est générée ici (la référence réelle vient du retour ASYCUDA du déclarant).
+    """
     today_str = datetime.now().strftime("%Y%m%d")
     count_today = db.query(func.count(DUM.id)).scalar() or 0
     numero_dum = f"DUM-{today_str}-{count_today + 1:04d}"
 
+    # Taux de change : celui saisi par le déclarant, sinon la référence BEAC
+    # enregistrée en base. Jamais de taux inventé (l'ancien fallback 615.0
+    # différait de ~6 % de la parité officielle 655,957 et faussait la liquidation).
+    taux_change = payload.taux_change
+    if not taux_change:
+        derniere_ref = (
+            db.query(TauxReferenceBEAC)
+            .filter(TauxReferenceBEAC.devise == (payload.devise or "USD"))
+            .order_by(desc(TauxReferenceBEAC.date_application))
+            .first()
+        )
+        if derniere_ref and derniere_ref.taux_moyen:
+            taux_change = float(derniere_ref.taux_moyen)
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "taux_change obligatoire : aucun taux BEAC de référence enregistré "
+                    "pour cette devise. Renseignez le taux officiel du jour (table "
+                    "taux_reference_beac) ou passez taux_change dans la requête."
+                ),
+            )
+
     # Calcul de la valeur en douane et des taxes
-    taux_change = payload.taux_change or 615.0
     val_caf = payload.valeur_caf or (payload.valeur_fob or 0) * 1.15
     valeur_douane_xaf = val_caf * taux_change
 
     # Taux standard Cameroun: TEC 20% + TVA 19.25% + CAC 10% sur droits
+    # NB : estimation  la catégorie TEC réelle dépend de la position tarifaire du code SH.
     droits_douane = valeur_douane_xaf * 0.20
     cac = droits_douane * 0.10
     assiette_tva = valeur_douane_xaf + droits_douane
@@ -202,7 +230,7 @@ async def create_goods_declaration(
         timbre_usage=timbre,
         montant_total=montant_total,
         statut="en_attente",
-        reference_sydonia=f"SYD-{datetime.now().strftime('%y%m%d%H%M%S')}",
+        reference_sydonia=None,  # remplie au retour réel ASYCUDA/SYDONIA par le déclarant
         notes=payload.notes
     )
 
@@ -211,9 +239,10 @@ async def create_goods_declaration(
     db.refresh(dum)
 
     return {
-        "message": "Déclaration DUM enregistrée et calculée avec succès",
+        "message": "DUM enregistrée localement avec une liquidation ESTIMATIVE (non télétransmise à SYDONIA)",
         "id": dum.id,
         "numero_dum": dum.numero_dum,
+        "estimation": True,
         "valeur_douane_xaf": float(dum.valeur_douane_xaf),
         "montant_total_taxes": float(dum.montant_total)
     }

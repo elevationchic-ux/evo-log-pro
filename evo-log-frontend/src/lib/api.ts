@@ -1,65 +1,10 @@
 /**
- * API client for EVO-LOG backend
- * Handles all HTTP requests to the FastAPI backend
+ * Shim de compatibilité  NE PAS UTILISER DANS DU NOUVEAU CODE.
+ *
+ * L'unique client API du projet est `@/lib/api-client` (apiClient + services typés).
+ * Cet ancien instance axios (avec son propre token localStorage et sa réécriture /api/v1)
+ * est redirigé vers le client unifié pour garantir une seule comportement d'auth,
+ * de refresh et de normalisation d'URL dans toute l'application.
  */
-import axios from 'axios'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
-const apiClient = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-
-// Request interceptor to add auth token
-apiClient.interceptors.request.use(
-  (config) => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('access_token')
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-      }
-    }
-    return config
-  },
-  (error) => Promise.reject(error)
-)
-
-// Response interceptor to handle errors
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config
-
-    // If 401 error, try to refresh token
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
-
-      try {
-        const refreshToken = localStorage.getItem('refresh_token')
-        const response = await axios.post(`${API_URL}/api/v1/auth/refresh`, {
-          refresh_token: refreshToken
-        })
-
-        const { access_token, refresh_token } = response.data
-        localStorage.setItem('access_token', access_token)
-        localStorage.setItem('refresh_token', refresh_token)
-
-        originalRequest.headers.Authorization = `Bearer ${access_token}`
-        return apiClient(originalRequest)
-      } catch (refreshError) {
-        // Refresh failed, redirect to login
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login'
-        }
-        return Promise.reject(refreshError)
-      }
-    }
-
-    return Promise.reject(error)
-  }
-)
-
-export default apiClient
+export { apiClient as default } from './api-client';
+export { apiClient } from './api-client';

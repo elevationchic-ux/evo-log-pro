@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 from app.core.database import get_db
 from app.core.security import get_current_user
@@ -61,6 +61,75 @@ def creer_notification(
         db, notification.numero_notification, notification.destinataire_id,
         notification.type_canal, notification.titre, notification.corps, notification.priorite
     )
+
+
+# ============ CENTRE DE NOTIFICATIONS (lecture) ============
+# Chemins semantiques reels appeles par le front (security/notifications) :
+# une notification « lue » = date_lecture horodatee (colonne reelle du
+# modele Notification). Routes statiques declarees AVANT /{notification_id}
+# pour que FastAPI ne lesinterprete pas comme un identifiant.
+
+@router.get("/stats")
+def stats_notifications(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    total = db.query(Notification).count()
+    non_lues = db.query(Notification).filter(Notification.date_lecture.is_(None)).count()
+    critiques = db.query(Notification).filter(Notification.priorite == "critique").count()
+    echouees = db.query(Notification).filter(Notification.statut == "echoue").count()
+    return {
+        "total": total,
+        "non_lues": non_lues,
+        "lues": total - non_lues,
+        "critiques": critiques,
+        "echouees": echouees,
+    }
+
+
+@router.put("/mark-all-read")
+def marquer_toutes_lues(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    now = datetime.now(timezone.utc)
+    updated = (
+        db.query(Notification)
+        .filter(Notification.date_lecture.is_(None))
+        .update({Notification.date_lecture: now}, synchronize_session=False)
+    )
+    db.commit()
+    return {"success": True, "updated": updated}
+
+
+@router.delete("/read")
+def supprimer_lues(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    deleted = (
+        db.query(Notification)
+        .filter(Notification.date_lecture.isnot(None))
+        .delete(synchronize_session=False)
+    )
+    db.commit()
+    return {"success": True, "deleted": deleted}
+
+
+@router.put("/{notification_id}/mark-read")
+def marquer_lue(
+    notification_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    n = db.query(Notification).filter(Notification.id == notification_id).first()
+    if not n:
+        raise HTTPException(status_code=404, detail="Notification non trouvée")
+    if n.date_lecture is None:
+        n.date_lecture = datetime.now(timezone.utc)
+        db.commit()
+        db.refresh(n)
+    return {"success": True, "id": n.id, "date_lecture": n.date_lecture}
 
 
 @router.put("/{notification_id}/envoyer", response_model=NotificationResponse)

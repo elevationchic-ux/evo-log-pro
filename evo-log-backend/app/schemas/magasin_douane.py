@@ -58,6 +58,9 @@ class DeclarationEntrepotBase(BaseModel):
     dossier_transit_id: int
     regime: str
     valeur_marchandise: float
+    # Rattachement chaine documentaire (migration 024) : optionnel, jamais devine.
+    conteneur_id: Optional[int] = None
+    numero_bl: Optional[str] = None
 
 
 class DeclarationEntrepotCreate(DeclarationEntrepotBase):

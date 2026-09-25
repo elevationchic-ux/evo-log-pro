@@ -7,16 +7,45 @@ from typing import List
 
 from app.core.database import get_db
 from app.schemas.tiers import TiersCreate, TiersUpdate, TiersResponse, ClientCreate, ClientResponse, FournisseurCreate, FournisseurResponse
-from app.models.tiers import Tiers, Client, Fournisseur
+from app.models.tiers import Tiers, Client, Fournisseur, Partenaire, TiersType
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[TiersResponse])
+@router.get("", response_model=List[TiersResponse], include_in_schema=False)
 async def get_all_tiers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """Get all tiers (clients, suppliers, partners)"""
     tiers = db.query(Tiers).offset(skip).limit(limit).all()
     return tiers
+
+
+@router.post("/", response_model=TiersResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=TiersResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+async def create_tiers(tiers_data: TiersCreate, db: Session = Depends(get_db)):
+    """Creer un tiers generique (client/fournisseur/partenaire).
+
+    Le front maitre-donnees poste ici ; on resout la sous-classe heritee
+    correspondant au type pour que les tables jointes (clients, fournisseurs,
+    partenaires) restent coherentes avec le polymorphisme SQLAlchemy.
+    """
+    if db.query(Tiers).filter(Tiers.code == tiers_data.code).first():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Code already exists")
+
+    type_enum = TiersType(tiers_data.type)
+    klass = {
+        TiersType.CLIENT: Client,
+        TiersType.FOURNISSEUR: Fournisseur,
+        TiersType.PARTENAIRE: Partenaire,
+    }.get(type_enum, Tiers)
+
+    payload = tiers_data.model_dump()
+    payload["type"] = type_enum
+    row = klass(**payload)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
 
 
 @router.get("/{tiers_id}", response_model=TiersResponse)

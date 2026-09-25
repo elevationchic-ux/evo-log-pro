@@ -31,8 +31,9 @@ export const viewport = {
   themeColor: '#0f172a',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // Le zoom pincement est RÉAUTORISÉ (WCAG 1.4.4) : l'ancien
+  // maximumScale=1 / userScalable=false rendait l'app illisible pour les
+  // opérateurs terrain qui doivent agrandir sur petits écrans.
 }
 
 
@@ -42,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" className="dark" suppressHydrationWarning>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

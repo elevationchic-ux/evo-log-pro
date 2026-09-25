@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     SETUP_ADMIN_PASSWORD: Optional[str] = None
     
     # CORS
-    BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "https://EVO-LOG-erp.cm"]
+    BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://127.0.0.1:3000", "https://EVO-LOG-erp.cm"]
     
     # MinIO
     MINIO_ENABLED: bool = False
@@ -63,6 +63,11 @@ class Settings(BaseSettings):
     WHATSAPP_ENABLED: bool = False
     WHATSAPP_API_URL: str = ""
     WHATSAPP_API_KEY: str = ""
+    
+    # Webhooks Mobile Money (MTN MoMo / Orange Money)
+    # Secret partagé utilisé pour vérifier la signature HMAC-SHA256 des
+    # notifications. Sans lui, le webhook refuse toute demande (fail-closed).
+    MOBILE_MONEY_WEBHOOK_SECRET: str = ""
     
     # Celery
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"

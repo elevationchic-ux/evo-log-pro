@@ -1,0 +1,215 @@
+{
+  "totals": {
+    "broken_links": 0,
+    "dead_buttons": 0,
+    "fake_data": 0,
+    "api_gaps": 37,
+    "ghost_routes": 0
+  },
+  "modules": {
+    "company": {
+      "broken_links": [],
+      "dead_buttons": [],
+      "fake_data": [],
+      "api_gaps": [
+        {
+          "file": "app/(app)/company/page.tsx",
+          "detail": "/api/admin/global-settings"
+        }
+      ],
+      "ghost_routes": []
+    },
+    "gps-tracking": {
+      "broken_links": [],
+      "dead_buttons": [],
+      "fake_data": [],
+      "api_gaps": [
+        {
+          "file": "app/(app)/gps-tracking/page.tsx",
+          "detail": "/api/v1/gps-tracking"
+        }
+      ],
+      "ghost_routes": []
+    },
+    "settings": {
+      "broken_links": [],
+      "dead_buttons": [],
+      "fake_data": [],
+      "api_gaps": [
+        {
+          "file": "app/(app)/settings/system/page.tsx",
+          "detail": "/api/admin/global-settings"
+        },
+        {
+          "file": "app/(app)/settings/system/page.tsx",
+          "detail": "/api/admin/system/config"
+        }
+      ],
+      "ghost_routes": []
+    },
+    "transit-douane": {
+      "broken_links": [],
+      "dead_buttons": [],
+      "fake_data": [],
+      "api_gaps": [
+        {
+          "file": "app/(app)/transit-douane/compliance/page.tsx",
+          "detail": "/api/v1/transit-douane/guce/documents"
+        }
+      ],
+      "ghost_routes": []
+    },
+    "transport": {
+      "broken_links": [],
+      "dead_buttons": [],
+      "fake_data": [],
+      "api_gaps": [
+        {
+          "file": "app/(app)/transport/carte-live/page.tsx",
+          "detail": "/api/v1/telematics/live-gps"
+        }
+      ],
+      "ghost_routes": []
+    },
+    "forgot-password": {
+      "broken_links": [],
+      "dead_buttons": [],
+      "fake_data": [],
+      "api_gaps": [
+        {
+          "file": "app/(auth)/forgot-password/page.tsx",
+          "detail": "/api/auth/forgot-password"
+        }
+      ],
+      "ghost_routes": []
+    },
+    "lib": {
+      "broken_links": [],
+      "dead_buttons": [],
+      "fake_data": [],
+      "api_gaps": [
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/ai/chat"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/finance/chart-accounts"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/finance/payroll/drivers"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/finance/tarifs"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/parc/emplacements"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/parc/gate-in"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/parc/gate-out"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/parc/ocr-extract"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/parc/stock"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/parc/stock-actifs"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/parc/workshop"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/parc/zones"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/passerelles"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/passerelles/en-attente"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/rh/paie"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/bi-analytics/executive-summary"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/compliance/audits"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/cotations"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/customers"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/customers/contracts"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/fleet/documents"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/fleet/fuel-records"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/fleet/vehicles"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/frais-missions"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/fuel-guard/sensors"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/procurement/orders"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/support/incidents"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/support/tickets"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/tracking/epod"
+        },
+        {
+          "file": "lib/api-client.ts",
+          "detail": "/api/v1/transit"
+        }
+      ],
+      "ghost_routes": []
+    }
+  }
+}

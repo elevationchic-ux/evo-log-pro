@@ -167,7 +167,7 @@ export default function DocumentsArchivePage() {
                         </td>
                       </tr>
                       {/* Row 2 */}
-                      <tr className="bg-[#F9FAFB] border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
+                      <tr className="bg-surface-container-low border-b border-outline-variant hover:bg-surface-container transition-colors group">
                         <td className="p-sm"><input className="rounded-sm border-outline-variant text-primary focus:ring-primary" type="checkbox"/></td>
                         <td className="p-sm">
                           <div className="flex items-center gap-xs">
@@ -217,7 +217,7 @@ export default function DocumentsArchivePage() {
                         </td>
                       </tr>
                       {/* Row 4 */}
-                      <tr className="bg-[#F9FAFB] border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
+                      <tr className="bg-surface-container-low border-b border-outline-variant hover:bg-surface-container transition-colors group">
                         <td className="p-sm"><input className="rounded-sm border-outline-variant text-primary focus:ring-primary" type="checkbox"/></td>
                         <td className="p-sm">
                           <div className="flex items-center gap-xs">

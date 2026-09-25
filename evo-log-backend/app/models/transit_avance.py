@@ -158,6 +158,11 @@ class NomenclatureCEMAC(Base):
     restrictions = Column(Text)
     statut = Column(String(20), default="actif")
     date_effet = Column(Date)
+    # Provenance : aucune donnee tarifaire n'est inventee. Ces champs tracent
+    # la source OFFICIELLE d'ou vient le taux (arrete tarifaire CEMAC, fichier
+    # DGD/CAMCIS importe, ou saisie manuelle identifiee).
+    date_fin_effet = Column(Date)
+    source_reference = Column(String(200))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -169,6 +174,11 @@ class DeclarationDouaniereAvance(Base):
     id = Column(Integer, primary_key=True, index=True)
     numero_declaration = Column(String(50), unique=True, nullable=False, index=True)
     dossier_transit_id = Column(Integer, ForeignKey('dossiers_transit_avance.id'))
+    # Rattachement a l'etape portuaire (chaine documentaire, migration 024).
+    # NULLable : jamais devine, saisi ou relie explicitement.
+    conteneur_id = Column(Integer, ForeignKey('conteneurs.id'), index=True)
+    escale_id = Column(Integer, ForeignKey('escales.id'), index=True)
+    numero_bl = Column(String(50), index=True)
     regime_douanier = Column(Enum(RegimeDouanier))
     bureau_douane_id = Column(Integer, ForeignKey('bureaux_douane.id'))
     reference_sygdonia = Column(String(50))  # SYDONIA+ reference

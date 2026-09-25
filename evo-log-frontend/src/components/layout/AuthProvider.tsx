@@ -10,6 +10,10 @@ interface User {
   email: string;
   roles: string[];
   modulesAllowed: string[];
+  permissions: string[];
+  sharedModules: string[];
+  roleLevel: number;
+  isSuperuser: boolean;
   fullName: string;
   agencyId: number;
   companyId: number | null;
@@ -52,6 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: session.user.email || '',
         roles: ((session.user as any).roles as string[]) || [],
         modulesAllowed: ((session.user as any).modules_allowed as string[]) || [],
+        permissions: ((session.user as any).permissions as string[]) || [],
+        sharedModules: ((session.user as any).shared_modules as string[]) || [],
+        roleLevel: Number((session.user as any).role_level ?? 3),
+        isSuperuser: Boolean((session.user as any).is_superuser),
         fullName: (session.user as any).nom || '',
         agencyId: Number((session.user as any).agency_id || 0),
         companyId: Number((session.user as any).company_id) || null,
@@ -157,4 +165,4 @@ export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
-};
+};

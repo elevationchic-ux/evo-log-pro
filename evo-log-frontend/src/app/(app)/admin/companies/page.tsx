@@ -118,8 +118,8 @@ export default function CompaniesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des Entreprises</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold text-slate-100">Gestion des Entreprises</h1>
+          <p className="text-slate-400 mt-1">
             Créer et gérer les entreprises clientes du SAAS
           </p>
         </div>
@@ -134,38 +134,38 @@ export default function CompaniesPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Entreprises</p>
-              <p className="text-2xl font-bold text-gray-900">{companies?.length || 0}</p>
+              <p className="text-sm text-slate-400">Total Entreprises</p>
+              <p className="text-2xl font-bold text-slate-100">{companies?.length || 0}</p>
             </div>
             <Building2 className="w-8 h-8 text-blue-600" />
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Actives</p>
+              <p className="text-sm text-slate-400">Actives</p>
               <p className="text-2xl font-bold text-green-600">{activeCompanies.length}</p>
             </div>
             <CheckCircle2 className="w-8 h-8 text-green-600" />
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">En Essai</p>
+              <p className="text-sm text-slate-400">En Essai</p>
               <p className="text-2xl font-bold text-orange-600">{trialCompanies.length}</p>
             </div>
             <ShieldCheck className="w-8 h-8 text-orange-600" />
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Utilisateurs Totaux</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm text-slate-400">Utilisateurs Totaux</p>
+              <p className="text-2xl font-bold text-slate-100">
                 {companies?.reduce((sum: number, c: any) => sum + c.current_users, 0) || 0}
               </p>
             </div>
@@ -175,10 +175,10 @@ export default function CompaniesPage() {
       </div>
 
       {/* Companies List */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
+      <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700">
+        <div className="p-6 border-b border-slate-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Entreprises Configurées</h2>
+            <h2 className="text-lg font-semibold text-slate-100">Entreprises Configurées</h2>
             <div className="flex items-center gap-2">
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -187,36 +187,36 @@ export default function CompaniesPage() {
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="pl-10 pr-4 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center gap-2 px-3 py-2 border border-slate-600 rounded-lg hover:bg-slate-800">
                 <Filter className="w-4 h-4" />
                 Filtrer
               </button>
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center gap-2 px-3 py-2 border border-slate-600 rounded-lg hover:bg-slate-800">
                 <RefreshCw className="w-4 h-4" />
                 Actualiser
               </button>
             </div>
           </div>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-slate-800">
           {companies?.map((company: any) => (
-            <div key={company.id} className="p-6 hover:bg-gray-50">
+            <div key={company.id} className="p-6 hover:bg-slate-800">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className={`p-3 rounded-lg ${
-                    company.is_active ? 'bg-green-100' : 'bg-red-100'
+                    company.is_active ? 'bg-green-500/15' : 'bg-red-500/15'
                   }`}>
                     <Building2 className={`w-6 h-6 ${
                       company.is_active ? 'text-green-600' : 'text-red-600'
                     }`} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{company.nom}</h3>
-                    <p className="text-sm text-gray-600">{company.code} • {company.legal_form}</p>
-                    <p className="text-xs text-gray-500 mt-1">{company.ville} • {company.email}</p>
+                    <h3 className="font-semibold text-slate-100">{company.nom}</h3>
+                    <p className="text-sm text-slate-400">{company.code} • {company.legal_form}</p>
+                    <p className="text-xs text-slate-400 mt-1">{company.ville} • {company.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-6">
@@ -226,19 +226,19 @@ export default function CompaniesPage() {
                     }`}>
                       {company.is_active ? 'Actif' : 'Suspendu'}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-slate-400">
                       {company.is_verified ? 'Vérifié' : 'En essai'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Utilisateurs</p>
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm text-slate-400">Utilisateurs</p>
+                    <p className="text-sm font-semibold text-slate-100">
                       {company.current_users}/{company.max_users}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Stockage</p>
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm text-slate-400">Stockage</p>
+                    <p className="text-sm font-semibold text-slate-100">
                       {company.current_storage_mb}MB / {company.max_storage_mb}MB
                     </p>
                   </div>
@@ -253,16 +253,16 @@ export default function CompaniesPage() {
                       }}
                       className={`px-3 py-1.5 text-sm rounded-lg ${
                         company.is_active
-                          ? 'border border-red-300 text-red-600 hover:bg-red-50'
-                          : 'border border-green-300 text-green-600 hover:bg-green-50'
+                          ? 'border border-red-500/50 text-red-600 hover:bg-red-500/10'
+                          : 'border border-green-500/50 text-green-600 hover:bg-green-500/10'
                       }`}
                     >
                       {company.is_active ? 'Suspendre' : 'Activer'}
                     </button>
-                    <button className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <button className="px-3 py-1.5 text-sm border border-slate-600 rounded-lg hover:bg-slate-800">
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <button className="px-3 py-1.5 text-sm border border-slate-600 rounded-lg hover:bg-slate-800">
                       <MoreVertical className="w-4 h-4" />
                     </button>
                   </div>
@@ -276,12 +276,12 @@ export default function CompaniesPage() {
       {/* Create Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
+          <div className="bg-slate-900 rounded-lg shadow-xl w-full max-w-2xl p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Nouvelle Entreprise</h2>
+              <h2 className="text-xl font-semibold text-slate-100">Nouvelle Entreprise</h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-slate-400"
               >
                 <XCircle className="w-6 h-6" />
               </button>
@@ -289,30 +289,30 @@ export default function CompaniesPage() {
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Code</label>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Code</label>
                   <input
                     name="code"
                     type="text"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="CAMLOG"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Nom</label>
                   <input
                     name="nom"
                     type="text"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="Cameroon Logistics SA"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Forme Juridique</label>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Forme Juridique</label>
                   <select
                     name="legal_form"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="SA">SA</option>
                     <option value="SARL">SARL</option>
@@ -321,32 +321,32 @@ export default function CompaniesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Email</label>
                   <input
                     name="email"
                     type="email"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="contact@company.cm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Téléphone</label>
                   <input
                     name="telephone"
                     type="tel"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="+237 233 456 789"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ville</label>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Ville</label>
                   <input
                     name="ville"
                     type="text"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="Douala"
                   />
                 </div>
@@ -355,7 +355,7 @@ export default function CompaniesPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 border border-slate-600 rounded-lg hover:bg-slate-800"
                 >
                   Annuler
                 </button>

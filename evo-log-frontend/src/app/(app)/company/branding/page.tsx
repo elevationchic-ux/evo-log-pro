@@ -74,8 +74,8 @@ export default function B2BBrandingPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Personnalisation Portail B2B</h1>
-          <p className="text-gray-600 mt-1">Personnaliser l'apparence et le branding de votre portail client</p>
+          <h1 className="text-3xl font-bold text-slate-100">Personnalisation Portail B2B</h1>
+          <p className="text-slate-400 mt-1">Personnaliser l'apparence et le branding de votre portail client</p>
         </div>
         <button
           onClick={handleSave}
@@ -88,14 +88,14 @@ export default function B2BBrandingPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Colors */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 p-6">
+          <h2 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
             <Palette className="w-5 h-5" />
             Couleurs
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Couleur Principale</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Couleur Principale</label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -107,12 +107,12 @@ export default function B2BBrandingPage() {
                   type="text"
                   value={primaryColor}
                   onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                  className="flex-1 px-3 py-2 border border-slate-600 rounded-lg"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Couleur Secondaire</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Couleur Secondaire</label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -124,12 +124,12 @@ export default function B2BBrandingPage() {
                   type="text"
                   value={secondaryColor}
                   onChange={(e) => setSecondaryColor(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                  className="flex-1 px-3 py-2 border border-slate-600 rounded-lg"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Couleur d'Accent</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Couleur d'Accent</label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -141,7 +141,7 @@ export default function B2BBrandingPage() {
                   type="text"
                   value={accentColor}
                   onChange={(e) => setAccentColor(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                  className="flex-1 px-3 py-2 border border-slate-600 rounded-lg"
                 />
               </div>
             </div>
@@ -149,29 +149,29 @@ export default function B2BBrandingPage() {
         </div>
 
         {/* Assets */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 p-6">
+          <h2 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
             <Image className="w-5 h-5" />
             Assets
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL Logo</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">URL Logo</label>
               <input
                 type="text"
                 value={logoUrl}
                 onChange={(e) => setLogoUrl(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-600 rounded-lg"
                 placeholder="https://example.com/logo.png"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL Bannière</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">URL Bannière</label>
               <input
                 type="text"
                 value={bannerUrl}
                 onChange={(e) => setBannerUrl(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-600 rounded-lg"
                 placeholder="https://example.com/banner.png"
               />
             </div>
@@ -179,56 +179,56 @@ export default function B2BBrandingPage() {
         </div>
 
         {/* Domain */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 p-6">
+          <h2 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
             <Link className="w-5 h-5" />
             Domaine
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sous-domaine</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Sous-domaine</label>
               <input
                 type="text"
                 value={subdomain}
                 onChange={(e) => setSubdomain(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-600 rounded-lg"
                 placeholder="camlog.evolog.cm"
               />
-              <p className="text-xs text-gray-500 mt-1">Votre portail sera accessible à cette adresse</p>
+              <p className="text-xs text-slate-400 mt-1">Votre portail sera accessible à cette adresse</p>
             </div>
           </div>
         </div>
 
         {/* Features */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 p-6">
+          <h2 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
             <Brush className="w-5 h-5" />
             Fonctionnalités
           </h2>
           <div className="space-y-3">
             <label className="flex items-center gap-2">
               <input type="checkbox" defaultChecked className="rounded" />
-              <span className="text-sm text-gray-700">Activer Chat Support</span>
+              <span className="text-sm text-slate-200">Activer Chat Support</span>
             </label>
             <label className="flex items-center gap-2">
               <input type="checkbox" defaultChecked className="rounded" />
-              <span className="text-sm text-gray-700">Activer Devis en ligne</span>
+              <span className="text-sm text-slate-200">Activer Devis en ligne</span>
             </label>
             <label className="flex items-center gap-2">
               <input type="checkbox" defaultChecked className="rounded" />
-              <span className="text-sm text-gray-700">Activer Tracking</span>
+              <span className="text-sm text-slate-200">Activer Tracking</span>
             </label>
             <label className="flex items-center gap-2">
               <input type="checkbox" className="rounded" />
-              <span className="text-sm text-gray-700">Activer API</span>
+              <span className="text-sm text-slate-200">Activer API</span>
             </label>
           </div>
         </div>
       </div>
 
       {/* Preview */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Aperçu</h2>
+      <div className="bg-slate-900 rounded-lg shadow-sm border border-slate-700 p-6">
+        <h2 className="text-lg font-semibold text-slate-100 mb-4">Aperçu</h2>
         <div 
           className="p-6 rounded-lg border-2 border-dashed"
           style={{ 
@@ -245,7 +245,7 @@ export default function B2BBrandingPage() {
             </div>
             <div>
               <h3 className="font-bold" style={{ color: primaryColor }}>Votre Entreprise</h3>
-              <p className="text-sm text-gray-600">Portail B2B</p>
+              <p className="text-sm text-slate-400">Portail B2B</p>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
@@ -254,21 +254,21 @@ export default function B2BBrandingPage() {
               style={{ backgroundColor: primaryColor + '10' }}
             >
               <p className="text-2xl font-bold" style={{ color: primaryColor }}>45</p>
-              <p className="text-xs text-gray-600">Commandes</p>
+              <p className="text-xs text-slate-400">Commandes</p>
             </div>
             <div 
               className="p-4 rounded-lg text-center"
               style={{ backgroundColor: secondaryColor + '10' }}
             >
               <p className="text-2xl font-bold" style={{ color: secondaryColor }}>38</p>
-              <p className="text-xs text-gray-600">Livraisons</p>
+              <p className="text-xs text-slate-400">Livraisons</p>
             </div>
             <div 
               className="p-4 rounded-lg text-center"
               style={{ backgroundColor: accentColor + '10' }}
             >
               <p className="text-2xl font-bold" style={{ color: accentColor }}>2</p>
-              <p className="text-xs text-gray-600">Litiges</p>
+              <p className="text-xs text-slate-400">Litiges</p>
             </div>
           </div>
         </div>

@@ -194,10 +194,12 @@ async def on_livraison_epod_validee(company_id: int, data: dict):
             # 3. Auto-generate invoice with TVA 19.25%
             try:
                 from app.models.finance import Facture, FactureStatus
+                from app.utils.numerotation import prochaine_reference
                 tva_rate = 0.1925
                 montant_tva = round(float(montant_ht) * tva_rate, 2)
                 montant_ttc = round(float(montant_ht) + montant_tva, 2)
-                ref = f"FAC-AUTO-{company_id}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+                # Sequence legale continue (exigence DGI)  pas de timestamp invente.
+                ref = prochaine_reference(db, "FACTURE", company_id=company_id)
                 facture = Facture(
                     company_id=company_id,
                     numero_facture=ref,

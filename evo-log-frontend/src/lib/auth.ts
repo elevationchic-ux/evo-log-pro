@@ -42,6 +42,14 @@ export const authOptions: NextAuthOptions = {
             roles: user.roles || [],
             company_id: user.company_id,
             modules_allowed: user.modules_allowed || [],
+            // RBAC granulaire : permissions effectives (codes module.sous.action),
+            // niveau hiérarchique, service commun par entreprise.
+            permissions: user.permissions || [],
+            shared_modules: user.shared_modules || [],
+            role_level: user.role_level ?? 3,
+            department_id: user.department_id ?? null,
+            is_superuser: !!user.is_superuser,
+            must_change_password: !!user.must_change_password,
           }
         }
         return null
@@ -56,6 +64,12 @@ export const authOptions: NextAuthOptions = {
         token.roles = (user as any).roles || []
         token.companyId = (user as any).company_id
         token.modulesAllowed = (user as any).modules_allowed || []
+        token.permissions = (user as any).permissions || []
+        token.sharedModules = (user as any).shared_modules || []
+        token.roleLevel = (user as any).role_level ?? 3
+        token.departmentId = (user as any).department_id ?? null
+        token.isSuperuser = !!(user as any).is_superuser
+        token.mustChangePassword = !!(user as any).must_change_password
       }
       return token
     },
@@ -63,9 +77,18 @@ export const authOptions: NextAuthOptions = {
       (session as any).accessToken = token.accessToken as string
       (session as any).refreshToken = token.refreshToken as string
       if (session.user) {
+        // AuthProvider lit session.user.accessToken  injecter sur user ET session
+        (session.user as any).accessToken = (token as any).accessToken
+        ;(session.user as any).refreshToken = (token as any).refreshToken
         (session.user as any).roles = (token as any).roles || []
         ;(session.user as any).company_id = (token as any).companyId
         ;(session.user as any).modules_allowed = (token as any).modulesAllowed || []
+        ;(session.user as any).permissions = (token as any).permissions || []
+        ;(session.user as any).shared_modules = (token as any).sharedModules || []
+        ;(session.user as any).role_level = (token as any).roleLevel ?? 3
+        ;(session.user as any).department_id = (token as any).departmentId ?? null
+        ;(session.user as any).is_superuser = !!(token as any).isSuperuser
+        ;(session.user as any).must_change_password = !!(token as any).mustChangePassword
       }
       return session
     },

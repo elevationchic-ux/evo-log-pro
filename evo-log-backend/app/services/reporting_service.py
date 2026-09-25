@@ -228,22 +228,58 @@ class ReportingReportingService:
     
     @staticmethod
     def rapport_executif(db: Session) -> Dict[str, Any]:
-        """Generate executive report"""
+        """Generate executive report.
+
+        100% agrégé depuis la table KPI (filtre tenant via filtre ORM global).
+        Aucune valeur inventée : sans KPI enregistré, kpis/poles restent vides
+        et l'frontend affiche un état neutre.
+        """
         kpis = db.query(KPI).filter(KPI.actif == True).all()
-        
+
+        # Regroupement réel par pôle (type_rapport) : nb d'indicateurs et
+        # somme des dernières valeurs, calculés sur les données persistées.
+        par_pole: Dict[str, Dict[str, Any]] = {}
+        for k in kpis:
+            pole = k.type_rapport or "GENERAL"
+            bucket = par_pole.setdefault(
+                pole, {"pole": pole, "nb_indicateurs": 0, "valeur_cumulee": 0.0}
+            )
+            bucket["nb_indicateurs"] += 1
+            if k.derniere_valeur is not None:
+                try:
+                    bucket["valeur_cumulee"] += float(k.derniere_valeur)
+                except (TypeError, ValueError):
+                    pass
+        poles = sorted(
+            (
+                {
+                    "pole": v["pole"],
+                    "nb_indicateurs": v["nb_indicateurs"],
+                    "valeur_cumulee": round(v["valeur_cumulee"], 2),
+                }
+                for v in par_pole.values()
+            ),
+            key=lambda p: p["pole"],
+        )
+
         return {
             "kpis": [
                 {
                     "code": k.code,
                     "nom": k.nom,
                     "valeur": k.derniere_valeur,
+                    "unite": k.unite,
+                    "objectif": k.objectif,
+                    "categorie": k.categorie,
+                    "type_rapport": k.type_rapport,
                     "tendance": k.tendance,
                     "variation": k.variation_pourcentage
                 }
                 for k in kpis
             ],
             "nombre_kpis": len(kpis),
-            "k_par_type": {k.type_rapport: 1 for k in kpis}
+            "k_par_type": {k.type_rapport: 1 for k in kpis},
+            "poles": poles
         }
     
     @staticmethod

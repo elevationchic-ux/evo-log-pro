@@ -132,8 +132,8 @@ export function StockFilter({ onFilter }: StockFilterProps) {
     <Card className="p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Filtres de Recherche</h2>
-          <p className="text-gray-600">Recherche avancée de stock</p>
+          <h2 className="text-2xl font-bold text-slate-100 mb-2">Filtres de Recherche</h2>
+          <p className="text-slate-400">Recherche avancée de stock</p>
         </div>
         <Button variant="outline" onClick={handleReset} size="sm">
           <X className="h-4 w-4 mr-2" />
@@ -168,7 +168,7 @@ export function StockFilter({ onFilter }: StockFilterProps) {
                 onChange={(e) => setCodeArticle(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-400 mt-1">
                 Code d'article de 7 chiffres
               </p>
             </div>
@@ -205,7 +205,7 @@ export function StockFilter({ onFilter }: StockFilterProps) {
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-400 mt-1">
                 Choix obligatoire - peut sélectionner plusieurs magasins
               </p>
             </div>

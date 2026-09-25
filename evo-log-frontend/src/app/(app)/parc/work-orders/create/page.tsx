@@ -22,7 +22,7 @@ export default function CreateWorkOrderPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Ordre de travail Workshop créé avec succès !");
-    router.push('/parc/worEVO-orders');
+    router.push('/parc/workshop');
   };
 
   return (

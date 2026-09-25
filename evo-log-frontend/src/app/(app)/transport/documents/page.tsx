@@ -6,6 +6,8 @@ import {
   FileText, Plus, Search, ArrowLeft, Download, CheckCircle2,
   Printer, Eye, Upload, Filter
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { exportToCSV } from '@/lib/export';
 
 interface DocumentTransport {
   id: number;
@@ -25,9 +27,29 @@ export default function TransportDocumentsPage() {
 
   const [formData, setFormData] = useState({
     type_document: 'Lettre de Voiture Internationale CEMAC',
-    mission_numero: 'TRN-2026-0418',
-    client: 'Société Camerounaise de Métallurgie',
+    mission_numero: '',
+    client: '',
   });
+
+  const handlePrint = (d: DocumentTransport) => {
+    const win = window.open('', '_blank', 'width=800,height=600');
+    if (!win) { toast.error('Impression impossible : la fenêtre d\'impression a été bloquée par le navigateur.'); return; }
+    win.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><title>${d.reference}</title>
+      <style>body{font-family:Arial,sans-serif;padding:32px;color:#0f172a}h1{font-size:20px;margin:0 0 4px}table{width:100%;border-collapse:collapse;margin-top:16px}td,th{border:1px solid #cbd5e1;padding:8px;text-align:left;font-size:13px}th{background:#f1f5f9}</style>
+      </head><body>
+      <h1>Document de transport  ${d.type_document}</h1>
+      <p>Référence&nbsp;: <strong>${d.reference}</strong></p>
+      <table><tbody>
+        <tr><th>N° Mission</th><td>${d.mission_numero || ''}</td></tr>
+        <tr><th>Client destinataire</th><td>${d.client || ''}</td></tr>
+        <tr><th>Date d'émission</th><td>${d.date_emission}</td></tr>
+        <tr><th>Statut</th><td>${d.statut}</td></tr>
+        ${d.signataire ? `<tr><th>Signataire</th><td>${d.signataire}</td></tr>` : ''}
+      </tbody></table>
+      <script>window.print()</script>
+      </body></html>`);
+    win.document.close();
+  };
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +77,7 @@ export default function TransportDocumentsPage() {
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 pb-24 text-slate-100">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-slate-400">
-        <Link href="/transport-flotte" className="hover:text-blue-400 flex items-center gap-1">
+        <Link href="/transport-flotte/control-tower" className="hover:text-blue-400 flex items-center gap-1">
           <ArrowLeft className="w-3.5 h-3.5" /> Transport & Flotte
         </Link>
         <span>/</span>
@@ -108,7 +130,7 @@ export default function TransportDocumentsPage() {
 
         {filtered.length === 0 ? (
           <div className="py-16 text-center bg-slate-950/40 rounded-xl border border-dashed border-slate-800">
-            <FileText className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+            <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
             <h3 className="text-base font-semibold text-white">Aucun document de transport enregistré</h3>
             <p className="text-sm text-slate-400 max-w-md mx-auto mt-1 mb-4">
               La base documentaire de transport est actuellement vierge. Émettez une lettre de voiture ou un bon de livraison pour votre premier ordre.
@@ -154,27 +176,28 @@ export default function TransportDocumentsPage() {
                       {d.date_emission}
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                        d.statut === 'SIGNE_EPOD'
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${d.statut === 'SIGNE_EPOD'
                           ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                           : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                      }`}>
+                        }`}>
                         {d.statut}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => alert(`Téléchargement de l'original électronique certifié : ${d.reference}`)}
+                          onClick={() => { exportToCSV([d], `document-${d.reference}`); toast.success(`Document ${d.reference} exporté (CSV).`); }}
                           className="p-1.5 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition"
                           title="Télécharger"
+                          aria-label="Télécharger le document"
                         >
                           <Download className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => alert(`Impression du document officiel : ${d.reference}`)}
+                          onClick={() => handlePrint(d)}
                           className="p-1.5 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition"
                           title="Imprimer"
+                          aria-label="Imprimer le document"
                         >
                           <Printer className="w-4 h-4" />
                         </button>

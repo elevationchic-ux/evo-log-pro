@@ -111,25 +111,25 @@ export default function GateOperationsPage() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 flex items-center gap-3">
+            <h1 className="text-3xl font-black text-slate-200 flex items-center gap-3">
               <ScanText className="w-8 h-8 text-blue-600" />
               Gate Operations & IA (OCR)
             </h1>
             <p className="text-sm text-slate-500 mt-2">Reconnaissance optique des documents d'entrée/sortie du parc.</p>
           </div>
-          <div className="flex bg-slate-100 p-1 rounded-xl">
-            <button onClick={() => setMode('IN')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${mode === 'IN' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Gate IN</button>
-            <button onClick={() => setMode('OUT')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${mode === 'OUT' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Gate OUT</button>
+          <div className="flex bg-slate-900 p-1 rounded-xl">
+            <button onClick={() => setMode('IN')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${mode === 'IN' ? 'bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}>Gate IN</button>
+            <button onClick={() => setMode('OUT')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${mode === 'OUT' ? 'bg-slate-900 text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}>Gate OUT</button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Upload Section */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
-            <h2 className="text-lg font-bold text-slate-800 mb-6">Scanner un Document</h2>
+          <div className="bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-700">
+            <h2 className="text-lg font-bold text-slate-200 mb-6">Scanner un Document</h2>
             
-            <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer mb-6" onClick={() => document.getElementById('file-upload')?.click()}>
+            <div className="border-2 border-dashed border-slate-600 rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-slate-800 hover:bg-slate-800 transition-colors cursor-pointer mb-6" onClick={() => document.getElementById('file-upload')?.click()}>
               <input 
                 id="file-upload" 
                 type="file" 
@@ -138,11 +138,11 @@ export default function GateOperationsPage() {
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
               />
               <UploadCloud className="w-12 h-12 text-slate-400 mb-4" />
-              <p className="text-sm font-bold text-slate-700">Cliquez pour capturer ou uploader</p>
+              <p className="text-sm font-bold text-slate-300">Cliquez pour capturer ou uploader</p>
               <p className="text-xs text-slate-500 mt-1">BL, Interchange, ou Plaque Immatriculation</p>
               
               {file && (
-                <div className="mt-4 px-4 py-2 bg-blue-100 text-blue-700 rounded-xl text-sm font-semibold">
+                <div className="mt-4 px-4 py-2 bg-blue-500/15 text-blue-300 rounded-xl text-sm font-semibold">
                   Fichier sélectionné : {file.name}
                 </div>
               )}
@@ -163,7 +163,7 @@ export default function GateOperationsPage() {
             </button>
             <button 
               onClick={() => setIsManual(true)}
-              className="w-full py-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-xl font-bold text-slate-300 bg-slate-900 hover:bg-slate-700 transition-colors flex items-center justify-center gap-2"
             >
               Saisie Manuelle (Fallback)
             </button>

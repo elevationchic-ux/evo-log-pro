@@ -76,13 +76,13 @@ export default function ChatOpsDashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-200 dark:text-slate-100 flex items-center gap-3">
               <MessageSquare className="w-8 h-8 text-blue-600 dark:text-blue-400" />
               ChatOps & K-Bot Live
             </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Supervisez en temps réel les interactions WhatsApp entre les chauffeurs et l'IA K-Bot.</p>
+            <p className="text-sm text-slate-400 dark:text-slate-400 mt-1">Supervisez en temps réel les interactions WhatsApp entre les chauffeurs et l'IA K-Bot.</p>
           </div>
-          <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 px-4 py-2 rounded-xl">
+          <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/40 dark:border-emerald-800/40 px-4 py-2 rounded-xl">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
@@ -94,39 +94,39 @@ export default function ChatOpsDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[650px] min-h-[600px]">
           
           {/* Chat Simulator Panel */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+          <div className="bg-slate-900 dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-700 dark:border-slate-800 flex flex-col">
+            <h2 className="text-lg font-bold text-slate-200 dark:text-slate-100 mb-4 flex items-center gap-2">
               <Smartphone className="w-5 h-5 text-blue-500" />
               Simulateur Chauffeur
             </h2>
             
             <form onSubmit={sendTestMessage} className="flex flex-col gap-4 flex-1">
               <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1 uppercase">Numéro (Sender)</label>
+                <label className="block text-xs font-bold text-slate-400 dark:text-slate-400 mb-1 uppercase">Numéro (Sender)</label>
                 <input 
                   type="text" 
                   value={testSender}
                   onChange={e => setTestSender(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-slate-800 dark:bg-slate-950 border border-slate-700 dark:border-slate-800 rounded-xl text-sm text-slate-200 dark:text-slate-100 outline-none focus:border-blue-500"
                 />
               </div>
               
               <div className="flex-1 flex flex-col">
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1 uppercase">Message WhatsApp</label>
+                <label className="block text-xs font-bold text-slate-400 dark:text-slate-400 mb-1 uppercase">Message WhatsApp</label>
                 <textarea 
                   value={testMessage}
                   onChange={e => setTestMessage(e.target.value)}
                   placeholder="Ex: Je suis en panne avec le camion LT-1234..."
-                  className="w-full flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-blue-500 resize-none"
+                  className="w-full flex-1 px-4 py-3 bg-slate-800 dark:bg-slate-950 border border-slate-700 dark:border-slate-800 rounded-xl text-sm text-slate-200 dark:text-slate-100 outline-none focus:border-blue-500 resize-none"
                 />
               </div>
 
               <div className="pt-2">
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Exemples supportés par le bot :</p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <button type="button" onClick={() => setTestMessage("Mission TRN-001 bien livrée à destination")} className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300 hover:bg-slate-200">Livraison</button>
-                  <button type="button" onClick={() => setTestMessage("Grosse panne moteur sur le LT-9999")} className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300 hover:bg-slate-200">Panne</button>
-                  <button type="button" onClick={() => setTestMessage("Besoin de carburant pour le trajet")} className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300 hover:bg-slate-200">Carburant</button>
+                  <button type="button" onClick={() => setTestMessage("Mission TRN-001 bien livrée à destination")} className="text-[10px] bg-slate-900 dark:bg-slate-800 px-2 py-1 rounded text-slate-300 dark:text-slate-300 hover:bg-slate-700">Livraison</button>
+                  <button type="button" onClick={() => setTestMessage("Grosse panne moteur sur le LT-9999")} className="text-[10px] bg-slate-900 dark:bg-slate-800 px-2 py-1 rounded text-slate-300 dark:text-slate-300 hover:bg-slate-700">Panne</button>
+                  <button type="button" onClick={() => setTestMessage("Besoin de carburant pour le trajet")} className="text-[10px] bg-slate-900 dark:bg-slate-800 px-2 py-1 rounded text-slate-300 dark:text-slate-300 hover:bg-slate-700">Carburant</button>
                 </div>
                 <button type="submit" disabled={!testMessage} className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl flex justify-center items-center gap-2 transition-all shadow-md cursor-pointer">
                   <Send className="w-4 h-4" /> Envoyer à K-Bot

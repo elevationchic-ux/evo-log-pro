@@ -23,17 +23,17 @@ interface StatusBadgeProps {
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
+  default: 'bg-slate-500/10 text-slate-400 dark:text-slate-400',
   success: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
   warning: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
   error: 'bg-red-500/10 text-red-600 dark:text-red-400',
   info: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  pending: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
+  pending: 'bg-slate-500/10 text-slate-400 dark:text-slate-400',
   transit: 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
-  loading: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
-  delivered: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
-  maintenance: 'bg-red-500/15 text-red-700 dark:text-red-400',
-  planified: 'bg-violet-500/15 text-violet-700 dark:text-violet-400',
+  loading: 'bg-amber-500/15 text-amber-300 dark:text-amber-400',
+  delivered: 'bg-emerald-500/15 text-emerald-300 dark:text-emerald-400',
+  maintenance: 'bg-red-500/15 text-red-300 dark:text-red-400',
+  planified: 'bg-violet-500/15 text-violet-300 dark:text-violet-400',
 };
 
 const iconMap: Record<BadgeVariant, string> = {

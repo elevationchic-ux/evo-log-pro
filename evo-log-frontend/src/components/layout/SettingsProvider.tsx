@@ -25,7 +25,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showSoundBadge, setShowSoundBadge] = useState(false);
-  const [theme, setThemeState] = useState<ThemePreference>('system');
+  const [theme, setThemeState] = useState<ThemePreference>('dark');
   const [language, setLanguageState] = useState<LanguagePreference>('fr');
   const soundBadgeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -35,23 +35,20 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (savedSound !== null) setSoundEnabled(savedSound === 'true');
 
     const savedTheme = localStorage.getItem(THEME_SETTINGS_KEY) as ThemePreference;
-    if (savedTheme) setThemeState(savedTheme);
+    if (savedTheme) setThemeState('dark'); // thème clair désactivé (identité sombre unique)
 
     const savedLang = localStorage.getItem(LANG_SETTINGS_KEY) as LanguagePreference;
     if (savedLang) setLanguageState(savedLang);
   }, []);
 
   useEffect(() => {
+    // Identité visuelle unique de l'ERP : thème sombre forcé (charte slate/onyx).
+    // Les 337 pages sont écrites en sombre ; le mode clair est désactivé jusqu'à
+    // une éventuelle passe de thématisation complète (hors périmètre actuel).
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(theme);
-    }
-  }, [theme]);
+    root.classList.remove('light');
+    root.classList.add('dark');
+  }, []);
 
   const toggleSound = useCallback(() => {
     const newValue = !soundEnabled;

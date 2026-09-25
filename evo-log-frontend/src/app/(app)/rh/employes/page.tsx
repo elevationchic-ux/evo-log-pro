@@ -142,9 +142,9 @@ export default function EmployesPage() {
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
         
         {/* Header Title Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-slate-900 dark:bg-slate-900 p-6 rounded-3xl border border-slate-700 dark:border-slate-800 shadow-sm">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+            <h1 className="text-3xl font-black text-slate-200 dark:text-white flex items-center gap-3">
               <Users className="w-8 h-8 text-pink-600 dark:text-pink-400" />
               Annuaire & Gestion des Employés
             </h1>
@@ -156,7 +156,7 @@ export default function EmployesPage() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={handleExportCSV}
-              className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-sm transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-300 dark:text-slate-200 font-bold rounded-xl text-sm transition-colors shadow-sm"
             >
               <Download className="w-4 h-4 text-emerald-600" />
               Exporter Excel / CSV
@@ -164,7 +164,7 @@ export default function EmployesPage() {
 
             <button
               onClick={() => setShowImportModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-pink-50 hover:bg-pink-100 dark:bg-pink-950/40 dark:hover:bg-pink-900/60 text-pink-700 dark:text-pink-300 font-bold rounded-xl text-sm transition-colors border border-pink-200 dark:border-pink-800 shadow-sm"
+              className="flex items-center gap-2 px-4 py-2.5 bg-pink-500/10 hover:bg-pink-500/15 dark:bg-pink-950/40 dark:hover:bg-pink-900/60 text-pink-300 dark:text-pink-300 font-bold rounded-xl text-sm transition-colors border border-pink-500/40 dark:border-pink-800 shadow-sm"
             >
               <Upload className="w-4 h-4 text-pink-600" />
               Importer Fichier Excel
@@ -181,7 +181,7 @@ export default function EmployesPage() {
         </div>
 
         {/* Filters & Search */}
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">
+        <div className="bg-slate-900 dark:bg-slate-900 p-4 rounded-2xl border border-slate-700 dark:border-slate-800 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">
           <div className="relative w-full md:w-96">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -189,7 +189,7 @@ export default function EmployesPage() {
               placeholder="Rechercher par nom, matricule, poste, email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full pl-10 pr-4 py-2 bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl text-sm text-slate-200 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-pink-500"
             />
           </div>
 
@@ -201,7 +201,7 @@ export default function EmployesPage() {
             <select
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
-              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:outline-none"
+              className="bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-slate-200 dark:text-slate-200 focus:outline-none"
             >
               <option value="TOUS">Tous les départements</option>
               {deptList.map(d => (
@@ -212,7 +212,7 @@ export default function EmployesPage() {
             <select
               value={selectedStatut}
               onChange={(e) => setSelectedStatut(e.target.value)}
-              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:outline-none"
+              className="bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-slate-200 dark:text-slate-200 focus:outline-none"
             >
               <option value="TOUS">Tous les statuts</option>
               <option value="ACTIF">ACTIF</option>
@@ -230,16 +230,16 @@ export default function EmployesPage() {
             ))}
           </div>
         ) : filteredEmployes.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="bg-slate-900 dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-700 dark:border-slate-800 shadow-sm">
             <Users className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">Aucun employé trouvé</h3>
+            <h3 className="text-lg font-bold text-slate-300 dark:text-slate-300">Aucun employé trouvé</h3>
             <p className="text-sm text-slate-400 mt-1">Modifiez vos critères de recherche ou ajoutez un nouveau collaborateur.</p>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+          <div className="bg-slate-900 dark:bg-slate-900 rounded-3xl border border-slate-700 dark:border-slate-800 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-xs font-black text-slate-500 uppercase tracking-wider">
+                <thead className="bg-slate-800 dark:bg-slate-800/80 border-b border-slate-700 dark:border-slate-700 text-xs font-black text-slate-500 uppercase tracking-wider">
                   <tr>
                     <th className="px-6 py-4">Collaborateur</th>
                     <th className="px-6 py-4">Poste & Dpt</th>
@@ -249,31 +249,31 @@ export default function EmployesPage() {
                     <th className="px-6 py-4">Statut</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                <tbody className="divide-y divide-slate-800 dark:divide-slate-800 text-sm">
                   {filteredEmployes.map((emp) => (
-                    <tr key={emp.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    <tr key={emp.id} className="hover:bg-slate-800/80 dark:hover:bg-slate-800/40 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-rose-500 text-white font-black text-sm flex items-center justify-center shadow-sm">
                             {emp.prenom?.[0] || ''}{emp.nom?.[0] || 'E'}
                           </div>
                           <div>
-                            <p className="font-bold text-slate-900 dark:text-slate-100">{emp.prenom} {emp.nom}</p>
+                            <p className="font-bold text-slate-200 dark:text-slate-100">{emp.prenom} {emp.nom}</p>
                             <p className="text-xs font-mono font-bold text-pink-600 dark:text-pink-400">{emp.matricule}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                        <p className="font-bold text-slate-200 dark:text-slate-200 flex items-center gap-1.5">
                           <Briefcase className="w-3.5 h-3.5 text-slate-400" />
                           {emp.poste}
                         </p>
-                        <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-md">
+                        <span className="inline-block mt-1 px-2 py-0.5 bg-slate-900 dark:bg-slate-800 text-slate-400 dark:text-slate-300 text-xs font-semibold rounded-md">
                           {emp.departement}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                        <p className="text-xs text-slate-400 dark:text-slate-300 flex items-center gap-1">
                           <Mail className="w-3.5 h-3.5 text-slate-400" />
                           {emp.email}
                         </p>
@@ -283,7 +283,7 @@ export default function EmployesPage() {
                         </p>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="font-bold text-slate-700 dark:text-slate-300">{emp.type_contrat || 'CDI'}</p>
+                        <p className="font-bold text-slate-300 dark:text-slate-300">{emp.type_contrat || 'CDI'}</p>
                         <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
                           Depuis {emp.date_embauche ? new Date(emp.date_embauche).toLocaleDateString('fr-FR') : '-'}
@@ -294,9 +294,9 @@ export default function EmployesPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-black uppercase ${
-                          emp.statut === 'ACTIF' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
-                          emp.statut === 'CONGE' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' :
-                          'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                          emp.statut === 'ACTIF' ? 'bg-emerald-500/15 text-emerald-300 dark:bg-emerald-950 dark:text-emerald-300' :
+                          emp.statut === 'CONGE' ? 'bg-amber-500/15 text-amber-300 dark:bg-amber-950 dark:text-amber-300' :
+                          'bg-slate-900 text-slate-300 dark:bg-slate-800 dark:text-slate-300'
                         }`}>
                           <CheckCircle2 className="w-3 h-3" />
                           {emp.statut || 'ACTIF'}
@@ -313,13 +313,13 @@ export default function EmployesPage() {
         {/* Modal Créer Employé */}
         {showCreateModal && (
           <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <div className="bg-slate-900 dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-700 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center pb-4 border-b border-slate-700 dark:border-slate-800">
+                <h3 className="text-xl font-black text-slate-200 dark:text-white flex items-center gap-2">
                   <UserPlus className="w-6 h-6 text-pink-600" />
                   Nouveau Collaborateur EVO-LOG
                 </h3>
-                <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600">
+                <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-400">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -327,70 +327,70 @@ export default function EmployesPage() {
               <form onSubmit={handleCreateSubmit} className="space-y-4 mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nom *</label>
+                    <label className="block text-xs font-bold text-slate-300 dark:text-slate-300 mb-1">Nom *</label>
                     <input
                       type="text"
                       required
                       value={formData.nom}
                       onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold"
+                      className="w-full px-3 py-2 bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl text-sm font-semibold"
                       placeholder="Ex: MVONDO"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Prénom *</label>
+                    <label className="block text-xs font-bold text-slate-300 dark:text-slate-300 mb-1">Prénom *</label>
                     <input
                       type="text"
                       required
                       value={formData.prenom}
                       onChange={(e) => setFormData({ ...formData, prenom: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold"
+                      className="w-full px-3 py-2 bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl text-sm font-semibold"
                       placeholder="Ex: Jean-Marc"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Professionnel *</label>
+                    <label className="block text-xs font-bold text-slate-300 dark:text-slate-300 mb-1">Email Professionnel *</label>
                     <input
                       type="email"
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold"
+                      className="w-full px-3 py-2 bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl text-sm font-semibold"
                       placeholder="Ex: mvondo@evo-log.cm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Téléphone</label>
+                    <label className="block text-xs font-bold text-slate-300 dark:text-slate-300 mb-1">Téléphone</label>
                     <input
                       type="text"
                       value={formData.telephone}
                       onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold"
+                      className="w-full px-3 py-2 bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl text-sm font-semibold"
                       placeholder="+237 677 00 11 22"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Poste *</label>
+                    <label className="block text-xs font-bold text-slate-300 dark:text-slate-300 mb-1">Poste *</label>
                     <input
                       type="text"
                       required
                       value={formData.poste}
                       onChange={(e) => setFormData({ ...formData, poste: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold"
+                      className="w-full px-3 py-2 bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl text-sm font-semibold"
                       placeholder="Ex: Responsable Operations Portuaires"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Département *</label>
+                    <label className="block text-xs font-bold text-slate-300 dark:text-slate-300 mb-1">Département *</label>
                     <select
                       value={formData.departement}
                       onChange={(e) => setFormData({ ...formData, departement: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold"
+                      className="w-full px-3 py-2 bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl text-sm font-semibold"
                     >
                       <option value="LOGISTIQUE">LOGISTIQUE</option>
                       <option value="TRANSPORT">TRANSPORT</option>
@@ -402,11 +402,11 @@ export default function EmployesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Type de Contrat</label>
+                    <label className="block text-xs font-bold text-slate-300 dark:text-slate-300 mb-1">Type de Contrat</label>
                     <select
                       value={formData.type_contrat}
                       onChange={(e) => setFormData({ ...formData, type_contrat: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold"
+                      className="w-full px-3 py-2 bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl text-sm font-semibold"
                     >
                       <option value="CDI">CDI</option>
                       <option value="CDD">CDD</option>
@@ -416,21 +416,21 @@ export default function EmployesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Salaire de Base (XAF)</label>
+                    <label className="block text-xs font-bold text-slate-300 dark:text-slate-300 mb-1">Salaire de Base (XAF)</label>
                     <input
                       type="number"
                       value={formData.salaire_base_xaf}
                       onChange={(e) => setFormData({ ...formData, salaire_base_xaf: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold font-mono"
+                      className="w-full px-3 py-2 bg-slate-800 dark:bg-slate-800 border border-slate-700 dark:border-slate-700 rounded-xl text-sm font-semibold font-mono"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-700 dark:border-slate-800">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-sm"
+                    className="px-4 py-2 bg-slate-900 dark:bg-slate-800 text-slate-300 dark:text-slate-300 font-bold rounded-xl text-sm"
                   >
                     Annuler
                   </button>
@@ -449,13 +449,13 @@ export default function EmployesPage() {
         {/* Modal Importer Fichier Excel */}
         {showImportModal && (
           <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <div className="bg-slate-900 dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-700 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center pb-4 border-b border-slate-700 dark:border-slate-800">
+                <h3 className="text-xl font-black text-slate-200 dark:text-white flex items-center gap-2">
                   <FileSpreadsheet className="w-6 h-6 text-pink-600" />
                   Importer Fichier Excel / CSV
                 </h3>
-                <button onClick={() => setShowImportModal(false)} className="text-slate-400 hover:text-slate-600">
+                <button onClick={() => setShowImportModal(false)} className="text-slate-400 hover:text-slate-400">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -465,7 +465,7 @@ export default function EmployesPage() {
                   Sélectionnez un fichier Excel (`.xlsx`, `.xls`) ou CSV contenant la liste de vos collaborateurs (Colonnes : Nom, Prénom, Email, Poste).
                 </p>
 
-                <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-6 text-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer relative">
+                <div className="border-2 border-dashed border-slate-600 dark:border-slate-700 rounded-2xl p-6 text-center hover:bg-slate-800 dark:hover:bg-slate-800/50 transition-colors cursor-pointer relative">
                   <input
                     type="file"
                     accept=".csv, .xlsx, .xls"
@@ -473,17 +473,17 @@ export default function EmployesPage() {
                     className="absolute inset-0 opacity-0 cursor-pointer"
                   />
                   <FileSpreadsheet className="w-10 h-10 text-pink-500 mx-auto mb-2" />
-                  <p className="font-bold text-sm text-slate-700 dark:text-slate-300">
+                  <p className="font-bold text-sm text-slate-300 dark:text-slate-300">
                     {importFile ? importFile.name : 'Cliquez ou glissez votre fichier ici'}
                   </p>
                   <p className="text-xs text-slate-400 mt-1">Formats acceptés : CSV, XLSX, XLS</p>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-700 dark:border-slate-800">
                   <button
                     type="button"
                     onClick={() => setShowImportModal(false)}
-                    className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-sm"
+                    className="px-4 py-2 bg-slate-900 dark:bg-slate-800 text-slate-300 dark:text-slate-300 font-bold rounded-xl text-sm"
                   >
                     Annuler
                   </button>

@@ -19,6 +19,8 @@
  *   4. On permanent fail (after 3 retries): mark as FAILED, notify user
  */
 
+import { getAccessToken, getApiBaseUrl, tryRefreshToken } from '@/lib/api-client';
+
 export type OfflineOpType =
   | 'TICKET_CARBURANT'
   | 'EPOD_SIGNATURE'
@@ -145,13 +147,32 @@ async function deleteOperation(id: string): Promise<void> {
 const MAX_RETRIES = 3;
 
 async function syncOperation(op: OfflineOperation, baseUrl: string): Promise<void> {
+  const base = baseUrl || getApiBaseUrl();
+
+  // Sans token, le POST échouerait à coup sûr (401) : on garde l'opération en
+  // file plutot que de la marquer FAILED pour une raison sans rapport avec sa
+  // validité métier. La synchronisation réessaiera au prochain retour en ligne.
+  let token = getAccessToken();
+  if (!token) {
+    const refreshed = await tryRefreshToken();
+    token = refreshed ? getAccessToken() : null;
+  }
+  if (!token) {
+    await updateOperation(op.id, { status: 'PENDING' });
+    console.warn(`[OfflineSync] ${op.type} en attente : aucune session authentifiée.`);
+    return;
+  }
+
   await updateOperation(op.id, { status: 'SYNCING', attempt_count: op.attempt_count + 1 });
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(`${baseUrl}${op.endpoint}`, {
+      const response = await fetch(`${base}${op.endpoint}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           ...op.payload,
           _offline_id: op.id,
@@ -163,6 +184,19 @@ async function syncOperation(op: OfflineOperation, baseUrl: string): Promise<voi
         await deleteOperation(op.id);
         console.info(`[OfflineSync] ✅ Synced ${op.type}  ID: ${op.id}`);
         window.dispatchEvent(new CustomEvent('offline-op-synced', { detail: { id: op.id, type: op.type } }));
+        return;
+      }
+
+      // Token expire entre-temps : on le rafraichit une fois et on retente,
+      // sinon la file mourrait en FAILED sur une simple expiration de session.
+      if (response.status === 401 && attempt === 0) {
+        const refreshed = await tryRefreshToken();
+        if (refreshed) {
+          token = getAccessToken() || token;
+          throw new Error('Session rafraîchie, nouvelle tentative');
+        }
+        await updateOperation(op.id, { status: 'FAILED', error: '401 : session expirée, reconnexion requise' });
+        console.error(`[OfflineSync] ❌ ${op.id} bloqué par la session expirée`);
         return;
       }
 
@@ -194,6 +228,8 @@ async function syncOperation(op: OfflineOperation, baseUrl: string): Promise<voi
 /**
  * Replay all pending operations in FIFO order.
  * Call this when navigator.onLine becomes true or on app startup.
+ * baseUrl vide => base de l'API resolue depuis api-client (jamais l'origine du
+ * frontend : les endpoints en file commencent par /api/v1/...).
  */
 export async function syncOutbox(baseUrl: string = ''): Promise<{ synced: number; failed: number }> {
   const pending = await getPendingOperations();
@@ -278,7 +314,7 @@ export function queueQHSEIncident(
 ) {
   return enqueueOperation({
     type: 'QHSE_INCIDENT',
-    endpoint: '/api/v1/qhse/incidents',
+    endpoint: '/api/v1/incidents',
     payload: data,
     ...context,
   });

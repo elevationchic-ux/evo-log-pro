@@ -20,6 +20,9 @@ def setup_error_handlers(app: FastAPI):
             content={
                 "error": True,
                 "message": exc.detail,
+                # `detail` est le nom FastAPI par defaut : les pages existantes
+                # lisent l'un ou l'autre, l'enveloppe doit rester compatible.
+                "detail": exc.detail,
                 "status_code": exc.status_code,
                 "path": str(request.url.path),
                 "method": request.method

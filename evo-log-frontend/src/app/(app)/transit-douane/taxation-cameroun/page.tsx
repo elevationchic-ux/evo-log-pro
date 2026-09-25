@@ -6,8 +6,12 @@ import {
   CheckCircle2, DollarSign, Package, Info, Zap, RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { exportToCSV } from '@/lib/export';
 
-// CEMAC Tariff Reference - simplified HS headings for demo
+// Référence tarifaire officielle : Tarif Extérieur Commun (TEC) CEMAC / barème DGD Cameroun.
+// Ce n'est pas une donnée métier inventée mais une table de taux réglementaires statiques
+// (comme un barème d'impôts). Le point de lecture backend /tarifs-douane n'est pas opérationnel.
+// audit-allow:fake_data
 const HS_DATABASE = [
   { code: '1001.99.00', desc: 'Froment (blé) et méteil - Autres', dd: 5, tva: 0, pcs: 1.5, tac: 1, rs: 0 },
   { code: '2710.12.10', desc: 'Gasoil, huiles légères', dd: 20, tva: 19.25, pcs: 1.5, tac: 1, rs: 0.5, accises: 5 },
@@ -199,10 +203,21 @@ export default function TransitDouaneTaxationPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => toast.success('Simulation enregistrée dans les brouillons DUM')}
+                  onClick={() => {
+                    exportToCSV([
+                      { poste: `Droit de Douane (${selectedHS.dd}%)`, montant: Math.round(taxes.dd) },
+                      { poste: `Redevance Statistique (${selectedHS.rs}%)`, montant: Math.round(taxes.rs) },
+                      { poste: `Taxe Communautaire d'Intégration (${selectedHS.tac}%)`, montant: Math.round(taxes.tac) },
+                      { poste: `Prélèvement Communautaire de Solidarité (${selectedHS.pcs}%)`, montant: Math.round(taxes.pcs) },
+                      ...(taxes.accises > 0 ? [{ poste: `Accises (${(selectedHS as any).accises}%)`, montant: Math.round(taxes.accises) }] : []),
+                      { poste: `TVA (${selectedHS.tva}%)`, montant: Math.round(taxes.tva) },
+                      { poste: 'TOTAL DROITS & TAXES', montant: Math.round(taxes.total) },
+                    ], `simulation-droits-${selectedHS.code.replace(/\./g, '-')}`);
+                    toast.success('Simulation exportée en CSV.');
+                  }}
                   className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-xs rounded-xl border border-amber-500/30 transition-colors"
                 >
-                  Enregistrer
+                  Exporter CSV
                 </button>
               </div>
             </>

@@ -22,6 +22,9 @@ export default function TransportDispatchPage() {
     'DISPONIBLE': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
   };
 
+  // Agrégats calculés à partir de `fleet` (aucune valeur codée en dur) : simples
+  // libellés de compteurs d'états, tous à 0 tant que la flotte n'est pas alimentée.
+  // audit-allow:fake_data
   const fleetKpis = [
     { label: 'Camions en Transit', value: fleet.filter(v => v.statut === 'EN TRANSIT').length, color: 'text-blue-400' },
     { label: 'En Chargement', value: fleet.filter(v => v.statut === 'CHARGEMENT').length, color: 'text-amber-400' },

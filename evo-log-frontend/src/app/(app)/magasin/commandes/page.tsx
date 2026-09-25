@@ -30,7 +30,7 @@ export default function CommandesPage() {
       cell: (row: Commande) => (
         <div>
           <div className="font-medium">{row.client?.nom} {row.client?.prenom}</div>
-          {row.client?.raison_sociale && <div className="text-sm text-gray-500">{row.client.raison_sociale}</div>}
+          {row.client?.raison_sociale && <div className="text-sm text-slate-400">{row.client.raison_sociale}</div>}
         </div>
       )
     },
@@ -49,15 +49,15 @@ export default function CommandesPage() {
       header: 'Statut',
       cell: (row: Commande) => {
         const statusConfig = {
-          [StatutCommande.BROUILLON]: { color: 'bg-gray-100 text-gray-800', icon: Clock },
-          [StatutCommande.EN_COURS]: { color: 'bg-blue-100 text-blue-800', icon: Clock },
-          [StatutCommande.EN_ATTENTE]: { color: 'bg-gray-100 text-gray-800', icon: Clock },
-          [StatutCommande.VERROUILLEE]: { color: 'bg-yellow-100 text-yellow-800', icon: Lock },
-          [StatutCommande.PAYEE]: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
-          [StatutCommande.EN_PREPARATION]: { color: 'bg-purple-100 text-purple-800', icon: ShoppingCart },
-          [StatutCommande.PRETE]: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
-          [StatutCommande.LIVREE]: { color: 'bg-teal-100 text-teal-800', icon: Truck },
-          [StatutCommande.ANNULEE]: { color: 'bg-red-100 text-red-800', icon: Trash2 }
+          [StatutCommande.BROUILLON]: { color: 'bg-slate-800 text-slate-100', icon: Clock },
+          [StatutCommande.EN_COURS]: { color: 'bg-blue-500/15 text-blue-300', icon: Clock },
+          [StatutCommande.EN_ATTENTE]: { color: 'bg-slate-800 text-slate-100', icon: Clock },
+          [StatutCommande.VERROUILLEE]: { color: 'bg-yellow-500/15 text-yellow-300', icon: Lock },
+          [StatutCommande.PAYEE]: { color: 'bg-blue-500/15 text-blue-300', icon: CheckCircle },
+          [StatutCommande.EN_PREPARATION]: { color: 'bg-purple-500/15 text-purple-300', icon: ShoppingCart },
+          [StatutCommande.PRETE]: { color: 'bg-green-500/15 text-green-300', icon: CheckCircle },
+          [StatutCommande.LIVREE]: { color: 'bg-teal-500/15 text-teal-300', icon: Truck },
+          [StatutCommande.ANNULEE]: { color: 'bg-red-500/15 text-red-300', icon: Trash2 }
         }
         const config = statusConfig[row.statut]
         const Icon = config.icon
@@ -184,8 +184,8 @@ export default function CommandesPage() {
       <div className="container mx-auto p-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Commandes Clients</h1>
-            <p className="text-gray-600 mt-1">Gestion des commandes avec système de verrouillage</p>
+            <h1 className="text-3xl font-bold text-slate-100">Commandes Clients</h1>
+            <p className="text-slate-400 mt-1">Gestion des commandes avec système de verrouillage</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="w-32 h-20">
@@ -219,7 +219,7 @@ export default function CommandesPage() {
         {/* Create Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="w-full max-w-4xl rounded-lg bg-white p-6">
+            <div className="w-full max-w-4xl rounded-lg bg-slate-900 p-6">
               <h2 className="mb-4 text-xl font-bold">Nouvelle Commande</h2>
               <CommandeForm
                 onSubmit={async (data) => {
@@ -244,7 +244,7 @@ export default function CommandesPage() {
         {/* Edit Modal */}
         {showEditModal && selectedCommande && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="w-full max-w-4xl rounded-lg bg-white p-6">
+            <div className="w-full max-w-4xl rounded-lg bg-slate-900 p-6">
               <h2 className="mb-4 text-xl font-bold">Modifier Commande</h2>
               <CommandeForm
                 initialData={selectedCommande}
@@ -377,15 +377,15 @@ function CommandeForm({
         <textarea
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          className="w-full rounded-md border border-gray-300 p-2"
+          className="w-full rounded-md border border-slate-600 p-2"
           rows={2}
         />
       </div>
 
-      <div className="flex items-center gap-4 rounded-lg bg-yellow-50 p-3">
+      <div className="flex items-center gap-4 rounded-lg bg-yellow-500/10 p-3">
         <Lock className="h-5 w-5 text-yellow-600" />
         <div className="flex-1">
-          <p className="text-sm font-medium text-yellow-800">Commande verrouillée</p>
+          <p className="text-sm font-medium text-yellow-300">Commande verrouillée</p>
           <p className="text-xs text-yellow-600">La commande sera verrouillée jusqu'à validation du paiement</p>
         </div>
         <input
@@ -400,7 +400,7 @@ function CommandeForm({
       <div className="border-t pt-4">
         <h3 className="mb-3 font-semibold">Lignes de commande</h3>
         
-        <div className="mb-4 rounded-lg bg-gray-50 p-4">
+        <div className="mb-4 rounded-lg bg-slate-800 p-4">
           <div className="grid grid-cols-5 gap-2">
             <div>
               <label className="mb-1 block text-xs font-medium">Article</label>
@@ -463,14 +463,14 @@ function CommandeForm({
         {(formData.lignes || []).length > 0 && (
           <div className="space-y-2">
             {(formData.lignes || []).map((ligne, index) => (
-              <div key={index} className="flex items-center justify-between rounded border bg-white p-2">
+              <div key={index} className="flex items-center justify-between rounded border bg-slate-900 p-2">
                 <div className="text-sm">
                   <span className="font-medium">Article #{ligne.article_id}</span>
-                  <span className="mx-2 text-gray-500">|</span>
+                  <span className="mx-2 text-slate-400">|</span>
                   <span>{ligne.quantite_demandee} {ligne.unite_mesure}</span>
                   {ligne.prix_unitaire && (
                     <>
-                      <span className="mx-2 text-gray-500">|</span>
+                      <span className="mx-2 text-slate-400">|</span>
                       <span className="text-green-600">{ligne.prix_unitaire.toLocaleString()} FCFA</span>
                     </>
                   )}

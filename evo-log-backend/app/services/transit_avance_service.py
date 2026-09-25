@@ -196,21 +196,20 @@ class NomenclatureCEMACService:
         code_hs: str,
         valeur_declaree: float
     ) -> Dict[str, float]:
-        """Calculate customs duties based on HS code"""
-        taric = NomenclatureCEMACService.obtenir_taux_taric(db, code_hs)
-        if not taric:
-            raise ValueError(f"Code HS {code_hs} non trouvé")
-        
-        montant_dd = valeur_declaree * (taric.taux_dd / 100)
-        montant_tva = valeur_declaree * (taric.taux_tva / 100)
-        
-        return {
-            "taux_dd": taric.taux_dd,
-            "montant_dd": montant_dd,
-            "taux_tva": taric.taux_tva,
-            "montant_tva": montant_tva,
-            "total_taxes": montant_dd + montant_tva
-        }
+        """Calculate customs duties based on HS code.
+
+        Délégué au moteur UNIQUE. L'ancien calcul appliquait la TVA sur la seule
+        valeur déclarée (base erronée) ; le moteur applique la TVA sur
+        (valeur + DD + redevance + CCI), conformément à la liquidation CEMAC.
+        Levante ValueError si la position SH est absente de la nomenclature.
+        """
+        from app.services.taxation_douaniere import calculer_liquidation
+
+        return calculer_liquidation(
+            valeur_en_douane=valeur_declaree,
+            db=db,
+            code_sh=code_hs,
+        )
 
 
 class DeclarationDouaniereAvanceService:
@@ -226,17 +225,20 @@ class DeclarationDouaniereAvanceService:
         valeur_declaree: float,
         code_hs: str
     ) -> DeclarationDouaniereAvance:
-        """Create customs declaration"""
-        # Calculate duties based on TARIC
-        taric = NomenclatureCEMACService.obtenir_taux_taric(db, code_hs)
-        if not taric:
-            raise ValueError(f"Code HS {code_hs} non trouvé")
-        
-        taux_dd = taric.taux_dd
-        montant_dd = valeur_declaree * (taux_dd / 100)
-        taux_tva = taric.taux_tva
-        montant_tva = valeur_declaree * (taux_tva / 100)
-        total_taxes = montant_dd + montant_tva
+        """Create customs declaration (montants issus du moteur UNIQUE de liquidation)"""
+        from app.services.taxation_douaniere import calculer_liquidation
+
+        # Levante ValueError si la position SH est absente de la nomenclature.
+        liquidation = calculer_liquidation(
+            valeur_en_douane=valeur_declaree,
+            db=db,
+            code_sh=code_hs,
+        )
+        taux_dd = liquidation["taux_dd"] * 100  # colonne stockee en pourcentage
+        taux_tva = liquidation["taux_tva"] * 100
+        montant_dd = liquidation["droit_douane_dd"]
+        montant_tva = liquidation["tva_1925"]
+        total_taxes = liquidation["total_a_liquider_xaf"]
         
         declaration = DeclarationDouaniereAvance(
             numero_declaration=numero_declaration,

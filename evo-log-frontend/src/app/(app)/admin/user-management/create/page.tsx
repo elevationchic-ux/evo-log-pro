@@ -3,9 +3,12 @@
 import React, { useState } from "react";
 import {
   UserPlus, User, Mail, Phone, Shield, Building,
-  Eye, EyeOff, ChevronDown, ArrowLeft
+  Eye, EyeOff, ChevronDown, ArrowLeft, Loader2
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
+import { adminAPI } from "@/lib/api-client";
+import { classifyApiError } from "@/hooks/useApi";
 
 const ROLES = ["ADMIN", "MANAGER", "DISPATCHER", "CHAUFFEUR", "MAGASINIER", "RH", "FINANCE", "TRANSIT", "QHSE", "MAINTENANCE", "CLIENT"];
 const DEPARTEMENTS = ["Direction Générale", "Transport", "Magasin WMS", "Finance & Comptabilité", "Ressources Humaines", "Transit & Douane", "QHSE & Sécurité", "Maintenance Atelier", "Informatique"];
@@ -17,13 +20,41 @@ export default function CreateUserPage() {
   });
   const [showPwd, setShowPwd] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [pwdError, setPwdError] = useState("");
+  const [apiError, setApiError] = useState("");
 
   const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.mot_de_passe !== form.confirmer_mot_de_passe) { alert("Les mots de passe ne correspondent pas"); return; }
-    setSubmitted(true);
+    setPwdError("");
+    setApiError("");
+    if (form.mot_de_passe !== form.confirmer_mot_de_passe) {
+      setPwdError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await adminAPI.createUser({
+        email: form.email,
+        password: form.mot_de_passe,
+        full_name: `${form.prenom} ${form.nom}`.trim(),
+        role: form.role,
+        phone: form.telephone || undefined,
+        department: form.departement,
+      });
+      toast.success(`Compte créé pour ${form.prenom} ${form.nom}.`);
+      setSubmitted(true);
+    } catch (err) {
+      const info = classifyApiError(err);
+      // Le backend renvoie un detail lisible (email déjà pris, etc.)
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      setApiError(detail || info.message);
+      toast.error(detail || info.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -47,7 +78,7 @@ export default function CreateUserPage() {
             <User size={32} className="text-emerald-400" />
           </div>
           <h3 className="text-lg font-bold text-foreground mb-2">Utilisateur créé avec succès !</h3>
-          <p className="text-muted-foreground text-sm mb-4">{form.prenom} {form.nom} a été créé avec le rôle <strong>{form.role}</strong>. Un email de bienvenue lui a été envoyé à {form.email}.</p>
+          <p className="text-muted-foreground text-sm mb-4">{form.prenom} {form.nom} dispose maintenant d&apos;un compte actif avec le rôle <strong>{form.role}</strong> (département {form.departement}). Communiquez-lui son mot de passe de façon sécurisée.</p>
           <div className="flex justify-center gap-3">
             <button onClick={() => setSubmitted(false)} className="px-4 py-2 rounded-xl border border-border text-sm hover:bg-accent transition-colors">Créer un autre</button>
             <Link href="/admin/user-management/listing" className="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-sm transition-colors">Retour à la liste</Link>
@@ -129,11 +160,20 @@ export default function CreateUserPage() {
               ))}
             </div>
             <p className="text-xs text-muted-foreground mt-2">Minimum 8 caractères avec majuscule, chiffre et caractère spécial.</p>
+            {pwdError && (
+              <p className="text-xs text-red-400 mt-2" role="alert">{pwdError}</p>
+            )}
           </div>
 
-          <button type="submit" className="w-full py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold transition-colors flex items-center justify-center gap-2">
-            <UserPlus size={16} />
-            Créer le compte utilisateur
+          {apiError && (
+            <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-xs text-red-300" role="alert">
+              Échec de la création : {apiError}
+            </div>
+          )}
+
+          <button type="submit" disabled={saving} className="w-full py-3 rounded-xl bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white font-semibold transition-colors flex items-center justify-center gap-2">
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
+            {saving ? "Création en cours…" : "Créer le compte utilisateur"}
           </button>
         </form>
       )}

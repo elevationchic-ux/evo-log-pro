@@ -99,7 +99,7 @@ export default function EncaissementsPage() {
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Encaissements & Règlements</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-100">Encaissements & Règlements</h1>
           <p className="text-muted-foreground mt-1">Gérez les paiements clients et le lettrage comptable.</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
@@ -117,7 +117,7 @@ export default function EncaissementsPage() {
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="bg-slate-50 border-b text-gray-600">
+                <thead className="bg-slate-800 border-b text-slate-400">
                   <tr>
                     <th className="px-6 py-4 font-semibold">Référence / Mode</th>
                     <th className="px-6 py-4 font-semibold">Date</th>
@@ -129,39 +129,39 @@ export default function EncaissementsPage() {
                 </thead>
                 <tbody className="divide-y">
                   {encaissements.map((enc) => (
-                    <tr key={enc.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={enc.id} className="hover:bg-slate-800 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="font-bold text-gray-900">{enc.reference || 'AUTO'}</div>
-                        <div className="text-xs text-gray-500 mt-1 flex items-center">
+                        <div className="font-bold text-slate-100">{enc.reference || 'AUTO'}</div>
+                        <div className="text-xs text-slate-400 mt-1 flex items-center">
                           <CreditCard className="w-3 h-3 mr-1" /> {enc.mode_paiement}
                         </div>
                         {enc.reference_paiement && (
                           <div className="text-xs text-gray-400">Réf: {enc.reference_paiement}</div>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-gray-600">
+                      <td className="px-6 py-4 text-slate-400">
                         {new Date(enc.date_paiement || enc.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
                         <span className="font-medium">{enc.tiers?.raison_sociale || 'N/A'}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="font-bold text-green-700 text-base">
+                        <span className="font-bold text-green-300 text-base">
                           {Number(enc.montant_encaisse).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         {enc.lettree ? (
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100 flex items-center w-fit">
+                          <Badge className="bg-green-500/15 text-green-300 hover:bg-green-500/15 flex items-center w-fit">
                             <CheckCircle className="w-3 h-3 mr-1" /> Lettré
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
+                          <Badge variant="outline" className="text-amber-600 border-amber-500/50 bg-amber-500/10">
                             Non lettré
                           </Badge>
                         )}
                         {enc.lettree && enc.facture_id && (
-                          <div className="text-xs text-gray-500 mt-1">Facture #{enc.facture_id}</div>
+                          <div className="text-xs text-slate-400 mt-1">Facture #{enc.facture_id}</div>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -183,7 +183,7 @@ export default function EncaissementsPage() {
                   ))}
                   {encaissements.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
                         Aucun encaissement trouvé.
                       </td>
                     </tr>
@@ -295,7 +295,7 @@ export default function EncaissementsPage() {
             <DialogTitle>Lettrer un paiement</DialogTitle>
           </DialogHeader>
           <div className="py-4 space-y-4">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-400">
               Associez ce paiement de <strong>{selectedEncaissement?.montant_encaisse?.toLocaleString()} XAF</strong> à une facture existante.
             </p>
             <div>

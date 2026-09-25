@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Filter, 
-  TrendingUp, 
-  DollarSign, 
-  CheckCircle2, 
-  Clock, 
-  FileText, 
+import {
+  Users,
+  Plus,
+  Search,
+  Filter,
+  TrendingUp,
+  DollarSign,
+  CheckCircle2,
+  Clock,
+  FileText,
   ChevronRight,
   Briefcase,
   Layers,
@@ -20,6 +20,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { customerAPI } from '@/lib/api-client';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 interface B2BOpportunity {
@@ -36,6 +37,7 @@ interface B2BOpportunity {
 }
 
 export default function ClientB2bDashboardPage() {
+  const router = useRouter();
   const [opportunities, setOpportunities] = useState<B2BOpportunity[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -85,18 +87,33 @@ export default function ClientB2bDashboardPage() {
     loadData();
   }, []);
 
-  const handleCreateOpportunity = (e: React.FormEvent) => {
+  const handleCreateOpportunity = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.nomEntreprise || !form.contactNom) {
       toast.error('Veuillez renseigner le nom de l\'entreprise et du contact.');
       return;
     }
 
-    toast.error('La création de prospects n’est pas encore reliée à un endpoint CRM persistant.');
+    try {
+      await customerAPI.createCustomer({
+        raison_sociale: form.nomEntreprise,
+        contact_nom: form.contactNom,
+        telephone: form.telephone || undefined,
+        email: form.email || undefined,
+        type_service: form.typeService,
+        budget_estime: form.montantEstime ? Number(form.montantEstime) : undefined,
+      });
+      toast.success(`Prospect « ${form.nomEntreprise} » ajouté au pipeline.`);
+      setShowAddModal(false);
+      setForm({ nomEntreprise: '', contactNom: '', telephone: '', email: '', typeService: 'TRANSIT_DOUANE', montantEstime: '', responsableCommercial: 'Équipe Commerciale CADC' });
+      loadData();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Erreur  prospect non enregistré.');
+    }
   };
 
   const filteredOpps = opportunities.filter(o => {
-    const matchesSearch = 
+    const matchesSearch =
       o.nomEntreprise.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.contactNom.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStage = stageFilter === 'ALL' || o.etape === stageFilter;
@@ -245,12 +262,11 @@ export default function ClientB2bDashboardPage() {
                   <span className="text-[10px] font-bold text-primary uppercase">{opp.typeService.replace(/_/g, ' ')}</span>
                   <h3 className="font-bold text-base text-on-surface">{opp.nomEntreprise}</h3>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                  opp.etape === 'GAGNE' ? 'bg-emerald-500/10 text-emerald-600' :
-                  opp.etape === 'NEGOCIATION' ? 'bg-blue-500/10 text-blue-600' :
-                  opp.etape === 'DEVIS_ENVOYE' ? 'bg-amber-500/10 text-amber-600' :
-                  'bg-surface-container text-on-surface-variant'
-                }`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${opp.etape === 'GAGNE' ? 'bg-emerald-500/10 text-emerald-600' :
+                    opp.etape === 'NEGOCIATION' ? 'bg-blue-500/10 text-blue-600' :
+                      opp.etape === 'DEVIS_ENVOYE' ? 'bg-amber-500/10 text-amber-600' :
+                        'bg-surface-container text-on-surface-variant'
+                  }`}>
                   {opp.etape}
                 </span>
               </div>
@@ -282,7 +298,7 @@ export default function ClientB2bDashboardPage() {
                   </span>
                 </div>
                 <button
-                  onClick={() => toast.success(`Ouverture du dossier commercial de ${opp.nomEntreprise}`)}
+                  onClick={() => router.push(`/client-b2b/crm?client=${opp.id}`)}
                   className="p-2 hover:bg-surface-container rounded-lg text-primary"
                 >
                   <ChevronRight className="w-4 h-4" />

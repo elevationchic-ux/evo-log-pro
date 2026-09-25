@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { magasinAPI } from '@/lib/api-client';
 import {
   Warehouse, Package, TrendingUp, AlertTriangle, Search, Plus,
-  MapPin, Grid3X3, RefreshCw, Eye, ArrowRight, BarChart3,
+  MapPin, RefreshCw, Eye, ArrowRight, BarChart3,
   Layers, Thermometer, Box, ShoppingCart, QrCode, Truck, ShieldCheck, X
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -133,10 +133,10 @@ export default function WMSDashboardPage() {
     : [];
 
   const kpis = [
-    { label: 'Capacité Utilisée', value: kpisData?.taux_occupation ?? '', sub: kpisData ? 'Donnée WMS' : 'Indisponible sans API WMS', icon: Grid3X3, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', trend: '' },
-    { label: 'Articles en Stock', value: kpisData?.articles_total != null ? String(kpisData.articles_total) : '', sub: 'Référentiel WMS', icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', trend: '' },
-    { label: 'Mouvements Aujourd’hui', value: kpisData?.mouvements_jour != null ? String(kpisData.mouvements_jour) : '', sub: 'Mouvements persistés', icon: ArrowRight, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', trend: '' },
-    { label: 'Valeur Totale Stock', value: kpisData?.valeur_stock != null ? `${kpisData.valeur_stock} XAF` : '', sub: 'Valorisation WMS', icon: TrendingUp, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20', trend: '' },
+    { label: 'Articles en Stock', value: kpisData?.nb_articles != null ? String(kpisData.nb_articles) : '0', sub: 'Référentiel stocks réel', icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', trend: '' },
+    { label: 'Mouvements Aujourd’hui', value: kpisData?.mouvements_jour != null ? String(kpisData.mouvements_jour) : '0', sub: 'Mouvements persistés', icon: ArrowRight, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', trend: '' },
+    { label: 'Valeur Totale Stock', value: kpisData?.valeur_stock != null ? `${Number(kpisData.valeur_stock).toLocaleString('fr-FR')} FCFA` : '0', sub: 'Valorisation WMS', icon: TrendingUp, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20', trend: '' },
+    { label: 'Alertes Stock Bas', value: kpisData?.nb_alertes_min != null ? String(kpisData.nb_alertes_min) : '0', sub: 'Sous seuil minimum', icon: AlertTriangle, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', trend: '' },
   ];
 
   const recentMovements: RecentMovement[] = [];

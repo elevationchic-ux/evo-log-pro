@@ -1,10 +1,10 @@
 # TODO - EVO-LOG SaaS
 
-**Date:** 19 septembre 2026  
+**Date:** 25 septembre 2026 (aligné code au 25/09/2026)  
 **Version:** 2.0  
 **Statut:** STAGING / VALIDATION REQUISE ⚠️
 
-> Voir la matrice de preuve dans [ETAT_REEL_2026-09-19.md](./ETAT_REEL_2026-09-19.md). Les tâches marquées terminées dans les anciens rapports doivent être considérées comme historiques tant qu'elles ne sont pas couvertes par un test reproductible.
+> Voir la matrice de preuve dans [docs/archive/ETAT_REEL_2026-09-19.md](./docs/archive/ETAT_REEL_2026-09-19.md). Les tâches marquées terminées dans les anciens rapports doivent être considérées comme historiques tant qu'elles ne sont pas couvertes par un test reproductible.
 
 ---
 
@@ -48,6 +48,18 @@
 - ✅ Créer DOCUMENTATION.md consolidé
 - ✅ Mettre à jour version 2.0 tous les rapports
 - ✅ Supprimer fichiers inutiles et obsolètes
+
+### Phase 6: RBAC granulaire, accréditations & espaces communs (25/09/2026)
+- ✅ Moteur de permissions `app/core/permissions.py` (`load_effective_permissions`, `can`, `require_perm`, `visible_user_ids`, wildcard + fallback `modules_allowed`)
+- ✅ Catalogue `app/core/permission_catalog.py` (6 domaines > modules > sous-modules > actions) + endpoint `GET /api/v1/permissions/catalog`
+- ✅ Migration `020_rbac_granulaire_accreditations` : 256 permissions, 11 rôles métier, 68 grants (rejouable, chaîne linéaire vérifiée)
+- ✅ Modèles `Accreditation` (datée, révocable, expiration) et `SharedAccess` (modules communs) + routers `/api/v1/accreditations`, `/api/v1/shared-access`
+- ✅ Sécurisation du router `rbac_avance` (tenants = SuperAdmin, rôles/catalogue = admin) + `PUT /roles/{id}/permissions` verrouillé au tenant
+- ✅ `require_perm` appliqué aux domaines cœur : comptabilité avancée, magasin
+- ✅ Frontend : session NextAuth enrichie, `lib/permissions.ts`, hook `useCan`, `PermissionGuard` mode `code`, filtrage navigation additif
+- ✅ Pages admin réelles : arbre de permissions par rôle, accréditations, espaces communs
+- ✅ Tests unitaires moteur (`tests/unit/test_rbac_permissions_engine.py`, 10 cas)
+- ⏳ Étendre `require_perm` au-delà des domaines cœur (~323 routes restantes) et brancher `visible_user_ids` sur les listes portant `created_by`/`department_id`
 
 ---
 

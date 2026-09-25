@@ -1,7 +1,7 @@
 """Add tenant scope to B2B quotes.
 
 Revision ID: 20260919_add_quote_company_scope
-Revises:
+Revises: 010_add_outbox_events
 """
 
 from alembic import op
@@ -9,7 +9,11 @@ import sqlalchemy as sa
 
 
 revision = "20260919_add_quote_company_scope"
-down_revision = None
+# Rattache a la chaine principale au lieu de rester une seconde racine : deux
+# bases independantes font un point de fusion en amont de 011, et un graphe non
+# lineaire casse `alembic downgrade base` (verifie par test_migrations_chain).
+# Le contenu est idempotent et ne depend d'aucune table portee par 010.
+down_revision = "010_add_outbox_events"
 branch_labels = None
 depends_on = None
 

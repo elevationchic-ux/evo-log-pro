@@ -36,15 +36,15 @@ export default function MissionsPage() {
 
   const getStatutColor = (statut: string) => {
     switch (statut) {
-      case 'BROUILLON': return 'bg-slate-100 text-slate-800';
-      case 'EN_ATTENTE_AFFECTATION': return 'bg-indigo-100 text-indigo-800';
-      case 'EN_CHARGEMENT': return 'bg-blue-100 text-blue-800';
-      case 'EN_ROUTE': return 'bg-amber-100 text-amber-800';
-      case 'EN_LIVRAISON': return 'bg-orange-100 text-orange-800';
+      case 'BROUILLON': return 'bg-slate-700 text-slate-300';
+      case 'EN_ATTENTE_AFFECTATION': return 'bg-indigo-500/20 text-indigo-300';
+      case 'EN_CHARGEMENT': return 'bg-blue-500/20 text-blue-300';
+      case 'EN_ROUTE': return 'bg-amber-500/20 text-amber-300';
+      case 'EN_LIVRAISON': return 'bg-orange-500/20 text-orange-300';
       case 'LIVRE':
-      case 'TERMINEE': return 'bg-emerald-100 text-emerald-800';
-      case 'FACTUREE': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-slate-100 text-slate-800';
+      case 'TERMINEE': return 'bg-emerald-500/20 text-emerald-300';
+      case 'FACTUREE': return 'bg-purple-500/20 text-purple-300';
+      default: return 'bg-slate-700 text-slate-300';
     }
   };
 
@@ -84,11 +84,11 @@ export default function MissionsPage() {
         {/* Header */}
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
-              <Package className="w-8 h-8 text-blue-600" />
+            <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+              <Package className="w-8 h-8 text-blue-400" />
               Missions de Transport
             </h1>
-            <p className="text-sm text-slate-500 mt-2">Suivi global, historique et recherche avancée des ordres de transport.</p>
+            <p className="text-sm text-slate-400 mt-2">Suivi global, historique et recherche avancée des ordres de transport.</p>
           </div>
           <button onClick={() => window.location.href='/transport/dispatch'} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition-all">
             <span className="material-symbols-outlined text-[20px]">add</span>
@@ -97,7 +97,7 @@ export default function MissionsPage() {
         </div>
 
         {/* Filters Bar */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col sm:flex-row gap-4 items-center">
+        <div className="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-700 mb-6 flex flex-col sm:flex-row gap-4 items-center">
           <div className="flex-1 w-full relative">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
@@ -105,14 +105,14 @@ export default function MissionsPage() {
               placeholder="Rechercher (Référence, Origine, Destination, Fret...)" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none"
             />
           </div>
           <div className="flex gap-4 w-full sm:w-auto">
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none"
+              className="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none"
             >
               <option value="">Tous les statuts</option>
               <option value="BROUILLON">Brouillon</option>
@@ -125,12 +125,12 @@ export default function MissionsPage() {
               type="date"
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none"
+              className="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none"
             />
             {activeFiltersCount > 0 && (
               <button 
                 onClick={clearFilters}
-                className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 text-sm font-bold flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 text-sm font-bold flex items-center gap-2"
                 title="Effacer les filtres"
               >
                 <FilterX className="w-4 h-4" />
@@ -141,17 +141,17 @@ export default function MissionsPage() {
         </div>
 
         {/* Missions List */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-            <h3 className="font-bold text-slate-800 flex items-center gap-2">
+        <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-700 overflow-x-auto">
+          <div className="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+            <h3 className="font-bold text-slate-200 flex items-center gap-2">
               <Filter className="w-4 h-4 text-slate-400" />
               Résultats de recherche
             </h3>
-            <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">{filteredMissions.length} Missions</span>
+            <span className="text-xs font-bold text-blue-400 bg-blue-500/20 px-2 py-1 rounded-full">{filteredMissions.length} Missions</span>
           </div>
 
           <table className="w-full text-left border-collapse">
-            <thead className="bg-white border-b border-slate-100 text-xs uppercase font-bold text-slate-500">
+            <thead className="bg-slate-900 border-b border-slate-700 text-xs uppercase font-bold text-slate-400">
               <tr>
                 <th className="px-6 py-4">Référence</th>
                 <th className="px-6 py-4">Trajet</th>
@@ -161,20 +161,20 @@ export default function MissionsPage() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-800">
               {loading ? (
                 <tr><td colSpan={5} className="px-6 py-12"><CardSkeletonLoader /></td></tr>
               ) : filteredMissions.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-16 text-center">
-                    <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-500 font-medium text-lg">Aucune mission ne correspond à vos filtres.</p>
+                    <Package className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                    <p className="text-slate-400 font-medium text-lg">Aucune mission ne correspond à vos filtres.</p>
                   </td>
                 </tr>
               ) : filteredMissions.map((mission) => (
-                <tr key={mission.id} className="hover:bg-slate-50/50 transition-colors">
+                <tr key={mission.id} className="hover:bg-slate-800/50 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-black text-slate-900">{mission.reference}</div>
+                    <div className="font-black text-white">{mission.reference}</div>
                     <div className="text-xs font-bold text-slate-400 flex items-center gap-1 mt-1">
                       <Calendar className="w-3.5 h-3.5" />
                       {new Date(mission.date_creation || Date.now()).toLocaleDateString()}
@@ -182,17 +182,17 @@ export default function MissionsPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col gap-1.5 text-sm font-bold">
-                      <div className="flex items-center gap-2 text-slate-700">
-                        <MapPin className="w-4 h-4 text-emerald-600" /> {mission.origine}
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <MapPin className="w-4 h-4 text-emerald-400" /> {mission.origine}
                       </div>
-                      <div className="flex items-center gap-2 text-slate-700">
-                        <MapPin className="w-4 h-4 text-red-600" /> {mission.destination}
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <MapPin className="w-4 h-4 text-red-400" /> {mission.destination}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col gap-1 text-sm font-bold">
-                      <div className="flex items-center gap-1.5 text-slate-700">
+                      <div className="flex items-center gap-1.5 text-slate-300">
                         <Truck className="w-4 h-4 text-slate-400" /> 
                         {mission.camion?.immatriculation || `Camion ID ${mission.camion_id}`}
                       </div>
@@ -202,7 +202,7 @@ export default function MissionsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm font-bold text-slate-800">{mission.nature_fret}</div>
+                    <div className="text-sm font-bold text-slate-200">{mission.nature_fret}</div>
                     <div className="text-xs font-medium text-slate-500 mt-1">{mission.poids_kg} kg | {mission.volume_m3} m³</div>
                   </td>
                   <td className="px-6 py-4">
@@ -213,7 +213,7 @@ export default function MissionsPage() {
                   <td className="px-6 py-4 text-right">
                     <button 
                       onClick={() => window.open(`/transport/documents/bl/${mission.id}`, '_blank')}
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 ml-auto"
+                      className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 ml-auto"
                       title="Imprimer le Bon de Livraison"
                     >
                       <span className="material-symbols-outlined text-[16px]">print</span>

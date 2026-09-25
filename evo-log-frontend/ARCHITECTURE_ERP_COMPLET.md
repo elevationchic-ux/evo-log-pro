@@ -556,6 +556,21 @@ Livraison effectuée
 └─────────────────────────────────────────────────────────────┘
 ```
 
+### Permissions granulaires, accréditations & espaces communs (aligné code au 25/09/2026)
+
+Au-delà de la hiérarchie de rôles, l'accès est affiné par un **moteur de permissions
+granulaires** côté serveur (`app/core/permissions.py`) : codes `module.sous_module.action`
+(jokers inclus) vérifiés par la dépendance `require_perm`, **visibilité hiérarchique**
+(`visible_user_ids`), **accréditations** nominatives datées et **espaces communs** par
+entreprise (`SharedAccess`). Le frontend propage les permissions effectives via NextAuth
+(`lib/permissions.ts`, hook `useCan`, `PermissionGuard` mode `code`) et l'administration
+les configure via l'arbre à cocher de `/admin/configuration-des-roles-rbac`.
+
+> **Non-régression** : niveaux 0/1 bypassent la granularité ; un rôle sans permission
+> granulaire semée retombe sur `modules_allowed`. `require_perm` est appliqué aux
+> domaines cœur ; le reste des routes conserve le comportement historique. Détail :
+> [`docs/RBAC_ACCREDITATIONS.md`](../docs/RBAC_ACCREDITATIONS.md).
+
 ### Rôles Détaillés
 
 #### 🔴 Niveau 1: Administration Système
@@ -848,7 +863,7 @@ POST   /api/v1/partner/customs-declaration
 ---
 
 **Version**: 1.0.0  
-**Dernière MAJ**: 24 Août 2026  
+**Dernière MAJ**: 25 septembre 2026 (aligné code RBAC granulaire au 25/09/2026)  
 **Auteur**: Équipe KAMLOG ERP Development
 
 © 2024-2026 KAMLOG ERP. Tous droits réservés.

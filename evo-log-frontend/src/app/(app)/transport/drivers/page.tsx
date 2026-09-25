@@ -31,12 +31,12 @@ export default function DriversListPage() {
 
   return (
     <ModuleLayout module="transport">
-      <div className="bg-slate-50 min-h-full p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+      <div className="bg-slate-800 min-h-full p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-200 flex items-center gap-2">
               <span className="material-symbols-outlined text-[32px] text-blue-600">badge</span>
               Annuaire Chauffeurs
             </h2>
@@ -50,7 +50,7 @@ export default function DriversListPage() {
                 placeholder="Rechercher un chauffeur..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64 text-sm"
+                className="pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64 text-sm"
               />
             </div>
             <button 
@@ -64,9 +64,9 @@ export default function DriversListPage() {
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-slate-900 rounded-2xl border border-slate-700 shadow-sm overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/80 border-b border-slate-100 text-xs uppercase font-bold text-slate-500">
+            <thead className="bg-slate-800/80 border-b border-slate-700 text-xs uppercase font-bold text-slate-500">
               <tr>
                 <th className="px-6 py-4">Nom Complet</th>
                 <th className="px-6 py-4">Contact</th>
@@ -76,7 +76,7 @@ export default function DriversListPage() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-800">
               {loading ? (
                 <tr><td colSpan={6} className="px-6 py-12"><CardSkeletonLoader /></td></tr>
               ) : filteredChauffeurs.length === 0 ? (
@@ -84,20 +84,20 @@ export default function DriversListPage() {
                   <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                     <div className="flex flex-col items-center justify-center">
                       <ShieldAlert className="w-12 h-12 text-slate-300 mb-4" />
-                      <p className="text-lg font-medium text-slate-600">Aucun chauffeur trouvé</p>
+                      <p className="text-lg font-medium text-slate-400">Aucun chauffeur trouvé</p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 filteredChauffeurs.map((chauffeur: any) => (
-                  <tr key={chauffeur.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={chauffeur.id} className="hover:bg-slate-800/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                        <div className="w-10 h-10 rounded-full bg-blue-500/15 text-blue-300 flex items-center justify-center font-bold">
                           {chauffeur.prenom?.[0]}{chauffeur.nom?.[0]}
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                          <p className="text-sm font-bold text-slate-200 group-hover:text-blue-600 transition-colors">
                             {chauffeur.prenom} {chauffeur.nom}
                           </p>
                           <p className="text-xs text-slate-500">ID: DRV-{chauffeur.id.toString().padStart(4, '0')}</p>
@@ -105,33 +105,36 @@ export default function DriversListPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                      <div className="flex items-center gap-1.5 text-sm text-slate-400">
                         <Phone className="w-4 h-4 text-slate-400" />
                         {chauffeur.telephone}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-mono text-slate-700">{chauffeur.numero_permis}</div>
+                      <div className="text-sm font-mono text-slate-300">{chauffeur.numero_permis}</div>
                       <div className="text-xs text-slate-500 font-medium">Cat: {chauffeur.categorie_permis}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-900 text-slate-300">
                         {chauffeur.specialisation || 'Aucune'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      {chauffeur.actif ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">
+                      {/* `is_active` : c'est le nom renvoyé par ConducteurResponse.
+                          `actif` n'existe nulle part, ce qui faisait basculer
+                          100 % des conducteurs en « Inactif » rouge. */}
+                      {chauffeur.is_active ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-300">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Actif
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-300">
                           <ShieldAlert className="w-3.5 h-3.5" /> Inactif
                         </span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Voir profil">
+                      <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-500/10 rounded-lg transition-colors" title="Voir profil">
                         <FileText className="w-5 h-5" />
                       </button>
                     </td>

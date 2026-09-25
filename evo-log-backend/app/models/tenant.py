@@ -90,6 +90,7 @@ class Company(Base):
     users = relationship("User", back_populates="company")
     departments = relationship("Department", back_populates="company")
     b2b_portal = relationship("B2BPortal", back_populates="company", uselist=False)
+    shared_access = relationship("SharedAccess", back_populates="company", cascade="all, delete-orphan")
 
 
 class SubscriptionPlan(Base):
