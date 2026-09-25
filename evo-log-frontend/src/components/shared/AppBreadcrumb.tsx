@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSettings } from '@/components/layout/SettingsProvider';
 
 const ROUTE_LABELS: Record<string, string> = {
   dashboard: 'Supervision Globale',
