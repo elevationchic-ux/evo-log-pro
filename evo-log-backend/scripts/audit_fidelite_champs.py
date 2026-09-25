@@ -340,7 +340,8 @@ def main():
         if "useState" not in texte and "useQuery" not in texte:
             continue
         noms_lus, valeurs, retably, ambigus = analyser(contrat, index, texte)
-        sans_source.update(ambigus)
+        sans_source.update("%s::%s" % (fichier.relative_to(FRONT.parent), v)
+                           for v in ambigus)
         if not retably:
             # Pas de lien retabli : ce fichier n'a pas ete verifie, ce qui ne
             # vaut pas dire qu'il est propre.
@@ -371,6 +372,8 @@ def main():
     valeurs = [d for d in rendus if d["genre"] == "valeur_hors_enum"]
     print("fichiers ou le lien donnee->variable est retabli : %d" % parles)
     print("fichiers a donnees API non retablis (NON verifies) : %d" % muets)
+    print("variables sans source etablie (plusieurs appels, non jugees) : %d"
+          % len(sans_source))
     print("-- axe noms : %d champ(s) lu(s) hors contrat dans %d fichier(s)"
           % (len(champs), len({d["fichier"] for d in champs})))
     for d in champs:
