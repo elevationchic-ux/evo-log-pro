@@ -173,11 +173,81 @@ def lien_donnees(contrat, index, texte):
     return vars_
 
 
+def corps_litteral(texte, debut):
+    """Texte entre `{` a `debut` et son `}` apparie (imbrications et chaines)."""
+    i, profondeur = debut, 0
+    while i < len(texte):
+        c = texte[i]
+        if c in "'\"`":
+            i += 1
+            while i < len(texte) and texte[i] != c:
+                i += 2 if texte[i] == "\\" else 1
+        elif c == "{":
+            profondeur += 1
+        elif c == "}":
+            profondeur -= 1
+            if profondeur == 0:
+                return texte[debut:i]
+        i += 1
+    return ""
+
+
+def formes_locales(texte):
+    """alias d'iteration -> cles que la page lui construit elle-meme.
+
+    `vehicles.map((v) => ...)` et `rows.map((c) => ({ brand: c.marque }))`
+    definissent ensemble la VRAIE forme de `v` : aucune de ces cles ne transite
+    par le contrat. Les ignorer est la seule facon d'evoyer l'outil noyer les
+    vrais trous sous des vues locales legitimes.
+    """
+    formes = {}
+    for m in CONSTRUCTION.finditer(texte):
+        cle = m.group(1)
+        acc = texte.find("{", m.end() - 1)
+        bloc = corps_litteral(texte, acc) if acc >= 0 else ""
+        cles = set(re.findall(r"(?:^|[{,])\s*([A-Za-z_$][\w$]*)\s*:", bloc))
+        if cles:
+            formes.setdefault(cle, set()).update(cles)
+    return formes
+
+
+def valeurs_hors_enum(contrat, schemas, texte):
+    """Litteraux compares a un champ a enum, mais absents de ce enum.
+
+    C'est l'autre moitie du defaut, et la plus dangereuse : le champ existe,
+    la comparaison s'execute, et elle ne reussit jamais. `transport/map`
+    comparait `statut` a 'EN_MAINTENANCE' pour `in_maintenance`.
+    """
+    perms = set()
+    for nom in schemas:
+        perms.update((contrat["schemas"].get(nom) or {}).get("enums", {}))
+    suspects = []
+    for champ in sorted(perms):
+        for regex in re.finditer(COMPARAISON % re.escape(champ), texte):
+            cible, _, litteral = regex.group(1), regex.group(2), regex.group(3)
+            admises = set()
+            for nom in schemas:
+                admises.update(
+                    ((contrat["schemas"].get(nom) or {}).get("enums") or {}).get(champ, []))
+            if not admises or litteral in admises:
+                continue
+            jumeau = next((v for v in sorted(admises) if v.lower() == litteral.lower()), None)
+            suspects.append({
+                "champ": champ,
+                "literal": litteral,
+                "variable": cible,
+                "admis": sorted(admises),
+                "jumeau": jumeau,
+            })
+    return suspects
+
+
 def analyser(contrat, index, texte):
     """-> (liste de soupcons, lien_retably: bool)."""
     vars_ = lien_donnees(contrat, index, texte)
     if not vars_:
-        return [], False
+        return [], [], False
+    formes = formes_locales(texte)
     alias = {}
     for _ in range(2):  # une passe de propagation suffit pour `x = foo.filter(...)`
         for iteree, nom in ITERATION.findall(texte):
@@ -186,14 +256,19 @@ def analyser(contrat, index, texte):
             elif iteree in alias:
                 alias.setdefault(nom, set()).update(alias[iteree])
     soupcons = []
+    pour_valeurs = set()
+    for schemas in vars_.values():
+        pour_valeurs.update(schemas)
     for nom, schemas in sorted(alias.items()):
         disponibles = champs_de(contrat, schemas)
         if not disponibles:
             continue
+        # Une cle construite par la page elle-meme n'est pas une lecture du contrat.
+        locales = formes.get(nom, set())
         vus = set()
         for champ in re.findall(
                 r"(?:%s)\s*(?:\?\.|\.)\s*([A-Za-z_$][\w$]*)" % re.escape(nom), texte):
-            if champ in vus:
+            if champ in vus or champ in locales:
                 continue
             if champ in BUILTIN or champ in ENVELOPPE or champ in RENDU:
                 continue
@@ -206,7 +281,7 @@ def analyser(contrat, index, texte):
                 "schemas": sorted(schemas),
                 "attendus": sorted(disponibles),
             })
-    return soupcons, True
+    return soupcons, valeurs_hors_enum(contrat, pour_valeurs, texte), True
 
 
 def main():
