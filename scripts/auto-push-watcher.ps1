@@ -13,7 +13,7 @@ if (-not $script:Mutex.WaitOne(0)) {
 # Shared state: event actions run in their own context and can only see MessageData (by reference).
 # Paths ignored (build output, caches, git internals, databases, logs...).
 $script:Data = @{
-    Exclude    = '\\(\.git|node_modules|\.next|\.venv|venv|__pycache__|dist|build|\.qoder|\.pytest_cache|\.turbo)\\|\.log$|\.db$|\.sqlite3?$|\.pyc$|\.tmp$|\.tsbuildinfo$'
+    Exclude    = '\\(\.git|node_modules|\.next|\.venv|venv|__pycache__|dist|build|\.qoder|\.pytest_cache|\.turbo)\\|\.log$|\.db$|\.db-(wal|shm|journal)$|\.sqlite3?$|\.sqlite-(wal|shm|journal)$|\.pyc$|\.tmp$|\.tsbuildinfo$'
     Debounce   = 20
     Dirty      = $false
     QuietUntil = [datetime]::MinValue

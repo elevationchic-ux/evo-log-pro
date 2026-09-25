@@ -61,8 +61,9 @@ CONSTRUCTION = re.compile(
     r"\.\s*(?:map)\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*\)?\s*=>\s*\(?\s*\{"
 )
 # Litteral compare a quelque chose qui porte le nom du champ :
-# `c.status === 'ACTIVE'`, `item.statut == "EN_COURS"`.
-COMPARAISON = re.compile(
+# `c.status === 'ACTIVE'`, `item.statut == "EN_COURS"`. Gabarit : le nom du
+# champ n'est connu qu'a l'analyse, d'ou le re.compile a chaque usage.
+COMPARAISON = (
     r"([\w$.]*\b%s\b[\w$.\[\]']*)\s*[=!]==?\s*([`'\"])([^`'\"]+)\2"
 )
 
@@ -243,7 +244,7 @@ def valeurs_hors_enum(contrat, schemas, texte):
 
 
 def analyser(contrat, index, texte):
-    """-> (liste de soupcons, lien_retably: bool)."""
+    """-> (soupcons de noms, soupcons de valeurs, lien_retably: bool)."""
     vars_ = lien_donnees(contrat, index, texte)
     if not vars_:
         return [], [], False
@@ -301,35 +302,47 @@ def main():
             continue
         if "useState" not in texte and "useQuery" not in texte:
             continue
-        soupcons, retably = analyser(contrat, index, texte)
-        if retably:
-            parles += 1
-            for s in soupcons:
-                s = dict(s)
-                s["fichier"] = str(fichier.relative_to(FRONT.parent))
-                rendu.append(s)
-        else:
+        noms_lus, valeurs, retably = analyser(contrat, index, texte)
+        if not retably:
             # Pas de lien retabli : ce fichier n'a pas ete verifie, ce qui ne
             # vaut pas dire qu'il est propre.
             muets += 1
+            continue
+        parles += 1
+        for s in noms_lus:
+            s = dict(s, genre="champ_inexistant")
+            s["fichier"] = str(fichier.relative_to(FRONT.parent))
+            rendu.append(s)
+        for s in valeurs:
+            s = dict(s, genre="valeur_hors_enum")
+            s["fichier"] = str(fichier.relative_to(FRONT.parent))
+            rendu.append(s)
 
+    cles_dedoublonnage = {
+        "champ_inexistant": lambda d: (d["fichier"], d["variable"], d["champ"]),
+        "valeur_hors_enum": lambda d: (d["fichier"], d["champ"], d["literal"]),
+    }
     avec_chemin = {}
     for d in rendu:
-        avec_chemin[(d["fichier"], d["variable"], d["champ"])] = d
+        avec_chemin[cles_dedoublonnage[d["genre"]](d)] = d
     rendus = sorted(avec_chemin.values(), key=lambda d: (d["fichier"], d["champ"]))
     with open(args.json, "w", encoding="utf-8") as fh:
         json.dump(rendus, fh, indent=1)
 
-    par_champ = {}
-    for d in rendus:
-        par_champ.setdefault(d["champ"], []).append(d["fichier"])
+    champs = [d for d in rendus if d["genre"] == "champ_inexistant"]
+    valeurs = [d for d in rendus if d["genre"] == "valeur_hors_enum"]
     print("fichiers ou le lien donnee->variable est retabli : %d" % parles)
     print("fichiers a donnees API non retablis (NON verifies) : %d" % muets)
-    print("champs lus hors contrat : %d occurrence(s), %d nom(s) distinct(s)"
-          % (len(rendus), len(par_champ)))
-    for champ in sorted(par_champ, key=lambda c: (-len(par_champ[c]), c)):
-        ou = par_champ[champ]
-        print("   %-28s x%-3d %s" % (champ, len(ou), ou[0] if len(ou) == 1 else ""))
+    print("-- axe noms : %d champ(s) lu(s) hors contrat dans %d fichier(s)"
+          % (len(champs), len({d["fichier"] for d in champs})))
+    for d in champs:
+        print("   %-24s .%-22s %s" % (d["champ"], d["variable"], d["fichier"]))
+    print("-- axe valeurs : %d comparaison(s) qui ne peuvent jamais reussir"
+          % len(valeurs))
+    for d in valeurs:
+        vers = ("  (la valeur reelle est %r)" % d["jumeau"]) if d["jumeau"] else ""
+        print("   %-14s == %-22s %s%s"
+              % (d["champ"], repr(d["literal"]), d["fichier"], vers))
     print("detail : %s" % args.json)
 
 
