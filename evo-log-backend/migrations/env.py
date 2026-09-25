@@ -43,6 +43,47 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def _ensure_version_column_wide(connection) -> None:
+    """Garantir que alembic_version.version_num accepte les identifiants de
+    revision longs (> 32 caracteres).
+
+    Alembic cree la colonne en VARCHAR(32) par defaut ; Postgres tronque alors
+    et leve StringDataRightTruncation sur des revisions comme
+    '018_add_customer_support_fleet_tables' (37) ou
+    '020_rbac_granulaire_accreditations' (34). SQLite ignore les bornes
+    VARCHAR, donc l'operation est specifique Postgres.
+
+    - Table existante -> ALTER COLUMN ... TYPE VARCHAR(255).
+    - Table absente   -> la pre-creer large pour qu'un 'upgrade head' en une
+      seule passe sur base vierge fonctionne (alembic.recreate est checkfirst).
+    """
+    try:
+        dialect = connection.dialect.name
+        if dialect != "postgresql":
+            return
+        inspector = inspect(connection)
+        if "alembic_version" in inspector.get_table_names():
+            row = connection.execute(text(
+                "SELECT character_maximum_length FROM information_schema.columns "
+                "WHERE table_name = 'alembic_version' AND column_name = 'version_num'"
+            )).first()
+            current_len = row[0] if row else None
+            if current_len is not None and current_len < 255:
+                connection.execute(text(
+                    "ALTER TABLE alembic_version ALTER COLUMN version_num TYPE VARCHAR(255)"
+                ))
+                connection.commit()
+        else:
+            connection.execute(text(
+                "CREATE TABLE IF NOT EXISTS alembic_version ("
+                "version_num VARCHAR(255) NOT NULL, "
+                "CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num))"
+            ))
+            connection.commit()
+    except Exception as exc:  # ne jamais bloquer une migration pour ca
+        print(f"[env.py] avertissement: alembic_version non elargi: {exc}")
+
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
     connectable = engine_from_config(
@@ -52,6 +93,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        _ensure_version_column_wide(connection)
         context.configure(
             connection=connection, target_metadata=target_metadata
         )
