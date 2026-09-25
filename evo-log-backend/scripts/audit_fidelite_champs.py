@@ -245,11 +245,16 @@ def lien_donnees(contrat, index, texte, trace=None):
                     sources[cible] = set(sources[nom])
                     break
     # 4) `const {data: factures = []} = useQuery({queryFn: () => financeAPI.x()})`
+    #    Ces pages n'ont AUCUN useState : le nom destructure est la variable
+    #    d'etat. Oublier cette branche laissait `transport/drivers` entierement
+    #    hors de verification.
+    pour_query = {}
     for m in DATA_QUERY.finditer(texte):
         autour = texte[max(0, m.start() - 300):m.end() + 300]
         c = resoudre(autour)
         if c:
             apporter_source(m.group(1), c)
+            pour_query.setdefault(m.group(1), set()).add(c)
 
     # 5) la source d'une variable d'etat est celle NOMMEE dans l'argument de son
     #    setter, pas celle qui passe a cote. C'est ce qui distingue `setKpis(k)`
@@ -281,6 +286,19 @@ def lien_donnees(contrat, index, texte, trace=None):
             continue
         vars_[nom] = set(noms)
         affectes[nom] = sorted(chemins)
+    for nom, chemins in pour_query.items():
+        if nom in vars_ or nom in ambigus:
+            continue
+        affectes[nom] = sorted(chemins)
+        if len(chemins) > 1:
+            ambigus.add(nom)
+            continue
+        methode, path = next(iter(chemins))
+        schemas = schemas_de_reponse(contrat, path, methode)
+        if not schemas:
+            ambigus.add(nom)
+            continue
+        vars_[nom] = set(schemas)
     if trace is not None:
         # Diagnostic : par quelle porte chaque variable a ete accostee.
         trace.update({"sources": sources, "affectes": affectes,
