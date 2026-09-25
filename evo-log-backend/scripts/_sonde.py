@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Sonde temporaire : pourquoi transport/epod n'est-il pas verifie ?"""
+"""Sonde temporaire : diagnostic de chainedonne sur deux fichiers connus."""
 import importlib.util
 import pathlib
-import sys
 
 B = pathlib.Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("afc", B / "scripts" / "audit_fidelite_champs.py")
@@ -11,14 +10,20 @@ spec.loader.exec_module(afc)
 
 contrat = afc.charger_contrat()
 index = afc.index_client(afc.FRONT)
-print("index client (transportAPI.getMissions) :", index.get("transportAPI.getMissions"))
-cible = afc.FRONT / "app" / "(app)" / "transport" / "epod" / "page.tsx"
-texte = cible.read_text(encoding="utf-8")
-vars_ = afc.lien_donnees(contrat, index, texte)
-print("lien_donnees ->", {k: sorted(v) for k, v in vars_.items()})
-print("schemas_de_reponse('/api/transport/missions','get') ->",
-      afc.schemas_de_reponse(contrat, "/api/transport/missions", "get"))
-mots = [p for p in contrat["reponses"] if p.endswith("transport/missions")]
-print("paths du contrat finissant par transport/missions :", mots)
-for p in mots:
-    print("   ", p, "->", contrat["reponses"][p])
+
+for nom in ("transport/epod", "transport/flotte"):
+    cible = afc.FRONT / "app" / "(app)" / nom / "page.tsx"
+    texte = cible.read_text(encoding="utf-8")
+    print("=" * 70)
+    print(nom)
+    print("  AFFECTATION trouvees :",
+          [(m.group(1), m.group(2)[:60]) for m in afc.AFFECTATION.finditer(texte)][:6])
+    vars_, ambigus = afc.lien_donnees(contrat, index, texte)
+    print("  vars_   :", {k: sorted(v) for k, v in vars_.items()})
+    print("  ambigus :", sorted(ambigus))
+    # detail des sources, c'est la que le ble est visible
+    import re as _re
+    sources = {}
+    for m in afc.AFFECTATION.finditer(texte):
+        pass
+    print("  ETAT    :", afc.ETAT.findall(texte)[:8])

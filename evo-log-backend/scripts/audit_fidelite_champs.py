@@ -258,8 +258,13 @@ def lien_donnees(contrat, index, texte):
         chemins = set()
         for m in re.finditer(r"\b%s\s*\(" % re.escape(seteur), texte):
             arg = bloc_apparie(texte, m.end() - 1)
+            # Seules les RACINES de l'argument comptent : au-dela du premier
+            # `=>`, on est dans un callback qui cite la moitie du fichier, et
+            # tout juger ambigu a partir de la n'aurait plus rien mesure
+            # (23 fichiers verifies sur 314 au lieu de 73).
+            amorce = arg.split("=>")[0]
             for local, si in sources.items():
-                if re.search(r"\b%s\b" % re.escape(local), arg):
+                if re.search(r"\b%s\b" % re.escape(local), amorce):
                     chemins |= si
         if len(chemins) > 1:
             ambigus.add(nom)
