@@ -169,7 +169,7 @@ export default function EPodPage() {
               </div>
               <div>
                 <p className="text-xs font-bold text-emerald-600 uppercase mb-0.5">Origine</p>
-                <p className="font-bold text-slate-200 text-lg leading-tight">{mission.origine}</p>
+                <p className="font-bold text-slate-200 text-lg leading-tight">{mission.point_depart}</p>
               </div>
             </div>
 
@@ -179,27 +179,31 @@ export default function EPodPage() {
               </div>
               <div>
                 <p className="text-xs font-bold text-red-600 uppercase mb-0.5">Destination</p>
-                <p className="font-bold text-slate-200 text-lg leading-tight">{mission.destination}</p>
+                <p className="font-bold text-slate-200 text-lg leading-tight">{mission.point_arrivee}</p>
                 <p className="text-sm text-slate-500 mt-1">{mission.distance_km} km</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Cargo Details */}
+        {/* Mission Details */}
         <div className="bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-700">
           <h3 className="font-bold text-slate-200 mb-4 flex items-center gap-2">
             <Package className="w-5 h-5 text-indigo-500" />
-            Marchandise
+            Fret
           </h3>
+          {/* `nature_fret` et `poids_kg` n'existent dans aucun schema transport :
+              l'ecran appelait `.replace()` sur `undefined`, ce qui levait une
+              TypeError et vidait la page. On affiche ce que la mission porte
+              reellement : son type et le numero de BL a faire signer. */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-slate-800 p-3 rounded-2xl">
-              <p className="text-xs text-slate-500 font-semibold mb-1">Type de Fret</p>
-              <p className="font-bold text-slate-200 text-sm">{mission.nature_fret.replace('_', ' ')}</p>
+              <p className="text-xs text-slate-500 font-semibold mb-1">Type de mission</p>
+              <p className="font-bold text-slate-200 text-sm">{(mission.type_mission || '').replace('_', ' ') || 'Non renseigné'}</p>
             </div>
             <div className="bg-slate-800 p-3 rounded-2xl">
-              <p className="text-xs text-slate-500 font-semibold mb-1">Poids</p>
-              <p className="font-bold text-slate-200 text-sm">{mission.poids_kg ? `${mission.poids_kg} Kg` : 'N/A'}</p>
+              <p className="text-xs text-slate-500 font-semibold mb-1">Numéro BL</p>
+              <p className="font-bold text-slate-200 text-sm">{mission.numero_bl || 'Non renseigné'}</p>
             </div>
           </div>
         </div>
