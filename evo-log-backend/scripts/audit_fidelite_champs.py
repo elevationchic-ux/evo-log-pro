@@ -4,8 +4,8 @@ reellement repondu par le backend (outil de audit, complementaire de
 `audit_api_gaps.py`).
 
 `audit_api_gaps.py` repond a « cette URL existe-t-elle, et travaille-t-elle ? ».
-Celui-ci repond a « une fois la reponse recue, les proprietes que l'ecran
-lit sont-elles bien dans le schema emis ? ». Les deux families de defauts sont
+Celui-ci repond a « une fois la reponse recue, les proprietes que l'ecran lit
+sont-elles bien dans le schema emis ? ». Les deux families de defauts sont
 differentes et la seconde est silencieuse : l'appel passe en HTTP 200, le
 tableau se remplit, et seule la colonne est vide — ou pire, fausse.
 
@@ -13,14 +13,15 @@ Deux bugs reels de ce repertoire, trouve a la main puis mecanises ici :
   * `transport/drivers` testait `chauffeur.actif` ; l'API envoie `is_active`.
     Resultat : 100 % des conducteurs affiches « Inactif », quel que soit l'etat.
   * `transport/map` comparait `c.statut` a 'EN_MAINTENANCE' ; `CamionResponse`
-    expose `status` et les valeurs reelles sont minuscules. Resultat : le
-    compteur « Hors Ligne » avalait toute la flotte.
+    expose `status`, aux valeurs minuscules. Le compteur « Hors Ligne »
+    avalait toute la flotte.
 
-Regle de non-surprise : un champ n est signale que si le cheminement de la
-donnee est RETABLI dans le fichier (appel API -> variable -> acces). Une
-simple ressemblance de nom ne suffit pas, sinon l'outil hurlerait sur chaque
-`item.key` de React. Les files non resolus sont comptes et affiches a part :
-un silence de l'outil doit rester distinguishable d'un « tout va bien ».
+Regle de non-surprise : un champ n'est signale que si le cheminement de la
+donnee est RETABLI dans le fichier (appel API -> variable d'etat -> acces).
+Une simple ressemblance de nom ne suffirait pas : l'outil hurlerait sur chaque
+`item.key` de React. Inversement, un fichier dont le lien n'a pas pu etre
+retabli est compte a part : le silence de l'outil doit rester distinguishable
+d'un « tout va bien ».
 
 Usage: python scripts/audit_fidelite_champs.py [--json sortie]
 """
@@ -35,44 +36,58 @@ BACKEND = RACINE
 FRONT = RACINE.parent / "evo-log-frontend" / "src"
 CONTRAT = BACKEND / "_openapi_contrat.json"
 
-# `apiClient.get('/api/x')`, `transportAPI.getMissions()`, backticks inclus.
-APPEL_API = re.compile(
-    r"\b(?:apiClient|[\w.]*API)\.(get|post|put|patch|delete)\(\s*[`'\"]([^`'\"]+)[`'\"]"
+# `apiClient.get('/api/x')` — objet client + verbe + literal de chemin.
+APPEL_DIRECT = re.compile(
+    r"\b(apiClient|[\w$]*API)\.(get|post|put|patch|delete)\(\s*[`'\"](/[^`'\"]*)[`'\"]"
 )
-# Methodes centralisees de api-client.ts : `getMissions: (p) => apiClient.get('/api/..')`
+# Appel d'une methode centralisee : `transportAPI.getMissions()`.
+APPEL_METODE = re.compile(r"\b([\w$]*API)\.(\w+)\s*\(")
+# Dans api-client.ts : `getMissions: (p) => apiClient.get('/api/transport/missions'`
 METHODE_CLIENT = re.compile(
-    r"^\s*(\w+)\s*:\s*(?:\([^)]*\)|[\w$]+)\s*=>\s*[\w.]*\.(get|post|put|patch|delete)\(\s*[`'\"]([^`'\"]+)[`'\"]",
+    r"^\s*(\w+)\s*:\s*(?:\([^)]*\)|[\w$]+)\s*=>\s*[\w.]*\.(get|post|put|patch|delete)\(\s*[`'\"](/[^`'\"]*)[`'\"]",
     re.M,
 )
-NOM_OBJET = re.compile(r"^\s*export const (\w+API)\s*=", re.M)
-# `const [camions, setCamions] = useState...` puis `setCamions(res.data)`
-STATE = re.compile(r"const \[(\w+), set(\w+)\] = useState")
-# `x.map((v) =>`, `x.filter(v =>`, `x.find(v =>` ... : objet itere -> alias
-ITERATION = re.compile(r"\b([A-Za-z_$][\w$]*)\s*\.\s*(?:map|filter|find|some|every|forEach)\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)")
-# Acces en properties sur un alias connu : `c.statut`, `chauffeur?.actif`
-ACCES = r"(?:%s)\s*(?:\?\.|\.)\s*([A-Za-z_$][\w$]*)"
+# `const [camions, setCamions] = useState(...)`
+ETAT = re.compile(r"const \[(\w+), (set\w+)\] = useState")
+# `camions.map((c) =>`, `data.filter(x =>` : collection iteree -> alias
+ITERATION = re.compile(
+    r"\b([A-Za-z_$][\w$]*)\s*\.\s*(?:map|filter|find|some|every|forEach)\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*[,)]"
+)
+# `rows.map((c) => ({ brand: c.marque, ... }))` : la page FABRIQUE un view-model.
+# Sans cette regle, l'outil signale `v.brand` comme champ invente alors que la
+# cle est definie deux cents lignes plus haut — c'etait le premier faux positif
+# produit par cet outil, sur `transport/flotte`.
+CONSTRUCTION = re.compile(
+    r"\.\s*(?:map)\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*\)?\s*=>\s*\(?\s*\{"
+)
+# Litteral compare a quelque chose qui porte le nom du champ :
+# `c.status === 'ACTIVE'`, `item.statut == "EN_COURS"`.
+COMPARAISON = re.compile(
+    r"([\w$.]*\b%s\b[\w$.\[\]']*)\s*[=!]==?\s*([`'\"])([^`'\"]+)\2"
+)
 
-# Menages : ce qui n'est PAS une donnee metier, meme lu sur un objet metier.
+# Ce qui n'est pas une donnee metier, meme lu sur un objet metier.
 BUILTIN = frozenset("""
-length map filter find findIndex some every forEach reduce flat flatArray sort push pop
-join split replace replaceAll toLowerCase toUpperCase trim padStart padEnd includes indexOf
-lastIndexOf slice concat indexOf keys values entries hasOwnProperty toString toFixed
-toLocaleString toLocaleDateString toLocaleTimeString then catch finally
-label value id name type items total count data error message statusText ok url params
+length map filter find findIndex some every forEach reduce flat sort push pop shift join
+split replace replaceAll match toLowerCase toUpperCase trim padStart padEnd includes
+indexOf lastIndexOf slice concat keys values entries hasOwnProperty toString toFixed
+toLocaleString toLocaleDateString toLocaleTimeString then catch finally charAt charCodeAt
+label value id name items total count data error message statusText ok url params props
 """.split())
-# Champs de l'enveloppe de pagination / reponse generee : jamais dans un modele.
+# Enveloppe de reponse paginee : ces cles sont reelles mais hors modele.
 ENVELOPPE = frozenset("""
-items total page size pages count detail pending message data results limit offset
+items total page pages size count detail pending message data results limit offset
+next previous tcode libelle_code
 """.split())
 # React / DOM / conventions de rendu.
 RENDU = frozenset("""
-className style onClick onChange onKeyDown href src alt key ref children checked disabled
-placeholder title width height target rel props state setState router
+className style onClick onChange onKeyDown onSubmit href src alt key ref children checked
+disabled placeholder title width height target rel type role tabIndex autoFocus required
 """.split())
 
 
-def normaliser(chemin: str) -> str:
-    """`/api/x` -> `/api/v1/x`, comme le middleware du backend. Retire la query."""
+def normaliser(chemin):
+    """`/api/x` -> `/api/v1/x`, comme le middleware du backend. Query retirlee."""
     chemin = chemin.split("?", 1)[0]
     if chemin.startswith("/api/") and not chemin.startswith("/api/v1/"):
         chemin = "/api/v1/" + chemin[len("/api/"):]
@@ -85,8 +100,8 @@ def charger_contrat():
     return json.loads(CONTRAT.read_text(encoding="utf-8"))
 
 
-def chemin_de_reponse(contrat, path, methode):
-    """Noms de schemas emis par `methode path`, ou None si l'URL n'est pas connue."""
+def schemas_de_reponse(contrat, path, methode):
+    """Liste de noms de schemas emis, ou None si l'URL est inconnue du contrat."""
     ops = contrat["reponses"].get(normaliser(path))
     if ops is None:
         return None
@@ -94,101 +109,104 @@ def chemin_de_reponse(contrat, path, methode):
 
 
 def champs_de(contrat, noms):
-    """Union des proprietes des schemas demandes, en suivant une imbrication."""
     rendu = set()
-    schemas = contrat["schemas"]
     for nom in noms:
-        s = schemas.get(nom)
-        if not s:
-            continue
-        rendu.update(s["champs"])
-        # une list-wrapper (`XResponse` contenant `items: [Y]`) doit etre ouverte
-        for imb in s.get("sous", []):
-            rendu.update(champs_de(contrat, [imb]))
+        s = contrat["schemas"].get(nom)
+        if s:
+            rendu.update(s["champs"])
     return rendu
 
 
 def index_client(front_src):
-    """`{transportAPI.getMissions: ('get', '/api/transport/missions')}`."""
+    """`{'transportAPI.getMissions': ('get', '/api/transport/missions')}`."""
     cible = front_src / "lib" / "api-client.ts"
     if not cible.exists():
         return {}
     texte = cible.read_text(encoding="utf-8", errors="replace")
     index = {}
-    courant = None
-    # le fichier est decoupe en blocs `export const xxxAPI = { ... }`
-    morceaux = re.split(r"export const (\w+API)\s*=", texte)
-    # re.split avec un groupe : [prefixe, NOM, bloc, NOM, bloc, ...]
-    for i in range(1, len(morceaux), 2):
+    # `export const xxxAPI = { ... }` : re.split avec groupe -> [pref, NOM, bloc, ...]
+    morceaux = re.split(r"export const (\w+API)\s*=\s*\{", texte)
+    for i in range(1, len(morceaux) - 1, 2):
         nom, bloc = morceaux[i], morceaux[i + 1]
         for m in METHODE_CLIENT.finditer(bloc):
-            index["%s.%s" % (nom, m.group(1))] = (m.group(2), m.group(3))
-    if courant:
-        pass
+            index.setdefault("%s.%s" % (nom, m.group(1)), (m.group(2), m.group(3)))
     return index
 
 
-def analyser_fichier(contrat, index, fichier, texte):
-    """Renvoie (soupcons, fichiers_non_resolus)."""
-    # 1. liens API -> variable d'etat
-    variables = {}   # nom d'etat -> set de (methode, path)
-    etats = {nom: set() for nom, _ in re.findall(r"const \[(\w+), set(\w+)\]", texte)}
-    setters = {"set%s" % cap: nom for nom, cap in re.findall(r"const \[(\w+), set(\w+)\]", texte)}
-    if not etats:
-        return [], 0
-    resolved = 0
-    for m in APPEL_API.finditer(texte):
-        methode, path = m.group(1), m.group(2)
-        if path.startswith("http"):
+def lien_donnees(contrat, index, texte):
+    """variable d'etat -> set de noms de schemas qui la nourrissent.
+
+    Deux motifs couverts, les deux reels dans ce code :
+      `const res = await apiClient.get('/api/x'); setFoo(res.data)`
+      `const {data: foo = []} = useQuery({queryFn: () => transportAPI.getX()})`
+    La proximite (fenetre de caracteres) tient lieu d'analyse de flot : grossier,
+    mais une erreur d'affectation ne cree qu'un faux negatif, jamais un faux
+    positif — le sens qui compte pour un outil de tri.
+    """
+    vars_ = {}
+    setters = {}
+    for nom, seteur in ETAT.findall(texte):
+        setters[seteur] = nom
+    fournisseurs = []
+    for m in APPEL_DIRECT.finditer(texte):
+        obj, methode, path = m.group(1), m.group(2), m.group(3)
+        if obj != "apiClient" and not obj.endswith("API"):
             continue
-        noms = chemin_de_reponse(contrat, path, methode)
-        if noms is None:
-            continue
-        resolved += 1
-        # qui recoit cette reponse ? `setFoo(res.data)` dans les 400 caracteres
-        fenetre = texte[m.end():m.end() + 700]
-        for seteur in setters:
-            if re.search(r"\b%s\s*\(" % seteur, fenetre):
-                variables.setdefault(setters[seteur], set()).update(noms)
-    for m in METHODE_APPELE.finditer(texte):
+        fournisseurs.append((methode, path, m.end(), m.end() + 900))
+    for m in APPEL_METODE.finditer(texte):
         cle = "%s.%s" % (m.group(1), m.group(2))
         if cle not in index:
             continue
         methode, path = index[cle]
-        noms = chemin_de_reponse(contrat, path, methode)
+        fournisseurs.append((methode, path, max(0, m.start() - 900), m.start() + 900))
+    for methode, path, debut, fin in fournisseurs:
+        noms = schemas_de_reponse(contrat, path, methode)
         if not noms:
             continue
-        fenetre = texte[max(0, m.start() - 700):m.start() + 700]
-        for seteur in setters:
-            if re.search(r"\b%s\s*\(" % seteur, fenetre):
-                variables.setdefault(setters[seteur], set()).update(noms)
+        fenetre = texte[debut:fin]
+        for seteur, etat in setters.items():
+            if re.search(r"\b%s\s*\(" % re.escape(seteur), fenetre):
+                vars_.setdefault(etat, set()).update(noms)
+        # `data: foo` destructures depuis useQuery, et `const foo = res.data`
+        for m in re.finditer(r"data\s*:\s*([A-Za-z_$][\w$]*)", fenetre):
+            vars_.setdefault(m.group(1), set()).update(noms)
+    return vars_
 
-    # 2. alias d'iteration sur ces variables
-    alias = {}   # nom d'alias -> set de noms de schemas
-    for itere, nom in ITERATION.findall(texte):
-        if itere in variables and variables[itere]:
-            alias.setdefault(nom, set()).update(variables[itere])
-        elif itere in alias:
-            alias.setdefault(nom, set()).update(alias[itere])
 
-    # 3. acces en propriete sur les alias
+def analyser(contrat, index, texte):
+    """-> (liste de soupcons, lien_retably: bool)."""
+    vars_ = lien_donnees(contrat, index, texte)
+    if not vars_:
+        return [], False
+    alias = {}
+    for _ in range(2):  # une passe de propagation suffit pour `x = foo.filter(...)`
+        for iteree, nom in ITERATION.findall(texte):
+            if iteree in vars_ and vars_[iteree]:
+                alias.setdefault(nom, set()).update(vars_[iteree])
+            elif iteree in alias:
+                alias.setdefault(nom, set()).update(alias[iteree])
     soupcons = []
-    for nom, schemas in alias.items():
+    for nom, schemas in sorted(alias.items()):
         disponibles = champs_de(contrat, schemas)
         if not disponibles:
             continue
-        for champ in re.findall(ACCES % re.escape(nom), texte):
+        vus = set()
+        for champ in re.findall(
+                r"(?:%s)\s*(?:\?\.|\.)\s*([A-Za-z_$][\w$]*)" % re.escape(nom), texte):
+            if champ in vus:
+                continue
             if champ in BUILTIN or champ in ENVELOPPE or champ in RENDU:
                 continue
             if champ in disponibles:
                 continue
-            soupcons.append({"variable": nom, "champ": champ,
-                             "attendus": sorted(disponibles)[:14],
-                             "schemas": sorted(schemas)})
-    return soupcons, (0 if resolved else 1)
-
-
-METHODE_APPELE = re.compile(r"\b([\w$]*API)\.(\w+)\s*\(")
+            vus.add(champ)
+            soupcons.append({
+                "variable": nom,
+                "champ": champ,
+                "schemas": sorted(schemas),
+                "attendus": sorted(disponibles),
+            })
+    return soupcons, True
 
 
 def main():
@@ -198,41 +216,45 @@ def main():
 
     contrat = charger_contrat()
     index = index_client(FRONT)
-    chemin_soupe = {}
-    total_vars = 0
-    non_resolus = []
+    rendu = []
+    muets = 0
+    parles = 0
     for fichier in sorted(FRONT.rglob("*.tsx")) + sorted(FRONT.rglob("*.ts")):
-        if "node_modules" in fichier.parts:
-            continue
         try:
             texte = fichier.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
-        if "useState" not in texte:
+        if "useState" not in texte and "useQuery" not in texte:
             continue
-        soupcons, mutisme = analyser_fichier(contrat, index, fichier, texte)
-        if mutisme:
-            non_resolus.append(str(fichier))
-        for s in soupcons:
-            cle = (str(fichier.relative_to(FRONT.parent)), s["variable"], s["champ"])
-            chemin_soupe.setdefault(cle, s)
-    rendus = sorted(chemin_soupe.values(), key=lambda d: (d.get("fichier") or "", d["champ"]))
-    for (fichier, variable, champ), detail in zip(chemin_soupe, rendus):
-        detail["fichier"] = fichier
-        detail["variable"] = variable
+        soupcons, retably = analyser(contrat, index, texte)
+        if retably:
+            parles += 1
+            for s in soupcons:
+                s = dict(s)
+                s["fichier"] = str(fichier.relative_to(FRONT.parent))
+                rendu.append(s)
+        else:
+            # Pas de lien retabli : ce fichier n'a pas ete verifie, ce qui ne
+            # vaut pas dire qu'il est propre.
+            muets += 1
+
+    avec_chemin = {}
+    for d in rendu:
+        avec_chemin[(d["fichier"], d["variable"], d["champ"])] = d
+    rendus = sorted(avec_chemin.values(), key=lambda d: (d["fichier"], d["champ"]))
     with open(args.json, "w", encoding="utf-8") as fh:
         json.dump(rendus, fh, indent=1)
 
     par_champ = {}
     for d in rendus:
         par_champ.setdefault(d["champ"], []).append(d["fichier"])
-    print("fichiers analyses sans lien retabli (silence = non verifie) : %d"
-          % len(non_resolus))
+    print("fichiers ou le lien donnee->variable est retabli : %d" % parles)
+    print("fichiers a donnees API non retablis (NON verifies) : %d" % muets)
     print("champs lus hors contrat : %d occurrence(s), %d nom(s) distinct(s)"
           % (len(rendus), len(par_champ)))
-    for champ in sorted(par_champ, key=lambda c: -len(par_champ[c])):
+    for champ in sorted(par_champ, key=lambda c: (-len(par_champ[c]), c)):
         ou = par_champ[champ]
-        print("   %-26s x%-3d %s" % (champ, len(ou), ou[0] if len(ou) == 1 else ""))
+        print("   %-28s x%-3d %s" % (champ, len(ou), ou[0] if len(ou) == 1 else ""))
     print("detail : %s" % args.json)
 
 

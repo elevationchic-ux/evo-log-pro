@@ -123,6 +123,22 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
     return () => window.removeEventListener('keydown', handleHelpKey)
   }, [])
 
+  // Escape ferme toute superposition ouverte (menu modules, agences, profil, tiroir)
+  useEffect(() => {
+    if (!isModuleMenuOpen && !isAgencyMenuOpen && !isProfileMenuOpen && !isDrawerOpen) return
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsModuleMenuOpen(false)
+        setOpenNavKey(null)
+        setIsAgencyMenuOpen(false)
+        setIsProfileMenuOpen(false)
+        setIsDrawerOpen(false)
+      }
+    }
+    window.addEventListener('keydown', onEsc)
+    return () => window.removeEventListener('keydown', onEsc)
+  }, [isModuleMenuOpen, isAgencyMenuOpen, isProfileMenuOpen, isDrawerOpen])
+
   useEffect(() => {
     if (!sessionExpiresAt) return
     const checkSession = () => {

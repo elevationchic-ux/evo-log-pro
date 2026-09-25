@@ -197,7 +197,7 @@ export default function SaisieTransactionBancairePage() {
                       </td>
                       <td className="p-3 text-center">
                         {tx.statut === 'valide' ? (
-                          <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto" title="Rapproché / lettré" />
+                          <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto" aria-hidden />
                         ) : (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleReconcile(tx) }}

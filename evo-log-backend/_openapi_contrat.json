@@ -11327,7 +11327,9 @@
  },
  "reponses": {
   "/api/v1/auth/register": {
-   "post": []
+   "post": [
+    "UserResponse"
+   ]
   },
   "/api/v1/auth/login": {
    "post": []
@@ -11463,7 +11465,10 @@
    "get": [
     "MeetingRoomOut"
    ],
-   "post": []
+   "post": [
+    "MeetingRoomMemberOut",
+    "MeetingRoomOut"
+   ]
   },
   "/api/v1/chat/rooms/{room_identifier}/messages": {
    "get": [
@@ -11498,13 +11503,17 @@
    "get": [
     "PrestataireOut"
    ],
-   "post": []
+   "post": [
+    "PrestataireOut"
+   ]
   },
   "/api/v1/prestataires/cotations": {
    "get": [
     "CotationOut"
    ],
-   "post": []
+   "post": [
+    "CotationOut"
+   ]
   },
   "/api/v1/prestataires/depannage-urgent/recherche-proche": {
    "post": []
@@ -11534,19 +11543,25 @@
    "get": [
     "PlanningGardeOut"
    ],
-   "post": []
+   "post": [
+    "PlanningGardeOut"
+   ]
   },
   "/api/v1/chef-personnel/pointages": {
    "get": [
     "PointageOut"
    ],
-   "post": []
+   "post": [
+    "PointageOut"
+   ]
   },
   "/api/v1/chef-personnel/dotations": {
    "get": [
     "DotationOut"
    ],
-   "post": []
+   "post": [
+    "DotationOut"
+   ]
   },
   "/api/v1/chef-personnel/pointage-biometrique": {
    "post": []
@@ -11556,87 +11571,120 @@
   },
   "/api/v1/tiers/": {
    "get": [
-    "TiersResponse"
+    "TiersResponse",
+    "TiersType"
    ],
-   "post": []
+   "post": [
+    "TiersResponse",
+    "TiersType"
+   ]
   },
   "/api/v1/tiers/{tiers_id}": {
    "get": [
-    "TiersResponse"
+    "TiersResponse",
+    "TiersType"
    ],
    "put": [
-    "TiersResponse"
+    "TiersResponse",
+    "TiersType"
    ],
    "delete": []
   },
   "/api/v1/tiers/clients": {
-   "post": []
+   "post": [
+    "TiersType",
+    "app__schemas__tiers__ClientResponse"
+   ]
   },
   "/api/v1/tiers/clients/": {
    "get": [
+    "TiersType",
     "app__schemas__tiers__ClientResponse"
    ]
   },
   "/api/v1/tiers/fournisseurs": {
-   "post": []
+   "post": [
+    "FournisseurResponse",
+    "TiersType"
+   ]
   },
   "/api/v1/tiers/fournisseurs/": {
    "get": [
-    "FournisseurResponse"
+    "FournisseurResponse",
+    "TiersType"
    ]
   },
   "/api/v1/transport/camions": {
    "get": [
-    "CamionResponse"
+    "CamionResponse",
+    "CamionStatus"
    ],
-   "post": []
+   "post": [
+    "CamionResponse",
+    "CamionStatus"
+   ]
   },
   "/api/v1/transport/camions/{camion_id}": {
    "get": [
-    "CamionResponse"
+    "CamionResponse",
+    "CamionStatus"
    ],
    "put": [
-    "CamionResponse"
+    "CamionResponse",
+    "CamionStatus"
    ]
   },
   "/api/v1/transport/conducteurs": {
    "get": [
     "ConducteurResponse"
    ],
-   "post": []
+   "post": [
+    "ConducteurResponse"
+   ]
   },
   "/api/v1/transport/chauffeurs": {
    "get": [
     "ConducteurResponse"
    ],
-   "post": []
+   "post": [
+    "ConducteurResponse"
+   ]
   },
   "/api/v1/transport/missions": {
    "get": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ],
-   "post": []
+   "post": [
+    "MissionStatus",
+    "app__schemas__transport__MissionResponse"
+   ]
   },
   "/api/v1/transport/missions/{mission_id}": {
    "get": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ],
    "put": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ]
   },
   "/api/v1/transport/missions/{mission_id}/statut": {
    "patch": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ]
   },
   "/api/v1/transport/": {
    "get": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ]
   },
   "/api/v1/transport": {
    "get": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ]
   },
@@ -11654,15 +11702,21 @@
   },
   "/api/v1/transport/pannes": {
    "get": [
+    "PanneLine",
     "PanneListResponse"
    ],
-   "post": []
+   "post": [
+    "PanneLine"
+   ]
   },
   "/api/v1/transport/camions/{camion_id}/pannes": {
    "get": [
+    "PanneLine",
     "PanneListResponse"
    ],
-   "post": []
+   "post": [
+    "PanneLine"
+   ]
   },
   "/api/v1/transport/camions/{camion_id}/pannes/{panne_id}": {
    "put": [
@@ -11680,6 +11734,7 @@
   },
   "/api/v1/transport/camions/{camion_id}/historique-couplage": {
    "get": [
+    "AtelageLine",
     "AtelageListResponse"
    ]
   },
@@ -11700,12 +11755,16 @@
   },
   "/api/v1/transport/missions/{mission_id}/deliver": {
    "post": [
-    "app__schemas__transport_exploitation__LivraisonResponse"
+    "FactureAuto",
+    "app__schemas__transport_exploitation__LivraisonResponse",
+    "app__schemas__transport_exploitation__MissionResponse"
    ]
   },
   "/api/v1/transport/missions/{mission_id}/livrer": {
    "post": [
-    "app__schemas__transport_exploitation__LivraisonResponse"
+    "FactureAuto",
+    "app__schemas__transport_exploitation__LivraisonResponse",
+    "app__schemas__transport_exploitation__MissionResponse"
    ]
   },
   "/api/v1/transport/chauffeurs/{chauffeur_id}": {
@@ -11726,6 +11785,7 @@
   },
   "/api/v1/transport/chauffeurs/{chauffeur_id}/dossier": {
    "get": [
+    "ChauffeurDocumentLine",
     "ChauffeurDocumentsResponse"
    ],
    "put": [
@@ -11734,6 +11794,7 @@
   },
   "/api/v1/transport/conducteurs/{conducteur_id}/dossier": {
    "get": [
+    "ChauffeurDocumentLine",
     "ChauffeurDocumentsResponse"
    ],
    "put": [
@@ -11742,29 +11803,40 @@
   },
   "/api/v1/transport/gps": {
    "get": [
+    "GPSLine",
     "GPSListResponse"
    ],
    "post": []
   },
   "/api/v1/transport/fuel": {
    "get": [
-    "FuelListResponse"
+    "FuelConsommationVehicule",
+    "FuelListResponse",
+    "FuelTicketLine"
    ],
-   "post": []
+   "post": [
+    "FuelTicketLine"
+   ]
   },
   "/api/v1/transport/carburant/tickets": {
-   "post": [],
+   "post": [
+    "FuelTicketLine"
+   ],
    "get": [
+    "FuelTicketLine",
     "FuelTicketListResponse"
    ]
   },
   "/api/v1/transport/analytics/vehicles-history": {
    "get": [
+    "VehicleHistoryEvent",
     "VehicleHistoryResponse"
    ]
   },
   "/api/v1/finance/plan-comptable": {
-   "post": []
+   "post": [
+    "PlanComptableOHADAResponse"
+   ]
   },
   "/api/v1/finance/plan-comptable/{compte_id}": {
    "put": [
@@ -11772,7 +11844,9 @@
    ]
   },
   "/api/v1/finance/ecritures": {
-   "post": []
+   "post": [
+    "EcritureComptableResponse"
+   ]
   },
   "/api/v1/finance/ecritures/{ecriture_id}/valider": {
    "put": [
@@ -11785,7 +11859,9 @@
    ]
   },
   "/api/v1/finance/exercices": {
-   "post": []
+   "post": [
+    "ExerciceComptableResponse"
+   ]
   },
   "/api/v1/finance/exercices/{exercice_id}/cloturer": {
    "put": [
@@ -11799,10 +11875,14 @@
   },
   "/api/v1/finance/factures": {
    "get": [],
-   "post": []
+   "post": [
+    "FactureResponse"
+   ]
   },
   "/api/v1/finance/factures/{facture_id}/lignes": {
-   "post": []
+   "post": [
+    "LigneFactureResponse"
+   ]
   },
   "/api/v1/finance/factures/{facture_id}": {
    "put": [
@@ -11813,7 +11893,9 @@
    "get": []
   },
   "/api/v1/finance/reglements": {
-   "post": []
+   "post": [
+    "ReglementResponse"
+   ]
   },
   "/api/v1/finance/reglements/{reglement_id}": {
    "put": [
@@ -11821,7 +11903,9 @@
    ]
   },
   "/api/v1/finance/tva-declarations": {
-   "post": []
+   "post": [
+    "TVADeclarableResponse"
+   ]
   },
   "/api/v1/finance/tva-declarations/{declaration_id}": {
    "put": [
@@ -11829,7 +11913,9 @@
    ]
   },
   "/api/v1/finance/retenues-source": {
-   "post": []
+   "post": [
+    "RetenueSourceResponse"
+   ]
   },
   "/api/v1/finance/retenues-source/{retenue_id}": {
    "put": [
@@ -11837,7 +11923,9 @@
    ]
   },
   "/api/v1/finance/is-declarations": {
-   "post": []
+   "post": [
+    "ISDeclarableResponse"
+   ]
   },
   "/api/v1/finance/is-declarations/{declaration_id}": {
    "put": [
@@ -11845,7 +11933,9 @@
    ]
   },
   "/api/v1/finance/centimes-additionnels": {
-   "post": []
+   "post": [
+    "CentimesAdditionnelsResponse"
+   ]
   },
   "/api/v1/finance/centimes-additionnels/{centimes_id}": {
    "put": [
@@ -11853,7 +11943,9 @@
    ]
   },
   "/api/v1/finance/patentes": {
-   "post": []
+   "post": [
+    "PatenteResponse"
+   ]
   },
   "/api/v1/finance/patentes/{patente_id}": {
    "put": [
@@ -11861,7 +11953,9 @@
    ]
   },
   "/api/v1/finance/bilans": {
-   "post": []
+   "post": [
+    "BilanResponse"
+   ]
   },
   "/api/v1/finance/bilans/{bilan_id}": {
    "put": [
@@ -11869,7 +11963,9 @@
    ]
   },
   "/api/v1/finance/comptes-resultat": {
-   "post": []
+   "post": [
+    "CompteResultatResponse"
+   ]
   },
   "/api/v1/finance/comptes-resultat/{compte_id}": {
    "put": [
@@ -11877,7 +11973,9 @@
    ]
   },
   "/api/v1/finance/signatures-electroniques": {
-   "post": []
+   "post": [
+    "SignatureElectroniqueResponse"
+   ]
   },
   "/api/v1/finance/signatures-electroniques/{signature_id}": {
    "put": [
@@ -11900,19 +11998,27 @@
   },
   "/api/v1/parc/vehicules": {
    "get": [
-    "VehiculeResponse"
+    "VehiculeResponse",
+    "VehiculeStatus"
    ],
-   "post": []
+   "post": [
+    "VehiculeResponse",
+    "VehiculeStatus"
+   ]
   },
   "/api/v1/parc/equipements": {
    "get": [
     "EquipementResponse"
    ],
-   "post": []
+   "post": [
+    "EquipementResponse"
+   ]
   },
   "/api/v1/parc/zones": {
    "get": [],
-   "post": []
+   "post": [
+    "ZoneParcResponse"
+   ]
   },
   "/api/v1/parc/zones/{zone_id}": {
    "get": [
@@ -11925,7 +12031,9 @@
   },
   "/api/v1/parc/emplacements": {
    "get": [],
-   "post": []
+   "post": [
+    "EmplacementParcResponse"
+   ]
   },
   "/api/v1/parc/emplacements/{empl_id}": {
    "get": [
@@ -11937,10 +12045,14 @@
    "delete": []
   },
   "/api/v1/parc/gate-in": {
-   "post": []
+   "post": [
+    "MouvementParcResponse"
+   ]
   },
   "/api/v1/parc/gate-out": {
-   "post": []
+   "post": [
+    "MouvementParcResponse"
+   ]
   },
   "/api/v1/parc/mouvements": {
    "get": []
@@ -11949,10 +12061,14 @@
    "get": [
     "DocumentResponse"
    ],
-   "post": []
+   "post": [
+    "DocumentResponse"
+   ]
   },
   "/api/v1/documents/upload": {
-   "post": []
+   "post": [
+    "DocumentResponse"
+   ]
   },
   "/api/v1/documents/{document_id}/valider": {
    "put": [
@@ -11965,7 +12081,9 @@
    ]
   },
   "/api/v1/documents/dossiers": {
-   "post": []
+   "post": [
+    "DossierResponse"
+   ]
   },
   "/api/v1/documents/dossiers/{dossier_id}": {
    "put": [
@@ -11973,10 +12091,14 @@
    ]
   },
   "/api/v1/documents/versions": {
-   "post": []
+   "post": [
+    "VersionDocumentResponse"
+   ]
   },
   "/api/v1/documents/signatures": {
-   "post": []
+   "post": [
+    "SignatureDocumentResponse"
+   ]
   },
   "/api/v1/documents/signatures/{signature_id}": {
    "put": [
@@ -11984,7 +12106,9 @@
    ]
   },
   "/api/v1/documents/workflows": {
-   "post": []
+   "post": [
+    "WorkflowDocumentResponse"
+   ]
   },
   "/api/v1/documents/workflows/{workflow_id}/avancer": {
    "put": [
@@ -11997,7 +12121,9 @@
    ]
   },
   "/api/v1/documents/sceaux": {
-   "post": []
+   "post": [
+    "SceauNumeriqueResponse"
+   ]
   },
   "/api/v1/documents/sceaux/{sceau_id}": {
    "put": [
@@ -12005,10 +12131,14 @@
    ]
   },
   "/api/v1/documents/analyses-ocr": {
-   "post": []
+   "post": [
+    "AnalyseOCRResponse"
+   ]
   },
   "/api/v1/documents/archivages-legal": {
-   "post": []
+   "post": [
+    "ArchivageLegalResponse"
+   ]
   },
   "/api/v1/documents/archivages-legal/{archivage_id}": {
    "put": [
@@ -12016,7 +12146,9 @@
    ]
   },
   "/api/v1/documents/templates": {
-   "post": []
+   "post": [
+    "TemplateDocumentResponse"
+   ]
   },
   "/api/v1/documents/templates/{template_id}": {
    "put": [
@@ -12024,7 +12156,9 @@
    ]
   },
   "/api/v1/documents/partages": {
-   "post": []
+   "post": [
+    "PartageDocumentResponse"
+   ]
   },
   "/api/v1/documents/partages/{partage_id}": {
    "put": [
@@ -12032,7 +12166,9 @@
    ]
   },
   "/api/v1/documents/historique": {
-   "post": []
+   "post": [
+    "HistoriqueDocumentResponse"
+   ]
   },
   "/api/v1/documents/dossiers/{dossier_id}/rapport": {
    "get": [
@@ -12064,10 +12200,15 @@
    "get": [
     "StockResponse"
    ],
-   "post": []
+   "post": [
+    "StockResponse"
+   ]
   },
   "/api/v1/magasin/mouvements": {
-   "post": []
+   "post": [
+    "MouvementStockResponse",
+    "MouvementType"
+   ]
   },
   "/api/v1/magasin/": {
    "get": [
@@ -12083,7 +12224,9 @@
    "get": [
     "EntrepotResponse"
    ],
-   "post": []
+   "post": [
+    "EntrepotResponse"
+   ]
   },
   "/api/v1/magasin/cross-docking": {
    "post": []
@@ -12096,7 +12239,9 @@
   },
   "/api/v1/magasin/articles": {
    "get": [],
-   "post": []
+   "post": [
+    "ArticleResponse"
+   ]
   },
   "/api/v1/magasin/articles/by-code/{code}": {
    "get": [
@@ -12114,7 +12259,9 @@
   },
   "/api/v1/magasin/clients": {
    "get": [],
-   "post": []
+   "post": [
+    "app__schemas__magasin_store__ClientResponse"
+   ]
   },
   "/api/v1/magasin/clients/{client_id}": {
    "get": [
@@ -12127,70 +12274,95 @@
   },
   "/api/v1/magasin/commandes": {
    "get": [],
-   "post": []
+   "post": [
+    "CommandeResponse",
+    "CommandeStatut",
+    "LigneCommandeResponse"
+   ]
   },
   "/api/v1/magasin/commandes/{commande_id}": {
    "get": [
-    "CommandeResponse"
+    "CommandeResponse",
+    "CommandeStatut",
+    "LigneCommandeResponse"
    ]
   },
   "/api/v1/magasin/commandes/{commande_id}/valider": {
    "post": [
-    "CommandeResponse"
+    "CommandeResponse",
+    "CommandeStatut",
+    "LigneCommandeResponse"
    ]
   },
   "/api/v1/magasin/commandes/{commande_id}/preparer": {
    "post": [
-    "CommandeResponse"
+    "CommandeResponse",
+    "CommandeStatut",
+    "LigneCommandeResponse"
    ]
   },
   "/api/v1/magasin/commandes/{commande_id}/valider-paiement": {
    "post": [
-    "CommandeResponse"
+    "CommandeResponse",
+    "CommandeStatut",
+    "LigneCommandeResponse"
    ]
   },
   "/api/v1/magasin/commandes/{commande_id}/annuler": {
    "post": [
-    "CommandeResponse"
+    "CommandeResponse",
+    "CommandeStatut",
+    "LigneCommandeResponse"
    ]
   },
   "/api/v1/magasin/ordres-transfert": {
    "get": [],
-   "post": []
+   "post": [
+    "OrdreTransfertResponse",
+    "TransfertStatut"
+   ]
   },
   "/api/v1/magasin/ordres-transfert/{ot_id}": {
    "get": [
-    "OrdreTransfertResponse"
+    "OrdreTransfertResponse",
+    "TransfertStatut"
    ]
   },
   "/api/v1/magasin/ordres-transfert/{ot_id}/valider": {
    "post": [
-    "OrdreTransfertResponse"
+    "OrdreTransfertResponse",
+    "TransfertStatut"
    ]
   },
   "/api/v1/magasin/ordres-transfert/{ot_id}/valider-paiement": {
    "post": [
-    "OrdreTransfertResponse"
+    "OrdreTransfertResponse",
+    "TransfertStatut"
    ]
   },
   "/api/v1/magasin/ordres-transfert/{ot_id}/expedier": {
    "post": [
-    "OrdreTransfertResponse"
+    "OrdreTransfertResponse",
+    "TransfertStatut"
    ]
   },
   "/api/v1/magasin/ordres-transfert/{ot_id}/receptionner": {
    "post": [
-    "OrdreTransfertResponse"
+    "OrdreTransfertResponse",
+    "TransfertStatut"
    ]
   },
   "/api/v1/magasin/ordres-transfert/{ot_id}/annuler": {
    "post": [
-    "OrdreTransfertResponse"
+    "OrdreTransfertResponse",
+    "TransfertStatut"
    ]
   },
   "/api/v1/magasin/bandes-livraison": {
    "get": [],
-   "post": []
+   "post": [
+    "BandeLivraisonResponse"
+   ]
   },
   "/api/v1/magasin/bandes-livraison/ordre-transfert/{ot_id}": {
    "get": [
@@ -12198,7 +12370,9 @@
    ]
   },
   "/api/v1/magasin/bandes-livraison/from-ordre-transfert/{ot_id}": {
-   "post": []
+   "post": [
+    "BandeLivraisonResponse"
+   ]
   },
   "/api/v1/magasin/bandes-livraison/{bande_id}": {
    "get": [
@@ -12210,7 +12384,9 @@
   },
   "/api/v1/magasin/magasins": {
    "get": [],
-   "post": []
+   "post": [
+    "MagasinResponse"
+   ]
   },
   "/api/v1/magasin/magasins/{entrepot_id}": {
    "get": [
@@ -12223,26 +12399,31 @@
   },
   "/api/v1/magasin/magasins/{entrepot_id}/stocks": {
    "get": [
+    "StockLine",
     "StockSearchResponse"
    ]
   },
   "/api/v1/magasin/stocks/search": {
    "get": [
+    "StockLine",
     "StockSearchResponse"
    ]
   },
   "/api/v1/magasin/stock-statuses": {
    "get": [
+    "StockStatusBucket",
     "StockStatusesResponse"
    ]
   },
   "/api/v1/magasin/history": {
    "get": [
+    "MovementLine",
     "MovementListResponse"
    ]
   },
   "/api/v1/magasin/transactions": {
    "get": [
+    "MovementLine",
     "MovementListResponse"
    ]
   },
@@ -12251,7 +12432,8 @@
   },
   "/api/v1/magasin/import/{resource}": {
    "post": [
-    "ImportResult"
+    "ImportResult",
+    "ImportRowError"
    ]
   },
   "/api/v1/magasin/import/{resource}/template": {
@@ -12271,9 +12453,11 @@
   },
   "/api/v1/magasin/analytics/anomaly-detection": {
    "get": [
+    "AnomalyItem",
     "AnomalyResponse"
    ],
    "post": [
+    "AnomalyItem",
     "AnomalyResponse"
    ]
   },
@@ -12460,7 +12644,9 @@
    "get": [
     "NotificationResponse"
    ],
-   "post": []
+   "post": [
+    "NotificationResponse"
+   ]
   },
   "/api/v1/notifications/stats": {
    "get": []
@@ -12488,7 +12674,9 @@
    "get": [
     "TemplateNotificationResponse"
    ],
-   "post": []
+   "post": [
+    "TemplateNotificationResponse"
+   ]
   },
   "/api/v1/notifications/templates/{template_id}": {
    "put": [
@@ -12496,7 +12684,9 @@
    ]
   },
   "/api/v1/notifications/preferences": {
-   "post": []
+   "post": [
+    "PreferenceNotificationResponse"
+   ]
   },
   "/api/v1/notifications/preferences/{preference_id}": {
    "put": [
@@ -12507,7 +12697,9 @@
    "get": [
     "CampagneNotificationResponse"
    ],
-   "post": []
+   "post": [
+    "CampagneNotificationResponse"
+   ]
   },
   "/api/v1/notifications/campagnes/{campagne_id}/lancer": {
    "put": [
@@ -12520,19 +12712,29 @@
    ]
   },
   "/api/v1/notifications/historique-envoi": {
-   "post": []
+   "post": [
+    "HistoriqueEnvoiResponse"
+   ]
   },
   "/api/v1/notifications/emails": {
-   "post": []
+   "post": [
+    "EmailNotificationResponse"
+   ]
   },
   "/api/v1/notifications/sms": {
-   "post": []
+   "post": [
+    "SMSNotificationResponse"
+   ]
   },
   "/api/v1/notifications/whatsapp": {
-   "post": []
+   "post": [
+    "WhatsAppNotificationResponse"
+   ]
   },
   "/api/v1/notifications/push": {
-   "post": []
+   "post": [
+    "PushNotificationResponse"
+   ]
   },
   "/api/v1/notifications/utilisateurs/{utilisateur_id}/rapport": {
    "get": [
@@ -12568,35 +12770,45 @@
   },
   "/api/v1/purchase/requisitions": {
    "get": [],
-   "post": []
+   "post": [
+    "RequisitionResponse",
+    "RequisitionStatut"
+   ]
   },
   "/api/v1/purchase/requisitions/{req_id}": {
    "get": [
-    "RequisitionResponse"
+    "RequisitionResponse",
+    "RequisitionStatut"
    ],
    "put": [
-    "RequisitionResponse"
+    "RequisitionResponse",
+    "RequisitionStatut"
    ],
    "delete": []
   },
   "/api/v1/purchase/requisitions/{req_id}/submit": {
    "post": [
-    "RequisitionResponse"
+    "RequisitionResponse",
+    "RequisitionStatut"
    ]
   },
   "/api/v1/purchase/requisitions/{req_id}/approve": {
    "post": [
-    "RequisitionResponse"
+    "RequisitionResponse",
+    "RequisitionStatut"
    ]
   },
   "/api/v1/purchase/requisitions/{req_id}/reject": {
    "post": [
-    "RequisitionResponse"
+    "RequisitionResponse",
+    "RequisitionStatut"
    ]
   },
   "/api/v1/fleet/vehicles": {
    "get": [],
-   "post": []
+   "post": [
+    "FleetVehicleResponse"
+   ]
   },
   "/api/v1/fleet/vehicles/{vehicle_id}": {
    "get": [
@@ -12609,19 +12821,27 @@
   },
   "/api/v1/fleet/fuel-records": {
    "get": [],
-   "post": []
+   "post": [
+    "FuelRecordResponse"
+   ]
   },
   "/api/v1/fleet/documents": {
    "get": [],
-   "post": []
+   "post": [
+    "FleetDocumentResponse"
+   ]
   },
   "/api/v1/customers": {
    "get": [],
-   "post": []
+   "post": [
+    "CustomerResponse"
+   ]
   },
   "/api/v1/customers/contracts": {
    "get": [],
-   "post": []
+   "post": [
+    "ContractResponse"
+   ]
   },
   "/api/v1/customers/{customer_id}": {
    "get": [
@@ -12634,11 +12854,15 @@
   },
   "/api/v1/support/tickets": {
    "get": [],
-   "post": []
+   "post": [
+    "TicketResponse"
+   ]
   },
   "/api/v1/support/incidents": {
    "get": [],
-   "post": []
+   "post": [
+    "IncidentResponse"
+   ]
   },
   "/api/v1/support/incidents/{incident_id}": {
    "put": [
@@ -12696,7 +12920,9 @@
    "get": []
   },
   "/api/v1/rh/conges": {
-   "post": []
+   "post": [
+    "CongeResponse"
+   ]
   },
   "/api/v1/rh/conges/solde/{employe_id}/{annee}": {
    "get": [
@@ -12714,13 +12940,17 @@
    ]
   },
   "/api/v1/rh/absences": {
-   "post": []
+   "post": [
+    "AbsenceResponse"
+   ]
   },
   "/api/v1/rh/absences/taux/{employe_id}/{mois}/{annee}": {
    "get": []
   },
   "/api/v1/rh/pointage/arrivee": {
-   "post": []
+   "post": [
+    "TempsTravailResponse"
+   ]
   },
   "/api/v1/rh/pointage/depart": {
    "post": [
@@ -12733,10 +12963,14 @@
    ]
   },
   "/api/v1/rh/formations": {
-   "post": []
+   "post": [
+    "FormationResponse"
+   ]
   },
   "/api/v1/rh/formations/{formation_id}/inscrire/{employe_id}": {
-   "post": []
+   "post": [
+    "ParticipationFormationResponse"
+   ]
   },
   "/api/v1/rh/formations/participations/{participation_id}": {
    "put": []
@@ -12745,13 +12979,17 @@
    "get": []
   },
   "/api/v1/rh/evaluations": {
-   "post": []
+   "post": [
+    "EvaluationPerformanceResponse"
+   ]
   },
   "/api/v1/rh/evaluations/{employe_id}": {
    "get": []
   },
   "/api/v1/rh/contrats": {
-   "post": []
+   "post": [
+    "ContratTravailResponse"
+   ]
   },
   "/api/v1/rh/contrats/expirants": {
    "get": []
@@ -12767,22 +13005,30 @@
    ]
   },
   "/api/v1/rh/documents": {
-   "post": []
+   "post": [
+    "DocumentEmployeResponse"
+   ]
   },
   "/api/v1/rh/documents/expirants": {
    "get": []
   },
   "/api/v1/rh/organigramme": {
-   "post": []
+   "post": [
+    "OrganigrammeResponse"
+   ]
   },
   "/api/v1/rh/organigramme/subordonnes/{manager_id}": {
    "get": []
   },
   "/api/v1/rh/competences": {
-   "post": []
+   "post": [
+    "CompetenceResponse"
+   ]
   },
   "/api/v1/rh/competences/attribuer": {
-   "post": []
+   "post": [
+    "CompetenceEmployeResponse"
+   ]
   },
   "/api/v1/rh/competences/{employe_id}": {
    "get": []
@@ -12803,28 +13049,38 @@
    "get": [
     "NavireResponse"
    ],
-   "post": []
+   "post": [
+    "NavireResponse"
+   ]
   },
   "/api/v1/acconage/escales": {
    "get": [
     "EscaleResponse"
    ],
-   "post": []
+   "post": [
+    "EscaleResponse"
+   ]
   },
   "/api/v1/acconage/": {
    "get": [
     "OperationAcconageResponse"
    ],
-   "post": []
+   "post": [
+    "OperationAcconageResponse"
+   ]
   },
   "/api/v1/acconage": {
    "get": [
     "OperationAcconageResponse"
    ],
-   "post": []
+   "post": [
+    "OperationAcconageResponse"
+   ]
   },
   "/api/v1/acconage/operations": {
-   "post": []
+   "post": [
+    "OperationAcconageResponse"
+   ]
   },
   "/api/v1/acconage/dossier-marchandise": {
    "get": []
@@ -12852,12 +13108,18 @@
   },
   "/api/v1/transit/dossiers": {
    "get": [
-    "DossierTransitResponse"
+    "DossierTransitResponse",
+    "DossierTransitStatus"
    ],
-   "post": []
+   "post": [
+    "DossierTransitResponse",
+    "DossierTransitStatus"
+   ]
   },
   "/api/v1/transit/declarations": {
-   "post": []
+   "post": [
+    "DeclarationDouaniereResponse"
+   ]
   },
   "/api/v1/maintenance/": {
    "get": []
@@ -12887,7 +13149,9 @@
    "get": []
   },
   "/api/v1/qhse/analyses-risques": {
-   "post": []
+   "post": [
+    "AnalyseRisqueResponse"
+   ]
   },
   "/api/v1/qhse/analyses-risques/{analyse_id}": {
    "put": [
@@ -12895,7 +13159,9 @@
    ]
   },
   "/api/v1/qhse/actions-prevention": {
-   "post": []
+   "post": [
+    "ActionPreventionResponse"
+   ]
   },
   "/api/v1/qhse/actions-prevention/{action_id}": {
    "put": [
@@ -12903,7 +13169,9 @@
    ]
   },
   "/api/v1/qhse/plans-prevention": {
-   "post": []
+   "post": [
+    "PlanPreventionResponse"
+   ]
   },
   "/api/v1/qhse/plans-prevention/{plan_id}": {
    "put": [
@@ -12911,7 +13179,9 @@
    ]
   },
   "/api/v1/qhse/epi-requis": {
-   "post": []
+   "post": [
+    "EPIRequisResponse"
+   ]
   },
   "/api/v1/qhse/epi-requis/{epi_id}": {
    "put": [
@@ -12920,7 +13190,9 @@
   },
   "/api/v1/qhse/accidents": {
    "get": [],
-   "post": []
+   "post": [
+    "AccidentTravailResponse"
+   ]
   },
   "/api/v1/qhse/accidents/{accident_id}": {
    "put": [
@@ -12929,7 +13201,9 @@
   },
   "/api/v1/qhse/investigations": {
    "get": [],
-   "post": []
+   "post": [
+    "InvestigationAccidentResponse"
+   ]
   },
   "/api/v1/qhse/investigations/{investigation_id}": {
    "put": [
@@ -12937,7 +13211,9 @@
    ]
   },
   "/api/v1/qhse/certifications": {
-   "post": [],
+   "post": [
+    "NormeCertificationResponse"
+   ],
    "get": []
   },
   "/api/v1/qhse/certifications/{certification_id}": {
@@ -12946,7 +13222,9 @@
    ]
   },
   "/api/v1/qhse/audits": {
-   "post": [],
+   "post": [
+    "AuditQualiteResponse"
+   ],
    "get": []
   },
   "/api/v1/qhse/audits/{audit_id}": {
@@ -12955,7 +13233,9 @@
    ]
   },
   "/api/v1/qhse/plans-haccp": {
-   "post": []
+   "post": [
+    "HACCPPlanResponse"
+   ]
   },
   "/api/v1/qhse/plans-haccp/{plan_id}": {
    "put": [
@@ -12963,7 +13243,9 @@
    ]
   },
   "/api/v1/qhse/points-critiques": {
-   "post": []
+   "post": [
+    "PointCritiqueCCPResponse"
+   ]
   },
   "/api/v1/qhse/points-critiques/{ccp_id}": {
    "put": [
@@ -12971,7 +13253,9 @@
    ]
   },
   "/api/v1/qhse/enregistrements-haccp": {
-   "post": []
+   "post": [
+    "EnregistrementHACCPResponse"
+   ]
   },
   "/api/v1/qhse/enregistrements-haccp/{enregistrement_id}": {
    "put": [
@@ -12979,7 +13263,9 @@
    ]
   },
   "/api/v1/qhse/formations": {
-   "post": [],
+   "post": [
+    "FormationQHSEResponse"
+   ],
    "get": []
   },
   "/api/v1/qhse/formations/{formation_id}": {
@@ -12988,7 +13274,9 @@
    ]
   },
   "/api/v1/qhse/indicateurs": {
-   "post": []
+   "post": [
+    "IndicateurQHSEResponse"
+   ]
   },
   "/api/v1/qhse/indicateurs/{indicateur_id}/valeur": {
    "put": [
@@ -13028,7 +13316,9 @@
    "get": []
   },
   "/api/v1/magasin-avance/peremptions": {
-   "post": []
+   "post": [
+    "PeremptionResponse"
+   ]
   },
   "/api/v1/magasin-avance/peremptions/fefo/{article_id}/{quantite}": {
    "get": []
@@ -13040,7 +13330,9 @@
    "get": []
   },
   "/api/v1/magasin-avance/reservations": {
-   "post": []
+   "post": [
+    "ReservationStockResponse"
+   ]
   },
   "/api/v1/magasin-avance/reservations/{reservation_id}/liberer": {
    "put": [
@@ -13056,22 +13348,30 @@
    "post": []
   },
   "/api/v1/magasin-avance/kits": {
-   "post": []
+   "post": [
+    "KitArticleResponse"
+   ]
   },
   "/api/v1/magasin-avance/kits/{kit_id}/composants": {
-   "post": []
+   "post": [
+    "ComposantKitResponse"
+   ]
   },
   "/api/v1/magasin-avance/kits/{kit_id}/assembler": {
    "post": []
   },
   "/api/v1/magasin-avance/emplacements": {
-   "post": []
+   "post": [
+    "EmplacementDetailResponse"
+   ]
   },
   "/api/v1/magasin-avance/emplacements/{emplacement_id}/stock": {
    "get": []
   },
   "/api/v1/magasin-avance/transferts": {
-   "post": []
+   "post": [
+    "TransfertStockResponse"
+   ]
   },
   "/api/v1/magasin-avance/transferts/{transfert_id}/executer": {
    "put": [
@@ -13079,10 +13379,14 @@
    ]
   },
   "/api/v1/magasin-avance/inventaires": {
-   "post": []
+   "post": [
+    "InventaireTournantResponse"
+   ]
   },
   "/api/v1/magasin-avance/inventaires/{inventaire_id}/lignes": {
-   "post": []
+   "post": [
+    "LigneInventaireResponse"
+   ]
   },
   "/api/v1/magasin-avance/inventaires/{inventaire_id}/valider": {
    "put": [
@@ -13095,7 +13399,9 @@
    ]
   },
   "/api/v1/magasin-avance/fournisseurs-stock": {
-   "post": []
+   "post": [
+    "FournisseurStockResponse"
+   ]
   },
   "/api/v1/magasin-avance/fournisseurs/{fournisseur_id}/performance": {
    "get": []
@@ -13104,10 +13410,14 @@
    "post": []
   },
   "/api/v1/magasin-avance/receptions": {
-   "post": []
+   "post": [
+    "BonReceptionResponse"
+   ]
   },
   "/api/v1/magasin-avance/receptions/{bon_id}/lignes": {
-   "post": []
+   "post": [
+    "LigneBonReceptionResponse"
+   ]
   },
   "/api/v1/magasin-avance/receptions/{bon_id}/valider": {
    "put": [
@@ -13115,10 +13425,14 @@
    ]
   },
   "/api/v1/magasin-avance/sorties": {
-   "post": []
+   "post": [
+    "BonSortieResponse"
+   ]
   },
   "/api/v1/magasin-avance/sorties/{bon_id}/lignes": {
-   "post": []
+   "post": [
+    "LigneBonSortieResponse"
+   ]
   },
   "/api/v1/magasin-avance/sorties/{bon_id}/valider": {
    "put": [
@@ -13126,7 +13440,9 @@
    ]
   },
   "/api/v1/magasin-avance/retours": {
-   "post": []
+   "post": [
+    "RetourClientResponse"
+   ]
   },
   "/api/v1/magasin-avance/retours/{retour_id}/traiter": {
    "put": [
@@ -13134,7 +13450,9 @@
    ]
   },
   "/api/v1/magasin-avance/litiges": {
-   "post": []
+   "post": [
+    "LitigeTransporteurResponse"
+   ]
   },
   "/api/v1/magasin-avance/litiges/{litige_id}/resoudre": {
    "put": [
@@ -13142,7 +13460,9 @@
    ]
   },
   "/api/v1/magasin-avance/colis": {
-   "post": []
+   "post": [
+    "ColisResponse"
+   ]
   },
   "/api/v1/magasin-avance/colis/{colis_id}/etiqueter": {
    "put": [
@@ -13163,10 +13483,14 @@
    "get": []
   },
   "/api/v1/transport-avance/tournees": {
-   "post": []
+   "post": [
+    "TourneeResponse"
+   ]
   },
   "/api/v1/transport-avance/tournees/{tournee_id}/livraisons": {
-   "post": []
+   "post": [
+    "app__schemas__transport_avance__LivraisonResponse"
+   ]
   },
   "/api/v1/transport-avance/tournees/{tournee_id}/optimiser": {
    "put": [
@@ -13184,7 +13508,9 @@
    ]
   },
   "/api/v1/transport-avance/frais-km": {
-   "post": []
+   "post": [
+    "FraisKilometriqueResponse"
+   ]
   },
   "/api/v1/transport-avance/frais-km/cout/{vehicule_id}/{mois}/{annee}": {
    "get": [
@@ -13200,7 +13526,9 @@
    ]
   },
   "/api/v1/transport-avance/temps-conduite": {
-   "post": []
+   "post": [
+    "TempsConduiteResponse"
+   ]
   },
   "/api/v1/transport-avance/temps-conduite/conformite/{conducteur_id}/{date_verif}": {
    "get": [
@@ -13208,13 +13536,19 @@
    ]
   },
   "/api/v1/transport-avance/sous-traitants": {
-   "post": []
+   "post": [
+    "SousTraitantResponse"
+   ]
   },
   "/api/v1/transport-avance/sous-traitants/contrats": {
-   "post": []
+   "post": [
+    "ContratSousTraitantResponse"
+   ]
   },
   "/api/v1/transport-avance/sous-traitants/missions": {
-   "post": []
+   "post": [
+    "MissionSousTraitantResponse"
+   ]
   },
   "/api/v1/transport-avance/sous-traitants/{sous_traitant_id}/performance": {
    "get": [
@@ -13222,7 +13556,9 @@
    ]
   },
   "/api/v1/transport-avance/accidents": {
-   "post": []
+   "post": [
+    "AccidentTransportResponse"
+   ]
   },
   "/api/v1/transport-avance/accidents/{accident_id}/enquete": {
    "put": [
@@ -13235,7 +13571,9 @@
    ]
   },
   "/api/v1/transport-avance/maintenance-preventive": {
-   "post": []
+   "post": [
+    "MaintenancePreventiveResponse"
+   ]
   },
   "/api/v1/transport-avance/maintenance-preventive/{maintenance_id}/executer": {
    "put": [
@@ -13246,7 +13584,9 @@
    "get": []
   },
   "/api/v1/transport-avance/gps/positions": {
-   "post": []
+   "post": [
+    "PositionGPSResponse"
+   ]
   },
   "/api/v1/transport-avance/gps/derniere-position/{vehicule_id}": {
    "get": [
@@ -13257,13 +13597,17 @@
    "get": []
   },
   "/api/v1/transport-avance/geofencing/zones": {
-   "post": []
+   "post": [
+    "ZoneGeofencingResponse"
+   ]
   },
   "/api/v1/transport-avance/geofencing/verifier/{vehicule_id}": {
    "get": []
   },
   "/api/v1/transport-avance/geofencing/evenements": {
-   "post": []
+   "post": [
+    "EvenementVehiculeResponse"
+   ]
   },
   "/api/v1/transport-avance/conducteurs/{conducteur_id}/comportement": {
    "get": [
@@ -13283,7 +13627,9 @@
    "get": [
     "NavireResponse"
    ],
-   "post": []
+   "post": [
+    "NavireResponse"
+   ]
   },
   "/api/v1/acconage-avance/navires/{navire_id}": {
    "get": [
@@ -13292,7 +13638,9 @@
   },
   "/api/v1/acconage-avance/escales": {
    "get": [],
-   "post": []
+   "post": [
+    "EscaleResponse"
+   ]
   },
   "/api/v1/acconage-avance/escales/{escale_id}": {
    "put": [
@@ -13305,10 +13653,14 @@
    ]
   },
   "/api/v1/acconage-avance/stowage-plans": {
-   "post": []
+   "post": [
+    "StowagePlanResponse"
+   ]
   },
   "/api/v1/acconage-avance/stowage-plans/{plan_id}/positions": {
-   "post": []
+   "post": [
+    "PositionConteneurResponse"
+   ]
   },
   "/api/v1/acconage-avance/stowage-plans/{plan_id}/valider": {
    "put": [
@@ -13316,7 +13668,9 @@
    ]
   },
   "/api/v1/acconage-avance/grues": {
-   "post": []
+   "post": [
+    "GrueResponse"
+   ]
   },
   "/api/v1/acconage-avance/grues/{grue_id}": {
    "put": [
@@ -13324,13 +13678,17 @@
    ]
   },
   "/api/v1/acconage-avance/grues/reservations": {
-   "post": []
+   "post": [
+    "ReservationGrueResponse"
+   ]
   },
   "/api/v1/acconage-avance/grues/disponibles": {
    "get": []
   },
   "/api/v1/acconage-avance/remorqueurs": {
-   "post": []
+   "post": [
+    "RemorqueurResponse"
+   ]
   },
   "/api/v1/acconage-avance/remorqueurs/{remorqueur_id}": {
    "put": [
@@ -13338,10 +13696,14 @@
    ]
   },
   "/api/v1/acconage-avance/amarages": {
-   "post": []
+   "post": [
+    "AmarageResponse"
+   ]
   },
   "/api/v1/acconage-avance/conteneurs": {
-   "post": []
+   "post": [
+    "ConteneurResponse"
+   ]
   },
   "/api/v1/acconage-avance/conteneurs/{conteneur_id}/inspection-phytosanitaire": {
    "put": [
@@ -13349,7 +13711,9 @@
    ]
   },
   "/api/v1/acconage-avance/connaissements": {
-   "post": []
+   "post": [
+    "ConnaissementResponse"
+   ]
   },
   "/api/v1/acconage-avance/connaissements/{bl_id}": {
    "put": [
@@ -13357,14 +13721,20 @@
    ]
   },
   "/api/v1/acconage-avance/packing-lists": {
-   "post": []
+   "post": [
+    "PackingListResponse"
+   ]
   },
   "/api/v1/acconage-avance/manifestes": {
    "get": [],
-   "post": []
+   "post": [
+    "ManifesteResponse"
+   ]
   },
   "/api/v1/acconage-avance/manifestes/{manifeste_id}/marchandises-dangereuses": {
-   "post": []
+   "post": [
+    "MarchandiseDangereuseResponse"
+   ]
   },
   "/api/v1/acconage-avance/manifestes/{manifeste_id}": {
    "put": [
@@ -13372,7 +13742,9 @@
    ]
   },
   "/api/v1/acconage-avance/surestaries": {
-   "post": []
+   "post": [
+    "SurestarieResponse"
+   ]
   },
   "/api/v1/acconage-avance/escales/{escale_id}/surestaries": {
    "get": [
@@ -13385,7 +13757,9 @@
    ]
   },
   "/api/v1/acconage-avance/thc": {
-   "post": []
+   "post": [
+    "THCResponse"
+   ]
   },
   "/api/v1/acconage-avance/thc/{thc_id}": {
    "put": [
@@ -13393,7 +13767,9 @@
    ]
   },
   "/api/v1/acconage-avance/nettoyage-cales": {
-   "post": []
+   "post": [
+    "NettoyageCaleResponse"
+   ]
   },
   "/api/v1/acconage-avance/nettoyage-cales/{nettoyage_id}": {
    "put": [
@@ -13415,7 +13791,9 @@
    "get": [
     "BureauDouaneResponse"
    ],
-   "post": []
+   "post": [
+    "BureauDouaneResponse"
+   ]
   },
   "/api/v1/transit-avance/bureaux-douane/{bureau_id}": {
    "put": [
@@ -13423,7 +13801,9 @@
    ]
   },
   "/api/v1/transit-avance/dossiers": {
-   "post": []
+   "post": [
+    "DossierTransitAvanceResponse"
+   ]
   },
   "/api/v1/transit-avance/dossiers/{dossier_id}": {
    "put": [
@@ -13441,7 +13821,9 @@
    ]
   },
   "/api/v1/transit-avance/visites-physiques": {
-   "post": []
+   "post": [
+    "VisitePhysiqueResponse"
+   ]
   },
   "/api/v1/transit-avance/visites-physiques/{visite_id}": {
    "put": [
@@ -13449,10 +13831,14 @@
    ]
   },
   "/api/v1/transit-avance/valorisations": {
-   "post": []
+   "post": [
+    "ValorisationDouaniereResponse"
+   ]
   },
   "/api/v1/transit-avance/nomenclature-cemac": {
-   "post": [],
+   "post": [
+    "NomenclatureCEMACResponse"
+   ],
    "get": [
     "NomenclatureCEMACResponse"
    ]
@@ -13469,7 +13855,9 @@
    "get": []
   },
   "/api/v1/transit-avance/declarations": {
-   "post": []
+   "post": [
+    "DeclarationDouaniereAvanceResponse"
+   ]
   },
   "/api/v1/transit-avance/declarations/{declaration_id}/valider": {
    "put": [
@@ -13487,10 +13875,14 @@
    ]
   },
   "/api/v1/transit-avance/lignes-declaration": {
-   "post": []
+   "post": [
+    "LigneDeclarationResponse"
+   ]
   },
   "/api/v1/transit-avance/bons-ad": {
-   "post": []
+   "post": [
+    "BonADResponse"
+   ]
   },
   "/api/v1/transit-avance/bons-ad/{bad_id}": {
    "put": [
@@ -13498,7 +13890,9 @@
    ]
   },
   "/api/v1/transit-avance/amc": {
-   "post": []
+   "post": [
+    "AvisMiseConsommationResponse"
+   ]
   },
   "/api/v1/transit-avance/amc/{amc_id}": {
    "put": [
@@ -13506,7 +13900,9 @@
    ]
   },
   "/api/v1/transit-avance/credits-enlevement": {
-   "post": []
+   "post": [
+    "CreditEnlevementResponse"
+   ]
   },
   "/api/v1/transit-avance/credits-enlevement/{credit_id}": {
    "put": [
@@ -13514,7 +13910,9 @@
    ]
   },
   "/api/v1/transit-avance/droits-port": {
-   "post": []
+   "post": [
+    "DroitPortResponse"
+   ]
   },
   "/api/v1/transit-avance/droits-port/{droit_id}": {
    "put": [
@@ -13522,7 +13920,9 @@
    ]
   },
   "/api/v1/transit-avance/timbres-usage": {
-   "post": []
+   "post": [
+    "TimbreUsageResponse"
+   ]
   },
   "/api/v1/transit-avance/timbres-usage/{timbre_id}": {
    "put": [
@@ -13530,7 +13930,9 @@
    ]
   },
   "/api/v1/transit-avance/litiges": {
-   "post": []
+   "post": [
+    "LitigeDouanierResponse"
+   ]
   },
   "/api/v1/transit-avance/litiges/{litige_id}/resoudre": {
    "put": [
@@ -13543,7 +13945,9 @@
    ]
   },
   "/api/v1/transit-avance/archivage": {
-   "post": []
+   "post": [
+    "ArchivageDossierResponse"
+   ]
   },
   "/api/v1/transit-avance/archivage/{archivage_id}": {
    "put": [
@@ -13551,7 +13955,9 @@
    ]
   },
   "/api/v1/transit-avance/procedures-urgentes": {
-   "post": []
+   "post": [
+    "ProcedureUrgenteResponse"
+   ]
   },
   "/api/v1/transit-avance/procedures-urgentes/{procedure_id}/autoriser": {
    "put": [
@@ -13567,7 +13973,9 @@
    "get": [
     "EntrepotDouaneResponse"
    ],
-   "post": []
+   "post": [
+    "EntrepotDouaneResponse"
+   ]
   },
   "/api/v1/magasin-douane/entrepots/{entrepot_id}": {
    "put": [
@@ -13581,7 +13989,9 @@
   },
   "/api/v1/magasin-douane/declarations": {
    "get": [],
-   "post": []
+   "post": [
+    "DeclarationEntrepotResponse"
+   ]
   },
   "/api/v1/magasin-douane/declarations/{declaration_id}/accepter": {
    "put": [
@@ -13594,7 +14004,9 @@
    ]
   },
   "/api/v1/magasin-douane/lignes-entrepot": {
-   "post": []
+   "post": [
+    "LigneEntrepotResponse"
+   ]
   },
   "/api/v1/magasin-douane/lignes-entrepot/{ligne_id}": {
    "put": [
@@ -13602,7 +14014,9 @@
    ]
   },
   "/api/v1/magasin-douane/fiches-magasin": {
-   "post": []
+   "post": [
+    "FicheMagasinResponse"
+   ]
   },
   "/api/v1/magasin-douane/fiches-magasin/{fiche_id}": {
    "put": [
@@ -13610,13 +14024,19 @@
    ]
   },
   "/api/v1/magasin-douane/mouvements-fiche": {
-   "post": []
+   "post": [
+    "MouvementFicheResponse"
+   ]
   },
   "/api/v1/magasin-douane/inventaires": {
-   "post": []
+   "post": [
+    "InventaireDouanierResponse"
+   ]
   },
   "/api/v1/magasin-douane/inventaires/{inventaire_id}/lignes": {
-   "post": []
+   "post": [
+    "LigneInventaireDouanierResponse"
+   ]
   },
   "/api/v1/magasin-douane/inventaires/{inventaire_id}/completer": {
    "put": [
@@ -13629,7 +14049,9 @@
    ]
   },
   "/api/v1/magasin-douane/surveillance": {
-   "post": []
+   "post": [
+    "SurveillanceMagazinResponse"
+   ]
   },
   "/api/v1/magasin-douane/surveillance/{surveillance_id}": {
    "put": [
@@ -13637,7 +14059,9 @@
    ]
   },
   "/api/v1/magasin-douane/mises-consommation": {
-   "post": []
+   "post": [
+    "MiseConsommationResponse"
+   ]
   },
   "/api/v1/magasin-douane/mises-consommation/{mise_id}": {
    "put": [
@@ -13645,7 +14069,9 @@
    ]
   },
   "/api/v1/magasin-douane/reexportations": {
-   "post": []
+   "post": [
+    "ReexportationResponse"
+   ]
   },
   "/api/v1/magasin-douane/reexportations/{reexport_id}": {
    "put": [
@@ -13653,7 +14079,9 @@
    ]
   },
   "/api/v1/magasin-douane/destructions": {
-   "post": []
+   "post": [
+    "DestructionResponse"
+   ]
   },
   "/api/v1/magasin-douane/destructions/{destruction_id}/autoriser": {
    "put": [
@@ -13671,7 +14099,9 @@
    ]
   },
   "/api/v1/magasin-douane/entretiens-stock": {
-   "post": []
+   "post": [
+    "EntretienStockResponse"
+   ]
   },
   "/api/v1/magasin-douane/entretiens-stock/{entretien_id}": {
    "put": [
@@ -13679,7 +14109,9 @@
    ]
   },
   "/api/v1/magasin-douane/assurances-stock": {
-   "post": []
+   "post": [
+    "AssuranceStockResponse"
+   ]
   },
   "/api/v1/magasin-douane/assurances-stock/{assurance_id}": {
    "put": [
@@ -13687,7 +14119,9 @@
    ]
   },
   "/api/v1/magasin-douane/comptes-rendus": {
-   "post": []
+   "post": [
+    "CompteRenduManutentionResponse"
+   ]
   },
   "/api/v1/magasin-douane/comptes-rendus/{cr_id}": {
    "put": [
@@ -13695,7 +14129,9 @@
    ]
   },
   "/api/v1/transport-international/ordres-transport": {
-   "post": []
+   "post": [
+    "OrdreTransportResponse"
+   ]
   },
   "/api/v1/transport-international/ordres-transport/{ot_id}/en-transit": {
    "put": [
@@ -13718,7 +14154,9 @@
    ]
   },
   "/api/v1/transport-international/carnets-tir": {
-   "post": []
+   "post": [
+    "CarnetTIRResponse"
+   ]
   },
   "/api/v1/transport-international/carnets-tir/{carnet_id}": {
    "put": [
@@ -13726,7 +14164,9 @@
    ]
   },
   "/api/v1/transport-international/cmr": {
-   "post": []
+   "post": [
+    "CMRResponse"
+   ]
   },
   "/api/v1/transport-international/cmr/{cmr_id}/signer": {
    "put": [
@@ -13739,7 +14179,9 @@
    ]
   },
   "/api/v1/transport-international/scelles-routiers": {
-   "post": []
+   "post": [
+    "ScelleRoutierResponse"
+   ]
   },
   "/api/v1/transport-international/scelles-routiers/{scelle_id}/verifier": {
    "put": [
@@ -13752,13 +14194,19 @@
    ]
   },
   "/api/v1/transport-international/positions": {
-   "post": []
+   "post": [
+    "PositionTransportResponse"
+   ]
   },
   "/api/v1/transport-international/cet-suivi": {
-   "post": []
+   "post": [
+    "CETSuiviResponse"
+   ]
   },
   "/api/v1/transport-international/assurances-fap": {
-   "post": []
+   "post": [
+    "AssuranceFAPResponse"
+   ]
   },
   "/api/v1/transport-international/assurances-fap/{assurance_id}": {
    "put": [
@@ -13766,7 +14214,9 @@
    ]
   },
   "/api/v1/transport-international/planning-livraison": {
-   "post": []
+   "post": [
+    "PlanningLivraisonResponse"
+   ]
   },
   "/api/v1/transport-international/planning-livraison/{planning_id}": {
    "put": [
@@ -13774,7 +14224,9 @@
    ]
   },
   "/api/v1/transport-international/preuves-livraison": {
-   "post": []
+   "post": [
+    "PreuveLivraisonResponse"
+   ]
   },
   "/api/v1/transport-international/preuves-livraison/{pod_id}": {
    "put": [
@@ -13782,7 +14234,9 @@
    ]
   },
   "/api/v1/transport-international/incidents": {
-   "post": []
+   "post": [
+    "IncidentTransportResponse"
+   ]
   },
   "/api/v1/transport-international/incidents/{incident_id}": {
    "put": [
@@ -13790,13 +14244,19 @@
    ]
   },
   "/api/v1/transport-international/controles-routiers": {
-   "post": []
+   "post": [
+    "ControleRoutierResponse"
+   ]
   },
   "/api/v1/transport-international/taxes-routieres": {
-   "post": []
+   "post": [
+    "TaxeRoutiereResponse"
+   ]
   },
   "/api/v1/transport-international/corridors-cemac": {
-   "post": []
+   "post": [
+    "CorridorCEMACResponse"
+   ]
   },
   "/api/v1/transport-international/corridors-cemac/{corridor_id}": {
    "put": [
@@ -13804,7 +14264,9 @@
    ]
   },
   "/api/v1/acquisition/appels-offres": {
-   "post": []
+   "post": [
+    "AppelOffresResponse"
+   ]
   },
   "/api/v1/acquisition/appels-offres/{appel_id}/publier": {
    "put": [
@@ -13817,10 +14279,14 @@
    ]
   },
   "/api/v1/acquisition/cahiers-charges": {
-   "post": []
+   "post": [
+    "CahierChargesResponse"
+   ]
   },
   "/api/v1/acquisition/cahiers-charges/{cdc_id}/lignes": {
-   "post": []
+   "post": [
+    "LigneCDCResponse"
+   ]
   },
   "/api/v1/acquisition/cahiers-charges/{cdc_id}": {
    "put": [
@@ -13828,10 +14294,14 @@
    ]
   },
   "/api/v1/acquisition/offres": {
-   "post": []
+   "post": [
+    "OffreResponse"
+   ]
   },
   "/api/v1/acquisition/offres/{offre_id}/evaluations": {
-   "post": []
+   "post": [
+    "EvaluationOffreResponse"
+   ]
   },
   "/api/v1/acquisition/offres/{offre_id}": {
    "put": [
@@ -13839,10 +14309,14 @@
    ]
   },
   "/api/v1/acquisition/comparatifs": {
-   "post": []
+   "post": [
+    "ComparatifResponse"
+   ]
   },
   "/api/v1/acquisition/comparatifs/{comparatif_id}/lignes": {
-   "post": []
+   "post": [
+    "LigneComparatifResponse"
+   ]
   },
   "/api/v1/acquisition/comparatifs/{comparatif_id}": {
    "put": [
@@ -13850,7 +14324,9 @@
    ]
   },
   "/api/v1/acquisition/contrats-cadre": {
-   "post": []
+   "post": [
+    "ContratCadreResponse"
+   ]
   },
   "/api/v1/acquisition/contrats-cadre/{contrat_id}": {
    "put": [
@@ -13861,7 +14337,9 @@
    "get": [
     "BonCommandeResponse"
    ],
-   "post": []
+   "post": [
+    "BonCommandeResponse"
+   ]
   },
   "/api/v1/acquisition/bons-commande/{bc_id}/valider": {
    "put": [
@@ -13874,7 +14352,9 @@
    ]
   },
   "/api/v1/acquisition/receptions": {
-   "post": []
+   "post": [
+    "ReceptionResponse"
+   ]
   },
   "/api/v1/acquisition/receptions/{reception_id}/valider": {
    "put": [
@@ -13887,10 +14367,14 @@
    ]
   },
   "/api/v1/acquisition/litiges": {
-   "post": []
+   "post": [
+    "LitigeFournisseurResponse"
+   ]
   },
   "/api/v1/acquisition/litiges/{litige_id}/historique": {
-   "post": []
+   "post": [
+    "HistoriqueLitigeResponse"
+   ]
   },
   "/api/v1/acquisition/litiges/{litige_id}": {
    "put": [
@@ -13898,7 +14382,9 @@
    ]
   },
   "/api/v1/acquisition/evaluations-fournisseur": {
-   "post": []
+   "post": [
+    "EvaluationFournisseurResponse"
+   ]
   },
   "/api/v1/acquisition/evaluations-fournisseur/{evaluation_id}": {
    "put": [
@@ -13911,7 +14397,9 @@
    ]
   },
   "/api/v1/maintenance-gmao/ordres": {
-   "post": []
+   "post": [
+    "OrdreMaintenanceResponse"
+   ]
   },
   "/api/v1/maintenance-gmao/ordres/{ordre_id}/completer": {
    "put": [
@@ -13924,7 +14412,9 @@
    ]
   },
   "/api/v1/maintenance-gmao/equipements": {
-   "post": []
+   "post": [
+    "EquipementGMAOResponse"
+   ]
   },
   "/api/v1/maintenance-gmao/equipements/{equipement_id}": {
    "put": [
@@ -13932,7 +14422,9 @@
    ]
   },
   "/api/v1/maintenance-gmao/plans": {
-   "post": []
+   "post": [
+    "PlanMaintenanceResponse"
+   ]
   },
   "/api/v1/maintenance-gmao/plans/{plan_id}": {
    "put": [
@@ -13940,7 +14432,9 @@
    ]
   },
   "/api/v1/maintenance-gmao/pieces-rechange": {
-   "post": []
+   "post": [
+    "PieceRechangeGMAOResponse"
+   ]
   },
   "/api/v1/maintenance-gmao/pieces-rechange/{piece_id}": {
    "put": [
@@ -13948,7 +14442,9 @@
    ]
   },
   "/api/v1/maintenance-gmao/calibrations": {
-   "post": []
+   "post": [
+    "CalibrationResponse"
+   ]
   },
   "/api/v1/maintenance-gmao/calibrations/{calibration_id}": {
    "put": [
@@ -13956,7 +14452,9 @@
    ]
   },
   "/api/v1/maintenance-gmao/performance": {
-   "post": []
+   "post": [
+    "PerformanceEquipementResponse"
+   ]
   },
   "/api/v1/maintenance-gmao/equipements/{equipement_id}/rapport": {
    "get": [
@@ -13967,19 +14465,25 @@
    "get": [
     "IntegrationResponse"
    ],
-   "post": []
+   "post": [
+    "IntegrationResponse"
+   ]
   },
   "/api/v1/integration/requetes": {
    "get": [
     "RequeteIntegrationResponse"
    ],
-   "post": []
+   "post": [
+    "RequeteIntegrationResponse"
+   ]
   },
   "/api/v1/integration/synchronisations": {
    "get": [
     "SynchronisationResponse"
    ],
-   "post": []
+   "post": [
+    "SynchronisationResponse"
+   ]
   },
   "/api/v1/integration/integrations/{integration_id}/activer": {
    "put": [
@@ -14002,7 +14506,9 @@
    ]
   },
   "/api/v1/integration/sydonia": {
-   "post": []
+   "post": [
+    "SYDONIAPlusResponse"
+   ]
   },
   "/api/v1/integration/sydonia/{dossier_id}": {
    "put": [
@@ -14010,7 +14516,9 @@
    ]
   },
   "/api/v1/integration/guichet-unique": {
-   "post": []
+   "post": [
+    "GuichetUniqueResponse"
+   ]
   },
   "/api/v1/integration/guichet-unique/{transaction_id}": {
    "put": [
@@ -14018,7 +14526,9 @@
    ]
   },
   "/api/v1/integration/pcs": {
-   "post": []
+   "post": [
+    "PCSResponse"
+   ]
   },
   "/api/v1/integration/pcs/{operation_id}": {
    "put": [
@@ -14026,7 +14536,9 @@
    ]
   },
   "/api/v1/integration/integrations-banque": {
-   "post": []
+   "post": [
+    "IntegrationBanqueResponse"
+   ]
   },
   "/api/v1/integration/integrations-banque/{integration_id}": {
    "put": [
@@ -14034,7 +14546,9 @@
    ]
   },
   "/api/v1/integration/integrations-assureur": {
-   "post": []
+   "post": [
+    "IntegrationAssureurResponse"
+   ]
   },
   "/api/v1/integration/integrations-assureur/{integration_id}": {
    "put": [
@@ -14042,7 +14556,9 @@
    ]
   },
   "/api/v1/integration/integrations-transitaire": {
-   "post": []
+   "post": [
+    "IntegrationTransitaireResponse"
+   ]
   },
   "/api/v1/integration/integrations-transitaire/{integration_id}": {
    "put": [
@@ -14068,31 +14584,41 @@
    "get": [
     "RapportResponse"
    ],
-   "post": []
+   "post": [
+    "RapportResponse"
+   ]
   },
   "/api/v1/reporting/dashboards": {
    "get": [
     "DashboardExecutifResponse"
    ],
-   "post": []
+   "post": [
+    "DashboardExecutifResponse"
+   ]
   },
   "/api/v1/reporting/kpis": {
    "get": [
     "app__schemas__reporting__KPIResponse"
    ],
-   "post": []
+   "post": [
+    "app__schemas__reporting__KPIResponse"
+   ]
   },
   "/api/v1/reporting/exports": {
    "get": [
     "ExportResponse"
    ],
-   "post": []
+   "post": [
+    "ExportResponse"
+   ]
   },
   "/api/v1/reporting/tableaux-bord": {
    "get": [
     "TableauBordOperationnelResponse"
    ],
-   "post": []
+   "post": [
+    "TableauBordOperationnelResponse"
+   ]
   },
   "/api/v1/reporting/dashboards/{dashboard_id}": {
    "put": [
@@ -14170,7 +14696,9 @@
    "get": [
     "CompanyResponse"
    ],
-   "post": []
+   "post": [
+    "CompanyResponse"
+   ]
   },
   "/api/v1/tenant/companies/{company_id}/activer": {
    "put": [
@@ -14191,10 +14719,14 @@
    "get": [
     "SubscriptionPlanResponse"
    ],
-   "post": []
+   "post": [
+    "SubscriptionPlanResponse"
+   ]
   },
   "/api/v1/tenant/subscriptions": {
-   "post": []
+   "post": [
+    "SubscriptionResponse"
+   ]
   },
   "/api/v1/tenant/subscriptions/{subscription_id}/renouveler": {
    "put": [
@@ -14203,7 +14735,9 @@
   },
   "/api/v1/tenant/departments": {
    "get": [],
-   "post": []
+   "post": [
+    "DepartmentResponse"
+   ]
   },
   "/api/v1/tenant/companies/{company_id}/departments": {
    "get": [
@@ -14267,7 +14801,9 @@
    "get": [
     "RoleResponse"
    ],
-   "post": []
+   "post": [
+    "RoleResponse"
+   ]
   },
   "/api/v1/roles/{role_id}/modules": {
    "put": [
@@ -14311,7 +14847,9 @@
    "get": [
     "JournalAuxiliaireResponse"
    ],
-   "post": []
+   "post": [
+    "JournalAuxiliaireResponse"
+   ]
   },
   "/api/v1/comptabilite-avance/journaux/{journal_id}": {
    "get": [
@@ -14361,17 +14899,20 @@
   },
   "/api/v1/comptabilite-avance/grand-livre/historique/{compte_id}": {
    "get": [
+    "GrandLivreLigneResponse",
     "HistoriqueCompteResponse"
    ]
   },
   "/api/v1/comptabilite-avance/balance/creer": {
    "post": [
-    "BalanceResponse"
+    "BalanceResponse",
+    "LigneBalanceResponse"
    ]
   },
   "/api/v1/comptabilite-avance/balance/{balance_id}": {
    "get": [
-    "BalanceResponse"
+    "BalanceResponse",
+    "LigneBalanceResponse"
    ]
   },
   "/api/v1/comptabilite-avance/balance/journal/{journal_code}": {
@@ -14487,7 +15028,9 @@
    ]
   },
   "/api/v1/transport-avance-complete/arrets": {
-   "post": []
+   "post": [
+    "ArretResponse"
+   ]
   },
   "/api/v1/transport-avance-complete/arrets/{dispatch_id}": {
    "get": [
@@ -14495,7 +15038,9 @@
    ]
   },
   "/api/v1/transport-avance-complete/pod": {
-   "post": [],
+   "post": [
+    "PODResponse"
+   ],
    "get": [
     "PODResponse"
    ]
@@ -14512,7 +15057,9 @@
    "post": []
   },
   "/api/v1/transport-avance-complete/documents-pod": {
-   "post": []
+   "post": [
+    "DocumentPODResponse"
+   ]
   },
   "/api/v1/transport-avance-complete/documents-pod/{pod_id}": {
    "get": [
@@ -14633,11 +15180,13 @@
   },
   "/api/v1/magasin-wms-avance/picking/vague": {
    "post": [
+    "LigneVaguePicking",
     "VaguePickingResponse"
    ]
   },
   "/api/v1/magasin-wms-avance/inventaire/regulariser": {
    "post": [
+    "EcartInventaire",
     "InventaireRegularisationResponse"
    ]
   },
@@ -15013,7 +15562,9 @@
    "get": [
     "OrganizationResponseSchema"
    ],
-   "post": []
+   "post": [
+    "OrganizationResponseSchema"
+   ]
   },
   "/api/v1/superadmin/organizations/{org_id}": {
    "get": [
@@ -15224,7 +15775,9 @@
    "get": []
   },
   "/api/auth/register": {
-   "post": []
+   "post": [
+    "UserResponse"
+   ]
   },
   "/api/auth/login": {
    "post": []
@@ -15267,87 +15820,120 @@
   },
   "/api/tiers/": {
    "get": [
-    "TiersResponse"
+    "TiersResponse",
+    "TiersType"
    ],
-   "post": []
+   "post": [
+    "TiersResponse",
+    "TiersType"
+   ]
   },
   "/api/tiers/{tiers_id}": {
    "get": [
-    "TiersResponse"
+    "TiersResponse",
+    "TiersType"
    ],
    "put": [
-    "TiersResponse"
+    "TiersResponse",
+    "TiersType"
    ],
    "delete": []
   },
   "/api/tiers/clients": {
-   "post": []
+   "post": [
+    "TiersType",
+    "app__schemas__tiers__ClientResponse"
+   ]
   },
   "/api/tiers/clients/": {
    "get": [
+    "TiersType",
     "app__schemas__tiers__ClientResponse"
    ]
   },
   "/api/tiers/fournisseurs": {
-   "post": []
+   "post": [
+    "FournisseurResponse",
+    "TiersType"
+   ]
   },
   "/api/tiers/fournisseurs/": {
    "get": [
-    "FournisseurResponse"
+    "FournisseurResponse",
+    "TiersType"
    ]
   },
   "/api/transport/camions": {
    "get": [
-    "CamionResponse"
+    "CamionResponse",
+    "CamionStatus"
    ],
-   "post": []
+   "post": [
+    "CamionResponse",
+    "CamionStatus"
+   ]
   },
   "/api/transport/camions/{camion_id}": {
    "get": [
-    "CamionResponse"
+    "CamionResponse",
+    "CamionStatus"
    ],
    "put": [
-    "CamionResponse"
+    "CamionResponse",
+    "CamionStatus"
    ]
   },
   "/api/transport/conducteurs": {
    "get": [
     "ConducteurResponse"
    ],
-   "post": []
+   "post": [
+    "ConducteurResponse"
+   ]
   },
   "/api/transport/chauffeurs": {
    "get": [
     "ConducteurResponse"
    ],
-   "post": []
+   "post": [
+    "ConducteurResponse"
+   ]
   },
   "/api/transport/missions": {
    "get": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ],
-   "post": []
+   "post": [
+    "MissionStatus",
+    "app__schemas__transport__MissionResponse"
+   ]
   },
   "/api/transport/missions/{mission_id}": {
    "get": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ],
    "put": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ]
   },
   "/api/transport/missions/{mission_id}/statut": {
    "patch": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ]
   },
   "/api/transport/": {
    "get": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ]
   },
   "/api/transport": {
    "get": [
+    "MissionStatus",
     "app__schemas__transport__MissionResponse"
    ]
   },
@@ -15364,7 +15950,9 @@
    "get": []
   },
   "/api/finance/plan-comptable": {
-   "post": []
+   "post": [
+    "PlanComptableOHADAResponse"
+   ]
   },
   "/api/finance/plan-comptable/{compte_id}": {
    "put": [
@@ -15372,7 +15960,9 @@
    ]
   },
   "/api/finance/ecritures": {
-   "post": []
+   "post": [
+    "EcritureComptableResponse"
+   ]
   },
   "/api/finance/ecritures/{ecriture_id}/valider": {
    "put": [
@@ -15385,7 +15975,9 @@
    ]
   },
   "/api/finance/exercices": {
-   "post": []
+   "post": [
+    "ExerciceComptableResponse"
+   ]
   },
   "/api/finance/exercices/{exercice_id}/cloturer": {
    "put": [
@@ -15399,10 +15991,14 @@
   },
   "/api/finance/factures": {
    "get": [],
-   "post": []
+   "post": [
+    "FactureResponse"
+   ]
   },
   "/api/finance/factures/{facture_id}/lignes": {
-   "post": []
+   "post": [
+    "LigneFactureResponse"
+   ]
   },
   "/api/finance/factures/{facture_id}": {
    "put": [
@@ -15413,7 +16009,9 @@
    "get": []
   },
   "/api/finance/reglements": {
-   "post": []
+   "post": [
+    "ReglementResponse"
+   ]
   },
   "/api/finance/reglements/{reglement_id}": {
    "put": [
@@ -15421,7 +16019,9 @@
    ]
   },
   "/api/finance/tva-declarations": {
-   "post": []
+   "post": [
+    "TVADeclarableResponse"
+   ]
   },
   "/api/finance/tva-declarations/{declaration_id}": {
    "put": [
@@ -15429,7 +16029,9 @@
    ]
   },
   "/api/finance/retenues-source": {
-   "post": []
+   "post": [
+    "RetenueSourceResponse"
+   ]
   },
   "/api/finance/retenues-source/{retenue_id}": {
    "put": [
@@ -15437,7 +16039,9 @@
    ]
   },
   "/api/finance/is-declarations": {
-   "post": []
+   "post": [
+    "ISDeclarableResponse"
+   ]
   },
   "/api/finance/is-declarations/{declaration_id}": {
    "put": [
@@ -15445,7 +16049,9 @@
    ]
   },
   "/api/finance/centimes-additionnels": {
-   "post": []
+   "post": [
+    "CentimesAdditionnelsResponse"
+   ]
   },
   "/api/finance/centimes-additionnels/{centimes_id}": {
    "put": [
@@ -15453,7 +16059,9 @@
    ]
   },
   "/api/finance/patentes": {
-   "post": []
+   "post": [
+    "PatenteResponse"
+   ]
   },
   "/api/finance/patentes/{patente_id}": {
    "put": [
@@ -15461,7 +16069,9 @@
    ]
   },
   "/api/finance/bilans": {
-   "post": []
+   "post": [
+    "BilanResponse"
+   ]
   },
   "/api/finance/bilans/{bilan_id}": {
    "put": [
@@ -15469,7 +16079,9 @@
    ]
   },
   "/api/finance/comptes-resultat": {
-   "post": []
+   "post": [
+    "CompteResultatResponse"
+   ]
   },
   "/api/finance/comptes-resultat/{compte_id}": {
    "put": [
@@ -15477,7 +16089,9 @@
    ]
   },
   "/api/finance/signatures-electroniques": {
-   "post": []
+   "post": [
+    "SignatureElectroniqueResponse"
+   ]
   },
   "/api/finance/signatures-electroniques/{signature_id}": {
    "put": [
@@ -15500,24 +16114,34 @@
   },
   "/api/parc/vehicules": {
    "get": [
-    "VehiculeResponse"
+    "VehiculeResponse",
+    "VehiculeStatus"
    ],
-   "post": []
+   "post": [
+    "VehiculeResponse",
+    "VehiculeStatus"
+   ]
   },
   "/api/parc/equipements": {
    "get": [
     "EquipementResponse"
    ],
-   "post": []
+   "post": [
+    "EquipementResponse"
+   ]
   },
   "/api/documents/": {
    "get": [
     "DocumentResponse"
    ],
-   "post": []
+   "post": [
+    "DocumentResponse"
+   ]
   },
   "/api/documents/upload": {
-   "post": []
+   "post": [
+    "DocumentResponse"
+   ]
   },
   "/api/documents/{document_id}/valider": {
    "put": [
@@ -15530,7 +16154,9 @@
    ]
   },
   "/api/documents/dossiers": {
-   "post": []
+   "post": [
+    "DossierResponse"
+   ]
   },
   "/api/documents/dossiers/{dossier_id}": {
    "put": [
@@ -15538,10 +16164,14 @@
    ]
   },
   "/api/documents/versions": {
-   "post": []
+   "post": [
+    "VersionDocumentResponse"
+   ]
   },
   "/api/documents/signatures": {
-   "post": []
+   "post": [
+    "SignatureDocumentResponse"
+   ]
   },
   "/api/documents/signatures/{signature_id}": {
    "put": [
@@ -15549,7 +16179,9 @@
    ]
   },
   "/api/documents/workflows": {
-   "post": []
+   "post": [
+    "WorkflowDocumentResponse"
+   ]
   },
   "/api/documents/workflows/{workflow_id}/avancer": {
    "put": [
@@ -15562,7 +16194,9 @@
    ]
   },
   "/api/documents/sceaux": {
-   "post": []
+   "post": [
+    "SceauNumeriqueResponse"
+   ]
   },
   "/api/documents/sceaux/{sceau_id}": {
    "put": [
@@ -15570,10 +16204,14 @@
    ]
   },
   "/api/documents/analyses-ocr": {
-   "post": []
+   "post": [
+    "AnalyseOCRResponse"
+   ]
   },
   "/api/documents/archivages-legal": {
-   "post": []
+   "post": [
+    "ArchivageLegalResponse"
+   ]
   },
   "/api/documents/archivages-legal/{archivage_id}": {
    "put": [
@@ -15581,7 +16219,9 @@
    ]
   },
   "/api/documents/templates": {
-   "post": []
+   "post": [
+    "TemplateDocumentResponse"
+   ]
   },
   "/api/documents/templates/{template_id}": {
    "put": [
@@ -15589,7 +16229,9 @@
    ]
   },
   "/api/documents/partages": {
-   "post": []
+   "post": [
+    "PartageDocumentResponse"
+   ]
   },
   "/api/documents/partages/{partage_id}": {
    "put": [
@@ -15597,7 +16239,9 @@
    ]
   },
   "/api/documents/historique": {
-   "post": []
+   "post": [
+    "HistoriqueDocumentResponse"
+   ]
   },
   "/api/documents/dossiers/{dossier_id}/rapport": {
    "get": [
@@ -15629,10 +16273,15 @@
    "get": [
     "StockResponse"
    ],
-   "post": []
+   "post": [
+    "StockResponse"
+   ]
   },
   "/api/magasin/mouvements": {
-   "post": []
+   "post": [
+    "MouvementStockResponse",
+    "MouvementType"
+   ]
   },
   "/api/magasin/": {
    "get": [
@@ -15648,7 +16297,9 @@
    "get": [
     "EntrepotResponse"
    ],
-   "post": []
+   "post": [
+    "EntrepotResponse"
+   ]
   },
   "/api/magasin/cross-docking": {
    "post": []
