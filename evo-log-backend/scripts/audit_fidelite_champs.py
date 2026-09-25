@@ -143,11 +143,22 @@ def lien_donnees(contrat, index, texte):
     Deux motifs couverts, les deux reels dans ce code :
       `const res = await apiClient.get('/api/x'); setFoo(res.data)`
       `const {data: foo = []} = useQuery({queryFn: () => transportAPI.getX()})`
-    La proximite (fenetre de caracteres) tient lieu d'analyse de flot : grossier,
-    mais une erreur d'affectation ne cree qu'un faux negatif, jamais un faux
-    positif — le sens qui compte pour un outil de tri.
+    La proximite (fenetre de caracteres) tient lieu d'analyse de flot : grossier.
+    Pour qu'elle ne tourne pas en affirmation fausse, une variable touchee par
+    PLUSIEURS chemins d'API distincts est tenue pour SANS SOURCE etablie : on ne
+    peut pas savoir lequel la remplit. `transport/flotte` appelle `/camions` et
+    `/kpis` a deux lignes d'ecart ; `kpis` (dictionnaire brut, sans
+    response_model, donc sans contrat lisible) heritait des champs de
+    CamionResponse et l'outil y aurait cherche `vehicules_actifs` en croyant
+    savoir. Ces variables sont comptees a part : le silence reste distinguishable
+    d'un « tout va bien ».
     """
-    vars_ = {}
+    vars_, provenances = {}, {}
+
+    def apporter(etat, methode, path, noms):
+        vars_.setdefault(etat, set()).update(noms)
+        provenances.setdefault(etat, set()).add((methode, path))
+
     setters = {}
     for nom, seteur in ETAT.findall(texte):
         setters[seteur] = nom
@@ -170,11 +181,12 @@ def lien_donnees(contrat, index, texte):
         fenetre = texte[debut:fin]
         for seteur, etat in setters.items():
             if re.search(r"\b%s\s*\(" % re.escape(seteur), fenetre):
-                vars_.setdefault(etat, set()).update(noms)
+                apporter(etat, methode, path, noms)
         # `data: foo` destructures depuis useQuery, et `const foo = res.data`
         for m in re.finditer(r"data\s*:\s*([A-Za-z_$][\w$]*)", fenetre):
-            vars_.setdefault(m.group(1), set()).update(noms)
-    return vars_
+            apporter(m.group(1), methode, path, noms)
+    ambigus = {e for e, chemins in provenances.items() if len(chemins) > 1}
+    return {e: n for e, n in vars_.items() if e not in ambigus}, ambigus
 
 
 def corps_litteral(texte, debut):
@@ -256,10 +268,10 @@ def valeurs_hors_enum(contrat, schemas, texte):
 
 
 def analyser(contrat, index, texte):
-    """-> (soupcons de noms, soupcons de valeurs, lien_retably: bool)."""
-    vars_ = lien_donnees(contrat, index, texte)
+    """-> (soupcons de noms, soupcons de valeurs, lien_retably, variables ambiguës)."""
+    vars_, ambigus = lien_donnees(contrat, index, texte)
     if not vars_:
-        return [], [], False
+        return [], [], False, ambigus
     formes = formes_locales(texte)
     alias = {}
     for _ in range(2):  # une passe de propagation suffit pour `x = foo.filter(...)`
@@ -306,7 +318,7 @@ def analyser(contrat, index, texte):
                 "schemas": sorted(schemas),
                 "attendus": sorted(disponibles),
             })
-    return soupcons, valeurs_hors_enum(contrat, pour_valeurs, texte), True
+    return soupcons, valeurs_hors_enum(contrat, pour_valeurs, texte), True, ambigus
 
 
 def main():
@@ -317,6 +329,7 @@ def main():
     contrat = charger_contrat()
     index = index_client(FRONT)
     rendu = []
+    sans_source = set()
     muets = 0
     parles = 0
     for fichier in sorted(FRONT.rglob("*.tsx")) + sorted(FRONT.rglob("*.ts")):
@@ -326,7 +339,8 @@ def main():
             continue
         if "useState" not in texte and "useQuery" not in texte:
             continue
-        noms_lus, valeurs, retably = analyser(contrat, index, texte)
+        noms_lus, valeurs, retably, ambigus = analyser(contrat, index, texte)
+        sans_source.update(ambigus)
         if not retably:
             # Pas de lien retabli : ce fichier n'a pas ete verifie, ce qui ne
             # vaut pas dire qu'il est propre.
