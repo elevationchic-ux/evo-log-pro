@@ -68,7 +68,7 @@ setKpis(k?.data ?? null);
 """
 
 
-def testPromise_all_apparie_positionnellement(audit):
+def test_promise_all_apparie_positionnellement(audit):
     vars_, ambigus = audit.lien_donnees(CONTRAT, {}, DEUX_APPELS)
     assert vars_["vehicles"] == {"CamionResponse"}
 
@@ -85,12 +85,12 @@ def test_une_cle_construite_par_la_page_n_est_pas_inventee(audit):
     """`brand: c.marque` definit `brand` : le juger hors contrat etait un faux
     positif, et c'est lui qui a revele que l'outil ne voyait pas les vues."""
     noms_lus, valeurs, retably, _ = audit.analyser(CONTRAT, {}, DEUX_APPELS + """
-const lignes = vehicles.map((v: any) => `${v.brand}-${v.marque}`);
+const lignes = vehicles.map((v: any) => `${v.brand}-${v.chassis}`);
 """)
     assert retably
     signales = {s["champ"] for s in noms_lus}
-    assert "brand" not in signales
-    assert "marque" in signales  # `brand: c.marque` ne definit pas `marque`
+    assert "brand" not in signales  # cle fabriquee par la page elle-meme
+    assert "chassis" in signales    # la, rien ne la produit ni ne l'emmet
 
 
 # ─── variables d'etat sans iteration ───────────────────────────────────────
