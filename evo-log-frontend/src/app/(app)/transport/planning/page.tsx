@@ -31,12 +31,15 @@ export default function PlanningPage() {
       const data = res.data || [];
       setMissions(data);
       
-      // Calculate stats
+      // MissionStatus (enum reel, minuscules, sans accent) : planifiee | en_cours |
+      // terminee | annulee | en_retard. Les comparaisons en majuscules ('PLANIFIE',
+      // 'EN_ROUTE', 'LIVRE'...) ne reussissaient jamais : les trois KPI etaient
+      // figes a 0 quel que soit le contenu de la base.
       setStats({
         total: data.length,
-        planifie: data.filter((m: any) => m.statut === 'PLANIFIE' || m.statut === 'BROUILLON').length,
-        enRoute: data.filter((m: any) => m.statut === 'EN_ROUTE' || m.statut === 'EN_CHARGEMENT').length,
-        livre: data.filter((m: any) => m.statut === 'LIVRE' || m.statut === 'TERMINEE').length
+        planifie: data.filter((m: any) => m.statut === 'planifiee').length,
+        enRoute: data.filter((m: any) => m.statut === 'en_cours').length,
+        livre: data.filter((m: any) => m.statut === 'terminee').length
       });
       
     } catch (error) {
@@ -88,20 +91,25 @@ export default function PlanningPage() {
                   </div>
                 </div>
                 
+                {/* `nature_fret` n'existe pas dans MissionResponse : l'appel `.replace()`
+                    sur undefined levait une TypeError qui vidait toute la page.
+                    Le champ reel est `type_mission`. */}
                 <h4 className="text-sm font-semibold text-slate-200 mb-1 line-clamp-1">
-                  {mission.nature_fret.replace(/_/g, ' ')}
+                  {(mission.type_mission || '').replace(/_/g, ' ') || 'Mission'}
                 </h4>
                 
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center gap-2 text-xs text-slate-400">
                     <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                    <span className="truncate">{mission.origine} → {mission.destination}</span>
+                    {/* MissionResponse (schemas/transport.py) expose point_depart /
+                        point_arrivee, pas origine / destination. */}
+                    <span className="truncate">{mission.point_depart} → {mission.point_arrivee}</span>
                   </div>
                   
-                  {mission.date_chargement_prevue && (
+                  {mission.date_debut_prevue && (
                     <div className="flex items-center gap-2 text-xs text-slate-400">
                       <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{format(new Date(mission.date_chargement_prevue), 'dd MMM yyyy', { locale: fr })}</span>
+                      <span>{format(new Date(mission.date_debut_prevue), 'dd MMM yyyy', { locale: fr })}</span>
                     </div>
                   )}
                   
@@ -200,10 +208,14 @@ export default function PlanningPage() {
             </div>
           ) : (
             <div className="flex gap-6 max-w-[1600px] mx-auto h-full">
-              {renderKanbanColumn('À Planifier (Garde-Fou)', 'bg-slate-400', ['BROUILLON', 'EN_ATTENTE_AFFECTATION'])}
-              {renderKanbanColumn('Planifié & Validé', 'bg-blue-500', ['PLANIFIE'])}
-              {renderKanbanColumn('En Cours d\'Exécution', 'bg-amber-500', ['EN_CHARGEMENT', 'EN_ROUTE'])}
-              {renderKanbanColumn('Clôturé / Livré', 'bg-emerald-500', ['LIVRE', 'TERMINEE', 'FACTUREE'])}
+              {/* Colonnes branchees sur les vrais MissionStatus. Les libelles
+                  precedents ('BROUILLON', 'EN_ATTENTE_AFFECTATION', 'EN_CHARGEMENT',
+                  'LIVRE', 'FACTUREE') ne correspondent a aucune valeur de l'enum :
+                  les quatre colonnes etaient systematiquement vides. */}
+              {renderKanbanColumn('Planifié & Validé', 'bg-blue-500', ['planifiee'])}
+              {renderKanbanColumn('En Cours d\'Exécution', 'bg-amber-500', ['en_cours'])}
+              {renderKanbanColumn('Clôturé / Terminé', 'bg-emerald-500', ['terminee'])}
+              {renderKanbanColumn('Annulé / En retard', 'bg-red-500', ['annulee', 'en_retard'])}
             </div>
           )}
         </div>
