@@ -228,8 +228,122 @@
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
+  "variable": "kpis",
+  "champ": "storage_used_gb",
+  "schemas": [
+   "CompanyResponse",
+   "SubscriptionPlanResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "agrement_douane",
+   "agrement_pad",
+   "agrement_pak",
+   "capital_social",
+   "code",
+   "created_at",
+   "current_storage_mb",
+   "current_users",
+   "custom_domain",
+   "description",
+   "email",
+   "features",
+   "id",
+   "is_active",
+   "is_verified",
+   "legal_form",
+   "logo_url",
+   "max_camions",
+   "max_storage_mb",
+   "max_users",
+   "modules_actives",
+   "modules_inclus",
+   "nom",
+   "pays",
+   "primary_color",
+   "prix_annuel",
+   "prix_mensuel",
+   "rccm",
+   "rib",
+   "secondary_color",
+   "sigle",
+   "subdomain",
+   "subscription_end",
+   "subscription_plan_id",
+   "subscription_start",
+   "suspension_reason",
+   "tax_id",
+   "telephone",
+   "trial_days",
+   "type_plan",
+   "updated_at",
+   "verification_date",
+   "ville",
+   "website"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
+ },
+ {
   "variable": "s",
   "champ": "storage_used_gb",
+  "schemas": [
+   "CompanyResponse",
+   "SubscriptionPlanResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "agrement_douane",
+   "agrement_pad",
+   "agrement_pak",
+   "capital_social",
+   "code",
+   "created_at",
+   "current_storage_mb",
+   "current_users",
+   "custom_domain",
+   "description",
+   "email",
+   "features",
+   "id",
+   "is_active",
+   "is_verified",
+   "legal_form",
+   "logo_url",
+   "max_camions",
+   "max_storage_mb",
+   "max_users",
+   "modules_actives",
+   "modules_inclus",
+   "nom",
+   "pays",
+   "primary_color",
+   "prix_annuel",
+   "prix_mensuel",
+   "rccm",
+   "rib",
+   "secondary_color",
+   "sigle",
+   "subdomain",
+   "subscription_end",
+   "subscription_plan_id",
+   "subscription_start",
+   "suspension_reason",
+   "tax_id",
+   "telephone",
+   "trial_days",
+   "type_plan",
+   "updated_at",
+   "verification_date",
+   "ville",
+   "website"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
+ },
+ {
+  "variable": "kpis",
+  "champ": "system_uptime",
   "schemas": [
    "CompanyResponse",
    "SubscriptionPlanResponse"
@@ -342,8 +456,122 @@
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
+  "variable": "kpis",
+  "champ": "tenants_actifs",
+  "schemas": [
+   "CompanyResponse",
+   "SubscriptionPlanResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "agrement_douane",
+   "agrement_pad",
+   "agrement_pak",
+   "capital_social",
+   "code",
+   "created_at",
+   "current_storage_mb",
+   "current_users",
+   "custom_domain",
+   "description",
+   "email",
+   "features",
+   "id",
+   "is_active",
+   "is_verified",
+   "legal_form",
+   "logo_url",
+   "max_camions",
+   "max_storage_mb",
+   "max_users",
+   "modules_actives",
+   "modules_inclus",
+   "nom",
+   "pays",
+   "primary_color",
+   "prix_annuel",
+   "prix_mensuel",
+   "rccm",
+   "rib",
+   "secondary_color",
+   "sigle",
+   "subdomain",
+   "subscription_end",
+   "subscription_plan_id",
+   "subscription_start",
+   "suspension_reason",
+   "tax_id",
+   "telephone",
+   "trial_days",
+   "type_plan",
+   "updated_at",
+   "verification_date",
+   "ville",
+   "website"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
+ },
+ {
   "variable": "s",
   "champ": "tenants_actifs",
+  "schemas": [
+   "CompanyResponse",
+   "SubscriptionPlanResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "agrement_douane",
+   "agrement_pad",
+   "agrement_pak",
+   "capital_social",
+   "code",
+   "created_at",
+   "current_storage_mb",
+   "current_users",
+   "custom_domain",
+   "description",
+   "email",
+   "features",
+   "id",
+   "is_active",
+   "is_verified",
+   "legal_form",
+   "logo_url",
+   "max_camions",
+   "max_storage_mb",
+   "max_users",
+   "modules_actives",
+   "modules_inclus",
+   "nom",
+   "pays",
+   "primary_color",
+   "prix_annuel",
+   "prix_mensuel",
+   "rccm",
+   "rib",
+   "secondary_color",
+   "sigle",
+   "subdomain",
+   "subscription_end",
+   "subscription_plan_id",
+   "subscription_start",
+   "suspension_reason",
+   "tax_id",
+   "telephone",
+   "trial_days",
+   "type_plan",
+   "updated_at",
+   "verification_date",
+   "ville",
+   "website"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
+ },
+ {
+  "variable": "kpis",
+  "champ": "tenants_total",
   "schemas": [
    "CompanyResponse",
    "SubscriptionPlanResponse"
@@ -513,8 +741,122 @@
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
  },
  {
+  "variable": "kpis",
+  "champ": "users_actifs",
+  "schemas": [
+   "CompanyResponse",
+   "SubscriptionPlanResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "agrement_douane",
+   "agrement_pad",
+   "agrement_pak",
+   "capital_social",
+   "code",
+   "created_at",
+   "current_storage_mb",
+   "current_users",
+   "custom_domain",
+   "description",
+   "email",
+   "features",
+   "id",
+   "is_active",
+   "is_verified",
+   "legal_form",
+   "logo_url",
+   "max_camions",
+   "max_storage_mb",
+   "max_users",
+   "modules_actives",
+   "modules_inclus",
+   "nom",
+   "pays",
+   "primary_color",
+   "prix_annuel",
+   "prix_mensuel",
+   "rccm",
+   "rib",
+   "secondary_color",
+   "sigle",
+   "subdomain",
+   "subscription_end",
+   "subscription_plan_id",
+   "subscription_start",
+   "suspension_reason",
+   "tax_id",
+   "telephone",
+   "trial_days",
+   "type_plan",
+   "updated_at",
+   "verification_date",
+   "ville",
+   "website"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
+ },
+ {
   "variable": "s",
   "champ": "users_actifs",
+  "schemas": [
+   "CompanyResponse",
+   "SubscriptionPlanResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "agrement_douane",
+   "agrement_pad",
+   "agrement_pak",
+   "capital_social",
+   "code",
+   "created_at",
+   "current_storage_mb",
+   "current_users",
+   "custom_domain",
+   "description",
+   "email",
+   "features",
+   "id",
+   "is_active",
+   "is_verified",
+   "legal_form",
+   "logo_url",
+   "max_camions",
+   "max_storage_mb",
+   "max_users",
+   "modules_actives",
+   "modules_inclus",
+   "nom",
+   "pays",
+   "primary_color",
+   "prix_annuel",
+   "prix_mensuel",
+   "rccm",
+   "rib",
+   "secondary_color",
+   "sigle",
+   "subdomain",
+   "subscription_end",
+   "subscription_plan_id",
+   "subscription_start",
+   "suspension_reason",
+   "tax_id",
+   "telephone",
+   "trial_days",
+   "type_plan",
+   "updated_at",
+   "verification_date",
+   "ville",
+   "website"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
+ },
+ {
+  "variable": "kpis",
+  "champ": "users_total",
   "schemas": [
    "CompanyResponse",
    "SubscriptionPlanResponse"
@@ -625,6 +967,187 @@
   ],
   "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\admin-saas\\page.tsx"
+ },
+ {
+  "variable": "integrations",
+  "champ": "L",
+  "schemas": [
+   "IntegrationResponse"
+  ],
+  "attendus": [
+   "actif",
+   "api_key",
+   "api_secret",
+   "cert_path",
+   "code_integration",
+   "configuration",
+   "created_at",
+   "date_activation",
+   "date_desactivation",
+   "derniere_synchronisation",
+   "description",
+   "frequence_synchronisation",
+   "id",
+   "logs_retention_jours",
+   "nom",
+   "parametres",
+   "retry_attempts",
+   "statut",
+   "timeout",
+   "type_integration",
+   "updated_at",
+   "url_api"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin-tenant\\integrations\\page.tsx"
+ },
+ {
+  "variable": "selectedConnector",
+  "champ": "category",
+  "schemas": [
+   "IntegrationResponse"
+  ],
+  "attendus": [
+   "actif",
+   "api_key",
+   "api_secret",
+   "cert_path",
+   "code_integration",
+   "configuration",
+   "created_at",
+   "date_activation",
+   "date_desactivation",
+   "derniere_synchronisation",
+   "description",
+   "frequence_synchronisation",
+   "id",
+   "logs_retention_jours",
+   "nom",
+   "parametres",
+   "retry_attempts",
+   "statut",
+   "timeout",
+   "type_integration",
+   "updated_at",
+   "url_api"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin-tenant\\integrations\\page.tsx"
+ },
+ {
+  "variable": "selectedConnector",
+  "champ": "code",
+  "schemas": [
+   "IntegrationResponse"
+  ],
+  "attendus": [
+   "actif",
+   "api_key",
+   "api_secret",
+   "cert_path",
+   "code_integration",
+   "configuration",
+   "created_at",
+   "date_activation",
+   "date_desactivation",
+   "derniere_synchronisation",
+   "description",
+   "frequence_synchronisation",
+   "id",
+   "logs_retention_jours",
+   "nom",
+   "parametres",
+   "retry_attempts",
+   "statut",
+   "timeout",
+   "type_integration",
+   "updated_at",
+   "url_api"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin-tenant\\integrations\\page.tsx"
+ },
+ {
+  "variable": "selectedConnector",
+  "champ": "endpoint",
+  "schemas": [
+   "IntegrationResponse"
+  ],
+  "attendus": [
+   "actif",
+   "api_key",
+   "api_secret",
+   "cert_path",
+   "code_integration",
+   "configuration",
+   "created_at",
+   "date_activation",
+   "date_desactivation",
+   "derniere_synchronisation",
+   "description",
+   "frequence_synchronisation",
+   "id",
+   "logs_retention_jours",
+   "nom",
+   "parametres",
+   "retry_attempts",
+   "statut",
+   "timeout",
+   "type_integration",
+   "updated_at",
+   "url_api"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin-tenant\\integrations\\page.tsx"
+ },
+ {
+  "variable": "any",
+  "champ": "cm",
+  "schemas": [
+   "CompanyResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "agrement_douane",
+   "agrement_pad",
+   "agrement_pak",
+   "capital_social",
+   "code",
+   "created_at",
+   "current_storage_mb",
+   "current_users",
+   "custom_domain",
+   "email",
+   "id",
+   "is_active",
+   "is_verified",
+   "legal_form",
+   "logo_url",
+   "max_camions",
+   "max_storage_mb",
+   "max_users",
+   "modules_actives",
+   "nom",
+   "pays",
+   "primary_color",
+   "rccm",
+   "rib",
+   "secondary_color",
+   "sigle",
+   "subdomain",
+   "subscription_end",
+   "subscription_plan_id",
+   "subscription_start",
+   "suspension_reason",
+   "tax_id",
+   "telephone",
+   "updated_at",
+   "verification_date",
+   "ville",
+   "website"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\admin\\companies\\page.tsx"
  },
  {
   "variable": "c",
@@ -1115,6 +1638,400 @@
   "fichier": "src\\app\\(app)\\chauffeur\\page.tsx"
  },
  {
+  "variable": "form",
+  "champ": "clientNom",
+  "schemas": [
+   "IncidentResponse"
+  ],
+  "attendus": [
+   "company_id",
+   "created_at",
+   "description",
+   "id",
+   "localisation",
+   "priorite",
+   "reference",
+   "resolved_at",
+   "signale_par",
+   "statut",
+   "titre",
+   "type"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\after-sales\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "montantReclame",
+  "schemas": [
+   "IncidentResponse"
+  ],
+  "attendus": [
+   "company_id",
+   "created_at",
+   "description",
+   "id",
+   "localisation",
+   "priorite",
+   "reference",
+   "resolved_at",
+   "signale_par",
+   "statut",
+   "titre",
+   "type"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\after-sales\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "typeLitige",
+  "schemas": [
+   "IncidentResponse"
+  ],
+  "attendus": [
+   "company_id",
+   "created_at",
+   "description",
+   "id",
+   "localisation",
+   "priorite",
+   "reference",
+   "resolved_at",
+   "signale_par",
+   "statut",
+   "titre",
+   "type"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\after-sales\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "contactNom",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\crm\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "nomEntreprise",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\crm\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "pays",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\crm\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "poste",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\crm\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "telephone",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\crm\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "ville",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\crm\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "contactNom",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\dashboard\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "montantEstime",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\dashboard\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "nomEntreprise",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\dashboard\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "telephone",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\dashboard\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "typeService",
+  "schemas": [
+   "CustomerResponse"
+  ],
+  "attendus": [
+   "city",
+   "code",
+   "company_id",
+   "contact_person",
+   "country",
+   "created_at",
+   "email",
+   "encadrant",
+   "id",
+   "is_active",
+   "name",
+   "phone",
+   "segment",
+   "source"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-b2b\\dashboard\\page.tsx"
+ },
+ {
+  "variable": "payTarget",
+  "champ": "montant_ttc",
+  "schemas": [
+   "ReglementResponse"
+  ],
+  "attendus": [
+   "banque",
+   "created_at",
+   "date_reglement",
+   "devise",
+   "effectue_par",
+   "facture_id",
+   "id",
+   "mode_paiement",
+   "montant",
+   "notes",
+   "numero_reglement",
+   "reference_bancaire",
+   "statut",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\invoices\\page.tsx"
+ },
+ {
+  "variable": "payTarget",
+  "champ": "numero_facture",
+  "schemas": [
+   "ReglementResponse"
+  ],
+  "attendus": [
+   "banque",
+   "created_at",
+   "date_reglement",
+   "devise",
+   "effectue_par",
+   "facture_id",
+   "id",
+   "mode_paiement",
+   "montant",
+   "notes",
+   "numero_reglement",
+   "reference_bancaire",
+   "statut",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\invoices\\page.tsx"
+ },
+ {
   "variable": "m",
   "champ": "date_chargement_prevue",
   "schemas": [
@@ -1592,6 +2509,799 @@
   "fichier": "src\\app\\(app)\\client-portal\\page.tsx"
  },
  {
+  "variable": "formData",
+  "champ": "NIU",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "NIU",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "RCCM",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "RCCM",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "adresse",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "adresse",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "codePostal",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "codePostal",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "dateCreation",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "image",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "nom",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "nom",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "pays",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "pays",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "prenom",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "prenom",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "secteurActivite",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "secteurActivite",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "statutJuridique",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "telephone",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "telephone",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "ville",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "profile",
+  "champ": "ville",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\profile\\page.tsx"
+ },
+ {
+  "variable": "missions",
+  "champ": "Veuillez",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "dateCreation",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "distance_estimee",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "lieu_arrivee",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "lieu_depart",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "nature_fret",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "nombre_colis",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "poids_total",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
   "champ": "statut",
   "literal": "LIVREE",
   "variable": "selectedMission.statut",
@@ -1679,6 +3389,39 @@
   ],
   "jumeau": "annulee",
   "genre": "valeur_hors_enum",
+  "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "volume_total",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\client-portal\\shipments\\page.tsx"
  },
  {
@@ -2011,6 +3754,378 @@
   ],
   "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\magasin-douane\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "client_id",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "code_article",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "date_expiration",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "date_fabrication",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "description_marchandises",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "mode_fret",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "nombre_colis",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "numero_lot",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "poids_brut_kg",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "poids_net_kg",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "quantite_declaree",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "volume_m3",
+  "schemas": [
+   "DeclarationEntrepotResponse"
+  ],
+  "attendus": [
+   "conteneur_id",
+   "created_at",
+   "date_acceptation",
+   "date_declaration",
+   "date_limite",
+   "devise",
+   "dossier_transit_id",
+   "entrepot_id",
+   "fonction",
+   "id",
+   "motifs_refus",
+   "notes",
+   "numero_bl",
+   "numero_declaration",
+   "reference_sygdonia",
+   "regime",
+   "statut",
+   "updated_at",
+   "valeur_marchandise",
+   "valide_par"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\declarations\\page.tsx"
  },
  {
   "variable": "m",
@@ -2553,8 +4668,332 @@
   "fichier": "src\\app\\(app)\\magasin\\inventory\\page.tsx"
  },
  {
+  "variable": "ot",
+  "champ": "article_id",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "article",
+  "champ": "code",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "ot",
+  "champ": "date_transfert",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "article",
+  "champ": "designation",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "ot",
+  "champ": "entrepot_dest_id",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "ot",
+  "champ": "entrepot_source_id",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "ot",
+  "champ": "montant_paiement",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "ot",
+  "champ": "motif",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "ot",
+  "champ": "quantite",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "ot",
+  "champ": "reference",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "ot",
+  "champ": "statut",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "article",
+  "champ": "unite_mesure",
+  "schemas": [
+   "UserResponse"
+  ],
+  "attendus": [
+   "agency_id",
+   "created_at",
+   "email",
+   "full_name",
+   "id",
+   "is_active",
+   "is_superuser",
+   "last_login",
+   "must_change_password",
+   "phone",
+   "updated_at",
+   "username"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\[id]\\page.tsx"
+ },
+ {
+  "variable": "articleInfo",
+  "champ": "designation",
+  "schemas": [
+   "OrdreTransfertResponse",
+   "TransfertStatut"
+  ],
+  "attendus": [
+   "article_id",
+   "company_id",
+   "created_at",
+   "date_transfert",
+   "entrepot_dest_id",
+   "entrepot_source_id",
+   "id",
+   "montant_paiement",
+   "motif",
+   "quantite",
+   "reference",
+   "statut"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\page.tsx"
+ },
+ {
   "variable": "m",
   "champ": "nom",
+  "schemas": [
+   "OrdreTransfertResponse",
+   "TransfertStatut"
+  ],
+  "attendus": [
+   "article_id",
+   "company_id",
+   "created_at",
+   "date_transfert",
+   "entrepot_dest_id",
+   "entrepot_source_id",
+   "id",
+   "montant_paiement",
+   "motif",
+   "quantite",
+   "reference",
+   "statut"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\ordres-transfert\\page.tsx"
+ },
+ {
+  "variable": "articleInfo",
+  "champ": "unite_mesure",
   "schemas": [
    "OrdreTransfertResponse",
    "TransfertStatut"
@@ -2667,6 +5106,96 @@
   "fichier": "src\\app\\(app)\\magasin\\page.tsx"
  },
  {
+  "variable": "kpisData",
+  "champ": "mouvements_jour",
+  "schemas": [
+   "StockResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code_article",
+   "created_at",
+   "date_derniere_entree",
+   "date_derniere_sortie",
+   "description",
+   "designation",
+   "emplacement",
+   "entrepot_id",
+   "fournisseur_id",
+   "id",
+   "is_active",
+   "prix_unitaire",
+   "quantite_disponible",
+   "quantite_maximum",
+   "quantite_minimum",
+   "quantite_reservee",
+   "unite_mesure",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\page.tsx"
+ },
+ {
+  "variable": "kpisData",
+  "champ": "nb_alertes_min",
+  "schemas": [
+   "StockResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code_article",
+   "created_at",
+   "date_derniere_entree",
+   "date_derniere_sortie",
+   "description",
+   "designation",
+   "emplacement",
+   "entrepot_id",
+   "fournisseur_id",
+   "id",
+   "is_active",
+   "prix_unitaire",
+   "quantite_disponible",
+   "quantite_maximum",
+   "quantite_minimum",
+   "quantite_reservee",
+   "unite_mesure",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\page.tsx"
+ },
+ {
+  "variable": "kpisData",
+  "champ": "nb_articles",
+  "schemas": [
+   "StockResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code_article",
+   "created_at",
+   "date_derniere_entree",
+   "date_derniere_sortie",
+   "description",
+   "designation",
+   "emplacement",
+   "entrepot_id",
+   "fournisseur_id",
+   "id",
+   "is_active",
+   "prix_unitaire",
+   "quantite_disponible",
+   "quantite_maximum",
+   "quantite_minimum",
+   "quantite_reservee",
+   "unite_mesure",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\page.tsx"
+ },
+ {
   "variable": "s",
   "champ": "niveau",
   "schemas": [
@@ -2697,8 +5226,68 @@
   "fichier": "src\\app\\(app)\\magasin\\page.tsx"
  },
  {
+  "variable": "ropData",
+  "champ": "point_de_commande_rop",
+  "schemas": [
+   "StockResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code_article",
+   "created_at",
+   "date_derniere_entree",
+   "date_derniere_sortie",
+   "description",
+   "designation",
+   "emplacement",
+   "entrepot_id",
+   "fournisseur_id",
+   "id",
+   "is_active",
+   "prix_unitaire",
+   "quantite_disponible",
+   "quantite_maximum",
+   "quantite_minimum",
+   "quantite_reservee",
+   "unite_mesure",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\page.tsx"
+ },
+ {
   "variable": "s",
   "champ": "qte",
+  "schemas": [
+   "StockResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code_article",
+   "created_at",
+   "date_derniere_entree",
+   "date_derniere_sortie",
+   "description",
+   "designation",
+   "emplacement",
+   "entrepot_id",
+   "fournisseur_id",
+   "id",
+   "is_active",
+   "prix_unitaire",
+   "quantite_disponible",
+   "quantite_maximum",
+   "quantite_minimum",
+   "quantite_reservee",
+   "unite_mesure",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\page.tsx"
+ },
+ {
+  "variable": "ropData",
+  "champ": "quantite_economique_commande_wilson",
   "schemas": [
    "StockResponse"
   ],
@@ -2759,6 +5348,36 @@
  {
   "variable": "s",
   "champ": "seuil_alerte",
+  "schemas": [
+   "StockResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code_article",
+   "created_at",
+   "date_derniere_entree",
+   "date_derniere_sortie",
+   "description",
+   "designation",
+   "emplacement",
+   "entrepot_id",
+   "fournisseur_id",
+   "id",
+   "is_active",
+   "prix_unitaire",
+   "quantite_disponible",
+   "quantite_maximum",
+   "quantite_minimum",
+   "quantite_reservee",
+   "unite_mesure",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\page.tsx"
+ },
+ {
+  "variable": "ropData",
+  "champ": "stock_securite_calcule",
   "schemas": [
    "StockResponse"
   ],
@@ -2877,6 +5496,36 @@
   "fichier": "src\\app\\(app)\\magasin\\page.tsx"
  },
  {
+  "variable": "kpisData",
+  "champ": "valeur_stock",
+  "schemas": [
+   "StockResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code_article",
+   "created_at",
+   "date_derniere_entree",
+   "date_derniere_sortie",
+   "description",
+   "designation",
+   "emplacement",
+   "entrepot_id",
+   "fournisseur_id",
+   "id",
+   "is_active",
+   "prix_unitaire",
+   "quantite_disponible",
+   "quantite_maximum",
+   "quantite_minimum",
+   "quantite_reservee",
+   "unite_mesure",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\magasin\\page.tsx"
+ },
+ {
   "variable": "s",
   "champ": "zone",
   "schemas": [
@@ -2907,7 +5556,217 @@
   "fichier": "src\\app\\(app)\\magasin\\page.tsx"
  },
  {
+  "variable": "form",
+  "champ": "code_article",
+  "schemas": [
+   "ArticleResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code",
+   "code_barres",
+   "company_id",
+   "created_at",
+   "description",
+   "designation",
+   "hs_code",
+   "id",
+   "is_active",
+   "poids_kg",
+   "prix_unitaire",
+   "unite_mesure",
+   "updated_at",
+   "volume_m3"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\master-data\\articles\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "type_article",
+  "schemas": [
+   "ArticleResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code",
+   "code_barres",
+   "company_id",
+   "created_at",
+   "description",
+   "designation",
+   "hs_code",
+   "id",
+   "is_active",
+   "poids_kg",
+   "prix_unitaire",
+   "unite_mesure",
+   "updated_at",
+   "volume_m3"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\master-data\\articles\\page.tsx"
+ },
+ {
+  "variable": "form",
+  "champ": "unite",
+  "schemas": [
+   "ArticleResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code",
+   "code_barres",
+   "company_id",
+   "created_at",
+   "description",
+   "designation",
+   "hs_code",
+   "id",
+   "is_active",
+   "poids_kg",
+   "prix_unitaire",
+   "unite_mesure",
+   "updated_at",
+   "volume_m3"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\master-data\\articles\\page.tsx"
+ },
+ {
+  "variable": "newArticle",
+  "champ": "code_sh",
+  "schemas": [
+   "ArticleResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code",
+   "code_barres",
+   "company_id",
+   "created_at",
+   "description",
+   "designation",
+   "hs_code",
+   "id",
+   "is_active",
+   "poids_kg",
+   "prix_unitaire",
+   "unite_mesure",
+   "updated_at",
+   "volume_m3"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\master-data\\page.tsx"
+ },
+ {
+  "variable": "newArticle",
+  "champ": "unite",
+  "schemas": [
+   "ArticleResponse"
+  ],
+  "attendus": [
+   "categorie",
+   "code",
+   "code_barres",
+   "company_id",
+   "created_at",
+   "description",
+   "designation",
+   "hs_code",
+   "id",
+   "is_active",
+   "poids_kg",
+   "prix_unitaire",
+   "unite_mesure",
+   "updated_at",
+   "volume_m3"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\master-data\\page.tsx"
+ },
+ {
+  "variable": "formVehicle",
+  "champ": "siteAffectation",
+  "schemas": [
+   "FleetVehicleResponse"
+  ],
+  "attendus": [
+   "annee",
+   "carburant",
+   "company_id",
+   "created_at",
+   "id",
+   "immatriculation",
+   "is_active",
+   "kilometrage",
+   "localisation",
+   "marque",
+   "modele",
+   "status",
+   "type_vehicule"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\parc-vehicules\\fleet-complete\\page.tsx"
+ },
+ {
+  "variable": "scanResult",
+  "champ": "confidence",
+  "schemas": [
+   "MouvementParcResponse"
+  ],
+  "attendus": [
+   "chauffeur",
+   "company_id",
+   "emplacement_id",
+   "etat",
+   "horodatage",
+   "id",
+   "immatriculation",
+   "motif",
+   "numero_conteneur",
+   "poids_tare_kg",
+   "sens",
+   "type_conteneur"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\parc\\gate\\page.tsx"
+ },
+ {
   "variable": "m",
+  "champ": "client_nom",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
   "champ": "client_nom",
   "schemas": [
    "MissionStatus",
@@ -2973,6 +5832,72 @@
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
+  "variable": "selectedMission",
+  "champ": "destination",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "immatriculation",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
   "variable": "m",
   "champ": "kilometrage",
   "schemas": [
@@ -3001,6 +5926,36 @@
    "statut",
    "type_mission",
    "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
+  "variable": "fuelForm",
+  "champ": "litrage",
+  "schemas": [
+   "FuelTicketLine"
+  ],
+  "attendus": [
+   "chauffeur",
+   "conducteur_id",
+   "conso_l100",
+   "cout",
+   "date_plein",
+   "delta_km",
+   "id",
+   "immatriculation",
+   "index_precedent",
+   "kilometrage",
+   "litres",
+   "mission_id",
+   "mode_paiement",
+   "notes",
+   "numero_ticket",
+   "prix_litre",
+   "station",
+   "statut",
+   "vehicule_id"
   ],
   "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
@@ -3039,7 +5994,73 @@
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
+  "variable": "selectedMission",
+  "champ": "marchandise",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
   "variable": "m",
+  "champ": "numero_ordre",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
   "champ": "numero_ordre",
   "schemas": [
    "MissionStatus",
@@ -3107,6 +6128,72 @@
  {
   "variable": "m",
   "champ": "origine",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "origine",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
+  "variable": "selectedMission",
+  "champ": "poids_kg",
   "schemas": [
    "MissionStatus",
    "app__schemas__transport__MissionResponse"
@@ -3234,6 +6321,39 @@
   "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
  },
  {
+  "variable": "selectedMission",
+  "champ": "telephone_client",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\portail-chauffeur\\page.tsx"
+ },
+ {
   "variable": "i",
   "champ": "post",
   "schemas": [
@@ -3262,6 +6382,151 @@
   ],
   "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\portail-magasinier\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "type_evenement",
+  "schemas": [
+   "AccidentTravailResponse"
+  ],
+  "attendus": [
+   "arret_travail",
+   "created_at",
+   "date_accident",
+   "date_declaration",
+   "declarant",
+   "description",
+   "duree_hospitalisation",
+   "employe_id",
+   "gravite",
+   "hospitalisation",
+   "id",
+   "lieu",
+   "numero_accident",
+   "partie_corps",
+   "photos",
+   "premier_secours",
+   "rapport_medical",
+   "statut",
+   "temoin1",
+   "temoin2",
+   "type_accident",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\qhse-securite\\dashboard\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "action_corrective",
+  "schemas": [
+   "InvestigationAccidentResponse"
+  ],
+  "attendus": [
+   "accident_id",
+   "causes_directes",
+   "causes_indirectes",
+   "causes_racines",
+   "conclusions",
+   "created_at",
+   "date_investigation",
+   "delai_mise_oeuvre",
+   "id",
+   "investigateur",
+   "mesures_correctives",
+   "mesures_preventives",
+   "numero_investigation",
+   "responsable_suivi",
+   "statut",
+   "temoins",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\qhse-securite\\incident-management\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "cause_racine",
+  "schemas": [
+   "InvestigationAccidentResponse"
+  ],
+  "attendus": [
+   "accident_id",
+   "causes_directes",
+   "causes_indirectes",
+   "causes_racines",
+   "conclusions",
+   "created_at",
+   "date_investigation",
+   "delai_mise_oeuvre",
+   "id",
+   "investigateur",
+   "mesures_correctives",
+   "mesures_preventives",
+   "numero_investigation",
+   "responsable_suivi",
+   "statut",
+   "temoins",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\qhse-securite\\incident-management\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "echeance",
+  "schemas": [
+   "InvestigationAccidentResponse"
+  ],
+  "attendus": [
+   "accident_id",
+   "causes_directes",
+   "causes_indirectes",
+   "causes_racines",
+   "conclusions",
+   "created_at",
+   "date_investigation",
+   "delai_mise_oeuvre",
+   "id",
+   "investigateur",
+   "mesures_correctives",
+   "mesures_preventives",
+   "numero_investigation",
+   "responsable_suivi",
+   "statut",
+   "temoins",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\qhse-securite\\incident-management\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "responsable_enquete",
+  "schemas": [
+   "InvestigationAccidentResponse"
+  ],
+  "attendus": [
+   "accident_id",
+   "causes_directes",
+   "causes_indirectes",
+   "causes_racines",
+   "conclusions",
+   "created_at",
+   "date_investigation",
+   "delai_mise_oeuvre",
+   "id",
+   "investigateur",
+   "mesures_correctives",
+   "mesures_preventives",
+   "numero_investigation",
+   "responsable_suivi",
+   "statut",
+   "temoins",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\qhse-securite\\incident-management\\page.tsx"
  },
  {
   "variable": "row",
@@ -3399,6 +6664,222 @@
   "fichier": "src\\app\\(app)\\reports-bi\\executive-dashboard\\page.tsx"
  },
  {
+  "variable": "stats",
+  "champ": "caTotal",
+  "schemas": [
+   "DossierTransitResponse",
+   "DossierTransitStatus",
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_cloture",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "date_ouverture",
+   "destination",
+   "distance_km",
+   "id",
+   "marchandise",
+   "montant_droits",
+   "montant_frais",
+   "montant_total",
+   "montant_tva",
+   "moyen_transport",
+   "nombre_colis",
+   "notes",
+   "numero_bl",
+   "numero_connaisse",
+   "numero_dossier",
+   "origine",
+   "poids_brut",
+   "poids_net",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "taux_change",
+   "transitaire_id",
+   "type_mission",
+   "type_transit",
+   "updated_at",
+   "valeur_marchandise"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\reports\\page.tsx"
+ },
+ {
+  "variable": "stats",
+  "champ": "delaiMoyenDouane",
+  "schemas": [
+   "DossierTransitResponse",
+   "DossierTransitStatus",
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_cloture",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "date_ouverture",
+   "destination",
+   "distance_km",
+   "id",
+   "marchandise",
+   "montant_droits",
+   "montant_frais",
+   "montant_total",
+   "montant_tva",
+   "moyen_transport",
+   "nombre_colis",
+   "notes",
+   "numero_bl",
+   "numero_connaisse",
+   "numero_dossier",
+   "origine",
+   "poids_brut",
+   "poids_net",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "taux_change",
+   "transitaire_id",
+   "type_mission",
+   "type_transit",
+   "updated_at",
+   "valeur_marchandise"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\reports\\page.tsx"
+ },
+ {
+  "variable": "stats",
+  "champ": "dossiersTransit",
+  "schemas": [
+   "DossierTransitResponse",
+   "DossierTransitStatus",
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_cloture",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "date_ouverture",
+   "destination",
+   "distance_km",
+   "id",
+   "marchandise",
+   "montant_droits",
+   "montant_frais",
+   "montant_total",
+   "montant_tva",
+   "moyen_transport",
+   "nombre_colis",
+   "notes",
+   "numero_bl",
+   "numero_connaisse",
+   "numero_dossier",
+   "origine",
+   "poids_brut",
+   "poids_net",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "taux_change",
+   "transitaire_id",
+   "type_mission",
+   "type_transit",
+   "updated_at",
+   "valeur_marchandise"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\reports\\page.tsx"
+ },
+ {
+  "variable": "stats",
+  "champ": "missionsTotal",
+  "schemas": [
+   "DossierTransitResponse",
+   "DossierTransitStatus",
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_cloture",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "date_ouverture",
+   "destination",
+   "distance_km",
+   "id",
+   "marchandise",
+   "montant_droits",
+   "montant_frais",
+   "montant_total",
+   "montant_tva",
+   "moyen_transport",
+   "nombre_colis",
+   "notes",
+   "numero_bl",
+   "numero_connaisse",
+   "numero_dossier",
+   "origine",
+   "poids_brut",
+   "poids_net",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "taux_change",
+   "transitaire_id",
+   "type_mission",
+   "type_transit",
+   "updated_at",
+   "valeur_marchandise"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\reports\\page.tsx"
+ },
+ {
   "variable": "p",
   "champ": "net_a_payer",
   "schemas": [
@@ -3445,6 +6926,27 @@
   ],
   "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\rh\\mon-espace\\page.tsx"
+ },
+ {
+  "variable": "newRole",
+  "champ": "modules",
+  "schemas": [
+   "RoleResponse"
+  ],
+  "attendus": [
+   "company_id",
+   "created_at",
+   "description",
+   "id",
+   "is_active",
+   "is_system",
+   "level",
+   "modules_allowed",
+   "name",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\role\\page.tsx"
  },
  {
   "variable": "r",
@@ -3634,6 +7136,328 @@
   "fichier": "src\\app\\(app)\\tenant\\page.tsx"
  },
  {
+  "variable": "companyProfile",
+  "champ": "statut",
+  "schemas": [
+   "CompanyResponse",
+   "RapportCompaniesResponse",
+   "SubscriptionPlanResponse"
+  ],
+  "attendus": [
+   "actives",
+   "adresse",
+   "agrement_douane",
+   "agrement_pad",
+   "agrement_pak",
+   "capital_social",
+   "code",
+   "created_at",
+   "current_storage_mb",
+   "current_users",
+   "custom_domain",
+   "description",
+   "email",
+   "features",
+   "id",
+   "is_active",
+   "is_verified",
+   "legal_form",
+   "logo_url",
+   "max_camions",
+   "max_storage_mb",
+   "max_users",
+   "modules_actives",
+   "modules_inclus",
+   "nom",
+   "par_plan",
+   "pays",
+   "primary_color",
+   "prix_annuel",
+   "prix_mensuel",
+   "rccm",
+   "rib",
+   "secondary_color",
+   "sigle",
+   "subdomain",
+   "subscription_end",
+   "subscription_plan_id",
+   "subscription_start",
+   "suspension_reason",
+   "tax_id",
+   "telephone",
+   "total_companies",
+   "trial",
+   "trial_days",
+   "type_plan",
+   "updated_at",
+   "verification_date",
+   "ville",
+   "website"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\tenant\\page.tsx"
+ },
+ {
+  "variable": "rapportCompanies",
+  "champ": "suspendues",
+  "schemas": [
+   "CompanyResponse",
+   "RapportCompaniesResponse",
+   "SubscriptionPlanResponse"
+  ],
+  "attendus": [
+   "actives",
+   "adresse",
+   "agrement_douane",
+   "agrement_pad",
+   "agrement_pak",
+   "capital_social",
+   "code",
+   "created_at",
+   "current_storage_mb",
+   "current_users",
+   "custom_domain",
+   "description",
+   "email",
+   "features",
+   "id",
+   "is_active",
+   "is_verified",
+   "legal_form",
+   "logo_url",
+   "max_camions",
+   "max_storage_mb",
+   "max_users",
+   "modules_actives",
+   "modules_inclus",
+   "nom",
+   "par_plan",
+   "pays",
+   "primary_color",
+   "prix_annuel",
+   "prix_mensuel",
+   "rccm",
+   "rib",
+   "secondary_color",
+   "sigle",
+   "subdomain",
+   "subscription_end",
+   "subscription_plan_id",
+   "subscription_start",
+   "suspension_reason",
+   "tax_id",
+   "telephone",
+   "total_companies",
+   "trial",
+   "trial_days",
+   "type_plan",
+   "updated_at",
+   "verification_date",
+   "ville",
+   "website"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\tenant\\page.tsx"
+ },
+ {
+  "variable": "invoiceResult",
+  "champ": "devise",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\tracking\\epod\\page.tsx"
+ },
+ {
+  "variable": "invoiceResult",
+  "champ": "montant_ht",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\tracking\\epod\\page.tsx"
+ },
+ {
+  "variable": "invoiceResult",
+  "champ": "montant_ttc",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\tracking\\epod\\page.tsx"
+ },
+ {
+  "variable": "invoiceResult",
+  "champ": "montant_tva",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\tracking\\epod\\page.tsx"
+ },
+ {
+  "variable": "invoiceResult",
+  "champ": "numero_facture",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\tracking\\epod\\page.tsx"
+ },
+ {
+  "variable": "r",
+  "champ": "response",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\tracking\\epod\\page.tsx"
+ },
+ {
   "variable": "b",
   "champ": "code_bureau",
   "schemas": [
@@ -3680,6 +7504,39 @@
   ],
   "genre": "champ_inexistant",
   "fichier": "src\\app\\(app)\\transit-avance\\page.tsx"
+ },
+ {
+  "variable": "tcoData",
+  "champ": "alertes_maintenance_predictive",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\control\\page.tsx"
  },
  {
   "variable": "m",
@@ -3781,6 +7638,39 @@
   "fichier": "src\\app\\(app)\\transport\\control\\page.tsx"
  },
  {
+  "variable": "tcoData",
+  "champ": "cout_global_moyen_km_xaf",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\control\\page.tsx"
+ },
+ {
   "variable": "m",
   "champ": "destination",
   "schemas": [
@@ -3849,6 +7739,39 @@
  {
   "variable": "m",
   "champ": "eta",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\control\\page.tsx"
+ },
+ {
+  "variable": "tcoData",
+  "champ": "flotte_totale_vehicules",
   "schemas": [
    "MissionStatus",
    "app__schemas__transport__MissionResponse"
@@ -4012,6 +7935,296 @@
   "fichier": "src\\app\\(app)\\transport\\control\\page.tsx"
  },
  {
+  "variable": "corridorsData",
+  "champ": "total_camions_en_transit",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\control\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "categorie_permis",
+  "schemas": [
+   "ConducteurResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "created_at",
+   "date_embauche",
+   "date_expiration_permis",
+   "email",
+   "id",
+   "is_active",
+   "nom",
+   "numero_permis",
+   "prenom",
+   "telephone",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\drivers\\new\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "contact_urgence_nom",
+  "schemas": [
+   "ConducteurResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "created_at",
+   "date_embauche",
+   "date_expiration_permis",
+   "email",
+   "id",
+   "is_active",
+   "nom",
+   "numero_permis",
+   "prenom",
+   "telephone",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\drivers\\new\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "contact_urgence_telephone",
+  "schemas": [
+   "ConducteurResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "created_at",
+   "date_embauche",
+   "date_expiration_permis",
+   "email",
+   "id",
+   "is_active",
+   "nom",
+   "numero_permis",
+   "prenom",
+   "telephone",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\drivers\\new\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "specialisation",
+  "schemas": [
+   "ConducteurResponse"
+  ],
+  "attendus": [
+   "adresse",
+   "created_at",
+   "date_embauche",
+   "date_expiration_permis",
+   "email",
+   "id",
+   "is_active",
+   "nom",
+   "numero_permis",
+   "prenom",
+   "telephone",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\drivers\\new\\page.tsx"
+ },
+ {
+  "variable": "mission",
+  "champ": "date_chargement_prevue",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\epod\\page.tsx"
+ },
+ {
+  "variable": "mission",
+  "champ": "destination",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\epod\\page.tsx"
+ },
+ {
+  "variable": "mission",
+  "champ": "nature_fret",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\epod\\page.tsx"
+ },
+ {
+  "variable": "mission",
+  "champ": "origine",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\epod\\page.tsx"
+ },
+ {
+  "variable": "mission",
+  "champ": "poids_kg",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\epod\\page.tsx"
+ },
+ {
   "champ": "statut",
   "literal": "EN_ROUTE",
   "variable": "m.statut",
@@ -4055,6 +8268,209 @@
   "jumeau": null,
   "genre": "valeur_hors_enum",
   "fichier": "src\\app\\(app)\\transport\\epod\\page.tsx"
+ },
+ {
+  "variable": "kpis",
+  "champ": "camions_en_maintenance",
+  "schemas": [
+   "CamionResponse",
+   "CamionStatus"
+  ],
+  "attendus": [
+   "annee",
+   "capacite_tonnage",
+   "created_at",
+   "date_mise_service",
+   "derniere_maintenance",
+   "id",
+   "immatriculation",
+   "is_active",
+   "kilometrage",
+   "marque",
+   "modele",
+   "prochaine_maintenance",
+   "status",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\flotte\\page.tsx"
+ },
+ {
+  "variable": "kpis",
+  "champ": "taux_disponibilite",
+  "schemas": [
+   "CamionResponse",
+   "CamionStatus"
+  ],
+  "attendus": [
+   "annee",
+   "capacite_tonnage",
+   "created_at",
+   "date_mise_service",
+   "derniere_maintenance",
+   "id",
+   "immatriculation",
+   "is_active",
+   "kilometrage",
+   "marque",
+   "modele",
+   "prochaine_maintenance",
+   "status",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\flotte\\page.tsx"
+ },
+ {
+  "variable": "kpis",
+  "champ": "vehicules_actifs",
+  "schemas": [
+   "CamionResponse",
+   "CamionStatus"
+  ],
+  "attendus": [
+   "annee",
+   "capacite_tonnage",
+   "created_at",
+   "date_mise_service",
+   "derniere_maintenance",
+   "id",
+   "immatriculation",
+   "is_active",
+   "kilometrage",
+   "marque",
+   "modele",
+   "prochaine_maintenance",
+   "status",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\flotte\\page.tsx"
+ },
+ {
+  "variable": "kpis",
+  "champ": "vehicules_total",
+  "schemas": [
+   "CamionResponse",
+   "CamionStatus"
+  ],
+  "attendus": [
+   "annee",
+   "capacite_tonnage",
+   "created_at",
+   "date_mise_service",
+   "derniere_maintenance",
+   "id",
+   "immatriculation",
+   "is_active",
+   "kilometrage",
+   "marque",
+   "modele",
+   "prochaine_maintenance",
+   "status",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\flotte\\page.tsx"
+ },
+ {
+  "variable": "stats",
+  "champ": "enRoute",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\planning\\page.tsx"
+ },
+ {
+  "variable": "stats",
+  "champ": "livre",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\planning\\page.tsx"
+ },
+ {
+  "variable": "stats",
+  "champ": "planifie",
+  "schemas": [
+   "MissionStatus",
+   "app__schemas__transport__MissionResponse"
+  ],
+  "attendus": [
+   "camion_id",
+   "client_id",
+   "conducteur_id",
+   "conteneur_id",
+   "cout_estime",
+   "cout_reel",
+   "created_at",
+   "date_debut_prevue",
+   "date_debut_reelle",
+   "date_fin_prevue",
+   "date_fin_reelle",
+   "distance_km",
+   "id",
+   "notes",
+   "numero_bl",
+   "point_arrivee",
+   "point_depart",
+   "reference",
+   "statut",
+   "type_mission",
+   "updated_at"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\planning\\page.tsx"
  },
  {
   "champ": "statut",
@@ -4145,6 +8561,96 @@
   "jumeau": "terminee",
   "genre": "valeur_hors_enum",
   "fichier": "src\\app\\(app)\\transport\\planning\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "chauffeur_id",
+  "schemas": [
+   "FuelTicketLine"
+  ],
+  "attendus": [
+   "chauffeur",
+   "conducteur_id",
+   "conso_l100",
+   "cout",
+   "date_plein",
+   "delta_km",
+   "id",
+   "immatriculation",
+   "index_precedent",
+   "kilometrage",
+   "litres",
+   "mission_id",
+   "mode_paiement",
+   "notes",
+   "numero_ticket",
+   "prix_litre",
+   "station",
+   "statut",
+   "vehicule_id"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\saisie-ticket-carburant\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "index_km",
+  "schemas": [
+   "FuelTicketLine"
+  ],
+  "attendus": [
+   "chauffeur",
+   "conducteur_id",
+   "conso_l100",
+   "cout",
+   "date_plein",
+   "delta_km",
+   "id",
+   "immatriculation",
+   "index_precedent",
+   "kilometrage",
+   "litres",
+   "mission_id",
+   "mode_paiement",
+   "notes",
+   "numero_ticket",
+   "prix_litre",
+   "station",
+   "statut",
+   "vehicule_id"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\saisie-ticket-carburant\\page.tsx"
+ },
+ {
+  "variable": "formData",
+  "champ": "prix_litre_xaf",
+  "schemas": [
+   "FuelTicketLine"
+  ],
+  "attendus": [
+   "chauffeur",
+   "conducteur_id",
+   "conso_l100",
+   "cout",
+   "date_plein",
+   "delta_km",
+   "id",
+   "immatriculation",
+   "index_precedent",
+   "kilometrage",
+   "litres",
+   "mission_id",
+   "mode_paiement",
+   "notes",
+   "numero_ticket",
+   "prix_litre",
+   "station",
+   "statut",
+   "vehicule_id"
+  ],
+  "genre": "champ_inexistant",
+  "fichier": "src\\app\\(app)\\transport\\saisie-ticket-carburant\\page.tsx"
  },
  {
   "variable": "magasin",

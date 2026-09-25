@@ -277,7 +277,14 @@ def analyser(contrat, index, texte):
     pour_valeurs = set()
     for schemas in vars_.values():
         pour_valeurs.update(schemas)
-    for nom, schemas in sorted(alias.items()):
+    # Les variables d'etat se verifient AUSSI : `setMission(activeMissions[0])`
+    # puis `mission.origine` ne passe par aucune iteration, et c'est le motif le
+    # plus frequent de ce frontend. Ne verifier que les alias d'iteration
+    # laissait l'ecran e-pod entier sous silence alors que le lien etait retabli.
+    a_verifier = dict(alias)
+    for nom, schemas in vars_.items():
+        a_verifier.setdefault(nom, set()).update(schemas)
+    for nom, schemas in sorted(a_verifier.items()):
         disponibles = champs_de(contrat, schemas)
         if not disponibles:
             continue
