@@ -69,6 +69,15 @@ CONSTRUCTION = re.compile(
 COMPARAISON = (
     r"([\w$.]*\b%s\b[\w$.\[\]']*)\s*[=!]==?\s*([`'\"])([^`'\"]+)\2"
 )
+# `const res = await transportAPI.getMissions()` — le nom lie a l'appel est la
+# seule facon de savoir QUI remplit quelle variable d'etat.
+AFFECTATION = re.compile(
+    r"(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*([^;\n]{0,220})"
+)
+PROMESSE = re.compile(
+    r"(?:const|let|var)\s*\[([^\]]*)\]\s*=\s*(?:await\s*)?Promise\.all\(\s*\["
+)
+DATA_QUERY = re.compile(r"\bdata\s*:\s*([A-Za-z_$][\w$]*)")
 
 # Ce qui n'est pas une donnee metier, meme lu sur un objet metier.
 BUILTIN = frozenset("""
@@ -137,6 +146,45 @@ def index_client(front_src):
     return index
 
 
+def bloc_apparie(texte, debut):
+    """Contenu (hors delimitateurs) du bloc `{} [] ()` ouvert a `debut`."""
+    if debut >= len(texte) or texte[debut] not in "{[(":
+        return ""
+    i, prof = debut, 0
+    while i < len(texte):
+        c = texte[i]
+        if c in "'\"`":
+            i += 1
+            while i < len(texte) and texte[i] != c:
+                i += 2 if texte[i] == "\\" else 1
+        elif c in "{[(":
+            prof += 1
+        elif c in ")]}":
+            prof -= 1
+            if prof == 0:
+                return texte[debut + 1:i]
+        i += 1
+    return ""
+
+
+def decoupage(corps):
+    """Decoupe le contenu d'un tableau aux virgules de profondeur 0."""
+    morceaux, prof, buf = [], 0, []
+    for c in corps:
+        if c in "{[(":
+            prof += 1
+        elif c in ")]}":
+            prof -= 1
+        if c == "," and prof == 0:
+            morceaux.append("".join(buf))
+            buf = []
+        else:
+            buf.append(c)
+    if buf:
+        morceaux.append("".join(buf))
+    return morceaux
+
+
 def lien_donnees(contrat, index, texte):
     """variable d'etat -> set de noms de schemas qui la nourrissent.
 
@@ -153,40 +201,80 @@ def lien_donnees(contrat, index, texte):
     savoir. Ces variables sont comptees a part : le silence reste distinguishable
     d'un « tout va bien ».
     """
-    vars_, provenances = {}, {}
+    vars_, sources, ambigus = {}, {}, set()
 
-    def apporter(etat, methode, path, noms):
-        vars_.setdefault(etat, set()).update(noms)
-        provenances.setdefault(etat, set()).add((methode, path))
+    def resoudre(expr):
+        """(methode, path) depuis le texte d'un appel, ou None."""
+        m = APPEL_DIRECT.search(expr)
+        if m and (m.group(1) == "apiClient" or m.group(1).endswith("API")):
+            return m.group(2), m.group(3)
+        for m in APPEL_METODE.finditer(expr):
+            cle = "%s.%s" % (m.group(1), m.group(2))
+            if cle in index:
+                return index[cle]
+        return None
 
-    setters = {}
+    def apporter_source(nom, chemin):
+        sources.setdefault(nom, set()).add(chemin)
+
+    # 1) `const res = await transportAPI.getMissions()`
+    for m in AFFECTATION.finditer(texte):
+        c = resoudre(m.group(2))
+        if c:
+            apporter_source(m.group(1), c)
+    # 2) `const [v, k] = await Promise.all([get('/a'), get('/b')])` : ce motif
+    #    est courant et la simple proximite y melange les deux reponses.
+    for m in PROMESSE.finditer(texte):
+        noms = [n.strip() for n in m.group(1).split(",")]
+        corps = bloc_apparie(texte, texte.find("[", m.end() - 1))
+        morceaux = decoupage(corps)
+        for i, nom in enumerate(noms):
+            if nom and i < len(morceaux):
+                c = resoudre(morceaux[i])
+                if c:
+                    apporter_source(nom, c)
+    # 3) une passe de propagation sur les affectations locales :
+    #    `const rows = v.data` puis `setVehicles(rows.map(...))`.
+    for _ in range(2):
+        for m in AFFECTATION.finditer(texte):
+            cible, droite = m.group(1), m.group(2)
+            if cible in sources:
+                continue
+            for nom in re.findall(r"[A-Za-z_$][\w$]*", droite):
+                if nom in sources:
+                    sources[cible] = set(sources[nom])
+                    break
+    # 4) `const {data: factures = []} = useQuery({queryFn: () => financeAPI.x()})`
+    for m in DATA_QUERY.finditer(texte):
+        autour = texte[max(0, m.start() - 300):m.end() + 300]
+        c = resoudre(autour)
+        if c:
+            apporter_source(m.group(1), c)
+
+    # 5) la source d'une variable d'etat est celle NOMMEE dans l'argument de son
+    #    setter, pas celle qui passe a cote. C'est ce qui distingue `setKpis(k)`
+    #    (aucun contrat : dictionnaire brut) de `setVehicles(rows.map(...))`.
     for nom, seteur in ETAT.findall(texte):
-        setters[seteur] = nom
-    fournisseurs = []
-    for m in APPEL_DIRECT.finditer(texte):
-        obj, methode, path = m.group(1), m.group(2), m.group(3)
-        if obj != "apiClient" and not obj.endswith("API"):
+        chemins = set()
+        for m in re.finditer(r"\b%s\s*\(" % re.escape(seteur), texte):
+            arg = bloc_apparie(texte, m.end() - 1)
+            for local, si in sources.items():
+                if re.search(r"\b%s\b" % re.escape(local), arg):
+                    chemins |= si
+        if len(chemins) > 1:
+            ambigus.add(nom)
             continue
-        fournisseurs.append((methode, path, m.end(), m.end() + 900))
-    for m in APPEL_METODE.finditer(texte):
-        cle = "%s.%s" % (m.group(1), m.group(2))
-        if cle not in index:
+        if not chemins:
             continue
-        methode, path = index[cle]
-        fournisseurs.append((methode, path, max(0, m.start() - 900), m.start() + 900))
-    for methode, path, debut, fin in fournisseurs:
+        methode, path = next(iter(chemins))
         noms = schemas_de_reponse(contrat, path, methode)
         if not noms:
+            # L'appel existe mais n'emet aucun schema : rien a verifier ici,
+            # et ce n'est pas pour autant une donnee conforme.
+            ambigus.add(nom)
             continue
-        fenetre = texte[debut:fin]
-        for seteur, etat in setters.items():
-            if re.search(r"\b%s\s*\(" % re.escape(seteur), fenetre):
-                apporter(etat, methode, path, noms)
-        # `data: foo` destructures depuis useQuery, et `const foo = res.data`
-        for m in re.finditer(r"data\s*:\s*([A-Za-z_$][\w$]*)", fenetre):
-            apporter(m.group(1), methode, path, noms)
-    ambigus = {e for e, chemins in provenances.items() if len(chemins) > 1}
-    return {e: n for e, n in vars_.items() if e not in ambigus}, ambigus
+        vars_[nom] = set(noms)
+    return vars_, ambigus
 
 
 def corps_litteral(texte, debut):
