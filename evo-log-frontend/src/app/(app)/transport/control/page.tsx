@@ -127,7 +127,7 @@ export default function TransportControlPage() {
 
   const kpis = [
     { title: 'Véhicules Flotte', value: String(tcoData?.flotte_totale_vehicules ?? ''), subtitle: 'Tracteurs & Plateaux', icon: <span className="material-symbols-outlined text-2xl">local_shipping</span>, color: 'blue' as const },
-    { title: 'Missions Actives', value: String(missions.length), subtitle: 'En cours d\'acheminement', icon: <span className="material-symbols-outlined text-2xl">route</span>, color: 'emerald' as const, trend: { value: 12, isPositive: true } },
+    { title: 'Missions Actives', value: String(missions.length), subtitle: 'En cours d\'acheminement', icon: <span className="material-symbols-outlined text-2xl">route</span>, color: 'emerald' as const },
     { title: 'Corridors CEMAC', value: corridorsData?.total_camions_en_transit == null ? '' : `${corridorsData.total_camions_en_transit} convois`, subtitle: "Douala - N'Djamena & Bangui", icon: <span className="material-symbols-outlined text-2xl">public</span>, color: 'amber' as const },
     { title: 'TCO Moyen Flotte', value: tcoData?.cout_global_moyen_km_xaf == null ? '' : `${tcoData.cout_global_moyen_km_xaf} XAF`, subtitle: 'Coût au km parcouru', icon: <span className="material-symbols-outlined text-2xl">paid</span>, color: 'violet' as const },
   ];
@@ -147,7 +147,7 @@ export default function TransportControlPage() {
         // L'ancien statusMap testait EN_ROUTE / CHARGEMENT / LIVRE / ATTENTE :
         // aucune mission ne porte ces valeurs, chaque ligne tombait donc dans
         // le fallback avec le code technique brut comme libelle.
-        const parStatut: Record<string, React.ReactElement> = {
+        const parStatut: Record<string, JSX.Element> = {
           planifiee: <StatusBadge label="Planifiée" variant="pending" icon />,
           en_cours: <StatusBadge label="En Route" variant="transit" icon pulse />,
           terminee: <StatusBadge label="Terminée" variant="delivered" icon />,
@@ -199,12 +199,23 @@ export default function TransportControlPage() {
         ))}
       </div>
 
-      {/* Stats Overview */}
+      {/* Stats Overview — calculees depuis les donnees API deja chargees.
+          Les valeurs precedentes (42, 38, « 3,150 km », « 31.8 L/100km »)
+          etaient des litteraux inventes dans le JSX, presents quelle que soit
+          la base. */}
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Camions en Service" value="42" change={5} color="primary" icon={<span className="material-symbols-outlined">local_shipping</span>} />
-        <StatCard label="Chauffeurs Actifs" value="38" change={2} color="success" icon={<span className="material-symbols-outlined">person</span>} />
-        <StatCard label="Kilomètres Jour" value="3,150 km" change={15} color="info" icon={<span className="material-symbols-outlined">speed</span>} />
-        <StatCard label="Consommation Moyenne" value="31.8 L/100km" change={-4} changeLabel="vs cible" color="warning" icon={<span className="material-symbols-outlined">local_gas_station</span>} />
+        <StatCard label="Camions Actifs" value={String((camionsData || []).filter((c: any) => c.status === 'active').length)} color="primary" icon={<span className="material-symbols-outlined">local_shipping</span>} />
+        <StatCard label="Chauffeurs Actifs" value={String((chauffeursData || []).filter((d: any) => d.is_active).length)} color="success" icon={<span className="material-symbols-outlined">person</span>} />
+        <StatCard label="Missions en Cours" value={String(missions.filter((m: any) => m.status === 'en_cours').length)} color="info" icon={<span className="material-symbols-outlined">route</span>} />
+        <StatCard
+          label="Distance Planifiée"
+          value={(() => {
+            const km = missions.map((m: any) => m.distance_km).filter((v: any) => typeof v === 'number').reduce((a: number, b: number) => a + b, 0);
+            return missions.some((m: any) => typeof m.distance_km === 'number') ? `${km.toLocaleString('fr-FR')} km` : '—';
+          })()}
+          color="warning"
+          icon={<span className="material-symbols-outlined">speed</span>}
+        />
       </div>
 
       {/* Main Content Grid */}
@@ -239,21 +250,23 @@ export default function TransportControlPage() {
           <Card>
             <CardHeader title="Corridors Internationaux CEMAC" icon={<span className="material-symbols-outlined text-xl text-amber-500">public</span>} />
             <CardContent>
+              {/* Avant : « 14 convois » / « 9 convois » en dur dans le JSX.
+                  Maintenant : rendu depuis corridorsData.corridors, et un etat
+                  vide honnete si l'API ne repond pas. */}
               <div className="space-y-3">
-                <div className="p-3 rounded-xl border border-slate-800 bg-slate-900/60">
-                  <div className="text-xs font-bold text-white flex justify-between">
-                    <span>Axe Douala - N'Djamena (1 850 km)</span>
-                    <span className="text-emerald-400 font-mono">14 convois</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-1">Carnet TRIE Inter-États • Escorte Ngaoundéré-Kousseri active.</p>
-                </div>
-                <div className="p-3 rounded-xl border border-slate-800 bg-slate-900/60">
-                  <div className="text-xs font-bold text-white flex justify-between">
-                    <span>Axe Douala - Bangui (1 430 km)</span>
-                    <span className="text-cyan-400 font-mono">9 convois</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-1">Poste frontière Garoua-Boulaï • Caution apurée à 100%.</p>
-                </div>
+                {(corridorsData?.corridors || []).length === 0 ? (
+                  <p className="text-xs text-slate-500 py-2">Aucun corridor remonté par l'API.</p>
+                ) : (
+                  corridorsData.corridors.map((c: any, idx: number) => (
+                    <div key={idx} className="p-3 rounded-xl border border-slate-800 bg-slate-900/60">
+                      <div className="text-xs font-bold text-white flex justify-between">
+                        <span>{c.axe} ({c.distance_km} km)</span>
+                        <span className="text-emerald-400 font-mono">{c.convois_actifs} convois</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-1">{c.regime_douane}</p>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -263,10 +276,12 @@ export default function TransportControlPage() {
             <CardHeader title="Alertes Maintenance Prédictive Flotte" icon={<span className="material-symbols-outlined text-xl text-red-500">warning</span>} />
             <CardContent>
               <div className="space-y-3">
-                {(tcoData?.alertes_maintenance_predictive || [
-                  { immatriculation: 'LT-TR-4021', type: 'Tracteur Actros', alerte: 'VIDANGE_MOTEUR_IMMINENTE', echeance_km: 500, priorite: 'HAUTE' },
-                  { immatriculation: 'LT-TR-8812', type: 'Plateau 40ft', alerte: 'CONTROLE_PNEUMATIQUES', echeance_km: 1200, priorite: 'MOYENNE' }
-                ]).map((alt: any, idx: number) => (
+                {/* Pas de fallback invente : quand l'endpoint ne repond pas, on
+                    le dit au lieu d'afficher des immatriculations fictives. */}
+                {(tcoData?.alertes_maintenance_predictive || []).length === 0 ? (
+                  <p className="text-xs text-slate-500 py-2">Aucune alerte remontee par l'API TCO.</p>
+                ) : (
+                  tcoData.alertes_maintenance_predictive.map((alt: any, idx: number) => (
                   <div key={idx} className="p-3 rounded-xl border border-red-500/20 bg-red-500/5 flex justify-between items-center">
                     <div>
                       <div className="text-xs font-bold text-red-400 font-mono">{alt.immatriculation}</div>
@@ -276,7 +291,8 @@ export default function TransportControlPage() {
                       -{alt.echeance_km} km
                     </span>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>

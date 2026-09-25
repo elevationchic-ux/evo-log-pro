@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { X, Search, LayoutDashboard } from "lucide-react";
 import { NAVIGATION_REGISTRY, ModuleNavConfig } from "@/config/navigationRegistry";
@@ -70,6 +70,16 @@ export default function SubModuleOrbitalBubble() {
     setIsOpen(false);
     router.push(path);
   };
+
+  // Fermeture clavier : Échap replie le panneau (tous modules), aligné sur le reste du chrome.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen]);
 
   return (
     <>

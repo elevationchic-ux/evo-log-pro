@@ -116,7 +116,7 @@ export default function ModuleSidebar({
             </div>
           </div>
 
-          <button onClick={onClose} className="p-2 min-w-11 min-h-11 text-slate-400 hover:text-white" aria-label="Fermer le menu">
+          <button onClick={onClose} className="p-2 min-w-11 min-h-11 text-slate-400 hover:text-white" aria-label={language === 'en' ? 'Close menu' : 'Fermer le menu'}>
             <X className="w-5 h-5" />
           </button>
         </div>
