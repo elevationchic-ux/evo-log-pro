@@ -153,3 +153,78 @@ def test_bloc_apparie_ignore_les_delimitateurs_d_une_chaine(audit):
 def test_decoupage_respecte_les_parentheses_imbriquees(audit):
     morceaux = audit.decoupage("get('/a'), get('/b', { x: 1 }), c")
     assert morceaux == ["get('/a')", " get('/b', { x: 1 })", " c"]
+
+
+# ─── verrous ajoutes apres la deuxieme passe de precision ──────────────────
+def test_un_commentaire_n_est_pas_du_code(audit):
+    """Apres la correction de `transport/control`, le commentaire
+    « lisait m.immatriculation / m.conducteur » produisait lui-meme des
+    signaux : l'outil se signalait ses propres explications."""
+    clean = audit.retirer_commentaires(
+        "const a = m.immatriculation; // m.conducteur est faux\n"
+        "/* m.client n'existe pas */\n"
+        "const u = 'https://exemple.fr/x';"
+    )
+    assert "m.conducteur" not in clean
+    assert "m.client" not in clean
+    assert "https://exemple.fr/x" in clean  # les chaines survivent
+
+
+def test_useQuery_attribution_par_bloc_pas_par_fenetre(audit):
+    """Deux useQuery adjacents : `kpisData` (endpoint sans response_model) ne
+    doit pas heriter des champs de MissionResponse par proximite. La fenetre
+    ±300 caracteres le faisait — faux positif `corridorsData->corridors`."""
+    code = """
+const { data: missionsData } = useQuery({
+  queryFn: async () => { const res = await transportAPI.getMissions(); return res.data; },
+});
+const { data: kpisData } = useQuery({
+  queryFn: async () => { const res = await apiClient.get('/api/v1/transport/kpis'); return res.data; },
+});
+const v = kpisData.mouvements_jour + missionsData.length;
+"""
+    noms_lus, _val, retably, ambigus = audit.analyser(CONTRAT, INDEX, code)
+    assert retably
+    assert "kpisData" in ambigus
+    signales = {s["champ"] for s in noms_lus}
+    assert "mouvements_jour" not in signales  # non juge, pas jugeable a tort
+
+
+def test_view_model_porte_par_une_constante(audit):
+    """`const missions = missionsData.map((m) => ({ status: m.statut }))` puis
+    `m.status === 'en_cours'` : la cle est construite par la page. Ni l'axe
+    noms ni l'axe valeurs ne doivent reagir — c'etait le signal fantome restant
+    sur `transport/control` apres correction."""
+    code = """
+const { data: missionsData } = useQuery({
+  queryFn: async () => { const res = await transportAPI.getMissions(); return res.data; },
+});
+const { data: camionsData } = useQuery({
+  queryFn: async () => { const res = await apiClient.get('/api/v1/transport/camions'); return res.data; },
+});
+const missions = missionsData.map((m: any) => ({ status: m.statut, vehicle: m.reference }));
+const actives = missions.filter((m: any) => m.status === 'en_cours');
+const nb = camionsData.length;
+"""
+    noms_lus, valeurs, retably, _ = audit.analyser(CONTRAT, INDEX, code)
+    assert retably
+    assert {s["champ"] for s in noms_lus} == set()
+    assert valeurs == []
+
+
+def test_agregat_construit_dans_un_setter(audit):
+    """`setStats({ total, planifie })` puis `stats.planifie` : l'agregat ne
+    transite par aucun contrat. `transport/planning` etait signale trois fois
+    pour ses propres cles de KPI."""
+    code = """
+const [stats, setStats] = useState({ total: 0, planifie: 0 });
+const res = await transportAPI.getMissions();
+const data = res.data || [];
+setStats({ total: data.length, planifie: data.filter((m: any) => m.statut === 'planifiee').length });
+return <p>{stats.total} {stats.planifie} {stats.inventee}</p>;
+"""
+    noms_lus, _val, retably, _ = audit.analyser(CONTRAT, INDEX, code)
+    assert retably
+    signales = {s["champ"] for s in noms_lus}
+    assert "planifie" not in signales
+    assert "inventee" in signales  # la, oui : rien ne la construit

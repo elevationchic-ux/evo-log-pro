@@ -39,6 +39,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getRouteFromTCode } from '@/utils/tcodeLookup'
 import { financeAPI, transportAPI, magasinAPI } from '@/lib/api-client'
+import { useI18n } from '@/hooks/useI18n'
+import { useSettings } from '@/components/layout/SettingsProvider'
 
 type Num = number | null
 
