@@ -503,10 +503,17 @@ def get_system_health(
 
     from app.core.config import settings
     from app.models.audit import AuditLog
-    from app.models.integration import Integration
+    # La colonne est un Enum SQLAlchemy : filtrer sur les membres (et non sur
+    # les chaines) evite un "in_" qui ne correspond jamais a rien.
+    from app.models.integration import Integration, TypeIntegration
+    from sqlalchemy import text
 
     def probe_tcp(url: str, default_port: int, timeout: float = 0.6):
-        """Sondage reel : connexion TCP + latence en ms. (None, None) si non configure."""
+        """Sondage reel : tentative de connexion TCP + latence mesuree.
+
+        Retourne (joignable, latence_ms) : (None, None) si aucune URL configuree,
+        (True, ms) si la poignee a reussi, (False, ms) si elle a echoue.
+        """
         if not url:
             return None, None
         parsed = urlparse(url if "//" in url else f"redis://{url}")
@@ -517,11 +524,12 @@ def get_system_health(
         started = time.time()
         try:
             with socket.create_connection((host, port), timeout=timeout):
-                return int((time.time() - started) * 1000), None
+                return True, int((time.time() - started) * 1000)
         except OSError:
-            return None, int((time.time() - started) * 1000)
+            return False, int((time.time() - started) * 1000)
 
-    # --- Base de donnees : seule mesure reelle historiquement disponible ---
+    # --- Base de donnees : latence mesuree par un aller-retour reel ---
+    t0 = time.time()
     db_started = time.time()
     db_ok = True
     try:
@@ -550,7 +558,11 @@ def get_system_health(
     # --- Passerelles : etat reellement configure, sinon NON_CONFIGURE ---
     customs = (
         db.query(Integration)
-        .filter(Integration.type_integration.in_(["sydonia", "guichet_unique", "pcs"]))
+        .filter(Integration.type_integration.in_([
+            TypeIntegration.SYDONIA,
+            TypeIntegration.GUICHET_UNIQUE,
+            TypeIntegration.PCS,
+        ]))
         .order_by(Integration.id.desc())
         .limit(10)
         .all()
@@ -568,7 +580,7 @@ def get_system_health(
             "status": "OK",
             "version": settings.APP_VERSION,
             "environment": settings.ENVIRONMENT,
-            "responseMs": None,          # la latence reponse de cet endpoint est mesuree separement
+            "responseMs": None,          # mesuree globalement par measured_at_ms
             "uptimeSeconds": int(time.time() - _PROCESS_START),
             "uptimeSource": "processus courant (redemarrage a zero, pas un SLA)",
             "measured": True,
@@ -587,7 +599,7 @@ def get_system_health(
         {
             "service": "Coffre de stockage documents (MinIO)",
             "category": "STORAGE",
-            "status": ("OK" if storage_ok is not None else "DOWN")
+            "status": ("OK" if storage_ok else "DOWN")
             if settings.MINIO_ENABLED else "NON_CONFIGURE",
             "responseMs": storage_latency,
             "endpoint": settings.MINIO_ENDPOINT if settings.MINIO_ENABLED else None,
