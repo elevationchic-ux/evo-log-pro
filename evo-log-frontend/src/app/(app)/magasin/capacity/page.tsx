@@ -128,7 +128,7 @@ export default function MagasinCapacityPage() {
     a.click();
     URL.revokeObjectURL(url);
     toast.success(t('Export généré depuis les données affichées.', 'Export built from the displayed data.'));
-  }, [filtered, t, lang]);
+  }, [filtered, t]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">

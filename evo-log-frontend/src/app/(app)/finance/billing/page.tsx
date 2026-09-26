@@ -306,7 +306,7 @@ export default function KFinanceBillingPage() {
       `${filtered.length} facture(s) exportée(s) depuis la liste affichée.`,
       `${filtered.length} invoice(s) exported from the displayed list.`,
     ));
-  }, [filtered, resteDu, nomClient, t, lang, today]);
+  }, [filtered, resteDu, nomClient, t, today]);
 
   const telechargerPdf = useCallback(async (f: FactureRow) => {
     setBusyId(f.id);
@@ -324,7 +324,7 @@ export default function KFinanceBillingPage() {
     } finally {
       setBusyId(null);
     }
-  }, [t, lang]);
+  }, [t]);
 
   const changerStatut = useCallback(async (f: FactureRow, statut: string) => {
     setBusyId(f.id);
@@ -338,7 +338,7 @@ export default function KFinanceBillingPage() {
     } finally {
       setBusyId(null);
     }
-  }, [t, lang]);
+  }, [t]);
 
   const statutsDisponibles = useMemo(() => {
     const vus = new Set(factures.map((f) => String(f.statut || '').toLowerCase()));

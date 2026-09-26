@@ -44,8 +44,7 @@ export default function GPSControlTowerPage() {
   }, []);
 
   const filteredMissions = missions.filter(m => 
-    (m.reference && m.reference.toLowerCase().includes(search.toLowerCase())) ||
-    (m.camion_immatriculation && m.camion_immatriculation.toLowerCase().includes(search.toLowerCase()))
+    (m.reference && m.reference.toLowerCase().includes(search.toLowerCase()))
   );
 
   // CamionResponse expose `status` (valeurs reelles de l'enum CamionStatus :
@@ -62,6 +61,24 @@ export default function GPSControlTowerPage() {
   const enMouvement = camions.filter(c => camionsEnMission.has(c.id)).length;
   const enArret = camions.filter(c => c.status === 'active' && !camionsEnMission.has(c.id)).length;
   const horsLigne = camions.filter(c => c.status === 'in_maintenance' || c.status === 'out_of_service').length;
+
+  // Construire le vehicules[] attendu par MapControlTower (interface Vehicle)
+  const towerVehicles = camions
+    .filter(c => !search || (c.immatriculation || '').toLowerCase().includes(search.toLowerCase()))
+    .map(c => ({
+      id: String(c.id),
+      name: c.immatriculation || `Camion #${c.id}`,
+      lat: undefined as number | undefined,
+      lng: undefined as number | undefined,
+      status: (
+        c.status === 'in_maintenance' || c.status === 'out_of_service'
+          ? 'maintenance' as const
+          : camionsEnMission.has(c.id)
+            ? 'en_route' as const
+            : 'arrete' as const
+      ),
+      speed: undefined as number | undefined,
+    }));
 
   const total = enMouvement + enArret + horsLigne || 1;
   const pctMouvement = Math.round((enMouvement / total) * 100);
