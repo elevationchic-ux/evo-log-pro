@@ -255,6 +255,18 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--module", help="filtrer un module (ex: magasin)")
     ap.add_argument("--backend", default=os.path.join(FE_ROOT, "..", "evo-log-backend"))
+    ap.add_argument(
+        "--strict-honesty",
+        action="store_true",
+        help=(
+            "Verrou CI 'Zero-Mock' : exit 1 UNIQUEMENT si une metrique d'honnetete "
+            "retombe au-dessus de 0 (broken_links / dead_buttons / fake_data / "
+            "ghost_routes). Les api_gaps restent affiches mais ne font pas echouer, "
+            "car un appel frontend vers un endpoint backend non implemente est un "
+            "trou de couverture, pas une regression d'honnetete (le backend "
+            "repond 501 explicite, jamais un faux succes)."
+        ),
+    )
     args = ap.parse_args()
 
     report = audit(os.path.abspath(args.backend))
@@ -281,6 +293,22 @@ def main():
             for k in ("broken_links", "dead_buttons", "fake_data", "api_gaps", "ghost_routes"):
                 for it in b[k][:50]:
                     print(f"  {k[:4]}  {it['file']}  ->  {it['detail']}")
+
+    if args.strict_honesty:
+        honesty = {k: totals[k] for k in
+                   ("broken_links", "dead_buttons", "fake_data", "ghost_routes")}
+        failing = {k: v for k, v in honesty.items() if v > 0}
+        if failing:
+            print(
+                "\nSTRICT-HONESTY FAIL : regression Zero-Mock -> "
+                + ", ".join(f"{k}={v}" for k, v in failing.items())
+            )
+            sys.exit(1)
+        print(
+            "\nSTRICT-HONESTY OK : broken_links/dead_buttons/fake_data/ghost_routes = 0 "
+            f"(api_gaps={totals['api_gaps']} tolere, hors perimetre d'honnetete)."
+        )
+        sys.exit(0)
     sys.exit(1 if sum(totals.values()) else 0)
 
 

@@ -707,6 +707,133 @@ def list_encaissements(
     ]
 
 
+@router.post("/encaissements", status_code=status.HTTP_201_CREATED)
+def creer_encaissement(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Enregistrer un reglement sur une facture.
+
+    Le routeur n'existait pas : l'ecran d'encaissements appelait un POST qui
+    renvoyait un 404. Deux tables de factures coexistent, et une seule est
+    reliee a une table de paiements :
+
+    - `factures` (exploitation) : la table `paiements` lui est rattachee, on y
+      insere le reglement puis on recalcule le statut de la facture.
+    - `factures_ohada` : aucune table de reglement ne point sur elle (la
+      contrainte cle etrangere de `reglements` cible `factures.id`). On ecrit
+      donc le reglement dans les colonnes portees par la facture elle-meme
+      (`reglement_partiel`, `solde_restant`, `date_paiement`, `statut`), sans
+      inventer de ligne orthogonale.
+    """
+    from decimal import Decimal
+    from sqlalchemy import func as sa_func
+    from app.models.finance import (
+        Facture as FactureSimple, Paiement, PaiementStatus, FactureStatus,
+    )
+
+    facture_id = payload.get("facture_id")
+    if not facture_id:
+        raise HTTPException(status_code=422, detail="facture_id requis")
+
+    try:
+        montant = float(payload.get("montant_encaisse") or payload.get("montant") or 0)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=422, detail="montant_encaisse invalide")
+    if montant <= 0:
+        raise HTTPException(status_code=422, detail="Le montant encaisse doit etre positif")
+
+    source = payload.get("source")
+    date_text = payload.get("date_paiement") or payload.get("date_reglement")
+    try:
+        date_reglement = date.fromisoformat(str(date_text)) if date_text else date.today()
+    except ValueError:
+        raise HTTPException(status_code=422, detail="date_paiement invalide (attendu AAAA-MM-JJ)")
+
+    f_simple = f_ohada = None
+    if source != "ohada":
+        f_simple = db.query(FactureSimple).filter(FactureSimple.id == facture_id).first()
+    if f_simple is None and source != "exploitation":
+        f_ohada = db.query(Facture).filter(Facture.id == facture_id).first()
+    if f_simple is None and f_ohada is None:
+        raise HTTPException(status_code=404, detail="Facture introuvable")
+
+    mode = payload.get("mode_paiement") or "virement"
+    reference = payload.get("reference_paiement") or payload.get("reference")
+
+    if f_simple is not None:
+        paiement = Paiement(
+            company_id=getattr(current_user, "company_id", None),
+            facture_id=f_simple.id,
+            montant=Decimal(str(montant)),
+            date_paiement=date_reglement,
+            mode_paiement=mode,
+            reference=reference,
+            statut=PaiementStatus.CONFIRME,
+            notes=payload.get("notes"),
+        )
+        db.add(paiement)
+        db.flush()
+        paye = float(
+            db.query(sa_func.sum(Paiement.montant)).filter(
+                Paiement.facture_id == f_simple.id,
+                Paiement.statut == PaiementStatus.CONFIRME,
+            ).scalar() or 0.0
+        )
+        total = float(f_simple.montant_ttc or 0)
+        # La table d'exploitation ne porte pas de colonne date_paiement : la
+        # date du reglement est portee par la ligne `paiements` elle-meme.
+        if total > 0 and paye >= total:
+            f_simple.statut = FactureStatus.PAYEE
+        elif paye > 0:
+            f_simple.statut = FactureStatus.PAYEE_PARTIELLEMENT
+        db.commit()
+        db.refresh(paiement)
+        db.refresh(f_simple)
+        return {
+            "id": paiement.id,
+            "source": "exploitation",
+            "facture_id": f_simple.id,
+            "numero_facture": f_simple.numero_facture,
+            "montant": float(paiement.montant or 0),
+            "date_paiement": paiement.date_paiement.isoformat() if paiement.date_paiement else None,
+            "mode_paiement": paiement.mode_paiement,
+            "reference": paiement.reference,
+            "statut_paiement": paiement.statut.value,
+            "statut_facture": f_simple.statut.value if hasattr(f_simple.statut, "value") else str(f_simple.statut),
+            "total_regle": round(paye, 2),
+            "montant_ttc": round(total, 2),
+        }
+
+    deja_regle = float(f_ohada.reglement_partiel or 0)
+    total = float(f_ohada.montant_ttc or 0)
+    nouveau = round(deja_regle + montant, 2)
+    f_ohada.reglement_partiel = Decimal(str(nouveau))
+    f_ohada.solde_restant = Decimal(str(max(0.0, round(total - nouveau, 2))))
+    if total > 0 and nouveau >= total:
+        f_ohada.statut = "payee"
+        f_ohada.date_paiement = date_reglement
+    else:
+        f_ohada.statut = "payee_partiel"
+    db.commit()
+    db.refresh(f_ohada)
+    return {
+        "id": f_ohada.id,
+        "source": "ohada",
+        "facture_id": f_ohada.id,
+        "numero_facture": f_ohada.numero_facture,
+        "montant": montant,
+        "date_paiement": date_reglement.isoformat(),
+        "mode_paiement": mode,
+        "reference": reference,
+        "statut_paiement": "confirme",
+        "statut_facture": f_ohada.statut,
+        "total_regle": float(f_ohada.reglement_partiel or 0),
+        "montant_ttc": total,
+    }
+
+
 @router.get("/kpis")
 def get_finance_kpis(
     db: Session = Depends(get_db),
