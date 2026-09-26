@@ -121,7 +121,13 @@ export default function WMSDashboardPage() {
       return res.data || res;
     },
     onSuccess: (data: any) => {
-      toast.success(`Cross-docking ${data?.cross_dock_ref || 'enregistré'} avec succès ! Quai-to-Truck direct.`);
+      if (data?.statut === 'non_persiste') {
+        toast.info(
+          `Cross-dock calcule : ${data?.nb_colis ?? '?'} colis, ${data?.poids_total_kg ?? '?'} kg (manifeste ${data?.manifeste_origine ?? '-'}) \u2014 op\u00e9ration non persist\u00e9e en base.`
+        );
+      } else {
+        toast.success(`Cross-docking ${data?.cross_dock_ref} enregistr\u00e9.`);
+      }
       setIsCrossDockModalOpen(false);
     },
     onError: () => {

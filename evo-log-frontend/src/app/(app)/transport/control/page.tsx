@@ -307,17 +307,39 @@ export default function TransportControlPage() {
                 {(tcoData?.alertes_maintenance_predictive || []).length === 0 ? (
                   <p className="text-xs text-slate-500 py-2">Aucune alerte remontee par l'API TCO.</p>
                 ) : (
-                  tcoData.alertes_maintenance_predictive.map((alt, idx) => (
-                  <div key={idx} className="p-3 rounded-xl border border-red-500/20 bg-red-500/5 flex justify-between items-center">
-                    <div>
-                      <div className="text-xs font-bold text-red-400 font-mono">{alt.immatriculation}</div>
-                      <div className="text-[11px] text-slate-400">{alt.alerte} • {alt.type}</div>
+                  tcoData.alertes_maintenance_predictive.map((alt, idx) => {
+                  // Contrat reel (transport_international_service.get_tco_fleet_analytics) :
+                  //   - branche « maintenance periodique » : echeance = ISO date, priorite in
+                  //     {CRITIQUE, HAUTE, MOYENNE} selon le retard en jours
+                  //   - branche « panne » : echeance = None, priorite in {CRITIQUE, HAUTE}
+                  // L'ancien JSX affichait `-{alt.echeance_km} km` : ce champ
+                  // n'a JAMAIS existe cote backend (aucune des deux branches ne
+                  // le renvoie). Le remplacer par la priorite + l'echeance date
+                  // quand elle existe, sans inventer de km.
+                  const badgeTone =
+                    alt.priorite === 'CRITIQUE'
+                      ? 'bg-red-500/20 text-red-300'
+                      : alt.priorite === 'HAUTE'
+                        ? 'bg-amber-500/20 text-amber-300'
+                        : 'bg-slate-500/20 text-slate-300';
+                  const echeanceLabel = alt.echeance
+                    ? new Date(alt.echeance).toLocaleDateString('fr-FR')
+                    : null;
+                  return (
+                    <div key={idx} className="p-3 rounded-xl border border-red-500/20 bg-red-500/5 flex justify-between items-center gap-3">
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-red-400 font-mono truncate">{alt.immatriculation}</div>
+                        <div className="text-[11px] text-slate-400 truncate">{alt.alerte} • {alt.type}</div>
+                        {echeanceLabel && (
+                          <div className="text-[11px] text-slate-500 mt-0.5">Echeance : {echeanceLabel}</div>
+                        )}
+                      </div>
+                      <span className={`shrink-0 text-[11px] font-mono font-bold px-2 py-0.5 rounded ${badgeTone}`}>
+                        {alt.priorite}
+                      </span>
                     </div>
-                    <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-300">
-                      -{alt.echeance_km} km
-                    </span>
-                  </div>
-                  ))
+                  );
+                  })
                 )}
               </div>
             </CardContent>
