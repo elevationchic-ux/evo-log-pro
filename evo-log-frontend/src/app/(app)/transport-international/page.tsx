@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Truck, Globe, FileText, Shield, RefreshCw, PlusCircle,
-  CheckCircle2, AlertTriangle, MapPin, X, Save, ArrowRight, Anchor
+  Truck, Globe, Shield, RefreshCw, PlusCircle,
+  CheckCircle2, AlertTriangle, MapPin, ArrowRight
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';

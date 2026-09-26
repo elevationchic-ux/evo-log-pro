@@ -91,16 +91,22 @@ export default function TrackingPage() {
                 filteredItems.map((item: any, idx: number) => (
                   <tr key={item.id || idx} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-100">
-                      {item.reference_mission || `OT-2026-00${item.id}`}
-                      <div className="text-xs font-normal text-slate-400">{item.nom_destinataire}</div>
+                      OT-{String(item.ordre_transport_id || '?').padStart(4, '0')}
+                      <div className="text-xs font-normal text-slate-400">{item.destinataire || '-'}</div>
                     </td>
                     <td className="px-6 py-4 font-mono text-sky-400 text-xs flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-sky-400" />
-                      Lat: {item.latitude || 4.051}, Lon: {item.longitude || 9.704}
+                      {item.latitude && item.longitude
+                        ? `Lat: ${item.latitude}, Lon: ${item.longitude}`
+                        : 'Non g\u00e9olocalis\u00e9'}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                        <CheckCircle2 className="w-3 h-3" /> SIGNÉ & VALIDÉ
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${
+                        item.statut === 'signe' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          : item.statut === 'refuse' ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                          : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                      }`}>
+                        <CheckCircle2 className="w-3 h-3" /> {(item.statut || 'inconnu').toUpperCase()}
                       </span>
                     </td>
                   </tr>

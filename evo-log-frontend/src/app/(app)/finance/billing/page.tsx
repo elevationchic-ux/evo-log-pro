@@ -111,7 +111,6 @@ export default function KFinanceBillingPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [showPay, setShowPay] = useState<FactureRow | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
-  const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -221,16 +220,15 @@ export default function KFinanceBillingPage() {
       if (fam === 'brouillon') brouillons += 1;
       else emises += 1;
       if (fam === 'annulee') continue;
-      const reste = fam === 'payee' ? 0 : resteDu(f) ?? f.montant_ttc ?? 0;
-      if (fam === 'ouverte' || fam === 'brouillon') {
-        if (fam === 'ouverte') {
-          enAttente += reste;
-          nbARecouvrer += 1;
-          if (isEchue(f)) {
-            echueMontant += reste;
-            echueCount += 1;
-          }
-        }
+      // Un brouillon n'est pas une créance opposable : seul l'état « ouverte »
+      // alimente le reste à recouvrer.
+      if (fam !== 'ouverte') continue;
+      const reste = resteDu(f) ?? f.montant_ttc ?? 0;
+      enAttente += reste;
+      nbARecouvrer += 1;
+      if (isEchue(f)) {
+        echueMontant += reste;
+        echueCount += 1;
       }
     }
     const moisCourant = today.slice(0, 7);
@@ -825,6 +823,7 @@ function ModalShell({
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
+  const { language } = useSettings();
   return (
     <div
       className="fixed inset-0 z-[80] bg-slate-950/85 flex items-end sm:items-center justify-center p-0 sm:p-4"
@@ -843,7 +842,7 @@ function ModalShell({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fermer"
+            aria-label={language === 'en' ? 'Close' : 'Fermer'}
             className="grid place-items-center w-11 h-11 rounded-xl text-on-surface-variant hover:bg-surface-container"
           >
             <XCircle className="w-5 h-5" />

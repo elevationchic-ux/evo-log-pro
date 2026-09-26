@@ -3,7 +3,7 @@
     "broken_links": 0,
     "dead_buttons": 0,
     "fake_data": 0,
-    "api_gaps": 33,
+    "api_gaps": 32,
     "ghost_routes": 0
   },
   "modules": {
@@ -171,10 +171,6 @@
         {
           "file": "lib/api-client.ts",
           "detail": "/api/v1/k-modules/procurement/orders"
-        },
-        {
-          "file": "lib/api-client.ts",
-          "detail": "/api/v1/k-modules/tracking/epod"
         },
         {
           "file": "lib/api-client.ts",
