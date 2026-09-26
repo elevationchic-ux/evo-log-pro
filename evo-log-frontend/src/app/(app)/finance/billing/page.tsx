@@ -985,7 +985,7 @@ function CreateInvoiceModal({
             </select>
           </Field>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label={t('Date d''émission', 'Issue date')}>
+            <Field label={t('Date d’émission', 'Issue date')}>
               <input type="date" className={inputCls} value={form.date_emission} onChange={(e) => set('date_emission', e.target.value)} />
             </Field>
             <Field label={t('Échéance', 'Due date')} hint={t('Vide = sans échéance enregistrée.', 'Empty = no stored due date.')}>

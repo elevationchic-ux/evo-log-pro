@@ -29,7 +29,7 @@ from app.services.transport_international_service import (
     PreuveLivraisonService, IncidentTransportService, ControleRoutierService,
     TaxeRoutiereService, CorridorCEMACService, TransportInternationalReportingService
 )
-from app.models.transport_international import OrdreTransport, CarnetTIR, CMR, CorridorCEMAC
+from app.models.transport_international import OrdreTransport, CarnetTIR, CMR, CorridorCEMAC, PreuveLivraison
 
 router = APIRouter(tags=["Transport International"])
 
