@@ -14,6 +14,8 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { getAllOperations, syncOutbox, installAutoSync, type OfflineOperation } from '@/utils/offlineSync';
+import { useI18n } from '@/hooks/useI18n';
+import { useSettings } from '@/components/layout/SettingsProvider';
 
 interface OfflineSyncIndicatorProps {
   baseUrl?: string;
@@ -21,6 +23,9 @@ interface OfflineSyncIndicatorProps {
 }
 
 export default function OfflineSyncIndicator({ baseUrl = '', companyId }: OfflineSyncIndicatorProps) {
+  const t = useI18n();
+  const { language } = useSettings();
+  const locale = language === 'en' ? 'en-GB' : 'fr-FR';
   const [isOnline, setIsOnline] = useState(true);
   const [operations, setOperations] = useState<OfflineOperation[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -62,6 +67,14 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
     };
   }, [baseUrl, refreshQueue]);
 
+  // Fermeture clavier du panneau, comme le reste du chrome applicatif.
+  useEffect(() => {
+    if (!showPanel) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowPanel(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showPanel]);
+
   // Don't render on server (SSR)
   if (!mounted) return null;
 
@@ -97,33 +110,33 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
   const getStatusText = () => {
     if (!isOnline) {
       return pendingCount > 0
-        ? `Hors ligne  ${pendingCount} en file`
-        : 'Hors ligne';
+        ? `${t.offline.statusOffline} · ${pendingCount} ${t.offline.offlineQueued}`
+        : t.offline.statusOffline;
     }
-    if (isSyncing) return 'Synchronisation…';
-    if (failedCount > 0) return `${failedCount} erreur(s)`;
-    if (pendingCount > 0) return `${pendingCount} en attente`;
-    return 'En ligne';
+    if (isSyncing) return t.offline.syncing;
+    if (failedCount > 0) return `${failedCount} ${t.offline.errorsCount}`;
+    if (pendingCount > 0) return `${pendingCount} ${t.offline.pendingCount}`;
+    return t.offline.statusOnline;
   };
 
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      TICKET_CARBURANT: '⛽ Ticket carburant',
-      EPOD_SIGNATURE: '✍️ ePOD Signature',
-      QHSE_INCIDENT: '⚠️ Incident QHSE',
-      PANNE_VEHICULE: '🔧 Panne véhicule',
-      POINTAGE_CHAUFFEUR: '📍 Pointage',
-      GENERIC_POST: '📤 Envoi',
+      TICKET_CARBURANT: `⛽ ${t.offline.typeFuel}`,
+      EPOD_SIGNATURE: `✍️ ${t.offline.typeEpod}`,
+      QHSE_INCIDENT: `⚠️ ${t.offline.typeQhse}`,
+      PANNE_VEHICULE: `🔧 ${t.offline.typeBreakdown}`,
+      POINTAGE_CHAUFFEUR: `📍 ${t.offline.typeCheckin}`,
+      GENERIC_POST: `📤 ${t.offline.typeSubmit}`,
     };
     return labels[type] || type;
   };
 
   const getStatusBadge = (status: string) => {
     const badges: Record<string, { text: string; color: string }> = {
-      PENDING: { text: 'En attente', color: '#eab308' },
-      SYNCING: { text: 'Sync…', color: '#3b82f6' },
-      SYNCED: { text: 'Synchronisé', color: '#22c55e' },
-      FAILED: { text: 'Échec', color: '#ef4444' },
+      PENDING: { text: t.offline.badgePending, color: '#eab308' },
+      SYNCING: { text: t.offline.syncShort, color: '#3b82f6' },
+      SYNCED: { text: t.offline.badgeSynced, color: '#22c55e' },
+      FAILED: { text: t.offline.badgeFailed, color: '#ef4444' },
     };
     return badges[status] || { text: status, color: '#6b7280' };
   };
