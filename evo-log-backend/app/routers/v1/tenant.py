@@ -67,6 +67,70 @@ def get_company_profile(
     }
 
 
+@router.put("/company-profile")
+def update_company_profile(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Met a jour la fiche de l'entreprise courante dans le MEME vocabulaire que
+    GET /company-profile.
+
+    Sans cette route, l'ecran « Entreprise » n'avait aucun point d'ecriture :
+    le PUT /company-profile/legal attend les noms de colonnes internes (nom,
+    tax_id, website) que le formulaire ne connait pas, et l'enregistrement
+    echouait en silence. Les champs absents de la requete restent inchanges.
+    """
+    company_id = current_user.company_id if getattr(current_user, 'company_id', None) else None
+    if current_user.is_superuser and payload.get('company_id'):
+        company_id = payload['company_id']
+    if not company_id:
+        raise HTTPException(status_code=404, detail="Société non trouvée")
+
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Société non trouvée")
+
+    if not current_user.is_superuser and getattr(current_user, 'role_level', 99) > 1:
+        raise HTTPException(status_code=403, detail="Admin requis pour modifier la fiche d'entreprise")
+
+    # Vocabulaire expose par GET -> colonne reelle. Toute correspondance
+    # inconnue est ignoree plutot que creee : pas de colonne fantome.
+    cartographie = {
+        "raison_sociale": "nom",
+        "sigle": "sigle",
+        "forme_juridique": "legal_form",
+        "capital_social": "capital_social",
+        "nif": "tax_id",
+        "rccm": "rccm",
+        "agrement_douane": "agrement_douane",
+        "agrement_pad": "agrement_pad",
+        "agrement_pak": "agrement_pak",
+        "adresse": "adresse",
+        "ville": "ville",
+        "pays": "pays",
+        "telephone": "telephone",
+        "email": "email",
+        "site_web": "website",
+        "logo_url": "logo_url",
+        "rib": "rib",
+    }
+    colonnes = {c.name for c in company.__table__.columns}
+    modifie = 0
+    for champ_cle, colonne in cartographie.items():
+        if champ_cle in payload and colonne in colonnes:
+            setattr(company, colonne, payload[champ_cle])
+            modifie += 1
+
+    db.commit()
+    db.refresh(company)
+    return {
+        "success": True,
+        "champs_modifies": modifie,
+        "message": "Fiche d'entreprise mise à jour",
+    }
+
+
 @router.put("/company-profile/legal")
 def update_company_legal_info(
     payload: dict,

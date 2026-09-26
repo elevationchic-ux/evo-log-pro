@@ -1,58 +1,127 @@
-"""Service Magasin WMS Avancé (Picking FIFO/FEFO optimisé, Inventaires Tournants)"""
+"""Service Magasin WMS Avancé (Picking FIFO/FEFO optimisé, Inventaires Tournants)
+
+Politique zero-mock : ce service ne renvoie que ce que la base prouve. Les
+premières versions fabriquaient des lignes de vague (ART-1000x, LOT-2026-x,
+"12.5" par ligne), un prix moyen de 15 000 XAF arbitraire, des reçus
+« XDOCK-… » sans persistance et des scans « valides » pour tout code d'au
+moins 4 caracteres. Chaque simulation est remplacee par un calcul reel ou un
+null explique.
+"""
 from datetime import datetime
 from typing import List, Dict, Any
+
+from sqlalchemy.orm import Session
+
+from app.models.magasin import Article, Commande, LigneCommande, Stock
 
 
 class PickingAvanceService:
     @staticmethod
-    def generer_vague_picking(db, commandes_ids: List[int], regle: str) -> Dict[str, Any]:
+    def generer_vague_picking(db: Session, commandes_ids: List[int], regle: str) -> Dict[str, Any]:
+        """Vague de picking calculee sur les lignes de commande REELLES.
+
+        Tri FIFO = ordre chronologique de la ligne de stock (date_derniere_entree,
+        fallback created_at). FEFO demande une notion de lot/peremption qui
+        n'existe pas en base : a defaut, meme tri chronologique, signalé dans
+        `note` au lieu d'inventer des numeros de lot.
+        """
         lignes = []
-        for i, cmd_id in enumerate(commandes_ids):
-            lignes.append({
-                "commande_id": cmd_id,
-                "article_code": f"ART-{10000 + i:05d}",
-                "emplacement": f"B{i % 5 + 1}-R{i % 12 + 1:02d}-N{i % 3 + 1}",
-                "quantite": 12.5,
-                "lot_numero": f"LOT-2026-{1000 + i}",
-                "date_expiration": "2027-06-30",
-                "distance_parcours_m": 45 + (i * 8)
-            })
+        for cmd_id in commandes_ids:
+            for cmd, lcmd in (
+                db.query(Commande, LigneCommande)
+                .join(LigneCommande, LigneCommande.commande_id == Commande.id)
+                .filter(Commande.id == cmd_id)
+                .all()
+            ):
+                article = (
+                    db.query(Article).filter(Article.id == lcmd.article_id).first()
+                    if lcmd.article_id
+                    else None
+                )
+                stock = None
+                if article:
+                    stock = (
+                        db.query(Stock)
+                        .filter(Stock.code_article == article.code, Stock.is_active.is_(True))
+                        .order_by(Stock.date_derniere_entree.asc(), Stock.id.asc())
+                        .first()
+                    )
+                lignes.append({
+                    "commande_id": cmd_id,
+                    "article_code": article.code if article else (lcmd.designation or f"ligne#{lcmd.id}"),
+                    "emplacement": (stock.emplacement if stock else None) or "",
+                    "quantite": float(lcmd.quantite or 0),
+                    "lot_numero": None,
+                    "date_expiration": None,
+                    "distance_parcours_m": None,
+                })
         return {
             "vague_code": f"VAGUE-{datetime.now().strftime('%Y%m%d%H%M%S')}",
             "regle_appliquee": regle,
             "nb_lignes": len(lignes),
-            "distance_totale_m": sum(l["distance_parcours_m"] for l in lignes),
+            "distance_totale_m": None,
             "temps_estime_min": len(lignes) * 3,
-            "lignes": lignes
+            "lignes": lignes,
+            "note": (
+                "Tri FEFO demande une gestion par lot (date de peremption) qui "
+                "n'existe pas en base : tri chronologique d'entree applique a la place. "
+                "Distances de parcours non mesurees en base : non simulees."
+            ),
         }
 
 
 class InventaireCompletService:
     @staticmethod
-    def calculer_ecarts_et_regulariser(db, campagne_id: int, lignes_comptage: List[Dict]) -> Dict[str, Any]:
-        ecarts = []
-        valeur_totale = 0
-        for ligne in lignes_comptage:
-            diff = ligne.get("quantite_physique", 0) - ligne.get("quantite_theorique", 0)
-            if diff != 0:
-                val_ecart = abs(diff) * 15000  # Prix unitaire moyen 15 000 XAF
-                valeur_totale += val_ecart
-                ecarts.append({
-                    "article_code": ligne.get("article_code"),
-                    "emplacement": ligne.get("emplacement"),
-                    "ecart_quantite": diff,
-                    "valeur_ecart_xaf": val_ecart,
-                    "imputation_comptable": "603/703 OHADA - Variation de stocks"
-                })
+    def calculer_ecarts_et_regulariser(db: Session, campagne_id: int, lignes_comptage: List[Dict]) -> Dict[str, Any]:
+        """Ecarts d'inventaire valorises au prix unitaire REEL de la ligne de stock.
 
+        L'ancienne version multipliait tout ecart par un prix moyen arbitraire
+        de 15 000 XAF et pretendait « regulariser » sans ecrire en base. Ici :
+        valorisation par article si prix connu, 0.0 + signalement si inconnu,
+        et statut explicite `non_persiste` car aucune table de campagne
+        d'inventaire n'existe.
+        """
+        ecarts = []
+        valeur_totale = 0.0
+        prix_inconnus = []
+        for ligne in lignes_comptage:
+            diff = float(ligne.get("quantite_physique", 0)) - float(ligne.get("quantite_theorique", 0))
+            if diff == 0:
+                continue
+            code = ligne.get("article_code")
+            stock = (
+                db.query(Stock)
+                .filter(Stock.code_article == code, Stock.is_active.is_(True))
+                .first()
+                if code
+                else None
+            )
+            prix = float(stock.prix_unitaire) if stock and stock.prix_unitaire is not None else None
+            if prix is None:
+                prix_inconnus.append(code or "(sans code)")
+            val_ecart = abs(diff) * (prix or 0.0)
+            valeur_totale += val_ecart
+            ecarts.append({
+                "article_code": code,
+                "emplacement": ligne.get("emplacement"),
+                "ecart_quantite": diff,
+                "valeur_ecart_xaf": round(val_ecart, 2),
+                "imputation_comptable": "603/703 OHADA - Variation de stocks",
+            })
+
+        note = "Ecart calcule et valorise ; AUCUNE ecriture comptable ni mouvement de stock persiste (pas de table de campagne d'inventaire)."
+        if prix_inconnus:
+            note += " Prix unitaire inconnu en base (valorisation a 0) pour : " + ", ".join(prix_inconnus) + "."
         return {
             "campagne_id": campagne_id,
             "nb_articles_controles": len(lignes_comptage),
             "nb_ecarts_detectes": len(ecarts),
-            "valeur_totale_ecarts_xaf": valeur_totale,
+            "valeur_totale_ecarts_xaf": round(valeur_totale, 2),
             "ecarts": ecarts,
             "pv_reference": f"PV-INV-{campagne_id:04d}-{datetime.now().strftime('%Y%m%d')}",
-            "journal_comptable": "603 - Variations de stocks (OHADA)"
+            "journal_comptable": "603 - Variations de stocks (OHADA)",
+            "statut": "non_persiste",
+            "note": note,
         }
 
 

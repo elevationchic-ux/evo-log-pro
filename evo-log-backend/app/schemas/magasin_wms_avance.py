@@ -13,18 +13,22 @@ class LigneVaguePicking(BaseModel):
     article_code: str
     emplacement: str
     quantite: float
-    lot_numero: str
+    # Lot/expiration : aucun modele "lot" ni "date_peremption" n'existe en base;
+    # ces champs ne sont plus remplis avec des valeurs inventees.
+    lot_numero: Optional[str] = None
     date_expiration: Optional[str] = None
-    distance_parcours_m: int
+    # Distance physique entre cases : non mesuree en base -> jamais simulee.
+    distance_parcours_m: Optional[int] = None
 
 
 class VaguePickingResponse(BaseModel):
     vague_code: str
     regle_appliquee: str
     nb_lignes: int
-    distance_totale_m: int
+    distance_totale_m: Optional[int] = None
     temps_estime_min: int
     lignes: List[LigneVaguePicking]
+    note: Optional[str] = None
 
 
 class LigneComptageInventaire(BaseModel):
@@ -55,3 +59,7 @@ class InventaireRegularisationResponse(BaseModel):
     ecarts: List[EcartInventaire]
     pv_reference: str
     journal_comptable: str = "603 - Variations de stocks (OHADA)"
+    # Honnetete produit : la regularisation n'ecrit rien en base (aucune table
+    # de campagne) -> le statut doit rester visible de l'appelant.
+    statut: Optional[str] = None
+    note: Optional[str] = None

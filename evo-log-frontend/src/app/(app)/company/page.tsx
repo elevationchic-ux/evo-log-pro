@@ -45,13 +45,13 @@ export default function CompanyProfilePage() {
   });
 
   useEffect(() => {
-    // Load company profile from tenant / global settings
-    apiClient.get('/api/v1/tenant/company-profile').catch(() => {
-      return apiClient.get('/api/admin/global-settings');
-    }).then(res => {
-      if (res?.data) {
+    // Fiche légale du tenant courant (GET /api/v1/tenant/company-profile)
+    apiClient.get('/api/v1/tenant/company-profile').then(res => {
+      if (res?.data && Object.keys(res.data).length) {
         setCompany(prev => ({ ...prev, ...res.data }));
       }
+    }).catch((err) => {
+      toast.error(err?.response?.data?.detail || "Fiche d'entreprise illisible côté serveur.");
     }).finally(() => setLoading(false));
   }, []);
 
@@ -59,9 +59,10 @@ export default function CompanyProfilePage() {
     e.preventDefault();
     setSaving(true);
     try {
-      await apiClient.post('/api/v1/tenant/company-profile', company).catch(() => {
-        return apiClient.post('/api/admin/global-settings', company);
-      });
+      // PUT /company-profile accepte le même vocabulaire que le GET : sans lui
+      // l'enregistrement retombait sur une route inexistante et le message de
+      // succès affichait une sauvegarde qui n'avait pas eu lieu.
+      await apiClient.put('/api/v1/tenant/company-profile', company);
       toast.success("Fiche d'entreprise mise à jour avec succès !");
     } catch (err: any) {
       toast.error(err?.response?.data?.detail || "Erreur lors de l'enregistrement de l'entreprise.");
