@@ -455,14 +455,14 @@ export default function KFinanceBillingPage() {
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
-              {t('Période d''émission', 'Issue period')}
+              {t('Période d’émission', 'Issue period')}
             </span>
             <select
               value={periode}
               onChange={(e) => setPeriode(e.target.value as PeriodeKey)}
               className="px-3 py-2 min-h-11 text-sm bg-surface-container-low border border-outline rounded-xl text-on-surface focus:outline-none focus:border-emerald-500"
             >
-              <option value="all">{t('Tout l''historique', 'Full history')}</option>
+              <option value="all">{t('Tout l’historique', 'Full history')}</option>
               <option value="30">{t('30 derniers jours', 'Last 30 days')}</option>
               <option value="90">{t('90 derniers jours', 'Last 90 days')}</option>
               <option value="365">{t('12 derniers mois', 'Last 12 months')}</option>

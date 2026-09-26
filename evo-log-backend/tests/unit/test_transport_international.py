@@ -64,6 +64,32 @@ class TestOrdreTransportService:
         assert ot.statut == StatutTransport.LIVRE
         assert ot.date_livraison_reelle is not None
 
+    def test_lister_retourne_les_ot_crees(self, db: Session, ordre_transport):
+        """Batch 12 : GET /ordres-transport branché sur lister(). Vérifie que
+        la route frontend (transport-international/page.tsx) recevra bien les
+        lignes stockées au lieu d'une liste vide."""
+        rows = OrdreTransportService.lister(db)
+        assert any(r.id == ordre_transport.id for r in rows)
+
+    def test_lister_filtre_par_statut(self, db: Session, ordre_transport):
+        """Batch 12 : le filtre `statut=` est exploitable côté écran (onglet
+        'En transit' / 'Livrés')."""
+        OrdreTransportService.lister(db, statut=StatutTransport.LIVRE.value) == []
+        OrdreTransportService.marquer_livre(db=db, ot_id=ordre_transport.id)
+        livres = OrdreTransportService.lister(db, statut=StatutTransport.LIVRE.value)
+        planifies = OrdreTransportService.lister(db, statut=StatutTransport.PLANIFIE.value)
+        assert any(r.id == ordre_transport.id for r in livres)
+        assert not any(r.id == ordre_transport.id for r in planifies)
+
+    def test_lister_pagination_bornee(self, db: Session, ordre_transport):
+        """Batch 12 : `limit` est borné à 500 côté service pour éviter un
+        abuse. offset/limit doivent être appliqués sans crash."""
+        # limit <= 0 ou > 500 est clampé, jamais de SQL négatif
+        rows_small = OrdreTransportService.lister(db, limit=1)
+        assert len(rows_small) <= 1
+        rows_overflow = OrdreTransportService.lister(db, limit=10_000)
+        assert len(rows_overflow) <= 500
+
 
 class TestCarnetTIRService:
     """Test Carnet TIR service"""
@@ -85,6 +111,21 @@ class TestCarnetTIRService:
         assert carnet.statut == "actif"
         # Validite d'un an pose par le service
         assert carnet.date_validite > carnet.date_emission
+
+    def test_lister_carnets(self, db: Session, ordre_transport):
+        """Batch 12 : GET /carnets-tir branché sur lister() côté frontend."""
+        CarnetTIRService.creer_carnet_tir(
+            db=db,
+            numero_carnet="TIR-LIST-01",
+            ordre_transport_id=ordre_transport.id,
+            pays_emission="Cameroun",
+            code_pays_emission="CM",
+            bureau_depart="Douala",
+            bureau_arrivee="N'Djamena",
+            montant_garantie=5000000.0,
+        )
+        rows = CarnetTIRService.lister(db)
+        assert any(r.numero_carnet == "TIR-LIST-01" for r in rows)
 
 
 class TestCMRService:

@@ -1,7 +1,7 @@
 """Transport International router - Road transport management for Cameroon/CEMAC"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from datetime import datetime, date
 
 from app.core.database import get_db
@@ -35,6 +35,24 @@ router = APIRouter(tags=["Transport International"])
 
 
 # ============ ORDRES TRANSPORT ============
+@router.get("/ordres-transport", response_model=List[OrdreTransportResponse])
+def lister_ordres_transport(
+    statut: Optional[str] = None,
+    offset: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Liste des Ordres de Transport international.
+
+    Batch 12 : la page `transport-international/page.tsx` appelait deja
+    `GET /api/v1/transport-international/ordres-transport` via
+    `Promise.allSettled`, mais la route n'existait pas : le 404 etait
+    avale silencieusement, la liste restait systematiquement vide.
+    """
+    return OrdreTransportService.lister(db, statut=statut, offset=offset, limit=limit)
+
+
 @router.post("/ordres-transport", response_model=OrdreTransportResponse, status_code=status.HTTP_201_CREATED)
 def creer_ordre_transport(
     ot: OrdreTransportCreate,
@@ -101,6 +119,20 @@ def rapport_transport(
 
 
 # ============ CARNETS TIR ============
+@router.get("/carnets-tir", response_model=List[CarnetTIRResponse])
+def lister_carnets_tir(
+    statut: Optional[str] = None,
+    offset: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Liste des carnets TIR (batch 12). Meme raison que
+    lister_ordres_transport : l'ecran fetch deja cette URL, l'endpoint
+    etait absent."""
+    return CarnetTIRService.lister(db, statut=statut, offset=offset, limit=limit)
+
+
 @router.post("/carnets-tir", response_model=CarnetTIRResponse, status_code=status.HTTP_201_CREATED)
 def creer_carnet_tir(
     carnet: CarnetTIRCreate,
