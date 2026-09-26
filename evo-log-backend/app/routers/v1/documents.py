@@ -16,6 +16,7 @@ from app.schemas.documents import (
     SceauNumeriqueCreate, SceauNumeriqueUpdate, SceauNumeriqueResponse,
     AnalyseOCRCreate, AnalyseOCRResponse,
     ArchivageLegalCreate, ArchivageLegalUpdate, ArchivageLegalResponse,
+    ArchivageLegalDetailResponse,
     TemplateDocumentCreate, TemplateDocumentUpdate, TemplateDocumentResponse,
     PartageDocumentCreate, PartageDocumentUpdate, PartageDocumentResponse,
     HistoriqueDocumentCreate, HistoriqueDocumentResponse,
@@ -27,7 +28,12 @@ from app.services.documents_service import (
     TemplateDocumentService, PartageDocumentService, HistoriqueDocumentService,
     DocumentsReportingService
 )
-from app.models.documents import Document, Dossier, TemplateDocument
+from app.models.documents import (
+    Document, Dossier, TemplateDocument,
+    # Ces trois modeles sont utilises par les PUT /sceaux, /archivages-legal et
+    # /partages sans jamais etre imports : la requete levait un NameError (500).
+    SceauNumerique, ArchivageLegal, PartageDocument,
+)
 
 router = APIRouter(tags=["Documents"])  # monte sur /api/v1/documents par main.py; routes relatives au prefix
 
@@ -293,6 +299,41 @@ def creer_analyse_ocr(
 
 
 # ============ ARCHIVAGE LEGAL ============
+@router.get("/archivages-legal", response_model=List[ArchivageLegalDetailResponse])
+def lister_archivages_legal(
+    statut: str = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Lister les archivages legaux reellement persistes, enrichis du document
+    archive (titre / numero / type) pour que l'ecran d'archive reste lisible."""
+    query = db.query(ArchivageLegal)
+    if statut:
+        query = query.filter(ArchivageLegal.statut == statut)
+    rows = query.order_by(ArchivageLegal.id.desc()).offset(skip).limit(limit).all()
+    if not rows:
+        return []
+
+    documents = {
+        d.id: d
+        for d in db.query(Document).filter(
+            Document.id.in_([r.document_id for r in rows])
+        ).all()
+    }
+    resultat = []
+    for r in rows:
+        item = ArchivageLegalDetailResponse.model_validate(r)
+        doc = documents.get(r.document_id)
+        if doc:
+            item.document_titre = doc.titre
+            item.document_numero = doc.numero_document
+            item.document_type = doc.type_document.value if doc.type_document else None
+        resultat.append(item)
+    return resultat
+
+
 @router.post("/archivages-legal", response_model=ArchivageLegalResponse, status_code=status.HTTP_201_CREATED)
 def archiver_document(
     archivage: ArchivageLegalCreate,

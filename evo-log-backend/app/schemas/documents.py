@@ -290,6 +290,14 @@ class ArchivageLegalResponse(ArchivageLegalBase):
         from_attributes = True
 
 
+class ArchivageLegalDetailResponse(ArchivageLegalResponse):
+    """Archivage enrichi du document archive: la liste seule (ids) n'est pas
+    exploitable dans l'ecran d'archive."""
+    document_titre: Optional[str] = None
+    document_numero: Optional[str] = None
+    document_type: Optional[str] = None
+
+
 # Template Document schemas
 class TemplateDocumentBase(BaseModel):
     nom: str
