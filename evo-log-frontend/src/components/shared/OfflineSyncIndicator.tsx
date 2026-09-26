@@ -149,11 +149,14 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
       <button
         onClick={() => setShowPanel(!showPanel)}
         title={getStatusText()}
+        aria-label={t.offline.queueAria}
+        aria-expanded={showPanel}
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
-          padding: '4px 10px',
+          padding: '6px 10px',
+          minHeight: '36px',
           borderRadius: '20px',
           border: `1px solid ${dotColor}30`,
           background: `${dotColor}15`,
@@ -203,7 +206,10 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
             position: 'absolute',
             top: 'calc(100% + 8px)',
             right: 0,
-            width: '320px',
+            // Largeur plafonnee : sur mobile (320px) le panneau ne doit pas
+            // deborder de l'ecran ni passer sous le bord gauche.
+            width: 'min(320px, calc(100vw - 24px))',
+            maxWidth: 'calc(100vw - 24px)',
             background: 'var(--card, #1e2433)',
             border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: '12px',
@@ -224,14 +230,15 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
             }}
           >
             <span style={{ fontWeight: 600, fontSize: '14px', color: '#e2e8f0' }}>
-              📡 File d'attente hors ligne
+              📡 {t.offline.queueTitle}
             </span>
             {isOnline && pendingCount > 0 && (
               <button
                 onClick={handleManualSync}
                 disabled={isSyncing}
                 style={{
-                  padding: '4px 12px',
+                  padding: '8px 12px',
+                  minHeight: '36px',
                   borderRadius: '8px',
                   background: '#3b82f6',
                   color: '#fff',
@@ -241,7 +248,7 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
                   opacity: isSyncing ? 0.6 : 1,
                 }}
               >
-                {isSyncing ? '⏳ Sync…' : '🔄 Synchroniser'}
+                {isSyncing ? `⏳ ${t.offline.syncShort}` : `🔄 ${t.offline.syncNow}`}
               </button>
             )}
           </div>
@@ -257,7 +264,7 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
                   fontSize: '13px',
                 }}
               >
-                ✅ Aucune opération en attente
+                ✅ {t.offline.emptyQueue}
               </div>
             ) : (
               operations.map((op) => {
