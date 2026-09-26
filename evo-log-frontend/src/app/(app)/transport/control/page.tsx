@@ -154,7 +154,7 @@ export default function TransportControlPage() {
   const kpis = [
     { title: 'Véhicules Flotte', value: String(tcoData?.flotte_totale_vehicules ?? ''), subtitle: 'Tracteurs & Plateaux', icon: <span className="material-symbols-outlined text-2xl">local_shipping</span>, color: 'blue' as const },
     { title: 'Missions Actives', value: String(missions.length), subtitle: 'En cours d\'acheminement', icon: <span className="material-symbols-outlined text-2xl">route</span>, color: 'emerald' as const },
-    { title: 'Corridors CEMAC', value: corridorsData?.total_camions_en_transit == null ? '' : `${corridorsData.total_camions_en_transit} convois`, subtitle: (corridorsData?.corridors || []).length > 0 ? corridorsData.corridors.map((c) => c.axe).join(' · ') : 'Aucun corridor actif en base', icon: <span className="material-symbols-outlined text-2xl">public</span>, color: 'amber' as const },
+    { title: 'Corridors CEMAC', value: corridorsData?.total_camions_en_transit == null ? '' : `${corridorsData.total_camions_en_transit} convois`, subtitle: (corridorsData?.corridors ?? []).length > 0 ? (corridorsData?.corridors ?? []).map((c) => c.axe).join(' · ') : 'Aucun corridor actif en base', icon: <span className="material-symbols-outlined text-2xl">public</span>, color: 'amber' as const },
     { title: 'TCO Moyen Flotte', value: tcoData?.cout_global_moyen_km_xaf == null ? '' : `${tcoData.cout_global_moyen_km_xaf} XAF`, subtitle: 'Coût au km parcouru', icon: <span className="material-symbols-outlined text-2xl">paid</span>, color: 'violet' as const },
   ];
 
@@ -283,7 +283,7 @@ export default function TransportControlPage() {
                 {(corridorsData?.corridors || []).length === 0 ? (
                   <p className="text-xs text-slate-500 py-2">Aucun corridor remonté par l'API.</p>
                 ) : (
-                  corridorsData.corridors.map((c, idx) => (
+                  corridorsData!.corridors.map((c, idx) => (
                     <div key={idx} className="p-3 rounded-xl border border-slate-800 bg-slate-900/60">
                       <div className="text-xs font-bold text-white flex justify-between">
                         <span>{c.axe} ({c.distance_km} km)</span>
@@ -307,7 +307,7 @@ export default function TransportControlPage() {
                 {(tcoData?.alertes_maintenance_predictive || []).length === 0 ? (
                   <p className="text-xs text-slate-500 py-2">Aucune alerte remontee par l'API TCO.</p>
                 ) : (
-                  tcoData.alertes_maintenance_predictive.map((alt, idx) => {
+                  tcoData!.alertes_maintenance_predictive.map((alt, idx) => {
                   // Contrat reel (transport_international_service.get_tco_fleet_analytics) :
                   //   - branche « maintenance periodique » : echeance = ISO date, priorite in
                   //     {CRITIQUE, HAUTE, MOYENNE} selon le retard en jours
