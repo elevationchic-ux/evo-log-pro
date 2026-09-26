@@ -94,7 +94,11 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
   const AGENCIES = agencies.map(a => ({ id: a.code, name: a.name, icon: 'domain' }))
 
   // Source de vérité unique : TOUS les modules et sous-modules de la registry.
-  const NAV_TREE = Object.values(NAVIGATION_REGISTRY).map((m) => ({
+  // Invisibilité : la console Super-Admin CADC n'apparaît que pour un niveau 0.
+  const isSuperUser = Boolean(user?.isSuperuser) || Number(user?.roleLevel ?? 9) === 0
+  const NAV_TREE = Object.values(NAVIGATION_REGISTRY)
+    .filter((m) => m.key !== 'superadmin-cadc' || isSuperUser)
+    .map((m) => ({
     key: m.key,
     label: localizeTitle(m, language),
     path: m.path,

@@ -136,6 +136,55 @@ export const adminAPI = {
   getSystemHealth: () => apiClient.get('/api/admin/system-health'),
 };
 
+// ─── Console Super-Admin CADC (SaaS) ──────────────────────────────────────────
+// Toutes les routes backend exigent require_superadmin (403 sinon).
+// Base : /api/v1/saas/console
+const CADC_BASE = '/api/v1/saas/console';
+export const saasConsoleAPI = {
+  // Catalogue des modules allouables
+  getModulesCatalog: () => apiClient.get(`${CADC_BASE}/modules-catalog`),
+
+  // Entreprises : CRUD total + logo + allocation modules + accréditations
+  listCompanies: (search?: string) =>
+    apiClient.get(`${CADC_BASE}/companies`, { params: search ? { search } : undefined }),
+  getCompany: (id: number) => apiClient.get(`${CADC_BASE}/companies/${id}`),
+  createCompany: (data: Record<string, unknown>) => apiClient.post(`${CADC_BASE}/companies`, data),
+  updateCompany: (id: number, data: Record<string, unknown>) =>
+    apiClient.patch(`${CADC_BASE}/companies/${id}`, data),
+  deleteCompany: (id: number) => apiClient.delete(`${CADC_BASE}/companies/${id}`),
+  uploadLogo: (id: number, file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return apiClient.post(`${CADC_BASE}/companies/${id}/logo`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  allocateModules: (id: number, modules: string[]) =>
+    apiClient.put(`${CADC_BASE}/companies/${id}/modules`, { modules }),
+  listCompanyAccreditations: (id: number) =>
+    apiClient.get(`${CADC_BASE}/companies/${id}/accreditations`),
+  grantCompanyAccreditation: (id: number, data: Record<string, unknown>) =>
+    apiClient.post(`${CADC_BASE}/companies/${id}/accreditations`, data),
+  revokeCompanyAccreditation: (id: number, accredId: number) =>
+    apiClient.delete(`${CADC_BASE}/companies/${id}/accreditations/${accredId}`),
+
+  // Plans d'abonnement (paliers SaaS) : CRUD + verrou max_modules
+  listPlans: () => apiClient.get(`${CADC_BASE}/plans`),
+  createPlan: (data: Record<string, unknown>) => apiClient.post(`${CADC_BASE}/plans`, data),
+  updatePlan: (id: number, data: Record<string, unknown>) =>
+    apiClient.patch(`${CADC_BASE}/plans/${id}`, data),
+  deletePlan: (id: number) => apiClient.delete(`${CADC_BASE}/plans/${id}`),
+
+  // Annuaire prestataires (écriture réservée CADC)
+  listPrestataires: (params?: Record<string, unknown>) =>
+    apiClient.get(`${CADC_BASE}/prestataires`, { params }),
+  createPrestataire: (data: Record<string, unknown>) =>
+    apiClient.post(`${CADC_BASE}/prestataires`, data),
+  updatePrestataire: (id: number, data: Record<string, unknown>) =>
+    apiClient.patch(`${CADC_BASE}/prestataires/${id}`, data),
+  deletePrestataire: (id: number) => apiClient.delete(`${CADC_BASE}/prestataires/${id}`),
+};
+
 /** RBAC granulaire : catalogue de permissions, rôles effectifs, accréditations
  *  et modules communs (acces partages) par entreprise. */
 export const rbacAPI = {
