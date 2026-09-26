@@ -647,7 +647,7 @@ class TMSAdvancedOptimizerService:
                 "axe": cor.nom,
                 "distance_km": cor.distance_km,
                 "duree_moyenne_jours": (
-                    int(cor.duree_estimee_heures / 24) + 1 if cor.duree_estimee_heures else None
+                    int(cor.duree_estimee_heures) // 24 if cor.duree_estimee_heures else None
                 ),
                 "convois_actifs": convois,
                 "points_passage": points,
@@ -699,7 +699,8 @@ class TMSAdvancedOptimizerService:
                 Mission.distance_km > 0,
             )
             .scalar()
-        ) or 0.0
+            or 0.0
+        )
 
         couls_par_type: Dict[str, float] = {}
         total_frais = 0.0

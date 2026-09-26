@@ -481,72 +481,259 @@ def get_global_kpis(db: Session = Depends(get_db)):
 
 
 @router.get("/system-health")
-def get_system_health(db: Session = Depends(get_db)):
-    """Health check status and latencies of all micro-services and third-party bridges"""
-    t0 = time.time()
+def get_system_health(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Etat de sante reel de la plateforme.
+
+    Principe produit : aucune valeur inventee. Une latence n'est publiee que si
+    elle a ete mesuree dans la requete courante ; un service non configure est
+    signale NON_CONFIGURE et un service non sonde est signale NON_MESURE, avec
+    responseMs / uptime a null. L'ecran d'audit affiche la verite technique,
+    pas une garantie contractuelle imaginaire.
+
+    Protege par authentification : la cartographie de l'infrastructure (URLs,
+    etat des passerelles, volumes de requetes) n'a rien de public.
+    """
+    import os
+    import socket
+    from datetime import timedelta, timezone
+    from urllib.parse import urlparse
+
+    from app.core.config import settings
+    from app.models.audit import AuditLog
+    from app.models.integration import Integration
+
+    def probe_tcp(url: str, default_port: int, timeout: float = 0.6):
+        """Sondage reel : connexion TCP + latence en ms. (None, None) si non configure."""
+        if not url:
+            return None, None
+        parsed = urlparse(url if "//" in url else f"redis://{url}")
+        host = parsed.hostname
+        if not host:
+            return None, None
+        port = parsed.port or default_port
+        started = time.time()
+        try:
+            with socket.create_connection((host, port), timeout=timeout):
+                return int((time.time() - started) * 1000), None
+        except OSError:
+            return None, int((time.time() - started) * 1000)
+
+    # --- Base de donnees : seule mesure reelle historiquement disponible ---
+    db_started = time.time()
     db_ok = True
     try:
         db.execute(func.now())
-        db_latency = int((time.time() - t0) * 1000)
     except Exception:
         db_ok = False
-        db_latency = 999
+    db_latency_ms = int((time.time() - db_started) * 1000)
 
-    now_str = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
+    if settings.DATABASE_URL.startswith("sqlite"):
+        db_flavor = "SQLite"
+        db_path = settings.DATABASE_URL.split("///", 1)[-1]
+        db_size_mb = (
+            round(os.path.getsize(db_path) / (1024 * 1024), 1)
+            if os.path.exists(db_path) else None
+        )
+    else:
+        db_flavor = "PostgreSQL"
+        try:
+            taille_octets = db.execute(text(
+                "select pg_database_size(current_database())"
+            )).scalar()
+            db_size_mb = round(float(taille_octets) / (1024 * 1024), 1) if taille_octets else None
+        except Exception:
+            db_size_mb = None
+
+    # --- Passerelles : etat reellement configure, sinon NON_CONFIGURE ---
+    customs = (
+        db.query(Integration)
+        .filter(Integration.type_integration.in_(["sydonia", "guichet_unique", "pcs"]))
+        .order_by(Integration.id.desc())
+        .limit(10)
+        .all()
+    )
+    storage_ok, storage_latency = (
+        probe_tcp(settings.MINIO_ENDPOINT, 9000)
+        if settings.MINIO_ENABLED else (None, None)
+    )
+    broker_ok, broker_latency = probe_tcp(settings.CELERY_BROKER_URL, 6379)
 
     services = [
         {
-            "service": "Passerelle API CADC ERP (FastAPI)",
+            "service": "API FastAPI (EVO-LOG EM-ERP)",
+            "category": "CORE",
             "status": "OK",
-            "uptime": "99.98%",
-            "responseMs": 18,
-            "lastCheck": now_str,
-            "category": "CORE"
+            "version": settings.APP_VERSION,
+            "environment": settings.ENVIRONMENT,
+            "responseMs": None,          # la latence reponse de cet endpoint est mesuree separement
+            "uptimeSeconds": int(time.time() - _PROCESS_START),
+            "uptimeSource": "processus courant (redemarrage a zero, pas un SLA)",
+            "measured": True,
+            "lastCheck": datetime.now(timezone.utc).isoformat(),
         },
         {
-            "service": "Base de Données Principale PostgreSQL",
+            "service": f"Base de donnees principale {db_flavor}",
+            "category": "STORAGE",
             "status": "OK" if db_ok else "DOWN",
-            "uptime": "99.99%",
-            "responseMs": max(db_latency, 4),
-            "lastCheck": now_str,
-            "category": "STORAGE"
+            "responseMs": db_latency_ms,
+            "sizeMb": db_size_mb,
+            "uptimeSeconds": None,
+            "measured": True,
+            "lastCheck": datetime.now(timezone.utc).isoformat(),
         },
         {
-            "service": "Serveur de Stockage & Coffre GED Sécurisé",
-            "status": "OK",
-            "uptime": "99.92%",
-            "responseMs": 42,
-            "lastCheck": now_str,
-            "category": "STORAGE"
+            "service": "Coffre de stockage documents (MinIO)",
+            "category": "STORAGE",
+            "status": ("OK" if storage_ok is not None else "DOWN")
+            if settings.MINIO_ENABLED else "NON_CONFIGURE",
+            "responseMs": storage_latency,
+            "endpoint": settings.MINIO_ENDPOINT if settings.MINIO_ENABLED else None,
+            "uptimeSeconds": None,
+            "measured": bool(settings.MINIO_ENABLED),
+            "lastCheck": datetime.now(timezone.utc).isoformat(),
         },
         {
-            "service": "Passerelle Douane SYDONIA / CAMCIS DGD",
-            "status": "OK",
-            "uptime": "98.50%",
-            "responseMs": 145,
-            "lastCheck": now_str,
-            "category": "INTEGRATION"
+            "service": "Broker de taches asynchrones (Redis / Celery)",
+            "category": "CORE",
+            "status": "OK" if broker_ok is not None else ("DOWN" if broker_latency is not None else "NON_CONFIGURE"),
+            "responseMs": broker_latency,
+            "uptimeSeconds": None,
+            "measured": broker_ok is not None or broker_latency is not None,
+            "lastCheck": datetime.now(timezone.utc).isoformat(),
+        },
+        {
+            "service": "Serveur de messagerie (SMTP)",
+            "category": "INTEGRATION",
+            "status": "CONFIGURE" if settings.SMTP_USER else "NON_CONFIGURE",
+            "responseMs": None,
+            "uptimeSeconds": None,
+            "measured": False,
+            "lastCheck": datetime.now(timezone.utc).isoformat(),
         },
         {
             "service": "Passerelle Mobile Money (MTN MoMo / Orange Money)",
-            "status": "OK",
-            "uptime": "99.70%",
-            "responseMs": 95,
-            "lastCheck": now_str,
-            "category": "PAYMENT"
+            "category": "PAYMENT",
+            "status": "CONFIGURE" if settings.MOBILE_MONEY_WEBHOOK_SECRET else "NON_CONFIGURE",
+            "responseMs": None,
+            "uptimeSeconds": None,
+            "measured": False,
+            "lastCheck": datetime.now(timezone.utc).isoformat(),
         },
         {
-            "service": "Serveur Télématique Flotte & GPS Live",
-            "status": "OK",
-            "uptime": "99.40%",
-            "responseMs": 68,
-            "lastCheck": now_str,
-            "category": "IOT"
-        }
+            "service": "Notifications WhatsApp Business",
+            "category": "INTEGRATION",
+            "status": "CONFIGURE" if (settings.WHATSAPP_ENABLED and settings.WHATSAPP_API_URL) else "NON_CONFIGURE",
+            "responseMs": None,
+            "uptimeSeconds": None,
+            "measured": False,
+            "lastCheck": datetime.now(timezone.utc).isoformat(),
+        },
     ]
 
+    # Une ligne par passerelle douaniere reellement enregistree (table
+    # integrations) : un ecran qui annoncerait SYDONIA "OK" sans aucune ligne
+    # configuree serait un mensonge.
+    if customs:
+        for it in customs:
+            services.append({
+                "service": f"Passerelle douaniere {it.nom}",
+                "category": "INTEGRATION",
+                "status": (it.statut.value if getattr(it, "statut", None) else "INCONNU"),
+                "responseMs": None,
+                "uptimeSeconds": None,
+                "actif": bool(it.actif),
+                "derniereSynchronisation": (
+                    it.derniere_synchronisation.isoformat() if it.derniere_synchronisation else None
+                ),
+                "measured": False,
+                "lastCheck": datetime.now(timezone.utc).isoformat(),
+            })
+    else:
+        services.append({
+            "service": "Passerelle douaniere (SYDONIA / GUICHET UNIQUE / PCS)",
+            "category": "INTEGRATION",
+            "status": "NON_CONFIGURE",
+            "responseMs": None,
+            "uptimeSeconds": None,
+            "measured": False,
+            "lastCheck": datetime.now(timezone.utc).isoformat(),
+        })
+
+    # --- Traffics et erreurs : agregats reels de la table d'audit ---
+    now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+    one_hour_ago = now_utc - timedelta(hours=1)
+    total_req = db.query(func.count(AuditLog.id)).scalar() or 0
+    req_1h = db.query(func.count(AuditLog.id)).filter(
+        AuditLog.timestamp >= one_hour_ago
+    ).scalar() or 0
+    erreurs_5xx = db.query(func.count(AuditLog.id)).filter(
+        AuditLog.status_code >= 500
+    ).scalar() or 0
+    erreurs_4xx = db.query(func.count(AuditLog.id)).filter(
+        AuditLog.status_code >= 400, AuditLog.status_code < 500
+    ).scalar() or 0
+    latence_moy = db.query(func.avg(AuditLog.process_time)).scalar()
+    latence_max = db.query(func.max(AuditLog.process_time)).scalar()
+    actifs = db.query(func.count(func.distinct(User.id))).filter(
+        User.is_active.is_(True)
+    ).scalar() or 0
+
+    metrics = {
+        "requests_total": total_req,
+        "requests_last_hour": req_1h,
+        "errors_4xx": erreurs_4xx,
+        "errors_5xx": erreurs_5xx,
+        "error_rate_percent": (
+            round((erreurs_5xx / total_req) * 100, 2) if total_req else None
+        ),
+        "avg_process_seconds": round(float(latence_moy), 3) if latence_moy is not None else None,
+        "max_process_seconds": round(float(latence_max), 3) if latence_max is not None else None,
+        "active_users": actifs,
+        # Non mesures cote applicatif : le CPU et la RAM appartiennent a
+        # l'orchestrateur (Railway / Kubernetes), pas au code applicatif.
+        "cpu_percent": None,
+        "memory_used_mb": None,
+        "memory_total_mb": None,
+        "db_pool_active": None,
+        "db_pool_max": settings.DATABASE_POOL_SIZE + settings.DATABASE_MAX_OVERFLOW,
+    }
+
+    # --- Flux d'evenements : vraies traces HTTP en erreur, pas de log fabrique ---
+    recent = (
+        db.query(AuditLog)
+        .filter(or_(AuditLog.status_code >= 400, AuditLog.error_message.isnot(None)))
+        .order_by(AuditLog.id.desc())
+        .limit(50)
+        .all()
+    )
+    events = [
+        {
+            "id": l.id,
+            "timestamp": l.timestamp.isoformat() if l.timestamp else None,
+            "level": "ERROR" if (l.status_code or 0) >= 500 else "WARN",
+            "service": (l.url or "/").split("/")[1] if l.url and len(l.url.split("/")) > 1 else "api",
+            "method": l.method,
+            "status_code": l.status_code,
+            "message": l.error_message or f"{l.method} {l.url} -> HTTP {l.status_code}",
+            "process_seconds": round(float(l.process_time), 3) if l.process_time is not None else None,
+            "ip": l.client_host,
+        }
+        for l in recent
+    ]
+
+    critiques = sum(1 for s in services if s["status"] in ("DOWN", "ERREUR"))
     return {
-        "status": "ALL_SYSTEMS_OPERATIONAL",
-        "timestamp": now_str,
-        "services": services
+        "status": "DEGRADE" if (critiques or not db_ok) else "OPERATIONNEL",
+        "timestamp": now_utc.isoformat(),
+        "measured_at_ms": int((time.time() - t0) * 1000),
+        "services": services,
+        "metrics": metrics,
+        "events": events,
+        "notes": [
+            "Les colonnes uptimeSeconds / responseMs a null signifient non mesure, jamais non disponible par defaut.",
+            "CPU, RAM et pool de connexnes dependent de l'orchestrateur d'execution et ne sont pas exposes par l'application.",
+        ],
     }
