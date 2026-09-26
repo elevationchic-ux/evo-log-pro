@@ -234,6 +234,7 @@ const translations = {
       unspecifiedMode: 'method not specified',
       actInvoice: 'Invoice',
       actReceipt: 'Receipt',
+      actOf: 'of',
     },
     shell: {
       toggleMenu: 'Show/hide sidebar',

@@ -212,6 +212,24 @@ const nb = camionsData.length;
     assert valeurs == []
 
 
+def test_un_sous_produit_de_nom_n_est_pas_un_champ(audit):
+    """`React.FormEvent` contient la sous-chaine `t.FormEvent` : sans limite de
+    mot, l'outil inventait un champ `FormEvent` lu par l'alias `t` sur le
+    chercheur magasin TransactionSearch.tsx."""
+    code = """
+const [missions, setMissions] = useState([]);
+const res = await transportAPI.getMissions();
+setMissions(res.data);
+const enCours = missions.filter((t: any) => t.statut === 'en_cours');
+const ev: React.FormEvent = null;
+"""
+    noms_lus, _val, retably, _ = audit.analyser(CONTRAT, INDEX, code)
+    assert retably
+    signales = {s["champ"] for s in noms_lus}
+    assert "FormEvent" not in signales
+    assert "statut" not in signales
+
+
 def test_agregat_construit_dans_un_setter(audit):
     """`setStats({ total, planifie })` puis `stats.planifie` : l'agregat ne
     transite par aucun contrat. `transport/planning` etait signale trois fois

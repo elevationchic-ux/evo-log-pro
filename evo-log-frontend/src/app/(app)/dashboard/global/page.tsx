@@ -233,6 +233,13 @@ export default function GlobalDashboard() {
     { label: t.dash.kpiMovements, value: fmtInt(data.mouvementsJour, locale), icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/30' }
   ]
 
+  // Composition localisée du flux d'activité : les donnees restent brutes, seule
+  // la phrase suit la langue active. Montants toujours exprimes en millions de FCFA.
+  const activityText = (log: ActivityItem) =>
+    log.type === 'FACTURE'
+      ? `${t.dash.actInvoice} ${log.numero} · ${log.client || t.dash.unknownClient} (${fmtM(log.montant ?? 0, ' M FCFA', locale)})`
+      : `${t.dash.actReceipt} ${log.numero} ${t.dash.actOf} ${fmtM(log.montant ?? 0, ' M FCFA', locale)} (${log.mode || t.dash.unspecifiedMode})`
+
   return (
     <div className="space-y-6 text-slate-100 font-sans pb-12">
       {/* 👑 Top Executive Enterprise Header */}
@@ -440,7 +447,7 @@ export default function GlobalDashboard() {
       {/* 📡 Last document activity  issu des écritures réelles */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
         <h2 className="text-lg font-bold text-white flex items-center gap-2 pb-3 border-b border-slate-800">
-          <Clock className="w-5 h-5 text-emerald-400" /> Derniers Documents Financiers (factures & encaissements)
+          <Clock className="w-5 h-5 text-emerald-400" /> {t.dash.lastDocsTitle}
         </h2>
 
         {activity.length > 0 ? (
@@ -451,10 +458,10 @@ export default function GlobalDashboard() {
                   <span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-amber-300 font-mono text-[10px] font-bold shrink-0">
                     {log.type}
                   </span>
-                  <span className="text-xs text-slate-200 font-semibold truncate">{log.text}</span>
+                  <span className="text-xs text-slate-200 font-semibold truncate">{activityText(log)}</span>
                 </div>
                 <span className="text-xs text-slate-400 font-mono shrink-0">
-                  {log.date ? new Date(log.date).toLocaleDateString('fr-FR') : 'date inconnue'}
+                  {log.date ? new Date(log.date).toLocaleDateString(locale) : t.dash.unknownDate}
                 </span>
               </div>
             ))}
@@ -462,11 +469,11 @@ export default function GlobalDashboard() {
         ) : (
           <div className="py-8 flex flex-col items-center justify-center text-center gap-2 border border-dashed border-slate-800 rounded-2xl">
             <Warehouse className="w-8 h-8 text-slate-400" />
-            <p className="text-sm font-bold text-slate-300">Aucun document financier enregistré</p>
+            <p className="text-sm font-bold text-slate-300">{t.dash.noDocTitle}</p>
             <p className="text-xs text-slate-500 max-w-md">
-              Ce flux affiche les dernières factures émises et encaissements enregistrés dans la base.{' '}
+              {t.dash.noDocHint}{' '}
               <Link href="/finance/overview" className="text-amber-400 font-bold inline-flex items-center gap-1 hover:underline">
-                Ouvrir la console Finance <ArrowRight className="w-3 h-3" />
+                {t.dash.openFinance} <ArrowRight className="w-3 h-3" />
               </Link>
             </p>
           </div>
