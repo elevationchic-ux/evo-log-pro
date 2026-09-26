@@ -90,6 +90,39 @@ class OrdreTransportService:
         db.refresh(ot)
         return ot
 
+    @staticmethod
+    def lister(
+        db: Session,
+        statut: Optional[str] = None,
+        offset: int = 0,
+        limit: int = 100,
+    ) -> List[OrdreTransport]:
+        """Liste des Ordres de Transport, par id décroissant.
+
+        Route GET /ordres-transport branchée sur ce lister (batch 12) :
+        l'ecran `transport-international/page.tsx` appelait deja cette URL
+        mais l'endpoint n'existait pas cote backend (le fetch tombait en
+        404 et `Promise.allSettled` avalait silencieusement l'erreur → liste
+        systematiquement vide).
+
+        Scoping entreprise : `OrdreTransport.company_id` est nullable dans
+        le modele ; le POST / PUT de ce routeur ne le renseignent pas
+        actuellement. Filtrer ici reviendrait a masquer les enregistrements
+        existants sans garantir que les nouveaux heritent du company_id
+        courant. Aligne sur le comportement des autres endpoints du module
+        (auth requise, pas de filtre entreprise), a corriger globalement
+        quand le scoping SaaS sera uniformise.
+        """
+        q = db.query(OrdreTransport)
+        if statut:
+            q = q.filter(OrdreTransport.statut == statut)
+        return (
+            q.order_by(OrdreTransport.id.desc())
+            .offset(max(offset, 0))
+            .limit(min(max(limit, 1), 500))
+            .all()
+        )
+
 
 class CarnetTIRService:
     """TIR Carnet service"""
@@ -125,6 +158,26 @@ class CarnetTIRService:
         db.commit()
         db.refresh(carnet)
         return carnet
+
+    @staticmethod
+    def lister(
+        db: Session,
+        statut: Optional[str] = None,
+        offset: int = 0,
+        limit: int = 100,
+    ) -> List[CarnetTIR]:
+        """Liste des carnets TIR (batch 12). cf. OrdreTransportService.lister
+        pour la raison : l'appel frontend GET /carnets-tir n'etait pas
+        implemente cote backend."""
+        q = db.query(CarnetTIR)
+        if statut:
+            q = q.filter(CarnetTIR.statut == statut)
+        return (
+            q.order_by(CarnetTIR.id.desc())
+            .offset(max(offset, 0))
+            .limit(min(max(limit, 1), 500))
+            .all()
+        )
 
 
 class CMRService:

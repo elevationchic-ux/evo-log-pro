@@ -21,7 +21,7 @@ interface Vehicle {
 }
 
 const emptyForm = {
-  immatriculation: '', marque: '', modele: '', annee: '', capacite_tonnage: '', kilometrage: '', status: 'ACTIVE',
+  immatriculation: '', marque: '', modele: '', annee: '', capacite_tonnage: '', kilometrage: '', status: 'active',
 };
 
 export default function TransportFlottePage() {
@@ -115,7 +115,7 @@ export default function TransportFlottePage() {
   };
 
   const statusVariant = (s: string) =>
-    s === 'ACTIVE' ? 'success' : s === 'IN_MAINTENANCE' ? 'warning' : s === 'IMMOBILISE' || s === 'OUT_OF_SERVICE' ? 'error' : 'default';
+    s === 'active' ? 'success' : s === 'in_maintenance' ? 'warning' : s === 'out_of_service' || s === 'reserved' ? 'error' : 'default';
 
   const columns = [
     { key: 'immatriculation', header: t('Immatriculation', 'Registration'), sortable: true },
@@ -221,9 +221,10 @@ export default function TransportFlottePage() {
               </label>
               <label className="text-xs text-slate-400">{t('Statut', 'Status')}
                 <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100">
-                  <option value="ACTIVE">{t('Actif', 'Active')}</option>
-                  <option value="IN_MAINTENANCE">{t('Maintenance', 'Maintenance')}</option>
-                  <option value="IMMOBILISE">{t('Immobilisé', 'Immobilized')}</option>
+                  <option value="active">{t('Actif', 'Active')}</option>
+                  <option value="in_maintenance">{t('Maintenance', 'Maintenance')}</option>
+                  <option value="out_of_service">{t('Hors service', 'Out of service')}</option>
+                  <option value="reserved">{t('Réservé', 'Reserved')}</option>
                 </select>
               </label>
               <label className="text-xs text-slate-400">{t('Marque', 'Brand')}
