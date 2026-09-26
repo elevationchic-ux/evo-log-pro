@@ -119,21 +119,25 @@ apiClient.interceptors.response.use(
 
 
 // ─── Service Admin ──────────────────────────────────────────────────────────
+// Le routeur admin n'est monte que sur /api/v1/admin (main.py) : les appels en
+// /api/admin/... retombaient systematiquement sur le fallback « pending », ce
+// qui vidait tous les ecrans d'administration. /api/v1/admin/agencies est bien
+// distinct (routeur admin_agency monte sur ce meme prefixe).
 export const adminAPI = {
-  getUsers: (params?: Record<string, unknown>) => apiClient.get('/api/admin/users', { params }),
-  createUser: (data: any) => apiClient.post('/api/admin/users', data),
-  updateUser: (id: number, data: any) => apiClient.put(`/api/admin/users/${id}`, data),
-  toggleUserStatus: (id: number, data?: any) => apiClient.patch(`/api/admin/users/${id}/status`, data),
-  resetPassword: (id: number, new_password?: string) => apiClient.post(`/api/admin/users/${id}/reset-password`, { new_password }),
-  getRoles: () => apiClient.get('/api/admin/roles'),
-  createRole: (data: any) => apiClient.post('/api/admin/roles', data),
-  getAuditLogs: (params?: Record<string, unknown>) => apiClient.get('/api/admin/audit-logs', { params }),
-  getAgencies: (params?: Record<string, unknown>) => apiClient.get('/api/admin/agencies', { params }),
-  createAgency: (data: unknown) => apiClient.post('/api/admin/agencies', data),
-  updateAgency: (id: number, data: unknown) => apiClient.put(`/api/admin/agencies/${id}`, data),
-  deleteAgency: (id: number) => apiClient.delete(`/api/admin/agencies/${id}`),
-  getDashboardKpis: () => apiClient.get('/api/admin/dashboard/global-kpis'),
-  getSystemHealth: () => apiClient.get('/api/admin/system-health'),
+  getUsers: (params?: Record<string, unknown>) => apiClient.get('/api/v1/admin/users', { params }),
+  createUser: (data: any) => apiClient.post('/api/v1/admin/users', data),
+  updateUser: (id: number, data: any) => apiClient.put(`/api/v1/admin/users/${id}`, data),
+  toggleUserStatus: (id: number, data?: any) => apiClient.patch(`/api/v1/admin/users/${id}/status`, data),
+  resetPassword: (id: number, new_password?: string) => apiClient.post(`/api/v1/admin/users/${id}/reset-password`, { new_password }),
+  getRoles: () => apiClient.get('/api/v1/admin/roles'),
+  createRole: (data: any) => apiClient.post('/api/v1/admin/roles', data),
+  getAuditLogs: (params?: Record<string, unknown>) => apiClient.get('/api/v1/admin/audit-logs', { params }),
+  getAgencies: (params?: Record<string, unknown>) => apiClient.get('/api/v1/admin/agencies', { params }),
+  createAgency: (data: unknown) => apiClient.post('/api/v1/admin/agencies', data),
+  updateAgency: (id: number, data: unknown) => apiClient.put(`/api/v1/admin/agencies/${id}`, data),
+  deleteAgency: (id: number) => apiClient.delete(`/api/v1/admin/agencies/${id}`),
+  getDashboardKpis: () => apiClient.get('/api/v1/admin/dashboard/global-kpis'),
+  getSystemHealth: () => apiClient.get('/api/v1/admin/system-health'),
 };
 
 // ─── Console Super-Admin CADC (SaaS) ──────────────────────────────────────────

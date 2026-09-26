@@ -21,6 +21,11 @@ from app.utils.rbac import (
 
 router = APIRouter()
 
+# Horodatage d'import du module = demarrage reel du processus worker. Sert a
+# l'uptime de /system-health : une valeur mesuree, remise a zero a chaque
+# redemarrage, et surtout pas un pourcentage de SLA invente.
+_PROCESS_START = time.time()
+
 
 def _get_scoped_user(db: Session, current_user: User, user_id: int) -> User:
     """Load a target user enforcing tenancy: an Admin Entreprise may only touch
@@ -610,7 +615,7 @@ def get_system_health(
         {
             "service": "Broker de taches asynchrones (Redis / Celery)",
             "category": "CORE",
-            "status": "OK" if broker_ok is not None else ("DOWN" if broker_latency is not None else "NON_CONFIGURE"),
+            "status": ("OK" if broker_ok else "DOWN") if broker_ok is not None else "NON_CONFIGURE",
             "responseMs": broker_latency,
             "uptimeSeconds": None,
             "measured": broker_ok is not None or broker_latency is not None,
@@ -746,6 +751,6 @@ def get_system_health(
         "events": events,
         "notes": [
             "Les colonnes uptimeSeconds / responseMs a null signifient non mesure, jamais non disponible par defaut.",
-            "CPU, RAM et pool de connexnes dependent de l'orchestrateur d'execution et ne sont pas exposes par l'application.",
+            "CPU, RAM et pool de connexions dependent de l'orchestrateur d'execution et ne sont pas exposes par l'application.",
         ],
     }
