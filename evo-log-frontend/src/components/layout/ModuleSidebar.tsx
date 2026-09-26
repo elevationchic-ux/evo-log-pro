@@ -271,15 +271,18 @@ export default function ModuleSidebar({
       {!isMobile && onToggle && (
         <div className="p-3 border-t border-slate-800 shrink-0">
           <button
+            type="button"
             onClick={onToggle}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+            className="w-full flex items-center justify-center gap-2 py-2 min-h-11 px-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+            aria-label={isCollapsed ? (language === "en" ? "Expand sidebar" : "Déplier la barre latérale") : (language === "en" ? "Collapse sidebar" : "Rétracter la barre latérale")}
+            aria-expanded={!isCollapsed}
           >
             {isCollapsed ? (
               <ChevronRight className="w-4 h-4 text-indigo-400" />
             ) : (
               <>
                 <ChevronLeft className="w-4 h-4 text-indigo-400" />
-                <span>Rétracter la sidebar</span>
+                <span>{language === "en" ? 'Collapse sidebar' : 'Rétracter la sidebar'}</span>
               </>
             )}
           </button>
@@ -288,31 +291,46 @@ export default function ModuleSidebar({
 
       {/* 🔒 Modale d'avertissement Module Non Autorisé */}
       {deniedModalItem && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-200 text-slate-100">
+        <div
+          className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+          onMouseDown={(e) => { if (e.target === e.currentTarget) setDeniedModalItem(null); }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="denied-module-title"
+            className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 max-w-md w-full my-8 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200 text-slate-100"
+          >
             <div className="w-12 h-12 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto">
               <AlertTriangle className="w-6 h-6" />
             </div>
 
             <div className="text-center space-y-2">
-              <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block">
-                Accès Restreint CADC
+              <span className="text-[11px] font-black tracking-widest text-amber-400 uppercase bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block">
+                {language === "en" ? "Restricted Access" : "Accès Restreint"}
               </span>
-              <h3 className="text-lg font-black">Module Non Autorisé</h3>
+              <h3 id="denied-module-title" className="text-lg font-black">
+                {language === "en" ? "Module Not Authorized" : "Module Non Autorisé"}
+              </h3>
               <p className="text-xs text-slate-300 leading-relaxed font-medium bg-slate-950 p-3 rounded-2xl border border-slate-800">
-                Accès restreint : Votre profil <b className="text-amber-400">[{userRoles.join(", ") || "Utilisateur"}]</b> n'est pas autorisé à accéder au module <b className="text-white">[{deniedModalItem.label}]</b>. Veuillez contacter l'Admin CADC.
+                {language === "en" ? (
+                  <>Restricted access: your profile <b className="text-amber-400">[{userRoles.join(", ") || "User"}]</b> is not allowed to open the module <b className="text-white">[{deniedModalItem.label}]</b>. Please contact the platform administrator.</>
+                ) : (
+                  <>Accès restreint : Votre profil <b className="text-amber-400">[{userRoles.join(", ") || "Utilisateur"}]</b> n'est pas autorisé à accéder au module <b className="text-white">[{deniedModalItem.label}]</b>. Veuillez contacter l'Admin CADC.</>
+                )}
               </p>
               <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl text-left text-xs font-mono text-slate-400 space-y-1">
-                <div>• Code module : <span className="text-amber-400">{deniedModalItem.key}</span></div>
-                <div>• Vos modules autorisés : <span className="text-slate-200">{userModules.length > 0 ? userModules.join(", ") : "Aucun"}</span></div>
+                <div>• {language === "en" ? "Module code" : "Code module"} : <span className="text-amber-400">{deniedModalItem.key}</span></div>
+                <div>• {language === "en" ? "Your authorized modules" : "Vos modules autorisés"} : <span className="text-slate-200">{userModules.length > 0 ? userModules.join(", ") : (language === "en" ? "None" : "Aucun")}</span></div>
               </div>
             </div>
 
             <button
+              type="button"
               onClick={() => setDeniedModalItem(null)}
-              className="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black rounded-xl text-xs hover:brightness-110 transition-all cursor-pointer shadow-lg shadow-amber-500/20"
+              className="w-full py-3 min-h-11 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black rounded-xl text-xs hover:brightness-110 transition-all cursor-pointer shadow-lg shadow-amber-500/20"
             >
-              Compris / Fermer
+              {language === "en" ? "Got it / Close" : "Compris / Fermer"}
             </button>
           </div>
         </div>
@@ -323,9 +341,23 @@ export default function ModuleSidebar({
   if (isMobile) {
     if (!isOpen) return null;
     return (
-      <div className="fixed inset-y-0 left-0 z-[60] w-72 shadow-2xl">
-        {sidebarContent}
-      </div>
+      <>
+        {/* Voile opaque derriere le tiroir : le contenu reste lisible derriere
+            et un tap a droite referme le menu (jusqu'ici seule la croix le pouvait). */}
+        <div
+          className="fixed inset-0 z-[55] bg-slate-950/80"
+          onClick={() => onClose && onClose()}
+          aria-hidden="true"
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={language === "en" ? "Modules menu" : "Menu des modules"}
+          className="fixed inset-y-0 left-0 z-[60] w-72 max-w-[86vw] shadow-2xl"
+        >
+          {sidebarContent}
+        </div>
+      </>
     );
   }
 
