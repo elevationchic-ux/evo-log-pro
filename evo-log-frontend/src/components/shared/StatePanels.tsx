@@ -78,6 +78,7 @@ const ERROR_ICONS = {
 } as const;
 
 export function DataErrorState({ error, onRetry }: { error: ApiErrorInfo; onRetry?: () => void }) {
+  const t = useI18n();
   const Icon = ERROR_ICONS[error.kind] ?? ServerCrash;
   const isUnavailable = error.kind === 'not_found';
   return (
@@ -88,27 +89,28 @@ export function DataErrorState({ error, onRetry }: { error: ApiErrorInfo; onRetr
         <Icon className={`w-6 h-6 ${isUnavailable ? 'text-slate-400' : 'text-red-400'}`} />
       </div>
       <p className="mt-3 text-sm font-semibold text-slate-200">
-        {isUnavailable ? 'Fonction non disponible' : 'Le chargement a échoué'}
+        {isUnavailable ? t.common.featureUnavailable : t.common.loadFailed}
       </p>
-      <p className="mt-1 text-xs text-slate-500 max-w-md mx-auto leading-relaxed">{error.message}</p>
+      <p className="mt-1 text-xs text-slate-400 max-w-md mx-auto leading-relaxed">{error.message}</p>
       {error.detail && (
-        <p className="mt-2 text-[10px] font-mono text-slate-400 break-all">{error.detail}</p>
+        <p className="mt-2 text-[11px] font-mono text-slate-400 break-all">{error.detail}</p>
       )}
       {onRetry && !isUnavailable && (
         <button
+          type="button"
           onClick={onRetry}
-          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
+          className="mt-4 inline-flex items-center gap-2 px-4 py-2 min-h-11 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          Réessayer
+          {t.shell.retry}
         </button>
       )}
       {error.kind === 'unauthorized' && (
         <Link
           href="/login"
-          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400 transition-colors"
+          className="mt-4 inline-flex items-center gap-2 px-4 py-2 min-h-11 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400 transition-colors"
         >
-          Se reconnecter
+          {t.auth.reconnectCta}
         </Link>
       )}
     </div>

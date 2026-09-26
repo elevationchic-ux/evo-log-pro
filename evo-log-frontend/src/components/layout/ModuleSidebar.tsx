@@ -139,8 +139,8 @@ export default function ModuleSidebar({
             <button
               onClick={onToggle}
               className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ml-auto"
-              title={isCollapsed ? "Déplier la Sidebar" : "Rétracter la Sidebar"}
-              aria-label={isCollapsed ? "Déplier la barre latérale" : "Rétracter la barre latérale"}
+              title={isCollapsed ? (language === 'en' ? 'Expand sidebar' : 'Déplier la Sidebar') : (language === 'en' ? 'Collapse sidebar' : 'Rétracter la Sidebar')}
+              aria-label={isCollapsed ? (language === 'en' ? 'Expand the sidebar' : 'Déplier la barre latérale') : (language === 'en' ? 'Collapse the sidebar' : 'Rétracter la barre latérale')}
               aria-expanded={!isCollapsed}
             >
               {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
