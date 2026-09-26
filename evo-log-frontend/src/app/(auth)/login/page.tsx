@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { signIn, getSession } from 'next-auth/react';
+import { getSession } from 'next-auth/react';
 import { apiClient } from '@/lib/api-client';
 import { establishSession } from '@/lib/login-session';
 import { landingRouteFor } from '@/lib/auth';
@@ -56,43 +56,65 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      const res = await signIn('credentials', { email, password, redirect: false });
+      // /auth/login est appele par le navigateur, pas par NextAuth : seul le
+      // backend sait si le compte exige un second facteur, et il le declare
+      // dans le corps de la reponse (`two_factor_required`) — une information
+      // que la plomberie signIn() de next-auth v4 ne peut pas remonter.
+      const res = await apiClient.post('/auth/login', { username: email, password });
+      const data = res.data || {};
 
-      if (res?.error) {
-        setErrorMessage('Identifiants incorrects. Veuillez vérifier votre identifiant ou mot de passe institutionnel.');
+      if (data.two_factor_required) {
+        if (!data.two_factor_token) {
+          setErrorMessage("Le serveur demande une vérification à deux facteurs mais n'a livré aucun jeton. Réessayez ou contactez un administrateur.");
+          return;
+        }
+        saveTwoFactorChallenge({ two_factor_token: data.two_factor_token, identifier: email });
+        router.push('/mfa');
         return;
       }
 
-      const session = await getSession();
-      const roles: string[] = (session?.user as any)?.roles || [];
+      if (!data.access_token) {
+        setErrorMessage('Réponse du serveur incomplète : aucun jeton de session. Réessayez.');
+        return;
+      }
+
+      const outcome = await establishSession(data.access_token);
+      if (!outcome.ok) {
+        setErrorMessage(outcome.message || "La session n'a pas pu être ouverte. Réessayez.");
+        return;
+      }
+
+      const roles = outcome.roles;
       setPendingRoles(roles);
 
       // La regle vient du backend (users.must_change_password), pas d'une
       // comparaison cote client sur le mot de passe saisi.
-      if ((session?.user as any)?.must_change_password) {
+      if (outcome.mustChangePassword) {
         setMustChangePassword(true);
         setIsLoading(false);
         return;
       }
 
       setTimeout(() => {
-        if (roles.includes('CHAUFFEUR')) {
-          router.push('/chauffeur');
-        } else if (roles.includes('ADMIN') || roles.includes('MANAGER')) {
-          router.push('/dashboard/global');
-        } else if (roles.includes('MAGASINIER') || roles.includes('MAGASIN')) {
-          router.push('/magasin/dashboard');
-        } else if (roles.includes('TRANSPORT') || roles.includes('DISPATCHER')) {
-          router.push('/transport/control');
-        } else if (roles.includes('FINANCE')) {
-          router.push('/finance/overview');
-        } else {
-          router.push('/dashboard/global');
-        }
+        router.push(landingRouteFor(roles));
         router.refresh();
       }, 500);
-    } catch {
-      setErrorMessage('Une erreur de connexion est survenue. Vérifiez la disponibilité de l\'API.');
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const detail = err?.response?.data?.detail;
+      if (status === 401) {
+        setErrorMessage('Identifiants incorrects. Veuillez vérifier votre identifiant ou mot de passe institutionnel.');
+      } else if (status === 403) {
+        // Compte désactivé : le backend renvoie ce cas en anglais, on le
+        // formule dans la langue de l'écran plutôt que de coller un texte brut.
+        setErrorMessage('Ce compte est désactivé. Contactez un administrateur.');
+      } else if (status === 429) {
+        setErrorMessage('Trop de tentatives. Réessayez dans une minute.');
+      } else if (err?.response) {
+        setErrorMessage(typeof detail === 'string' ? detail : 'Le serveur a refusé la connexion.');
+      } else {
+        setErrorMessage('Une erreur de connexion est survenue. Vérifiez la disponibilité de l\'API.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +148,7 @@ export default function LoginPage() {
     setPasswordSuccess(true);
     setTimeout(() => {
       setMustChangePassword(false);
-      router.push(pendingRoles.includes('CHAUFFEUR') ? '/chauffeur' : '/dashboard/global');
+      router.push(landingRouteFor(pendingRoles));
       router.refresh();
     }, 1200);
   };
