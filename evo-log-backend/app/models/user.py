@@ -65,6 +65,11 @@ class User(Base):
     two_factor_enabled = Column(Boolean, default=False, nullable=False)
     two_factor_secret = Column(String(64))  # secret base32, jamais expose en clair
     two_factor_confirmed_at = Column(DateTime(timezone=True))
+    # Codes de secours 2FA : tableau JSON de hachages SHA-256
+    # [{"hash": ..., "used_at": ...}]. Les codes en clair ne sont jamais stockes
+    # et ne sont affiches qu'au moment de leur generation.
+    two_factor_recovery_codes = Column(Text)
+    two_factor_recovery_issued_at = Column(DateTime(timezone=True))
     
     # Metadata
     created_at = Column(DateTime(timezone=True), server_default=func.now())

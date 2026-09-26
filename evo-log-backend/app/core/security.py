@@ -9,6 +9,11 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 import pyotp
+import hashlib
+import json
+import re
+import secrets
+from typing import List, Optional
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.user import User
@@ -107,6 +112,8 @@ def create_refresh_token(data: dict) -> str:
 # --------------------------------------------------------------------------- #
 TOTP_VALID_WINDOW = 1  # accepte le code precedent/suivant (tolerance d'horloge)
 TWO_FACTOR_TOKEN_EXPIRE_MINUTES = 5
+# Codes de secours 2FA : nombre de codes emis a chaque regeneration.
+RECOVERY_CODES_COUNT = 8
 
 
 def generate_totp_secret() -> str:
@@ -129,7 +136,56 @@ def verify_totp(secret: str, code: str) -> bool:
         return False
 
 
-def create_2fa_token(user_id: int) -> str:    """Jeton intermediaire court delivre apres mot de passe correct, AVANT que
+def hash_recovery_code(code: str) -> str:
+    """Hash SHA-256 d'un code de secours, apres normalisation (sans tiret,
+    minuscule) : la frappe « abcd-1234 » doit valoir « ABCD1234 »."""
+    normalise = re.sub(r"[^0-9a-z]", "", str(code or "").lower())
+    return hashlib.sha256(normalise.encode("utf-8")).hexdigest()
+
+
+def generate_recovery_codes(count: int = RECOVERY_CODES_COUNT) -> tuple[List[str], str]:
+    """Codes de secours 2FA.
+
+    Retourne (codes_en_clair, blob_a_persister). Seul le blob de hachages est
+    ecrit en base : les codes en clair n'existent qu'au moment de la generation
+    et ne peuvent plus etre relus ensuite (cf. /auth/2fa/recovery-codes)."""
+    codes: List[str] = []
+    for _ in range(count):
+        brut = secrets.token_hex(4)  # 8 caracteres hexadecimaux
+        codes.append(f"{brut[:4]}-{brut[4:]}".upper())
+    blob = json.dumps(
+        [{"hash": hash_recovery_code(c), "used_at": None} for c in codes]
+    )
+    return codes, blob
+
+
+def parse_recovery_codes(blob: Optional[str]) -> List[dict]:
+    """Lit le blob JSON ; une valeur illisible n'est pas une exception 500."""
+    if not blob:
+        return []
+    try:
+        data = json.loads(blob)
+    except (ValueError, TypeError):
+        return []
+    return [c for c in data if isinstance(c, dict) and c.get("hash")] if isinstance(data, list) else []
+
+
+def try_consume_recovery_code(blob: Optional[str], code: str) -> tuple[bool, Optional[str]]:
+    """Utilise un code de secours. Retourne (acceptable, nouveau_blob) ; le
+    nouveau blob marque la ligne utilisee avec son horodatage."""
+    codes = parse_recovery_codes(blob)
+    if not codes or not (code or "").strip():
+        return False, None
+    cible = hash_recovery_code(code)
+    for entree in codes:
+        if entree.get("hash") == cible and not entree.get("used_at"):
+            entree["used_at"] = datetime.utcnow().isoformat()
+            return True, json.dumps(codes)
+    return False, None
+
+
+def create_2fa_token(user_id: int) -> str:
+    """Jeton intermediaire court delivre apres mot de passe correct, AVANT que
     le code TOTP soit valide. N'est PAS un token d'acces (type='2fa')."""
     expire = datetime.utcnow() + timedelta(minutes=TWO_FACTOR_TOKEN_EXPIRE_MINUTES)
     payload = {"sub": str(user_id), "type": "2fa", "exp": expire}
