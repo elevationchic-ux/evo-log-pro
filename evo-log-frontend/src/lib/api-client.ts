@@ -228,8 +228,8 @@ export const authAPI = {
   // (status -> setup -> enable | disable), le secret n'est jamais relus.
   get2FAStatus: () =>
     apiClient.get('/api/v1/auth/2fa/status'),
-  setup2FA: () =>
-    apiClient.post('/api/v1/auth/2fa/setup'),
+  setup2FA: (code?: string) =>
+    apiClient.post('/api/v1/auth/2fa/setup', code ? { code } : {}),
   enable2FA: (code: string) =>
     apiClient.post('/api/v1/auth/2fa/enable', { code }),
   disable2FA: (password: string) =>

@@ -5,6 +5,59 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
+
+interface BackendSession {
+  access_token?: string
+  refresh_token?: string
+  user_id?: number
+  username?: string
+  email?: string
+  roles?: string[]
+  company_id?: number | null
+  modules_allowed?: string[]
+  permissions?: string[]
+  shared_modules?: string[]
+  role_level?: number
+  department_id?: number | null
+  is_superuser?: boolean
+  must_change_password?: boolean
+}
+
+/** Map backend -> objet NextAuth. Partagee par les deux voies d'entree (jalon
+ *  deja authentifie / couple identifiant-mot de passe) pour qu'aucune ne oublie
+ *  un champ RBAC. */
+function toSessionUser(p: BackendSession, accessToken: string, refreshToken?: string) {
+  return {
+    id: String(p.user_id ?? ''),
+    name: p.username,
+    email: p.email,
+    access_token: accessToken,
+    refresh_token: refreshToken ?? null,
+    roles: p.roles || [],
+    company_id: p.company_id ?? null,
+    modules_allowed: p.modules_allowed || [],
+    // RBAC granulaire : permissions effectives (codes module.sous.action),
+    // niveau hiérarchique, service commun par entreprise.
+    permissions: p.permissions || [],
+    shared_modules: p.shared_modules || [],
+    role_level: p.role_level ?? 3,
+    department_id: p.department_id ?? null,
+    is_superuser: !!p.is_superuser,
+    must_change_password: !!p.must_change_password,
+  }
+}
+
+/** Aterrage par defaut selon les roles renvoyes par le backend. */
+export function landingRouteFor(roles: string[]): string {
+  if (roles.includes('CHAUFFEUR')) return '/chauffeur'
+  if (roles.includes('ADMIN') || roles.includes('MANAGER')) return '/dashboard/global'
+  if (roles.includes('MAGASINIER') || roles.includes('MAGASIN')) return '/magasin/dashboard'
+  if (roles.includes('TRANSPORT') || roles.includes('DISPATCHER')) return '/transport/control'
+  if (roles.includes('FINANCE')) return '/finance/overview'
+  return '/dashboard/global'
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -12,12 +65,29 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
-        email: { label: "Email", type: "text" }
+        email: { label: "Email", type: "text" },
+        // Jalon delivre par le formulaire de connexion apres verification du
+        // mot de passe (et du code 2FA quand il y en a un).
+        ticket: { label: "Session ticket", type: "text" },
       },
       async authorize(credentials) {
+        // Voie « jalon » : /login a deja ete appele par le navigateur. On
+        // revalide le token aupres de GET /auth/session au lieu de renvoyer le
+        // mot de passe : un deuxieme /login gonflerait le compteur de
+        // tentatives (et le rate-limit) pour une seule connexion.
+        if (credentials?.ticket) {
+          const res = await fetch(`${API_BASE}/api/v1/auth/session`, {
+            headers: { Authorization: `Bearer ${credentials.ticket}` },
+          })
+          if (!res.ok) return null
+          const payload: BackendSession = await res.json()
+          if (!payload?.access_token) return null
+          return toSessionUser(payload, payload.access_token, payload.refresh_token)
+        }
+
         // Call backend auth API
         const identifier = (credentials as any)?.email || credentials?.username
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/v1/auth/login`, {
+        const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -33,25 +103,11 @@ export const authOptions: NextAuthOptions = {
         const user = await res.json()
 
         if (user && user.access_token) {
-          return {
-            id: String(user.user_id),
-            name: user.username,
-            email: user.email,
-            access_token: user.access_token,
-            refresh_token: user.refresh_token,
-            roles: user.roles || [],
-            company_id: user.company_id,
-            modules_allowed: user.modules_allowed || [],
-            // RBAC granulaire : permissions effectives (codes module.sous.action),
-            // niveau hiérarchique, service commun par entreprise.
-            permissions: user.permissions || [],
-            shared_modules: user.shared_modules || [],
-            role_level: user.role_level ?? 3,
-            department_id: user.department_id ?? null,
-            is_superuser: !!user.is_superuser,
-            must_change_password: !!user.must_change_password,
-          }
+          return toSessionUser(user, user.access_token, user.refresh_token)
         }
+        // 2FA active : le backend renvoie un jeton intermediaire, pas de
+        // session. Le formulaire doit passer par /mfa puis revenir avec un
+        // ticket ; on ne cree jamais de session sans le second facteur.
         return null
       }
     })
