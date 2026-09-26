@@ -167,7 +167,7 @@ export default function AdminTenantAuditLogsPage() {
                     </td>
                     <td className="p-3 font-semibold text-on-surface">{l.adminUser}</td>
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[10px]">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[11px]">
                         {l.category}
                       </span>
                     </td>
@@ -175,7 +175,7 @@ export default function AdminTenantAuditLogsPage() {
                     <td className="p-3 font-mono text-on-surface-variant">{l.target}</td>
                     <td className="p-3 font-mono text-[11px] text-on-surface-variant">{l.ip}</td>
                     <td className="p-3 text-right pr-5">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
                         l.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'
                       }`}>
                         {l.status}

@@ -87,7 +87,7 @@ export default function B2BPortalLayout({ children }: { children: React.ReactNod
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="font-black text-lg tracking-tight text-white">{activeCompany.name}</span>
-                    <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">PORTAIL B2B</span>
+                    <span className="text-[11px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">PORTAIL B2B</span>
                   </div>
                   <p className="text-[11px] text-slate-400">Guichet Client & Suivi Logistique Portuaire</p>
                 </div>
@@ -120,7 +120,7 @@ export default function B2BPortalLayout({ children }: { children: React.ReactNod
               <Link href="/b2b/dashboard" className="relative p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition-colors">
                 <Bell className="w-4 h-4" />
                 {unreadNotifications > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[11px] font-black flex items-center justify-center">
                     {unreadNotifications}
                   </span>
                 )}
@@ -133,7 +133,7 @@ export default function B2BPortalLayout({ children }: { children: React.ReactNod
                 </div>
                 <div className="text-left">
                   <div className="text-xs font-bold text-slate-200">Société Camerounaise d'Import (SOCAM)</div>
-                  <div className="text-[10px] text-slate-400 font-mono">Compte Chargeur #CLI-2026-88</div>
+                  <div className="text-[11px] text-slate-400 font-mono">Compte Chargeur #CLI-2026-88</div>
                 </div>
               </div>
 

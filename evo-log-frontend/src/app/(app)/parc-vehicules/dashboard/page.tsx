@@ -10,7 +10,7 @@ export default function ParcVehiculesDashboard() {
       {/* Header */}
       <div className="bg-slate-900/90 border border-slate-700/50 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-slate-700/50 text-slate-300 border border-slate-700">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-slate-700/50 text-slate-300 border border-slate-700">
             Gestion du Parc Automobile & Maintenance
           </span>
           <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">

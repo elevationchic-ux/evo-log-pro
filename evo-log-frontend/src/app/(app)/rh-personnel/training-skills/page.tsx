@@ -148,16 +148,16 @@ export default function RhPersonnelTrainingSkills() {
 
   const statutBadge = (s: CertificationSkill) => {
     if (s.status === 'EXPIRE') {
-      return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">✗ {t('Expiré', 'Expired')}</span>;
+      return <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">✗ {t('Expiré', 'Expired')}</span>;
     }
     if (s.status === 'EXPIRATION_PROCHE') {
-      return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse">⚠ {t('Expire bientôt', 'Expiring soon')}</span>;
+      return <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse">⚠ {t('Expire bientôt', 'Expiring soon')}</span>;
     }
-    return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✓ {t('Valide', 'Valid')}</span>;
+    return <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✓ {t('Valide', 'Valid')}</span>;
   };
 
   const inputCls = "w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-pink-500";
-  const labelCls = "block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1";
+  const labelCls = "block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1";
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -165,7 +165,7 @@ export default function RhPersonnelTrainingSkills() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-pink-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-pink-500/20 text-pink-300 border border-pink-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-pink-500/20 text-pink-300 border border-pink-500/30">
               {t('Habilitations & Compétences Portuaires', 'Port Accreditation & Skills')}
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -251,7 +251,7 @@ export default function RhPersonnelTrainingSkills() {
             <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs font-mono">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+                  <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                     <th className="py-3.5 px-4">{t('Collaborateur', 'Employee')}</th>
                     <th className="py-3.5 px-4">{t('Certification & Habilitation', 'Certification & Accreditation')}</th>
                     <th className="py-3.5 px-4">{t('Organisme Émetteur', 'Issuing Body')}</th>

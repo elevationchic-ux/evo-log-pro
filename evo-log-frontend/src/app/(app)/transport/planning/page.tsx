@@ -119,9 +119,9 @@ export default function PlanningPage() {
                       Tracteur assigné
                     </div>
                     {mission.camion_id ? (
-                      <span className="text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded font-bold text-[10px]">OK</span>
+                      <span className="text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded font-bold text-[11px]">OK</span>
                     ) : (
-                      <span className="text-red-600 bg-red-500/10 px-1.5 py-0.5 rounded font-bold text-[10px]">À FAIRE</span>
+                      <span className="text-red-600 bg-red-500/10 px-1.5 py-0.5 rounded font-bold text-[11px]">À FAIRE</span>
                     )}
                   </div>
                 </div>

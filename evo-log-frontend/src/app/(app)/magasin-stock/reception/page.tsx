@@ -38,7 +38,7 @@ export default function MagasinStockReception() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-amber-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
               Quai de Réception MAG3 & Dépotage
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -82,7 +82,7 @@ export default function MagasinStockReception() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">N° BL / Document</th>
                 <th className="py-3.5 px-4">Conteneur & Chargeur</th>
                 <th className="py-3.5 px-4">Marchandise</th>
@@ -105,7 +105,7 @@ export default function MagasinStockReception() {
                   <td className="py-3.5 px-4 text-right font-bold text-slate-200">{r.weightKg.toLocaleString()} kg</td>
                   <td className="py-3.5 px-4 text-amber-300 font-sans font-medium">{r.allocatedLocation}</td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                       r.status === 'RECEPTIONNE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                       r.status === 'EN_DECHARGEMENT' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
                       'bg-amber-500/10 text-amber-400 border border-amber-500/20'

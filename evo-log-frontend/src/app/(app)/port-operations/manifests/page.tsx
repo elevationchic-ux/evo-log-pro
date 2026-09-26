@@ -218,7 +218,7 @@ export default function PortOperationsManifestsPage() {
                 <div key={m.id} className="bg-slate-950/50 border border-slate-800 rounded-xl p-4 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-mono text-xs font-medium text-blue-400 break-all">{m.numero_manifeste}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 flex items-center gap-1 ${m.conforme
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border shrink-0 flex items-center gap-1 ${m.conforme
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                         : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                       }`}>
@@ -258,7 +258,7 @@ export default function PortOperationsManifestsPage() {
                       <td className="py-3.5 px-4 font-mono font-medium text-blue-400">{m.numero_manifeste}</td>
                       <td className="py-3.5 px-4 text-white font-medium">{m.navire || ''}</td>
                       <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-700/50 text-slate-300 uppercase border border-slate-600/50">
+                        <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-700/50 text-slate-300 uppercase border border-slate-600/50">
                           {m.type_manifeste || 'import'}
                         </span>
                       </td>

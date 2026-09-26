@@ -112,7 +112,7 @@ export default function IntegrationPage() {
             <p className="text-xs text-slate-400 mb-3">{s.description}</p>
             <div className="flex items-center justify-between">
               <span className={`text-2xl font-black ${s.color}`}>{loading ? '' : s.dossiers}</span>
-              <span className="text-[10px] text-slate-500">dossiers liés</span>
+              <span className="text-[11px] text-slate-500">dossiers liés</span>
             </div>
           </div>
         ))}
@@ -190,7 +190,7 @@ export default function IntegrationPage() {
                   <span className="text-sm font-bold text-white">DUM #{s.numero_dum || s.id}</span>
                   <p className="text-xs text-slate-400 mt-0.5">Valeur CIF: {s.valeur_cif_xaf?.toLocaleString('fr-FR') || '-'} XAF • Circuit: {s.circuit_controle || '-'}</p>
                 </div>
-                <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase border ${s.statut === 'accepté' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30'}`}>
+                <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border ${s.statut === 'accepté' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30'}`}>
                   {s.statut || 'En cours'}
                 </span>
               </div>

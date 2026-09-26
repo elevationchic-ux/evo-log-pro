@@ -337,7 +337,7 @@ export default function PortOperationsMainPage() {
                       <div className="font-mono text-xs text-blue-400">{escale.numero_escale || `#${escale.id}`}</div>
                       <div className="text-white font-medium">{escale.navire_nom || ''}</div>
                     </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${escale.statut === 'A_QUAI'
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border shrink-0 ${escale.statut === 'A_QUAI'
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                         : escale.statut === 'CLOTUREE'
                           ? 'bg-slate-500/10 text-slate-400 border-slate-500/20'

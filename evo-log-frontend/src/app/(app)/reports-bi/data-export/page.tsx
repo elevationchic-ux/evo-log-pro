@@ -145,7 +145,7 @@ export default function ReportsBiDataExportPage() {
                   }`}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-surface-container-high text-primary">
+                  <span className="text-[11px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-surface-container-high text-primary">
                     {ds.category}
                   </span>
                   <span className="text-xs text-on-surface-variant font-mono">{ds.approxCount}</span>
@@ -154,7 +154,7 @@ export default function ReportsBiDataExportPage() {
                 <p className="text-xs text-on-surface-variant leading-relaxed mb-3">{ds.description}</p>
                 <div className="flex gap-1.5">
                   {ds.formatSupported.map(fmt => (
-                    <span key={fmt} className="text-[10px] font-semibold px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">
+                    <span key={fmt} className="text-[11px] font-semibold px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">
                       {fmt}
                     </span>
                   ))}
@@ -265,7 +265,7 @@ export default function ReportsBiDataExportPage() {
                     <td className="p-3 font-mono">{entry.format}</td>
                     <td className="p-3 text-on-surface-variant">{entry.date}</td>
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[10px]">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[11px]">
                         {entry.status}
                       </span>
                     </td>

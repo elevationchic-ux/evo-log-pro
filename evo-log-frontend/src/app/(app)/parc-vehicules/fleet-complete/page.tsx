@@ -283,7 +283,7 @@ export default function ParcFleetCompletePage() {
             >
               <div className="flex justify-between items-start">
                 <h3 className="font-bold text-lg font-mono text-primary">{v.immatriculation}</h3>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${v.statut === 'DISPONIBLE' ? 'bg-emerald-500/10 text-emerald-600' :
+                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${v.statut === 'DISPONIBLE' ? 'bg-emerald-500/10 text-emerald-600' :
                     v.statut === 'EN_MISSION' ? 'bg-blue-500/10 text-blue-600' :
                       v.statut === 'EN_MAINTENANCE' ? 'bg-amber-500/10 text-amber-600' :
                         v.statut === 'RESERVE' ? 'bg-slate-500/10 text-slate-500' :

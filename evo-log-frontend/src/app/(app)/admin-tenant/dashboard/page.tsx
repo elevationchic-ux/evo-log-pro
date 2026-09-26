@@ -14,7 +14,7 @@ export default function AdminTenantDashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-rose-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
               Console Super Administrateur CADC
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">

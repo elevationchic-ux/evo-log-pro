@@ -98,7 +98,7 @@ export default function TransitDouaneDashboardPage() {
                   <td className="px-4 py-3 text-slate-200 font-medium">{row.client}</td>
                   <td className="px-4 py-3 text-slate-400 hidden md:table-cell max-w-48 truncate">{row.marchandise}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${circuitColors[row.circuit]}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-black border ${circuitColors[row.circuit]}`}>
                       ● {row.circuit}
                     </span>
                   </td>

@@ -160,7 +160,7 @@ export default function TransportContainersPage() {
   };
 
   const inputCls = "w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500";
-  const labelCls = "block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1";
+  const labelCls = "block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1";
 
   return (
     <div className="min-h-screen p-4 sm:p-6 space-y-6">
@@ -243,7 +243,7 @@ export default function TransportContainersPage() {
               <div key={c.id} onClick={() => openDetail(c.id)} className="rounded-2xl border border-border bg-card p-4 space-y-2 cursor-pointer hover:border-cyan-500/50 transition-colors">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-mono text-sm font-bold text-cyan-400">{c.numero}</span>
-                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border ${ETAT_CONFIG[c.etat]?.color || "text-slate-400 border-slate-500/30"}`}>
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium border ${ETAT_CONFIG[c.etat]?.color || "text-slate-400 border-slate-500/30"}`}>
                     {ETAT_CONFIG[c.etat]?.label || c.etat}
                   </span>
                 </div>

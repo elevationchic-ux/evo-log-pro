@@ -234,7 +234,7 @@ export default function AlertsPage() {
               return (
                 <div key={alert.id} className="p-5 hover:bg-slate-800/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
-                    <div className={`mt-1 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider border ${badge.bg} ${badge.border} ${badge.text}`}>
+                    <div className={`mt-1 px-2.5 py-1 rounded-xl text-[11px] font-black uppercase tracking-wider border ${badge.bg} ${badge.border} ${badge.text}`}>
                       {badge.label}
                     </div>
                     <div>

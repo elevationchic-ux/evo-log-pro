@@ -221,7 +221,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
           { label: 'Total Vacations', value: `${totalMontant.toLocaleString('fr-FR')} FCFA`, color: 'text-primary' },
         ].map(kpi => (
           <div key={kpi.label} className="p-3 bg-surface rounded-xl border border-outline">
-            <p className="text-[10px] text-on-surface-variant uppercase tracking-wider">{kpi.label}</p>
+            <p className="text-[11px] text-on-surface-variant uppercase tracking-wider">{kpi.label}</p>
             <p className={`text-base font-bold mt-0.5 ${kpi.color}`}>{kpi.value}</p>
           </div>
         ))}
@@ -257,7 +257,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-sm text-on-surface">{docker.prenom} {docker.nom}</span>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${docker.statut === 'ACTIF' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                        <span className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${docker.statut === 'ACTIF' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
                             : docker.statut === 'EXPIRE' ? 'bg-slate-500/10 text-slate-500 border-slate-500/20'
                               : 'bg-rose-500/10 text-rose-600 border-rose-500/20'
                           }`}>{docker.statut}</span>

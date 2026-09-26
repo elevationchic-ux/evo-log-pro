@@ -189,7 +189,7 @@ export default function NotificationsPage() {
                         <Send className="w-3.5 h-3.5" /> Envoyer
                       </button>
                     ) : (
-                      <span className="px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Envoyé</span>
+                      <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Envoyé</span>
                     )}
                   </div>
                 );
@@ -216,7 +216,7 @@ export default function NotificationsPage() {
                       <span className="text-sm font-bold text-white">{t.nom}</span>
                       <p className="text-xs text-slate-400 mt-0.5">Template {t.canal || t.type} • Variables: {(t.variables || []).length}</p>
                     </div>
-                    <span className="px-2 py-1 rounded-lg text-[10px] font-bold border bg-purple-500/20 text-purple-400 border-purple-500/30">Template</span>
+                    <span className="px-2 py-1 rounded-lg text-[11px] font-bold border bg-purple-500/20 text-purple-400 border-purple-500/30">Template</span>
                   </div>
                 </div>
               ))}
@@ -227,7 +227,7 @@ export default function NotificationsPage() {
                       <span className="text-sm font-bold text-white">{c.nom}</span>
                       <p className="text-xs text-slate-400 mt-0.5">Campagne • {c.nb_destinataires || 0} destinataires</p>
                     </div>
-                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold border ${c.statut === 'envoyée' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30'}`}>
+                    <span className={`px-2 py-1 rounded-lg text-[11px] font-bold border ${c.statut === 'envoyée' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30'}`}>
                       {c.statut || 'Planifiée'}
                     </span>
                   </div>

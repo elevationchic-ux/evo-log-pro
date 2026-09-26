@@ -76,10 +76,10 @@ export default function TransportDispatchPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black text-white">{v.immat}</span>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${statutColors[v.statut]}`}>{v.statut}</span>
+                    <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded border ${statutColors[v.statut]}`}>{v.statut}</span>
                   </div>
                   <div className="text-[11px] text-slate-400 truncate">{v.chauffeur}</div>
-                  <div className="text-[10px] text-slate-500 truncate mt-0.5">{v.position}</div>
+                  <div className="text-[11px] text-slate-500 truncate mt-0.5">{v.position}</div>
                 </div>
                 {v.alerts.length > 0 && <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />}
               </div>
@@ -93,7 +93,7 @@ export default function TransportDispatchPage() {
                     style={{ width: `${v.fuel}%` }}
                   ></div>
                 </div>
-                <span className="text-[10px] font-mono text-slate-400">{v.fuel}%</span>
+                <span className="text-[11px] font-mono text-slate-400">{v.fuel}%</span>
               </div>
             </button>
           ))}
@@ -133,7 +133,7 @@ export default function TransportDispatchPage() {
                   <MapPin className="w-8 h-8 text-amber-400 mx-auto mb-1 animate-bounce" />
                   <div className="text-xs font-bold text-white">{selected.position}</div>
                   <div className="text-[11px] text-slate-400 font-mono mt-0.5">{selected.gps.lat.toFixed(4)}°N, {selected.gps.lng.toFixed(4)}°E</div>
-                  <div className="text-[10px] text-amber-400/60 mt-0.5">GPS mis à jour il y a 45 sec</div>
+                  <div className="text-[11px] text-amber-400/60 mt-0.5">GPS mis à jour il y a 45 sec</div>
                 </div>
               </div>
 
@@ -152,7 +152,7 @@ export default function TransportDispatchPage() {
                     <div key={i} className="bg-slate-950 border border-slate-800/60 rounded-xl p-3">
                       <div className="flex items-center gap-1.5 mb-1">
                         <Icon className="w-3.5 h-3.5 text-amber-400" />
-                        <span className="text-[10px] text-slate-500 uppercase font-semibold">{m.label}</span>
+                        <span className="text-[11px] text-slate-500 uppercase font-semibold">{m.label}</span>
                       </div>
                       <div className="text-xs font-bold text-slate-200 truncate">{m.value}</div>
                     </div>

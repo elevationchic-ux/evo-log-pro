@@ -196,7 +196,7 @@ export function HelpAndShortcutsModal({
                           <span className="text-xs font-medium text-on-surface-variant">({item.fullForm})</span>
                         )}
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-outline bg-surface text-on-surface-variant uppercase">
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded border border-outline bg-surface text-on-surface-variant uppercase">
                         {item.category}
                       </span>
                     </div>

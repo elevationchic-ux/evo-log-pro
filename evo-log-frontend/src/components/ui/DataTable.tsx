@@ -320,7 +320,7 @@ export function DataTable<T extends Record<string, any>>({
                   <span className="material-symbols-outlined text-[14px]">{filter.icon}</span>
                 )}
                 <span>{filter.label}</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                <span className={`px-1.5 py-0.2 rounded-full text-[11px] font-bold ${
                   isActive ? 'bg-white/20 text-white' : 'bg-surface-container text-on-surface-variant'
                 }`}>
                   {count}
@@ -392,7 +392,7 @@ export function DataTable<T extends Record<string, any>>({
                       <span className="font-bold text-[11px] uppercase tracking-wider text-on-surface-variant">Colonnes visibles</span>
                       <button
                         onClick={resetColumns}
-                        className="text-[10px] text-primary hover:underline font-bold"
+                        className="text-[11px] text-primary hover:underline font-bold"
                       >
                         Tout afficher
                       </button>

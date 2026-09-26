@@ -299,7 +299,7 @@ export default function PortailFraisPage() {
                     <tr key={f.id} className="hover:bg-slate-800/80 transition-colors">
                       <td className="p-3.5">
                         <div className="font-bold text-slate-200">#{f.numero_recu || `FR-${f.id}`}</div>
-                        <div className="text-[10px] text-slate-400">
+                        <div className="text-[11px] text-slate-400">
                           {f.created_at ? new Date(f.created_at).toLocaleDateString() : 'Aujourd’hui'}
                         </div>
                       </td>
@@ -307,19 +307,19 @@ export default function PortailFraisPage() {
                         {f.titre_mission || 'Mission générale'}
                       </td>
                       <td className="p-3.5">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-900 text-slate-300 border border-slate-700">
+                        <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900 text-slate-300 border border-slate-700">
                           {f.type_frais}
                         </span>
                       </td>
                       <td className="p-3.5 text-slate-400">
                         <div>{f.fournisseur || 'Comptant'}</div>
-                        <div className="text-[10px] text-slate-400">{f.ville_lieu || 'Cameroun'}</div>
+                        <div className="text-[11px] text-slate-400">{f.ville_lieu || 'Cameroun'}</div>
                       </td>
                       <td className="p-3.5 font-mono font-bold text-slate-200">
                         {f.montant.toLocaleString()} {f.devise}
                       </td>
                       <td className="p-3.5">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
                           f.statut === 'VALIDE' ? 'bg-emerald-500/15 text-emerald-300' :
                           f.statut === 'REJETE' ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'
                         }`}>
@@ -531,13 +531,13 @@ export default function PortailFraisPage() {
                     <div className="space-y-1">
                       <div className="text-xs font-bold text-slate-200">{a.titre_mission}</div>
                       <div className="text-[11px] text-slate-500">Destination : {a.corridor_destination || 'Cameroun'}</div>
-                      <div className="text-[10px] text-slate-400">{a.motif}</div>
+                      <div className="text-[11px] text-slate-400">{a.motif}</div>
                     </div>
                     <div className="text-right space-y-1">
                       <div className="text-sm font-mono font-bold text-slate-200">
                         {a.montant_demande.toLocaleString()} {a.devise}
                       </div>
-                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                         a.statut === 'ACCORDEE' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
                       }`}>
                         {a.statut}
@@ -574,7 +574,7 @@ export default function PortailFraisPage() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-200">#{f.numero_recu || `FR-${f.id}`}</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400">
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400">
                         {f.type_frais}
                       </span>
                     </div>
@@ -587,7 +587,7 @@ export default function PortailFraisPage() {
                       <div className="text-sm font-mono font-bold text-slate-200">
                         {f.montant.toLocaleString()} {f.devise}
                       </div>
-                      <span className="text-[10px] text-amber-600 font-bold">À valider</span>
+                      <span className="text-[11px] text-amber-600 font-bold">À valider</span>
                     </div>
 
                     <div className="flex items-center gap-2">

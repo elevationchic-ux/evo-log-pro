@@ -201,14 +201,14 @@ function PreventiveMaintenanceInner() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-amber-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
               {t('GMAO - Maintenance Préventive & Corrective', 'CMMS - Preventive & Corrective Maintenance')}
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
               {t('Seuils : 10 000 km / 3 mois', 'Thresholds: 10,000 km / 3 months')}
             </span>
             {vehiculeFilter && (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
                 {t('Filtré sur un véhicule', 'Filtered on one vehicle')}
               </span>
             )}
@@ -279,7 +279,7 @@ function PreventiveMaintenanceInner() {
                 <div key={o.id} className="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-amber-400 font-mono text-sm">{o.orderCode}</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${STATUT_COLORS[o.status] || 'bg-slate-800 text-slate-400'}`}>{o.status}</span>
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${STATUT_COLORS[o.status] || 'bg-slate-800 text-slate-400'}`}>{o.status}</span>
                   </div>
                   <div className="font-sans font-bold text-slate-100 text-sm">{o.vehiclePlate} <span className="font-normal text-slate-400 text-xs"> {o.vehicleType}</span></div>
                   {o.description && <p className="text-xs text-slate-300 font-sans">{o.description}</p>}
@@ -307,7 +307,7 @@ function PreventiveMaintenanceInner() {
             <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs font-mono">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+                  <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                     <th className="py-3.5 px-4">{t('Code OT & Véhicule', 'WO Code & Vehicle')}</th>
                     <th className="py-3.5 px-4">{t('Intervention', 'Intervention')}</th>
                     <th className="py-3.5 px-4">{t('Technicien', 'Technician')}</th>
@@ -342,7 +342,7 @@ function PreventiveMaintenanceInner() {
                       <td className="py-3.5 px-4 font-sans text-slate-300">{o.technicien}</td>
                       <td className="py-3.5 px-4 text-slate-400">{o.plannedDate}</td>
                       <td className="py-3.5 px-4 text-center">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${o.orderType?.startsWith('PREVENT') ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${o.orderType?.startsWith('PREVENT') ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
                             o.orderType ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
                               'bg-slate-800 text-slate-400'
                           }`}>
@@ -350,7 +350,7 @@ function PreventiveMaintenanceInner() {
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-center">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${STATUT_COLORS[o.status] || 'bg-slate-800 text-slate-400'}`}>
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${STATUT_COLORS[o.status] || 'bg-slate-800 text-slate-400'}`}>
                           {o.status}
                         </span>
                       </td>
@@ -358,7 +358,7 @@ function PreventiveMaintenanceInner() {
                         {o.status !== 'TERMINE' && (
                           <button
                             onClick={() => advanceStatut(o)}
-                            className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded-lg text-[10px] font-bold hover:bg-amber-500/20 transition-colors"
+                            className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded-lg text-[11px] font-bold hover:bg-amber-500/20 transition-colors"
                           >
                             {o.status === 'PLANIFIE' ? t('Démarrer', 'Start') : t('Clôturer', 'Close')}
                           </button>
@@ -387,7 +387,7 @@ function PreventiveMaintenanceInner() {
             <form onSubmit={handleCreate} className="space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Véhicule *', 'Vehicle *')}</label>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Véhicule *', 'Vehicle *')}</label>
                   <select
                     value={form.vehicule_id}
                     onChange={(e) => setForm({ ...form, vehicule_id: e.target.value })}
@@ -400,7 +400,7 @@ function PreventiveMaintenanceInner() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Type', 'Type')}</label>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Type', 'Type')}</label>
                   <select
                     value={form.type_maintenance}
                     onChange={(e) => setForm({ ...form, type_maintenance: e.target.value })}
@@ -411,7 +411,7 @@ function PreventiveMaintenanceInner() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Date prévue', 'Planned date')}</label>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Date prévue', 'Planned date')}</label>
                   <input
                     type="datetime-local"
                     value={form.date_debut}
@@ -420,7 +420,7 @@ function PreventiveMaintenanceInner() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Kilométrage', 'Mileage')}</label>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Kilométrage', 'Mileage')}</label>
                   <input
                     type="number" min="0"
                     value={form.kilometrage}
@@ -429,7 +429,7 @@ function PreventiveMaintenanceInner() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Coût estimé (FCFA)', 'Estimated cost (FCFA)')}</label>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Coût estimé (FCFA)', 'Estimated cost (FCFA)')}</label>
                   <input
                     type="number" min="0"
                     value={form.cout}
@@ -438,7 +438,7 @@ function PreventiveMaintenanceInner() {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Technicien / Réalisateur', 'Technician / Provider')}</label>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Technicien / Réalisateur', 'Technician / Provider')}</label>
                   <input
                     value={form.realisateur}
                     onChange={(e) => setForm({ ...form, realisateur: e.target.value })}
@@ -447,7 +447,7 @@ function PreventiveMaintenanceInner() {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Description des travaux', 'Scope of work')}</label>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Description des travaux', 'Scope of work')}</label>
                   <textarea
                     rows={3}
                     value={form.description}

@@ -211,7 +211,7 @@ export default function ClientB2bAfterSalesPage() {
                     <td className="p-3 text-on-surface">{c.typeLitige.replace(/_/g, ' ')}</td>
                     <td className="p-3 text-on-surface-variant font-mono">{c.dateDeclaration}</td>
                     <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
                         c.priorite === 'URGENTE' ? 'bg-red-500/10 text-red-600' :
                         c.priorite === 'HAUTE' ? 'bg-amber-500/10 text-amber-600' :
                         'bg-blue-500/10 text-blue-600'
@@ -223,7 +223,7 @@ export default function ClientB2bAfterSalesPage() {
                       {c.montantReclame > 0 ? `${c.montantReclame.toLocaleString('fr-FR')} FCFA` : 'N/D'}
                     </td>
                     <td className="p-3 text-right pr-5">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
                         c.statut === 'RESOLU' ? 'bg-emerald-500/10 text-emerald-600' :
                         c.statut === 'EN_INSTRUCTION' ? 'bg-amber-500/10 text-amber-600' :
                         'bg-blue-500/10 text-blue-600'

@@ -173,7 +173,7 @@ export default function ParcCostsConsumptionPage() {
           <div>
             <p className="text-xs text-on-surface-variant font-medium">Dépenses Flotte Totales</p>
             <p className="text-xl font-bold font-mono text-on-surface mt-1">{totalDepenses.toLocaleString('fr-FR')} FCFA</p>
-            <span className="text-[10px] text-on-surface-variant">Carburant + Pièces</span>
+            <span className="text-[11px] text-on-surface-variant">Carburant + Pièces</span>
           </div>
           <div className="p-3 bg-primary/10 rounded-xl text-primary">
             <DollarSign className="w-5 h-5" />
@@ -184,7 +184,7 @@ export default function ParcCostsConsumptionPage() {
           <div>
             <p className="text-xs text-on-surface-variant font-medium">Volume Gasoil Pris</p>
             <p className="text-xl font-bold font-mono text-on-surface mt-1">{totalLitres.toLocaleString('fr-FR')} L</p>
-            <span className="text-[10px] text-on-surface-variant">Contrôlé FuelGuard</span>
+            <span className="text-[11px] text-on-surface-variant">Contrôlé FuelGuard</span>
           </div>
           <div className="p-3 bg-amber-500/10 rounded-xl text-amber-500">
             <Fuel className="w-5 h-5" />
@@ -195,7 +195,7 @@ export default function ParcCostsConsumptionPage() {
           <div>
             <p className="text-xs text-on-surface-variant font-medium">Véhicules Suivis</p>
             <p className="text-xl font-bold font-mono text-on-surface mt-1">{vehicles.length}</p>
-            <span className="text-[10px] text-on-surface-variant">Tracteurs, porteurs, semi</span>
+            <span className="text-[11px] text-on-surface-variant">Tracteurs, porteurs, semi</span>
           </div>
           <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500">
             <Truck className="w-5 h-5" />
@@ -208,7 +208,7 @@ export default function ParcCostsConsumptionPage() {
             <p className="text-xl font-bold font-mono text-emerald-600 mt-1">
               {vehicles.length > 0 ? Math.round(totalDepenses / Math.max(1, vehicles.reduce((s, v) => s + v.totalKm, 0))) : 0} FCFA/km
             </p>
-            <span className="text-[10px] text-on-surface-variant">Benchmark CEMAC</span>
+            <span className="text-[11px] text-on-surface-variant">Benchmark CEMAC</span>
           </div>
           <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
             <TrendingUp className="w-5 h-5" />

@@ -126,7 +126,7 @@ export default function ReportsBiComplianceAuditPage() {
           <div>
             <p className="text-xs text-on-surface-variant font-medium">Intégrité Piste d'Audit</p>
             <p className="text-xl font-bold text-emerald-600 mt-1">100% Conforme</p>
-            <span className="text-[10px] text-on-surface-variant">Blockchain hash scellé</span>
+            <span className="text-[11px] text-on-surface-variant">Blockchain hash scellé</span>
           </div>
           <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
             <CheckCircle2 className="w-5 h-5" />
@@ -137,7 +137,7 @@ export default function ReportsBiComplianceAuditPage() {
           <div>
             <p className="text-xs text-on-surface-variant font-medium">Événements Journalisés</p>
             <p className="text-xl font-bold text-on-surface mt-1">{logs.length}</p>
-            <span className="text-[10px] text-on-surface-variant">Traceur 24/7 temps réel</span>
+            <span className="text-[11px] text-on-surface-variant">Traceur 24/7 temps réel</span>
           </div>
           <div className="p-3 bg-primary/10 rounded-xl text-primary">
             <Lock className="w-5 h-5" />
@@ -148,7 +148,7 @@ export default function ReportsBiComplianceAuditPage() {
           <div>
             <p className="text-xs text-on-surface-variant font-medium">Comptes Utilisateurs Actifs</p>
             <p className="text-xl font-bold text-on-surface mt-1">Supervisés</p>
-            <span className="text-[10px] text-on-surface-variant">RBAC cloisonné</span>
+            <span className="text-[11px] text-on-surface-variant">RBAC cloisonné</span>
           </div>
           <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500">
             <UserCheck className="w-5 h-5" />
@@ -159,7 +159,7 @@ export default function ReportsBiComplianceAuditPage() {
           <div>
             <p className="text-xs text-on-surface-variant font-medium">Alertes Suspicion Fraude</p>
             <p className="text-xl font-bold text-emerald-600 mt-1">0</p>
-            <span className="text-[10px] text-on-surface-variant">FuelGuard & Factures OK</span>
+            <span className="text-[11px] text-on-surface-variant">FuelGuard & Factures OK</span>
           </div>
           <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
             <ShieldCheck className="w-5 h-5" />
@@ -241,10 +241,10 @@ export default function ReportsBiComplianceAuditPage() {
                     </td>
                     <td className="p-3">
                       <span className="font-semibold text-on-surface block">{log.user_email}</span>
-                      <span className="text-[10px] text-on-surface-variant">{log.user_role}</span>
+                      <span className="text-[11px] text-on-surface-variant">{log.user_role}</span>
                     </td>
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[10px]">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[11px]">
                         {log.module}
                       </span>
                     </td>
@@ -252,7 +252,7 @@ export default function ReportsBiComplianceAuditPage() {
                     <td className="p-3 font-mono font-medium text-on-surface-variant">{log.entity_id}</td>
                     <td className="p-3 font-mono text-on-surface-variant text-[11px]">{log.ip_address}</td>
                     <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
                         log.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-600' :
                         log.status === 'WARNING' ? 'bg-amber-500/10 text-amber-600' :
                         'bg-red-500/10 text-red-600'

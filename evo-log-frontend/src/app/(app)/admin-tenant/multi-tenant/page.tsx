@@ -262,7 +262,7 @@ export default function AdminTenantMultiTenant() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-rose-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
               Infrastructure Multi-Tenant CADC
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -302,7 +302,7 @@ export default function AdminTenantMultiTenant() {
           { label: 'Total Utilisateurs', value: tenants.reduce((s, t) => s + t.current_users, 0), color: 'text-blue-400' },
         ].map(kpi => (
           <div key={kpi.label} className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-            <p className="text-[10px] text-slate-400 uppercase tracking-wider">{kpi.label}</p>
+            <p className="text-[11px] text-slate-400 uppercase tracking-wider">{kpi.label}</p>
             <p className={`text-2xl font-black mt-1 ${kpi.color}`}>{kpi.value}</p>
           </div>
         ))}
@@ -326,7 +326,7 @@ export default function AdminTenantMultiTenant() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">Entreprise</th>
                 <th className="py-3.5 px-4">Infos Légales</th>
                 <th className="py-3.5 px-4 text-center">Utilisateurs</th>
@@ -373,19 +373,19 @@ export default function AdminTenantMultiTenant() {
                           {t.logo_url ? (
                             <img src={t.logo_url} alt={t.nom} className="w-8 h-8 rounded-lg object-contain bg-slate-900 p-0.5 border border-slate-700" />
                           ) : (
-                            <div className="w-8 h-8 rounded-lg bg-slate-700 text-slate-200 flex items-center justify-center font-black text-[10px]">
+                            <div className="w-8 h-8 rounded-lg bg-slate-700 text-slate-200 flex items-center justify-center font-black text-[11px]">
                               {(t.sigle || t.code || '?').slice(0, 3).toUpperCase()}
                             </div>
                           )}
                           <div>
                             <div className="font-bold text-rose-400 font-mono text-[11px]">{t.code}</div>
                             <div className="font-sans font-semibold text-slate-100 text-sm leading-tight">{t.nom}</div>
-                            <div className="text-slate-400 text-[10px]">{t.ville}, {t.pays}</div>
+                            <div className="text-slate-400 text-[11px]">{t.ville}, {t.pays}</div>
                           </div>
                         </div>
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="space-y-0.5 text-[10px]">
+                        <div className="space-y-0.5 text-[11px]">
                           {t.tax_id && <p><span className="text-slate-500">NIF :</span> {t.tax_id}</p>}
                           {t.rccm && <p><span className="text-slate-500">RCCM :</span> {t.rccm}</p>}
                           {t.email && <p className="text-slate-400">{t.email}</p>}
@@ -403,7 +403,7 @@ export default function AdminTenantMultiTenant() {
                               style={{ width: `${storagePct}%` }}
                             />
                           </div>
-                          <span className="text-slate-300 whitespace-nowrap text-[10px]">
+                          <span className="text-slate-300 whitespace-nowrap text-[11px]">
                             {storageUsedGb}/{storageLimitGb}Go
                           </span>
                         </div>
@@ -414,7 +414,7 @@ export default function AdminTenantMultiTenant() {
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-center">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                           t.is_active
                             ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
@@ -465,7 +465,7 @@ export default function AdminTenantMultiTenant() {
           <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 my-8 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-rose-400">
+                <span className="text-[11px] font-black uppercase tracking-widest text-rose-400">
                   {editingTenant ? 'Modifier Tenant' : 'Onboarding Nouveau Tenant'}
                 </span>
                 <h3 className="text-lg font-black text-slate-100">
@@ -494,7 +494,7 @@ export default function AdminTenantMultiTenant() {
                     ) : (
                       <div className="text-center">
                         <Upload className="w-6 h-6 text-slate-500 mx-auto mb-1" />
-                        <span className="text-[9px] text-slate-500">PNG/SVG</span>
+                        <span className="text-[11px] text-slate-500">PNG/SVG</span>
                       </div>
                     )}
                   </div>
@@ -509,7 +509,7 @@ export default function AdminTenantMultiTenant() {
 
               {/* Identity */}
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-rose-400 mb-3">Identité & Raison Sociale</p>
+                <p className="text-[11px] font-black uppercase tracking-widest text-rose-400 mb-3">Identité & Raison Sociale</p>
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { label: 'Code Tenant *', key: 'code', ph: 'EX: LPC-DLA' },
@@ -562,7 +562,7 @@ export default function AdminTenantMultiTenant() {
 
               {/* Legal IDs */}
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-rose-400 mb-3">Identifiants Légaux OHADA</p>
+                <p className="text-[11px] font-black uppercase tracking-widest text-rose-400 mb-3">Identifiants Légaux OHADA</p>
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { label: 'NIF *', key: 'tax_id', ph: 'M010200034567P' },
@@ -588,7 +588,7 @@ export default function AdminTenantMultiTenant() {
 
               {/* Coordinates */}
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-rose-400 mb-3">Coordonnées</p>
+                <p className="text-[11px] font-black uppercase tracking-widest text-rose-400 mb-3">Coordonnées</p>
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { label: 'Email Admin *', key: 'email', ph: 'admin@entreprise.cm' },
@@ -612,7 +612,7 @@ export default function AdminTenantMultiTenant() {
 
               {/* Quotas */}
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-rose-400 mb-3">Quotas & Limites</p>
+                <p className="text-[11px] font-black uppercase tracking-widest text-rose-400 mb-3">Quotas & Limites</p>
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { label: 'Max Utilisateurs', key: 'max_users' },
@@ -638,7 +638,7 @@ export default function AdminTenantMultiTenant() {
                 <button
                   type="button"
                   onClick={() => setExpandedModules(p => !p)}
-                  className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-rose-400 mb-3 hover:text-rose-300"
+                  className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-rose-400 mb-3 hover:text-rose-300"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   Modules Activés ({(form.modules_actives as string[]).length}/{ALL_MODULES.length})

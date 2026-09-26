@@ -97,7 +97,7 @@ export default function ComptabiliteOhadaFinancialStatements() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-violet-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl print:hidden">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
               États Financiers Normalisés SYSCOHADA
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -263,7 +263,7 @@ export default function ComptabiliteOhadaFinancialStatements() {
             <div className="py-2.5 flex justify-between items-center">
               <div>
                 <span className="font-bold text-slate-200">Chiffre d&apos;Affaires Net (Classe 7)</span>
-                <p className="text-[10px] text-slate-500 font-sans">Prestations de transit, transport routier et manutention quai</p>
+                <p className="text-[11px] text-slate-500 font-sans">Prestations de transit, transport routier et manutention quai</p>
               </div>
               <span className="font-black text-emerald-400 text-sm">+{compteResultat.chiffre_affaires.toLocaleString()}</span>
             </div>
@@ -271,7 +271,7 @@ export default function ComptabiliteOhadaFinancialStatements() {
             <div className="py-2.5 flex justify-between items-center">
               <div>
                 <span className="font-bold text-slate-200">Achats Consommés de Matières & Fournitures (Compte 60)</span>
-                <p className="text-[10px] text-slate-500 font-sans">Carburants, lubrifiants, pneumatiques</p>
+                <p className="text-[11px] text-slate-500 font-sans">Carburants, lubrifiants, pneumatiques</p>
               </div>
               <span className="font-bold text-red-400">-{compteResultat.achats_consommes.toLocaleString()}</span>
             </div>
@@ -284,7 +284,7 @@ export default function ComptabiliteOhadaFinancialStatements() {
             <div className="py-2.5 flex justify-between items-center">
               <div>
                 <span className="font-bold text-slate-200">Charges de Personnel (Compte 66)</span>
-                <p className="text-[10px] text-slate-500 font-sans">Salaires chauffeurs, dockers de quart, charges CNPS</p>
+                <p className="text-[11px] text-slate-500 font-sans">Salaires chauffeurs, dockers de quart, charges CNPS</p>
               </div>
               <span className="font-bold text-red-400">-{compteResultat.charges_personnel.toLocaleString()}</span>
             </div>
@@ -297,7 +297,7 @@ export default function ComptabiliteOhadaFinancialStatements() {
             <div className="py-2.5 flex justify-between items-center">
               <div>
                 <span className="font-bold text-slate-200">Dotations aux Amortissements & Provisions (Compte 68)</span>
-                <p className="text-[10px] text-slate-500 font-sans">Usure camions et équipements portuaires</p>
+                <p className="text-[11px] text-slate-500 font-sans">Usure camions et équipements portuaires</p>
               </div>
               <span className="font-bold text-red-400">-{compteResultat.dotations_amortissements.toLocaleString()}</span>
             </div>

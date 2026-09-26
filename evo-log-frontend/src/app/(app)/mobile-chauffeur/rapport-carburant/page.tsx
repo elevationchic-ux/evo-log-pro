@@ -44,7 +44,7 @@ export default function MobileChauffeurCarburantPage() {
           <Fuel className="w-5 h-5 text-orange-400" />
           <div>
             <div className="text-xs font-black text-slate-100">Rapport Carburant & Anti-Siphonnage</div>
-            <div className="text-[10px] font-mono text-orange-400">T-Code : KDRV_CBT  {form.vehicule}</div>
+            <div className="text-[11px] font-mono text-orange-400">T-Code : KDRV_CBT  {form.vehicule}</div>
           </div>
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function MobileChauffeurCarburantPage() {
 
         {/* Kilométrage */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-3">Kilométrage</div>
+          <div className="text-[11px] text-slate-500 uppercase font-bold tracking-wider mb-3">Kilométrage</div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-[11px] text-slate-400 font-bold">KM Départ</label>
@@ -87,7 +87,7 @@ export default function MobileChauffeurCarburantPage() {
 
         {/* Ravitaillement */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-3">Ravitaillement Carburant</div>
+          <div className="text-[11px] text-slate-500 uppercase font-bold tracking-wider mb-3">Ravitaillement Carburant</div>
           <div className="space-y-3">
             <div>
               <label className="text-[11px] text-slate-400 font-bold">Station-Service *</label>
@@ -150,7 +150,7 @@ export default function MobileChauffeurCarburantPage() {
           <div className="py-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center">
             <CheckCircle2 className="w-6 h-6 text-emerald-400 mx-auto mb-1" />
             <div className="text-sm font-black text-emerald-400">Rapport transmis au dispatching</div>
-            <div className="text-[10px] text-slate-400 mt-0.5 font-mono">27/08/2026  {form.vehicule}</div>
+            <div className="text-[11px] text-slate-400 mt-0.5 font-mono">27/08/2026  {form.vehicule}</div>
           </div>
         )}
       </div>

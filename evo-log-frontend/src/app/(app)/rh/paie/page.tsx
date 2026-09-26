@@ -144,7 +144,7 @@ export default function RHPaiePage() {
 
           {/* GAINS section */}
           <div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase mb-2">ÉLÉMENTS DE RÉMUNÉRATION</div>
+            <div className="text-[11px] font-bold text-slate-400 uppercase mb-2">ÉLÉMENTS DE RÉMUNÉRATION</div>
             <div className="space-y-1">
               {[
                 { label: 'Salaire de Base', amount: salaireBase },
@@ -166,7 +166,7 @@ export default function RHPaiePage() {
 
           {/* COTISATIONS */}
           <div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase mb-2">RETENUES SALARIALES</div>
+            <div className="text-[11px] font-bold text-slate-400 uppercase mb-2">RETENUES SALARIALES</div>
             <div className="space-y-1">
               {[
                 { label: 'CNPS Part Salarié (4.2% sur brut plafonné 750k)', amount: paie.cnpsSalarie },
@@ -191,7 +191,7 @@ export default function RHPaiePage() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] text-slate-500">Coût total employeur</div>
+                <div className="text-[11px] text-slate-500">Coût total employeur</div>
                 <div className="text-sm font-black text-slate-300 font-mono">{Math.round(paie.coutEmployeur).toLocaleString()} XAF</div>
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function RHPaiePage() {
 
           {/* Charges patronales */}
           <div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase mb-2">CHARGES PATRONALES</div>
+            <div className="text-[11px] font-bold text-slate-400 uppercase mb-2">CHARGES PATRONALES</div>
             <div className="space-y-1">
               {[
                 { label: 'CNPS Patronal (AT+VF+PS+AF = 16.75%)', amount: paie.cnpsPatronal },

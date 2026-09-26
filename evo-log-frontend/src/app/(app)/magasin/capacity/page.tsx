@@ -76,7 +76,7 @@ export default function MagasinCapacityPage() {
                   <div className="text-label-md font-label-md text-on-surface-variant mb-1">Alertes Saturation</div>
                   <div className="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
                     2
-                    <span className="px-2 py-0.5 bg-km-red-light text-km-red text-[10px] rounded uppercase font-bold">Critique</span>
+                    <span className="px-2 py-0.5 bg-km-red-light text-km-red text-[11px] rounded uppercase font-bold">Critique</span>
                   </div>
                 </div>
               </div>
@@ -103,7 +103,7 @@ export default function MagasinCapacityPage() {
                         </div>
                       </div>
                       <div className="bg-surface border-x border-b border-outline-variant p-xs text-center">
-                        <div className="text-[10px] text-on-surface-variant truncate">Blé Dur</div>
+                        <div className="text-[11px] text-on-surface-variant truncate">Blé Dur</div>
                       </div>
                       {/* Tooltip (Hover) */}
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-inverse-surface text-inverse-on-surface p-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none text-body-sm font-body-sm hidden md:block">
@@ -125,7 +125,7 @@ export default function MagasinCapacityPage() {
                         </div>
                       </div>
                       <div className="bg-surface border-x border-b border-outline-variant p-xs text-center">
-                        <div className="text-[10px] text-on-surface-variant truncate">Maïs</div>
+                        <div className="text-[11px] text-on-surface-variant truncate">Maïs</div>
                       </div>
                     </div>
                     {/* Silo 3 */}
@@ -140,7 +140,7 @@ export default function MagasinCapacityPage() {
                         </div>
                       </div>
                       <div className="bg-surface border-x border-b border-outline-variant p-xs text-center">
-                        <div className="text-[10px] text-km-red font-bold flex items-center justify-center gap-1">
+                        <div className="text-[11px] text-km-red font-bold flex items-center justify-center gap-1">
                           <span className="material-symbols-outlined text-[12px]">warning</span>
                           Orge
                         </div>
@@ -157,7 +157,7 @@ export default function MagasinCapacityPage() {
                         </div>
                       </div>
                       <div className="bg-surface border-x border-b border-outline-variant p-xs text-center">
-                        <div className="text-[10px] text-on-surface-variant truncate">-</div>
+                        <div className="text-[11px] text-on-surface-variant truncate">-</div>
                       </div>
                     </div>
                   </div>

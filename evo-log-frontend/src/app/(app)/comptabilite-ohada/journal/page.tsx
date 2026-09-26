@@ -183,7 +183,7 @@ export default function ComptabiliteOhadaJournal() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-violet-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl print:hidden">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
               Livre-Journal Général & Auxiliaires
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -326,7 +326,7 @@ export default function ComptabiliteOhadaJournal() {
                       <td className="py-3 px-4 text-slate-300 whitespace-nowrap">{entry.date}</td>
                       <td className="py-3 px-4 font-bold text-violet-400">{entry.piece}</td>
                       <td className="py-3 px-4">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-950 border border-slate-800 text-slate-300">
+                        <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-950 border border-slate-800 text-slate-300">
                           {entry.journal}
                         </span>
                       </td>
@@ -340,11 +340,11 @@ export default function ComptabiliteOhadaJournal() {
                       </td>
                       <td className="py-3 px-4 text-center">
                         {entry.lettrage ? (
-                          <span className="px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-bold font-mono">
+                          <span className="px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold font-mono">
                             {entry.lettrage}
                           </span>
                         ) : (
-                          <span className="text-slate-400 text-[10px]">-</span>
+                          <span className="text-slate-400 text-[11px]">-</span>
                         )}
                       </td>
                     </tr>

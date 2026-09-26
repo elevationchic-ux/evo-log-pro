@@ -601,7 +601,7 @@ export default function EnterpriseChatPage() {
                   </div>
                   <div className="truncate">
                     <div className="text-xs font-bold truncate text-white">{r.name}</div>
-                    <div className="text-[10px] text-slate-400 truncate">{r.topic}</div>
+                    <div className="text-[11px] text-slate-400 truncate">{r.topic}</div>
                   </div>
                 </div>
                 {r.active_call && (
@@ -629,13 +629,13 @@ export default function EnterpriseChatPage() {
                       </div>
                       <div className="truncate">
                         <div className="text-xs font-bold truncate text-white">{r.name}</div>
-                        <div className="text-[10px] text-slate-400 truncate">
+                        <div className="text-[11px] text-slate-400 truncate">
                           {r.members_count} participants • {r.created_by_name}
                         </div>
                       </div>
                     </div>
                     {r.active_call && (
-                      <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 text-[9px] font-black animate-pulse">
+                      <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 text-[11px] font-black animate-pulse">
                         EN DIRECT
                       </span>
                     )}
@@ -677,7 +677,7 @@ export default function EnterpriseChatPage() {
                   </div>
                   <div className="truncate">
                     <div className="text-xs font-bold text-white truncate">{colleague.full_name}</div>
-                    <div className="text-[10px] text-slate-400 truncate">{colleague.role_title}</div>
+                    <div className="text-[11px] text-slate-400 truncate">{colleague.role_title}</div>
                   </div>
                 </div>
               </button>
@@ -687,7 +687,7 @@ export default function EnterpriseChatPage() {
           {/* User Quick Info */}
           <div className="pt-3 border-t border-slate-800/80 mt-2 flex items-center justify-between text-xs text-slate-400">
             <span className="truncate">Connecté : <b className="text-slate-200">{user?.fullName || (user as any)?.username || 'Utilisateur'}</b></span>
-            <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">En ligne</span>
+            <span className="text-[11px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">En ligne</span>
           </div>
         </div>
 
@@ -704,7 +704,7 @@ export default function EnterpriseChatPage() {
                   <div>
                     <h2 className="text-sm font-bold text-white flex items-center gap-2">
                       {selectedColleague.full_name}
-                      <span className="text-[10px] font-normal text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      <span className="text-[11px] font-normal text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                         {selectedColleague.role_code}
                       </span>
                     </h2>
@@ -720,7 +720,7 @@ export default function EnterpriseChatPage() {
                     <h2 className="text-sm font-bold text-white flex items-center gap-2">
                       {selectedRoom.name}
                       {selectedRoom.channel_type !== 'thematic' && (
-                        <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        <span className="text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                           {selectedRoom.members_count} participants
                         </span>
                       )}
@@ -770,8 +770,8 @@ export default function EnterpriseChatPage() {
                   >
                     <div className="flex items-center gap-2 mb-1 px-1">
                       <span className="text-[11px] font-bold text-slate-300">{m.sender_name}</span>
-                      <span className="text-[10px] text-slate-500">{m.sender_role}</span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[11px] text-slate-500">{m.sender_role}</span>
+                      <span className="text-[11px] text-slate-400">
                         {new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -797,10 +797,10 @@ export default function EnterpriseChatPage() {
                   >
                     <div className="flex items-center gap-2 mb-1 px-1">
                       <span className="text-[11px] font-bold text-slate-300">{m.sender_name}</span>
-                      <span className="text-[10px] text-cyan-400 font-mono bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20">
+                      <span className="text-[11px] text-cyan-400 font-mono bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20">
                         {m.sender_role}
                       </span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[11px] text-slate-400">
                         {new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -894,7 +894,7 @@ export default function EnterpriseChatPage() {
                     {callPeerName}
                   </span>
                 </div>
-                <div className="absolute bottom-3 left-3 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800 text-[10px] text-slate-300 font-mono">
+                <div className="absolute bottom-3 left-3 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800 text-[11px] text-slate-300 font-mono">
                   Flux Distant
                 </div>
               </div>
@@ -916,7 +916,7 @@ export default function EnterpriseChatPage() {
                     <span className="text-xs text-slate-400 mt-2 font-medium">Caméra désactivée</span>
                   </div>
                 )}
-                <div className="absolute bottom-3 left-3 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800 text-[10px] text-slate-300 font-mono">
+                <div className="absolute bottom-3 left-3 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800 text-[11px] text-slate-300 font-mono">
                   Vous ({user?.fullName || (user as any)?.username || 'Moi'})
                 </div>
               </div>
@@ -1040,7 +1040,7 @@ export default function EnterpriseChatPage() {
                         }`}
                       >
                         <div className="truncate">
-                          <span className="font-bold">{c.full_name}</span> • <span className="text-[10px] text-slate-400">{c.role_title}</span>
+                          <span className="font-bold">{c.full_name}</span> • <span className="text-[11px] text-slate-400">{c.role_title}</span>
                         </div>
                         {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
                       </button>

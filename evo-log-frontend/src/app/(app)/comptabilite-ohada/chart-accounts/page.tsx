@@ -164,7 +164,7 @@ export default function ComptabiliteOhadaChartAccounts() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-violet-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
               Nomenclature Officielle SYSCOHADA
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -254,7 +254,7 @@ export default function ComptabiliteOhadaChartAccounts() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">Numéro de Compte</th>
                 <th className="py-3.5 px-4">Intitulé Officiel SYSCOHADA</th>
                 <th className="py-3.5 px-4">Classe</th>
@@ -270,7 +270,7 @@ export default function ComptabiliteOhadaChartAccounts() {
                   <td className="py-3 px-4 font-sans text-slate-100 font-semibold">{acc.intitule}</td>
                   <td className="py-3 px-4 text-slate-400">Classe {acc.classe}</td>
                   <td className="py-3 px-4">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                       acc.type === 'ACTIF' ? 'bg-blue-500/20 text-blue-300' :
                       acc.type === 'PASSIF' ? 'bg-purple-500/20 text-purple-300' :
                       acc.type === 'CHARGE' ? 'bg-red-500/20 text-red-300' :
@@ -281,7 +281,7 @@ export default function ComptabiliteOhadaChartAccounts() {
                   </td>
                   <td className="py-3 px-4 text-slate-400">{acc.nature}</td>
                   <td className="py-3 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold font-mono ${
                       acc.sens === 'DEBITEUR' ? 'text-blue-400 bg-blue-500/10' : 'text-emerald-400 bg-emerald-500/10'
                     }`}>
                       {acc.sens}

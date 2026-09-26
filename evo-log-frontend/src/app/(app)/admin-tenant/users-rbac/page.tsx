@@ -100,7 +100,7 @@ export default function AdminTenantUsersRbac() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-rose-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
               Contrôle d Accès Basé sur les Rôles
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -144,7 +144,7 @@ export default function AdminTenantUsersRbac() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">Utilisateur</th>
                 <th className="py-3.5 px-4">Rôle RBAC</th>
                 <th className="py-3.5 px-4">Tenant / Société</th>
@@ -162,7 +162,7 @@ export default function AdminTenantUsersRbac() {
                     <div className="text-[11px] text-slate-400">{u.email}</div>
                   </td>
                   <td className="py-3.5 px-4">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${ROLE_COLORS[u.role]}`}>
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${ROLE_COLORS[u.role]}`}>
                       {u.role}
                     </span>
                   </td>
@@ -212,7 +212,7 @@ export default function AdminTenantUsersRbac() {
         </h3>
         <div className="flex flex-wrap gap-2">
           {(Object.keys(ROLE_COLORS) as UserRole[]).map(role => (
-            <span key={role} className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${ROLE_COLORS[role]}`}>
+            <span key={role} className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${ROLE_COLORS[role]}`}>
               {role}
             </span>
           ))}

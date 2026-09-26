@@ -51,7 +51,7 @@ export default function TransitDouaneCompliance() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-cyan-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
               Guichet Unique GUCE & Contrôle Réglementaire
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -96,7 +96,7 @@ export default function TransitDouaneCompliance() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">Réf. GUCE & Type</th>
                 <th className="py-3.5 px-4">Opérateur / Importateur</th>
                 <th className="py-3.5 px-4">Autorité Émettrice</th>
@@ -115,7 +115,7 @@ export default function TransitDouaneCompliance() {
                   <td className="py-3.5 px-4 font-sans text-slate-300">{d.issuingAuthority}</td>
                   <td className="py-3.5 px-4 text-slate-400">{d.issueDate}</td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                       d.status === 'VALIDE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                       'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                     }`}>

@@ -281,7 +281,7 @@ export default function ClientInvoicesPage() {
               <div key={f.id} className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-mono font-bold text-cyan-400 text-sm">{f.numero_facture}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${STATUT_STYLE[f.statut] || 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${STATUT_STYLE[f.statut] || 'bg-slate-800 text-slate-400 border-slate-700'}`}>
                     {statutLabel(f.statut)}
                   </span>
                 </div>
@@ -339,7 +339,7 @@ export default function ClientInvoicesPage() {
                       <td className="px-4 py-3 text-right font-mono text-xs">{fmtXaf(f.montant_tva, lang)}</td>
                       <td className="px-4 py-3 text-right font-mono text-xs font-bold text-white">{fmtXaf(f.montant_ttc, lang)}</td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold border ${STATUT_STYLE[f.statut] || 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                        <span className={`inline-flex px-2.5 py-1 rounded-full text-[11px] font-bold border ${STATUT_STYLE[f.statut] || 'bg-slate-800 text-slate-400 border-slate-700'}`}>
                           {statutLabel(f.statut)}
                         </span>
                       </td>
@@ -408,7 +408,7 @@ export default function ClientInvoicesPage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Montant reçu (FCFA) *', 'Amount received (FCFA) *')}</label>
+                <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Montant reçu (FCFA) *', 'Amount received (FCFA) *')}</label>
                 <input
                   type="number" min="0" step="1"
                   value={payForm.montant}
@@ -418,7 +418,7 @@ export default function ClientInvoicesPage() {
                 />
               </div>
               <div>
-                <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Mode de paiement', 'Payment method')}</label>
+                <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Mode de paiement', 'Payment method')}</label>
                 <select
                   value={payForm.mode_paiement}
                   onChange={e => setPayForm({ ...payForm, mode_paiement: e.target.value })}
@@ -432,7 +432,7 @@ export default function ClientInvoicesPage() {
                 </select>
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Référence bancaire (facultatif)', 'Bank reference (optional)')}</label>
+                <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1">{t('Référence bancaire (facultatif)', 'Bank reference (optional)')}</label>
                 <input
                   value={payForm.reference_bancaire}
                   onChange={e => setPayForm({ ...payForm, reference_bancaire: e.target.value })}

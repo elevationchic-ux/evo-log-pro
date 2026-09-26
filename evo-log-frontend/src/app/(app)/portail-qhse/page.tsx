@@ -286,7 +286,7 @@ export default function PortailQHSEPage() {
                   />
                   <span className="text-xs font-bold text-slate-200">{item.label}</span>
                 </div>
-                <span className={`text-[10px] font-bold ${
+                <span className={`text-[11px] font-bold ${
                   epiChecklist[item.key as keyof typeof epiChecklist] ? 'text-emerald-300' : 'text-slate-400'
                 }`}>
                   {epiChecklist[item.key as keyof typeof epiChecklist] ? 'Conforme' : 'Non porté'}
@@ -336,7 +336,7 @@ export default function PortailQHSEPage() {
                   <span className="font-mono text-xs font-black px-2.5 py-0.5 rounded bg-amber-500/15 text-amber-200">
                     {item.code}
                   </span>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">{item.classe}</span>
+                  <span className="text-[11px] font-bold text-slate-500 uppercase">{item.classe}</span>
                 </div>
                 <h3 className="text-sm font-bold text-slate-200">{item.nom}</h3>
                 <p className="text-xs text-slate-400 leading-relaxed bg-slate-900 p-3 rounded-xl border border-slate-700/80">
@@ -391,7 +391,7 @@ export default function PortailQHSEPage() {
                       <div className="text-[11px] text-slate-500">Lieu : {inc.lieu} • Type : {inc.type_incident}</div>
                     </div>
                     <div>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                         inc.severite === 'CRITIQUE' ? 'bg-rose-500/15 text-rose-300' :
                         inc.severite === 'HAUTE' ? 'bg-amber-500/15 text-amber-300' : 'bg-blue-500/15 text-blue-300'
                       }`}>

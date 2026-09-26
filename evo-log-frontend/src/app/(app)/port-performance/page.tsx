@@ -134,7 +134,7 @@ export default function PortPerformancePage() {
               <div key={i} className="p-4 rounded-2xl bg-slate-800/40 border border-slate-800 space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-white">{p.quai}</span>
-                  <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[11px] font-bold">
                     {p.statut}
                   </span>
                 </div>

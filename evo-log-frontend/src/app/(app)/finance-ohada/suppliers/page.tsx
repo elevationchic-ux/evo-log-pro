@@ -168,7 +168,7 @@ export default function FinanceOhadaSuppliers() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-emerald-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               Gestion des Dettes &amp; Décaissements
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -240,7 +240,7 @@ export default function FinanceOhadaSuppliers() {
 
       {/* Légende */}
       <div className="flex flex-wrap items-center gap-4 bg-slate-900/60 border border-slate-800 rounded-2xl px-5 py-3 text-xs">
-        <span className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Balance Âgée :</span>
+        <span className="font-bold text-slate-400 uppercase tracking-wider text-[11px]">Balance Âgée :</span>
         {[['bg-emerald-500', 'Non Échu'], ['bg-amber-500', 'Échu 1-30j'], ['bg-orange-500', 'Échu 31-60j'], ['bg-red-500', '+60j (Critique)']].map(([c, l]) => (
           <div key={l} className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full ${c}`} /><span className="text-slate-400">{l}</span></div>
         ))}
@@ -270,7 +270,7 @@ export default function FinanceOhadaSuppliers() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">Fournisseur</th>
                 <th className="py-3.5 px-4">Cpte 401</th>
                 <th className="py-3.5 px-4">Catégorie</th>
@@ -313,7 +313,7 @@ export default function FinanceOhadaSuppliers() {
                           {item.fournisseur_nom}
                         </div>
                         {item.prochaine_echeance && (
-                          <div className="text-[10px] text-slate-500 font-normal mt-0.5 flex items-center gap-1">
+                          <div className="text-[11px] text-slate-500 font-normal mt-0.5 flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             {new Date(item.prochaine_echeance).toLocaleDateString('fr-FR')}
                           </div>
@@ -337,7 +337,7 @@ export default function FinanceOhadaSuppliers() {
                       <td className="py-3.5 px-4 text-slate-400 text-[11px]">{item.mode_paiement}</td>
                       <td className="py-3.5 px-4 text-center">
                         <button onClick={() => setPayModal({ fournisseur: item, open: true })}
-                          className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-bold text-[10px] rounded-lg border border-emerald-500/30 transition-all">
+                          className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-bold text-[11px] rounded-lg border border-emerald-500/30 transition-all">
                           Régler
                         </button>
                       </td>
@@ -349,7 +349,7 @@ export default function FinanceOhadaSuppliers() {
             {!loading && filtered.length > 0 && (
               <tfoot className="bg-slate-950 border-t-2 border-slate-700">
                 <tr className="text-slate-300 font-bold font-mono">
-                  <td colSpan={3} className="py-3 px-4 text-slate-400 font-sans uppercase text-[10px] tracking-wider">TOTAUX GÉNÉRAUX</td>
+                  <td colSpan={3} className="py-3 px-4 text-slate-400 font-sans uppercase text-[11px] tracking-wider">TOTAUX GÉNÉRAUX</td>
                   <td className="py-3 px-4 text-right text-slate-100">{totalDu.toLocaleString('fr-FR')}</td>
                   <td className="py-3 px-4 text-right text-emerald-400">{data.reduce((s, d) => s + d.non_echu, 0).toLocaleString('fr-FR')}</td>
                   <td className="py-3 px-4 text-right text-amber-400">{data.reduce((s, d) => s + d.echu_1_30, 0).toLocaleString('fr-FR')}</td>

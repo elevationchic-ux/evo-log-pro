@@ -115,7 +115,7 @@ export default function ComptabiliteOhadaMonthlyClosing() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-violet-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
               Arrêtés des Comptes & Verrouillage
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -164,12 +164,12 @@ export default function ComptabiliteOhadaMonthlyClosing() {
                 >
                   <div>
                     <div className="font-black text-xs">{p.label}</div>
-                    <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                    <div className="text-[11px] text-slate-500 font-mono mt-0.5">
                       {p.status === 'CLOTURE' ? `Clôturé le ${p.closedAt}` : (p.status === 'EN_COURS' ? 'Période active' : 'Non ouverte')}
                     </div>
                   </div>
 
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase ${
                     p.status === 'CLOTURE'
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                       : p.status === 'EN_COURS'
@@ -221,7 +221,7 @@ export default function ComptabiliteOhadaMonthlyClosing() {
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80">
                     <span className="text-slate-300">{item.label}</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 ${
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1 ${
                       item.done
                         ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                         : 'bg-slate-800 text-slate-400 border border-slate-700'

@@ -214,7 +214,7 @@ export default function WMSDashboardPage() {
               </div>
               <div className={`text-2xl font-black ${kpi.color} font-mono`}>{kpi.value}</div>
               <div className="text-[11px] text-slate-500 mt-0.5">{kpi.sub}</div>
-              <div className={`text-[10px] ${kpi.color} mt-1 font-mono opacity-70`}>{kpi.trend}</div>
+              <div className={`text-[11px] ${kpi.color} mt-1 font-mono opacity-70`}>{kpi.trend}</div>
             </div>
           );
         })}
@@ -307,13 +307,13 @@ export default function WMSDashboardPage() {
                       <div className={`font-mono font-bold ${item.statut === 'CRITIQUE' ? 'text-red-400' : item.statut === 'ALERTE' ? 'text-amber-400' : 'text-slate-200'}`}>
                         {item.qte.toLocaleString()} {item.unite}
                       </div>
-                      <div className="text-[10px] text-slate-500">{item.seuil != null ? `Seuil: ${item.seuil}` : 'Seuil: non défini'}</div>
+                      <div className="text-[11px] text-slate-500">{item.seuil != null ? `Seuil: ${item.seuil}` : 'Seuil: non défini'}</div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">{item.valeur.toLocaleString('fr-FR')} FCFA</span>
+                      <span className="text-[11px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">{item.valeur.toLocaleString('fr-FR')} FCFA</span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statut[item.statut] || 'bg-slate-800 text-slate-300'}`}>
+                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${statut[item.statut] || 'bg-slate-800 text-slate-300'}`}>
                         {item.statut}
                       </span>
                     </td>

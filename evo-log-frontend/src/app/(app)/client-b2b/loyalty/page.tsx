@@ -178,7 +178,7 @@ export default function ClientB2bLoyaltyPage() {
                   <tr key={a.id} className="hover:bg-surface-container transition-colors">
                     <td className="p-3 pl-5 font-bold text-on-surface">{a.clientNom}</td>
                     <td className="p-3">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${a.palier === 'PLATINUM' ? 'bg-purple-500/10 text-purple-600' :
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${a.palier === 'PLATINUM' ? 'bg-purple-500/10 text-purple-600' :
                           a.palier === 'GOLD' ? 'bg-amber-500/10 text-amber-600' :
                             a.palier === 'SILVER' ? 'bg-slate-500/10 text-slate-400' :
                               'bg-surface-container text-on-surface-variant'
@@ -191,7 +191,7 @@ export default function ClientB2bLoyaltyPage() {
                     <td className="p-3 text-center font-mono font-semibold text-emerald-600">+{a.joursFranchiseOfferts} jours</td>
                     <td className="p-3 text-on-surface">{a.gestionnaireDedie}</td>
                     <td className="p-3 text-right pr-5">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[10px]">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[11px]">
                         {a.statut}
                       </span>
                     </td>

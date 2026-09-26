@@ -108,7 +108,7 @@ export default function CadcPrestatairesPage() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="bg-slate-900/90 border border-amber-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">Console Super-Admin CADC</span>
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">Console Super-Admin CADC</span>
           <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">T-Code : KCADC_PRE</span>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -133,7 +133,7 @@ export default function CadcPrestatairesPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">Prestataire</th>
                 <th className="py-3.5 px-4">Spécialité</th>
                 <th className="py-3.5 px-4">Contact</th>
@@ -156,7 +156,7 @@ export default function CadcPrestatairesPage() {
                   </td>
                   <td className="py-3.5 px-4 text-center font-mono text-[11px]">{p.agrement_portuaire || '—'}</td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${p.est_actif ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>{p.est_actif ? 'ACTIF' : 'INACTIF'}</span>
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${p.est_actif ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>{p.est_actif ? 'ACTIF' : 'INACTIF'}</span>
                   </td>
                   <td className="py-3.5 px-4 text-right">
                     <div className="flex items-center justify-end gap-2">

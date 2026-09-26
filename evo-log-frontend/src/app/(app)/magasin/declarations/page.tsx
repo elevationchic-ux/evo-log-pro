@@ -98,7 +98,7 @@ export default function DeclarationsPage() {
                     <div className="font-mono font-black text-blue-600 flex items-center gap-2">
                       {decl.numero_bl}
                       {decl.numero_bl_externe && (
-                        <span className="text-[10px] bg-slate-900 text-slate-500 px-1.5 py-0.5 rounded uppercase font-bold">EXT: {decl.numero_bl_externe}</span>
+                        <span className="text-[11px] bg-slate-900 text-slate-500 px-1.5 py-0.5 rounded uppercase font-bold">EXT: {decl.numero_bl_externe}</span>
                       )}
                     </div>
                     <div className="text-xs text-slate-500 flex items-center gap-1 mt-1 font-bold">

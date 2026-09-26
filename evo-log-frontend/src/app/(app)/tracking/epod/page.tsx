@@ -318,7 +318,7 @@ export default function EPodCapturePage() {
                 </p>
               )}
             </div>
-            <p className="text-[10px] text-muted-foreground mt-1">
+            <p className="text-[11px] text-muted-foreground mt-1">
               {t('La signature est capturée, transmise et archivée sur la mission.', 'The signature is captured, transmitted and archived onto the mission.')}
             </p>
           </div>

@@ -133,7 +133,7 @@ export default function FinanceOhadaCollections() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-emerald-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl print:hidden">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               Gestion du Risque Client & Recouvrement
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -224,7 +224,7 @@ export default function FinanceOhadaCollections() {
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/90 border-b border-slate-800 text-[10px] uppercase tracking-wider font-mono text-slate-400">
+            <thead className="bg-slate-950/90 border-b border-slate-800 text-[11px] uppercase tracking-wider font-mono text-slate-400">
               <tr>
                 <th className="py-3 px-4">Client / Chargeur</th>
                 <th className="py-3 px-4 text-right">Total Dû (XAF)</th>
@@ -255,7 +255,7 @@ export default function FinanceOhadaCollections() {
                     <td className="py-3.5 px-4 text-right font-bold text-red-400">{c.days90Plus > 0 ? c.days90Plus.toLocaleString() : '-'}</td>
                     <td className="py-3.5 px-4 text-center font-bold">{c.dso}j</td>
                     <td className="py-3.5 px-4 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-black uppercase ${
                         c.riskLevel === 'CRITIQUE'
                           ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse'
                           : c.riskLevel === 'MOYEN'

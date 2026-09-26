@@ -182,7 +182,7 @@ export default function QhseOhadaCompliancePage() {
                 <div key={item.id} className="bg-slate-950/50 border border-slate-800 rounded-xl p-4 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-mono text-xs font-medium text-purple-400 break-all">{item.article_reference}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border flex items-center gap-1 shrink-0 ${item.niveau_conformite === 'ACTION_REQUISE'
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border flex items-center gap-1 shrink-0 ${item.niveau_conformite === 'ACTION_REQUISE'
                         ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                         : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                       }`}>

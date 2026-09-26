@@ -184,7 +184,7 @@ export default function ClientB2bPortalPage() {
                     <td className="p-3 text-center font-mono font-bold text-on-surface">{u.dossiersSuivis}</td>
                     <td className="p-3 text-on-surface-variant">{u.dernierAcces}</td>
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[10px]">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[11px]">
                         {u.statut}
                       </span>
                     </td>

@@ -127,7 +127,7 @@ export default function SuiviDossiersPortailB2B() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
                 Portail Client • Suivi & E-Booking
               </span>
               <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -188,7 +188,7 @@ export default function SuiviDossiersPortailB2B() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-lg font-black text-violet-400">{trackingResult.query}</span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-500/10 text-violet-300 border border-violet-500/20">
+                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-violet-500/10 text-violet-300 border border-violet-500/20">
                   {trackingResult.type_recherche}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5">
@@ -208,7 +208,7 @@ export default function SuiviDossiersPortailB2B() {
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase">Franchise Surestaries Armateur</div>
+                <div className="text-[11px] font-bold text-slate-400 uppercase">Franchise Surestaries Armateur</div>
                 <div className="text-sm font-black font-mono text-slate-200">
                   <span className="text-emerald-400">{trackingResult.franchise_surestaries.jours_restants} jours restants</span> / {trackingResult.franchise_surestaries.jours_accordes} j accordés
                 </div>
@@ -272,12 +272,12 @@ export default function SuiviDossiersPortailB2B() {
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-mono text-xs font-bold text-violet-400">{d.dossier_id}</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-950 text-slate-300">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-950 text-slate-300">
                     {d.statut}
                   </span>
                 </div>
                 <div className="text-xs font-semibold line-clamp-2">{d.description}</div>
-                <div className="text-[10px] text-slate-400 mt-2 flex items-center justify-between">
+                <div className="text-[11px] text-slate-400 mt-2 flex items-center justify-between">
                   <span>Conteneur: {d.conteneur_no}</span>
                   <span className="font-mono text-emerald-400">{d.montant_ht_xaf.toLocaleString()} XAF</span>
                 </div>
@@ -317,7 +317,7 @@ export default function SuiviDossiersPortailB2B() {
                         <FileText className="w-4 h-4 text-violet-400 shrink-0" />
                         <div className="truncate">
                           <div className="text-xs font-mono font-bold text-slate-200 truncate">{docName}</div>
-                          <div className="text-[10px] text-slate-500">{docSize} • Certifié EVO-LOG</div>
+                          <div className="text-[11px] text-slate-500">{docSize} • Certifié EVO-LOG</div>
                         </div>
                       </div>
                       <button
@@ -339,11 +339,11 @@ export default function SuiviDossiersPortailB2B() {
                   <ShieldCheck className="w-4 h-4 text-emerald-400" /> Preuve de Livraison Dématérialisée (e-POD)
                 </h4>
                 {selectedDossier.epod?.signed ? (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     SIGNÉ ÉLECTRONIQUEMENT
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
                     LIVRAISON EN ATTENTE
                   </span>
                 )}

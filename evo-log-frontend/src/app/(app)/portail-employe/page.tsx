@@ -284,7 +284,7 @@ export default function PortailEmployePage() {
             <div className="text-xl font-black text-emerald-400 mt-1">
               {profile?.solde_conges !== undefined ? `${profile.solde_conges} Jours` : '24 Jours'}
             </div>
-            <div className="text-[10px] text-slate-500 mt-0.5">Droit légal annuel OHADA</div>
+            <div className="text-[11px] text-slate-500 mt-0.5">Droit légal annuel OHADA</div>
           </div>
 
           <div className="bg-slate-950/70 rounded-xl p-3.5 border border-slate-800/90 shadow-inner">
@@ -295,7 +295,7 @@ export default function PortailEmployePage() {
             <div className="text-xl font-black text-slate-100 mt-1">
               {dernierNet}
             </div>
-            <div className="text-[10px] text-slate-500 mt-0.5">Virement bancaire certifié</div>
+            <div className="text-[11px] text-slate-500 mt-0.5">Virement bancaire certifié</div>
           </div>
 
           <div className="bg-slate-950/70 rounded-xl p-3.5 border border-slate-800/90 shadow-inner">
@@ -306,7 +306,7 @@ export default function PortailEmployePage() {
             <div className="text-xl font-black text-cyan-400 mt-1">
               {calendrier?.prochaine_paie?.date || '28 du mois'}
             </div>
-            <div className="text-[10px] text-slate-500 mt-0.5">
+            <div className="text-[11px] text-slate-500 mt-0.5">
               {calendrier?.prochaine_paie?.jours_restants !== undefined 
                 ? `Dans ${calendrier.prochaine_paie.jours_restants} jour(s)` 
                 : 'Cycle automatique'}
@@ -321,7 +321,7 @@ export default function PortailEmployePage() {
             <div className="text-xl font-black text-emerald-400 mt-1">
               CNPS Conforme
             </div>
-            <div className="text-[10px] text-slate-500 mt-0.5">Cotisation 4.2% à jour</div>
+            <div className="text-[11px] text-slate-500 mt-0.5">Cotisation 4.2% à jour</div>
           </div>
         </div>
       </div>
@@ -449,9 +449,9 @@ export default function PortailEmployePage() {
 
                 <div className="flex items-end justify-between pt-1">
                   <div>
-                    <div className="text-[10px] text-slate-400 uppercase font-bold">Net Viré sur Compte</div>
+                    <div className="text-[11px] text-slate-400 uppercase font-bold">Net Viré sur Compte</div>
                     <div className="text-lg font-black text-emerald-400 font-mono">{b.netAPayer.toLocaleString()} XAF</div>
-                    <div className="text-[10px] text-slate-500 mt-0.5">Payé le {b.datePaiement}</div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">Payé le {b.datePaiement}</div>
                   </div>
                   
                   <a
@@ -501,7 +501,7 @@ export default function PortailEmployePage() {
                 <div className="text-3xl font-black text-cyan-400 font-mono mt-0.5">
                   {calendrier?.prochaine_paie?.jours_restants ?? 15} Jours
                 </div>
-                <div className="text-[10px] text-emerald-400 mt-1 font-medium">● Traitement RH en cours</div>
+                <div className="text-[11px] text-emerald-400 mt-1 font-medium">● Traitement RH en cours</div>
               </div>
             </div>
           </div>
@@ -529,7 +529,7 @@ export default function PortailEmployePage() {
                     <span className="text-[11px] font-bold text-slate-300 font-mono">{step.jour_cible}</span>
                   </div>
                   <p className="text-xs font-bold text-slate-200 leading-snug">{step.etape}</p>
-                  <p className="text-[10px] text-slate-500">{step.responsable}</p>
+                  <p className="text-[11px] text-slate-500">{step.responsable}</p>
                 </div>
               ))}
             </div>
@@ -554,9 +554,9 @@ export default function PortailEmployePage() {
                 <div key={i} className="flex items-center justify-between p-3.5 bg-slate-950/60 border border-slate-800/80 rounded-xl">
                   <div>
                     <div className="text-xs font-bold text-slate-200">{f.nom}</div>
-                    <div className="text-[10px] text-slate-500 font-mono">{f.date}</div>
+                    <div className="text-[11px] text-slate-500 font-mono">{f.date}</div>
                   </div>
-                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                     {f.statut}
                   </span>
                 </div>
@@ -592,7 +592,7 @@ export default function PortailEmployePage() {
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-100">{d.type}</span>
                       <span className="text-[11px] text-slate-500 font-mono">• {d.joursOuvrables} jour(s) ouvrable(s)</span>
-                      <span className="text-[10px] text-slate-500">Ref: {d.id}</span>
+                      <span className="text-[11px] text-slate-500">Ref: {d.id}</span>
                     </div>
                     <p className="text-xs text-slate-400">
                       Période d&apos;absence : <b className="text-slate-200">{d.dateDebut}</b> au <b className="text-slate-200">{d.dateFin}</b>
@@ -660,7 +660,7 @@ export default function PortailEmployePage() {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-100">{doc.titre}</h3>
-                    <span className="text-[10px] text-slate-500 font-mono">{doc.format} • {doc.date_emission}</span>
+                    <span className="text-[11px] text-slate-500 font-mono">{doc.format} • {doc.date_emission}</span>
                   </div>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">{doc.description}</p>

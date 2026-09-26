@@ -320,7 +320,7 @@ export default function GlobalDashboard() {
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-emerald-400" /> {t.dash.revenueTitle}
             </h2>
-            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">{t.dash.revenueSource}</span>
+            <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold">{t.dash.revenueSource}</span>
           </div>
 
           {revenueMonths.length > 0 ? (
@@ -455,7 +455,7 @@ export default function GlobalDashboard() {
             {activity.map((log) => (
               <div key={log.id} className="py-3 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-amber-300 font-mono text-[10px] font-bold shrink-0">
+                  <span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-amber-300 font-mono text-[11px] font-bold shrink-0">
                     {log.type}
                   </span>
                   <span className="text-xs text-slate-200 font-semibold truncate">{activityText(log)}</span>

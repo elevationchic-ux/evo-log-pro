@@ -47,7 +47,7 @@ export default function PortailB2BDashboard() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
                 Portail Client • Espace Privé
               </span>
               <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -126,7 +126,7 @@ export default function PortailB2BDashboard() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-violet-400 text-sm font-bold">{dossierActif.dossier_id}</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">
                     Conteneur : {dossierActif.conteneur_no || 'MSKU9823412'}
                   </span>
                 </div>
@@ -174,7 +174,7 @@ export default function PortailB2BDashboard() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-sans text-xs font-semibold truncate">{step.nom}</div>
-                    <div className="font-mono text-[10px] text-slate-400">{step.date} {step.heure ? `à ${step.heure}` : ''}</div>
+                    <div className="font-mono text-[11px] text-slate-400">{step.date} {step.heure ? `à ${step.heure}` : ''}</div>
                   </div>
                 </div>
               ))}

@@ -135,7 +135,7 @@ export function CommandPalette() {
                     {item.label}
                   </span>
                   {!item.isModuleRoot && (
-                    <span className="ml-2 hidden sm:inline shrink-0 text-[10px] text-slate-500 truncate max-w-[10rem]">
+                    <span className="ml-2 hidden sm:inline shrink-0 text-[11px] text-slate-500 truncate max-w-[10rem]">
                       {item.module}
                     </span>
                   )}

@@ -316,7 +316,7 @@ export default function PortailChauffeurPage() {
                     <span className="text-xs font-mono font-black text-slate-200">
                       #{m.numero_ordre || m.reference || `MIS-${m.id}`}
                     </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                       m.statut === 'EN_ROUTE' ? 'bg-blue-500/15 text-blue-300' :
                       m.statut === 'LIVRE' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
                     }`}>

@@ -134,14 +134,14 @@ export default function CarteLivePage() {
                         <span className="text-sm font-semibold text-white">
                           {pos.vehicule_id != null ? `Véhicule #${pos.vehicule_id}` : `#${pos.id}`}
                         </span>
-                        <Badge variant={(pos.vitesse ?? 0) > 0 ? 'default' : 'secondary'} className="text-[10px]">
+                        <Badge variant={(pos.vitesse ?? 0) > 0 ? 'default' : 'secondary'} className="text-[11px]">
                           {(pos.vitesse ?? 0) > 0 ? t('En route', 'Moving') : t("À l'arrêt", 'Stopped')}
                         </Badge>
                       </div>
                       <div className="text-xs text-slate-400">
                         {t('Vitesse', 'Speed')}: {(pos.vitesse ?? 0).toFixed(1)} km/h
                       </div>
-                      <div className="mt-1 truncate text-[10px] text-slate-500">
+                      <div className="mt-1 truncate text-[11px] text-slate-500">
                         {t('Statut ERP', 'ERP status')}: {pos.statut_vehicule || ''}
                       </div>
                     </div>

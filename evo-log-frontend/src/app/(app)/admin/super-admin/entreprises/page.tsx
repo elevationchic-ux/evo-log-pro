@@ -179,7 +179,7 @@ export default function CadcEntreprisesPage() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="bg-slate-900/90 border border-amber-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
             Console Super-Admin CADC
           </span>
           <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">T-Code : KCADC_ENT</span>
@@ -215,7 +215,7 @@ export default function CadcEntreprisesPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">Entreprise</th>
                 <th className="py-3.5 px-4">Palier</th>
                 <th className="py-3.5 px-4 text-center">Modules</th>
@@ -233,7 +233,7 @@ export default function CadcEntreprisesPage() {
                       <div className="flex items-center gap-3">
                         {logoSrc(c.logo_url)
                           ? <img src={logoSrc(c.logo_url) as string} alt="" className="w-8 h-8 rounded-lg object-contain bg-slate-950 border border-slate-800" />
-                          : <span className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-500 text-[10px] font-black">{c.nom.slice(0, 2).toUpperCase()}</span>}
+                          : <span className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-500 text-[11px] font-black">{c.nom.slice(0, 2).toUpperCase()}</span>}
                         <div>
                           <div className="font-bold font-sans text-slate-100">{c.nom}</div>
                           <div className="text-[11px] text-amber-400 font-mono">{c.code}</div>
@@ -242,13 +242,13 @@ export default function CadcEntreprisesPage() {
                     </td>
                     <td className="py-3.5 px-4 font-sans">{plan ? `${plan.nom}` : '—'}</td>
                     <td className="py-3.5 px-4 text-center">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-300">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300">
                         {c.modules_actives?.length || 0}{plan?.max_modules ? ` / ${plan.max_modules}` : ''}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-center font-bold text-blue-400">{c.user_count ?? 0}</td>
                     <td className="py-3.5 px-4 text-center">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${c.is_active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${c.is_active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
                         {c.is_active ? 'ACTIF' : 'INACTIF'}
                       </span>
                     </td>

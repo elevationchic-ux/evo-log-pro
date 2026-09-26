@@ -150,7 +150,7 @@ export default function TransitAvancePage() {
                     <span className="text-sm font-bold text-white">{d.numero_dossier || `TRANSIT-${d.id}`}</span>
                     <p className="text-xs text-slate-400 mt-0.5">{d.corridor || 'Corridor CEMAC'} • {d.date_depart ? new Date(d.date_depart).toLocaleDateString('fr-FR') : '-'}</p>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase border ${getStatutBadge(d.statut)}`}>
+                  <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border ${getStatutBadge(d.statut)}`}>
                     {d.statut || 'En attente'}
                   </span>
                 </div>

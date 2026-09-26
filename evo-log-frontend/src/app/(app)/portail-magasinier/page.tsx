@@ -352,7 +352,7 @@ export default function PortailMagasinierPage() {
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-xs font-mono font-black text-white">#{o.reference}</span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300">
                       {o.statut}
                     </span>
                   </div>
@@ -421,7 +421,7 @@ export default function PortailMagasinierPage() {
 
                       <div className="text-right">
                         <div className="text-sm font-mono font-bold text-white">Qté : {art.quantite}</div>
-                        <span className={`text-[10px] font-bold ${art.picked ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        <span className={`text-[11px] font-bold ${art.picked ? 'text-emerald-600' : 'text-slate-400'}`}>
                           {art.picked ? 'Prélevé' : 'À prélever'}
                         </span>
                       </div>
@@ -459,14 +459,14 @@ export default function PortailMagasinierPage() {
                     <div className="text-xs font-bold text-white">BL #{r.numero_bl}</div>
                     <div className="text-[11px] text-slate-400">Fournisseur : {r.fournisseur}</div>
                     {r.conteneur_ref && (
-                      <div className="text-[10px] font-mono text-indigo-400">Conteneur : {r.conteneur_ref}</div>
+                      <div className="text-[11px] font-mono text-indigo-400">Conteneur : {r.conteneur_ref}</div>
                     )}
                   </div>
 
                   <div className="flex items-center gap-4">
                     <div className="text-right text-xs">
                       <div className="font-bold text-white">{r.nb_colis} Colis</div>
-                      <span className="text-[10px] font-mono text-emerald-400 font-bold">{r.statut}</span>
+                      <span className="text-[11px] font-mono text-emerald-400 font-bold">{r.statut}</span>
                     </div>
 
                     <button

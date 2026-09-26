@@ -192,7 +192,7 @@ export default function FinanceOverviewPage() {
                     <td className="px-3 py-2.5 font-mono text-amber-400">{row.j60 > 0 ? (row.j60 / 1000).toFixed(0) + 'k' : ''}</td>
                     <td className="px-3 py-2.5 font-mono text-red-400">{row.j90 > 0 ? (row.j90 / 1000).toFixed(0) + 'k' : ''}</td>
                     <td className="px-3 py-2.5">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusColors[row.statut]}`}>{row.statut}</span>
+                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${statusColors[row.statut]}`}>{row.statut}</span>
                     </td>
                   </tr>
                 ))}

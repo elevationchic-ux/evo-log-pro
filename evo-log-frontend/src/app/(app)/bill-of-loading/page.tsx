@@ -292,7 +292,7 @@ export default function BillOfLoadingPage() {
                         )}
                       </span>
                       {b.reference_cncc && (
-                        <div className="text-[10px] text-slate-500 font-mono mt-0.5">{b.reference_cncc}</div>
+                        <div className="text-[11px] text-slate-500 font-mono mt-0.5">{b.reference_cncc}</div>
                       )}
                     </td>
                     <td className="py-4 px-5 text-right">

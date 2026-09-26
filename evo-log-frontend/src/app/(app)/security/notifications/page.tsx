@@ -211,11 +211,11 @@ export default function NotificationsPage() {
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-slate-200 dark:text-slate-100 text-sm">{item.title}</span>
                       {!item.read && (
-                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-600 text-white">
+                        <span className="text-[11px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-600 text-white">
                           Nouveau
                         </span>
                       )}
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 dark:bg-slate-950 text-slate-300 dark:text-slate-400 border border-slate-700 dark:border-slate-800">
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 dark:bg-slate-950 text-slate-300 dark:text-slate-400 border border-slate-700 dark:border-slate-800">
                         {item.agency}
                       </span>
                     </div>

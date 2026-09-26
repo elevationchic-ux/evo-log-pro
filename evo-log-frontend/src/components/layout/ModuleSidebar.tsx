@@ -253,7 +253,7 @@ export default function ModuleSidebar({
                           <span className="truncate min-w-0">{localizeSubLabel(sub.label, language)}</span>
                         </div>
                         {sub.badge && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 border border-slate-700 shrink-0">
+                          <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 border border-slate-700 shrink-0">
                             {sub.badge}
                           </span>
                         )}

@@ -96,11 +96,11 @@ export default function MaintenanceGMAODashboardPage() {
               <button key={v.id} onClick={() => setSelectedEngin(v.id)} className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedEngin === v.id ? 'bg-amber-500/10 border-amber-500/40' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}`}>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-black text-white font-mono">{v.immat}</span>
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${statutColors[v.statut]}`}>{v.statut}</span>
+                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded border ${statutColors[v.statut]}`}>{v.statut}</span>
                 </div>
                 <div className="text-[11px] text-slate-400">{v.model}</div>
                 {v.alertes.length > 0 && (
-                  <div className="mt-1 flex items-center gap-1 text-[10px] text-amber-400">
+                  <div className="mt-1 flex items-center gap-1 text-[11px] text-amber-400">
                     <AlertTriangle className="w-3 h-3" /> {v.alertes.length} alerte{v.alertes.length > 1 ? 's' : ''}
                   </div>
                 )}
@@ -109,7 +109,7 @@ export default function MaintenanceGMAODashboardPage() {
                   <div className="flex-1 bg-slate-800 rounded-full h-1.5 overflow-hidden">
                     <div className={`h-full rounded-full ${v.disponibilite > 90 ? 'bg-emerald-500' : v.disponibilite > 80 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${v.disponibilite}%` }}></div>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400">{v.disponibilite}%</span>
+                  <span className="text-[11px] font-mono text-slate-400">{v.disponibilite}%</span>
                 </div>
               </button>
             ))}
@@ -140,7 +140,7 @@ export default function MaintenanceGMAODashboardPage() {
                       <div key={i} className="bg-slate-950 border border-slate-800 rounded-xl p-3 text-center">
                         <Icon className="w-4 h-4 text-amber-400 mx-auto mb-1" />
                         <div className="text-sm font-black text-white font-mono">{m.value}</div>
-                        <div className="text-[10px] text-slate-500">{m.label}</div>
+                        <div className="text-[11px] text-slate-500">{m.label}</div>
                       </div>
                     );
                   })}
@@ -195,7 +195,7 @@ export default function MaintenanceGMAODashboardPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-mono text-xs font-black text-amber-300">{pm.ref}</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statutColors[pm.statut]}`}>{pm.statut}</span>
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${statutColors[pm.statut]}`}>{pm.statut}</span>
                   </div>
                   <div className="text-sm font-bold text-white">{pm.type}</div>
                   <div className="text-[11px] text-slate-400 mt-0.5">
@@ -204,7 +204,7 @@ export default function MaintenanceGMAODashboardPage() {
                   {pm.pieces.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {pm.pieces.map((p: string, i: number) => (
-                        <span key={i} className="text-[10px] font-mono bg-slate-800 border border-slate-700 text-slate-400 px-2 py-0.5 rounded">{p}</span>
+                        <span key={i} className="text-[11px] font-mono bg-slate-800 border border-slate-700 text-slate-400 px-2 py-0.5 rounded">{p}</span>
                       ))}
                     </div>
                   )}
@@ -227,7 +227,7 @@ export default function MaintenanceGMAODashboardPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-mono text-xs font-black text-amber-300">{ot.ref}</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statutColors[ot.statut]}`}>{ot.statut}</span>
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${statutColors[ot.statut]}`}>{ot.statut}</span>
                   </div>
                   <div className="text-sm font-bold text-white">{ot.panne}</div>
                   <div className="text-[11px] text-slate-400 mt-0.5">
@@ -236,7 +236,7 @@ export default function MaintenanceGMAODashboardPage() {
                   {ot.pieces.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {ot.pieces.map((p: string, i: number) => (
-                        <span key={i} className="text-[10px] font-mono bg-red-500/5 border border-red-500/20 text-red-400 px-2 py-0.5 rounded">{p}</span>
+                        <span key={i} className="text-[11px] font-mono bg-red-500/5 border border-red-500/20 text-red-400 px-2 py-0.5 rounded">{p}</span>
                       ))}
                     </div>
                   )}

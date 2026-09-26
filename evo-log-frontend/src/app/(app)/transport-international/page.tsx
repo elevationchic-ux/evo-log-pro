@@ -200,7 +200,7 @@ export default function TransportInternationalPage() {
                     <td className="px-5 py-4 text-slate-300 font-mono">{o.incoterm}</td>
                     <td className="px-5 py-4 text-slate-300">{o.poids_kg?.toLocaleString('fr-FR') || '-'}</td>
                     <td className="px-5 py-4">
-                      <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase border ${getStatutBadge(o.statut)}`}>
+                      <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border ${getStatutBadge(o.statut)}`}>
                         {o.statut || 'Créé'}
                       </span>
                     </td>

@@ -226,7 +226,7 @@ export default function RBACPage() {
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}50` }} />
                     <span className="font-bold text-foreground font-mono text-sm">{role.name}</span>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full border border-border text-muted-foreground font-semibold">
+                  <span className="text-[11px] px-2 py-0.5 rounded-full border border-border text-muted-foreground font-semibold">
                     {role.is_system ? "Système" : "Personnalisé"}
                   </span>
                 </div>

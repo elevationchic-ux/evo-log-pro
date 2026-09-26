@@ -104,7 +104,7 @@ export default function CadcAccreditationsPage() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="bg-slate-900/90 border border-amber-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">Console Super-Admin CADC</span>
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">Console Super-Admin CADC</span>
           <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">T-Code : KCADC_ACR</span>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -133,7 +133,7 @@ export default function CadcAccreditationsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+                <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                   <th className="py-3.5 px-4">Collaborateur</th>
                   <th className="py-3.5 px-4">Module</th>
                   <th className="py-3.5 px-4">Code</th>
@@ -150,7 +150,7 @@ export default function CadcAccreditationsPage() {
                     <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500">{a.code}</td>
                     <td className="py-3.5 px-4 text-center text-[11px]">{a.date_debut || '…'} → {a.date_fin || 'illimité'}</td>
                     <td className="py-3.5 px-4 text-center">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${a.valide ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>{a.valide ? 'VALIDE' : 'EXPIRÉE'}</span>
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${a.valide ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>{a.valide ? 'VALIDE' : 'EXPIRÉE'}</span>
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <button onClick={() => handleRevoke(a)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/30" title="Révoquer"><Trash2 className="w-4 h-4" /></button>

@@ -184,7 +184,7 @@ export default function PortailDeclarantPage() {
                     <span className="text-xs font-mono font-black text-slate-200">
                       #{d.numero_dossier || d.reference || `TR-${d.id}`}
                     </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300">
                       {d.statut}
                     </span>
                   </div>
@@ -281,7 +281,7 @@ export default function PortailDeclarantPage() {
                       {step.label}
                     </span>
                   </div>
-                  <span className={`text-[10px] font-bold ${checked ? 'text-emerald-300' : 'text-slate-400'}`}>
+                  <span className={`text-[11px] font-bold ${checked ? 'text-emerald-300' : 'text-slate-400'}`}>
                     {checked ? 'Validé' : 'En attente'}
                   </span>
                 </div>

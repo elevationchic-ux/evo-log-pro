@@ -151,7 +151,7 @@ export default function SystemHealthMonitorPage() {
                     <tr className="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
                       <td className="py-3 px-4 text-outline">14:02:11.405</td>
                       <td className="py-3 px-4">
-                        <span className="bg-error-container text-error px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase">Error</span>
+                        <span className="bg-error-container text-error px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase">Error</span>
                       </td>
                       <td className="py-3 px-4 text-on-surface-variant">EVO-LOG-Finance-Svc</td>
                       <td className="py-3 px-4 font-medium">Connection timeout to payment gateway (Retry 3/3)</td>
@@ -160,7 +160,7 @@ export default function SystemHealthMonitorPage() {
                     <tr className="border-b border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low transition-colors">
                       <td className="py-3 px-4 text-outline">14:01:55.120</td>
                       <td className="py-3 px-4">
-                        <span className="bg-error-container text-error px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase">Error</span>
+                        <span className="bg-error-container text-error px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase">Error</span>
                       </td>
                       <td className="py-3 px-4 text-on-surface-variant">EVO-LOG-Auth-Svc</td>
                       <td className="py-3 px-4 font-medium">Invalid LDAP credentials supplied for user_id: 8442</td>
@@ -169,7 +169,7 @@ export default function SystemHealthMonitorPage() {
                     <tr className="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
                       <td className="py-3 px-4 text-outline">13:58:44.901</td>
                       <td className="py-3 px-4">
-                        <span className="bg-tertiary-fixed-dim text-on-tertiary-fixed-variant px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase">Warn</span>
+                        <span className="bg-tertiary-fixed-dim text-on-tertiary-fixed-variant px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase">Warn</span>
                       </td>
                       <td className="py-3 px-4 text-on-surface-variant">Postgres-DB-Master</td>
                       <td className="py-3 px-4">Connection pool approaching max capacity (95%)</td>
@@ -178,7 +178,7 @@ export default function SystemHealthMonitorPage() {
                     <tr className="border-b border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low transition-colors">
                       <td className="py-3 px-4 text-outline">13:45:10.002</td>
                       <td className="py-3 px-4">
-                        <span className="bg-error-container text-error px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase">Error</span>
+                        <span className="bg-error-container text-error px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase">Error</span>
                       </td>
                       <td className="py-3 px-4 text-on-surface-variant">EVO-LOG-Logistics-Svc</td>
                       <td className="py-3 px-4 font-medium">Failed to parse manifest XML from T-Code: MNF-209</td>

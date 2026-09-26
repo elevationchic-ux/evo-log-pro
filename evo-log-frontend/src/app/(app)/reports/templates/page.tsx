@@ -168,12 +168,12 @@ export default function ReportTemplatesPage() {
             <div className="pt-3 border-t border-outline/30 space-y-3">
               <div className="flex flex-wrap gap-1">
                 {tpl.colonnes.slice(0, 3).map((col, idx) => (
-                  <span key={idx} className="px-2 py-0.5 rounded text-[10px] bg-surface-container text-on-surface-variant">
+                  <span key={idx} className="px-2 py-0.5 rounded text-[11px] bg-surface-container text-on-surface-variant">
                     {col}
                   </span>
                 ))}
                 {tpl.colonnes.length > 3 && (
-                  <span className="px-1.5 py-0.5 rounded text-[10px] text-on-surface-variant">
+                  <span className="px-1.5 py-0.5 rounded text-[11px] text-on-surface-variant">
                     +{tpl.colonnes.length - 3}
                   </span>
                 )}

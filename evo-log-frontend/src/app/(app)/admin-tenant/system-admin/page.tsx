@@ -89,7 +89,7 @@ export default function AdminTenantSystemAdmin() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-rose-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
               Tableau de Bord Technique CADC
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -146,16 +146,16 @@ export default function AdminTenantSystemAdmin() {
 
               <div className="flex items-center gap-6 text-xs font-mono">
                 <div className="text-right">
-                  <div className="text-slate-400 text-[10px] uppercase font-sans">Uptime</div>
+                  <div className="text-slate-400 text-[11px] uppercase font-sans">Uptime</div>
                   <div className="font-bold text-slate-200">{s.uptime}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-slate-400 text-[10px] uppercase font-sans">Réponse</div>
+                  <div className="text-slate-400 text-[11px] uppercase font-sans">Réponse</div>
                   <div className={`font-bold ${s.responseMs > 500 ? 'text-amber-400' : 'text-emerald-400'}`}>
                     {s.responseMs} ms
                   </div>
                 </div>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${s.status === 'OK' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${s.status === 'OK' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                     s.status === 'DEGRADED' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
                       'bg-red-500/10 text-red-400 border border-red-500/20'
                   }`}>

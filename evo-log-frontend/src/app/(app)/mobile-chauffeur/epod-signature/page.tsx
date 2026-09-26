@@ -70,7 +70,7 @@ export default function MobileChauffeurEPODPage() {
           <PenLine className="w-5 h-5 text-emerald-400" />
           <div>
             <div className="text-xs font-black text-slate-100">e-POD  Bon de Livraison Électronique</div>
-            <div className="text-[10px] font-mono text-emerald-400">T-Code : KDRV_POD  MIS-2026-01847</div>
+            <div className="text-[11px] font-mono text-emerald-400">T-Code : KDRV_POD  MIS-2026-01847</div>
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@ export default function MobileChauffeurEPODPage() {
       <div className="p-4 space-y-4 max-w-lg mx-auto">
         {/* Infos livraison */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
-          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Détails de la livraison</div>
+          <div className="text-[11px] text-slate-500 uppercase font-bold tracking-wider">Détails de la livraison</div>
           <div className="flex items-center gap-2 text-xs">
             <Package className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-slate-300">32T  Matières premières (houblon)</span>
@@ -95,7 +95,7 @@ export default function MobileChauffeurEPODPage() {
 
         {/* État marchandise */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-2">État à la livraison</div>
+          <div className="text-[11px] text-slate-500 uppercase font-bold tracking-wider mb-2">État à la livraison</div>
           <div className="grid grid-cols-3 gap-2">
             {(['BON', 'ENDOMMAGE', 'MANQUANT'] as const).map(etat => (
               <button key={etat} onClick={() => !signed && setEtatMarchandise(etat)}
@@ -111,7 +111,7 @@ export default function MobileChauffeurEPODPage() {
 
         {/* Observations */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-2">Observations (optionnel)</div>
+          <div className="text-[11px] text-slate-500 uppercase font-bold tracking-wider mb-2">Observations (optionnel)</div>
           <textarea value={observation} onChange={e => setObservation(e.target.value)} disabled={signed} rows={2}
             placeholder="Ex: 2 colis avec emballage légèrement froissé..."
             className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500 resize-none disabled:opacity-50"
@@ -121,12 +121,12 @@ export default function MobileChauffeurEPODPage() {
         {/* Zone signature */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">
+            <div className="text-[11px] text-slate-500 uppercase font-bold tracking-wider">
               Signature du Réceptionnaire
             </div>
             {!signed && (
               <button onClick={clearSignature}
-                className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-slate-200 cursor-pointer">
+                className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-200 cursor-pointer">
                 <RotateCcw className="w-3 h-3" /> Effacer
               </button>
             )}
@@ -137,8 +137,8 @@ export default function MobileChauffeurEPODPage() {
               onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw}
             />
           </div>
-          {!signed && <p className="text-[10px] text-slate-400 mt-1 text-center">← Faites signer le réceptionnaire ici</p>}
-          {signed && <p className="text-[10px] text-emerald-400 mt-1 text-center flex items-center justify-center gap-1"><CheckCircle2 className="w-3 h-3" /> Signature enregistrée</p>}
+          {!signed && <p className="text-[11px] text-slate-400 mt-1 text-center">← Faites signer le réceptionnaire ici</p>}
+          {signed && <p className="text-[11px] text-emerald-400 mt-1 text-center flex items-center justify-center gap-1"><CheckCircle2 className="w-3 h-3" /> Signature enregistrée</p>}
         </div>
 
         {/* Valider */}
@@ -151,7 +151,7 @@ export default function MobileChauffeurEPODPage() {
           <div className="py-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center">
             <CheckCircle2 className="w-6 h-6 text-emerald-400 mx-auto mb-1" />
             <div className="text-sm font-black text-emerald-400">e-POD validé et transmis</div>
-            <div className="text-[10px] text-slate-400 mt-0.5 font-mono">Réf: ePOD-MIS-2026-01847-{new Date().toISOString().slice(0, 10)}</div>
+            <div className="text-[11px] text-slate-400 mt-0.5 font-mono">Réf: ePOD-MIS-2026-01847-{new Date().toISOString().slice(0, 10)}</div>
           </div>
         )}
       </div>

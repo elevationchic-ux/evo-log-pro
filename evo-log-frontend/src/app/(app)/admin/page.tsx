@@ -469,11 +469,11 @@ export default function AdminHubPage() {
                     </td>
                     <td className="p-4">
                       {u.is_active ? (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold text-[10px]">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold text-[11px]">
                           ACTIF
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 font-bold text-[10px]">
+                        <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 font-bold text-[11px]">
                           SUSPENDU
                         </span>
                       )}
@@ -567,7 +567,7 @@ export default function AdminHubPage() {
                   <h3 className="text-base font-bold text-white mt-0.5">{a.name}</h3>
                   <div className="text-xs text-slate-400 mt-1">Ville: {a.ville} • Utilisateurs: {a.usersCount}</div>
                 </div>
-                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
                   a.statut === 'ACTIF' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
                 }`}>
                   {a.statut}
@@ -699,7 +699,7 @@ export default function AdminHubPage() {
                         setNewModulesAllowed(ALL_AVAILABLE_MODULES.map(m => m.id));
                       }
                     }}
-                    className="text-[10px] text-amber-300 hover:underline font-mono"
+                    className="text-[11px] text-amber-300 hover:underline font-mono"
                   >
                     {newModulesAllowed.length === ALL_AVAILABLE_MODULES.length ? "Tout désélectionner" : "Tout sélectionner"}
                   </button>

@@ -303,7 +303,7 @@ export default function SuperAdminSaasHub() {
                     <div>
                       <div className="text-sm font-bold text-slate-100 flex items-center gap-2">
                         <span>{t.nom}</span>
-                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        <span className="text-[11px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
                           {t.legal_form || 'SA'}
                         </span>
                       </div>
@@ -396,7 +396,7 @@ export default function SuperAdminSaasHub() {
                     <Server className="w-5 h-5 text-amber-400" />
                     <h3 className="text-xs font-bold text-slate-100">{s.service}</h3>
                   </div>
-                  <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
+                  <span className={`text-[11px] font-black uppercase px-2 py-0.5 rounded-full border ${
                     s.status === 'OK' 
                       ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' 
                       : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
@@ -440,7 +440,7 @@ export default function SuperAdminSaasHub() {
                   <div className="text-slate-400">{log.user_email || 'Système'} • {log.target || log.resource || log.ip}</div>
                 </div>
                 <div className="text-right">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     {log.status || 'SUCCESS'}
                   </span>
                   <div className="text-[11px] text-slate-500 mt-1 font-mono">{log.timestamp ? new Date(log.timestamp).toLocaleString('fr-FR') : 'Récent'}</div>

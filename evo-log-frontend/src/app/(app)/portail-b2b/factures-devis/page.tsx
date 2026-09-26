@@ -69,7 +69,7 @@ export default function PortailB2BFacturesPage() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="bg-slate-900/90 border border-violet-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
             Portail Client • Facturation & Règlements
           </span>
           <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -101,7 +101,7 @@ export default function PortailB2BFacturesPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">N° Facture</th>
                 <th className="py-3.5 px-4">Prestation</th>
                 <th className="py-3.5 px-4 text-right">HT (XAF)</th>
@@ -132,11 +132,11 @@ export default function PortailB2BFacturesPage() {
                   <td className="py-3.5 px-4 text-slate-400">{f.echeance}</td>
                   <td className="py-3.5 px-4 text-center">
                     {f.statut === 'PAYEE' ? (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1 w-fit mx-auto">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1 w-fit mx-auto">
                         <CheckCircle2 className="w-3 h-3" /> PAYÉE
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1 w-fit mx-auto animate-pulse">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1 w-fit mx-auto animate-pulse">
                         <Clock className="w-3 h-3" /> EN ATTENTE
                       </span>
                     )}

@@ -135,10 +135,10 @@ export default function AdminTenantIntegrationsPage() {
             >
               <div className="space-y-3">
                 <div className="flex justify-between items-start gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                  <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                     {c.category}
                   </span>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1 ${
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1 ${
                     configured
                       ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10'
                       : 'border-outline text-on-surface-variant'
@@ -155,12 +155,12 @@ export default function AdminTenantIntegrationsPage() {
                   <p className="text-xs text-on-surface-variant leading-relaxed">{t(c.description, c.description)}</p>
                 </div>
 
-                <div className="p-2.5 bg-surface-container-low rounded-xl font-mono text-[10px] text-on-surface-variant break-all">
+                <div className="p-2.5 bg-surface-container-low rounded-xl font-mono text-[11px] text-on-surface-variant break-all">
                   {c.endpoint}
                 </div>
 
                 {configured && integ!.derniere_synchronisation && (
-                  <p className="text-[10px] text-on-surface-variant">
+                  <p className="text-[11px] text-on-surface-variant">
                     {t('Dernière sync.', 'Last sync.')} : {new Date(integ!.derniere_synchronisation).toLocaleString(lang === 'en' ? 'en-US' : 'fr-FR')}
                   </p>
                 )}

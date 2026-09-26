@@ -207,7 +207,7 @@ export default function DocumentBLPage() {
           </div>
 
           {/* Footer Footer */}
-          <div className="mt-12 text-center text-[10px] text-slate-400 uppercase tracking-widest">
+          <div className="mt-12 text-center text-[11px] text-slate-400 uppercase tracking-widest">
             <p>Document généré par le module K-Docs de EVO-LOG ERP.</p>
             <p>Ce bon de livraison fait foi en cas de litige concernant les marchandises transportées.</p>
           </div>

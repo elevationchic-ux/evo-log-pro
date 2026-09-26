@@ -137,7 +137,7 @@ export default function ParcLicensePlatesPage() {
           <div>
             <p className="text-xs text-on-surface-variant font-medium">Titres Enregistrés</p>
             <p className="text-xl font-bold font-mono text-on-surface mt-1">{records.length}</p>
-            <span className="text-[10px] text-on-surface-variant">Véhicules immatriculés</span>
+            <span className="text-[11px] text-on-surface-variant">Véhicules immatriculés</span>
           </div>
           <div className="p-3 bg-primary/10 rounded-xl text-primary">
             <FileCheck className="w-5 h-5" />
@@ -150,7 +150,7 @@ export default function ParcLicensePlatesPage() {
             <p className="text-xl font-bold font-mono text-emerald-600 mt-1">
               {records.filter(r => r.statut === 'VALIDE').length}
             </p>
-            <span className="text-[10px] text-on-surface-variant">Visite & Assurance à jour</span>
+            <span className="text-[11px] text-on-surface-variant">Visite & Assurance à jour</span>
           </div>
           <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
             <CheckCircle2 className="w-5 h-5" />
@@ -163,7 +163,7 @@ export default function ParcLicensePlatesPage() {
             <p className="text-xl font-bold font-mono text-amber-500 mt-1">
               {records.filter(r => r.statut === 'EXPIRATION_PROCHE').length}
             </p>
-            <span className="text-[10px] text-on-surface-variant">Renouvellement requis</span>
+            <span className="text-[11px] text-on-surface-variant">Renouvellement requis</span>
           </div>
           <div className="p-3 bg-amber-500/10 rounded-xl text-amber-500">
             <Clock className="w-5 h-5" />
@@ -176,7 +176,7 @@ export default function ParcLicensePlatesPage() {
             <p className="text-xl font-bold font-mono text-red-500 mt-1">
               {records.filter(r => r.statut === 'EXPIRE').length}
             </p>
-            <span className="text-[10px] text-on-surface-variant">Interdiction circulation</span>
+            <span className="text-[11px] text-on-surface-variant">Interdiction circulation</span>
           </div>
           <div className="p-3 bg-red-500/10 rounded-xl text-red-500">
             <ShieldAlert className="w-5 h-5" />
@@ -259,14 +259,14 @@ export default function ParcLicensePlatesPage() {
                     <td className="p-3 font-mono text-on-surface">{r.dateExpirationVisite}</td>
                     <td className="p-3 font-mono text-on-surface">{r.dateExpirationAssurance}</td>
                     <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
                         r.agrementPortuairePad ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'
                       }`}>
                         {r.agrementPortuairePad ? 'Autorisé Quai' : 'Non Autorisé'}
                       </span>
                     </td>
                     <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
                         r.statut === 'VALIDE' ? 'bg-emerald-500/10 text-emerald-600' :
                         r.statut === 'EXPIRATION_PROCHE' ? 'bg-amber-500/10 text-amber-600' :
                         'bg-red-500/10 text-red-600'

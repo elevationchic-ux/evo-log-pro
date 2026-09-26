@@ -172,7 +172,7 @@ export default function ParcVehiculesDocumentsPage() {
                     <span className="font-mono text-xs font-semibold text-primary">{doc.immatriculation}</span>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">
+                <span className="text-[11px] font-mono text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">
                   {doc.tailleFichier}
                 </span>
               </div>
@@ -287,7 +287,7 @@ export default function ParcVehiculesDocumentsPage() {
                 <input
                   type="file"
                   onChange={(e) => setForm({ ...form, fichierNom: e.target.files?.[0]?.name || '' })}
-                  className="mt-2 text-[10px] text-on-surface-variant"
+                  className="mt-2 text-[11px] text-on-surface-variant"
                 />
               </div>
 

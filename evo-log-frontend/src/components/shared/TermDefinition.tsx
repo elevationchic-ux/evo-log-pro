@@ -191,7 +191,7 @@ export function TermDefinition({ term, children, showIcon = true }: TermDefiniti
         >
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <span className="font-bold text-sm text-on-surface">{info.title}</span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase ${categoryColors[info.category]}`}>
+            <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded border uppercase ${categoryColors[info.category]}`}>
               {info.category}
             </span>
           </div>
@@ -206,7 +206,7 @@ export function TermDefinition({ term, children, showIcon = true }: TermDefiniti
             {info.definition}
           </p>
 
-          <div className="mt-2.5 pt-2 border-t border-outline/50 flex items-center justify-between text-[10px] text-on-surface-variant/80">
+          <div className="mt-2.5 pt-2 border-t border-outline/50 flex items-center justify-between text-[11px] text-on-surface-variant/80">
             <span>Guide d'aide EVO-LOG</span>
             <button
               onClick={() => setIsOpen(false)}

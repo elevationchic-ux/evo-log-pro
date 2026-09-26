@@ -103,7 +103,7 @@ export default function ProcessFlowPage() {
               )}
               <div className="flex items-stretch gap-3 sm:gap-4">
                 <div className={`shrink-0 w-14 h-14 rounded-2xl border flex flex-col items-center justify-center font-black text-sm ${etape.couleur}`}>
-                  <span className="text-[10px] opacity-70 leading-none">ÉT</span>
+                  <span className="text-[11px] opacity-70 leading-none">ÉT</span>
                   {etape.num}
                 </div>
                 <div className="flex-1 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:border-slate-700 transition-colors">

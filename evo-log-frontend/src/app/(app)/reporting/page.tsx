@@ -137,7 +137,7 @@ export default function ReportingPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-black text-violet-400">{k.valeur_actuelle}</p>
-                    <p className="text-[10px] text-slate-500">/ Cible: {k.valeur_cible}</p>
+                    <p className="text-[11px] text-slate-500">/ Cible: {k.valeur_cible}</p>
                   </div>
                 </div>
               ))}

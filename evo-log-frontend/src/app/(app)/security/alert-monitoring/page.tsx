@@ -163,7 +163,7 @@ export default function SecurityAlertMonitoringPage() {
               {incidents.map((inc) => (
                 <tr key={inc.id} className="hover:bg-slate-800/40 transition-colors">
                   <td className="px-6 py-4 font-bold text-indigo-400">
-                    {inc.id} <span className="block text-[10px] text-slate-500 font-sans">{inc.source}</span>
+                    {inc.id} <span className="block text-[11px] text-slate-500 font-sans">{inc.source}</span>
                   </td>
                   <td className="px-6 py-4 text-slate-200 font-sans font-semibold">
                     {inc.type}
@@ -173,10 +173,10 @@ export default function SecurityAlertMonitoringPage() {
                   </td>
                   <td className="px-6 py-4 text-slate-400">
                     <div>{inc.ip || ''}</div>
-                    <div className="text-[10px] text-slate-500">{inc.date ? new Date(inc.date).toLocaleString('fr-FR') : ''}</div>
+                    <div className="text-[11px] text-slate-500">{inc.date ? new Date(inc.date).toLocaleString('fr-FR') : ''}</div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${inc.severity === 'CRITICAL'
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${inc.severity === 'CRITICAL'
                         ? 'bg-red-500/10 text-red-400 border border-red-500/30'
                         : inc.severity === 'WARNING'
                           ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'

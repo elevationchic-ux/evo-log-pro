@@ -619,10 +619,10 @@ export default function AnnuairePrestatairesPage() {
                         )}
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-950 border border-slate-800 text-amber-400 font-bold">
+                            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-950 border border-slate-800 text-amber-400 font-bold">
                               {prestataire.code}
                             </span>
-                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                            <span className="text-[11px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                               {prestataire.statut_agrement}
                             </span>
                           </div>
@@ -675,15 +675,15 @@ export default function AnnuairePrestatairesPage() {
                     {/* SLA Metrics */}
                     <div className="grid grid-cols-3 gap-2 bg-slate-950 p-2.5 rounded-2xl border border-slate-800 text-center mb-4">
                       <div>
-                        <div className="text-[10px] text-slate-500 font-bold uppercase">Missions</div>
+                        <div className="text-[11px] text-slate-500 font-bold uppercase">Missions</div>
                         <div className="text-xs font-black text-white">{prestataire.nb_missions_realisees}</div>
                       </div>
                       <div>
-                        <div className="text-[10px] text-slate-500 font-bold uppercase">Ponctualité</div>
+                        <div className="text-[11px] text-slate-500 font-bold uppercase">Ponctualité</div>
                         <div className="text-xs font-black text-emerald-400">{prestataire.taux_ponctualite}%</div>
                       </div>
                       <div>
-                        <div className="text-[10px] text-slate-500 font-bold uppercase">QHSE</div>
+                        <div className="text-[11px] text-slate-500 font-bold uppercase">QHSE</div>
                         <div className="text-xs font-black text-cyan-400">{prestataire.taux_conformite_qhse}%</div>
                       </div>
                     </div>
@@ -694,7 +694,7 @@ export default function AnnuairePrestatairesPage() {
                         <Phone className="w-3.5 h-3.5 text-slate-500" />
                         <span>{prestataire.contact_telephone}</span>
                         {prestataire.telephone_astreinte_24h && (
-                          <span className="text-[10px] text-red-400 font-bold ml-auto px-1.5 py-0.5 rounded bg-red-500/10 border border-red-500/20">
+                          <span className="text-[11px] text-red-400 font-bold ml-auto px-1.5 py-0.5 rounded bg-red-500/10 border border-red-500/20">
                             24h/24
                           </span>
                         )}
@@ -784,7 +784,7 @@ export default function AnnuairePrestatairesPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+                          <span className="px-2 py-0.5 text-[11px] font-black rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
                             GARAGE AGRÉÉ
                           </span>
                           <span className="text-xs text-slate-400 font-mono">{g.ville}</span>
@@ -803,7 +803,7 @@ export default function AnnuairePrestatairesPage() {
                       <div className="text-[11px] font-bold text-slate-400 uppercase mb-1">Spécialités de Dépannage</div>
                       <div className="flex flex-wrap gap-1.5">
                         {(g.specialites_panne || ['Moteur PL', 'Pneumatique', 'Électricité', 'Remorquage']).map(spec => (
-                          <span key={spec} className="px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[10px] font-semibold text-slate-300">
+                          <span key={spec} className="px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-semibold text-slate-300">
                             {spec}
                           </span>
                         ))}
@@ -891,7 +891,7 @@ export default function AnnuairePrestatairesPage() {
                   <div>
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                        <span className="px-2 py-0.5 text-[11px] font-black rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
                           TRANSPORTEUR AFFRÉTÉ
                         </span>
                         <h3 className="text-base font-black text-white mt-1">{t.raison_sociale}</h3>
@@ -923,7 +923,7 @@ export default function AnnuairePrestatairesPage() {
                           <div key={v.type} className="py-1.5 flex items-center justify-between text-xs">
                             <div>
                               <div className="font-bold text-slate-200">{v.type}</div>
-                              <div className="text-[10px] text-slate-500">
+                              <div className="text-[11px] text-slate-500">
                                 {v.tarif_journalier ? `${v.tarif_journalier.toLocaleString()} XAF / jour` : 'Sur devis'}
                               </div>
                             </div>
@@ -995,10 +995,10 @@ export default function AnnuairePrestatairesPage() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono font-bold text-amber-400">{c.numero_dossier}</span>
-                      <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30">
+                      <span className="px-2 py-0.5 text-[11px] font-black rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30">
                         {c.urgence}
                       </span>
-                      <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                      <span className="px-2 py-0.5 text-[11px] font-black rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
                         {c.statut}
                       </span>
                     </div>
@@ -1075,7 +1075,7 @@ export default function AnnuairePrestatairesPage() {
                         <span>{p.raison_sociale}</span>
                       </td>
                       <td className="py-3.5 px-4 text-slate-300 font-sans">
-                        <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-[10px]">
+                        <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-[11px]">
                           {p.type_entite}
                         </span>
                       </td>
@@ -1083,7 +1083,7 @@ export default function AnnuairePrestatairesPage() {
                       <td className="py-3.5 px-4 text-slate-400">{p.rccm || '-'}</td>
                       <td className="py-3.5 px-4 text-emerald-300 truncate max-w-xs">{p.agrement_portuaire || '-'}</td>
                       <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <span className="px-2 py-0.5 text-[11px] font-black rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                           {p.statut_agrement}
                         </span>
                       </td>

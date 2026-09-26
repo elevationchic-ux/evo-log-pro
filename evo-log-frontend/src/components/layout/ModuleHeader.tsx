@@ -307,7 +307,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                   <div className="fixed inset-0 z-[45]" onClick={() => setIsModuleMenuOpen(false)} />
                   <div className="absolute top-full left-0 z-50 mt-1.5 w-[20rem] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-outline bg-surface shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="border-b border-outline bg-surface-container-low px-4 py-2.5">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t.shell.switchModule}</span>
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">{t.shell.switchModule}</span>
                     </div>
                     <div className="max-h-[70vh] overflow-y-auto py-1">
                       {NAV_TREE.map((m) => {
@@ -388,7 +388,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
               />
               {/* Keyboard shortcut hint  hidden on very small screens */}
               <div className="pointer-events-none absolute inset-y-0 right-0 hidden items-center pr-2.5 sm:flex">
-                <kbd className="rounded border border-outline px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant bg-surface-container">⌘K</kbd>
+                <kbd className="rounded border border-outline px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-tighter text-on-surface-variant bg-surface-container">⌘K</kbd>
               </div>
 
               {/* T-Code suggestion dropdown */}
@@ -406,7 +406,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                         <span className="flex-shrink-0 rounded border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-sm font-bold text-primary">{tcodeKey}</span>
                         <span className="truncate text-sm text-on-surface">→ {matchedSuggestion.split('/').pop()?.replace(/-/g, ' ')}</span>
                       </div>
-                      <kbd className="flex-shrink-0 rounded border border-outline px-1.5 py-0.5 text-[10px] font-bold uppercase text-on-surface-variant">↵</kbd>
+                      <kbd className="flex-shrink-0 rounded border border-outline px-1.5 py-0.5 text-[11px] font-bold uppercase text-on-surface-variant">↵</kbd>
                     </div>
                   </button>
                 </div>
@@ -436,7 +436,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
             {wsStatus === 'connecting' && (
               <div className="hidden items-center gap-1.5 rounded-lg bg-surface-container px-2.5 py-1.5 md:flex">
                 <span className='h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse' />
-                <span className="text-[10px] font-bold uppercase text-on-surface-variant">
+                <span className="text-[11px] font-bold uppercase text-on-surface-variant">
                   {t.shell.sync}
                 </span>
               </div>
@@ -445,8 +445,8 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
             {/* Session expiry warning  xl only */}
             {minutesLeft !== null && minutesLeft <= 5 && minutesLeft > 0 && (
               <div className="hidden animate-pulse items-center gap-1 rounded-lg border border-red-300/50 bg-red-500/10 px-2.5 py-1.5 xl:flex">
-                <span className="text-[10px] font-bold text-red-500">SESSION {minutesLeft}m</span>
-                <button onClick={renewSession} className="text-[10px] font-black text-primary hover:underline">↺</button>
+                <span className="text-[11px] font-bold text-red-500">SESSION {minutesLeft}m</span>
+                <button onClick={renewSession} className="text-[11px] font-black text-primary hover:underline">↺</button>
               </div>
             )}
 
@@ -468,8 +468,8 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                   <div className="fixed inset-0 z-[45]" onClick={() => setIsAgencyMenuOpen(false)} />
                   <div className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-outline bg-surface shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="flex items-center justify-between border-b border-outline bg-surface-container-low px-4 py-2.5">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{t.shell.agency}</span>
-                      <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">Global</span>
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">{t.shell.agency}</span>
+                      <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-bold uppercase text-primary">Global</span>
                     </div>
                     <div className="py-1">
                       {AGENCIES.map((agency) => (
@@ -513,7 +513,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
             >
               <span className="material-symbols-outlined text-[20px]">notifications</span>
               {unreadCount > 0 && (
-                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-surface bg-red-500 px-0.5 text-[9px] font-black text-white">
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-surface bg-red-500 px-0.5 text-[11px] font-black text-white">
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
@@ -531,7 +531,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
               >
                 <div className="hidden flex-col items-end text-right lg:flex">
                   <p className="text-[13px] font-semibold leading-tight text-on-surface">{user?.fullName || t.shell.user}</p>
-                  {selectedAgency && <p className="text-[10px] text-on-surface-variant font-medium">{selectedAgency.split(',')[0]}</p>}
+                  {selectedAgency && <p className="text-[11px] text-on-surface-variant font-medium">{selectedAgency.split(',')[0]}</p>}
                 </div>
                 <div className="relative h-8 w-8 rounded-xl bg-primary flex items-center justify-center text-on-primary text-xs font-black shadow-sm ring-2 ring-primary/20">
                   {user?.fullName?.charAt(0) || 'U'}
@@ -556,7 +556,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                         <div className="min-w-0 flex-1">
                           <p className="font-bold text-sm text-on-surface truncate">{user?.fullName || t.shell.user}</p>
                           <p className="text-[11px] text-on-surface-variant truncate">{user?.email}</p>
-                          <span className="inline-flex items-center px-1.5 py-0.5 mt-1 rounded bg-primary/10 text-primary font-mono text-[10px] font-bold">
+                          <span className="inline-flex items-center px-1.5 py-0.5 mt-1 rounded bg-primary/10 text-primary font-mono text-[11px] font-bold">
                             {user?.roles?.[0] || 'COLLABORATEUR'}
                           </span>
                         </div>
@@ -696,7 +696,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                 <span className="material-symbols-outlined text-[20px] text-on-surface-variant">notifications</span>
                 <h2 className="text-sm font-bold uppercase tracking-wider text-on-surface">{t.auth.notifTitle}</h2>
                 {unreadCount > 0 && (
-                  <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-black text-white">{unreadCount}</span>
+                  <span className="rounded-full bg-red-500 px-2 py-0.5 text-[11px] font-black text-white">{unreadCount}</span>
                 )}
               </div>
               <button

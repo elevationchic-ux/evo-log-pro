@@ -161,7 +161,7 @@ export default function ClientB2bContractsPage() {
                       {c.valeurAnnuelleEstimee.toLocaleString('fr-FR')} FCFA
                     </td>
                     <td className="p-3 text-right pr-5">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[10px]">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[11px]">
                         {c.statut}
                       </span>
                     </td>

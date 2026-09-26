@@ -124,9 +124,9 @@ export default function ChatOpsDashboard() {
               <div className="pt-2">
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Exemples supportés par le bot :</p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <button type="button" onClick={() => setTestMessage("Mission TRN-001 bien livrée à destination")} className="text-[10px] bg-slate-900 dark:bg-slate-800 px-2 py-1 rounded text-slate-300 dark:text-slate-300 hover:bg-slate-700">Livraison</button>
-                  <button type="button" onClick={() => setTestMessage("Grosse panne moteur sur le LT-9999")} className="text-[10px] bg-slate-900 dark:bg-slate-800 px-2 py-1 rounded text-slate-300 dark:text-slate-300 hover:bg-slate-700">Panne</button>
-                  <button type="button" onClick={() => setTestMessage("Besoin de carburant pour le trajet")} className="text-[10px] bg-slate-900 dark:bg-slate-800 px-2 py-1 rounded text-slate-300 dark:text-slate-300 hover:bg-slate-700">Carburant</button>
+                  <button type="button" onClick={() => setTestMessage("Mission TRN-001 bien livrée à destination")} className="text-[11px] bg-slate-900 dark:bg-slate-800 px-2 py-1 rounded text-slate-300 dark:text-slate-300 hover:bg-slate-700">Livraison</button>
+                  <button type="button" onClick={() => setTestMessage("Grosse panne moteur sur le LT-9999")} className="text-[11px] bg-slate-900 dark:bg-slate-800 px-2 py-1 rounded text-slate-300 dark:text-slate-300 hover:bg-slate-700">Panne</button>
+                  <button type="button" onClick={() => setTestMessage("Besoin de carburant pour le trajet")} className="text-[11px] bg-slate-900 dark:bg-slate-800 px-2 py-1 rounded text-slate-300 dark:text-slate-300 hover:bg-slate-700">Carburant</button>
                 </div>
                 <button type="submit" disabled={!testMessage} className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl flex justify-center items-center gap-2 transition-all shadow-md cursor-pointer">
                   <Send className="w-4 h-4" /> Envoyer à K-Bot
@@ -143,7 +143,7 @@ export default function ChatOpsDashboard() {
                 <Bot className="w-6 h-6 text-blue-400" />
                 <div>
                   <h3 className="font-bold text-sm">Monitoring WhatsApp Global</h3>
-                  <p className="text-[10px] text-slate-400">Canal: Tous les chauffeurs</p>
+                  <p className="text-[11px] text-slate-400">Canal: Tous les chauffeurs</p>
                 </div>
               </div>
               <button onClick={fetchLogs} className="text-slate-400 hover:text-white transition-colors cursor-pointer">
@@ -170,7 +170,7 @@ export default function ChatOpsDashboard() {
                           {log.is_bot ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
                           {log.sender}
                         </span>
-                        <span className="text-[10px] opacity-40">
+                        <span className="text-[11px] opacity-40">
                           {new Date(log.timestamp).toLocaleTimeString()}
                         </span>
                       </div>

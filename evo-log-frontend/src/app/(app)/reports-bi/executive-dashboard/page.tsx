@@ -71,7 +71,7 @@ export default function ReportsBIExecutiveDashboard() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                 {t('Direction Générale & Pilotage Stratégique', 'Executive & Strategic Steering')}
               </span>
               <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -179,7 +179,7 @@ export default function ReportsBIExecutiveDashboard() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">{t('Pôle Métier', 'Business Pole')}</th>
                 <th className="py-3.5 px-4 text-right">{t('Indicateurs', 'Indicators')}</th>
                 <th className="py-3.5 px-4 text-right">{t('Valeur Cumulée', 'Cumulative Value')}</th>

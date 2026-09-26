@@ -252,7 +252,7 @@ export default function GoodsDeclarationPage() {
                   <tr key={d.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-4 px-5 font-mono">
                       <div className="font-bold text-violet-400">{d.numero_dum}</div>
-                      <div className="text-[10px] text-slate-500">{d.reference_sydonia}</div>
+                      <div className="text-[11px] text-slate-500">{d.reference_sydonia}</div>
                     </td>
                     <td className="py-4 px-5 text-xs">
                       <div className="font-semibold text-white">{d.regime_douanier}</div>

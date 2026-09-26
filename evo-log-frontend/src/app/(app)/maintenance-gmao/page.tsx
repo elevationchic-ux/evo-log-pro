@@ -196,12 +196,12 @@ export default function MaintenanceGMAOPage() {
                     <td className="px-5 py-4 font-mono text-xs text-cyan-400">{o.numero_ordre}</td>
                     <td className="px-5 py-4 text-slate-300 capitalize">{o.type_maintenance}</td>
                     <td className="px-5 py-4">
-                      <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase border ${getPrioriteBadge(o.priorite)}`}>{o.priorite}</span>
+                      <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border ${getPrioriteBadge(o.priorite)}`}>{o.priorite}</span>
                     </td>
                     <td className="px-5 py-4 text-slate-300 max-w-xs truncate">{o.description}</td>
                     <td className="px-5 py-4 text-slate-400 text-xs">{o.date_planifiee ? new Date(o.date_planifiee).toLocaleDateString('fr-FR') : '-'}</td>
                     <td className="px-5 py-4">
-                      <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase border ${o.statut === 'complété' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30'}`}>
+                      <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border ${o.statut === 'complété' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30'}`}>
                         {o.statut || 'en_cours'}
                       </span>
                     </td>

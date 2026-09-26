@@ -97,7 +97,7 @@ export default function RHDashboardPage() {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === tab.id ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'}`}
           >
-            {tab.label} {tab.id === 'conges' && <span className="ml-1 bg-amber-500 text-slate-950 rounded-full px-1.5 py-0.5 text-[9px] font-black">{congesEnAttente.length}</span>}
+            {tab.label} {tab.id === 'conges' && <span className="ml-1 bg-amber-500 text-slate-950 rounded-full px-1.5 py-0.5 text-[11px] font-black">{congesEnAttente.length}</span>}
           </button>
         ))}
       </div>
@@ -139,11 +139,11 @@ export default function RHDashboardPage() {
                     <td className="px-4 py-3 text-slate-400 hidden md:table-cell">{emp.poste}</td>
                     <td className="px-4 py-3 text-slate-400 hidden lg:table-cell">{emp.dept}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${emp.contrat === 'CDI' ? 'text-blue-400 bg-blue-500/10' : 'text-amber-400 bg-amber-500/10'}`}>{emp.contrat}</span>
+                      <span className={`text-[11px] px-2 py-0.5 rounded font-bold ${emp.contrat === 'CDI' ? 'text-blue-400 bg-blue-500/10' : 'text-amber-400 bg-amber-500/10'}`}>{emp.contrat}</span>
                     </td>
                     <td className="px-4 py-3 font-mono text-slate-300 hidden md:table-cell">{emp.salaire.toLocaleString()} XAF</td>
                     <td className="px-4 py-3">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statutColors[emp.statut]}`}>{emp.statut}</span>
+                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${statutColors[emp.statut]}`}>{emp.statut}</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">

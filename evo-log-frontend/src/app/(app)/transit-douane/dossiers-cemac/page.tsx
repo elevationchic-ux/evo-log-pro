@@ -37,7 +37,7 @@ export default function TransitDouaneDossiersCemac() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-cyan-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
               Transit International Terrestre
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -68,7 +68,7 @@ export default function TransitDouaneDossiersCemac() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">N° Dossier Transit</th>
                 <th className="py-3.5 px-4">Destinataire & Pays</th>
                 <th className="py-3.5 px-4">Corridor & Itinéraire</th>
@@ -88,18 +88,18 @@ export default function TransitDouaneDossiersCemac() {
                   <td className="py-3.5 px-4 font-sans text-slate-300 max-w-[280px]">{f.corridorAxis}</td>
                   <td className="py-3.5 px-4 text-center">
                     {f.escortRequired ? (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">
                         🛡️ Requise
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 text-slate-400">
                         Non
                       </span>
                     )}
                   </td>
                   <td className="py-3.5 px-4 text-right font-bold text-amber-400">{f.cautionDepositXaf.toLocaleString()} XAF</td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                       f.status === 'APURE_ARCHIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                       f.status === 'EN_ROUTE_CEMAC' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
                       'bg-amber-500/10 text-amber-400 border border-amber-500/20'

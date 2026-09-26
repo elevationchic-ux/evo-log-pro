@@ -118,7 +118,7 @@ export default function MfaConfigurationPage() {
                       </div>
                       <div className="font-data-tabular text-data-tabular text-on-surface flex items-center justify-between group">
                         <span className="line-through text-outline">5938-1024</span>
-                        <span className="text-[10px] bg-outline-variant text-on-surface px-1 rounded ml-auto">USED</span>
+                        <span className="text-[11px] bg-outline-variant text-on-surface px-1 rounded ml-auto">USED</span>
                       </div>
                     </div>
                   </div>

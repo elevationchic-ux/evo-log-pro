@@ -40,7 +40,7 @@ export default function FinanceOhadaInvoicing() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-emerald-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               Facturation Intégrée Fret & Transit
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -101,7 +101,7 @@ export default function FinanceOhadaInvoicing() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">N° Facture</th>
                 <th className="py-3.5 px-4">Client</th>
                 <th className="py-3.5 px-4">Date</th>
@@ -124,7 +124,7 @@ export default function FinanceOhadaInvoicing() {
                   <td className="py-3 px-4 text-right text-slate-400">{inv.tva.toLocaleString()}</td>
                   <td className="py-3 px-4 text-right font-bold text-slate-100">{inv.amountTTC.toLocaleString()}</td>
                   <td className="py-3 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                       inv.status === 'PAYEE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                       inv.status === 'EN_ATTENTE' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
                       inv.status === 'RETARD' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :

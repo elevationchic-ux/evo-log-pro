@@ -130,7 +130,7 @@ export default function FinanceOhadaTreasury() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-emerald-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl print:hidden">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               Trésorerie & Cash Flow Management
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -206,7 +206,7 @@ export default function FinanceOhadaTreasury() {
               <button
                 key={h}
                 onClick={() => setHorizonJours(h)}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                   horizonJours === h ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'
                 }`}
               >
@@ -242,7 +242,7 @@ export default function FinanceOhadaTreasury() {
             >
               <div>
                 <div className="flex items-start justify-between gap-2">
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-black uppercase ${
                     acc.type === 'BANQUE'
                       ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
                       : acc.type === 'MOBILE_MONEY'
@@ -266,7 +266,7 @@ export default function FinanceOhadaTreasury() {
 
               <div className="pt-3 border-t border-slate-900 flex items-center justify-between">
                 <div>
-                  <div className="text-[10px] text-slate-500 font-bold uppercase">Solde Comptable</div>
+                  <div className="text-[11px] text-slate-500 font-bold uppercase">Solde Comptable</div>
                   <div className="text-base font-black text-white font-mono">
                     {acc.balance.toLocaleString()} <span className="text-xs font-normal text-slate-400">{acc.currency}</span>
                   </div>

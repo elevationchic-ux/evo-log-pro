@@ -287,7 +287,7 @@ export default function TransportControlPage() {
                       <div className="text-xs font-bold text-red-400 font-mono">{alt.immatriculation}</div>
                       <div className="text-[11px] text-slate-400">{alt.alerte} • {alt.type}</div>
                     </div>
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-300">
+                    <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-300">
                       -{alt.echeance_km} km
                     </span>
                   </div>

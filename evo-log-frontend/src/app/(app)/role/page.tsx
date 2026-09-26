@@ -175,14 +175,14 @@ export default function RolePage() {
                   <div className="flex items-center gap-3">
                     <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase border ${getRoleColor(r.nom)}`}>{r.nom}</span>
                     {(r.systeme || r.is_system) && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-700/60 text-slate-400 border border-slate-600/60">Système</span>
+                      <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-700/60 text-slate-400 border border-slate-600/60">Système</span>
                     )}
                   </div>
                   <p className="text-xs text-slate-400">{r.description || 'Sans description'}</p>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {(r.modules || []).map((m: string) => (
-                    <span key={m} className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">{m}</span>
+                    <span key={m} className="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">{m}</span>
                   ))}
                   {(!r.modules || r.modules.length === 0) && <span className="text-xs text-slate-400 italic">Aucun module assigné</span>}
                 </div>

@@ -63,12 +63,12 @@ export default function MobileChauffeurMissionPage() {
           <Truck className="w-5 h-5 text-blue-400" />
           <div>
             <div className="text-xs font-black text-slate-100">Mission Active</div>
-            <div className="text-[10px] font-mono text-blue-400">{MISSION.id}</div>
+            <div className="text-[11px] font-mono text-blue-400">{MISSION.id}</div>
           </div>
         </div>
         <div className="text-right">
           <div className="text-xs font-mono text-slate-300">{heure}</div>
-          <div className="text-[10px] text-slate-500 font-mono">T-Code: KDRV_MIS</div>
+          <div className="text-[11px] text-slate-500 font-mono">T-Code: KDRV_MIS</div>
         </div>
       </div>
 
@@ -83,7 +83,7 @@ export default function MobileChauffeurMissionPage() {
           <div className="flex items-start gap-2">
             <div className="w-3 h-3 rounded-full bg-green-500 mt-0.5 shrink-0" />
             <div>
-              <div className="text-[10px] text-slate-500 uppercase font-bold">Départ</div>
+              <div className="text-[11px] text-slate-500 uppercase font-bold">Départ</div>
               <div className="text-xs font-bold text-slate-200">{MISSION.depart}</div>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function MobileChauffeurMissionPage() {
           <div className="flex items-start gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500 mt-0.5 shrink-0" />
             <div>
-              <div className="text-[10px] text-slate-500 uppercase font-bold">Arrivée</div>
+              <div className="text-[11px] text-slate-500 uppercase font-bold">Arrivée</div>
               <div className="text-xs font-bold text-slate-200">{MISSION.arrivee}</div>
             </div>
           </div>
@@ -100,14 +100,14 @@ export default function MobileChauffeurMissionPage() {
         {/* Infos véhicule + charge */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3">
-            <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Tracteur</div>
+            <div className="text-[11px] text-slate-500 uppercase font-bold mb-1">Tracteur</div>
             <div className="text-xs font-bold text-blue-400 font-mono">{MISSION.vehicule.split('  ')[0]}</div>
-            <div className="text-[10px] text-slate-400">{MISSION.vehicule.split('  ')[1]}</div>
+            <div className="text-[11px] text-slate-400">{MISSION.vehicule.split('  ')[1]}</div>
           </div>
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3">
-            <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Chargement</div>
+            <div className="text-[11px] text-slate-500 uppercase font-bold mb-1">Chargement</div>
             <div className="text-xs font-bold text-amber-400">{MISSION.chargement}</div>
-            <div className="text-[10px] text-slate-400">{MISSION.distance_km} km</div>
+            <div className="text-[11px] text-slate-400">{MISSION.distance_km} km</div>
           </div>
         </div>
 
@@ -115,12 +115,12 @@ export default function MobileChauffeurMissionPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 text-center">
             <Clock className="w-4 h-4 text-slate-500 mx-auto mb-1" />
-            <div className="text-[10px] text-slate-500 uppercase font-bold">Départ prévu</div>
+            <div className="text-[11px] text-slate-500 uppercase font-bold">Départ prévu</div>
             <div className="text-lg font-black text-slate-100">{MISSION.heure_chargement}</div>
           </div>
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 text-center">
             <MapPin className="w-4 h-4 text-red-400 mx-auto mb-1" />
-            <div className="text-[10px] text-slate-500 uppercase font-bold">Arrivée prévue</div>
+            <div className="text-[11px] text-slate-500 uppercase font-bold">Arrivée prévue</div>
             <div className="text-lg font-black text-emerald-400">{MISSION.heure_arrivee_prevue}</div>
           </div>
         </div>
@@ -129,7 +129,7 @@ export default function MobileChauffeurMissionPage() {
         <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-3">
           <div className="flex items-center gap-1.5 mb-2">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">Instructions</span>
+            <span className="text-[11px] font-black text-amber-400 uppercase tracking-wider">Instructions</span>
           </div>
           <p className="text-[11px] text-slate-300">{MISSION.instructions}</p>
         </div>

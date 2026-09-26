@@ -153,7 +153,7 @@ export default function ClientB2bDashboardPage() {
           <div>
             <p className="text-xs text-on-surface-variant font-medium">Valeur Pipeline B2B</p>
             <p className="text-xl font-bold font-mono text-on-surface mt-1">{totalPipeline.toLocaleString('fr-FR')} FCFA</p>
-            <span className="text-[10px] text-on-surface-variant">Opportunités actives</span>
+            <span className="text-[11px] text-on-surface-variant">Opportunités actives</span>
           </div>
           <div className="p-3 bg-primary/10 rounded-xl text-primary">
             <DollarSign className="w-5 h-5" />
@@ -164,7 +164,7 @@ export default function ClientB2bDashboardPage() {
           <div>
             <p className="text-xs text-on-surface-variant font-medium">Prospects en Cours</p>
             <p className="text-xl font-bold font-mono text-on-surface mt-1">{opportunities.length}</p>
-            <span className="text-[10px] text-on-surface-variant">Importateurs / Chargeurs</span>
+            <span className="text-[11px] text-on-surface-variant">Importateurs / Chargeurs</span>
           </div>
           <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500">
             <Users className="w-5 h-5" />
@@ -177,7 +177,7 @@ export default function ClientB2bDashboardPage() {
             <p className="text-xl font-bold font-mono text-emerald-600 mt-1">
               {opportunities.filter(o => o.etape === 'GAGNE').length}
             </p>
-            <span className="text-[10px] text-on-surface-variant">Accords cadres logistiques</span>
+            <span className="text-[11px] text-on-surface-variant">Accords cadres logistiques</span>
           </div>
           <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
             <CheckCircle2 className="w-5 h-5" />
@@ -190,7 +190,7 @@ export default function ClientB2bDashboardPage() {
             <p className="text-xl font-bold font-mono text-emerald-600 mt-1">
               {opportunities.length > 0 ? Math.round((opportunities.filter(o => o.etape === 'GAGNE').length / opportunities.length) * 100) : 0}%
             </p>
-            <span className="text-[10px] text-on-surface-variant">Devis convertis en missions</span>
+            <span className="text-[11px] text-on-surface-variant">Devis convertis en missions</span>
           </div>
           <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
             <TrendingUp className="w-5 h-5" />
@@ -259,10 +259,10 @@ export default function ClientB2bDashboardPage() {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-[10px] font-bold text-primary uppercase">{opp.typeService.replace(/_/g, ' ')}</span>
+                  <span className="text-[11px] font-bold text-primary uppercase">{opp.typeService.replace(/_/g, ' ')}</span>
                   <h3 className="font-bold text-base text-on-surface">{opp.nomEntreprise}</h3>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${opp.etape === 'GAGNE' ? 'bg-emerald-500/10 text-emerald-600' :
+                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${opp.etape === 'GAGNE' ? 'bg-emerald-500/10 text-emerald-600' :
                     opp.etape === 'NEGOCIATION' ? 'bg-blue-500/10 text-blue-600' :
                       opp.etape === 'DEVIS_ENVOYE' ? 'bg-amber-500/10 text-amber-600' :
                         'bg-surface-container text-on-surface-variant'
@@ -292,7 +292,7 @@ export default function ClientB2bDashboardPage() {
 
               <div className="pt-2 border-t border-outline/50 flex justify-between items-center">
                 <div>
-                  <span className="text-[10px] text-on-surface-variant block">Volume Estimé :</span>
+                  <span className="text-[11px] text-on-surface-variant block">Volume Estimé :</span>
                   <span className="font-mono font-bold text-sm text-primary">
                     {opp.montantEstime.toLocaleString('fr-FR')} FCFA
                   </span>

@@ -125,7 +125,7 @@ export default function CadcPlansPage() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="bg-slate-900/90 border border-amber-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">Console Super-Admin CADC</span>
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">Console Super-Admin CADC</span>
           <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">T-Code : KCADC_PLN</span>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -145,7 +145,7 @@ export default function CadcPlansPage() {
           <div key={p.id} className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col">
             <div className="flex items-start justify-between">
               <div>
-                <div className="text-[10px] font-black uppercase tracking-wider text-amber-400">{p.type_plan}</div>
+                <div className="text-[11px] font-black uppercase tracking-wider text-amber-400">{p.type_plan}</div>
                 <h3 className="text-lg font-black text-slate-100">{p.nom}</h3>
                 <div className="font-mono text-[11px] text-slate-500">{p.code}</div>
               </div>

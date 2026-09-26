@@ -84,7 +84,7 @@ export default function AdminSaasTenantsPage() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="bg-slate-900/90 border border-purple-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">
             Administration SaaS • Gestion Multi-Tenant
           </span>
           <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -149,7 +149,7 @@ export default function AdminSaasTenantsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">Organisation</th>
                 <th className="py-3.5 px-4">Localisation</th>
                 <th className="py-3.5 px-4 text-center">Forme</th>
@@ -170,7 +170,7 @@ export default function AdminSaasTenantsPage() {
                     <div className="text-[11px] text-slate-500">{t.ville || 'Douala'}</div>
                   </td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-black border border-slate-700 bg-slate-800 text-slate-300">
+                    <span className="px-2 py-0.5 rounded text-[11px] font-black border border-slate-700 bg-slate-800 text-slate-300">
                       {t.legal_form || 'SA'}
                     </span>
                   </td>
@@ -178,7 +178,7 @@ export default function AdminSaasTenantsPage() {
                     {t.current_users || 0} / {t.max_users || 20}
                   </td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${
                       t.is_active 
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
                         : 'bg-red-500/10 text-red-400 border-red-500/20'

@@ -50,7 +50,7 @@ export default function MagasinStockMovements() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-amber-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
               Journal des Mouvements WMS
             </span>
             <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -111,7 +111,7 @@ export default function MagasinStockMovements() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+              <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                 <th className="py-3.5 px-4">Date & Heure</th>
                 <th className="py-3.5 px-4">SKU & Désignation</th>
                 <th className="py-3.5 px-4 text-center">Type</th>
@@ -131,7 +131,7 @@ export default function MagasinStockMovements() {
                     <div className="text-[11px] text-slate-400 font-sans">{m.designation}</div>
                   </td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${MVT_COLORS[m.type]}`}>
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${MVT_COLORS[m.type]}`}>
                       {m.type}
                     </span>
                   </td>

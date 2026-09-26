@@ -189,7 +189,7 @@ export default function InvoicingPage() {
                     <td className="px-5 py-3.5 text-right">{Number(inv.montant_ht || inv.montant || 0).toLocaleString('fr-FR')} FCFA</td>
                     <td className="px-5 py-3.5 text-right font-bold text-primary">{Number(inv.montant_ttc || inv.montant || 0).toLocaleString('fr-FR')} FCFA</td>
                     <td className="px-5 py-3.5 text-center">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                         inv.statut === 'PAYEE' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'
                       }`}>
                         {inv.statut || 'VALIDÉE'}

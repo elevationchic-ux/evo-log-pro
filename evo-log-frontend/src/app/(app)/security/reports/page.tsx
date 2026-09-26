@@ -136,7 +136,7 @@ export default function SecurityReportsPage() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-3">
                     <h3 className="font-bold text-slate-100 text-base">{rep.title}</h3>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950 text-emerald-400 border border-slate-800">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-950 text-emerald-400 border border-slate-800">
                       {rep.id}
                     </span>
                   </div>

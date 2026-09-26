@@ -417,7 +417,7 @@ export default function ChefPersonnelPage() {
           <Calendar className="w-4 h-4" />
           Validation Congés N+1
           {pendingCongesCount > 0 && (
-            <span className="ml-1 px-1.5 py-0.2 bg-red-500 text-white rounded-full text-[10px] font-black animate-pulse">
+            <span className="ml-1 px-1.5 py-0.2 bg-red-500 text-white rounded-full text-[11px] font-black animate-pulse">
               {pendingCongesCount}
             </span>
           )}
@@ -509,7 +509,7 @@ export default function ChefPersonnelPage() {
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center font-black text-lg text-slate-950 shadow-md">
                       {agent.full_name.substring(0, 2).toUpperCase()}
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                       {agent.statut_presence.replace('_', ' ')}
                     </span>
                   </div>
@@ -575,10 +575,10 @@ export default function ChefPersonnelPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <span className="font-black text-sm text-white">{cg.employe_nom}</span>
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-800 text-slate-300 font-mono">
+                    <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-slate-800 text-slate-300 font-mono">
                       {cg.employe_role}
                     </span>
-                    <span className={`px-2 py-0.5 text-[10px] font-black rounded-full ${cg.statut === 'APPROUVE'
+                    <span className={`px-2 py-0.5 text-[11px] font-black rounded-full ${cg.statut === 'APPROUVE'
                       ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                       : cg.statut === 'REJETE'
                         ? 'bg-red-500/15 text-red-400 border border-red-500/30'
@@ -674,7 +674,7 @@ export default function ChefPersonnelPage() {
                     <td className="py-3.5 px-4 text-emerald-300 font-bold">{p.quart}</td>
                     <td className="py-3.5 px-4 text-slate-200 font-sans">{p.poste_assigne}</td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="px-2 py-0.5 text-[11px] font-black rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                         {p.statut}
                       </span>
                     </td>
@@ -731,7 +731,7 @@ export default function ChefPersonnelPage() {
                     <td className="py-3.5 px-4 font-bold text-white">{pt.heures_effectives}h</td>
                     <td className="py-3.5 px-4">
                       {pt.droit_panier_nuit ? (
-                        <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                        <span className="px-2 py-0.5 text-[11px] font-black rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
                           ÉLIGIBLE NUIT
                         </span>
                       ) : (
@@ -797,7 +797,7 @@ export default function ChefPersonnelPage() {
                     <td className="py-3.5 px-4 font-bold text-white font-sans">{dt.employe_nom}</td>
                     <td className="py-3.5 px-4 text-slate-200 font-sans font-bold">{dt.designation}</td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-800 text-slate-300">
+                      <span className="px-2 py-0.5 text-[11px] font-mono rounded bg-slate-800 text-slate-300">
                         {dt.categorie}
                       </span>
                     </td>
@@ -805,7 +805,7 @@ export default function ChefPersonnelPage() {
                     <td className="py-3.5 px-4 text-slate-400">{dt.date_remise}</td>
                     <td className="py-3.5 px-4 text-emerald-300">{dt.date_renouvellement_prevue || '1 an'}</td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="px-2 py-0.5 text-[11px] font-black rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                         {dt.etat}
                       </span>
                     </td>

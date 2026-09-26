@@ -112,7 +112,7 @@ export default function SubModuleOrbitalBubble() {
           <div className={`relative w-11 h-11 rounded-full bg-gradient-to-tr ${activeOrbit.bgGradient} flex items-center justify-center text-white shadow-inner`}>
             {isOpen ? <X className="w-6 h-6" /> : <MainIcon className="w-6 h-6" />}
           </div>
-          <span className="absolute -top-1 -right-1 bg-slate-950 text-amber-400 font-black text-[10px] px-2 py-0.5 rounded-full border border-amber-500/50 shadow-md">
+          <span className="absolute -top-1 -right-1 bg-slate-950 text-amber-400 font-black text-[11px] px-2 py-0.5 rounded-full border border-amber-500/50 shadow-md">
             {filteredNav.length}
           </span>
         </button>
@@ -179,7 +179,7 @@ export default function SubModuleOrbitalBubble() {
                           </span>
                           <span className="min-w-0 flex-1">
                             <span className="block text-[13px] font-bold text-slate-100 truncate group-hover:text-white">{localizeTitle(mod, language)}</span>
-                            <span className="block text-[10px] text-slate-500 truncate">{mod.subModules.length} {t.shell.subModules}</span>
+                            <span className="block text-[11px] text-slate-500 truncate">{mod.subModules.length} {t.shell.subModules}</span>
                           </span>
                           <span className="shrink-0 h-2 w-2 rounded-full" style={{ backgroundColor: mod.color }} />
                         </button>

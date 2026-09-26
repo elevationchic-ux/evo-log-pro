@@ -330,13 +330,13 @@ export default function PortailCommercialPage() {
                   <div>
                     <div className="text-xs font-bold text-slate-200">Devis #{d.reference || `DEV-${d.id}`}</div>
                     <div className="text-[11px] text-slate-400">Client : {d.client_nom || 'Importateur CEMAC'}</div>
-                    <div className="text-[10px] text-slate-400">Corridor : {d.corridor || 'Douala - N’Djamena'}</div>
+                    <div className="text-[11px] text-slate-400">Corridor : {d.corridor || 'Douala - N’Djamena'}</div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-mono font-bold text-slate-200">
                       {d.montant_total ? d.montant_total.toLocaleString() : '4 850 000'} XAF
                     </div>
-                    <span className="text-[10px] font-bold text-emerald-600">Offre transmise</span>
+                    <span className="text-[11px] font-bold text-emerald-600">Offre transmise</span>
                   </div>
                 </div>
               ))
@@ -367,7 +367,7 @@ export default function PortailCommercialPage() {
                     <div className="text-[11px] text-slate-500">Ville : {c.ville || 'Douala'} • Téléphone : {c.telephone || '+237 6XX XX XX XX'}</div>
                   </div>
                   <div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300">
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-300">
                       Compte Actif
                     </span>
                   </div>

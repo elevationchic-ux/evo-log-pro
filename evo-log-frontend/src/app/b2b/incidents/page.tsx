@@ -180,7 +180,7 @@ export default function B2BIncidentsPage() {
             <div className="space-y-2">
               {inc.timeline.map((step, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] ${step.done ? 'bg-emerald-500 text-white' : 'bg-slate-800 border border-slate-700 text-slate-500'}`}>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[11px] ${step.done ? 'bg-emerald-500 text-white' : 'bg-slate-800 border border-slate-700 text-slate-500'}`}>
                     {step.done ? '✓' : (i + 1)}
                   </div>
                   <div className="flex-1">
@@ -200,9 +200,9 @@ export default function B2BIncidentsPage() {
             {inc.messages.map((msg, i) => (
               <div key={i} className="bg-slate-950 border border-slate-800 rounded-2xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center text-[10px] text-amber-400 font-bold">CA</div>
+                  <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center text-[11px] text-amber-400 font-bold">CA</div>
                   <span className="text-xs font-bold text-slate-300">{msg.from}</span>
-                  <span className="text-[10px] text-slate-500 font-mono ml-auto">{msg.time}</span>
+                  <span className="text-[11px] text-slate-500 font-mono ml-auto">{msg.time}</span>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">{msg.body}</p>
               </div>

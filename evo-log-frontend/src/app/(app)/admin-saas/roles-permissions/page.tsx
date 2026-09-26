@@ -117,7 +117,7 @@ export default function RolesPermissionsPage() {
       {/* Header */}
       <div className="bg-slate-900/90 border border-red-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-red-500/20 text-red-300 border border-red-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-red-500/20 text-red-300 border border-red-500/30">
             Administration SaaS • Contrôle d&apos;Accès & Permissions
           </span>
           <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
@@ -224,7 +224,7 @@ export default function RolesPermissionsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+                <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                   <th className="py-3.5 px-4">Utilisateur</th>
                   <th className="py-3.5 px-4">Entreprise (Tenant)</th>
                   <th className="py-3.5 px-4 text-center">Rôle Assigné</th>
@@ -241,12 +241,12 @@ export default function RolesPermissionsPage() {
                     </td>
                     <td className="py-3.5 px-4 text-slate-300 font-sans">{u.tenant || 'CADC Global'}</td>
                     <td className="py-3.5 px-4 text-center">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${getRoleStyle(u.role)}`}>
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-black border ${getRoleStyle(u.role)}`}>
                         {u.role}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-center">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                         u.is_active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
                       }`}>
                         {u.is_active ? 'ACTIF' : 'VERROUILLÉ'}
@@ -273,7 +273,7 @@ export default function RolesPermissionsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[10px] tracking-wider bg-slate-950">
+                <tr className="border-b border-slate-800 text-slate-400 font-sans uppercase text-[11px] tracking-wider bg-slate-950">
                   <th className="py-3.5 px-4">Module Métier</th>
                   {roles.slice(0, 7).map(r => (
                     <th key={r.id} className="py-3.5 px-3 text-center">{r.name}</th>

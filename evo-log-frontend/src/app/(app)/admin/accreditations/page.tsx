@@ -123,8 +123,8 @@ export default function AccreditationsPage() {
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                   <BadgeCheck size={15} className="text-primary" />
                   <span className="font-semibold text-foreground text-sm">{a.libelle}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${STATUT_COLOR[a.statut] || STATUT_COLOR.actif}`}>{a.statut}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full border border-border text-muted-foreground font-mono">{a.type}</span>
+                  <span className={`text-[11px] px-2 py-0.5 rounded-full border font-semibold ${STATUT_COLOR[a.statut] || STATUT_COLOR.actif}`}>{a.statut}</span>
+                  <span className="text-[11px] px-2 py-0.5 rounded-full border border-border text-muted-foreground font-mono">{a.type}</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Utilisateur #{a.user_id}

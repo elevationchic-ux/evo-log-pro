@@ -194,7 +194,7 @@ export default function PortailTechnicienPage() {
                     <span className="text-xs font-mono font-black text-slate-200">
                       #{ot.numero_ot || `OT-${ot.id}`}
                     </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                       ot.type_maintenance === 'CURATIF' ? 'bg-rose-500/15 text-rose-300' : 'bg-blue-500/15 text-blue-300'
                     }`}>
                       {ot.type_maintenance}
@@ -434,7 +434,7 @@ export default function PortailTechnicienPage() {
                     <div className="text-[11px] text-slate-500">Catégorie : {eq.categorie || 'Poids Lourd'} • Marque : {eq.marque || 'Renault / Mercedes'}</div>
                   </div>
                   <div className="text-right">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
                       eq.statut === 'OPERATIONNEL' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
                     }`}>
                       {eq.statut || 'EN SERVICE'}
