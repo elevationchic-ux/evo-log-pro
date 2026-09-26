@@ -430,13 +430,17 @@ def formes_locales(texte):
     return formes
 
 
-def valeurs_hors_enum(contrat, schemas, texte):
+def valeurs_hors_enum(contrat, schemas, texte, formes=None):
     """Litteraux compares a un champ a enum, mais absents de ce enum.
 
     C'est l'autre moitie du defaut, et la plus dangereuse : le champ existe,
     la comparaison s'execute, et elle ne reussit jamais. `transport/map`
     comparait `statut` a 'EN_MAINTENANCE' pour `in_maintenance`.
+    Une comparaison portee par une CLE CONSTRITE par la page (`m.status` issu
+    d'un view-model local) n'est pas une lecture du contrat : la filtrer par
+    `formes`, sinon chaque vue locale legitime devient un faux positif.
     """
+    formes = formes or {}
     perms = set()
     for nom in schemas:
         perms.update((contrat["schemas"].get(nom) or {}).get("enums", {}))
@@ -444,6 +448,11 @@ def valeurs_hors_enum(contrat, schemas, texte):
     for champ in sorted(perms):
         for regex in re.finditer(COMPARAISON % re.escape(champ), texte):
             cible, _, litteral = regex.group(1), regex.group(2), regex.group(3)
+            morceaux = cible.split(".")
+            if len(morceaux) >= 2:
+                porteur = morceaux[-2]
+                if champ in formes.get(porteur, set()):
+                    continue
             admises = set()
             for nom in schemas:
                 admises.update(
@@ -512,7 +521,7 @@ def analyser(contrat, index, texte):
                 "schemas": sorted(schemas),
                 "attendus": sorted(disponibles),
             })
-    return soupcons, valeurs_hors_enum(contrat, pour_valeurs, texte), True, ambigus
+    return soupcons, valeurs_hors_enum(contrat, pour_valeurs, texte, formes), True, ambigus
 
 
 def main():
@@ -533,7 +542,8 @@ def main():
             continue
         if "useState" not in texte and "useQuery" not in texte:
             continue
-        noms_lus, valeurs, retably, ambigus = analyser(contrat, index, texte)
+        # Ce que le code explique dans un commentaire n'est pas ce qu'il fait.
+        noms_lus, valeurs, retably, ambigus = analyser(contrat, index, retirer_commentaires(texte))
         sans_source.update("%s::%s" % (fichier.relative_to(FRONT.parent), v)
                            for v in ambigus)
         if not retably:

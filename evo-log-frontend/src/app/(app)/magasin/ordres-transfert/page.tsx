@@ -287,14 +287,17 @@ function OTModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () =>
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 overflow-y-auto"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
       <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
         <div className="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
           <h2 className="text-xl font-bold text-slate-200 flex items-center gap-2">
             <ArrowRightLeft className="w-5 h-5 text-blue-600" />
             Nouvel Ordre de Transfert
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-400"><span className="material-symbols-outlined">close</span></button>
+          <button type="button" onClick={onClose} className="p-2 min-w-11 min-h-11 grid place-items-center rounded-lg text-slate-400 hover:text-white transition-colors" aria-label="Fermer"><span className="material-symbols-outlined">close</span></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
 
