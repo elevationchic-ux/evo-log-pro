@@ -246,7 +246,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
 
   const navigateToTCode = (code: string) => {
     const hasAccess = user?.roles?.some((r) => canAccessTCode(r, code)) ?? false
-    if (!hasAccess) { toast.error(`Accès Interdit : Votre profil (${user?.roles?.join(', ') || 'INVITÉ'}) ne dispose pas des droits pour ${code}.`, { id: 'forbidden-tcode', icon: 'lock' }); return }
+    if (!hasAccess) { toast.error(language === 'en' ? `Access denied: your profile (${user?.roles?.join(', ') || 'GUEST'}) has no rights for ${code}.` : `Accès Interdit : Votre profil (${user?.roles?.join(', ') || 'INVITÉ'}) ne dispose pas des droits pour ${code}.`, { id: 'forbidden-tcode', icon: 'lock' }); return }
     const targetRoute = getRouteFromTCode(code)
     if (targetRoute) { router.push(targetRoute); setSearchValue(''); setShowSuggestion(false) }
   }

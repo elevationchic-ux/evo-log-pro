@@ -130,7 +130,7 @@ export default function ModuleSidebar({
             </div>
             <div>
               <span className="font-black text-slate-100 tracking-wider text-sm block">EVO-LOG SaaS</span>
-              <span className="text-[10px] text-slate-400 font-mono block">
+              <span className="text-[11px] text-slate-400 font-mono block">
                 {isAdmin ? (language === 'en' ? 'Full Admin Access' : 'Accès Admin Total') : `${language === 'en' ? 'Profile' : 'Profil'} : ${userRoles[0] || (language === 'en' ? 'User' : 'Utilisateur')}`}
               </span>
             </div>
@@ -143,7 +143,7 @@ export default function ModuleSidebar({
       ) : (
         <div className="flex items-center h-9 px-3 border-b border-slate-800 shrink-0 gap-2">
           {!isCollapsed && (
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider truncate flex-1">
+            <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider truncate flex-1">
               {isAdmin ? (language === 'en' ? 'Full Admin Access' : 'Accès Admin Total') : `${language === 'en' ? 'Profile' : 'Profil'} : ${userRoles[0] || (language === 'en' ? 'User' : 'Utilisateur')}`}
             </span>
           )}
