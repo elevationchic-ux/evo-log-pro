@@ -1,4 +1,4 @@
-﻿// src/lib/utils.ts  Utilitaires Frontend EVO-LOG
+// src/lib/utils.ts  Utilitaires Frontend EVO-LOG
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 

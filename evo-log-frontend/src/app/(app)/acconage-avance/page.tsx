@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { LayoutDashboard } from 'lucide-react'
 

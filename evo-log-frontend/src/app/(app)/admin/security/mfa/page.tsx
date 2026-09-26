@@ -1,4 +1,4 @@
-﻿// src/app/(app)/admin/security/mfa/page.tsx - Security MFA Configuration - Fidèle 100% au HTML original
+// src/app/(app)/admin/security/mfa/page.tsx - Security MFA Configuration - Fidèle 100% au HTML original
 'use client'
 
 

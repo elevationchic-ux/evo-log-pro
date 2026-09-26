@@ -1,4 +1,4 @@
-﻿// src/lib/tcodes.ts
+// src/lib/tcodes.ts
 // T-Code Registry for EVO-LOG SaaS
 
 export const T_CODES: Record<string, string> = {

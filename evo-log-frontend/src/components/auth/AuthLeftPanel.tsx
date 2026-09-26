@@ -1,4 +1,4 @@
-﻿import loginPanelSvg from '@/app/login-panel.svg'
+import loginPanelSvg from '@/app/login-panel.svg'
 
 export function AuthLeftPanel() {
   return (

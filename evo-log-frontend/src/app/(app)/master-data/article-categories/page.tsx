@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Layers, Plus, Search, Edit, Trash2, Package, Loader2, X } from "lucide-react";

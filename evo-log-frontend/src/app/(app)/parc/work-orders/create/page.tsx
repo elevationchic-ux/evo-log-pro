@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Wrench, ArrowLeft, CheckCircle2, AlertTriangle, Truck } from 'lucide-react';

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 /**
  * FullScreenLoader: Écran de chargement ultra-pro & élégant CADC EM-ERP

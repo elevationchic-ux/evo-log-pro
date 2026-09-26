@@ -341,6 +341,19 @@ def archiver_document(
     current_user: User = Depends(get_current_user)
 ):
     """Archive document legally"""
+    # Le service genere `numero_archivage` a partir de la date et de l'id du
+    # document : archive deux fois le meme jour, le document se heurte a la
+    # contrainte d'unicite et la requete part en 500. On repond 409 avec le
+    # numero deja attribue, que l'ecran peut afficher.
+    deja = db.query(ArchivageLegal).filter(
+        ArchivageLegal.document_id == archivage.document_id,
+        ArchivageLegal.statut == "archive",
+    ).first()
+    if deja:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Ce document est deja archive sous le numero {deja.numero_archivage}",
+        )
     return ArchivageLegalService.archiver_document(
         db, archivage.document_id, archivage.type_archivage,
         archivage.duree_conservation, archivage.autorite_archivage

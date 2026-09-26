@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import GlobalDashboard from './global/page'
 
