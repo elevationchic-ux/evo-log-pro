@@ -173,7 +173,7 @@ export default function KFinanceBillingInvoicing() {
                       </span>
                     </td>
                     <td className="py-2 px-md text-right">
-                      <button className="text-outline hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+                      <button className="text-outline hover:text-primary transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100">
                         <span className="material-symbols-outlined text-[18px]">more_vert</span>
                       </button>
                     </td>
@@ -196,7 +196,7 @@ export default function KFinanceBillingInvoicing() {
                       </span>
                     </td>
                     <td className="py-2 px-md text-right">
-                      <button className="text-outline hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+                      <button className="text-outline hover:text-primary transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100">
                         <span className="material-symbols-outlined text-[18px]">more_vert</span>
                       </button>
                     </td>
@@ -219,7 +219,7 @@ export default function KFinanceBillingInvoicing() {
                       </span>
                     </td>
                     <td className="py-2 px-md text-right">
-                      <button className="text-outline hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+                      <button className="text-outline hover:text-primary transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100">
                         <span className="material-symbols-outlined text-[18px]">more_vert</span>
                       </button>
                     </td>
@@ -242,7 +242,7 @@ export default function KFinanceBillingInvoicing() {
                       </span>
                     </td>
                     <td className="py-2 px-md text-right">
-                      <button className="text-outline hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+                      <button className="text-outline hover:text-primary transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100">
                         <span className="material-symbols-outlined text-[18px]">more_vert</span>
                       </button>
                     </td>

@@ -7,7 +7,6 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..', 'src');
 const RE = /opacity-0 (group-hover|hover|focus):opacity-100/g;
-const FIX = 'opacity-100 md:opacity-0 md:$1:opacity-100';
 
 function walk(dir, out = []) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {

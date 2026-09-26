@@ -159,7 +159,7 @@ export default function DocumentsArchivePage() {
                         </td>
                         <td className="p-sm text-on-surface-variant">1.2 MB</td>
                         <td className="p-sm text-right">
-                          <div className="flex items-center justify-end gap-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-end gap-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">visibility</span></button>
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">download</span></button>
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">share</span></button>
@@ -184,7 +184,7 @@ export default function DocumentsArchivePage() {
                         </td>
                         <td className="p-sm text-on-surface-variant">3.4 MB</td>
                         <td className="p-sm text-right">
-                          <div className="flex items-center justify-end gap-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-end gap-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">visibility</span></button>
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">download</span></button>
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">share</span></button>
@@ -209,7 +209,7 @@ export default function DocumentsArchivePage() {
                         </td>
                         <td className="p-sm text-on-surface-variant">8.1 MB</td>
                         <td className="p-sm text-right">
-                          <div className="flex items-center justify-end gap-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-end gap-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">visibility</span></button>
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">download</span></button>
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">share</span></button>
@@ -234,7 +234,7 @@ export default function DocumentsArchivePage() {
                         </td>
                         <td className="p-sm text-on-surface-variant">0.8 MB</td>
                         <td className="p-sm text-right">
-                          <div className="flex items-center justify-end gap-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-end gap-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">visibility</span></button>
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">download</span></button>
                             <button className="p-xxs text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">share</span></button>

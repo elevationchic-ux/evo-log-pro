@@ -86,35 +86,35 @@ export default function MfaConfigurationPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-sm gap-x-md">
                       <div className="font-data-tabular text-data-tabular text-on-surface flex items-center justify-between group">
                         <span>8472-9104</span>
-                        <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
+                        <button className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
                       </div>
                       <div className="font-data-tabular text-data-tabular text-on-surface flex items-center justify-between group">
                         <span>3951-0284</span>
-                        <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
+                        <button className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
                       </div>
                       <div className="font-data-tabular text-data-tabular text-on-surface flex items-center justify-between group">
                         <span>6105-8372</span>
-                        <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
+                        <button className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
                       </div>
                       <div className="font-data-tabular text-data-tabular text-on-surface flex items-center justify-between group">
                         <span>9284-5710</span>
-                        <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
+                        <button className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
                       </div>
                       <div className="font-data-tabular text-data-tabular text-on-surface flex items-center justify-between group">
                         <span>1048-2957</span>
-                        <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
+                        <button className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
                       </div>
                       <div className="font-data-tabular text-data-tabular text-on-surface flex items-center justify-between group">
                         <span>7539-1826</span>
-                        <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
+                        <button className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
                       </div>
                       <div className="font-data-tabular text-data-tabular text-on-surface flex items-center justify-between group">
                         <span>4820-9153</span>
-                        <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
+                        <button className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
                       </div>
                       <div className="font-data-tabular text-data-tabular text-on-surface flex items-center justify-between group">
                         <span>2619-7485</span>
-                        <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
+                        <button className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-outline hover:text-primary transition-opacity"><span className="material-symbols-outlined text-[16px]">content_copy</span></button>
                       </div>
                       <div className="font-data-tabular text-data-tabular text-on-surface flex items-center justify-between group">
                         <span className="line-through text-outline">5938-1024</span>

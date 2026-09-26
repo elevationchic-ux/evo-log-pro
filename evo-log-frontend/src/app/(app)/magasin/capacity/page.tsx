@@ -106,7 +106,7 @@ export default function MagasinCapacityPage() {
                         <div className="text-[11px] text-on-surface-variant truncate">Blé Dur</div>
                       </div>
                       {/* Tooltip (Hover) */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-inverse-surface text-inverse-on-surface p-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none text-body-sm font-body-sm hidden md:block">
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-inverse-surface text-inverse-on-surface p-sm rounded shadow-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none text-body-sm font-body-sm hidden md:block">
                         <div className="font-bold border-b border-outline/30 pb-1 mb-1">Silo N-01</div>
                         <div className="flex justify-between"><span>Capacité:</span> <span>10,000 T</span></div>
                         <div className="flex justify-between"><span>Occupé:</span> <span>8,500 T</span></div>

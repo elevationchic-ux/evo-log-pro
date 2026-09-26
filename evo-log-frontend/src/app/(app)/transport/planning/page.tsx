@@ -79,7 +79,7 @@ export default function PlanningPage() {
                   <span className="text-xs font-bold text-blue-600 bg-blue-500/10 px-2 py-1 rounded-md">
                     {mission.reference}
                   </span>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={() => window.open(`/transport/documents/bl/${mission.id}`, '_blank')}
                       className="p-1 hover:bg-slate-800 rounded text-slate-500 hover:text-blue-600 transition-colors"
