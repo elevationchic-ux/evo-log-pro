@@ -36,6 +36,10 @@ class User(Base):
     is_superuser = Column(Boolean, default=False)
     agency_id = Column(Integer, ForeignKey('agencies.id'))
     phone = Column(String(20))
+    # Identite employe (distinguee du role/casquette) : un Utilisateur porte
+    # un matricule et un poste ; le Role determine l'acces (beaucoup-a-beaucoup).
+    matricule = Column(String(50), nullable=True, index=True)
+    job_title = Column(String(100), nullable=True)
     must_change_password = Column(Boolean, default=True)
     password_changed_at = Column(DateTime(timezone=True))
     

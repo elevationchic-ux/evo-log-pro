@@ -201,7 +201,13 @@ def _build_login_payload(user: User) -> dict:
         "shared_modules": shared_modules,
         # Le front n'invente jamais cette regle : c'est la source backend
         # (colonne users.must_change_password) qui declenche le gate.
-        "must_change_password": bool(getattr(user, "must_change_password", False)),
+        # Exception : un Super Administrateur (compte CADC) n'est JAMAIS renvoye
+        # vers le changement de mot de passe, meme si la colonne vaut True (ex.
+        # apres regeneration de la colonne). Protoge contre les regressions.
+        "must_change_password": bool(
+            getattr(user, "must_change_password", False)
+            and not (user.is_superuser or "SUPER_ADMIN" in user_roles)
+        ),
     }
 
 

@@ -111,6 +111,10 @@ class SubscriptionPlan(Base):
     # Features
     features = Column(Text)  # JSON string of features
     modules_inclus = Column(Text)  # JSON array of module names
+    # Nombre max de modules selectionnables pour une entreprise sur ce plan.
+    # NULL = illimité. Une fois le plan cree, cette valeur verrouille le nombre
+    # de modules allouables (regle metier Super-Admin CADC).
+    max_modules = Column(Integer, nullable=True)
     
     # Limits
     max_users = Column(Integer, default=10)
