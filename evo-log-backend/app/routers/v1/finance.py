@@ -228,7 +228,19 @@ def mettre_a_jour_facture(
 
     db.commit()
     db.refresh(f)
-    return f
+    # Dictionnaire explicite : sans response_model, un objet ORM de l'une ou
+    # l'autre table serialiserait ses relations (et _sa_instance_state).
+    return {
+        "id": f.id,
+        "numero_facture": f.numero_facture,
+        "client_id": f.client_id,
+        "date_emission": f.date_emission.isoformat() if f.date_emission else None,
+        "date_echeance": f.date_echeance.isoformat() if f.date_echeance else None,
+        "montant_ht": float(f.montant_ht or 0),
+        "montant_tva": float(f.montant_tva or 0),
+        "montant_ttc": float(f.montant_ttc or 0),
+        "statut": (f.statut.value if hasattr(f.statut, "value") else str(f.statut)),
+    }
 
 
 @router.get("/factures/{facture_id}/pdf")
