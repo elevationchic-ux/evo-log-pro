@@ -87,6 +87,7 @@ const translations = {
       unspecifiedMode: 'mode non précisé',
       actInvoice: 'Facture',
       actReceipt: 'Encaissement',
+      actOf: 'de',
     },
     shell: {
       toggleMenu: 'Activer/Rétracter la Sidebar',

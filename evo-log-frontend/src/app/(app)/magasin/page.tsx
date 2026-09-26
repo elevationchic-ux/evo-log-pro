@@ -6,7 +6,7 @@ import { magasinAPI, apiClient } from '@/lib/api-client';
 import {
   Warehouse, Package, TrendingUp, AlertTriangle, Search, Plus,
   MapPin, RefreshCw, Eye, ArrowRight, BarChart3,
-  Layers, Thermometer, Box, ShoppingCart, QrCode, Truck, ShieldCheck, X
+  Layers, Box, ShoppingCart, QrCode, Truck, ShieldCheck, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -318,7 +318,7 @@ export default function WMSDashboardPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => toast.info(`Détail article ${item.ref} • Valorisation active FIFO`)} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg">
+                      <button onClick={() => toast.info(`Détail article ${item.ref}`)} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg">
                         <Eye className="w-3.5 h-3.5 text-amber-400" />
                       </button>
                     </td>

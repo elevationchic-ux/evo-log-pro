@@ -506,8 +506,11 @@ def analyser(contrat, index, texte):
         # Une cle construite par la page elle-meme n'est pas une lecture du contrat.
         locales = formes.get(nom, set())
         vus = set()
+        # \\b de chaque cote : sans lui, `React.FormEvent` se lisait comme le
+        # variable `t` suivie du champ `FormEvent` (signal hallucine sur
+        # TransactionSearch.tsx, chercheur magasin reel).
         for champ in re.findall(
-                r"(?:%s)\s*(?:\?\.|\.)\s*([A-Za-z_$][\w$]*)" % re.escape(nom), texte):
+                r"(?<![\w$])(?:%s)\s*(?:\?\.|\.)\s*([A-Za-z_$][\w$]*)\b" % re.escape(nom), texte):
             if champ in vus or champ in locales:
                 continue
             if champ in BUILTIN or champ in ENVELOPPE or champ in RENDU:

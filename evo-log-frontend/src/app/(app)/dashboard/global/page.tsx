@@ -402,23 +402,23 @@ export default function GlobalDashboard() {
       {/* 🚀 All ERP Modules Quick Access Grid */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
         <h2 className="text-lg font-bold text-white flex items-center gap-2 pb-3 border-b border-slate-800">
-          <Zap className="w-5 h-5 text-amber-400" /> Navigation Rapide aux Modules ERP
+          <Zap className="w-5 h-5 text-amber-400" /> {t.dash.quickNavTitle}
         </h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {[
-            { label: 'Admin ERP', href: '/admin', icon: ShieldCheck, color: 'text-amber-400' },
-            { label: 'Transport', href: '/transport/control', icon: Truck, color: 'text-emerald-400' },
-            { label: 'Magasin', href: '/magasin/dashboard', icon: Package, color: 'text-indigo-400' },
-            { label: 'Finance', href: '/finance/overview', icon: CreditCard, color: 'text-cyan-400' },
-            { label: 'Acconage Quai', href: '/acconage', icon: Building, color: 'text-purple-400' },
-            { label: 'QHSE Sécurité', href: '/qhse', icon: ShieldAlert, color: 'text-red-400' },
-            { label: 'Transit Douane', href: '/transit', icon: Globe, color: 'text-yellow-400' },
-            { label: 'Maintenance', href: '/maintenance', icon: RefreshCw, color: 'text-blue-400' },
+            { label: t.dash.adminErp, href: '/admin', icon: ShieldCheck, color: 'text-amber-400' },
+            { label: t.dash.modTransport, href: '/transport/control', icon: Truck, color: 'text-emerald-400' },
+            { label: t.dash.modWarehouse, href: '/magasin/dashboard', icon: Package, color: 'text-indigo-400' },
+            { label: t.dash.modFinance, href: '/finance/overview', icon: CreditCard, color: 'text-cyan-400' },
+            { label: t.dash.modStevedoring, href: '/acconage', icon: Building, color: 'text-purple-400' },
+            { label: t.dash.modQhse, href: '/qhse', icon: ShieldAlert, color: 'text-red-400' },
+            { label: t.dash.modCustoms, href: '/transit', icon: Globe, color: 'text-yellow-400' },
+            { label: t.dash.modMaintenance, href: '/maintenance', icon: RefreshCw, color: 'text-blue-400' },
             { label: 'e-POD & GPS', href: '/tracking', icon: Radio, color: 'text-emerald-400' },
             { label: 'FuelGuard', href: '/fuel-guard', icon: Fuel, color: 'text-orange-400' },
             { label: 'Procurement', href: '/procurement', icon: ShoppingCart, color: 'text-pink-400' },
-            { label: 'Analytics BI', href: '/bi', icon: BarChart3, color: 'text-amber-400' },
+            { label: t.dash.modAnalytics, href: '/bi', icon: BarChart3, color: 'text-amber-400' },
           ].map((m, idx) => {
             const IconComponent = m.icon
             return (
