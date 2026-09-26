@@ -12,6 +12,7 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
 from app.models.prestataire import Prestataire, DemandeCotation
+from app.utils.rbac import require_superadmin
 
 router = APIRouter()
 
@@ -167,9 +168,15 @@ def get_prestataires(
 def creer_prestataire(
     data: PrestataireCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_purchase_access)
+    current_user: User = Depends(require_superadmin),
 ):
-    """Enregistre et référence un nouveau prestataire agréé dans l'annuaire de l'entreprise"""
+    """Enregistre et référence un nouveau prestataire agréé dans l'annuaire.
+
+    Ecriture reservee au Super Administrateur CADC : l'annuaire des prestataires
+    est une ressource plateforme que lui seul alimente (les entreprises et leurs
+    departements Achats consultent l'annuaire et soumettent des cotations, mais
+    n'ajoutent pas de prestataires). La console CADC propose le CRUD complet.
+    """
     import random
     code = f"PREST-{data.specialite[:3].upper()}-{random.randint(1000, 9999)}"
     

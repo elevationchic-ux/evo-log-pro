@@ -43,29 +43,73 @@ const ROUTE_LABELS: Record<string, string> = {
   'admin-tenant': 'Paramètres Société',
 };
 
+// Équivalent anglais : le fil d'Ariane fait partie du chrome et doit suivre le toggle de langue.
+const ROUTE_LABELS_EN: Record<string, string> = {
+  dashboard: 'Global Oversight',
+  global: 'Executive View',
+  'process-flow': 'Vessel ➔ Client Flow',
+  transport: 'Transport TMS & Fleet',
+  'transport-flotte': 'Fleet & Convoys',
+  'control-tower': 'Control Tower',
+  magasin: 'Warehouse WMS & Stock',
+  'magasin-stock': 'Stock Levels',
+  'magasin-avance': 'Advanced FEFO Management',
+  'magasin-douane': 'Bonded Warehouse (MAD)',
+  acconage: 'Stevedoring & Quay (TOS)',
+  transit: 'Transit & Customs CAMCIS',
+  'transit-douane': 'DUM Declarations',
+  'comptabilite-ohada': 'SYSCOHADA Accounting',
+  finance: 'Finance & Treasury',
+  'finance-ohada': 'CEMAC Tax Filing',
+  rh: 'Human Resources',
+  'rh-personnel': 'Staff & Employees',
+  'chef-personnel': 'HR Manager & Time Tracking',
+  maintenance: 'Maintenance CMMS & Fleet',
+  'maintenance-gmao': 'Work Orders',
+  qhse: 'QHSE & ISPS Security',
+  'qhse-securite': 'Incident Registers',
+  'portail-collaborateur': 'Collaborator Hub',
+  'portail-chauffeur': 'Driver Space & Routes',
+  'portail-magasinier': 'Warehouse Keeper Space & Dock',
+  'portail-technicien': 'CMMS Technician Space',
+  'portail-declarant': 'Customs Declarant Space',
+  'portail-frais': 'Expense Reports & Advances',
+  'portail-qhse': 'QHSE Security Watch',
+  'portail-commercial': 'CEMAC Sales Space',
+  'portail-employe': 'Employee & Payroll Portal',
+  'portail-b2b': 'B2B Client Portal',
+  'admin-saas': 'SaaS Administration',
+  'admin-tenant': 'Company Settings',
+};
+
 export function AppBreadcrumb() {
   const pathname = usePathname();
+  const { language } = useSettings();
 
   if (!pathname || pathname === '/' || pathname === '/login') return null;
 
+  const labels = language === 'en' ? ROUTE_LABELS_EN : ROUTE_LABELS;
   const segments = pathname.split('/').filter(Boolean);
 
   let currentPath = '';
 
   return (
-    <nav aria-label="Fil d'Ariane" className="flex items-center gap-1.5 text-xs text-on-surface-variant/80 py-1 overflow-x-auto no-scrollbar">
+    <nav aria-label={language === 'en' ? 'Breadcrumb' : "Fil d'Ariane"} className="flex items-center gap-1.5 text-xs text-on-surface-variant/80 py-1 overflow-x-auto no-scrollbar">
       <Link
         href="/dashboard/global"
         className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors font-medium shrink-0"
       >
         <span className="material-symbols-outlined text-[16px]">home</span>
-        <span className="hidden sm:inline">Accueil</span>
+        <span className="hidden sm:inline">{language === 'en' ? 'Home' : 'Accueil'}</span>
       </Link>
 
       {segments.map((segment, index) => {
         currentPath += `/${segment}`;
         const isLast = index === segments.length - 1;
-        const label = ROUTE_LABELS[segment] || segment.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+        const label = labels[segment]
+          || (language === 'en'
+            ? segment.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
+            : (ROUTE_LABELS[segment] || segment.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())));
 
         return (
           <React.Fragment key={currentPath}>
