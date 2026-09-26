@@ -92,10 +92,10 @@ const EMPTY: DashboardData = {
   nbEntrepots: null
 }
 
-const fmtM = (v: Num, unit = 'M') =>
-  v === null ? '' : `${(v / 1_000_000).toFixed(1)}${unit}`
+const fmtM = (v: Num, unit = 'M', locale = 'fr-FR') =>
+  v === null ? '' : `${(v / 1_000_000).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}${unit}`
 
-const fmtInt = (v: Num) => (v === null ? '' : v.toLocaleString('fr-FR'))
+const fmtInt = (v: Num, locale = 'fr-FR') => (v === null ? '' : v.toLocaleString(locale))
 
 export default function GlobalDashboard() {
   const router = useRouter()
@@ -166,14 +166,17 @@ export default function GlobalDashboard() {
       setZones([])
     }
 
-    // Flux d'activité : fusions réelles factures + encaissements, tri chronologique
+    // Flux d'activité : fusions réelles factures + encaissements, tri chronologique.
+    // Seules les données brutes sont conservées : la phrase est composée au rendu (FR/EN).
     const items: ActivityItem[] = []
     if (facturesRes.status === 'fulfilled' && Array.isArray(facturesRes.value?.data)) {
       for (const f of facturesRes.value.data.slice(0, 20)) {
         items.push({
           id: `F-${f.id}`,
           type: 'FACTURE',
-          text: `Facture ${f.numero || `#${f.id}`}  ${f.client_nom || 'client inconnu'} (${fmtM(Number(f.montant_ttc), ' M FCFA')})`,
+          numero: f.numero || `#${f.id}`,
+          client: f.client_nom || undefined,
+          montant: Number(f.montant_ttc ?? 0),
           date: f.date_emission || f.created_at || ''
         })
       }
@@ -183,7 +186,9 @@ export default function GlobalDashboard() {
         items.push({
           id: `E-${p.id}`,
           type: 'ENCAISSEMENT',
-          text: `Encaissement #${p.id} de ${fmtM(Number(p.montant), ' FCFA')} (${p.mode_paiement || 'mode non précisé'})`,
+          numero: `#${p.id}`,
+          montant: Number(p.montant ?? 0),
+          mode: p.mode_paiement || undefined,
           date: p.date_paiement || ''
         })
       }
@@ -192,7 +197,8 @@ export default function GlobalDashboard() {
     setActivity(items.slice(0, 8))
 
     setLoadError(!ok)
-    if (ok) setLastSync(new Date().toLocaleTimeString('fr-FR'))
+    // Horodatage brut : le formatage local (heure) est appliqué à l'affichage.
+    if (ok) setLastSync(new Date().toISOString())
     return ok
   }, [])
 
