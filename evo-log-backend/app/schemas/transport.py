@@ -99,6 +99,10 @@ class ConducteurResponse(ConducteurBase):
     """Schema for driver response"""
     id: int
     date_embauche: Optional[datetime] = None
+    date_naissance: Optional[datetime] = None
+    categorie_permis: Optional[str] = None
+    numero_cnps: Optional[str] = None
+    expiration_visite_medicale: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     

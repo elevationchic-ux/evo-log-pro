@@ -938,5 +938,25 @@ export const transitAvanceAPI = {
   createBureau: (data: unknown) => apiClient.post('/api/v1/transit-avance/bureaux-douane', data),
 };
 
+// --- Service Documents / GED (archivage legal inclus) -------------------------
+// L'ecran d'archive ne telecharge rien : la GED ne possede pas de route de
+// delivrance de fichier. Seules les routes existantes du routeur
+// /api/v1/documents sont exposees ici.
+export const documentsAPI = {
+  getDocuments: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/documents/', { params }),
+  getArchivagesLegal: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/documents/archivages-legal', { params }),
+  creerArchivageLegal: (data: {
+    document_id: number;
+    type_archivage: string;
+    duree_conservation: number;
+    autorite_archivage: string;
+    classification?: string;
+  }) => apiClient.post('/api/v1/documents/archivages-legal', data),
+  mettreAJourArchivageLegal: (id: number, data: Record<string, unknown>) =>
+    apiClient.put(`/api/v1/documents/archivages-legal/${id}`, data),
+};
+
 export default apiClient;
 
