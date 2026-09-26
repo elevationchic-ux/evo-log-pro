@@ -41,8 +41,15 @@ def db():
 
 @pytest.fixture(scope="function")
 def client(db):
-    """Provide a FastAPI client bound to the test database."""
+    """Provide a FastAPI client bound to the test database with superuser auth."""
     from app.main import app
+    from app.core.security import get_current_user
+
+    # Fake superuser that bypasses all permission checks
+    _fake_user = types.SimpleNamespace(
+        id=1, email="admin@test.local", is_active=True,
+        is_superuser=True, company_id=None, role_level=0,
+    )
 
     def override_get_db():
         try:
@@ -50,7 +57,11 @@ def client(db):
         finally:
             pass
 
+    def override_get_current_user():
+        return _fake_user
+
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = override_get_current_user
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()

@@ -72,19 +72,31 @@ jobs:
     - name: Install dependencies
       working-directory: ./evo-log-frontend
       run: npm ci
-    
+
     - name: Run lint
       working-directory: ./evo-log-frontend
       run: npm run lint
-    
+
     - name: Run type check
       working-directory: ./evo-log-frontend
       run: npm run type-check
-    
+
+    # ------------------------------------------------------------------
+    # Verrou Zero-Mock (batch 11) : casse la CI si une donnee inventee,
+    # un bouton mort, un lien casse ou un fichier dechet revient dans
+    # src/. Les api_gaps (appels frontend vers endpoints backend non
+    # implementes) restent affiches mais ne bloquent pas : le backend
+    # repond 501 explicite, jamais un faux succes.
+    # Ref. RAPPORT_CORRECTIONS_P0_HONNETETE.md #13.
+    # ------------------------------------------------------------------
+    - name: Honesty gate (Zero-Mock)
+      working-directory: ./evo-log-frontend
+      run: python scripts/audit_frontend.py --strict-honesty
+
     - name: Run build
       working-directory: ./evo-log-frontend
       run: npm run build
-    
+
     - name: Run tests
       working-directory: ./evo-log-frontend
       run: npm test || echo "Tests skipped"

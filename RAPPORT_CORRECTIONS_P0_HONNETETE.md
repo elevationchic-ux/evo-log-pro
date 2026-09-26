@@ -69,7 +69,7 @@ pas des correctifs. Ils sont listés ici pour ne pas être oubliés :
 
 ### Qualité de vie (quick wins restants)
 - ~~Remplacer les `any` des pages branchées cette semaine par les types existants de `src/types/`.~~ → **PARTIELLEMENT FAIT (batch 10, voir §12)** : `src/types/transport.ts` était un **contrat mort** dont les champs ne correspondaient à aucun schéma backend — réaligné sur le vrai contrat et adopté par `transport/planning` + `transport/control`. Les ~700 `any` restants dans `src/` exigent la même réécriture module par module.
-- Ajouter un linteau CI (`tsc --noEmit` + `pytest`) sur les rapports de coverage par module.
+- ~~Ajouter un linteau CI (`tsc --noEmit` + `pytest`) sur les rapports de coverage par module.~~ → **VERROU ZERO-MOCK AJOUTE (batch 11, voir §13)** : `audit_frontend.py --strict-honesty` est désormais une étape bloquante de `test-frontend` dans `.github/workflows/ci-cd.yml`. `pytest` (backend) et `tsc --noEmit` (frontend) y étaient déjà ; la regression sur `fake_data` / `dead_buttons` / `broken_links` / `ghost_routes` est ce qui manquait. Le coverage par module (codecov) reste a affiner.
 
 ---
 
@@ -339,6 +339,47 @@ Les 33 `api_gaps` restants sont des endpoints backend non implémentés (`/api/p
 Le vrai gain structurel est que `src/types/transport.ts` est désormais **adoptable** —
 avant ce batch, aucun consumer n'aurait pu l'utiliser sans réécrire tous ses appels,
 ce qui explique pourquoi le fichier est resté mort si longtemps.
+
+---
+
+## 13. Batch 11  Verrou CI "Zero-Mock" (quick win restant)
+
+**Problème** : les 10 premiers batches ont ete vérifies **manuellement** a chaque
+tour (`python scripts/audit_frontend.py`, `npx tsc --noEmit`, `pytest`). Rien n'empeche
+un PR futur de reintroduire un `MOCK_DATA = [...]`, un `href="#"`, un `alert("a faire")`
+ou un fichier `.BAK` dans `src/` : la convention etait explicite dans le rapport
+mais **pas executable par la CI**. Le pipeline `.github/workflows/ci-cd.yml` courait
+deja `pytest` (backend) et `tsc --noEmit` (frontend) mais ignorait completement le
+script d'audit.
+
+| Fichier | Ce qui a été fait |
+|---|---|
+| `evo-log-frontend/scripts/audit_frontend.py` | Ajout du flag `--strict-honesty` : exit 1 **uniquement** si l'une des 4 metriques d'honnetete (`broken_links`, `dead_buttons`, `fake_data`, `ghost_routes`) repasse au-dessus de 0. Les `api_gaps` restent affiches et enregistres dans `audit_report.json` mais ne font plus echouer le script. Justification consignee dans le `help` : un appel frontend vers un endpoint backend non implemente est un **trou de couverture** (reponse 501 explicite du backend), pas une regression Zero-Mock — l'inverse d'un faux succes. |
+| `.github/workflows/ci-cd.yml` | Nouvelle etape **"Honesty gate (Zero-Mock)"** dans le job `test-frontend`, placee **apres** `tsc --noEmit` et **avant** `next build` : `python scripts/audit_frontend.py --strict-honesty`. Le job echoue donc si une PR reintroduit une donnee inventee, avant meme de tenter le build. Un commentaire dans le YAML rattache l'etape au present rapport (§13). |
+
+**Vérification batch 11** (localement) :
+
+```
+$ python scripts/audit_frontend.py --strict-honesty
+=== AUDIT FRONTEND EVO-LOG ===
+  broken_links   : 0
+  dead_buttons   : 0
+  fake_data      : 0
+  api_gaps       : 33
+  ghost_routes   : 0
+...
+STRICT-HONESTY OK : broken_links/dead_buttons/fake_data/ghost_routes = 0 (api_gaps=33 tolere, hors perimetre d'honnetete).
+EXIT=0
+```
+
+Sans `--strict-honesty`, le comportement historique est preserve (`api_gaps > 0` → exit 1)
+pour ne pas casser les usages existants du script.
+
+➡️ Les batches 1-10 qui ont supprime les donnees inventees sont desormais **verrouilles** :
+un developpeur qui remet un `MOCK_DATA = [...]` dans une page verra sa PR bloquee par
+la CI avec le nom exact du fichier et la ligne en cause. Les 33 `api_gaps` tolere
+sont la liste des endpoints backend restant a ecrire (voir `audit_report.json`), pas
+une dette d'honnetete.
 
 ---
 
