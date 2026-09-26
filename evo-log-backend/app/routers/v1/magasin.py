@@ -169,7 +169,7 @@ async def executer_cross_docking(
     current_user: User = Depends(require_perm("magasin.picking.create")),
 ):
     """Consolidation cross-dock sur le payload soumis. Plus de defaults
-    fabriques (« MAN-2026-001 », « LT-452-BA », colis 1200 kg ») : sans
+    fabriques (« MAN-2026-001 », « LT-452-BA », colis 1200 kg) : sans
     manifeste ni camion reels dans la requete, reponse 400."""
     from app.services.magasin_wms_avance_service import CrossDockingService
     manifeste_ref = payload.get("manifeste_ref")

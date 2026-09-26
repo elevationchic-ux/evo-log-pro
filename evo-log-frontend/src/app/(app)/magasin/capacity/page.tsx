@@ -1,216 +1,371 @@
-// src/app/(app)/magasin/capacity/page.tsx - K-Magasin Capacity Map - Fidèle 100% au HTML original
-'use client'
+'use client';
+
+/**
+ * K-Magasin — Taux d'occupation des entrepôts.
+ *
+ * Source unique : GET /api/magasin/entrepots/occupation, qui agrège les
+ * stockages réellement persistés. L'API ne connaît pas la surface occupée :
+ * elle renvoie `occupancy = null` dès qu'aucune capacité n'a été enregistrée
+ * sur l'entrepôt. Dans ce cas on affiche l'article et la valeur stockée
+ * réels, et on le dit — aucun pourcentage n'est inventé.
+ */
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { toast } from 'sonner';
+import {
+  Warehouse, RefreshCw, Download, Search, AlertTriangle,
+  Boxes, ArrowDownWideNarrow, CircleGauge,
+} from 'lucide-react';
+import { magasinAPI } from '@/lib/api-client';
+import { useSettings } from '@/components/layout/SettingsProvider';
+import { DataEmptyState, DataErrorState, DataLoadingState } from '@/components/shared/StatePanels';
+import { classifyApiError, type ApiErrorInfo } from '@/hooks/useApi';
+
+interface ZoneRow {
+  entrepot_id: number;
+  zone: string;
+  nb_articles: number;
+  valeur_stockee: number;
+  occupancy: number | null;
+}
+
+const SEUIL_SATURE = 90;
+const SEUIL_CHARGE = 70;
+
+/** Couleur de la barre selon le taux réellement calculé côté serveur. */
+function occupancyTone(rate: number | null): string {
+  if (rate === null) return 'bg-slate-600';
+  if (rate >= SEUIL_SATURE) return 'bg-red-500';
+  if (rate >= SEUIL_CHARGE) return 'bg-amber-500';
+  return 'bg-emerald-500';
+}
 
 export default function MagasinCapacityPage() {
+  const { language } = useSettings();
+  const lang = language === 'en' ? 'en' : 'fr';
+  const t = useCallback(
+    (fr: string, en: string) => (lang === 'en' ? en : fr),
+    [lang],
+  );
+  const locale = lang === 'en' ? 'en-GB' : 'fr-FR';
+
+  const [zones, setZones] = useState<ZoneRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<ApiErrorInfo | null>(null);
+  const [search, setSearch] = useState('');
+  const [sortDesc, setSortDesc] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await magasinAPI.getEntrepotsOccupation();
+      const rows = res.data?.zones;
+      setZones(Array.isArray(rows) ? rows : []);
+    } catch (err) {
+      setError(classifyApiError(err));
+      setZones([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const money = useMemo(
+    () => new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }),
+    [locale],
+  );
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const rows = q
+      ? zones.filter((z) => z.zone.toLowerCase().includes(q))
+      : [...zones];
+    // Les capacités connues ouvrent le classement, les null ferment toujours.
+    return rows.sort((a, b) => {
+      const av = a.occupancy ?? -1;
+      const bv = b.occupancy ?? -1;
+      return sortDesc ? bv - av : av - bv;
+    });
+  }, [zones, search, sortDesc]);
+
+  const kpis = useMemo(() => {
+    const avecCapacite = zones.filter((z) => z.occupancy !== null);
+    const satures = avecCapacite.filter((z) => (z.occupancy ?? 0) >= SEUIL_SATURE);
+    const totalArticles = zones.reduce((acc, z) => acc + (z.nb_articles || 0), 0);
+    const totalValeur = zones.reduce((acc, z) => acc + (z.valeur_stockee || 0), 0);
+    const tauxMoyen = avecCapacite.length
+      ? avecCapacite.reduce((acc, z) => acc + (z.occupancy ?? 0), 0) / avecCapacite.length
+      : null;
+    return { avecCapacite, satures, totalArticles, totalValeur, tauxMoyen };
+  }, [zones]);
+
+  const exportCsv = useCallback(() => {
+    if (!filtered.length) return;
+    const entetes = [
+      t('Entrepôt', 'Warehouse'),
+      t('Articles', 'Items'),
+      t('Valeur stockée', 'Stock value'),
+      t('Occupation %', 'Occupancy %'),
+    ];
+    const lignes = filtered.map((z) => [
+      z.zone,
+      String(z.nb_articles),
+      String(z.valeur_stockee),
+      z.occupancy === null ? t('capacité non enregistrée', 'capacity not registered') : String(z.occupancy),
+    ]);
+    const csv = [entetes, ...lignes]
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';'))
+      .join('\n');
+    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `occupation-entrepots-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(t('Export généré depuis les données affichées.', 'Export built from the displayed data.'));
+  }, [filtered, t, lang]);
+
   return (
-    <>
-      <style jsx global>{`
-        body { font-family: 'Inter', sans-serif; background-color: #f0f3ff; }
-        .material-symbols-outlined { font-variation-settings: 'FILL 0, wght 400, GRAD 0, opsz 24'; }
-        .material-symbols-outlined.filled { font-variation-settings: 'FILL 1'; }
-        /* Custom scrollbar for high-density areas */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #c2c6d6; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #727785; }
-      `}</style>
-      <div className="text-on-background flex flex-col">
-        
-        
-
-        
-        <div className="flex-1 flex flex-col min-h-screen">
-          
-          
-
-          {/* Canvas */}
-          <main className="flex-1 overflow-auto p-gutter bg-surface-container-low">
-            {/* Breadcrumbs & Header */}
-            <div className="mb-lg">
-              <div className="flex items-center text-label-sm font-label-sm text-outline mb-xxs">
-                <span>K-Magasin</span>
-                <span className="material-symbols-outlined text-[14px] mx-1">chevron_right</span>
-                <span>T-Code: KM32</span>
-              </div>
-              <div className="flex justify-between items-end">
-                <div>
-                  <h2 className="font-headline-lg text-headline-lg text-on-surface flex items-center gap-sm">
-                    <span className="material-symbols-outlined text-[28px] text-km-red">warehouse</span>
-                    Taux d'Occupation
-                  </h2>
-                  <p className="font-body-md text-body-md text-on-surface-variant mt-1">Vue d'ensemble des silos et sections de stockage.</p>
-                </div>
-                <div className="flex gap-sm">
-                  <button className="bg-surface-container-lowest border border-outline-variant hover:bg-surface-container-high text-on-surface font-title-sm text-title-sm py-xs px-md rounded flex items-center gap-xs transition-colors shadow-sm">
-                    <span className="material-symbols-outlined text-[18px]">filter_list</span>
-                    Filtrer
-                  </button>
-                  <button className="bg-km-red hover:bg-[#DC2626] text-white font-title-sm text-title-sm py-xs px-md rounded flex items-center gap-xs transition-colors shadow-sm">
-                    <span className="material-symbols-outlined text-[18px]">download</span>
-                    Rapport
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Dashboard Grid */}
-            <div className="grid grid-cols-12 gap-gutter max-w-[1600px] mx-auto">
-              {/* KPI Row */}
-              <div className="col-span-12 grid grid-cols-4 gap-gutter mb-xs">
-                <div className="bg-surface-container-lowest rounded border border-outline-variant p-md shadow-sm">
-                  <div className="text-label-md font-label-md text-on-surface-variant mb-1">Capacité Totale (T)</div>
-                  <div className="font-headline-md text-headline-md text-on-surface">125,000</div>
-                </div>
-                <div className="bg-surface-container-lowest rounded border border-outline-variant p-md shadow-sm">
-                  <div className="text-label-md font-label-md text-on-surface-variant mb-1">Volume Actuel (T)</div>
-                  <div className="font-headline-md text-headline-md text-on-surface">89,450</div>
-                </div>
-                <div className="bg-surface-container-lowest rounded border border-outline-variant p-md shadow-sm border-l-4" style={{ borderLeftColor: '#EF4444' }}>
-                  <div className="text-label-md font-label-md text-on-surface-variant mb-1">Taux Global</div>
-                  <div className="font-headline-md text-headline-md text-km-red flex items-baseline gap-xs">
-                    71.5%
-                    <span className="material-symbols-outlined text-[16px] text-km-red">trending_up</span>
-                  </div>
-                </div>
-                <div className="bg-surface-container-lowest rounded border border-outline-variant p-md shadow-sm">
-                  <div className="text-label-md font-label-md text-on-surface-variant mb-1">Alertes Saturation</div>
-                  <div className="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
-                    2
-                    <span className="px-2 py-0.5 bg-km-red-light text-km-red text-[11px] rounded uppercase font-bold">Critique</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Silo Visualizations (Bento Grid Style) */}
-              <div className="col-span-8 space-y-gutter">
-                {/* Silo Group A */}
-                <div className="bg-surface-container-lowest rounded border border-outline-variant p-md shadow-sm">
-                  <div className="flex justify-between items-center mb-md border-b border-outline-variant pb-xs">
-                    <h3 className="font-title-lg text-title-lg text-on-surface">Secteur Nord (Vrac)</h3>
-                    <span className="text-label-md font-label-md text-on-surface-variant">4 Silos</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-md h-[240px]">
-                    {/* Silo 1 */}
-                    <div className="flex flex-col h-full group relative cursor-pointer">
-                      <div className="text-center font-label-sm text-label-sm text-on-surface-variant mb-xs">N-01</div>
-                      <div className="flex-1 bg-surface-container border border-outline-variant rounded-t-lg relative overflow-hidden flex flex-col justify-end">
-                        <div className="absolute inset-x-0 bottom-0 bg-km-red transition-all duration-500 ease-in-out opacity-90 group-hover:opacity-100" style={{ height: '85%' }}>
-                          {/* Animated subtle gradient overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                        </div>
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <span className="font-data-tabular text-data-tabular text-white font-bold bg-black/30 px-2 py-1 rounded backdrop-blur-sm z-10">85%</span>
-                        </div>
-                      </div>
-                      <div className="bg-surface border-x border-b border-outline-variant p-xs text-center">
-                        <div className="text-[11px] text-on-surface-variant truncate">Blé Dur</div>
-                      </div>
-                      {/* Tooltip (Hover) */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-inverse-surface text-inverse-on-surface p-sm rounded shadow-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none text-body-sm font-body-sm hidden md:block">
-                        <div className="font-bold border-b border-outline/30 pb-1 mb-1">Silo N-01</div>
-                        <div className="flex justify-between"><span>Capacité:</span> <span>10,000 T</span></div>
-                        <div className="flex justify-between"><span>Occupé:</span> <span>8,500 T</span></div>
-                        <div className="flex justify-between text-km-red"><span>Statut:</span> <span>Saturé</span></div>
-                      </div>
-                    </div>
-                    {/* Silo 2 */}
-                    <div className="flex flex-col h-full group relative cursor-pointer">
-                      <div className="text-center font-label-sm text-label-sm text-on-surface-variant mb-xs">N-02</div>
-                      <div className="flex-1 bg-surface-container border border-outline-variant rounded-t-lg relative overflow-hidden flex flex-col justify-end">
-                        <div className="absolute inset-x-0 bottom-0 bg-km-red transition-all duration-500 ease-in-out opacity-60 group-hover:opacity-80" style={{ height: '42%' }}>
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                        </div>
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <span className="font-data-tabular text-data-tabular text-on-surface font-bold">42%</span>
-                        </div>
-                      </div>
-                      <div className="bg-surface border-x border-b border-outline-variant p-xs text-center">
-                        <div className="text-[11px] text-on-surface-variant truncate">Maïs</div>
-                      </div>
-                    </div>
-                    {/* Silo 3 */}
-                    <div className="flex flex-col h-full group relative cursor-pointer">
-                      <div className="text-center font-label-sm text-label-sm text-on-surface-variant mb-xs">N-03</div>
-                      <div className="flex-1 bg-surface-container border border-outline-variant rounded-t-lg relative overflow-hidden flex flex-col justify-end">
-                        <div className="absolute inset-x-0 bottom-0 bg-km-red transition-all duration-500 ease-in-out opacity-90 group-hover:opacity-100" style={{ height: '92%' }}>
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                        </div>
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <span className="font-data-tabular text-data-tabular text-white font-bold bg-black/30 px-2 py-1 rounded backdrop-blur-sm z-10">92%</span>
-                        </div>
-                      </div>
-                      <div className="bg-surface border-x border-b border-outline-variant p-xs text-center">
-                        <div className="text-[11px] text-km-red font-bold flex items-center justify-center gap-1">
-                          <span className="material-symbols-outlined text-[12px]">warning</span>
-                          Orge
-                        </div>
-                      </div>
-                    </div>
-                    {/* Silo 4 */}
-                    <div className="flex flex-col h-full group relative cursor-pointer">
-                      <div className="text-center font-label-sm text-label-sm text-on-surface-variant mb-xs">N-04</div>
-                      <div className="flex-1 bg-surface-container border border-outline-variant rounded-t-lg relative overflow-hidden flex flex-col justify-end">
-                        <div className="absolute inset-x-0 bottom-0 bg-outline-variant transition-all duration-500 ease-in-out opacity-50" style={{ height: '5%' }}>
-                        </div>
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <span className="font-data-tabular text-data-tabular text-on-surface-variant">Vide</span>
-                        </div>
-                      </div>
-                      <div className="bg-surface border-x border-b border-outline-variant p-xs text-center">
-                        <div className="text-[11px] text-on-surface-variant truncate">-</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Rail: Details & List */}
-              <div className="col-span-4 space-y-gutter">
-                {/* Table summary */}
-                <div className="bg-surface-container-lowest rounded border border-outline-variant shadow-sm flex flex-col h-[340px]">
-                  <div className="p-md border-b border-outline-variant flex justify-between items-center">
-                    <h3 className="font-title-md text-title-md text-on-surface">Top Occupations</h3>
-                    <button className="text-km-red text-label-sm font-label-sm hover:underline">Voir Tout</button>
-                  </div>
-                  <div className="flex-1 overflow-auto">
-                    <table className="w-full text-left font-data-tabular text-data-tabular">
-                      <thead className="sticky top-0 bg-surface-container-low text-on-surface-variant">
-                        <tr>
-                          <th className="py-2 px-3 font-medium">Empl.</th>
-                          <th className="py-2 px-3 font-medium">Produit</th>
-                          <th className="py-2 px-3 font-medium text-right">%</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="border-b border-outline-variant/50 hover:bg-surface-container-low cursor-pointer">
-                          <td className="py-2 px-3">N-03</td>
-                          <td className="py-2 px-3">Orge</td>
-                          <td className="py-2 px-3 text-right font-bold text-km-red">92%</td>
-                        </tr>
-                        <tr className="border-b border-outline-variant/50 hover:bg-surface-container-low cursor-pointer">
-                          <td className="py-2 px-3">N-01</td>
-                          <td className="py-2 px-3">Blé Dur</td>
-                          <td className="py-2 px-3 text-right text-on-surface">85%</td>
-                        </tr>
-                        <tr className="border-b border-outline-variant/50 hover:bg-surface-container-low cursor-pointer">
-                          <td className="py-2 px-3">S-04</td>
-                          <td className="py-2 px-3">Soja</td>
-                          <td className="py-2 px-3 text-right text-on-surface">78%</td>
-                        </tr>
-                        <tr className="border-b border-outline-variant/50 hover:bg-surface-container-low cursor-pointer bg-km-red-light/30">
-                          <td className="py-2 px-3">E-12</td>
-                          <td className="py-2 px-3 text-km-red">Ciment</td>
-                          <td className="py-2 px-3 text-right text-km-red font-bold">98%</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </main>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      {/* En-tête */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline pb-5">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2.5 bg-amber-500/10 rounded-xl text-amber-400 shrink-0">
+            <Warehouse className="w-6 h-6" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-on-surface">
+              {t("Taux d'occupation", 'Occupancy rate')}
+            </h1>
+            <p className="text-sm text-on-surface-variant">
+              {t(
+                'Surface et volume calculés depuis les stocks réellement enregistrés.',
+                'Footprint and volume computed from actually recorded stock.',
+              )}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={load}
+            disabled={loading}
+            aria-label={t('Recharger', 'Reload')}
+            className="p-2.5 min-h-11 border border-outline rounded-xl text-on-surface-variant hover:bg-surface-container disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            type="button"
+            onClick={exportCsv}
+            disabled={!filtered.length}
+            className="flex items-center gap-1.5 px-4 py-2 min-h-11 text-xs font-semibold rounded-xl border border-outline text-on-surface hover:bg-surface-container disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" /> {t('Exporter', 'Export')}
+          </button>
         </div>
       </div>
-    </>
-  )
+
+      {/* KPI agrégés depuis les lignes réelles */}
+      {!loading && !error && zones.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="p-4 bg-surface border border-outline rounded-2xl">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
+              {t('Entrepôts suivis', 'Warehouses tracked')}
+            </div>
+            <div className="mt-1 text-2xl font-bold text-on-surface tabular-nums">{zones.length}</div>
+          </div>
+          <div className="p-4 bg-surface border border-outline rounded-2xl">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
+              {t('Articles en stock', 'Items in stock')}
+            </div>
+            <div className="mt-1 text-2xl font-bold text-on-surface tabular-nums">
+              {money.format(kpis.totalArticles)}
+            </div>
+          </div>
+          <div className="p-4 bg-surface border border-outline rounded-2xl">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
+              {t('Valeur stockée (XAF)', 'Stock value (XAF)')}
+            </div>
+            <div className="mt-1 text-2xl font-bold text-on-surface tabular-nums">
+              {money.format(kpis.totalValeur)}
+            </div>
+          </div>
+          <div className={`p-4 border rounded-2xl ${kpis.satures.length ? 'bg-red-500/10 border-red-500/30' : 'bg-surface border-outline'}`}>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
+              {t('Capacités connues', 'Capacities known')}
+            </div>
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-on-surface tabular-nums">
+                {kpis.tauxMoyen === null ? '—' : `${kpis.tauxMoyen.toFixed(1)} %`}
+              </span>
+              {kpis.satures.length > 0 && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-400">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  {t(`${kpis.satures.length} saturé(s)`, `${kpis.satures.length} saturated`)}
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-[11px] text-on-surface-variant">
+              {t(
+                `${kpis.avecCapacite.length} entrepôt(s) avec capacité enregistrée sur ${zones.length}.`,
+                `${kpis.avecCapacite.length} of ${zones.length} warehouses have a registered capacity.`,
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Barre de filtres */}
+      {!loading && !error && zones.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('Rechercher un entrepôt…', 'Search a warehouse…')}
+              aria-label={t('Rechercher un entrepôt', 'Search a warehouse')}
+              className="w-full pl-9 pr-4 py-2.5 min-h-11 text-sm bg-surface-container-low border border-outline rounded-xl text-on-surface focus:outline-none focus:border-amber-500"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setSortDesc((v) => !v)}
+            className="flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-11 text-xs font-semibold rounded-xl border border-outline text-on-surface hover:bg-surface-container"
+          >
+            <ArrowDownWideNarrow className="w-4 h-4" />
+            {sortDesc ? t('Taux décroissant', 'Rate descending') : t('Taux croissant', 'Rate ascending')}
+          </button>
+        </div>
+      )}
+
+      {/* Corps */}
+      <div className="bg-surface border border-outline rounded-2xl overflow-hidden">
+        {loading ? (
+          <div className="p-6">
+            <DataLoadingState rows={5} />
+          </div>
+        ) : error ? (
+          <div className="p-6">
+            <DataErrorState error={error} onRetry={load} />
+          </div>
+        ) : zones.length === 0 ? (
+          <DataEmptyState
+            title={t('Aucun entrepôt enregistré', 'No warehouse registered')}
+            description={t(
+              "L'occupation se calcule à partir des entrepôts et des stocks créés dans la base. Aucun n'est encore enregistré.",
+              'Occupancy is derived from warehouses and stock created in the database. None is registered yet.',
+            )}
+            actionLabel={t('Créer un entrepôt', 'Create a warehouse')}
+            actionHref="/magasin/magasins"
+          />
+        ) : filtered.length === 0 ? (
+          <DataEmptyState
+            title={t('Aucun entrepôt ne correspond', 'No matching warehouse')}
+            description={t(`Recherche : « ${search} ».`, `Search: "${search}".`)}
+            actionLabel={t('Effacer la recherche', 'Clear search')}
+            onAction={() => setSearch('')}
+          />
+        ) : (
+          <ul className="divide-y divide-outline/40">
+            {filtered.map((z) => {
+              const rate = z.occupancy;
+              return (
+                <li key={z.entrepot_id} className="p-4 sm:p-5 hover:bg-surface-container/40 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 sm:w-64 shrink-0">
+                      <Boxes className="w-4 h-4 text-amber-400 shrink-0" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-on-surface truncate" title={z.zone}>
+                          {z.zone}
+                        </div>
+                        <div className="text-[11px] text-on-surface-variant tabular-nums">
+                          {t(
+                            `${money.format(z.nb_articles)} article(s)`,
+                            `${money.format(z.nb_articles)} item(s)`,
+                          )}
+                          {' · '}
+                          {money.format(z.valeur_stockee)} XAF
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      {rate === null ? (
+                        <div className="flex items-center gap-2 text-xs text-on-surface-variant">
+                          <CircleGauge className="w-4 h-4 text-slate-500" />
+                          <span>
+                            {t(
+                              "Capacité d'entreposage non enregistrée — pourcentage non calculable.",
+                              'Storage capacity not registered — percentage cannot be computed.',
+                            )}
+                          </span>
+                          <Link
+                            href="/magasin/magasins"
+                            className="font-semibold text-amber-400 hover:underline shrink-0"
+                          >
+                            {t('Renseigner', 'Set it up')}
+                          </Link>
+                        </div>
+                      ) : (
+                        <>
+                          <div
+                            className="h-2.5 w-full rounded-full bg-slate-800 overflow-hidden"
+                            role="progressbar"
+                            aria-valuenow={Math.round(rate)}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-label={`${z.zone} — ${t('occupation', 'occupancy')}`}
+                          >
+                            <div
+                              className={`h-full rounded-full ${occupancyTone(rate)} transition-all`}
+                              style={{ width: `${Math.min(100, Math.max(2, rate))}%` }}
+                            />
+                          </div>
+                          <div className="mt-1 flex items-center justify-between text-[11px]">
+                            <span className="font-semibold text-on-surface tabular-nums">
+                              {rate.toFixed(1)} %
+                            </span>
+                            <span
+                              className={`font-semibold ${
+                                rate >= SEUIL_SATURE
+                                  ? 'text-red-400'
+                                  : rate >= SEUIL_CHARGE
+                                    ? 'text-amber-400'
+                                    : 'text-emerald-400'
+                              }`}
+                            >
+                              {rate >= SEUIL_SATURE
+                                ? t('Saturé', 'Saturated')
+                                : rate >= SEUIL_CHARGE
+                                  ? t('Charge élevée', 'High load')
+                                  : t('Nominal', 'Nominal')}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      <p className="text-[11px] text-on-surface-variant">
+        {t(
+          'Les seuils de couleur (70 % / 90 %) sont des repères d’exploitation, pas des données de la base.',
+          'Colour thresholds (70% / 90%) are operational cues, not database values.',
+        )}
+      </p>
+    </div>
+  );
 }

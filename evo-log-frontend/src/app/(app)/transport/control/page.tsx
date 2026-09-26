@@ -22,12 +22,12 @@ export default function TransportControlPage() {
   }, []);
 
   // Fetch live missions
-  const { data: missionsData, isLoading: loadingMissions } = useQuery({
+  const { data: missionsData, isLoading: loadingMissions } = useQuery<MissionResponse[]>({
     queryKey: ['transport-missions'],
     queryFn: async () => {
       try {
         const res = await transportAPI.getMissions();
-        return res.data?.items || res.data || (Array.isArray(res) ? res : []);
+        return (res.data?.items || res.data || (Array.isArray(res) ? res : [])) as MissionResponse[];
       } catch (e) {
         return [];
       }
@@ -36,12 +36,12 @@ export default function TransportControlPage() {
   });
 
   // Fetch live CEMAC corridors
-  const { data: corridorsData } = useQuery({
+  const { data: corridorsData } = useQuery<CorridorsCEMACResponse | null>({
     queryKey: ['transport-corridors'],
     queryFn: async () => {
       try {
         const res = await transportAPI.getCorridorsCEMAC();
-        return res.data || res;
+        return (res.data || res) as CorridorsCEMACResponse;
       } catch (e) {
         return null;
       }
@@ -50,12 +50,12 @@ export default function TransportControlPage() {
   });
 
   // Fetch live Fleet TCO
-  const { data: tcoData } = useQuery({
+  const { data: tcoData } = useQuery<TcoFleetResponse | null>({
     queryKey: ['transport-tco'],
     queryFn: async () => {
       try {
         const res = await transportAPI.getFleetTCO();
-        return res.data || res;
+        return (res.data || res) as TcoFleetResponse;
       } catch (e) {
         return null;
       }
@@ -68,12 +68,12 @@ export default function TransportControlPage() {
   // colonnes Vehicule et Chauffeur ne pouvaient rien afficher : l'ancien code
   // lisait m.immatriculation / m.conducteur / m.client, champs qui n'existent
   // dans aucun schema.
-  const { data: camionsData } = useQuery({
+  const { data: camionsData } = useQuery<CamionResponse[]>({
     queryKey: ['transport-camions'],
     queryFn: async () => {
       try {
         const res = await transportAPI.getCamions();
-        return res.data?.items || res.data || [];
+        return (res.data?.items || res.data || []) as CamionResponse[];
       } catch (e) {
         return [];
       }
@@ -81,12 +81,12 @@ export default function TransportControlPage() {
     enabled: mounted,
   });
 
-  const { data: chauffeursData } = useQuery({
+  const { data: chauffeursData } = useQuery<ConducteurResponse[]>({
     queryKey: ['transport-chauffeurs'],
     queryFn: async () => {
       try {
         const res = await transportAPI.getChauffeurs();
-        return res.data?.items || res.data || [];
+        return (res.data?.items || res.data || []) as ConducteurResponse[];
       } catch (e) {
         return [];
       }
@@ -95,12 +95,12 @@ export default function TransportControlPage() {
   });
 
   // VRP Optimization mutation
-  const vrpMutation = useMutation({
+  const vrpMutation = useMutation<{ kms_a_vide_economises?: number } | null>({
     mutationFn: async () => {
       const res = await transportAPI.optimizeVRP({});
       return res.data || res;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data) => {
       toast.success(`Optimisation VRP réussie : ${data?.kms_a_vide_economises ?? 0} km économisés.`);
       queryClient.invalidateQueries({ queryKey: ['transport-missions'] });
     },
@@ -109,17 +109,36 @@ export default function TransportControlPage() {
     }
   });
 
-  const immatriculations = new Map((camionsData || []).map((c: any) => [c.id, c.immatriculation]));
-  const nomsChauffeurs = new Map((chauffeursData || []).map((d: any) => [d.id, `${d.nom || ''} ${d.prenom || ''}`.trim()]));
+  const immatriculations = new Map<number, string>(
+    (camionsData || []).map((c) => [c.id, c.immatriculation]),
+  );
+  const nomsChauffeurs = new Map<number, string>(
+    (chauffeursData || []).map((d) => [d.id, `${d.nom || ''} ${d.prenom || ''}`.trim()]),
+  );
 
-  const defaultMissions: Array<any> = [];
+  // Ligne enrichie affichée dans le DataTable : on garde volontairement le
+  // vocabulaire visuel (origin/destination/status/eta) distinct du contrat
+  // API (point_depart/point_arrivee/statut/date_fin_prevue) pour éviter
+  // toute confusion entre source et vue.
+  interface MissionRow {
+    id: string;
+    vehicle: string;
+    driver: string;
+    client: string;
+    origin: string;
+    destination: string;
+    status: string;
+    eta: string;
+    distance_km: number | null;
+  }
+  const defaultMissions: MissionRow[] = [];
 
-  const missions = Array.isArray(missionsData) && missionsData.length > 0
-    ? missionsData.map((m: any) => ({
+  const missions: MissionRow[] = Array.isArray(missionsData) && missionsData.length > 0
+    ? missionsData.map((m) => ({
         id: m.reference || `TR-${m.id || '2026'}`,
         // Jointures reelles par cles etrangeres ; pas de champ invente.
-        vehicle: immatriculations.get(m.camion_id) || '',
-        driver: nomsChauffeurs.get(m.conducteur_id) || '',
+        vehicle: (m.camion_id != null && immatriculations.get(m.camion_id)) || '',
+        driver: (m.conducteur_id != null && nomsChauffeurs.get(m.conducteur_id)) || '',
         client: m.client_id ? `Client #${m.client_id}` : '',
         // MissionResponse expose point_depart / point_arrivee (pas origine / destination).
         origin: m.point_depart || '',
@@ -128,7 +147,7 @@ export default function TransportControlPage() {
         // Pas de champ `eta` dans le contrat : l'heure de fin prevue est le seul
         // repere reel disponible.
         eta: m.date_fin_prevue ? new Date(m.date_fin_prevue).toLocaleDateString('fr-FR') : '',
-        distance_km: m.distance_km ?? null
+        distance_km: m.distance_km ?? null,
       }))
     : defaultMissions;
 
