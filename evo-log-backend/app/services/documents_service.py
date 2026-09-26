@@ -279,20 +279,36 @@ class ArchivageLegalService:
         document_id: int,
         type_archivage: str,
         duree_conservation: int,
-        autorite_archivage: str
+        autorite_archivage: str,
+        classification: str = "prive"
     ) -> ArchivageLegal:
         """Archive document legally"""
         date_expiration = date.today() + timedelta(days=duree_conservation * 30)
-        
+
+        # `numero_archivage` est unique : un document restaure puis archive a
+        # nouveau le meme jour entrait en collision avec le numero precedent et
+        # la requete echouait sur la contrainte d'unicite (500). On incremente
+        # un suffixe jusqu'a un numero libre.
+        base = f"ARCH-{datetime.utcnow().strftime('%Y%m%d')}-{document_id}"
+        numero = base
+        rang = 1
+        while db.query(ArchivageLegal.id).filter(
+            ArchivageLegal.numero_archivage == numero
+        ).first():
+            rang += 1
+            numero = f"{base}-{rang}"
+
         archivage = ArchivageLegal(
             document_id=document_id,
             type_archivage=type_archivage,
             duree_conservation=duree_conservation,
             date_archivage=datetime.utcnow(),
             date_expiration=date_expiration,
-            numero_archivage=f"ARCH-{datetime.utcnow().strftime('%Y%m%d')}-{document_id}",
+            numero_archivage=numero,
             autorite_archivage=autorite_archivage,
-            classification="prive",
+            # La classification saisie a l'ecran etait ignoree : toute archive
+            # passait en « prive », y compris un document confidentiel.
+            classification=classification,
             conformite=True,
             statut="archive"
         )

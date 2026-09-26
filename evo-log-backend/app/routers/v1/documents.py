@@ -356,7 +356,8 @@ def archiver_document(
         )
     return ArchivageLegalService.archiver_document(
         db, archivage.document_id, archivage.type_archivage,
-        archivage.duree_conservation, archivage.autorite_archivage
+        archivage.duree_conservation, archivage.autorite_archivage,
+        archivage.classification
     )
 
 
