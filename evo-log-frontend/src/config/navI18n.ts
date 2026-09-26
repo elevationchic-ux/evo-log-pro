@@ -47,6 +47,7 @@ export function localizeTitle(item: Localizable, lang: 'fr' | 'en'): string {
 // le français : aucune page ne peut se retrouver vide/morte.
 export const SUBMODULE_LABELS_EN: Record<string, string> = {
   'Abonnements & Licences Globales': 'Subscriptions & Global Licenses',
+  'Accréditations & Habilitations': 'Accreditations & Clearances',
   'Agences & Sites Opérationnels': 'Agencies & Operational Sites',
   'Alertes & Incidents Live': 'Live Alerts & Incidents',
   'Analytics Opérationnels WMS & Transport': 'WMS & Transport Operational Analytics',
@@ -81,6 +82,7 @@ export const SUBMODULE_LABELS_EN: Record<string, string> = {
   'Déclarations Sociales (CNPS & DIPE)': 'Social Declarations (CNPS & DIPE)',
   'Emplacements & Slots WMS': 'WMS Locations & Slots',
   'Espace Client B2B Central': 'Central B2B Client Space',
+  'Espaces Communs par Entreprise': 'Shared Workspaces by Company',
   'Executive Dashboard Direction': 'Executive Management Dashboard',
   'Facturation & Émission Client': 'Client Billing & Issuance',
   'Factures, Règlements & Avoirs': 'Invoices, Payments & Credit Notes',
@@ -124,6 +126,8 @@ export const SUBMODULE_LABELS_EN: Record<string, string> = {
   'Recouvrement & Créances Clients': 'Collections & Client Receivables',
   'Registre Incidents & Signalements': 'Incident & Reporting Register',
   'Réception & Entrées Magasin': 'Receiving & Warehouse Entries',
+  'Réception & Entrées MAG3': 'Receiving & Warehouse Entries (MAG3)',
+  'Rôles & Permissions Granulaires': 'Roles & Granular Permissions',
   'Service Client, Litiges & Tickets': 'Customer Service, Disputes & Tickets',
   'Signalement Flash Danger': 'Flash Hazard Report',
   'Simulateur Cotation CEMAC': 'CEMAC Quotation Simulator',
@@ -133,6 +137,7 @@ export const SUBMODULE_LABELS_EN: Record<string, string> = {
   'Tableau de Bord Entreprise': 'Company Dashboard',
   'Tableau de Bord Parc & Atelier': 'Fleet & Workshop Dashboard',
   'Tableau de Bord Trésorerie': 'Treasury Dashboard',
+  'Trésorerie, Banques & Caisses': 'Treasury, Banks & Cash',
   'Taxation & Droits Cameroun': 'Cameroon Taxation & Duties',
   'Tous les Portails Métier': 'All Business Portals',
   'Tracking GPS & e-POD Signatures': 'GPS Tracking & e-POD Signatures',

@@ -295,6 +295,19 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-Idempotency-Key", "X-Request-ID", "trace-id", "baggage", "sentry-trace"],
 )
 
+# Assets televerses par la console CADC (logos d'entreprise) : servis
+# statiquement sous /static/uploads. MinIO reste reserve aux documents
+# metier. Le repertoire est cree au demarrage pour eviter toute erreur de
+# mount sur un chemin absent.
+try:
+    from pathlib import Path as _Path
+    from fastapi.staticfiles import StaticFiles as _StaticFiles
+    _upload_root = _Path(settings.UPLOAD_DIR)
+    (_upload_root / "logos").mkdir(parents=True, exist_ok=True)
+    app.mount("/static/uploads", _StaticFiles(directory=str(_upload_root)), name="cadc_uploads")
+except Exception as e:  # noqa: BLE001 - un echec de mount ne doit pas couper l'API
+    logger.warning(f"Mount /static/uploads ignore : {e}")
+
 
 @app.middleware("http")
 async def api_v1_rewrite_middleware(request: Request, call_next):
