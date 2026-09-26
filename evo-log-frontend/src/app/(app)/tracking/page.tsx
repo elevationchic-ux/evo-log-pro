@@ -27,7 +27,7 @@ export default function TrackingPage() {
 
   const items = Array.isArray(data) ? data : [];
   const filteredItems = items.filter((i: any) =>
-    (String(i.nom_destinataire || '') + ' ' + String(i.reference_mission || ''))
+    (String(i.destinataire || '') + ' ' + String(i.ordre_transport_id || ''))
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
@@ -67,7 +67,7 @@ export default function TrackingPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher par mission..."
+              placeholder="Rechercher par destinataire ou N° OT..."
               className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500"
             />
           </div>
@@ -77,7 +77,7 @@ export default function TrackingPage() {
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="bg-slate-950 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
               <tr>
-                <th className="px-6 py-4">N° Mission / Destinataire</th>
+                <th className="px-6 py-4">N° OT / Destinataire</th>
                 <th className="px-6 py-4">Coordonnées GPS</th>
                 <th className="px-6 py-4 text-right">Statut Signature</th>
               </tr>

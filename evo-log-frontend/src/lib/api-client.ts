@@ -744,8 +744,8 @@ export const cotationsAPI = {
 
 // ─── Service Tracking & e-POD ──────────────────────────────────────────
 export const trackingAPI = {
-  getEpods: () => apiClient.get('/api/v1/k-modules/tracking/epod'),
-  createEpod: (data: unknown) => apiClient.post('/api/v1/k-modules/tracking/epod', data),
+  getEpods: () => apiClient.get('/api/v1/transport-international/preuves-livraison'),
+  createEpod: (data: unknown) => apiClient.post('/api/v1/transport-international/preuves-livraison', data),
 };
 
 // ─── Service FuelGuard Anti-Fraude ──────────────────────────────────────────

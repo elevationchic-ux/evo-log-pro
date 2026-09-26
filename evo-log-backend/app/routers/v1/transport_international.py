@@ -362,6 +362,29 @@ def mettre_a_jour_planning(
 
 
 # ============ PREUVE LIVRAISON ============
+@router.get("/preuves-livraison", response_model=dict)
+def list_preuves_livraison(
+    skip: int = 0,
+    limit: int = 100,
+    destinataire: Optional[str] = None,
+    statut: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Lister les preuves de livraison (e-POD)."""
+    q = db.query(PreuveLivraison)
+    if destinataire:
+        q = q.filter(PreuveLivraison.destinataire.ilike(f"%{destinataire}%"))
+    if statut:
+        q = q.filter(PreuveLivraison.statut == statut)
+    total = q.count()
+    rows = q.order_by(PreuveLivraison.date_livraison.desc()).offset(skip).limit(limit).all()
+    return {
+        "items": [PreuveLivraisonResponse.model_validate(r).model_dump() for r in rows],
+        "total": total,
+    }
+
+
 @router.post("/preuves-livraison", response_model=PreuveLivraisonResponse, status_code=status.HTTP_201_CREATED)
 def enregistrer_premiere_livraison(
     pod: PreuveLivraisonCreate,
