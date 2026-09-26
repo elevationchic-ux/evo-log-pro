@@ -308,6 +308,12 @@ export const financeAPI = {
     apiClient.get('/api/finance/factures', { params }),
   createFacture: (data: unknown) =>
     apiClient.post('/api/finance/factures', data),
+  // `source` (exploitation | ohada) : deux tables de factures coexistent et le
+  // backend ne peut pas deviner laquelle porte l'id a corriger.
+  updateFacture: (id: number, data: unknown, source?: string) =>
+    apiClient.put(`/api/finance/factures/${id}`, data, { params: source ? { source } : undefined }),
+  getFacturePdf: (id: number) =>
+    apiClient.get(`/api/finance/factures/${id}/pdf`, { responseType: 'blob' }),
   getEncaissements: (params?: Record<string, unknown>) =>
     apiClient.get('/api/finance/encaissements', { params }),
   getEncours: (tiersId: number) =>
