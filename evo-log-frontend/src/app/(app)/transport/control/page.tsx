@@ -307,7 +307,7 @@ export default function TransportControlPage() {
                 {(tcoData?.alertes_maintenance_predictive || []).length === 0 ? (
                   <p className="text-xs text-slate-500 py-2">Aucune alerte remontee par l'API TCO.</p>
                 ) : (
-                  tcoData.alertes_maintenance_predictive.map((alt: any, idx: number) => (
+                  tcoData.alertes_maintenance_predictive.map((alt, idx) => (
                   <div key={idx} className="p-3 rounded-xl border border-red-500/20 bg-red-500/5 flex justify-between items-center">
                     <div>
                       <div className="text-xs font-bold text-red-400 font-mono">{alt.immatriculation}</div>
