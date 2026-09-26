@@ -72,8 +72,12 @@ interface ZoneOccupation {
 interface ActivityItem {
   id: string
   type: string
-  text: string
   date: string
+  // Champs bruts : le libellé est composé au rendu selon la langue active.
+  numero?: string
+  client?: string
+  montant?: number
+  mode?: string
 }
 
 const EMPTY: DashboardData = {
@@ -95,6 +99,9 @@ const fmtInt = (v: Num) => (v === null ? '' : v.toLocaleString('fr-FR'))
 
 export default function GlobalDashboard() {
   const router = useRouter()
+  const t = useI18n()
+  const { language } = useSettings()
+  const locale = language === 'en' ? 'en-GB' : 'fr-FR'
   const [tcodeFocused, setTcodeFocused] = useState(false)
   const [tcode, setTcode] = useState('')
   const [loading, setLoading] = useState(true)
