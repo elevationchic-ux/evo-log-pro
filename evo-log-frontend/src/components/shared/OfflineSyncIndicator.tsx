@@ -189,9 +189,9 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
               color: '#fff',
               borderRadius: '10px',
               padding: '0 6px',
-              fontSize: '10px',
+              fontSize: '11px',
               fontWeight: 700,
-              lineHeight: '16px',
+              lineHeight: '18px',
             }}
           >
             {pendingCount}
@@ -285,17 +285,17 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
                       <div style={{ fontSize: '13px', color: '#e2e8f0', fontWeight: 500 }}>
                         {getTypeLabel(op.type)}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                        {new Date(op.created_at).toLocaleString('fr-FR', {
+                      <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
+                        {new Date(op.created_at).toLocaleString(locale, {
                           day: '2-digit',
                           month: '2-digit',
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
-                        {op.attempt_count > 0 && ` · ${op.attempt_count} tentative(s)`}
+                        {op.attempt_count > 0 && ` · ${op.attempt_count} ${t.offline.attempts}`}
                       </div>
                       {op.error && (
-                        <div style={{ fontSize: '11px', color: '#ef4444', marginTop: '2px' }}>
+                        <div style={{ fontSize: '12px', color: '#ef4444', marginTop: '2px' }}>
                           {op.error.slice(0, 60)}…
                         </div>
                       )}
@@ -306,7 +306,7 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
                         borderRadius: '10px',
                         background: `${badge.color}20`,
                         color: badge.color,
-                        fontSize: '11px',
+                        fontSize: '12px',
                         fontWeight: 600,
                         whiteSpace: 'nowrap',
                         flexShrink: 0,
@@ -325,12 +325,12 @@ export default function OfflineSyncIndicator({ baseUrl = '', companyId }: Offlin
             style={{
               padding: '8px 16px',
               borderTop: '1px solid rgba(255,255,255,0.08)',
-              fontSize: '11px',
-              color: '#475569',
+              fontSize: '12px',
+              color: '#94a3b8',
               textAlign: 'center',
             }}
           >
-            {operations.length} opération(s) total · Données stockées localement
+            {operations.length} {t.offline.opsTotal} · {t.offline.storedLocally}
           </div>
         </div>
       )}
