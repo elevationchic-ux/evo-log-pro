@@ -107,6 +107,39 @@ def normaliser(chemin):
     return chemin
 
 
+def retirer_commentaires(texte):
+    """Remplace le contenu des commentaires par des espaces, en preservant les
+    chaines. Sans ce nettoyage, l'outil signale ce que le code EXPLIQUE : apres
+    la correction de `transport/control`, le commentaire
+    « lisait m.immatriculation / m.conducteur » produisait trois faux positifs.
+    """
+    out = list(texte)
+    i, n = 0, len(texte)
+    while i < n:
+        c = texte[i]
+        if c in "'\"`":
+            i += 1
+            while i < n and texte[i] != c:
+                i += 2 if texte[i] == "\\" else 1
+            i += 1
+        elif texte.startswith("/*", i):
+            fin = texte.find("*/", i + 2)
+            fin = n if fin < 0 else fin + 2
+            for j in range(i, min(fin, n)):
+                if out[j] != "\n":
+                    out[j] = " "
+            i = fin
+        elif texte.startswith("//", i):
+            fin = texte.find("\n", i)
+            fin = n if fin < 0 else fin
+            for j in range(i, fin):
+                out[j] = " "
+            i = fin
+        else:
+            i += 1
+    return "".join(out)
+
+
 def charger_contrat():
     if not CONTRAT.exists():
         sys.exit("%s absent : lancer scripts/dump_openapi_paths.py d'abord" % CONTRAT.name)
