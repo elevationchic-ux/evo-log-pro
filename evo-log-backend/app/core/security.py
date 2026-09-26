@@ -129,8 +129,7 @@ def verify_totp(secret: str, code: str) -> bool:
         return False
 
 
-def create_2fa_token(user_id: int) -> str:
-    """Jeton intermediaire court delivre apres mot de passe correct, AVANT que
+def create_2fa_token(user_id: int) -> str:    """Jeton intermediaire court delivre apres mot de passe correct, AVANT que
     le code TOTP soit valide. N'est PAS un token d'acces (type='2fa')."""
     expire = datetime.utcnow() + timedelta(minutes=TWO_FACTOR_TOKEN_EXPIRE_MINUTES)
     payload = {"sub": str(user_id), "type": "2fa", "exp": expire}
