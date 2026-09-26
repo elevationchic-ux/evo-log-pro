@@ -7,11 +7,18 @@ import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/Card'
 import { magasinAPI } from '@/lib/api-client'
 
+// Contrat reel de /api/magasin/transactions : alias metier de /history,
+// qui renvoie un MovementListResponse (journal des mouvements de stock),
+// PAS un annuaire de « transactions » avec interface de navigation.
 interface Transaction {
-  code_transaction: string
-  nom: string
-  description: string
-  interface: string
+  id: number
+  reference: string
+  type_mouvement: string
+  quantite: number
+  code_article?: string | null
+  designation?: string | null
+  raison?: string | null
+  date_mouvement?: string | null
 }
 
 export function TransactionSearch() {
@@ -28,8 +35,8 @@ export function TransactionSearch() {
       setError(null)
       try {
         const res = await magasinAPI.getTransactions()
-        // Assuming the API returns { data: Transaction[] } or directly Transaction[]
-        const data = res.data || []
+        // L'enveloppe reelle est MovementListResponse : { items, total, entrees, sorties }
+        const data = res.data?.items || []
         setTransactions(data)
       } catch (err) {
         console.error('Failed to load transactions', err)
@@ -46,10 +53,12 @@ export function TransactionSearch() {
   const handleSearch = (value: string) => {
     setSearchTerm(value)
     if (value.length >= 2) {
+      const needle = value.toLowerCase()
       const filtered = transactions.filter(
         (t) =>
-          t.code_transaction.toLowerCase().includes(value.toLowerCase()) ||
-          t.nom.toLowerCase().includes(value.toLowerCase())
+          (t.reference ?? '').toLowerCase().includes(needle) ||
+          (t.code_article ?? '').toLowerCase().includes(needle) ||
+          (t.designation ?? '').toLowerCase().includes(needle)
       )
       setFilteredTransactions(filtered)
       setShowResults(true)
@@ -59,13 +68,16 @@ export function TransactionSearch() {
   }
 
   const handleSelect = (transaction: Transaction) => {
-    window.location.href = transaction.interface
+    // Pas de page de detail par mouvement : on ouvre le journal filtre sur la reference.
+    window.location.href = `/magasin/transactions?q=${encodeURIComponent(transaction.reference)}`
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const exactMatch = transactions.find(
-      (t) => t.code_transaction.toLowerCase() === searchTerm.toLowerCase()
+      (t) =>
+        (t.reference ?? '').toLowerCase() === searchTerm.toLowerCase() ||
+        (t.code_article ?? '').toLowerCase() === searchTerm.toLowerCase()
     )
     if (exactMatch) {
       handleSelect(exactMatch)
@@ -80,7 +92,7 @@ export function TransactionSearch() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
               type="text"
-              placeholder="Tapez une transaction (ex: KM24, KT10...)"
+              placeholder="Rechercher un mouvement (ref, article, designation...)"
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10"
@@ -108,7 +120,7 @@ export function TransactionSearch() {
           <div className="border rounded-lg overflow-hidden">
             {filteredTransactions.map((transaction) => (
               <button
-                key={transaction.code_transaction}
+                key={transaction.id}
                 type="button"
                 onClick={() => handleSelect(transaction)}
                 className="w-full px-4 py-3 text-left hover:bg-slate-800 border-b last:border-b-0 transition-colors"
@@ -116,9 +128,12 @@ export function TransactionSearch() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-semibold text-slate-100">
-                      {transaction.code_transaction} - {transaction.nom}
+                      {transaction.reference} - {transaction.designation || transaction.code_article || 'Mouvement de stock'}
                     </div>
-                    <div className="text-sm text-slate-400">{transaction.description}</div>
+                    <div className="text-sm text-slate-400">
+                      {transaction.type_mouvement} &middot; {transaction.quantite}
+                      {transaction.raison ? ` - ${transaction.raison}` : ''}
+                    </div>
                   </div>
                   <ArrowRight className="h-4 w-4 text-gray-400" />
                 </div>
