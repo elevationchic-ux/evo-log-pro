@@ -11,7 +11,7 @@
   "appel": "/api/v1/incidents/client/{p}",
   "brut": "/api/incidents/client/{p}",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 555,
+  "ligne": 614,
   "genre": "joker_ambigu",
   "route": "/api/v1/incidents/{incident_id}/statut"
  },
@@ -19,7 +19,7 @@
   "appel": "/api/v1/rh/conges/{p}/{p}",
   "brut": "/api/rh/conges/{p}/{p}",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 568,
+  "ligne": 627,
   "genre": "joker_ambigu",
   "route": "/api/v1/rh/conges/{conge_id}/approuver"
  },
@@ -27,7 +27,7 @@
   "appel": "/api/v1/acconage/{p}",
   "brut": "/api/v1/acconage/{p}",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 631,
+  "ligne": 690,
   "genre": "joker_ambigu",
   "route": "/api/v1/acconage/dossier-marchandise"
  },
@@ -35,7 +35,7 @@
   "appel": "/api/v1/acconage/{p}",
   "brut": "/api/v1/acconage/{p}",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 633,
+  "ligne": 692,
   "genre": "joker_ambigu",
   "route": "/api/v1/acconage/dossier-marchandise"
  },
@@ -43,7 +43,7 @@
   "appel": "/api/v1/acconage/{p}",
   "brut": "/api/v1/acconage/{p}",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 634,
+  "ligne": 693,
   "genre": "joker_ambigu",
   "route": "/api/v1/acconage/dossier-marchandise"
  },
@@ -51,7 +51,7 @@
   "appel": "/api/v1/maintenance/{p}",
   "brut": "/api/v1/maintenance/{p}",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 655,
+  "ligne": 714,
   "genre": "joker_ambigu",
   "route": "/api/v1/maintenance/destockage-pieces"
  },
@@ -59,7 +59,7 @@
   "appel": "/api/v1/maintenance/{p}",
   "brut": "/api/v1/maintenance/{p}",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 657,
+  "ligne": 716,
   "genre": "joker_ambigu",
   "route": "/api/v1/maintenance/destockage-pieces"
  },
@@ -67,7 +67,7 @@
   "appel": "/api/v1/maintenance/{p}",
   "brut": "/api/v1/maintenance/{p}",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 658,
+  "ligne": 717,
   "genre": "joker_ambigu",
   "route": "/api/v1/maintenance/destockage-pieces"
  },
@@ -99,7 +99,7 @@
   "appel": "/api/v1/ai/assistant/chat",
   "brut": "/api/v1/ai/assistant/chat",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 625,
+  "ligne": 684,
   "genre": "repond_501",
   "route": "/api/v1/ai/assistant/chat"
  },
@@ -107,7 +107,7 @@
   "appel": "/api/v1/k-modules/cotations",
   "brut": "/api/v1/k-modules/cotations",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 682,
+  "ligne": 741,
   "genre": "repond_501",
   "route": "/api/v1/k-modules/cotations"
  },
@@ -115,31 +115,15 @@
   "appel": "/api/v1/k-modules/cotations",
   "brut": "/api/v1/k-modules/cotations",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 683,
+  "ligne": 742,
   "genre": "repond_501",
   "route": "/api/v1/k-modules/cotations"
- },
- {
-  "appel": "/api/v1/k-modules/tracking/epod",
-  "brut": "/api/v1/k-modules/tracking/epod",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 688,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/tracking/epod"
- },
- {
-  "appel": "/api/v1/k-modules/tracking/epod",
-  "brut": "/api/v1/k-modules/tracking/epod",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 689,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/tracking/epod"
  },
  {
   "appel": "/api/v1/k-modules/fuel-guard/sensors",
   "brut": "/api/v1/k-modules/fuel-guard/sensors",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 694,
+  "ligne": 753,
   "genre": "repond_501",
   "route": "/api/v1/k-modules/fuel-guard/sensors"
  },
@@ -147,7 +131,7 @@
   "appel": "/api/v1/k-modules/fuel-guard/sensors",
   "brut": "/api/v1/k-modules/fuel-guard/sensors",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 695,
+  "ligne": 754,
   "genre": "repond_501",
   "route": "/api/v1/k-modules/fuel-guard/sensors"
  },
@@ -155,7 +139,7 @@
   "appel": "/api/v1/k-modules/procurement/orders",
   "brut": "/api/v1/k-modules/procurement/orders",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 700,
+  "ligne": 759,
   "genre": "repond_501",
   "route": "/api/v1/k-modules/procurement/orders"
  },
@@ -163,7 +147,7 @@
   "appel": "/api/v1/k-modules/procurement/orders",
   "brut": "/api/v1/k-modules/procurement/orders",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 701,
+  "ligne": 760,
   "genre": "repond_501",
   "route": "/api/v1/k-modules/procurement/orders"
  },
@@ -171,7 +155,7 @@
   "appel": "/api/v1/k-modules/compliance/audits",
   "brut": "/api/v1/k-modules/compliance/audits",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 706,
+  "ligne": 765,
   "genre": "repond_501",
   "route": "/api/v1/k-modules/compliance/audits"
  },
@@ -179,7 +163,7 @@
   "appel": "/api/v1/k-modules/compliance/audits",
   "brut": "/api/v1/k-modules/compliance/audits",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 707,
+  "ligne": 766,
   "genre": "repond_501",
   "route": "/api/v1/k-modules/compliance/audits"
  },
@@ -187,7 +171,7 @@
   "appel": "/api/v1/k-modules/bi-analytics/executive-summary",
   "brut": "/api/v1/k-modules/bi-analytics/executive-summary",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 712,
+  "ligne": 771,
   "genre": "repond_501",
   "route": "/api/v1/k-modules/bi-analytics/executive-summary"
  },
@@ -195,7 +179,7 @@
   "appel": "/api/v1/b2b-portal/dossiers",
   "brut": "/api/v1/b2b-portal/dossiers",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 726,
+  "ligne": 785,
   "genre": "repond_501",
   "route": "/api/v1/b2b-portal/dossiers"
  },
@@ -203,7 +187,7 @@
   "appel": "/api/v1/b2b-portal/factures",
   "brut": "/api/v1/b2b-portal/factures",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 727,
+  "ligne": 786,
   "genre": "repond_501",
   "route": "/api/v1/b2b-portal/factures"
  },
@@ -211,7 +195,7 @@
   "appel": "/api/v1/b2b-portal/quotes",
   "brut": "/api/v1/b2b-portal/quotes",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 728,
+  "ligne": 787,
   "genre": "repond_501",
   "route": "/api/v1/b2b-portal/quotes"
  },
@@ -219,7 +203,7 @@
   "appel": "/api/v1/b2b-portal/booking",
   "brut": "/api/v1/b2b-portal/booking",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 729,
+  "ligne": 788,
   "genre": "repond_501",
   "route": "/api/v1/b2b-portal/booking"
  },
@@ -227,7 +211,7 @@
   "appel": "/api/v1/b2b-portal/tracking/{p}",
   "brut": "/api/v1/b2b-portal/tracking/{p}",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 730,
+  "ligne": 789,
   "genre": "repond_501",
   "route": "/api/v1/b2b-portal/tracking/{query}"
  },
@@ -235,7 +219,7 @@
   "appel": "/api/v1/b2b-portal/payments/checkout",
   "brut": "/api/v1/b2b-portal/payments/checkout",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 731,
+  "ligne": 790,
   "genre": "repond_501",
   "route": "/api/v1/b2b-portal/payments/checkout"
  },
@@ -243,7 +227,7 @@
   "appel": "/api/v1/b2b-portal/notifications/preferences",
   "brut": "/api/v1/b2b-portal/notifications/preferences",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 732,
+  "ligne": 791,
   "genre": "repond_501",
   "route": "/api/v1/b2b-portal/notifications/preferences"
  },
@@ -251,7 +235,7 @@
   "appel": "/api/v1/b2b-portal/notifications/preferences",
   "brut": "/api/v1/b2b-portal/notifications/preferences",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 733,
+  "ligne": 792,
   "genre": "repond_501",
   "route": "/api/v1/b2b-portal/notifications/preferences"
  }
