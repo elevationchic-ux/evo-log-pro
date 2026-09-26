@@ -614,8 +614,9 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                       <div className="flex items-center justify-between px-1">
                         <span className="text-on-surface text-xs font-medium">{t.shell.soundAlerts}</span>
                         <button
+                          type="button"
                           onClick={toggleSound}
-                          className={`flex items-center gap-1 px-2 py-1 rounded-lg border border-outline text-[11px] font-bold ${
+                          className={`flex items-center gap-1 px-3 py-2 min-h-11 rounded-lg border border-outline text-[11px] font-bold ${
                             soundEnabled ? 'bg-primary/10 text-primary' : 'bg-surface-container text-on-surface-variant'
                           }`}
                         >
@@ -630,15 +631,17 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                     {/* Quick navigation links */}
                     <div className="p-2 space-y-0.5">
                       <button
+                        type="button"
                         onClick={() => { setIsProfileMenuOpen(false); router.push('/portail-employe'); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container text-left"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 min-h-11 rounded-xl text-on-surface hover:bg-surface-container text-left"
                       >
                         <span className="material-symbols-outlined text-[17px] text-primary">badge</span>
                         <span>{t.shell.mySpace}</span>
                       </button>
                       <button
+                        type="button"
                         onClick={() => { setIsProfileMenuOpen(false); router.push('/security'); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container text-left"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 min-h-11 rounded-xl text-on-surface hover:bg-surface-container text-left"
                       >
                         <span className="material-symbols-outlined text-[17px] text-primary">shield</span>
                         <span>{t.shell.accountSecurity}</span>
@@ -648,8 +651,9 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                     {/* Logout */}
                     <div className="p-2">
                       <button
+                        type="button"
                         onClick={() => { setIsProfileMenuOpen(false); router.push('/logout'); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-error hover:bg-error/10 text-left font-bold transition-colors"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 min-h-11 rounded-xl text-error hover:bg-error/10 text-left font-bold transition-colors"
                       >
                         <span className="material-symbols-outlined text-[17px]">logout</span>
                         <span>{t.shell.logout}</span>
@@ -696,9 +700,10 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                 )}
               </div>
               <button
+                type="button"
                 onClick={() => setIsDrawerOpen(false)}
-                className="rounded-lg p-1 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
-                aria-label="Fermer les notifications"
+                className="rounded-lg grid place-items-center min-h-11 min-w-11 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+                aria-label={language === 'en' ? 'Close notifications' : 'Fermer les notifications'}
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
@@ -721,12 +726,12 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                     `}
                   >
                     <div className="mb-1.5 flex items-center justify-between">
-                      <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide
+                      <span className={`rounded px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide
                         ${notif.severity === 'CRITICAL' ? 'bg-error-container text-on-error-container' : notif.severity === 'WARNING' ? 'bg-tertiary-container text-on-tertiary-container' : 'bg-primary-container text-on-primary-container'}
                       `}>
                         {notif.severity}
                       </span>
-                      <span className="font-mono text-[10px] text-on-surface-variant">
+                      <span className="font-mono text-[11px] text-on-surface-variant">
                         {mounted ? new Date(notif.timestamp).toLocaleTimeString() : '--:--'}
                       </span>
                     </div>
