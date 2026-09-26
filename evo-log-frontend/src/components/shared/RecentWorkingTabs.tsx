@@ -127,10 +127,10 @@ export function RecentWorkingTabs() {
   return (
     <nav
       aria-label={t.shell.recentTabsAria}
-      className="hidden md:flex items-center gap-1.5 px-4 py-1.5 bg-surface-container-low border-b border-outline overflow-x-auto text-[12px] select-none scrollbar-none"
+      className="hidden md:flex items-center gap-1.5 px-4 py-1.5 bg-surface-container-low border-b border-outline overflow-x-auto text-xs select-none scrollbar-none"
     >
-      <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/70 shrink-0 mr-1 flex items-center gap-1">
-        <span className="material-symbols-outlined text-[13px]">tab</span>
+      <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/80 shrink-0 mr-1 flex items-center gap-1">
+        <span className="material-symbols-outlined text-sm">tab</span>
         {t.shell.recentTabs}
       </span>
 
@@ -154,20 +154,20 @@ export function RecentWorkingTabs() {
                     : 'bg-transparent text-on-surface-variant hover:bg-surface/60 hover:text-on-surface'
                 }
               `}
-              title={tab.path}
+              title={`${display} — ${tab.path}`}
             >
               <span className={`material-symbols-outlined text-[14px] ${isActive ? 'text-primary' : 'text-on-surface-variant'}`}>
                 {tab.icon}
               </span>
-              <span className="max-w-[130px] truncate">{tab.label}</span>
+              <span className="max-w-[130px] truncate">{display}</span>
               <button
                 type="button"
                 onClick={(e) => handleClose(e, tab.path)}
-                className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-surface-container hover:text-error transition-all"
+                className="grid place-items-center w-7 h-7 -mr-1 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-error transition-all md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
                 title={t.shell.closeTab}
-                aria-label={`${t.shell.closeTab}`}
+                aria-label={`${t.shell.closeTab} : ${display}`}
               >
-                <span className="material-symbols-outlined text-[12px] block">close</span>
+                <span className="material-symbols-outlined text-[14px] block">close</span>
               </button>
             </div>
           );
