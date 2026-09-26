@@ -157,7 +157,7 @@ export default function CadcAccreditationsPage() {
                     </td>
                   </tr>
                 ))}
-                {!loading && accrreds.length === 0 && <tr><td colSpan={6} className="py-10 text-center text-slate-500 font-sans">Aucune accréditation pour cette entreprise.</td></tr>}
+                {!loading && accreds.length === 0 && <tr><td colSpan={6} className="py-10 text-center text-slate-500 font-sans">Aucune accréditation pour cette entreprise.</td></tr>}
               </tbody>
             </table>
           </div>

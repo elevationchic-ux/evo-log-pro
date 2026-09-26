@@ -8,12 +8,14 @@
 import Link from 'next/link';
 import { Inbox, RotateCcw, WifiOff, ShieldAlert, ServerCrash, FileQuestion, Plus } from 'lucide-react';
 import type { ApiErrorInfo } from '@/hooks/useApi';
+import { useI18n } from '@/hooks/useI18n';
 
 /* ------------------------------- Chargement ------------------------------- */
-export function DataLoadingState({ rows = 4, label = 'Chargement des données…' }: { rows?: number; label?: string }) {
+export function DataLoadingState({ rows = 4, label }: { rows?: number; label?: string }) {
+  const t = useI18n();
   return (
     <div className="space-y-3 animate-pulse" aria-busy="true" aria-live="polite">
-      <p className="text-xs text-slate-500 font-mono">{label}</p>
+      <p className="text-xs text-slate-400 font-mono">{label ?? t.common.loadingData}</p>
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="h-12 rounded-xl bg-slate-900 border border-slate-800" />
       ))}
@@ -23,7 +25,7 @@ export function DataLoadingState({ rows = 4, label = 'Chargement des données…
 
 /* --------------------------------- Vide ----------------------------------- */
 export function DataEmptyState({
-  title = 'Aucune donnée pour le moment',
+  title,
   description,
   actionLabel,
   actionHref,
@@ -35,13 +37,14 @@ export function DataEmptyState({
   actionHref?: string;
   onAction?: () => void;
 }) {
+  const t = useI18n();
   const inner = (
     <>
       <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-800/60 border border-slate-700">
         <Inbox className="w-6 h-6 text-slate-400" />
       </div>
-      <p className="mt-3 text-sm font-semibold text-slate-200">{title}</p>
-      {description && <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">{description}</p>}
+      <p className="mt-3 text-sm font-semibold text-slate-200">{title ?? t.common.noDataYet}</p>
+      {description && <p className="mt-1 text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">{description}</p>}
       {actionLabel && (
         <span className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold group-hover:bg-amber-400 transition-colors">
           <Plus className="w-3.5 h-3.5" />
@@ -55,7 +58,7 @@ export function DataEmptyState({
       {actionHref ? (
         <Link href={actionHref} className="inline-block group">{inner}</Link>
       ) : onAction ? (
-        <button onClick={onAction} className="inline-block group">{inner}</button>
+        <button type="button" onClick={onAction} className="inline-block group">{inner}</button>
       ) : (
         inner
       )}

@@ -10,8 +10,7 @@ import {
   CheckCircle2, ShieldCheck, Users2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { saasConsoleAPI } from '@/lib/api-client';
-import { getApiBaseUrl } from '@/lib/api-client';
+import { saasConsoleAPI, getApiBaseUrl } from '@/lib/api-client';
 
 interface CadcModule { key: string; label: string; domain: string }
 interface CadcPlan { id: number; code: string; nom: string; max_modules: number | null }
