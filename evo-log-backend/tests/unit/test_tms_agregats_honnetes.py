@@ -134,11 +134,11 @@ class TestTCORecalcule:
             reference="MSN-001", camion_id=camion.id,
             statut=MissionStatus.TERMINEE, distance_km=1000,
         )
-        mission_sans_distance = Mission(
+        mission_en_cours = Mission(
             reference="MSN-002", camion_id=camion_ok.id,
-            statut=MissionStatus.TERMINEE, distance_km=None,
+            statut=MissionStatus.EN_COURS, distance_km=None,
         )
-        db.add_all([mission, mission_sans_distance])
+        db.add_all([mission, mission_en_cours])
         db.flush()
 
         db.add_all([
@@ -149,8 +149,8 @@ class TestTCORecalcule:
             # Jamais compte : non valide.
             FraisMission(mission_id=mission.id, type_frais="DIVERS",
                          montant=999_999, statut="BROUILLON"),
-            # Jamais compte : mission non terminee (id inexistante côté terminé).
-            FraisMission(mission_id=mission_sans_distance.id, type_frais="CARBURANT",
+            # Jamais compte : mission non terminee.
+            FraisMission(mission_id=mission_en_cours.id, type_frais="CARBURANT",
                          montant=500_000, statut="VALIDE"),
         ])
 
