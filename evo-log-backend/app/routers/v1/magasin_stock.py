@@ -175,7 +175,7 @@ async def list_magasins(
 
 
 @router.post("/magasins", response_model=MagasinResponse, status_code=201)
-async def create_magasin(payload: MagasinCreate, db: Session = Depends(get_db)):
+async def create_magasin(payload: MagasinCreate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.modify"))):
     if db.query(Entrepot).filter(Entrepot.code == payload.code).first():
         raise HTTPException(status_code=400, detail="Un magasin avec ce code existe deja")
     row = Entrepot(**payload.model_dump())
@@ -186,7 +186,7 @@ async def create_magasin(payload: MagasinCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/magasins/{entrepot_id}", response_model=MagasinResponse)
-async def get_magasin(entrepot_id: int, db: Session = Depends(get_db)):
+async def get_magasin(entrepot_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.read"))):
     row = db.get(Entrepot, entrepot_id)
     if not row:
         raise HTTPException(status_code=404, detail="Magasin introuvable")
@@ -194,7 +194,7 @@ async def get_magasin(entrepot_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/magasins/{entrepot_id}", response_model=MagasinResponse)
-async def update_magasin(entrepot_id: int, payload: MagasinUpdate, db: Session = Depends(get_db)):
+async def update_magasin(entrepot_id: int, payload: MagasinUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.modify"))):
     row = db.get(Entrepot, entrepot_id)
     if not row:
         raise HTTPException(status_code=404, detail="Magasin introuvable")
@@ -211,7 +211,7 @@ async def update_magasin(entrepot_id: int, payload: MagasinUpdate, db: Session =
 
 
 @router.delete("/magasins/{entrepot_id}", status_code=204)
-async def delete_magasin(entrepot_id: int, db: Session = Depends(get_db)):
+async def delete_magasin(entrepot_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.modify"))):
     """Suppression logique : un entrepot porte des lignes de stock."""
     row = db.get(Entrepot, entrepot_id)
     if not row:
@@ -222,7 +222,7 @@ async def delete_magasin(entrepot_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/magasins/{entrepot_id}/stocks", response_model=StockSearchResponse)
-async def magasin_stocks(entrepot_id: int, db: Session = Depends(get_db)):
+async def magasin_stocks(entrepot_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.read"))):
     if not db.get(Entrepot, entrepot_id):
         raise HTTPException(status_code=404, detail="Magasin introuvable")
     rows = (
@@ -288,6 +288,7 @@ async def search_stocks(
     skip: int = 0,
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.stock.read")),
 ):
     query = _stock_query(db, q, categorie, entrepot_id, statut, stock_faible)
     if statut and statut not in (STATUT_RUPTURE, STATUT_EXCES):
@@ -315,7 +316,7 @@ async def search_stocks(
 
 
 @router.get("/stock-statuses", response_model=StockStatusesResponse)
-async def stock_statuses(db: Session = Depends(get_db)):
+async def stock_statuses(db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.read"))):
     rows = db.query(Stock).filter(Stock.is_active.is_(True)).all()
     buckets: Dict[str, StockStatusBucket] = {
         code: StockStatusBucket(statut=code, libelle=libelle)
@@ -424,6 +425,7 @@ async def stock_history(
     skip: int = 0,
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.stock.read")),
 ):
     return _list_movements(
         db, stock_id, code_article, type_mouvement, du, au, operateur_id, q, skip, limit
@@ -442,6 +444,7 @@ async def stock_transactions(
     skip: int = 0,
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.stock.read")),
 ):
     """Alias metier de /history (le frontend nomme « transactions » le journal)."""
     return _list_movements(
@@ -564,7 +567,7 @@ _EXPORTERS.update({
 
 
 @router.get("/export/{resource}/csv")
-async def export_csv(resource: str, db: Session = Depends(get_db)):
+async def export_csv(resource: str, db: Session = Depends(get_db), current_user: User = Depends(require_perm("magasin.stock.read"))):
     exporter = _EXPORTERS.get(resource)
     if not exporter:
         raise HTTPException(
@@ -805,6 +808,7 @@ async def import_csv(
     file: UploadFile = File(...),
     dry_run: bool = Query(False, description="Valider sans ecrire en base"),
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.stock.modify")),
 ):
     importer = _IMPORTERS.get(resource)
     if not importer:
@@ -818,7 +822,7 @@ async def import_csv(
 
 
 @router.get("/import/{resource}/template")
-async def import_template(resource: str):
+async def import_template(resource: str, current_user: User = Depends(require_perm("magasin.stock.read"))):
     """Modele CSV telechargeable (en-tetes attendus par l'import)."""
     templates = {
         "articles": ["code", "designation", "categorie", "unite_mesure", "prix_unitaire", "code_barres"],

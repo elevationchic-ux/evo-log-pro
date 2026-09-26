@@ -651,7 +651,10 @@ def list_factures(
             "montant_ht": float(f.montant_ht or 0),
             "montant_tva": float(f.montant_tva or 0),
             "montant_ttc": float(f.montant_ttc or 0),
+            # La table d'exploitation ne porte ni solde ni reglement partiel :
+            # ces colonnes existent seulement cote OHADA.
             "solde_restant": None,
+            "reglement_partiel": None,
             "statut": (f.statut.value if hasattr(f.statut, "value") else str(f.statut)),
         })
     for f in ohada:
@@ -668,6 +671,7 @@ def list_factures(
             "montant_tva": float(f.montant_tva or 0),
             "montant_ttc": float(f.montant_ttc or 0),
             "solde_restant": float(f.solde_restant) if f.solde_restant is not None else None,
+            "reglement_partiel": float(f.reglement_partiel or 0),
             "statut": (f.statut.value if hasattr(f.statut, "value") else str(f.statut)),
         })
 
