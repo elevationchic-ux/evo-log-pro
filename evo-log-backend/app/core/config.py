@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     MINIO_SECRET_KEY: str = "minioadmin"
     MINIO_SECURE: bool = False
     MINIO_BUCKET_DOCUMENTS: str = "documents"
+
+    # Uploads console CADC (logos d'entreprise). Stockage filesystem servi
+    # statiquement sous /static/uploads ; MinIO reste reserve aux documents.
+    UPLOAD_DIR: str = "static/uploads"
     
     # Sentry
     SENTRY_DSN: Optional[str] = None
