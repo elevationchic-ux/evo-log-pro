@@ -10,7 +10,7 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app` | ✅ EXIT=0 |
-| `python -m pytest tests` (suite complète, batches 2 à 9 inclus) | ✅ **393 passed, 2 xfailed** (IRGM/CNPS sur service réel + chaîne documentaire close + redevances portuaires réelles + numérotation légale + moteur douanier unifié + import tarif CEMAC) |
+| `python -m pytest tests` (suite complète, batches 2 à 12 inclus) | ⚠️ **444 passed, 2 xfailed, 2 failed** (1072 s). Les 2 failures (`test_requisition_requires_auth`, `test_endpoint_facture_pdf_exige_auth`) préexistent au batch 12 : elles proviennent du commit RBAC `8c49a9d` et signalent un vrai trou d'auth sur 2 routes, à traiter en batch séparé. |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1082 routes OpenAPI) |
 | `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
 
@@ -380,6 +380,52 @@ un developpeur qui remet un `MOCK_DATA = [...]` dans une page verra sa PR bloque
 la CI avec le nom exact du fichier et la ligne en cause. Les 33 `api_gaps` tolere
 sont la liste des endpoints backend restant a ecrire (voir `audit_report.json`), pas
 une dette d'honnetete.
+
+---
+
+## 14. Batch 12  Transport International : l'ecran ne pouvait pas marcher
+
+**Declencheur** : meme logique que batch 10 (typer un ecran `any` pour forcer tsc a
+signaler les fautes de frappe). La surprise : ici, le typage n'a pas seulement
+corrige 4-5 champs — il a montre que **la page entiere etait structurellement
+cassée** depuis son ecriture.
+
+| # | Ce que faisait la page | Ce que le backend expose reellement | Consequence |
+|---|---|---|---|
+| 1 | `apiClient.get('/api/v1/transport-international/ordres-transport')` | **Aucune route GET list** sur le router (seuls POST/PUT et un GET `/ordres-transport/{id}/rapport` existaient) | `Promise.allSettled` avalait le 404 → liste **systematiquement vide** |
+| 2 | `apiClient.get('/api/v1/transport-international/carnets-tir')` | **Aucune route GET list** idem | Carnets TIR jamais affiches, compteur "0" permanent |
+| 3 | `o.numero_ordre` | `OrdreTransportResponse.numero_ot` | Colonne "N° OTI" toujours `undefined` |
+| 4 | `o.mode_transport` | **N'EXISTE PAS** (le backend a `type_transit` avec enum `tir/t1/t2/national`) | Colonne "Mode" `undefined` |
+| 5 | `o.pays_depart` | **N'EXISTE PAS** (le backend a `lieu_chargement`) | Flux "Départ → Destination" moitie vide |
+| 6 | `o.incoterm` | **N'EXISTE PAS** (aucun incoterm dans `OrdreTransport`) | Colonne "Incoterm" inventee |
+| 7 | `o.poids_kg` | `poids_net` et `poids_brut` (deux champs distincts) | Colonne "Poids" `undefined` |
+| 8 | `o.statut === 'créé'` / `'livré'` / `'annulé'` | `StatutTransport.PLANIFIE = "planifie"`, `LIVRE = "livre"`, `ANNULE = "annule"` (**sans accent**) | **Aucun** filtre, **aucun** bouton d'action ne se declenchait, tous les OT tombaient dans le badge defaut ambre |
+| 9 | POST avec `{numero_ordre, mode_transport, pays_depart, pays_destination, marchandise, poids_kg, incoterm}` | `OrdreTransportCreate` exige 16 champs dont 4 FK `client_id / transporteur_id / camion_id / conducteur_id` + `poids_net, poids_brut, nombre_colis, valeur_marchandise, montant_freight, type_transit, lieu_chargement, lieu_livraison, code_pays_destination` | **Toujours 422**, erreur avalee par un `catch { console.error }` silencieux |
+
+➡️ 9 fautes differentes, **toutes invisibles** car portees par `useState<any[]>`.
+Aucun utilisateur n'a jamais pu creer un OTI par cette UI, et le tableau restait
+vide meme apres insertion reussie par API.
+
+| Fichier | Ce qui a été fait |
+|---|---|
+| `app/services/transport_international_service.py` | Ajout de `OrdreTransportService.lister(db, statut?, offset, limit)` et `CarnetTIRService.lister(db, statut?, offset, limit)` : requetes SQLAlchemy reelles, pagination bornee a 500, filtre `statut` optionnel. Docstring explicite sur la limitation de scoping entreprise (`company_id` nullable, non aligne avec le POST/PUT du meme router) pour eviter toute fausse assurance. |
+| `app/routers/v1/transport_international.py` | Ajout de **2 nouvelles routes GET list** : `GET /ordres-transport` → `List[OrdreTransportResponse]` et `GET /carnets-tir` → `List[CarnetTIRResponse]`, toutes deux protegees par `Depends(get_current_user)` et branchees sur les nouveaux `lister()`. |
+| `tests/unit/test_transport_international.py` | 4 tests supplementaires : `test_lister_retourne_les_ot_crees`, `test_lister_filtre_par_statut`, `test_lister_pagination_bornee`, `test_lister_carnets`. 13 passed sur le fichier. |
+| `src/types/transport_international.ts` (nouveau, 97 lignes) | Types **alignes Pydantic par Pydantic** : `OrdreTransportResponse` (25 champs), `CarnetTIRResponse` (16 champs), unions `StatutTransport` (7 valeurs backend, non accentuees) et `TypeTransitRoutier` (4 valeurs). Le header du fichier consigne l'expediteur : "neuf fautes differentes, toutes invisibles car portees par `useState<any[]>`". |
+| `src/app/(app)/transport-international/page.tsx` (reecrite) | `useState<OrdreTransportResponse[]>` / `<CarnetTIRResponse[]>` ; tous les acces aux champs corriges (`numero_ot`, `type_transit`, `lieu_chargement`/`lieu_livraison`, `poids_net`) ; objet `STATUTS` centralise avec les valeurs backend sans accent ; compteur "En transit" et "Livres" recalculs sur `STATUTS.EN_TRANSIT` / `STATUTS.LIVRE` qui matchent enfin ; **formulaire de creation remplace par un bouton "N.I."** (Non Implemente) qui ouvre un `toast()` expliquant precisement pourquoi (4 FK + 5 numeriques obligatoires non collectes) — Zero-Mock : un bouton qui affiche une UI mensongere et declenche un 422 avale est **pire** qu'un bouton absent. |
+
+**Vérifications batch 12**
+- `npx tsc --noEmit` → **EXIT=0**
+- `python scripts/audit_frontend.py --strict-honesty` → **EXIT=0** ; le compteur global `api_gaps` **descend de 33 a 32** (les routes GET backend ajoutees ferment un trou)
+- Suite backend complete `python -m pytest tests` → **444 passed, 2 xfailed, 2 failed** en 1072 s. Les 2 failures sont **strictement independantes** de ce batch :
+  - `test_parc_purchase_store.py::test_requisition_requires_auth` — GET `/api/v1/purchase/requisitions` repond 200 sans auth au lieu de 401/403
+  - `test_pdf_generator.py::test_endpoint_facture_pdf_exige_auth` — GET `/api/v1/finance/factures/1/pdf` repond 404 au lieu de 401/403
+  Les deux fichiers de test viennent du commit RBAC preexistant `8c49a9d` (avant session) et signalerent un vrai trou de securite a traiter dans un batch suivant — pas une regression batch 12. Les compter ici plutot que de masquer.
+
+➡️ Ce batch illustre la valeur reelle du typage strict : **la page transport-international
+etait ecrite contre un contrat backend imaginaire**. Sans `useState<OrdreTransportResponse[]>`,
+chacune des 9 erreurs ci-dessus passait silencieusement en production. Le pattern est
+exactement celui du bug `echeance_km` (batch 10) mais a plus grande echelle.
 
 ---
 

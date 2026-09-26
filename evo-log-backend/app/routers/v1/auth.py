@@ -14,6 +14,7 @@ from app.core.security import (
     validate_password_strength, limiter,
     generate_totp_secret, build_otpauth_uri, verify_totp,
     create_2fa_token, decode_2fa_token,
+    generate_recovery_codes, parse_recovery_codes, try_consume_recovery_code,
 )
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserResponse, Token, TokenData
@@ -211,6 +212,22 @@ def _build_login_payload(user: User) -> dict:
     }
 
 
+@router.get("/session")
+async def read_session(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Reconstruit le payload de session depuis un access token deja valide.
+
+    Utilise par NextAuth (provider credentials) quand le formulaire a deja
+    franchi l'etape mot de passe (+ code 2FA eventuel) directement contre
+    /auth/login et /auth/2fa/verify : le handler d'autorisation du front
+    verifie le jalon recu ici au lieu de renvoyer le mot de passe, ce qui
+    evite deux appels /login (et le compteur de tentatives associe) pour une
+    seule connexion utilisateur."""
+    return _build_login_payload(current_user)
+
+
 @router.post("/refresh", response_model=Token)
 async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
     """Refresh access token using refresh token"""
@@ -322,15 +339,26 @@ async def change_password(
 
 @router.get("/2fa/status")
 async def get_2fa_status(current_user: User = Depends(get_current_user)):
-    """Etat courant de la 2FA pour l'utilisateur authentifie."""
+    """Etat courant de la 2FA pour l'utilisateur authentifie.
+
+    Les codes de secours ne sont JAMAIS renvoyes ici : seuls le total et le
+    solde utilisable le sont (les codes en clair n'existent qu'a l'emission)."""
+    codes = parse_recovery_codes(getattr(current_user, "two_factor_recovery_codes", None))
+    issued_at = getattr(current_user, "two_factor_recovery_issued_at", None)
+    confirmed_at = getattr(current_user, "two_factor_confirmed_at", None)
     return {
         "two_factor_enabled": bool(getattr(current_user, "two_factor_enabled", False)),
         "configured": bool(getattr(current_user, "two_factor_secret", None)),
+        "confirmed_at": confirmed_at.isoformat() if confirmed_at else None,
+        "recovery_codes_total": len(codes),
+        "recovery_codes_remaining": sum(1 for c in codes if not c.get("used_at")),
+        "recovery_codes_issued_at": issued_at.isoformat() if issued_at else None,
     }
 
 
 @router.post("/2fa/setup")
 async def setup_2fa(
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -338,7 +366,28 @@ async def setup_2fa(
 
     La 2FA n'est PAS encore active : il faut confirmer via /2fa/enable avec un
     code valide. Le secret n'est jamais renvoye par un autre endpoint.
+
+    Quand la 2FA est deja active, re-emettre un secret la couperait
+    instantanement (two_factor_enabled remis a False) : un compte detourne
+    pourrait desarmer le second facteur sans le code courant. Un code TOTP
+    valide est donc exige avant tout re-provisionnement.
     """
+    try:
+        corps = await request.json()
+    except Exception:
+        corps = {}
+    code = (corps or {}).get("code")
+    deja_active = bool(getattr(current_user, "two_factor_enabled", False))
+    secret_courant = getattr(current_user, "two_factor_secret", None)
+    if deja_active:
+        if not verify_totp(secret_courant or "", code or ""):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    "La 2FA est deja active : un code TOTP en cours est requis "
+                    "pour reinitialiser le secret."
+                ),
+            )
     secret = generate_totp_secret()
     current_user.two_factor_secret = secret
     current_user.two_factor_enabled = False
@@ -346,6 +395,7 @@ async def setup_2fa(
     return {
         "secret": secret,
         "otpauth_uri": build_otpauth_uri(secret, current_user.username),
+        "reset": deja_active,
         "message": "Scannez le QR puis confirmez avec un code pour activer la 2FA.",
     }
 
