@@ -300,7 +300,7 @@ export default function MagasinCapacityPage() {
                     <div className="flex-1 min-w-0">
                       {rate === null ? (
                         <div className="flex items-center gap-2 text-xs text-on-surface-variant">
-                          <CircleGauge className="w-4 h-4 text-slate-500" />
+                          <Gauge className="w-4 h-4 text-slate-500" />
                           <span>
                             {t(
                               "Capacité d'entreposage non enregistrée — pourcentage non calculable.",

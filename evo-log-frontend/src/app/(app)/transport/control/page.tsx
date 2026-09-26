@@ -230,14 +230,14 @@ export default function TransportControlPage() {
           etaient des litteraux inventes dans le JSX, presents quelle que soit
           la base. */}
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Camions Actifs" value={String((camionsData || []).filter((c: any) => c.status === 'active').length)} color="primary" icon={<span className="material-symbols-outlined">local_shipping</span>} />
-        <StatCard label="Chauffeurs Actifs" value={String((chauffeursData || []).filter((d: any) => d.is_active).length)} color="success" icon={<span className="material-symbols-outlined">person</span>} />
-        <StatCard label="Missions en Cours" value={String(missions.filter((m: any) => m.status === 'en_cours').length)} color="info" icon={<span className="material-symbols-outlined">route</span>} />
+        <StatCard label="Camions Actifs" value={String((camionsData || []).filter((c) => c.status === 'active').length)} color="primary" icon={<span className="material-symbols-outlined">local_shipping</span>} />
+        <StatCard label="Chauffeurs Actifs" value={String((chauffeursData || []).filter((d) => d.is_active).length)} color="success" icon={<span className="material-symbols-outlined">person</span>} />
+        <StatCard label="Missions en Cours" value={String(missions.filter((m) => m.status === 'en_cours').length)} color="info" icon={<span className="material-symbols-outlined">route</span>} />
         <StatCard
           label="Distance Planifiée"
           value={(() => {
-            const km = missions.map((m: any) => m.distance_km).filter((v: any) => typeof v === 'number').reduce((a: number, b: number) => a + b, 0);
-            return missions.some((m: any) => typeof m.distance_km === 'number') ? `${km.toLocaleString('fr-FR')} km` : '—';
+            const km = missions.map((m) => m.distance_km).filter((v): v is number => typeof v === 'number').reduce((a, b) => a + b, 0);
+            return missions.some((m) => typeof m.distance_km === 'number') ? `${km.toLocaleString('fr-FR')} km` : '—';
           })()}
           color="warning"
           icon={<span className="material-symbols-outlined">speed</span>}
@@ -283,7 +283,7 @@ export default function TransportControlPage() {
                 {(corridorsData?.corridors || []).length === 0 ? (
                   <p className="text-xs text-slate-500 py-2">Aucun corridor remonté par l'API.</p>
                 ) : (
-                  corridorsData.corridors.map((c: any, idx: number) => (
+                  corridorsData.corridors.map((c, idx) => (
                     <div key={idx} className="p-3 rounded-xl border border-slate-800 bg-slate-900/60">
                       <div className="text-xs font-bold text-white flex justify-between">
                         <span>{c.axe} ({c.distance_km} km)</span>
