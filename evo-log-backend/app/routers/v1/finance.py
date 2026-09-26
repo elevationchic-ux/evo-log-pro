@@ -193,21 +193,39 @@ def ajouter_ligne_facture(
     )
 
 
-@router.put("/factures/{facture_id}", response_model=FactureResponse)
+@router.put("/factures/{facture_id}")
 def mettre_a_jour_facture(
     facture_id: int,
     facture: FactureUpdate,
+    source: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Update invoice"""
-    f = db.query(Facture).filter(Facture.id == facture_id).first()
+    """Update invoice.
+
+    `source` (ohada | exploitation) leve l'ambiguite entre les deux tables de
+    factures ; sans lui on cherche OHADA puis exploitation. Auparavant seule
+    la table OHADA etait testee, ce qui renvoyait un 404 sur toute facture
+    d'exploitation listee par GET /factures.
+    """
+    from app.models.finance import Facture as FactureSimple
+
+    f = None
+    if source != "exploitation":
+        f = db.query(Facture).filter(Facture.id == facture_id).first()
+    if f is None and source != "ohada":
+        f = db.query(FactureSimple).filter(FactureSimple.id == facture_id).first()
     if not f:
         raise HTTPException(status_code=404, detail="Facture non trouvée")
-    
-    for field, value in facture.model_dump(exclude_unset=True).items():
-        setattr(f, field, value)
-    
+
+    champs = facture.model_dump(exclude_unset=True)
+    # La table d'exploitation ne porte pas les colonnes OHADA : on ne garde que
+    # ce qu'elle sait stocker, sinon l'attribut fantome ferait echouer le commit.
+    colonnes = {c.name for c in f.__table__.columns}
+    for field, value in champs.items():
+        if field in colonnes:
+            setattr(f, field, value)
+
     db.commit()
     db.refresh(f)
     return f
@@ -571,33 +589,78 @@ def rapport_fiscal(
 # ============ KPIS & ANALYTICS ============
 @router.get("/factures")
 def list_factures(
+    statut: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Liste des factures d'exploitation du tenant courant (lecture reelle en base)."""
-    from app.models.finance import Facture as FactureSimple
+    """Liste des factures reellement persistees, les deux tables confondues.
 
-    factures = (
-        db.query(FactureSimple)
-        .order_by(FactureSimple.date_emission.desc(), FactureSimple.id.desc())
-        .limit(500)
-        .all()
+    Deux tables coexistent (`factures` d'exploitation et `factures_ohada`) et
+    POST /factures ecrit dans la table OHADA : ne lire que `factures` faisait
+    disparaitre immediatement toute facture creee depuis l'ecran de
+    facturation. Chaque ligne est taggee `source` pour que les actions
+    (changement de statut, PDF) ciblent la bonne table.
+    """
+    from app.models.finance import Facture as FactureSimple
+    from app.models.tiers import Tiers
+
+    q_simple = db.query(FactureSimple)
+    q_ohada = db.query(Facture)
+    if statut:
+        q_simple = q_simple.filter(FactureSimple.statut == statut)
+        q_ohada = q_ohada.filter(Facture.statut == statut)
+
+    simples = q_simple.order_by(
+        FactureSimple.date_emission.desc(), FactureSimple.id.desc()
+    ).limit(500).all()
+    ohada = q_ohada.order_by(
+        Facture.date_emission.desc(), Facture.id.desc()
+    ).limit(500).all()
+
+    # Les deux referentiel client_id pointent vers tiers.id (heritage
+    # single-table de Tiers) : une seule requete suffit pour les libelles.
+    ids = {f.client_id for f in simples if f.client_id} | {f.client_id for f in ohada if f.client_id}
+    noms = (
+        {t.id: t.name for t in db.query(Tiers).filter(Tiers.id.in_(ids)).all()}
+        if ids else {}
     )
-    return [
-        {
+
+    lignes = []
+    for f in simples:
+        lignes.append({
             "id": f.id,
+            "source": "exploitation",
             "numero_facture": f.numero_facture,
             "client_id": f.client_id,
-            "client_nom": (f.client.name if f.client else None),
+            "client_nom": noms.get(f.client_id),
+            "type_facture": "vente",
             "date_emission": f.date_emission.isoformat() if f.date_emission else None,
             "date_echeance": f.date_echeance.isoformat() if f.date_echeance else None,
             "montant_ht": float(f.montant_ht or 0),
             "montant_tva": float(f.montant_tva or 0),
             "montant_ttc": float(f.montant_ttc or 0),
+            "solde_restant": None,
             "statut": (f.statut.value if hasattr(f.statut, "value") else str(f.statut)),
-        }
-        for f in factures
-    ]
+        })
+    for f in ohada:
+        lignes.append({
+            "id": f.id,
+            "source": "ohada",
+            "numero_facture": f.numero_facture,
+            "client_id": f.client_id,
+            "client_nom": noms.get(f.client_id),
+            "type_facture": f.type_facture,
+            "date_emission": f.date_emission.isoformat() if f.date_emission else None,
+            "date_echeance": f.date_echeance.isoformat() if f.date_echeance else None,
+            "montant_ht": float(f.montant_ht or 0),
+            "montant_tva": float(f.montant_tva or 0),
+            "montant_ttc": float(f.montant_ttc or 0),
+            "solde_restant": float(f.solde_restant) if f.solde_restant is not None else None,
+            "statut": (f.statut.value if hasattr(f.statut, "value") else str(f.statut)),
+        })
+
+    lignes.sort(key=lambda x: (x["date_emission"] or "", x["id"]), reverse=True)
+    return lignes[:500]
 
 
 @router.get("/encaissements")

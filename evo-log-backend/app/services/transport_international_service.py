@@ -9,6 +9,9 @@ from app.models.transport_international import (
     IncidentTransport, ControleRoutier, TaxeRoutiere, CorridorCEMAC,
     TypeTransitRoutier, StatutTransport
 )
+from app.models.transit_cemac import (
+    CorridorCEMACTransit, PosteFrontalier, ProcedureTIR
+)
 
 
 class OrdreTransportService:
@@ -593,73 +596,214 @@ class TMSAdvancedOptimizerService:
         }
 
     @staticmethod
-    def get_corridor_cemac_status() -> Dict[str, Any]:
-        """Live status of international CEMAC transit corridors with TRIE carnet & customs convoys"""
-        corridors = [
-            {
-                "axe": "Corridor Douala - N'Djamena (Tchad)",
-                "distance_km": 1850,
-                "duree_moyenne_jours": 7,
-                "convois_actifs": 14,
-                "points_passage": [
-                    {"ville": "Douala (Origine Quai PAD)", "statut": "DEPARTS_JOURNALIERS", "lat": 4.0511, "lng": 9.7679},
-                    {"ville": "Yaoundé (Check-point)", "statut": "FLUIDE", "lat": 3.8480, "lng": 11.5021},
-                    {"ville": "Ngaoundéré (Plateforme Rail-Route)", "statut": "ESCORTE_DOUANE_GROUPEE", "lat": 7.3167, "lng": 13.5833},
-                    {"ville": "Maroua", "statut": "FLUIDE", "lat": 10.5978, "lng": 14.3166},
-                    {"ville": "Kousseri (Frontière Cameroun-Tchad)", "statut": "PASSEPORT_TRIE_VALIDE", "lat": 12.0833, "lng": 15.0333},
-                    {"ville": "N'Djamena (Destination Finale)", "statut": "LIVRAISON_EN_COURS", "lat": 12.1348, "lng": 15.0557}
-                ],
-                "regime_douane": "Carnet TRIE Inter-États CEMAC / Caution Bancaire Apurée",
-                "escorte_douaniere_obligatoire": True
-            },
-            {
-                "axe": "Corridor Douala - Bangui (RCA)",
-                "distance_km": 1430,
-                "duree_moyenne_jours": 6,
-                "convois_actifs": 9,
-                "points_passage": [
-                    {"ville": "Douala", "statut": "DEPARTS_JOURNALIERS", "lat": 4.0511, "lng": 9.7679},
-                    {"ville": "Bertoua (Poste Contrôle)", "statut": "FLUIDE", "lat": 4.5773, "lng": 13.6846},
-                    {"ville": "Garoua-Boulaï (Poste Frontière RCA)", "statut": "APUREMENT_TRANSIT", "lat": 5.8858, "lng": 14.5522},
-                    {"ville": "Bangui (Destination Finale)", "statut": "LIVRAISON_EN_COURS", "lat": 4.3947, "lng": 18.5582}
-                ],
-                "regime_douane": "Convention CMR & Déclaration IM8 CEMAC",
-                "escorte_douaniere_obligatoire": True
-            }
-        ]
+    def get_corridor_cemac_status(db: Session) -> Dict[str, Any]:
+        """Live status of international CEMAC transit corridors with TIR carnet & customs convoys.
+
+        Avant : dict 100% codé en dur (23 camions, convois 14/9, points de
+        passage inventés). Maintenant : agrégation réelle depuis
+        corridors_cemac_transit / postes_frontaliers / procedures_tir. Sans
+        données en base, le service renvoie des vides honnêtes — jamais des
+        chiffres décoratifs.
+        """
+        import json
+
+        corridors = []
+        total_en_transit: Optional[int] = None
+        for cor in (
+            db.query(CorridorCEMACTransit)
+            .filter(CorridorCEMACTransit.est_actif.is_(True))
+            .order_by(CorridorCEMACTransit.code)
+            .all()
+        ):
+            convois = (
+                db.query(func.count(ProcedureTIR.id))
+                .filter(ProcedureTIR.corridor == cor.code, ProcedureTIR.statut == "en_cours")
+                .scalar()
+            )
+            if isinstance(convois, int) and convois > 0:
+                total_en_transit = (total_en_transit or 0) + convois
+            points = []
+            for poste in sorted(cor.postes_frontaliers, key=lambda p: p.id):
+                lat = lng = None
+                if poste.coordonnees:
+                    parts = [x.strip() for x in poste.coordonnees.replace(";", ",").split(",")]
+                    if len(parts) >= 2:
+                        try:
+                            lat, lng = float(parts[0]), float(parts[1])
+                        except ValueError:
+                            pass
+                points.append({
+                    "ville": poste.ville or poste.nom,
+                    "statut": "ACTIF" if poste.est_actif else "FERME",
+                    "lat": lat,
+                    "lng": lng,
+                })
+            try:
+                risques = json.loads(cor.risques) if cor.risques else []
+            except (TypeError, ValueError):
+                risques = []
+            corridors.append({
+                "code": cor.code,
+                "axe": cor.nom,
+                "distance_km": cor.distance_km,
+                "duree_moyenne_jours": (
+                    int(cor.duree_estimee_heures / 24) + 1 if cor.duree_estimee_heures else None
+                ),
+                "convois_actifs": convois,
+                "points_passage": points,
+                "regime_douane": "Carnet TIR (procéduces enregistrées dans procedures_tir)",
+                "etat_route": cor.etat_route.value if cor.etat_route else None,
+                "risques": risques,
+                "escorte_douaniere_obligatoire": None,
+            })
         return {
             "zone": "Communauté Économique et Monétaire de l'Afrique Centrale (CEMAC)",
-            "total_camions_en_transit": 23,
+            "total_camions_en_transit": total_en_transit,
             "corridors": corridors,
-            "systeme_tracking": "Balise GPS Satellite + Scellés Électroniques Douaniers",
-            "last_check": datetime.utcnow().isoformat()
+            "source": "corridors_cemac_transit / postes_frontaliers / procedures_tir",
+            "last_check": datetime.utcnow().isoformat(),
         }
 
     @staticmethod
-    def get_tco_fleet_analytics() -> Dict[str, Any]:
-        """TCO (Total Cost of Ownership) per km & predictive maintenance alerts"""
-        cout_moyen_km_xaf = 1240
-        breakdown = [
-            {"poste": "Carburant & Lubrifiants (Gasoil)", "pourcentage": 42.0, "cout_km_xaf": 520.8},
-            {"poste": "Amortissement Tracteurs & Remorques", "pourcentage": 19.0, "cout_km_xaf": 235.6},
-            {"poste": "Maintenance, Pièces GMAO & Vidanges", "pourcentage": 18.0, "cout_km_xaf": 223.2},
-            {"poste": "Pneumatiques (Usure essieux & trains)", "pourcentage": 14.0, "cout_km_xaf": 173.6},
-            {"poste": "Assurance CMR, Taxes & Cautions Douane", "pourcentage": 7.0, "cout_km_xaf": 86.8},
-        ]
+    def get_tco_fleet_analytics(db: Session) -> Dict[str, Any]:
+        """TCO (Total Cost of Ownership) per km & maintenance alerts.
 
-        vehicules_alertes = [
-            {"immatriculation": "LT-TR-4021", "type": "Tracteur 6x4 Mercedes Actros", "km_compteur": 284500, "alerte": "VIDANGE_MOTEUR_IMMINENTE", "echeance_km": 500, "priorite": "HAUTE"},
-            {"immatriculation": "LT-TR-8812", "type": "Plateau Porte-Conteneur 40'", "km_compteur": 142100, "alerte": "CONTROLE_PNEUMATIQUES_ESSIEU_3", "echeance_km": 1200, "priorite": "MOYENNE"},
-            {"immatriculation": "CE-TR-1099", "type": "Tracteur 6x4 MAN TGX", "km_compteur": 312000, "alerte": "CONTROLE_SYSTEME_FREINAGE", "echeance_km": 200, "priorite": "CRITIQUE"}
+        Avant : coût 1240 XAF/km, répartition 42/19/18/14/7 % et trois
+        immatriculations fictives (LT-TR-4021...) codés en dur. Maintenant :
+        coût km réel = somme des notes de frais justifiées (frais_missions)
+        rapportée au kilométrage des missions terminées ; alertes = échéances
+        de maintenance réelles des camions + pannes non soldées. Nil explicite
+        quand la base ne prouve rien.
+        """
+        from app.models.frais_mission import FraisMission
+        from app.models.transport import Camion, CamionStatus, Mission, MissionStatus, Panne
+
+        nb_camions = (
+            db.query(func.count(Camion.id))
+            .filter(Camion.is_active.is_(True))
+            .scalar()
+        ) or 0
+
+        # --- Coût km réel : frais validés rattachés à des missions terminées ---
+        finished_mission_ids = [
+            mid
+            for (mid,) in db.query(Mission.id)
+            .filter(Mission.statut == MissionStatus.TERMINEE)
+            .all()
         ]
+        distance_totale_km = float(
+            db.query(func.sum(Mission.distance_km))
+            .filter(
+                Mission.statut == MissionStatus.TERMINEE,
+                Mission.distance_km.isnot(None),
+                Mission.distance_km > 0,
+            )
+            .scalar()
+        ) or 0.0
+
+        couls_par_type: Dict[str, float] = {}
+        total_frais = 0.0
+        if finished_mission_ids and distance_totale_km > 0:
+            rows = (
+                db.query(FraisMission.type_frais, func.sum(FraisMission.montant))
+                .filter(
+                    FraisMission.mission_id.in_(finished_mission_ids),
+                    FraisMission.statut.in_(["VALIDE", "REMBOURSE"]),
+                )
+                .group_by(FraisMission.type_frais)
+                .all()
+            )
+            for type_frais, sous_total in rows:
+                montant = float(sous_total or 0.0)
+                couls_par_type[type_frais or "DIVERS"] = couls_par_type.get(type_frais or "DIVERS", 0.0) + montant
+                total_frais += montant
+
+        if total_frais > 0 and distance_totale_km > 0:
+            cout_km = round(total_frais / distance_totale_km, 2)
+            breakdown = [
+                {
+                    "poste": poste,
+                    "pourcentage": round(montant / total_frais * 100, 1),
+                    "cout_km_xaf": round(montant / distance_totale_km, 2),
+                }
+                for poste, montant in sorted(couls_par_type.items(), key=lambda kv: -kv[1])
+            ]
+        else:
+            # Aucune preuve en base : on l'affiche plutôt que d'inventer 1240 XAF.
+            cout_km = None
+            breakdown = []
+
+        # --- Alertes : échéances réelles + pannes non soldées ---
+        maintenant = datetime.utcnow()
+        alerts: List[Dict[str, Any]] = []
+        for camion in (
+            db.query(Camion)
+            .filter(Camion.is_active.is_(True), Camion.prochaine_maintenance.isnot(None))
+            .order_by(Camion.prochaine_maintenance)
+            .limit(50)
+            .all()
+        ):
+            echeance = camion.prochaine_maintenance
+            if echeance.tzinfo is not None:
+                echeance = echeance.replace(tzinfo=None)
+            if echeance > maintenant + timedelta(days=30):
+                continue
+            retard_jours = (maintenant - echeance).days
+            priorite = "CRITIQUE" if retard_jours > 7 else ("HAUTE" if retard_jours >= 0 else "MOYENNE")
+            alerts.append({
+                "camion_id": camion.id,
+                "immatriculation": camion.immatriculation,
+                "type": " ".join(filter(None, [camion.marque, camion.modele])) or "Véhicule",
+                "km_compteur": camion.kilometrage,
+                "alerte": "MAINTENANCE_PERIODIQUE",
+                "echeance": echeance.isoformat(),
+                "retard_jours": max(retard_jours, 0),
+                "priorite": priorite,
+            })
+        for camion, panne in (
+            db.query(Camion, Panne)
+            .join(Panne, Panne.camion_id == Camion.id)
+            .filter(
+                Camion.is_active.is_(True),
+                Panne.statut.in_(["signalee", "en_cours", "immobilisee"]),
+                Panne.gravite.in_(["grave", "bloquante"]),
+            )
+            .all()
+        ):
+            alerts.append({
+                "camion_id": camion.id,
+                "immatriculation": camion.immatriculation,
+                "type": " ".join(filter(None, [camion.marque, camion.modele])) or "Véhicule",
+                "km_compteur": camion.kilometrage,
+                "alerte": f"PANNE_{(panne.type_panne or 'GENERALE').upper()}",
+                "echeance": None,
+                "panne_reference": panne.reference,
+                "priorite": "CRITIQUE" if panne.statut == "immobilisee" else "HAUTE",
+            })
+
+        nb_bloques = (
+            db.query(func.count(Camion.id))
+            .filter(Camion.status == CamionStatus.IN_MAINTENANCE)
+            .scalar()
+        ) or 0
 
         return {
-            "flotte_totale_vehicules": 48,
-            "cout_global_moyen_km_xaf": cout_moyen_km_xaf,
+            "flotte_totale_vehicules": nb_camions,
+            "vehicules_en_maintenance": nb_bloques,
+            "cout_global_moyen_km_xaf": cout_km,
+            "missions_terminees_prises_en_compte": len(finished_mission_ids),
+            "distance_totale_km_prouvee": round(distance_totale_km, 1),
+            "total_frais_justifies_xaf": round(total_frais, 2),
             "devis_monetaire": "XAF",
             "repartition_tco": breakdown,
-            "alertes_maintenance_predictive": vehicules_alertes,
-            "date_analyse": datetime.now().isoformat()
+            "alertes_maintenance_predictive": alerts,
+            "source": "camions / missions / frais_missions / transport_pannes",
+            "note": (
+                None if cout_km is not None
+                else "Aucun frais justifié rattaché à des missions terminées avec distance : "
+                     "coût/km non calculable — aucun chiffre n'est inventé."
+            ),
+            "date_analyse": datetime.now().isoformat(),
         }
 
 # Compatibility exports retained during the EVO-LOG Pro reconciliation.

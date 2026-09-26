@@ -157,18 +157,18 @@ async def optimiser_tournees_vrp(payload: dict = None):
 
 # ============ CORRIDORS INTERNATIONAUX CEMAC ============
 @router.get("/corridors-cemac")
-async def obtenir_statut_corridors_cemac():
-    """Live status of international CEMAC transit corridors with TRIE carnet & customs convoys"""
+async def obtenir_statut_corridors_cemac(db: Session = Depends(get_db)):
+    """Live status of international CEMAC transit corridors with TIR carnet & customs convoys"""
     from app.services.transport_international_service import TMSAdvancedOptimizerService
-    return TMSAdvancedOptimizerService.get_corridor_cemac_status()
+    return TMSAdvancedOptimizerService.get_corridor_cemac_status(db)
 
 
 # ============ TCO FLOTTE & MAINTENANCE PRÉDICTIVE ============
 @router.get("/flotte/tco")
-async def obtenir_tco_flotte():
-    """TCO cost per km and predictive maintenance alerts for the fleet"""
+async def obtenir_tco_flotte(db: Session = Depends(get_db)):
+    """TCO cost per km and maintenance alerts for the fleet (agregats reels)"""
     from app.services.transport_international_service import TMSAdvancedOptimizerService
-    return TMSAdvancedOptimizerService.get_tco_fleet_analytics()
+    return TMSAdvancedOptimizerService.get_tco_fleet_analytics(db)
 
 
 # ============ KPIS TRANSPORT ============
