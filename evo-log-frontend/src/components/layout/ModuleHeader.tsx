@@ -732,7 +732,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                         {notif.severity}
                       </span>
                       <span className="font-mono text-[11px] text-on-surface-variant">
-                        {mounted ? new Date(notif.timestamp).toLocaleTimeString() : '--:--'}
+                        {mounted ? new Date(notif.timestamp).toLocaleTimeString(language === 'en' ? 'en-GB' : 'fr-FR') : '--:--'}
                       </span>
                     </div>
                     <p className={`text-xs leading-relaxed ${notif.read ? 'text-on-surface-variant' : 'text-on-surface font-medium'}`}>
