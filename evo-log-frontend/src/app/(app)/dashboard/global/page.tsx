@@ -225,12 +225,12 @@ export default function GlobalDashboard() {
   }
 
   const kpiCards: { label: string; value: string; icon: typeof Truck; color: string; bg: string; border: string }[] = [
-    { label: "Chiffre d'Affaires (FCFA)", value: fmtM(data.chiffreAffaires), icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
-    { label: 'Missions en Cours', value: fmtInt(data.missionsEnCours), icon: Truck, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30' },
-    { label: 'Véhicules Actifs', value: data.vehiculesActifs === null ? '' : `${data.vehiculesActifs} / ${data.vehiculesTotal ?? 0}`, icon: Radio, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30' },
-    { label: 'Valeur Stock (FCFA)', value: fmtM(data.valeurStock), icon: Package, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/30' },
-    { label: 'Stock sous Minimum', value: fmtInt(data.alertesStock), icon: AlertTriangle, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/30' },
-    { label: 'Mouvements du Jour', value: fmtInt(data.mouvementsJour), icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/30' }
+    { label: t.dash.kpiRevenue, value: fmtM(data.chiffreAffaires, 'M', locale), icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
+    { label: t.dash.kpiMissions, value: fmtInt(data.missionsEnCours, locale), icon: Truck, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30' },
+    { label: t.dash.kpiActiveVehicles, value: data.vehiculesActifs === null ? '' : `${data.vehiculesActifs.toLocaleString(locale)} / ${(data.vehiculesTotal ?? 0).toLocaleString(locale)}`, icon: Radio, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30' },
+    { label: t.dash.kpiStockValue, value: fmtM(data.valeurStock, 'M', locale), icon: Package, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/30' },
+    { label: t.dash.kpiBelowMinimum, value: fmtInt(data.alertesStock, locale), icon: AlertTriangle, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/30' },
+    { label: t.dash.kpiMovements, value: fmtInt(data.mouvementsJour, locale), icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/30' }
   ]
 
   return (
@@ -239,13 +239,13 @@ export default function GlobalDashboard() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-2xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Sparkles className="w-3.5 h-3.5" /> Écosystème Logistique Global • Port de Douala & Kribi Deep Sea
+            <Sparkles className="w-3.5 h-3.5" /> {t.dash.badge}
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            Vue d'Ensemble Entreprise EVO-LOG
+            {t.dash.title}
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Supervision stratégique agrégée en temps réel depuis la base de votre organisation (finance, transport, magasin).
+            {t.dash.subtitle}
           </p>
         </div>
 
@@ -259,7 +259,7 @@ export default function GlobalDashboard() {
               onChange={(e) => setTcode(e.target.value.toUpperCase())}
               onFocus={() => setTcodeFocused(true)}
               onBlur={() => setTcodeFocused(false)}
-              placeholder="Saisir T-Code (ex: EVO-TR01)"
+              placeholder={t.dash.tcodePlaceholder}
               className="h-10 pl-9 pr-3 bg-slate-950 border border-amber-500/30 rounded-xl text-xs text-amber-300 font-mono placeholder-slate-500 focus:outline-none focus:border-amber-400 w-44"
             />
           </form>
@@ -271,7 +271,7 @@ export default function GlobalDashboard() {
             className="h-10 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold rounded-xl flex items-center gap-2 transition cursor-pointer text-slate-200"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-amber-400 ${isSyncing || loading ? 'animate-spin' : ''}`} />
-            {isSyncing || loading ? 'Chargement...' : `Actualisé (${lastSync})`}
+            {isSyncing || loading ? t.common.loading : `${t.dash.refreshed} (${lastSync ? new Date(lastSync).toLocaleTimeString(locale) : '—'})`}
           </button>
 
           <Link
@@ -279,7 +279,7 @@ export default function GlobalDashboard() {
             className="h-10 px-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs rounded-xl flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition cursor-pointer"
           >
             <ShieldCheck className="w-4 h-4" />
-            Admin ERP
+            {t.dash.adminErp}
           </Link>
         </div>
       </div>

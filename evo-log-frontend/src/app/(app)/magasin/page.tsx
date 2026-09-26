@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { magasinAPI } from '@/lib/api-client';
+import { magasinAPI, apiClient } from '@/lib/api-client';
 import {
   Warehouse, Package, TrendingUp, AlertTriangle, Search, Plus,
   MapPin, RefreshCw, Eye, ArrowRight, BarChart3,
@@ -51,6 +51,20 @@ export default function WMSDashboardPage() {
       try {
         const res = await magasinAPI.getStocks();
         return res.data?.items || res.data || (Array.isArray(res) ? res : []);
+      } catch (e) {
+        return [];
+      }
+    },
+    enabled: mounted,
+  });
+
+  // Occupation reelle par entrepot (agregat DB, pas les litteraux JSX d'avant).
+  const { data: occupationData } = useQuery({
+    queryKey: ['magasin-occupation'],
+    queryFn: async () => {
+      try {
+        const res = await apiClient.get('/api/v1/magasin/entrepots/occupation');
+        return res.data?.zones || [];
       } catch (e) {
         return [];
       }
@@ -115,20 +129,21 @@ export default function WMSDashboardPage() {
     }
   });
 
+  // StockResponse (contrat emis par /api/v1/magasin/stocks) ne contient ni
+  // zone/allee/travee/niveau, ni temperature, ni methode_valorisation, ni
+  // seuil_alerte : l'ancien mapping les reclamait puis FABRIQUAIT les defauts
+  // ('A'/'01', 100 unites, seuil 20, 'FIFO'). L'adresse reelle est le champ
+  // `emplacement` (chaine), le seuil bas est `quantite_minimum`.
   const stockItems = Array.isArray(stocksData) && stocksData.length > 0 
     ? stocksData.map((s: any) => ({
-        ref: s.code_article || s.ref || 'ART-GEN',
-        desc: s.designation || s.desc || 'Article d\'entrepôt',
-        zone: s.zone || 'A',
-        allee: s.allee || '01',
-        travee: s.travee || '01',
-        niveau: s.niveau || '01',
-        qte: s.quantite_disponible ?? s.qte ?? 100,
-        unite: s.unite || 'Unités',
-        seuil: s.seuil_alerte ?? s.seuil ?? 20,
-        temp: s.temperature || 'Ambiante',
-        methode: s.methode_valorisation || 'FIFO',
-        statut: (s.quantite_disponible ?? s.qte ?? 100) <= (s.seuil_alerte ?? 20) ? 'ALERTE' : 'OK'
+        ref: s.code_article || '—',
+        desc: s.designation || s.description || '—',
+        emplacement: s.emplacement || '',
+        qte: s.quantite_disponible ?? 0,
+        unite: s.unite_mesure || '',
+        seuil: s.quantite_minimum ?? null,
+        valeur: (s.quantite_disponible ?? 0) * (s.prix_unitaire ?? 0),
+        statut: s.quantite_minimum != null && (s.quantite_disponible ?? 0) <= s.quantite_minimum ? 'ALERTE' : 'OK'
       }))
     : [];
 
