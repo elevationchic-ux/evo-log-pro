@@ -65,12 +65,13 @@ export default function SystemSettingsPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      await apiClient.post('/api/admin/system/config', config).catch(() => {
-        return apiClient.put('/api/admin/global-settings', { system_config: config });
-      });
+      // /api/admin/... n'est jamais monté (seul /api/v1/admin l'est) : le
+      // système de secours masquait une écriture qui ne partait nulle part.
+      await apiClient.put('/api/v1/admin/system/config', config);
       toast.success('Paramètres système mis à jour avec succès.');
     } catch (err: any) {
-      toast.success('Configuration système enregistrée et appliquée au runtime.');
+      // Un echec d'ecriture ne doit surtout pas s'afficher comme un succes.
+      toast.error(err?.response?.data?.detail || 'Échec de l\'enregistrement des paramètres système.');
     } finally {
       setSaving(false);
     }

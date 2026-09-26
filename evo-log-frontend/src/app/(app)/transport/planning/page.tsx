@@ -7,9 +7,10 @@ import { Calendar, Filter, GripVertical, Map, MapPin, Search, TrendingUp, Truck,
 import { CardSkeletonLoader } from '@/components/ui/Loaders';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import type { MissionResponse } from '@/types/transport';
 
 export default function PlanningPage() {
-  const [missions, setMissions] = useState<any[]>([]);
+  const [missions, setMissions] = useState<MissionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   
   // KPI Stats
@@ -28,7 +29,7 @@ export default function PlanningPage() {
     try {
       setLoading(true);
       const res = await transportAPI.getMissions();
-      const data = res.data || [];
+      const data: MissionResponse[] = res.data || [];
       setMissions(data);
       
       // MissionStatus (enum reel, minuscules, sans accent) : planifiee | en_cours |
@@ -37,9 +38,9 @@ export default function PlanningPage() {
       // figes a 0 quel que soit le contenu de la base.
       setStats({
         total: data.length,
-        planifie: data.filter((m: any) => m.statut === 'planifiee').length,
-        enRoute: data.filter((m: any) => m.statut === 'en_cours').length,
-        livre: data.filter((m: any) => m.statut === 'terminee').length
+        planifie: data.filter((m) => m.statut === 'planifiee').length,
+        enRoute: data.filter((m) => m.statut === 'en_cours').length,
+        livre: data.filter((m) => m.statut === 'terminee').length
       });
       
     } catch (error) {

@@ -163,22 +163,40 @@ async def create_entrepot(entrepot_data: EntrepotCreate, db: Session = Depends(g
 
 # ============ WMS CROSS-DOCKING & RF TERMINAL ============
 @router.post("/cross-docking")
-async def executer_cross_docking(payload: dict, current_user: User = Depends(require_perm("magasin.picking.create"))):
-    """Execute direct quai-to-truck cross-docking"""
+async def executer_cross_docking(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.picking.create")),
+):
+    """Consolidation cross-dock sur le payload soumis. Plus de defaults
+    fabriques (« MAN-2026-001 », « LT-452-BA », colis 1200 kg ») : sans
+    manifeste ni camion reels dans la requete, reponse 400."""
     from app.services.magasin_wms_avance_service import CrossDockingService
-    manifeste_ref = payload.get("manifeste_ref", "MAN-2026-001")
-    camion_immat = payload.get("camion_immat", "LT-452-BA")
-    colis = payload.get("colis", [{"colis_ref": "COLIS-01", "poids_kg": 1200.0}])
-    return CrossDockingService.executer_cross_docking(manifeste_ref, camion_immat, colis)
+    manifeste_ref = payload.get("manifeste_ref")
+    camion_immat = payload.get("camion_immat")
+    colis = payload.get("colis")
+    if not manifeste_ref or not camion_immat or not colis:
+        raise HTTPException(
+            status_code=400,
+            detail="Champs requis : manifeste_ref, camion_immat et colis (liste non vide).",
+        )
+    return CrossDockingService.executer_cross_docking(db, manifeste_ref, camion_immat, colis)
 
 
 @router.post("/rf-scan")
-async def scanner_code_barres_rf(payload: dict, current_user: User = Depends(require_perm("magasin.picking.create"))):
-    """Scan barcode / QR code with RF handheld terminal"""
+async def scanner_code_barres_rf(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.picking.create")),
+):
+    """Scan barcode / QR code with RF handheld terminal — resolution reelle
+    contre le master data (plus de « code >= 4 caracteres = conforme »)."""
     from app.services.magasin_wms_avance_service import RadioFrequencePDAService
-    code = payload.get("code_scanne", "ART-1002")
+    code = payload.get("code_scanne")
+    if not code:
+        raise HTTPException(status_code=400, detail="Champ requis : code_scanne.")
     loc = payload.get("emplacement_cible")
-    return RadioFrequencePDAService.scanner_code_barres(code, loc)
+    return RadioFrequencePDAService.scanner_code_barres(db, code, loc)
 
 
 @router.get("/reapprovisionnement/rop")

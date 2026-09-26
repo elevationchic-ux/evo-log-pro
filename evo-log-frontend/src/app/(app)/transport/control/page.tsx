@@ -5,6 +5,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { transportAPI } from '@/lib/api-client';
 import { KPICard, StatCard, Card, CardHeader, CardContent, DataTable, StatusBadge, PageHeader } from '@/components/ui';
 import { toast } from 'sonner';
+import type {
+  MissionResponse,
+  CamionResponse,
+  ConducteurResponse,
+  CorridorsCEMACResponse,
+  TcoFleetResponse,
+} from '@/types/transport';
 
 export default function TransportControlPage() {
   const [mounted, setMounted] = useState(false);

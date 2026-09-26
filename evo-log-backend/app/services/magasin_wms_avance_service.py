@@ -127,48 +127,96 @@ class InventaireCompletService:
 
 class CrossDockingService:
     @staticmethod
-    def executer_cross_docking(manifeste_ref: str, camion_immat: str, colis_items: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Direct transshipment from vessel/quai to outgoing truck without rack storage"""
+    def executer_cross_docking(db: Session, manifeste_ref: str, camion_immat: str, colis_items: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Consolidation des colis d'un manifeste vers un camion partant.
+
+        Avant : faux receipt « XDOCK-timestamp », quai decoratif (« Quai
+        Cross-Dock #3 (PAD) ») et « gain_temps_heures: 18.5 » inventes, sans
+        rien ecrire en base. Maintenant : aggregation reelle des colis soumis
+        (quantites et poids réellement transmis), receipt NULL et statut
+        `non_persiste` tant qu'aucune table d'operation cross-dock n'existe —
+        un numero de recu ne doit pas etre fabrique.
+        """
         transferred_items = []
         total_poids = 0.0
-        for item in colis_items:
-            poids = float(item.get("poids_kg", 500.0))
-            total_poids += poids
+        for idx, item in enumerate(colis_items):
+            poids_raw = item.get("poids_kg")
+            poids = float(poids_raw) if poids_raw is not None else None
+            if poids is not None:
+                total_poids += poids
             transferred_items.append({
-                "colis_ref": item.get("colis_ref", "COLIS-AUTO"),
-                "description": item.get("description", "Marchandise sous douane"),
+                "colis_ref": item.get("colis_ref") or f"colis#{idx}",
+                "description": item.get("description"),
                 "poids_kg": poids,
-                "quai_chargement": "Quai Cross-Dock #3 (PAD)",
-                "statut": "CHARGÉ_DIRECT"
+                "statut": "EN_ATTENTE_PERSISTENCE",
             })
-        
         return {
-            "cross_dock_ref": f"XDOCK-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "cross_dock_ref": None,
             "manifeste_origine": manifeste_ref,
             "camion_destination": camion_immat,
             "nb_colis": len(transferred_items),
-            "poids_total_kg": total_poids,
-            "gain_temps_heures": 18.5,
-            "statut": "COMPLETE",
+            "poids_total_kg": round(total_poids, 2),
+            "poids_non_renseignes": sum(1 for i in transferred_items if i["poids_kg"] is None),
+            "gain_temps_heures": None,
+            "statut": "non_persiste",
             "items": transferred_items,
-            "date_operation": datetime.now().isoformat()
+            "date_operation": datetime.now().isoformat(),
+            "note": (
+                "Operation non enregistree : aucune table de cross-docking "
+                "n'existe encore (pas de receipt ni de guide-quai reels). "
+                "Les quantites ci-dessus sont la consolidation fidele du payload soumis."
+            ),
         }
 
 
 class RadioFrequencePDAService:
     @staticmethod
-    def scanner_code_barres(code_scanne: str, emplacement_cible: str = None) -> Dict[str, Any]:
-        """Validate barcode scan (Code 128 / Datamatrix / QR Code) with rack location check"""
-        is_valid_format = len(code_scanne) >= 4
-        # Format can be ART-xxx or PAL-xxx or LOC-xxx
-        scan_type = "PALETTE" if "PAL" in code_scanne.upper() else ("EMPLACEMENT" if "LOC" in code_scanne.upper() else "ARTICLE")
+    def scanner_code_barres(db: Session, code_scanne: str, emplacement_cible: str = None) -> Dict[str, Any]:
+        """Scanne et resolve un code contre le master data REEL (Article.code_barres
+        / Article.code / Stock.code_article), avec l'emplacement réellement
+        enregistre pour l'article.
+
+        Avant : tout code d'au moins 4 caracteres etait « certifie conforme »
+        et recevait l'emplacement invente « A01-R04-N02 ».
+        """
+        code = (code_scanne or "").strip()
+        article = None
+        stock = None
+        if code:
+            article = (
+                db.query(Article)
+                .filter((Article.code_barres == code) | (Article.code == code))
+                .first()
+            )
+            if article:
+                stock = (
+                    db.query(Stock)
+                    .filter(Stock.code_article == article.code, Stock.is_active.is_(True))
+                    .first()
+                )
+            else:
+                # Le code peut designer directement une ligne de stock.
+                stock = (
+                    db.query(Stock)
+                    .filter(Stock.code_article == code, Stock.is_active.is_(True))
+                    .first()
+                )
+        known = article is not None or stock is not None
+        emplacement = emplacement_cible or (stock.emplacement if stock else None) or (article.code if article else None)
+        code_resolu = (article.code if article else None) or (stock.code_article if stock else None)
         return {
-            "code_scanne": code_scanne,
-            "type_identifie": scan_type,
-            "valide": is_valid_format,
-            "emplacement_attribue": emplacement_cible or "A01-R04-N02",
-            "message": f"Scan {scan_type} certifié conforme. Guidage cariste validé.",
-            "timestamp": datetime.now().isoformat()
+            "code_scanne": code,
+            "type_identifie": "ARTICLE" if known else "INCONNU",
+            "valide": known,
+            "article_code": code_resolu,
+            "designation": (article.designation if article else (stock.designation if stock else None)),
+            "emplacement_attribue": emplacement,
+            "message": (
+                f"Code reconnu : {code_resolu}."
+                if known
+                else "Code inconnu du master data : aucune fiche article ni ligne de stock ne correspond."
+            ),
+            "timestamp": datetime.now().isoformat(),
         }
 
 
