@@ -7,12 +7,16 @@ import { NAVIGATION_REGISTRY, ModuleNavConfig } from "@/config/navigationRegistr
 import { localizeTitle, localizeSubLabel } from "@/config/navI18n";
 import { useSettings } from "@/components/layout/SettingsProvider";
 import { useI18n } from "@/hooks/useI18n";
+import { useSession } from "next-auth/react";
 
 export default function SubModuleOrbitalBubble() {
   const pathname = usePathname();
   const router = useRouter();
   const { language } = useSettings();
   const t = useI18n();
+  const { data: session } = useSession();
+  const isSuperUser = Boolean((session?.user as any)?.is_superuser)
+    || Number((session?.user as any)?.role_level ?? 9) === 0;
 
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -20,8 +24,11 @@ export default function SubModuleOrbitalBubble() {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef<{ startX: number; startY: number; posX: number; posY: number }>({ startX: 0, startY: 0, posX: 0, posY: 0 });
 
-  // TOUS les modules sont exposés dans la bulle flottante (exigence produit).
-  const filteredNav: ModuleNavConfig[] = Object.values(NAVIGATION_REGISTRY);
+  // TOUS les modules sont exposés dans la bulle flottante (exigence produit),
+  // SAUF la console Super-Admin CADC, invisible pour un non-super-admin.
+  const filteredNav: ModuleNavConfig[] = Object.values(NAVIGATION_REGISTRY).filter(
+    (m) => m.key !== "superadmin-cadc" || isSuperUser
+  );
 
   // Résolution du module actif à partir du pathname (pour colorer la bulle).
   const activeModuleKey =

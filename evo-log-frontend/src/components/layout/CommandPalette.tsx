@@ -25,6 +25,9 @@ export function CommandPalette() {
   const router = useRouter();
   const { language } = useSettings();
   const t = useI18n();
+  const { data: session } = useSession();
+  const isSuperUser = Boolean((session?.user as any)?.is_superuser)
+    || Number((session?.user as any)?.role_level ?? 9) === 0;
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -45,6 +48,8 @@ export function CommandPalette() {
   const allItems = useMemo<NavEntry[]>(() => {
     const items: NavEntry[] = [];
     for (const m of Object.values(NAVIGATION_REGISTRY)) {
+      // Invisibilité : la console CADC n'est pas recherchable par un non-super-admin.
+      if (m.key === "superadmin-cadc" && !isSuperUser) continue;
       const title = localizeTitle(m, language);
       items.push({
         key: `module:${m.key}`,
@@ -68,7 +73,7 @@ export function CommandPalette() {
       }
     }
     return items;
-  }, [language]);
+  }, [language, isSuperUser]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
