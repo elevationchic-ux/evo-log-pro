@@ -7,6 +7,7 @@ import { NAVIGATION_REGISTRY } from "@/config/navigationRegistry";
 import { localizeTitle, localizeSubLabel } from "@/config/navI18n";
 import { useSettings } from "@/components/layout/SettingsProvider";
 import { useI18n } from "@/hooks/useI18n";
+import { useSession } from "next-auth/react";
 
 interface NavEntry {
   key: string;

@@ -79,15 +79,23 @@ export default function ModuleSidebar({
   const userRoles: string[] = (session?.user as any)?.roles || [];
   const userModules: string[] = (session?.user as any)?.modules_allowed || [];
   const isAdmin = userRoles.some(r => r.toUpperCase() === "ADMIN");
+  // Console Super-Admin CADC : niveau hiérarchique 0 (ou compte super-utilisateur).
+  const isSuperUser = Boolean((session?.user as any)?.is_superuser)
+    || Number((session?.user as any)?.role_level ?? 9) === 0;
 
   const [expandedModule, setExpandedModule] = useState<string | null>(null);
 
   // Tous les modules sont visibles partout (exigence produit). La restriction
   // d'accès réelle est appliquée côté API à chaque requête ; les modules hors
   // profil restent affichés mais grisés/cadenassés via checkModuleAccess.
-  const filteredNav: ModuleNavConfig[] = Object.values(NAVIGATION_REGISTRY);
+  // EXCEPTION d'invisibilité : la console Super-Admin CADC n'est jamais affichée
+  // (même grisée) à un non-super-admin : on ne doit pas divulguer son existence.
+  const filteredNav: ModuleNavConfig[] = Object.values(NAVIGATION_REGISTRY).filter(
+    (m) => m.key !== "superadmin-cadc" || isSuperUser
+  );
 
   const checkModuleAccess = (itemKey: string): boolean => {
+    if (isSuperUser) return true;
     if (isAdmin) return true;
     if (itemKey === "dashboard" || itemKey === "settings") return true;
     if (userModules.includes(itemKey)) return true;

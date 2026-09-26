@@ -987,6 +987,66 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   },
 
   // ============================================================================
+  // 👑 CONSOLE SUPER-ADMIN CADC (SaaS : entreprises, plans, prestataires,
+  // accréditations). Visibility stricte : niveau 0 uniquement (role_level===0 /
+  // is_superuser). Le backend exige require_superadmin sur chaque endpoint.
+  // ============================================================================
+  'superadmin-cadc': {
+    key: 'superadmin-cadc',
+    title: '👑 Console Super-Admin CADC',
+    path: '/admin/super-admin/entreprises',
+    icon: Crown,
+    color: '#f59e0b',
+    glow: 'shadow-amber-500/50 border-amber-500/60',
+    bgGradient: 'from-amber-600 to-yellow-600',
+    businessArea: 'Gouvernance Plateforme SaaS (CADC)',
+    processPhase: 'Propriétaire Plateforme Multi-Entreprises',
+    requiredRoles: ['SUPER_ADMIN', 'CADC'],
+    subModules: [
+      {
+        label: 'Entreprises & Logos',
+        path: '/admin/super-admin/entreprises',
+        icon: Building,
+        badge: 'Clients',
+        tcode: 'KCADC_ENT',
+        description: 'CRUD total des entreprises clientes, plans et allocation de modules',
+        businessProcess: 'Gestion multi-tenants SaaS',
+        requiredRoles: ['SUPER_ADMIN', 'CADC']
+      },
+      {
+        label: 'Plans d\'Abonnement',
+        path: '/admin/super-admin/plans-abonnement',
+        icon: Tag,
+        badge: 'Paliers',
+        tcode: 'KCADC_PLN',
+        description: 'Configuration des paliers SaaS et verrou max_modules',
+        businessProcess: 'Monétisation SaaS',
+        requiredRoles: ['SUPER_ADMIN', 'CADC']
+      },
+      {
+        label: 'Annuaire Prestataires',
+        path: '/admin/super-admin/prestataires',
+        icon: Users,
+        badge: 'B2B',
+        tcode: 'KCADC_PRE',
+        description: 'Gestion réservée CADC de l\'annuaire des prestataires',
+        businessProcess: 'Référencement partenaires',
+        requiredRoles: ['SUPER_ADMIN', 'CADC']
+      },
+      {
+        label: 'Accréditations Entreprises',
+        path: '/admin/super-admin/accreditations-entreprises',
+        icon: ShieldAlert,
+        badge: 'Délais',
+        tcode: 'KCADC_ACR',
+        description: 'Accords module datés débloquant un accès au-delà de l\'allocation',
+        businessProcess: 'Conformité & délais',
+        requiredRoles: ['SUPER_ADMIN', 'CADC']
+      }
+    ]
+  },
+
+  // ============================================================================
   // 🏢 MODULE 12-B: ADMINISTRATION DE L'ENTREPRISE (ADMIN SIMPLE / COMPANY ADMIN)
   // ============================================================================
   'admin-tenant': {
