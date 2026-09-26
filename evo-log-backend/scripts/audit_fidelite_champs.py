@@ -277,17 +277,42 @@ def lien_donnees(contrat, index, texte, trace=None):
                 if nom in sources:
                     sources[cible] = set(sources[nom])
                     break
+    def resoudre_tout(expr):
+        """Tous les appels distincts resolus dans un bloc d'options."""
+        trouves = set()
+        for m in APPEL_DIRECT.finditer(expr):
+            if m.group(1) == "apiClient" or m.group(1).endswith("API"):
+                trouves.add((m.group(2), m.group(3)))
+        for m in APPEL_METODE.finditer(expr):
+            cle = "%s.%s" % (m.group(1), m.group(2))
+            if cle in index:
+                trouves.add(index[cle])
+        return trouves
+
     # 4) `const {data: factures = []} = useQuery({queryFn: () => financeAPI.x()})`
     #    Ces pages n'ont AUCUN useState : le nom destructure est la variable
     #    d'etat. Oublier cette branche laissait `transport/drivers` entierement
     #    hors de verification.
+    #    L'attribution se fait par le BLOC useQuery apparie, plus par une
+    #    fenetre de caracteres : la fenetre ±300 avait accole le schema des
+    #    MISSIONS a `corridorsData`, trois declarations plus bas dans le fichier,
+    #    et l'outil signait des signaux inventes de toutes pieces.
     pour_query = {}
+    pour_query_multi = set()
     for m in DATA_QUERY.finditer(texte):
-        autour = texte[max(0, m.start() - 300):m.end() + 300]
-        c = resoudre(autour)
-        if c:
+        q = re.compile(r"=\s*use[A-Za-z]*\(").search(texte, m.end())
+        if not q:
+            continue
+        options = bloc_apparie(texte, q.end() - 1)
+        if not options:
+            continue
+        trouves = resoudre_tout(options)
+        if len(trouves) == 1:
+            c = next(iter(trouves))
             apporter_source(m.group(1), c)
             pour_query.setdefault(m.group(1), set()).add(c)
+        elif len(trouves) > 1:
+            pour_query_multi.add(m.group(1))
 
     # 5) la source d'une variable d'etat est celle NOMMEE dans l'argument de son
     #    setter, pas celle qui passe a cote. C'est ce qui distingue `setKpis(k)`
@@ -319,6 +344,10 @@ def lien_donnees(contrat, index, texte, trace=None):
             continue
         vars_[nom] = set(noms)
         affectes[nom] = sorted(chemins)
+    for nom in pour_query_multi:
+        # Deux appels distincts dans le meme useQuery : on ne peut attribuer
+        # l'un ni l'autre. Declaration d'ignorance, pas de benediction muette.
+        ambigus.add(nom)
     for nom, chemins in pour_query.items():
         if nom in vars_ or nom in ambigus:
             continue
@@ -381,8 +410,23 @@ def formes_locales(texte):
         ports = set()
         for sm in re.finditer(r"\bset([A-Z]\w*)\s*\(", amont):
             ports.add(sm.group(1)[0].lower() + sm.group(1)[1:])
+        # `const missions = missionsData.map((m) => ({...}))` : le view-model est
+        # aussi porte par une constante locale, pas seulement par un setter.
+        # Sans quoi `m.status` (cle construite) etait signale comme lecture du
+        # contrat — premier signal faussement neuf sur `transport/control`.
+        consts = list(re.finditer(r"\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=", amont))
+        if consts:
+            ports.add(consts[-1].group(1))
         for nom in ports:
             formes.setdefault(nom, set()).update(cles)
+    # `setStats({ total: ..., enRoute: ... })` : agregat construit de bout en
+    # bout par la page. Ses cles ne transitent par aucun contrat.
+    for sm in re.finditer(r"\bset([A-Z]\w*)\s*\(\s*\{", texte):
+        acc = texte.find("{", sm.end() - 1)
+        bloc = corps_litteral(texte, acc) if acc >= 0 else ""
+        cles = set(re.findall(r"(?:^|[{,])\s*([A-Za-z_$][\w$]*)\s*:", bloc))
+        if cles:
+            formes.setdefault(sm.group(1)[0].lower() + sm.group(1)[1:], set()).update(cles)
     return formes
 
 

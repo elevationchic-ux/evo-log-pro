@@ -232,6 +232,15 @@ function OTModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () =>
   }, [])
 
   useEffect(() => {
+    // Fermeture clavier : Échap replie le modal, comme le reste du chrome applicatif.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  useEffect(() => {
     if (formData.code_article.length === 7) {
       magasinAPI.getArticleByCode(formData.code_article)
         .then(res => setArticleInfo(res.data))
