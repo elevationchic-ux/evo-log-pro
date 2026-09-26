@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -84,6 +84,18 @@ export default function ModuleSidebar({
     || Number((session?.user as any)?.role_level ?? 9) === 0;
 
   const [expandedModule, setExpandedModule] = useState<string | null>(null);
+
+  // Fermeture clavier : Echap replie d'abord la modale d'acces refuse, puis le
+  // tiroir mobile. Sans cela, le clavier restait sans issue de sortie.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (deniedModalItem) { setDeniedModalItem(null); return; }
+      if (isMobile && isOpen && onClose) onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [deniedModalItem, isMobile, isOpen, onClose]);
 
   // Tous les modules sont visibles partout (exigence produit). La restriction
   // d'accès réelle est appliquée côté API à chaque requête ; les modules hors
@@ -205,9 +217,12 @@ export default function ModuleSidebar({
 
                 {!isCollapsed && subItems.length > 0 && (
                   <button
+                    type="button"
                     onClick={() => toggleAccordion(item.key)}
-                    className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800/80 transition-transform"
+                    className="p-2 min-w-9 min-h-9 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800/80 transition-transform"
                     title={language === 'en' ? `View the ${subItems.length} sub-modules of ${title}` : `Voir les ${subItems.length} sous-modules de ${title}`}
+                    aria-label={language === 'en' ? `View the ${subItems.length} sub-modules of ${title}` : `Voir les ${subItems.length} sous-modules de ${title}`}
+                    aria-expanded={isAccordionOpen}
                   >
                     <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isAccordionOpen ? "rotate-90" : ""}`} style={isAccordionOpen ? { color: item.color } : undefined} />
                   </button>
@@ -226,19 +241,19 @@ export default function ModuleSidebar({
                         href={sub.path}
                         title={localizeSubLabel(sub.label, language)}
                         onClick={() => isMobile && onClose && onClose()}
-                        className={`flex min-w-0 items-center justify-between py-1.5 px-2.5 text-xs rounded-lg transition-colors group border ${
+                        className={`flex min-w-0 items-center justify-between gap-2 py-1.5 px-2.5 min-h-9 text-xs rounded-lg transition-colors group border ${
                           isSubActive
                             ? "font-bold"
                             : "border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 font-medium"
                         }`}
                         style={isSubActive ? { backgroundColor: `${item.color}30`, color: `${item.color}dd`, borderColor: `${item.color}60` } : undefined}
                       >
-                        <div className="flex min-w-0 items-center gap-2">
+                        <div className="flex min-w-0 flex-1 items-center gap-2">
                           {SubIcon && <SubIcon className="w-3.5 h-3.5 shrink-0 opacity-70 group-hover:opacity-100" />}
                           <span className="truncate min-w-0">{localizeSubLabel(sub.label, language)}</span>
                         </div>
                         {sub.badge && (
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 border border-slate-700 shrink-0">
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 border border-slate-700 shrink-0">
                             {sub.badge}
                           </span>
                         )}
