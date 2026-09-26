@@ -516,15 +516,25 @@ async def disable_2fa(
     return {"success": True, "two_factor_enabled": False, "message": "2FA desactivee."}
 
 
-@router.post("/2fa/verify", response_model=Token)
+@router.post("/2fa/verify")
 async def verify_2fa(
     request: Request,
     db: Session = Depends(get_db),
 ):
     """Echange un jeton 2FA (delivre par /login) + code TOTP contre une vraie
     session. Repond avec la MEME structure que /login pour rester compatible
-    avec NextAuth cote frontend."""
-    body = await request.json()
+    avec NextAuth cote frontend.
+
+    Pas de `response_model` : le schema Token ne declare ni must_change_password
+    ni les champs RBAC granulaires (permissions, shared_modules, role_level,
+    department_id). Avec ce filtre, un compte 2FA echappait au changement de mot
+    de passe obligatoire et perdait ses permissions effectives."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
     two_factor_token = body.get("two_factor_token")
     code = body.get("code")
     if not two_factor_token:
