@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn, getSession } from 'next-auth/react';
 import { apiClient } from '@/lib/api-client';
+import { establishSession } from '@/lib/login-session';
+import { landingRouteFor } from '@/lib/auth';
+import { saveTwoFactorChallenge } from '@/lib/2fa-challenge';
 import { Sparkles, Ship, Lock, User as UserIcon, ArrowRight, ShieldCheck, KeyRound, AlertTriangle, CheckCircle2, Radio, Compass, Anchor, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {

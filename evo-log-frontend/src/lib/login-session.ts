@@ -2,7 +2,7 @@
 // backend deja valide.
 //
 // Le formulaire de connexion et l'ecran 2FA appellent tous deux /api/v1/auth/*
-// elles-memes (le backend decide seul du mot de passe, du TOTP et des codes de
+// elles-mêmes (le backend décide seul du mot de passe, du TOTP et des codes de
 // secours). Ce qui reste au front est la deuxieme moitie : transformer l'
 // « access_token » obtenu en vraie session NextAuth, puis recuperer les roles
 // reels pour choisir la page d'atterrissage. Centralise ici pour que les deux
@@ -31,7 +31,7 @@ export async function establishSession(ticket: string): Promise<LoginOutcome> {
   }
   const res = await signIn('credentials', { ticket, redirect: false })
   if (res?.error) {
-    // next-auth ne remonte qu'un code d'erreur generic : on traduit cote front.
+    // next-auth ne remonte qu'un code d'erreur générique : on traduit côté front.
     return {
       ok: false,
       roles: [],
