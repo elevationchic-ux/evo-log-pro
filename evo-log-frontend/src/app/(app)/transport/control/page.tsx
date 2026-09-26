@@ -154,7 +154,7 @@ export default function TransportControlPage() {
   const kpis = [
     { title: 'Véhicules Flotte', value: String(tcoData?.flotte_totale_vehicules ?? ''), subtitle: 'Tracteurs & Plateaux', icon: <span className="material-symbols-outlined text-2xl">local_shipping</span>, color: 'blue' as const },
     { title: 'Missions Actives', value: String(missions.length), subtitle: 'En cours d\'acheminement', icon: <span className="material-symbols-outlined text-2xl">route</span>, color: 'emerald' as const },
-    { title: 'Corridors CEMAC', value: corridorsData?.total_camions_en_transit == null ? '' : `${corridorsData.total_camions_en_transit} convois`, subtitle: (corridorsData?.corridors || []).length > 0 ? corridorsData.corridors.map((c: any) => c.axe).join(' · ') : 'Aucun corridor actif en base', icon: <span className="material-symbols-outlined text-2xl">public</span>, color: 'amber' as const },
+    { title: 'Corridors CEMAC', value: corridorsData?.total_camions_en_transit == null ? '' : `${corridorsData.total_camions_en_transit} convois`, subtitle: (corridorsData?.corridors || []).length > 0 ? corridorsData.corridors.map((c) => c.axe).join(' · ') : 'Aucun corridor actif en base', icon: <span className="material-symbols-outlined text-2xl">public</span>, color: 'amber' as const },
     { title: 'TCO Moyen Flotte', value: tcoData?.cout_global_moyen_km_xaf == null ? '' : `${tcoData.cout_global_moyen_km_xaf} XAF`, subtitle: 'Coût au km parcouru', icon: <span className="material-symbols-outlined text-2xl">paid</span>, color: 'violet' as const },
   ];
 
@@ -168,7 +168,7 @@ export default function TransportControlPage() {
     { 
       key: 'status', 
       header: 'Statut',
-      render: (item: any) => {
+      render: (item: MissionRow) => {
         // Cles = valeurs reelles de MissionStatus (minuscules, sans accent).
         // L'ancien statusMap testait EN_ROUTE / CHARGEMENT / LIVRE / ATTENTE :
         // aucune mission ne porte ces valeurs, chaque ligne tombait donc dans

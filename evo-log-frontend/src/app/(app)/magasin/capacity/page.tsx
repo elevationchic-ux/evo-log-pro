@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import {
   Warehouse, RefreshCw, Download, Search, AlertTriangle,
-  Boxes, ArrowDownWideNarrow, CircleGauge,
+  Boxes, ArrowDownWideNarrow, Gauge,
 } from 'lucide-react';
 import { magasinAPI } from '@/lib/api-client';
 import { useSettings } from '@/components/layout/SettingsProvider';
