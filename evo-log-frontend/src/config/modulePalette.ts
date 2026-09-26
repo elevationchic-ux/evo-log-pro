@@ -105,6 +105,12 @@ export const MODULE_PALETTE: Record<string, ModulePaletteEntry> = {
     bgGradient: 'from-fuchsia-600 to-pink-600',
     sidebar: { activeAccent: 'text-fuchsia-400 border-fuchsia-400', activeBgSubtle: 'bg-fuchsia-500/10', brandIconBg: 'bg-fuchsia-600' },
   },
+  'superadmin-cadc': {
+    hex: '#F59E0B',
+    glow: 'shadow-amber-500/50 border-amber-500/60',
+    bgGradient: 'from-amber-500 to-yellow-600',
+    sidebar: { activeAccent: 'text-amber-400 border-amber-400', activeBgSubtle: 'bg-amber-500/10', brandIconBg: 'bg-amber-600' },
+  },
   'admin-tenant': {
     hex: '#64748B',
     glow: 'shadow-slate-500/50 border-slate-500/60',
