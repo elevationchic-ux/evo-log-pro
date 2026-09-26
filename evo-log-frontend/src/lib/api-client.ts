@@ -236,6 +236,12 @@ export const authAPI = {
     apiClient.post('/api/v1/auth/2fa/disable', { password }),
   verify2FA: (data: { two_factor_token: string; code: string }) =>
     apiClient.post('/api/v1/auth/2fa/verify', data),
+  // Codes de secours 2FA : la base ne stocke que des hachages, le solde seul
+  // est relus. Les codes en clair n'apparaissent que dans la reponse d'emission.
+  getRecoveryCodesStatus: () =>
+    apiClient.get('/api/v1/auth/2fa/recovery-codes'),
+  regenerateRecoveryCodes: (password: string) =>
+    apiClient.post('/api/v1/auth/2fa/recovery-codes', { password }),
   revokeSessions: () =>
     apiClient.post('/api/v1/auth/revoke-sessions'),
 };

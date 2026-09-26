@@ -422,8 +422,72 @@ async def enable_2fa(
         )
     current_user.two_factor_enabled = True
     current_user.two_factor_confirmed_at = datetime.utcnow()
+    # Emission automatique des codes de secours : sans eux, perdre son
+    # generateur de codes signifie ne plus jamais pouvoir se connecter. Les
+    # codes en clair ne sont renvoyes qu'ici, une seule fois.
+    codes_clairs, blob = generate_recovery_codes()
+    current_user.two_factor_recovery_codes = blob
+    current_user.two_factor_recovery_issued_at = datetime.utcnow()
     db.commit()
-    return {"success": True, "two_factor_enabled": True, "message": "2FA activee."}
+    return {
+        "success": True,
+        "two_factor_enabled": True,
+        "recovery_codes": codes_clairs,
+        "message": "2FA activee. Conservez les codes de secours hors ligne.",
+    }
+
+
+@router.get("/2fa/recovery-codes")
+async def recovery_codes_status(
+    current_user: User = Depends(get_current_user),
+):
+    """Solde des codes de secours. Les codes eux-memes ne sont jamais relus :
+    la base ne contient que leurs hachages."""
+    codes = parse_recovery_codes(getattr(current_user, "two_factor_recovery_codes", None))
+    issued_at = getattr(current_user, "two_factor_recovery_issued_at", None)
+    return {
+        "configured": bool(codes),
+        "total": len(codes),
+        "remaining": sum(1 for c in codes if not c.get("used_at")),
+        "used": sum(1 for c in codes if c.get("used_at")),
+        "issued_at": issued_at.isoformat() if issued_at else None,
+    }
+
+
+@router.post("/2fa/recovery-codes")
+async def regenerate_recovery_codes(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Regenere un jeu de codes de secours (les anciens sont remplaces).
+
+    Le mot de passe est exige : changer les codes de secours est une operation
+    sensible, au meme titre que desactiver la 2FA."""
+    try:
+        corps = await request.json()
+    except Exception:
+        corps = {}
+    password = (corps or {}).get("password")
+    if not password or not verify_password(password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mot de passe requis pour regenerer les codes de secours.",
+        )
+    if not bool(getattr(current_user, "two_factor_enabled", False)):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Aucune 2FA active : les codes de secours n'ont pas d'objet.",
+        )
+    codes_clairs, blob = generate_recovery_codes()
+    current_user.two_factor_recovery_codes = blob
+    current_user.two_factor_recovery_issued_at = datetime.utcnow()
+    db.commit()
+    return {
+        "success": True,
+        "recovery_codes": codes_clairs,
+        "message": "Nouveaux codes emis ; les precedents ne fonctionnent plus.",
+    }
 
 
 @router.post("/2fa/disable")
@@ -444,6 +508,10 @@ async def disable_2fa(
     current_user.two_factor_enabled = False
     current_user.two_factor_secret = None
     current_user.two_factor_confirmed_at = None
+    # Les codes de secours n'ont plus de sens sans second facteur : ils
+    # resteraient des trousseaux d'acces orphelins en base.
+    current_user.two_factor_recovery_codes = None
+    current_user.two_factor_recovery_issued_at = None
     db.commit()
     return {"success": True, "two_factor_enabled": False, "message": "2FA desactivee."}
 
@@ -472,13 +540,24 @@ async def verify_2fa(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Utilisateur introuvable ou inactif.",
         )
-    if not getattr(user, "two_factor_secret", None) or not verify_totp(user.two_factor_secret, code or ""):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Code de verification invalide.",
-        )
+    secret = getattr(user, "two_factor_secret", None)
+    if secret and verify_totp(secret, code or ""):
+        return _build_login_payload(user)
 
-    return _build_login_payload(user)
+    # Le code peut aussi etre un code de secours a usage unique : c'est la
+    # seule porte de sortie quand le telephone a ete perdu ou remplace.
+    accepte, nouveau_blob = try_consume_recovery_code(
+        getattr(user, "two_factor_recovery_codes", None), code or ""
+    )
+    if accepte:
+        user.two_factor_recovery_codes = nouveau_blob
+        db.commit()
+        return _build_login_payload(user)
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Code de verification invalide.",
+    )
 
 
 @router.post("/revoke-sessions")
