@@ -556,7 +556,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                         <div className="min-w-0 flex-1">
                           <p className="font-bold text-sm text-on-surface truncate">{user?.fullName || t.shell.user}</p>
                           <p className="text-[11px] text-on-surface-variant truncate">{user?.email}</p>
-                          <span className="inline-flex items-center px-1.5 py-0.2 mt-1 rounded bg-primary/10 text-primary font-mono text-[9px] font-bold">
+                          <span className="inline-flex items-center px-1.5 py-0.5 mt-1 rounded bg-primary/10 text-primary font-mono text-[10px] font-bold">
                             {user?.roles?.[0] || 'COLLABORATEUR'}
                           </span>
                         </div>
@@ -566,19 +566,20 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                     {/* Agency Switcher (affiche seulement si agences reelles) */}
                     {AGENCIES.length > 0 && (
                     <div className="p-3 space-y-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant px-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant px-1">
                         {t.shell.operatingAgency}
                       </span>
                       <div className="grid grid-cols-3 gap-1">
                         {AGENCIES.map((ag) => (
                           <button
                             key={ag.id}
+                            type="button"
                             onClick={() => {
                               setSelectedAgency(ag.name);
                               window.localStorage.setItem('evolog_active_agency', ag.name);
-                              toast.success(`Agence active : ${ag.name}`, { icon: '🏢' });
+                              toast.success(language === 'en' ? `Active agency: ${ag.name}` : `Agence active : ${ag.name}`, { icon: '🏢' });
                             }}
-                            className={`px-2 py-1.5 rounded-lg text-center font-bold text-[11px] transition-colors ${
+                            className={`px-2 py-2 min-h-11 rounded-lg text-center font-bold text-[11px] transition-colors ${
                               selectedAgency === ag.name
                                 ? 'bg-primary text-on-primary'
                                 : 'bg-surface-container hover:bg-surface-container-high text-on-surface'
@@ -593,7 +594,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
 
                     {/* Preferences: Theme, Language, Sound */}
                     <div className="p-3 space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant px-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant px-1">
                         {t.shell.workPreferences}
                       </span>
 
@@ -601,8 +602,9 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                       <div className="flex items-center justify-between px-1">
                         <span className="text-on-surface text-xs font-medium">{t.shell.language} :</span>
                         <button
+                          type="button"
                           onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
-                          className="px-2 py-1 rounded-lg border border-outline bg-surface-container font-bold text-[11px] hover:bg-surface-container-high"
+                          className="px-3 py-2 min-h-11 rounded-lg border border-outline bg-surface-container font-bold text-[11px] hover:bg-surface-container-high"
                         >
                           {language === 'fr' ? '🇫🇷 Français' : '🇬🇧 English'}
                         </button>
