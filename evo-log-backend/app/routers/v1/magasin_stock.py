@@ -30,6 +30,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.permissions import require_perm
+from app.models.user import User
 from app.models.magasin import Entrepot, MouvementStock, MouvementType, Stock
 from app.models.tiers import Client, Tiers, TiersType
 from app.schemas.magasin_stock import (
@@ -151,6 +153,7 @@ async def list_magasins(
     search: Optional[str] = None,
     actif: Optional[bool] = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.stock.read")),
 ):
     q = db.query(Entrepot)
     if search:

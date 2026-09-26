@@ -68,7 +68,7 @@ pas des correctifs. Ils sont listés ici pour ne pas être oubliés :
 11. ~~**PWA hors-ligne réel**~~ → **CORRIGÉ (batch 2, voir §4)** : `sw.js` créé et enregistré, `Authorization` ajoutée aux syncs, base d'API corrigée, page `/offline`.
 
 ### Qualité de vie (quick wins restants)
-- Remplacer les `any` des pages branchées cette semaine par les types existants de `src/types/`.
+- ~~Remplacer les `any` des pages branchées cette semaine par les types existants de `src/types/`.~~ → **PARTIELLEMENT FAIT (batch 10, voir §12)** : `src/types/transport.ts` était un **contrat mort** dont les champs ne correspondaient à aucun schéma backend — réaligné sur le vrai contrat et adopté par `transport/planning` + `transport/control`. Les ~700 `any` restants dans `src/` exigent la même réécriture module par module.
 - Ajouter un linteau CI (`tsc --noEmit` + `pytest`) sur les rapports de coverage par module.
 
 ---
@@ -298,6 +298,47 @@ elles-mêmes** sans JAMAIS importer ni appeler le code applicatif. Pire, les val
 si un développeur modifie `calculer_irmg()` ou change un taux CNPS sans mise à jour
 légale, le test **échoue**. Le FEFO et le TCO sont explicitement marqués comme des
 P1-gap (xfail strict = si le service est réparé sans activer le test, pytest le signale).
+
+---
+
+## 12. Batch 10  Frontend transport : suppression des `any` (quick win)
+
+**Problème** : `src/types/transport.ts::Mission` était un type **mort** — 0 import
+dans tout `src/` (`grep "from '@/types/transport'"` → 0 résultat) — dont les champs
+(`id: string`, `origin`, `destination`, `merchandise`, `status: 'pending' | 'in_progress' | …`)
+ne correspondaient à **aucun** schéma backend. Le vrai `MissionResponse`
+(`app/schemas/transport.py`) expose `id: number`, `point_depart`, `point_arrivee`,
+`statut: 'planifiee' | 'en_cours' | 'terminee' | 'annulee' | 'en_retard'`. Comme
+le type était faux, les pages transport roulaient en `any`, ce qui masquait les
+fautes de frappe (statut comparé `'EN_ROUTE'` qui ne matchait jamais, clés
+`m.immatriculation` / `m.conducteur` / `m.client` lues sur `MissionResponse` alors
+qu'elles n'existent nulle part dans le schéma → colonnes systématiquement vides).
+
+| Fichier | Ce qui a été fait |
+|---|---|
+| `src/types/transport.ts` (159 lignes, entièrement réécrit) | Types **alignés sur le contrat backend réel** : `MissionResponse` (avec `conteneur_id?` et `numero_bl?` ajoutés par la migration 024), `CamionResponse`, `ConducteurResponse`, `CorridorCEMAC`, `CorridorsCEMACResponse`, `AlerteMaintenancePredictive`, `TcoFleetResponse` ; unions littérales `MissionStatut` / `CamionStatut`. Un alias `Mission = MissionResponse` est conservé pour faire **casser explicitement** les anciens consumers qui lisaient `origin`/`destination`/`status`. |
+| `src/app/(app)/transport/planning/page.tsx` | `useState<any[]>` → `useState<MissionResponse[]>` ; suppression des `(m: any)` dans les filtres. |
+| `src/app/(app)/transport/control/page.tsx` | 5 `useQuery` typés (`MissionResponse[]`, `CorridorsCEMACResponse \| null`, `TcoFleetResponse \| null`, `CamionResponse[]`, `ConducteurResponse[]`), `useMutation<{ kms_a_vide_economises?: number } \| null>` typé, `new Map<number, string>(...)`, interface locale `MissionRow` (view model distinct du contrat API, pour garder `origin/destination/status/eta` côté vue sans mentir sur l'API), suppression de tous les `(x: any)`. Les jointures camion/chauffeur passent par deux requêtes séparées (`immatriculations.get(m.camion_id)`, `nomsChauffeurs.get(m.conducteur_id)`) : le contrat `MissionResponse` ne renvoie que les FK brutes. |
+
+**Bug latent débusqué par le typage strict** (ligne 317 de `transport/control/page.tsx`) :
+le JSX affichait `-{alt.echeance_km} km` dans le panneau des alertes TCO. Le backend
+ne renvoie **jamais** de champ `echeance_km` : les deux branches de
+`get_tco_fleet_analytics` exposent `echeance: string | null` (ISO date pour
+maintenance périodique, `None` pour panne) et `priorite: 'CRITIQUE' | 'HAUTE' | 'MOYENNE'`.
+Sans typage, le rendu affichait `undefined km` — un faux chiffre. **Correction** :
+badge coloré sur `alt.priorite` (rouge CRITIQUE / ambre HAUTE / ardoise MOYENNE)
++ libellé "Echeance : {date fr-FR}" uniquement quand `alt.echeance != null`.
+Aucun km n'est inventé ; le champ fantôme disparaît du type.
+
+**Vérification batch 10** : `npx tsc --noEmit` → **EXIT=0** ;
+`python scripts/audit_frontend.py` → `broken_links: 0, dead_buttons: 0, fake_data: 0, ghost_routes: 0`.
+Les 33 `api_gaps` restants sont des endpoints backend non implémentés (`/api/parc/*`,
+`/api/v1/customers`, `/api/v1/telematics/positions`…) : hors périmètre d'un batch de typage.
+
+➡️ Ce n'est qu'une **première brique** : 717 occurrences d'`any` restent dans `src/`.
+Le vrai gain structurel est que `src/types/transport.ts` est désormais **adoptable** —
+avant ce batch, aucun consumer n'aurait pu l'utiliser sans réécrire tous ses appels,
+ce qui explique pourquoi le fichier est resté mort si longtemps.
 
 ---
 
