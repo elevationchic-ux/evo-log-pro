@@ -169,7 +169,7 @@ def test_allocate_modules_over_cap_rejected(client, db, superadmin, company):
 # accreditation d'entreprise datee : valide puis expiree
 # --------------------------------------------------------------------------- #
 def test_company_accreditation_expiry_revokes_right(client, db, superadmin, company, plain_user):
-    from app.core.permissions import can
+    from app.core.permissions import load_effective_permissions, has_perm
     _as(superadmin)
     today = date.today()
     future = (today + timedelta(days=30)).isoformat()
@@ -183,15 +183,19 @@ def test_company_accreditation_expiry_revokes_right(client, db, superadmin, comp
     assert resp.status_code == 201
     assert resp.json()["valide"] is True
 
+    # Accreditation valide -> le code granulaire est effectif.
     db.refresh(plain_user)
-    assert can(plain_user, "transport.mission.read") is True
+    codes = load_effective_permissions(plain_user)
+    assert has_perm(codes, "transport.mission.read") is True
 
-    # On fait expirer l'accreditation -> le droit disparait.
+    # On fait expirer l'accreditation -> le code disparait des droits effectifs.
     acc = db.query(Accreditation).filter(Accreditation.user_id == plain_user.id).first()
     acc.date_fin = today - timedelta(days=1)
     db.commit()
     db.refresh(plain_user)
-    assert can(plain_user, "transport.mission.read") is False
+    codes = load_effective_permissions(plain_user)
+    assert "transport.*.*" not in codes
+    assert has_perm(codes, "transport.mission.read") is False
     _clear()
 
 

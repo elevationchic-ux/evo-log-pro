@@ -220,25 +220,35 @@ export default function WMSDashboardPage() {
         })}
       </div>
 
-      {/* Zone utilization bar */}
+      {/* Zone utilization bar — branches sur /magasin/entrepots/occupation.
+          Avant : 88/62/45/78/55% en dur dans le JSX, quels que soient la base
+          et le tenant. L'occupation en % n'est affichee que si une capacite
+          est enregistree (occupancy non-null), sinon articles + valeur reelles. */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow">
-        <div className="text-xs font-bold text-slate-300 uppercase mb-3">Taux d'Occupation par Zone (Entrepôts Douala & Kribi)</div>
+        <div className="text-xs font-bold text-slate-300 uppercase mb-3">Occupation par Entrepôt (données réelles)</div>
         <div className="space-y-2">
-          {[
-            { zone: 'Zone A  Denrées & Alimentaire', pct: 88, color: 'bg-amber-500' },
-            { zone: 'Zone B  Industriel & Électrique', pct: 62, color: 'bg-blue-500' },
-            { zone: 'Zone C  Pharmaceutique & Réfrigérée (2°C–8°C)', pct: 45, color: 'bg-cyan-500' },
-            { zone: 'Zone EXT  Matériaux de Construction (Extérieur)', pct: 78, color: 'bg-emerald-500' },
-            { zone: 'Zone MAD  Magasin et Aire de Dédouanement (90j max)', pct: 55, color: 'bg-purple-500' },
-          ].map((z, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="w-52 text-[11px] text-slate-400 shrink-0 truncate">{z.zone}</div>
-              <div className="flex-1 bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div className={`h-full ${z.color} rounded-full transition-all`} style={{ width: `${z.pct}%` }}></div>
+          {(occupationData || []).length === 0 ? (
+            <p className="text-[11px] text-slate-500">Aucun entrepôt avec capacite enregistree.</p>
+          ) : (
+            occupationData.map((z: any, i: number) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-52 text-[11px] text-slate-400 shrink-0 truncate">{z.zone}</div>
+                {z.occupancy != null ? (
+                  <>
+                    <div className="flex-1 bg-slate-800 rounded-full h-2 overflow-hidden">
+                      <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${z.occupancy}%` }}></div>
+                    </div>
+                    <div className="w-8 text-[11px] font-mono text-slate-400 text-right">{z.occupancy}%</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex-1 text-[11px] text-slate-500">{z.nb_articles} articles · {Number(z.valeur_stockee || 0).toLocaleString('fr-FR')} FCFA stockes</div>
+                    <div className="w-8 text-[11px] font-mono text-slate-500 text-right">—</div>
+                  </>
+                )}
               </div>
-              <div className="w-8 text-[11px] font-mono text-slate-400 text-right">{z.pct}%</div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -280,10 +290,9 @@ export default function WMSDashboardPage() {
                 <tr className="border-b border-slate-800 text-left">
                   <th className="px-4 py-3 text-slate-400 font-semibold uppercase">Référence</th>
                   <th className="px-4 py-3 text-slate-400 font-semibold uppercase">Description</th>
-                  <th className="px-4 py-3 text-slate-400 font-semibold uppercase">Adresse (Z/Al/Tr/Nv)</th>
+                  <th className="px-4 py-3 text-slate-400 font-semibold uppercase">Emplacement</th>
                   <th className="px-4 py-3 text-slate-400 font-semibold uppercase">Quantité</th>
-                  <th className="px-4 py-3 text-slate-400 font-semibold uppercase hidden md:table-cell">Méthode</th>
-                  <th className="px-4 py-3 text-slate-400 font-semibold uppercase hidden lg:table-cell">Temp.</th>
+                  <th className="px-4 py-3 text-slate-400 font-semibold uppercase hidden md:table-cell">Valeur</th>
                   <th className="px-4 py-3 text-slate-400 font-semibold uppercase">Statut</th>
                   <th className="px-4 py-3 text-slate-400 font-semibold uppercase"></th>
                 </tr>
@@ -293,21 +302,15 @@ export default function WMSDashboardPage() {
                   <tr key={item.ref} className="hover:bg-slate-800/30 transition-colors">
                     <td className="px-4 py-3 font-mono font-bold text-amber-300">{item.ref}</td>
                     <td className="px-4 py-3 text-slate-200 max-w-52 truncate font-medium">{item.desc}</td>
-                    <td className="px-4 py-3 font-mono text-slate-400">{item.zone}/{item.allee}/{item.travee}/{item.niveau}</td>
+                    <td className="px-4 py-3 font-mono text-slate-400">{item.emplacement || '—'}</td>
                     <td className="px-4 py-3">
                       <div className={`font-mono font-bold ${item.statut === 'CRITIQUE' ? 'text-red-400' : item.statut === 'ALERTE' ? 'text-amber-400' : 'text-slate-200'}`}>
                         {item.qte.toLocaleString()} {item.unite}
                       </div>
-                      <div className="text-[10px] text-slate-500">Seuil: {item.seuil}</div>
+                      <div className="text-[10px] text-slate-500">{item.seuil != null ? `Seuil: ${item.seuil}` : 'Seuil: non défini'}</div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">{item.methode}</span>
-                    </td>
-                    <td className="px-4 py-3 hidden lg:table-cell">
-                      <span className={`text-[10px] flex items-center gap-1 ${item.temp.includes('°C') ? 'text-cyan-400' : 'text-slate-400'}`}>
-                        {item.temp.includes('°C') && <Thermometer className="w-3 h-3" />}
-                        {item.temp}
-                      </span>
+                      <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">{item.valeur.toLocaleString('fr-FR')} FCFA</span>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statut[item.statut] || 'bg-slate-800 text-slate-300'}`}>
@@ -364,21 +367,21 @@ export default function WMSDashboardPage() {
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
               <div className="text-xs text-slate-400">Stock de Sécurité Déterministe</div>
               <div className="text-2xl font-black text-amber-400 font-mono mt-1">
-                {ropData?.stock_securite_calcule ?? 49} Unités
+                {ropData?.stock_securite_calcule ?? '—'} {ropData?.stock_securite_calcule != null ? 'Unités' : ''}
               </div>
               <p className="text-[11px] text-slate-500 mt-1">Niveau de service 95% (Z = 1.645) sur délai fournisseur de 14j.</p>
             </div>
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
               <div className="text-xs text-slate-400">Point de Commande (ROP)</div>
               <div className="text-2xl font-black text-cyan-400 font-mono mt-1">
-                {ropData?.point_de_commande_rop ?? 679} Unités
+                {ropData?.point_de_commande_rop ?? '—'} {ropData?.point_de_commande_rop != null ? 'Unités' : ''}
               </div>
               <p className="text-[11px] text-slate-500 mt-1">Déclencheur automatique de bon de commande fournisseur.</p>
             </div>
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
               <div className="text-xs text-slate-400">Quantité Économique Wilson (EOQ)</div>
               <div className="text-2xl font-black text-emerald-400 font-mono mt-1">
-                {ropData?.quantite_economique_commande_wilson ?? 604} Unités
+                {ropData?.quantite_economique_commande_wilson ?? '—'} {ropData?.quantite_economique_commande_wilson != null ? 'Unités' : ''}
               </div>
               <p className="text-[11px] text-slate-500 mt-1">Minimisation des coûts de possession et passation.</p>
             </div>

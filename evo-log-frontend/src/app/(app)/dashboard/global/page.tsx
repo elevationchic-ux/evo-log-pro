@@ -287,7 +287,7 @@ export default function GlobalDashboard() {
       {loadError && (
         <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/40 rounded-2xl px-4 py-3 text-xs text-amber-300">
           <AlertTriangle className="w-4 h-4 shrink-0" />
-          Backend injoignable ou non authentifié : les indicateurs ci-dessous ne peuvent pas être calculés. Aucune valeur n&apos;est simulée.
+          {t.dash.backendDown}
         </div>
       )}
 
@@ -311,9 +311,9 @@ export default function GlobalDashboard() {
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-emerald-400" /> Revenus (12 derniers mois)
+              <TrendingUp className="w-5 h-5 text-emerald-400" /> {t.dash.revenueTitle}
             </h2>
-            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Source : factures • M FCFA</span>
+            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">{t.dash.revenueSource}</span>
           </div>
 
           {revenueMonths.length > 0 ? (
@@ -338,8 +338,8 @@ export default function GlobalDashboard() {
           ) : (
             <div className="h-[250px] flex flex-col items-center justify-center text-center gap-2 border border-dashed border-slate-800 rounded-2xl">
               <BarChart3 className="w-8 h-8 text-slate-400" />
-              <p className="text-sm font-bold text-slate-300">Aucune facture enregistrée</p>
-              <p className="text-xs text-slate-500 max-w-xs">Le graphique se construit à partir des émissions de factures réelles de votre organisation.</p>
+              <p className="text-sm font-bold text-slate-300">{t.dash.noInvoiceTitle}</p>
+              <p className="text-xs text-slate-500 max-w-xs">{t.dash.noInvoiceHint}</p>
             </div>
           )}
         </div>
@@ -347,37 +347,37 @@ export default function GlobalDashboard() {
         {/* Fleet & Warehouse  agrégats réels */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Radio className="w-5 h-5 text-indigo-400" /> Flotte & Entrepôts
+            <Radio className="w-5 h-5 text-indigo-400" /> {t.dash.fleetTitle}
           </h2>
 
           <div className="space-y-3">
-            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Parc roulant (base réelle) :</div>
+            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">{t.dash.fleetSubtitle}</div>
             <div className="space-y-2">
               {[
-                { name: 'Véhicules actifs (en mission)', count: data.vehiculesActifs, color: '#10b981' },
-                { name: 'Véhicules disponibles', count: data.camionsDispos, color: '#6366f1' },
-                { name: 'Parc total immatriculé', count: data.vehiculesTotal, color: '#f59e0b' }
+                { name: t.dash.vehActiveMission, count: data.vehiculesActifs, color: '#10b981' },
+                { name: t.dash.vehAvailable, count: data.camionsDispos, color: '#6366f1' },
+                { name: t.dash.fleetRegistered, count: data.vehiculesTotal, color: '#f59e0b' }
               ].map((item, idx) => (
                 <div key={idx} className="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: item.color }} />
                     <span className="text-xs font-bold text-slate-200">{item.name}</span>
                   </div>
-                  <span className="text-sm font-black text-white">{fmtInt(item.count)} Camions</span>
+                  <span className="text-sm font-black text-white">{fmtInt(item.count, locale)} {t.dash.trucks}</span>
                 </div>
               ))}
             </div>
 
             <div className="pt-2 border-t border-slate-800">
-              <div className="text-xs text-slate-400 mb-2 font-bold uppercase tracking-wider">Entrepôts (valeur stockée réelle) :</div>
+              <div className="text-xs text-slate-400 mb-2 font-bold uppercase tracking-wider">{t.dash.warehousesLabel}</div>
               {zones.length > 0 ? (
                 <div className="space-y-2">
                   {zones.slice(0, 5).map((z) => (
                     <div key={z.entrepot_id} className="space-y-1">
                       <div className="flex justify-between text-[11px]">
-                        <span className="text-slate-300 font-semibold">{z.zone} • {z.nb_articles} art.</span>
+                        <span className="text-slate-300 font-semibold">{z.zone} • {z.nb_articles} {t.dash.itemsAbbr}</span>
                         <strong className="text-amber-400 font-bold">
-                          {z.occupancy !== null ? `${z.occupancy}%` : 'capacité non renseignée'}
+                          {z.occupancy !== null ? `${z.occupancy}%` : t.dash.capacityUnknown}
                         </strong>
                       </div>
                       <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
@@ -391,7 +391,7 @@ export default function GlobalDashboard() {
                 </div>
               ) : (
                 <p className="text-xs text-slate-500 border border-dashed border-slate-800 rounded-xl p-3">
-                  Aucun entrepot enregistre  la carte se remplit des entrepots et stocks reels de votre organisation.
+                  {t.dash.noWarehouse}
                 </p>
               )}
             </div>
