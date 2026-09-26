@@ -409,6 +409,16 @@ except ImportError as e:
     logger.critical(f"Accreditations router failed to load: {e}")
     raise
 
+# Console Super-Admin CADC (SaaS) : entreprises, plans, modules, accreditations,
+# annuaire prestataires. Toutes les routes exigent require_superadmin (403 pour
+# tout autre niveau, y compris admin entreprise) : console strictement invisible.
+try:
+    from app.routers.v1 import saas_console
+    safe_include_router(saas_console.router, prefix="/api/v1/saas/console", tags=["Console SuperAdmin CADC"])
+except ImportError as e:
+    logger.critical(f"Console SuperAdmin CADC router failed to load: {e}")
+    raise
+
 # New Version 2.0 Modules
 try:
     from app.routers.v1 import shift_planning, port_pricing, gps_tracking, real_customs, port_incidents, auto_invoicing, port_performance, notification_system, container_lifecycle, partner_api
