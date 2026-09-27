@@ -240,4 +240,5 @@ if __name__ == "__main__":
         cible = sys.argv[1]
     else:
         cible = str(ROOT / "kamlog_erp.db")
-    afficher(analyser(cible))
+    # Code de sortie non nul sur divergence bloquante : la CI peut caler ici.
+    sys.exit(1 if afficher(analyser(cible)) else 0)

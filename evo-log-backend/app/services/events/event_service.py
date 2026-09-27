@@ -33,6 +33,10 @@ class ReactiveEventBus:
         """Connect to Redis. On failure, run in degraded mode (in-process delivery only)."""
         if self.redis is not None:
             return
+        # Skip entirely when Redis is explicitly disabled (tests, single-process dev)
+        if not self.redis_url or self.redis_url.lower() in ("none", "disabled", ""):
+            logger.info("Redis bus intentionally disabled; in-process only.")
+            return
         client = aioredis.from_url(
             self.redis_url, decode_responses=True,
             socket_connect_timeout=2, socket_timeout=2,

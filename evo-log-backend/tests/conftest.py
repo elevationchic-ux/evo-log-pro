@@ -19,9 +19,9 @@ import os
 # session de test ; setdefault respecte une DATABASE_URL exportee explicitement
 # (CI Postgres, debug local volontaire).
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
-# Redis : force l'echec immediat du PING (port 1 jamais ouvert) pour eviter un
-# delai de 4 s par test. L'event_service bascule en mode degrade sans exception.
-os.environ.setdefault("REDIS_URL", "redis://127.0.0.1:1/0")
+# Redis : "disabled" fait skipper la connexion completement (0 s vs 2-4 s de timeout
+# TCP par test). L'event_service tourne en mode in-process uniquement.
+os.environ.setdefault("REDIS_URL", "disabled")
 
 import types
 
