@@ -38,11 +38,11 @@ class Facture(Base):
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     numero_facture = Column(String(50), nullable=False, index=True)
     client_id = Column(Integer, ForeignKey("clients.id"))
-    # default=date.today et surtout PAS func.now() : la colonne est Date, func.now()
-    # rend un horodatage complet ('2026-09-27 19:24:12'). SQLAlchemy lie alors
-    # l'expression SQL dans une colonne DATETIME cote base migrante, et a la
-    # relecture le processeur de resultat Date echoue sur
-    # "Invalid isoformat string" : toute creation de facture explosait.
+    # default=date.today, jamais func.now() : la colonne est Date alors que
+    # func.now() rend un horodatage complet ('2026-09-27 19:24:12'), que
+    # SQLAlchemy inscrit tel quel dans l'INSERT. A la relecture de la ligne, le
+    # processeur de resultat Date refuse la chaine ("Invalid isoformat string")
+    # : la creation d'une facture echouait systematiquement, sur toute base.
     date_emission = Column(Date, nullable=False, default=date.today)
     date_echeance = Column(Date)
     montant_ht = Column(Numeric(15, 2), nullable=False)
@@ -87,7 +87,7 @@ class Paiement(Base):
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     facture_id = Column(Integer, ForeignKey("factures.id"), nullable=False)
     montant = Column(Numeric(15, 2), nullable=False)
-    date_paiement = Column(Date, nullable=False, default=func.now())
+    date_paiement = Column(Date, nullable=False, default=date.today)
     mode_paiement = Column(String(50))  # virement, espece, cheque, mobile_money
     reference = Column(String(100))
     statut = Column(Enum(PaiementStatus), default=PaiementStatus.EN_ATTENTE)
@@ -123,7 +123,7 @@ class EcritureComptable(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
-    date_ecriture = Column(Date, nullable=False, default=func.now())
+    date_ecriture = Column(Date, nullable=False, default=date.today)
     reference = Column(String(50))
     libelle = Column(Text, nullable=False)
     compte_debit = Column(Integer, ForeignKey("comptes.id"))
