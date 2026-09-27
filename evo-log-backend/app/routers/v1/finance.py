@@ -39,6 +39,39 @@ router = APIRouter(tags=["Finance"])
 
 
 # ============ PLAN COMPTABLE OHADA ============
+@router.get("/plan-comptable", response_model=List[PlanComptableOHADAResponse])
+def lister_plan_comptable(
+    classe: int = None,
+    type_compte: str = None,
+    actif: bool = None,
+    search: str = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Comptes du plan OHADA reellement enregistres, classes par numero.
+
+    L'ecran de plan comptable liste les comptes avant d'en creer : sans cette
+    lecture il ne pouvait afficher que vide ou une erreur. Les filtres repris
+    ici (classe, type, actif, recherche) sont ceux que le frontend envoie deja.
+    """
+    q = db.query(PlanComptableOHADA)
+    if classe is not None:
+        q = q.filter(PlanComptableOHADA.classe == classe)
+    if type_compte:
+        q = q.filter(PlanComptableOHADA.type_compte == type_compte)
+    if actif is not None:
+        q = q.filter(PlanComptableOHADA.actif == actif)
+    if search:
+        motif = f"%{search}%"
+        q = q.filter(
+            (PlanComptableOHADA.numero_compte.like(motif))
+            | (PlanComptableOHADA.intitule.like(motif))
+        )
+    return q.order_by(PlanComptableOHADA.numero_compte).offset(skip).limit(limit).all()
+
+
 @router.post("/plan-comptable", response_model=PlanComptableOHADAResponse, status_code=status.HTTP_201_CREATED)
 def creer_compte(
     compte: PlanComptableOHADACreate,
