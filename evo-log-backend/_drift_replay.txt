@@ -1,0 +1,58 @@
+﻿base analysee : _replay.db
+tables declarees par les modeles : 106
+
+========================================================================
+TABLES ABSENTES DE LA BASE (0)
+========================================================================
+
+========================================================================
+DRIFT DE COLONNES (13)
+========================================================================
+
+   agencies
+      modele seulement : organization_id
+
+   camions
+      modele seulement : company_id
+
+   companies
+      modele seulement : agrement_douane agrement_pad agrement_pak capital_social max_camions modules_actives rccm rib sigle suspension_reason
+
+   comptes
+      modele seulement : company_id devise nom_compte numero_compte
+      base seulement   : compte_parent_id description nom numero sous_type
+      -> BLOQUANT : numero nom (NOT NULL sans defaut, le modele ne les remplit pas)
+
+   conducteurs
+      modele seulement : company_id
+
+   ecritures_comptables
+      modele seulement : company_id compte_credit compte_debit montant_credit montant_debit reference
+      base seulement   : compte_credit_id compte_debit_id created_by devise journal lettrage montant numero_piece periode_comptable reference_facture reference_paiement
+      -> BLOQUANT : numero_piece montant (NOT NULL sans defaut, le modele ne les remplit pas)
+
+   entrepots
+      modele seulement : company_id
+
+   factures
+      modele seulement : company_id numero_facture
+      base seulement   : conditions_paiement montant_paye numero penalites_retard reference_client reste_a_payer taux_change
+      -> BLOQUANT : numero (NOT NULL sans defaut, le modele ne les remplit pas)
+
+   missions
+      modele seulement : company_id
+
+   mouvements_stocks
+      modele seulement : company_id
+
+   paiements
+      modele seulement : company_id statut
+      base seulement   : banque reference_paiement
+
+   stocks
+      modele seulement : company_id
+
+   users
+      modele seulement : organization_id
+
+Verdict : 13 situation(s) ou le modele reclame des colonnes absentes de la base (erreur SQL garantie).

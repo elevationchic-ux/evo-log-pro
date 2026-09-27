@@ -37,14 +37,14 @@ export default function NewDriverPage() {
 
     try {
       await transportAPI.createChauffeur(formData);
-      setSuccess('Le profil chauffeur a Ã©tÃ© crÃ©Ã© avec succÃ¨s.');
+      setSuccess('Le profil chauffeur a été créé avec succès.');
       // Optional: redirect to drivers list after a short delay
       setTimeout(() => {
         router.push('/transport/control'); // Or a drivers list page if it exists
       }, 2000);
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.detail || 'Une erreur est survenue lors de la crÃ©ation du profil.');
+      setError(err.response?.data?.detail || 'Une erreur est survenue lors de la création du profil.');
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,7 @@ export default function NewDriverPage() {
           <div className="mb-6 bg-red-500/10 border border-red-500/40 rounded-xl p-4 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-red-300">Erreur de crÃ©ation</h3>
+              <h3 className="text-sm font-semibold text-red-300">Erreur de création</h3>
               <p className="text-sm text-red-600 mt-1">{error}</p>
             </div>
           </div>
@@ -78,7 +78,7 @@ export default function NewDriverPage() {
           <div className="mb-6 bg-green-500/10 border border-green-500/40 rounded-xl p-4 flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-green-300">SuccÃ¨s</h3>
+              <h3 className="text-sm font-semibold text-green-300">Succès</h3>
               <p className="text-sm text-green-600 mt-1">{success}</p>
             </div>
           </div>
@@ -87,13 +87,13 @@ export default function NewDriverPage() {
         <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-700 overflow-hidden">
           <form onSubmit={handleSubmit} className="divide-y divide-slate-800">
             
-            {/* Bloc "IdentitÃ© & Contact" */}
+            {/* Bloc "Identité & Contact" */}
             <div className="p-6 md:p-8">
               <div className="flex items-center gap-2 mb-6">
                 <div className="p-2 bg-blue-500/10 rounded-lg text-blue-600">
                   <User className="w-5 h-5" />
                 </div>
-                <h2 className="text-lg font-semibold text-slate-200">IdentitÃ© & Contact</h2>
+                <h2 className="text-lg font-semibold text-slate-200">Identité & Contact</h2>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -110,7 +110,7 @@ export default function NewDriverPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">PrÃ©nom *</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Prénom *</label>
                   <input
                     type="text"
                     name="prenom"
@@ -122,7 +122,7 @@ export default function NewDriverPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">TÃ©lÃ©phone *</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Téléphone *</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Phone className="w-4 h-4 text-slate-400" />
@@ -150,7 +150,7 @@ export default function NewDriverPage() {
                       value={formData.adresse}
                       onChange={handleChange}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                      placeholder="Lieu de rÃ©sidence"
+                      placeholder="Lieu de résidence"
                     />
                   </div>
                 </div>
@@ -172,7 +172,7 @@ export default function NewDriverPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">TÃ©lÃ©phone d'urgence</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Téléphone d'urgence</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Phone className="w-4 h-4 text-slate-400" />
@@ -189,18 +189,18 @@ export default function NewDriverPage() {
               </div>
             </div>
 
-            {/* Bloc "ConformitÃ© LÃ©gale & OpÃ©rationnelle" */}
+            {/* Bloc "Conformité Légale & Opérationnelle" */}
             <div className="p-6 md:p-8">
               <div className="flex items-center gap-2 mb-6">
                 <div className="p-2 bg-amber-500/10 rounded-lg text-amber-600">
                   <Truck className="w-5 h-5" />
                 </div>
-                <h2 className="text-lg font-semibold text-slate-200">ConformitÃ© LÃ©gale & CompÃ©tences</h2>
+                <h2 className="text-lg font-semibold text-slate-200">Conformité Légale & Compétences</h2>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">NÂ° de Permis *</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">N° de Permis *</label>
                   <input
                     type="text"
                     name="numero_permis"
@@ -212,7 +212,7 @@ export default function NewDriverPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">CatÃ©gorie *</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Catégorie *</label>
                   <select
                     name="categorie_permis"
                     required
@@ -220,25 +220,25 @@ export default function NewDriverPage() {
                     onChange={handleChange}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-slate-900"
                   >
-                    <option value="">SÃ©lectionner</option>
-                    <option value="B">B (LÃ©ger)</option>
+                    <option value="">Sélectionner</option>
+                    <option value="B">B (Léger)</option>
                     <option value="C">C (Lourd)</option>
                     <option value="CE">CE (Super Lourd / Semi)</option>
                     <option value="D">D (Transport commun)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">SpÃ©cialisation</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Spécialisation</label>
                   <select
                     name="specialisation"
                     value={formData.specialisation}
                     onChange={handleChange}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-slate-900"
                   >
-                    <option value="">Aucune spÃ©cifique</option>
-                    <option value="MATIERES_DANGEREUSES">MatiÃ¨res Dangereuses (ADR)</option>
+                    <option value="">Aucune spécifique</option>
+                    <option value="MATIERES_DANGEREUSES">Matières Dangereuses (ADR)</option>
                     <option value="CONDUITE_URBAINE">Conduite Urbaine</option>
-                    <option value="PORTE_CONTENEURS">Porte-conteneurs spÃ©cifiques</option>
+                    <option value="PORTE_CONTENEURS">Porte-conteneurs spécifiques</option>
                     <option value="CONVOI_EXCEPTIONNEL">Convoi Exceptionnel</option>
                   </select>
                 </div>
@@ -266,7 +266,7 @@ export default function NewDriverPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    CrÃ©ation...
+                    Création...
                   </>
                 ) : (
                   <>
