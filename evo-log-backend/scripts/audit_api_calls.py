@@ -116,7 +116,7 @@ def correspond(call: tuple, route: tuple) -> bool:
             # joker ici (`/x/${id}` vs `/x/{id}`), il doit consommer exactement un
             # segment : sans ce decalage, les routes de detail ne matchaient
             # jamais et toute l'API passait pour orpheline.
-            avance = j + 1 if b in (PLACEHOLDER,) else j
+            avance = j + 1 if b == PLACEHOLDER else j
             for k in range(i + 1, len(call) + 1):
                 if suit(k, avance):
                     memo[cle] = True

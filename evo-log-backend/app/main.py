@@ -432,6 +432,17 @@ except ImportError as e:
     logger.critical(f"Console SuperAdmin CADC router failed to load: {e}")
     raise
 
+# Administration interne Entreprise (Phase 2, niveau 1) : profil, collaborateurs,
+# roles/responsabilites, modules alloues et demandes d'accreditation vers le CADC.
+# require_company_admin + resolve_scope_company_id : each admin is pinned to its
+# own company (403 on any other tenant); the CADC passes with an explicit company_id.
+try:
+    from app.routers.v1 import company_admin
+    safe_include_router(company_admin.router, prefix="/api/v1/company-admin", tags=["Administration Entreprise"])
+except ImportError as e:
+    logger.critical(f"Administration Entreprise router failed to load: {e}")
+    raise
+
 # New Version 2.0 Modules
 try:
     from app.routers.v1 import shift_planning, port_pricing, gps_tracking, real_customs, port_incidents, auto_invoicing, port_performance, notification_system, container_lifecycle, partner_api

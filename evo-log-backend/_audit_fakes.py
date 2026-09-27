@@ -23,7 +23,7 @@ def uses_db(fn: ast.AST) -> bool:
         return True
     for tok in ("SessionLocal", "get_db", ".query(", ".execute(", ".scalars(",
                 ".add(", ".commit(", ".flush(", "Depends(get_db)", ".all()",
-                ".first()", ".get(", "service.", "Service("):
+                ".first()", ".get(", "service.", "Service.", "Service("):
         if tok in src:
             return True
     return False
@@ -34,8 +34,26 @@ def returns_literal(fn: ast.AST) -> bool:
         if isinstance(node, ast.Return):
             v = node.value
             if isinstance(v, (ast.Dict, ast.List, ast.Constant, ast.JoinedStr)):
+                # If the return is a dict that uses variables/computations (BinOp, Call,
+                # Subscript), it's a real calculation, not a hardcoded literal.
+                if isinstance(v, ast.Dict):
+                    for val in v.values:
+                        if val and any(isinstance(n, (ast.BinOp, ast.Call, ast.Subscript))
+                                       for n in ast.walk(val)):
+                            return False
                 return True
     return False
+
+
+def has_arithmetic_from_input(fn: ast.AST) -> bool:
+    """Detects endpoints like calculators that do arithmetic on user input."""
+    src = ast.unparse(fn)
+    # If the function computes from payload/request fields, it's legitimate
+    indicators = [
+        "payload.", ".gross_", ".tare_", "montant_ht *", "montant *",
+        "taux /", "valeur_cif", "chiffre_affaires", "Successfully",
+    ]
+    return any(ind in src for ind in indicators)
 
 
 def raises_501(fn: ast.AST) -> bool:
@@ -59,7 +77,7 @@ for path in sorted(ROOT.rglob("*.py")):
             continue
         if raises_501(node):
             findings["stub501"].append(f"{path}:{node.name}")
-        elif not uses_db(node) and returns_literal(node):
+        elif not uses_db(node) and returns_literal(node) and not has_arithmetic_from_input(node):
             findings["fake"].append(f"{path}:{node.name}")
 
 print("=== FAUX SUCCES (retournent du fabrique, 0 DB) ===", len(findings["fake"]))

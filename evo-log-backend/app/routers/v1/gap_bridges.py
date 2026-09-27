@@ -372,9 +372,10 @@ async def workshop_create(
 
 @router.post("/api/v1/parc/ocr-extract")
 async def ocr_extract(file: UploadFile = File(...)):
-    # Extrait de texte cote serveur non equipe : retour structure honnete et vide.
-    return {"extracted": {}, "fields": {}, "confidence": 0.0,
-            "message": "Aucun champ exploitable reconnu sur ce document."}
+    not_implemented(
+        "Extraction OCR cote serveur",
+        "un moteur OCR (Tesseract, AWS Textract ou Google Vision) installe et configure",
+    )
 
 
 # ─── Magasin : synthese declarations & prediction ──────────────────────────

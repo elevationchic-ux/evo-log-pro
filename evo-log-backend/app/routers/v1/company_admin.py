@@ -37,7 +37,7 @@ from app.core.security import get_password_hash, validate_password_strength
 from app.models.accreditation import ACC_TYPE_PERMISSION, Accreditation
 from app.models.tenant import Company, SubscriptionPlan
 from app.models.user import Role, User
-from app.utils.rbac import require_company_admin, resolve_scope_company_id
+from app.utils.rbac import _is_superadmin, require_company_admin, resolve_scope_company_id
 
 router = APIRouter(dependencies=[Depends(require_company_admin)])
 
@@ -238,9 +238,10 @@ def create_member(
     company = _scoped_company(db, current, company_id)
     _ensure_quota(db, company)
 
-    # Anti-escalade : un admin entreprise ne peut pas creer un niveau suprieur
+    # Anti-escalade : un admin entreprise ne peut pas creer un niveau superieur
     # au sien. Le CADC (level 0) passe sans restriction.
-    if payload.role_level < current.role_level and current.role_level != 0:
+    own_level = getattr(current, "role_level", 99)
+    if own_level != 0 and payload.role_level < own_level:
         raise HTTPException(
             status_code=403,
             detail="Vous ne pouvez pas creer un compte plus privilegie que vous",
@@ -516,7 +517,7 @@ def cancel_module_request(
         raise HTTPException(status_code=404, detail="Demande introuvable ou deja traitee")
     # Un admin entreprise ne retire que les demandes de SON entreprise ; le CADC
     # (level 0 / superuser) arbitre sur toutes.
-    if not _is_superadmin(current) and req.company_id != current.company_id:
+    if not _is_superadmin(current) and req.company_id != getattr(current, "company_id", None):
         raise HTTPException(status_code=403, detail="Demande d'une autre entreprise")
     db.delete(req)
     db.commit()
