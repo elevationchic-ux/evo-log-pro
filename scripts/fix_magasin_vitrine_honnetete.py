@@ -29,10 +29,10 @@ BADGE_PATTERN = re.compile(
     r"""(<div\s+className="p-8\s+bg-slate-950[^"]*"[^>]*>)\s*"""
     r"""<ShieldCheck\s+className="w-8\s+h-8\s+text-emerald-400[^"]*"\s*/>\s*"""
     r"""<div>\s*"""
-    r"""<h4\s+className="[^"]*"[^>]*>.*?Connect[eé].*?</h4>\s*"""
+    r"""<h4\s+className="[^"]*"[^>]*>.*?(?:Connect[eé]|connect[eé]).*?</h4>\s*"""
     r"""<p\s+className="[^"]*"[^>]*>.*?</p>\s*"""
     r"""</div>\s*""",
-    re.DOTALL,
+    re.DOTALL | re.IGNORECASE,
 )
 
 NEW_BADGE = (
