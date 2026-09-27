@@ -1,9 +1,9 @@
 /**
  * Page vitrine `magasin-stock/locations`.
- * Les emplacements/slots reels sont a /magasin/wms-slots.
+ * Pas encore de endpoint locations; redirige vers le dashboard principal.
  */
 import { redirect } from 'next/navigation';
 
 export default function MagasinStockLocationsPage() {
-  redirect('/magasin/wms-slots');
+  redirect('/magasin/dashboard');
 }
