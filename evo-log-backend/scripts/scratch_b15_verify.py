@@ -4,6 +4,9 @@
 #    (identique au conftest pytest) pour ne pas re-polluer le fichier de dev.
 import os
 import sqlite3
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # --- 1. Inventaire post-purge (lecture seule) -------------------------------
 c = sqlite3.connect("file:kamlog_erp.db?mode=ro", uri=True)

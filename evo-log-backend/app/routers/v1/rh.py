@@ -684,8 +684,26 @@ def telecharger_attestation_travail(
     )
     statut_contrat = escape(contrat.statut or "actif")
     cnps = "non renseigne par la DRH"
-    fait_a = escape((comp.ville if comp and comp.ville else None) or "le")
     today_str = date.today().strftime("%d/%m/%Y")
+    ville_entreprise = (comp.ville if comp else None)
+    ligne_fait = (
+        f"Fait &agrave; {escape(ville_entreprise)}, le {today_str}"
+        if ville_entreprise else f"Fait le {today_str}"
+    )
+    statut_contrat_norme = (contrat.statut or "actif").strip().lower()
+    if statut_contrat_norme == "actif":
+        phrase_emple = (
+            "Est li&eacute;(&eacute;) &agrave; la soci&eacute;t&eacute; par un contrat "
+            "en cours d'ex&eacute;cution depuis le "
+            f"{escape(date_embauche)}, et y occupe &agrave; ce jour le poste "
+            "mentionn&eacute; ci-dessus."
+        )
+    else:
+        phrase_emple = (
+            "A &eacute;t&eacute; li&eacute;(&eacute;) &agrave; la soci&eacute;t&eacute; par un "
+            f"contrat portant le statut « {escape(contrat.statut)} », avec une "
+            f"date d'effet au {escape(date_embauche)}."
+        )
 
     html_content = f"""
     <!DOCTYPE html>
@@ -734,20 +752,27 @@ def telecharger_attestation_travail(
 
         <p>La présente attestation lui est délivrée à sa demande pour servir et valoir ce que de droit.</p>
 
-        <p style="margin-top: 30px;">Fait à Douala, le {today_str}.</p>
+        <p style="margin-top: 30px;">{ligne_fait}.</p>
       </div>
 
       <div class="signature-block">
-        <div class="stamp">
-          <strong>DIRECTION DES RESSOURCES HUMAINES</strong><br>
-          CERTIFICAT D'AUTHENTICITÉ ÉLECTRONIQUE<br>
-          N° {matricule}-2026-DLA
+        <div>
+          <div class="signature-line"></div>
+          Cachet et signature de l'employeur
         </div>
         <div style="text-align: right;">
-          <strong>Pour la Direction Générale</strong><br>
-          <em>Le Directeur des Ressources Humaines</em><br><br>
-          <span style="font-family: cursive; font-size: 20px; color: #1e3a8a;">Dr. Albert MBARGA</span>
+          <div class="signature-line"></div>
+          Le responsable des ressources humaines
         </div>
+      </div>
+
+      <div class="note">
+        Document &eacute;tabli &agrave; partir des donn&eacute;es enregistr&eacute;es dans le
+        module RH (table <code>contrats_travail</code>, r&eacute;f&eacute;rence
+        n&deg;&nbsp;{contrat.id}). L'application n'appose aucune signature
+        &eacute;lectronique&nbsp;: la pr&eacute;sente attestation n'a de valeur
+        qu'apr&egrave;s signature manuscrite et apposition du cachet de
+        l'employeur.
       </div>
     </body>
     </html>

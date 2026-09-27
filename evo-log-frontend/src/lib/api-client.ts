@@ -237,6 +237,18 @@ export const companyAdminAPI = {
     apiClient.delete(`${CA_BASE}/modules/demandes/${requestId}`),
 };
 
+// ─── Espace Departement (Phase 3 - niveau 2, chef de departement) ────────────
+// Backend : /api/v1/departement, garde require_department_head + perimetre
+// departement. Un chef est epingle a SON departement ; admin entreprise (1) et
+// CADC (0) ciblent un departement de leur entreprise via department_id.
+const DEPT_BASE = '/api/v1/departement';
+export const departmentAPI = {
+  getOverview: (departmentId?: number) =>
+    apiClient.get(`${DEPT_BASE}/overview`, { params: departmentId ? { department_id: departmentId } : undefined }),
+  listMembers: (params?: Record<string, unknown>, departmentId?: number) =>
+    apiClient.get(`${DEPT_BASE}/membres`, { params: { ...params, ...(departmentId ? { department_id: departmentId } : {}) } }),
+};
+
 /** RBAC granulaire : catalogue de permissions, rôles effectifs, accréditations
  *  et modules communs (acces partages) par entreprise. */
 export const rbacAPI = {
