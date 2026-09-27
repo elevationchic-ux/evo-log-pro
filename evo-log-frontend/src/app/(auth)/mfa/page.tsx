@@ -21,8 +21,8 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  TriangleAlert,
-  CircleHelp,
+  AlertTriangle,
+  HelpCircle,
 } from 'lucide-react';
 import { apiClient, authAPI } from '@/lib/api-client';
 import { establishSession } from '@/lib/login-session';
@@ -264,6 +264,7 @@ export default function MfaPage() {
             value={currentPassword}
             onChange={setCurrentPassword}
             reveal={false}
+            autoComplete="current-password"
             placeholder={t('Mot de passe saisi à l’étape précédente', 'Password entered at the previous step')}
           />
           <Field
@@ -272,6 +273,10 @@ export default function MfaPage() {
             onChange={setNewPassword}
             reveal={revealNew}
             onToggleReveal={() => setRevealNew((v) => !v)}
+            autoComplete="new-password"
+            toggleLabel={revealNew
+              ? t('Masquer le mot de passe', 'Hide password')
+              : t('Afficher le mot de passe', 'Show password')}
             placeholder={t('Min. 8 caractères (lettres + chiffres)', 'Min. 8 characters (letters + digits)')}
           />
           <Field
@@ -279,6 +284,7 @@ export default function MfaPage() {
             value={confirmPassword}
             onChange={setConfirmPassword}
             reveal={revealNew}
+            autoComplete="new-password"
             placeholder={t('Répétez le nouveau mot de passe', 'Repeat the new password')}
           />
           {rotateError && (
@@ -315,12 +321,9 @@ export default function MfaPage() {
       <h1 className="text-2xl font-black text-slate-50 mb-2">
         {t('Double authentification', 'Two-factor authentication')}
       </h1>
-      <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-        {t(
-          'Le mot de passe de',
-          'The password of',
-        )}{' '}
-        <span className="text-slate-200 font-semibold break-all">{identifiant}</span>{' '}
+      <p className="text-sm text-slate-400 mb-6 leading-relaxed break-words">
+        {t('Le mot de passe de', 'The password of')}{' '}
+        <span className="text-slate-200 font-semibold">{identifiant}</span>{' '}
         {t('a été reconnu. Second facteur requis.', 'was accepted. A second factor is required.')}
       </p>
 
