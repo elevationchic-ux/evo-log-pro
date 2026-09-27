@@ -14,6 +14,7 @@ Usage :  python scripts/audit_api_calls.py          (depuis evo-log-backend)
 """
 from __future__ import annotations
 
+import difflib
 import re
 import sys
 from collections import defaultdict
@@ -36,6 +37,7 @@ APPEL = re.compile(
 )
 VAR = re.compile(r"\$\{[^{}]*\}")
 PLACEHOLDER = "\u0000"   # segment inconnu (variable ou {param}) -> joker
+ROUTES: list = []        # (METHODE, segments gabarit, chemin brut), rempli dans main()
 
 
 def segments_chemin(url: str):
