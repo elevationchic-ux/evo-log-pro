@@ -9,8 +9,8 @@
 
 | Contrôle | Résultat |
 |---|---|
-| `python -m compileall app` | ✅ EXIT=0 |
-| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 13) | ✅ **446 passed, 2 xfailed, 0 failed** (958 s). Voir §15 : les 2 « failures » annoncees a tort en batch 12 (`test_requisition_requires_auth`, `test_endpoint_facture_pdf_exige_auth`) ne se reproduisent ni en isolement (3/3 runs) ni sous la commande CI reellement executable. Elles provenaient d'un run background contamine et non d'un trou d'auth. La suite presente une **fragilite reelle** (pollution inter-fichiers sous `pytest tests/unit`) detaillee en §15. |
+| `python -m compileall app tests` | ✅ EXIT=0 |
+| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 14) | ✅ **485 passed, 2 xfailed, 0 failed** (305 s). Historique : les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`** — corrige, verrouille par meta-tests et `DB_CHANGED=False` sur le run definitif (§16). |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1082 routes OpenAPI) |
 | `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
 
@@ -558,7 +558,9 @@ run pytest (avant ce batch, le fichier ne devait plus bouger que par l'app en lo
 - Premier run complet posterieur aux correctifs : 3 failed / 479 passed — les 3
   echecs sont des tests non hermetiques dependant de l'etat de l'engine global
   (corriges ci-dessus, dont 1 deja en cours de reprise par la session parallele).
-- Run complet definitif (commande CI `pytest tests`) : A COMPLETER.
+- Run complet definitif (commande CI `pytest tests`) : ✅ **485 passed, 2 xfailed,
+  0 failed** en 305 s, `PYTEST_EXIT=0` et **`DB_CHANGED=False`** (mtime de
+  `kamlog_erp.db` identique avant/apres le run).
 
 **Laisse-pour-compte honnete** : `kamlog_erp.db` a bien ete ecrit par des runs AVANT
 la correction (02:37, possiblement avant). La base de dev peut donc contenir des

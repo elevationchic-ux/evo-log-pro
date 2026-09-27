@@ -139,6 +139,36 @@ def get_portail_mon_profil(
     }
 
 
+def _conge_dict(c: Conge) -> Dict[str, Any]:
+    """Demande de conge enregistree, telle quelle.
+
+    Le statut remonte dans sa valeur brute d'enum (``en_attente``, ``approuve``,
+    ``refuse``...) : l'ecran le traduit, donc la meme donnee s'affiche correctement
+    en francais comme en anglais. Un motif absent reste absent, il n'est pas
+    remplace par une phrase de remplissage.
+    """
+    def _valeur(col):
+        return col.value if hasattr(col, "value") else col
+
+    employe = c.employe
+    return {
+        "id": c.id,
+        "reference": f"DCG-{c.id}",
+        "employe_id": c.employe_id,
+        "employe_nom": (employe.full_name or employe.username) if employe else None,
+        "type_conge": _valeur(c.type_conge),
+        "date_debut": c.date_debut.isoformat() if c.date_debut else None,
+        "date_fin": c.date_fin.isoformat() if c.date_fin else None,
+        "nombre_jours": c.nombre_jours,
+        "statut": _valeur(c.statut),
+        "motif": c.motif,
+        "date_demande": c.date_demande.isoformat() if c.date_demande else None,
+        "approbateur_id": c.approbateur_id,
+        "date_approbation": c.date_approbation.isoformat() if c.date_approbation else None,
+        "commentaire_approbation": c.commentaires_approbation,
+    }
+
+
 MOIS_LIBELLES = [
     "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet",
     "Août", "Septembre", "Octobre", "Novembre", "Décembre",
@@ -460,55 +490,15 @@ def get_mes_conges(
     db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user)
 ):
-    """
-    Returns leave requests list for authenticated employee from database.
+    """Demandes de conge reellement deposees par le salarie connecte.
+
+    Liste vide tant que rien n'a ete depose : aucune demande historique n'est
+    generee pour meubler l'historique.
     """
     conges = db.query(Conge).filter(
         Conge.employe_id == current_user.id
     ).order_by(Conge.date_debut.desc()).all()
-
-    # If none exist, seed 2 realistic historical requests
-    if not conges:
-        c1 = Conge(
-            employe_id=current_user.id,
-            type_conge=TypeConge.CONGE_ANNUEL,
-            date_debut=date(2026, 1, 10),
-            date_fin=date(2026, 1, 20),
-            nombre_jours=8,
-            statut=StatutConge.APPROUVE,
-            motif="Congés annuels de détente premier trimestre.",
-            date_demande=date(2025, 12, 15)
-        )
-        c2 = Conge(
-            employe_id=current_user.id,
-            type_conge=TypeConge.CONGE_EXCEPTIONNEL,
-            date_debut=date(2026, 5, 2),
-            date_fin=date(2026, 5, 6),
-            nombre_jours=3,
-            statut=StatutConge.EN_ATTENTE,
-            motif="Événement familial (Mariage traditionnel).",
-            date_demande=date(2026, 3, 1)
-        )
-        db.add_all([c1, c2])
-        db.commit()
-        conges = db.query(Conge).filter(
-            Conge.employe_id == current_user.id
-        ).order_by(Conge.date_debut.desc()).all()
-
-    return [
-        {
-            "id": f"LV-2026-{str(c.id).zfill(3)}",
-            "db_id": c.id,
-            "type": str(c.type_conge.value if hasattr(c.type_conge, 'value') else c.type_conge).replace("_", " ").title(),
-            "dateDebut": c.date_debut.strftime("%d/%m/%Y") if c.date_debut else "",
-            "dateFin": c.date_fin.strftime("%d/%m/%Y") if c.date_fin else "",
-            "joursOuvrables": c.nombre_jours,
-            "motif": c.motif or "Sans motif particulier spécifié.",
-            "statut": "VALIDE" if c.statut in [StatutConge.APPROUVE, "approuve"] else ("REFUSE" if c.statut in [StatutConge.REFUSE, "refuse"] else "EN_ATTENTE"),
-            "dateSoumission": c.date_demande.strftime("%d/%m/%Y") if c.date_demande else "15/03/2026"
-        }
-        for c in conges
-    ]
+    return [_conge_dict(c) for c in conges]
 
 
 @router.post("/portail/conges", status_code=status.HTTP_201_CREATED)
