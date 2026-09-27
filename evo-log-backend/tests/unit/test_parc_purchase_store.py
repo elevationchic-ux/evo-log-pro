@@ -126,11 +126,10 @@ def _create_requisition(authed, **over):
     )
 
 
-def test_requisition_requires_auth(client):
-    # `client` authentifie par defaut (override get_current_user) ; retirer cet
-    # override pour verifier que la route refuse reellement un appel anonyme.
-    app.dependency_overrides.pop(get_current_user, None)
-    assert client.get("/api/v1/purchase/requisitions").status_code in (401, 403)
+def test_requisition_requires_auth(unauthenticated):
+    # `unauthenticated` retire uniquement l'override get_current_user pose par
+    # `client` ; l'override get_db reste actif (pas de pollution kamlog_erp.db).
+    assert unauthenticated.get("/api/v1/purchase/requisitions").status_code in (401, 403)
 
 
 def test_requisition_workflow(authed):
