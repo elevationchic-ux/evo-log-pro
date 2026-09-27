@@ -109,12 +109,15 @@ class TestDatabaseConnection:
             result = conn.execute(text("SELECT 1"))
             assert result.fetchone()[0] == 1
     
-    @pytest.mark.skipif(
-        "sqlite:///:memory:" in os.environ.get("DATABASE_URL", ""),
-        reason="Schema check requires a persistent database (skipped for in-memory tests)",
-    )
-    def test_database_tables_exist(self):
-        """Test required database tables exist"""
+    def test_database_tables_exist(self, client):
+        """Test required database tables exist.
+
+        Meme correction qu'a batch 14 dans test_real_backend.py : sans la
+        fixture `client`, ce test dependait de l'etat laisse par les autres
+        tests sur l'engine global (jadis le fichier de dev kamlog_erp.db).
+        Le startup du TestClient (lifespan -> create_all) rend l'assertion
+        hermetique et reellement executee.
+        """
         from app.core.database import engine
         from sqlalchemy import inspect
         

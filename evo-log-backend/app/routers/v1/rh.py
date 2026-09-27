@@ -138,98 +138,79 @@ def get_portail_mon_profil(
     }
 
 
+MOIS_LIBELLES = [
+    "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet",
+    "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+]
+
+
+def _bulletin_dict(s: Salaire) -> Dict[str, Any]:
+    """Transforme une ligne ``salaires`` reellement enregistree en bulletin.
+
+    Aucune valeur n'est ajoutee : les colonnes absentes de la base donnent 0 ou
+    null, jamais une moyenne de marche. Le taux de cotisation est retrouve par
+    division des retenues reellement appliquees sur le brut, de sorte que le
+    document affiche ce qui a effectivement ete paye et non un taux theorie.
+    """
+    base = float(s.salaire_base or 0)
+    total_primes = sum(
+        float(getattr(s, p) or 0)
+        for p in (
+            "prime_anciennete", "prime_performance", "prime_responsabilite",
+            "prime_logement", "prime_transport", "prime_autre",
+        )
+    )
+    heures = float(s.heures_supplementaires or 0)
+    indemnite = float(s.taux_horaire_sup or 0)
+    cnps = float(s.deductions_cnps or 0)
+    irgm = float(s.deductions_impot or 0)
+    autres = float(s.deductions_avances or 0) + float(s.autres_deductions or 0)
+    brut = base + total_primes + indemnite
+    debut = s.periode_debut
+    fin = s.periode_fin or debut
+
+    return {
+        "id": s.id,
+        "reference": f"SAL-{s.id}",
+        "employe_id": s.employe_id,
+        "periode": f"{debut.year}-{debut.month:02d}" if debut else None,
+        "mois": debut.month if debut else None,
+        "mois_libelle": MOIS_LIBELLES[debut.month] if debut and debut.month else None,
+        "annee": debut.year if debut else None,
+        "periode_debut": debut.isoformat() if debut else None,
+        "periode_fin": fin.isoformat() if fin else None,
+        "salaire_base": base,
+        "heures_supplementaires": heures,
+        "indemnite_heures_sup": indemnite,
+        "primes": total_primes,
+        "salaire_brut": round(brut, 2),
+        "cotisations_cnps": round(cnps, 2),
+        "retenues_fiscales": round(irgm, 2),
+        "autres_deductions": round(autres, 2),
+        "total_deductions": round(cnps + irgm + autres, 2),
+        "taux_cnps": round(cnps / brut, 4) if brut else None,
+        "net_a_payer": float(s.salaire_net or 0),
+        "statut": s.statut,
+        "date_paiement": s.date_paiement.isoformat() if s.date_paiement else None,
+        "devise": s.devise,
+    }
+
+
 @router.get("/portail/bulletins")
 def get_portail_bulletins(
     db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user)
 ):
-    """
-    Returns the real list of OHADA pay slips for the authenticated employee from the database.
-    If database records are empty, automatically generates certified payroll entries in `salaires`.
+    """Bulletins de paie reellement enregistres pour le salarie connecte.
+
+    La liste est vide tant qu'aucune fiche n'a ete creee par la paie : rien
+    n'est genére a la volee pour remplir l'ecran. L'appel equivaut a
+    ``GET /rh/paie/bulletin`` limite a soi-meme.
     """
     salaires = db.query(Salaire).filter(
         Salaire.employe_id == current_user.id
     ).order_by(Salaire.periode_fin.desc()).all()
-
-    # If user has no payslips in database yet, auto-seed realistic OHADA payslips for past months
-    if not salaires:
-        # Determine base salary according to role
-        base_salary = 380000.0
-        if current_user.is_superuser or (current_user.roles and "ADMIN" in current_user.roles[0].name):
-            base_salary = 750000.0
-        elif current_user.roles and ("COMPTABLE" in current_user.roles[0].name or "DISPATCHER" in current_user.roles[0].name):
-            base_salary = 480000.0
-
-        sample_periods = [
-            (date(2026, 3, 1), date(2026, 3, 31), date(2026, 3, 28), "Mars", 2026, 85000.0, 12),
-            (date(2026, 2, 1), date(2026, 2, 28), date(2026, 2, 27), "Février", 2026, 75000.0, 8),
-            (date(2026, 1, 1), date(2026, 1, 31), date(2026, 1, 29), "Janvier", 2026, 80000.0, 10),
-            (date(2025, 12, 1), date(2025, 12, 31), date(2025, 12, 24), "Décembre", 2025, 120000.0, 16),
-        ]
-
-        for p_start, p_end, p_pay, m_name, yr, primes_val, h_sup in sample_periods:
-            brut = base_salary + primes_val + (h_sup * (base_salary / 173.33) * 1.25)
-            cnps = round(brut * 0.042, 0)
-            irpp = round(brut * 0.065, 0)
-            net = round(brut - cnps - irpp, 0)
-
-            sal = Salaire(
-                employe_id=current_user.id,
-                periode_debut=p_start,
-                periode_fin=p_end,
-                salaire_base=base_salary,
-                heures_supplementaires=h_sup,
-                prime_anciennete=30000.0,
-                prime_performance=primes_val - 30000.0,
-                prime_transport=25000.0,
-                deductions_cnps=cnps,
-                deductions_impot=irpp,
-                salaire_net=net,
-                date_paiement=p_pay,
-                statut="paye"
-            )
-            db.add(sal)
-
-        db.commit()
-        salaires = db.query(Salaire).filter(
-            Salaire.employe_id == current_user.id
-        ).order_by(Salaire.periode_fin.desc()).all()
-
-    results = []
-    mois_noms = ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
-
-    for s in salaires:
-        m_num = s.periode_debut.month if s.periode_debut else 1
-        annee = s.periode_debut.year if s.periode_debut else 2026
-        mois_libelle = mois_noms[m_num] if 1 <= m_num <= 12 else "Mois"
-
-        total_primes = float(s.prime_anciennete or 0) + float(s.prime_performance or 0) + float(s.prime_transport or 0) + float(s.prime_logement or 0)
-        salaire_base = float(s.salaire_base)
-        salaire_brut = salaire_base + total_primes + (float(s.heures_supplementaires or 0) * (salaire_base / 173.33) * 1.25)
-
-        results.append({
-            "id": f"PAY-{annee}-{str(m_num).zfill(2)}-{s.id}",
-            "db_id": s.id,
-            "mois": mois_libelle,
-            "annee": annee,
-            "periode": f"{annee}-{str(m_num).zfill(2)}",
-            "periode_debut": s.periode_debut.strftime("%d/%m/%Y") if s.periode_debut else "",
-            "periode_fin": s.periode_fin.strftime("%d/%m/%Y") if s.periode_fin else "",
-            "salaireBase": salaire_base,
-            "primes": total_primes,
-            "heuresSup": float(s.heures_supplementaires or 0),
-            "salaireBrut": round(salaire_brut, 0),
-            "cotisationsCnps": float(s.deductions_cnps or 0),
-            "retenuesFiscales": float(s.deductions_impot or 0),
-            "netAPayer": float(s.salaire_net),
-            "statut": "PAYE",
-            "statut_libelle": "Virement bancaire exécuté",
-            "datePaiement": s.date_paiement.strftime("%d/%m/%Y") if s.date_paiement else "28/03/2026",
-            "banque": "Afriland First Bank Cameroun",
-            "reference_virement": f"VIR-OHADA-{annee}{str(m_num).zfill(2)}-{str(current_user.id * 109).zfill(6)}"
-        })
-
-    return results
+    return [_bulletin_dict(s) for s in salaires]
 
 
 @router.get("/portail/bulletins/{bulletin_id}/telecharger")
