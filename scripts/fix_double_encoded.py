@@ -26,8 +26,12 @@ def fix_file(path: pathlib.Path) -> bool:
     try:
         # First decode gives us the mojibake (e.g., "Ã©" for "é")
         text = raw.decode("utf-8")
-        # Re-encode as Latin-1 recovers original UTF-8 bytes, then decode properly
-        fixed = text.encode("latin-1").decode("utf-8")
+        # Re-encode recovers original UTF-8 bytes, then decode properly
+        # Try latin-1 first (covers U+0000 to U+00FF), then cp1252 (adds 0x80-0x9F)
+        try:
+            fixed = text.encode("latin-1").decode("utf-8")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            fixed = text.encode("cp1252").decode("utf-8")
     except (UnicodeDecodeError, UnicodeEncodeError):
         return False
     # Normalize line endings to LF (frontend standard)

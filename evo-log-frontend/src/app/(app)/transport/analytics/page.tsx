@@ -34,7 +34,7 @@ export default function AnalyticsPage() {
             <PieChart className="w-8 h-8 text-blue-600" />
             EVO-Analytics (Business Intelligence)
           </h1>
-          <p className="text-sm text-slate-500 mt-2">Vue consolidÃ©e des performances financiÃ¨res et opÃ©rationnelles.</p>
+          <p className="text-sm text-slate-500 mt-2">Vue consolidée des performances financières et opérationnelles.</p>
         </div>
 
         {/* KPIs */}
@@ -49,7 +49,7 @@ export default function AnalyticsPage() {
           </div>
           <div className="bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-700">
             <div className="flex justify-between items-start">
-              <h3 className="text-sm font-bold text-slate-500 uppercase">DÃ©penses OpÃ©rationnelles</h3>
+              <h3 className="text-sm font-bold text-slate-500 uppercase">Dépenses Opérationnelles</h3>
               <div className="p-2 bg-rose-500/10 text-rose-600 rounded-lg"><Activity className="w-5 h-5"/></div>
             </div>
             <p className="text-3xl font-black text-slate-200 mt-4 font-mono">12.3M</p>
@@ -62,7 +62,7 @@ export default function AnalyticsPage() {
           
           {/* Evolution CA vs Depenses */}
           <div className="bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-700">
-            <h3 className="text-lg font-bold text-slate-200 mb-6">Ã‰volution CA vs DÃ©penses</h3>
+            <h3 className="text-lg font-bold text-slate-200 mb-6">Évolution CA vs Dépenses</h3>
             <div className="h-80 w-full">
               {loading ? (
                 <div className="h-full w-full bg-slate-800 rounded-xl animate-pulse"></div>
@@ -94,7 +94,7 @@ export default function AnalyticsPage() {
 
           {/* Marges par mois */}
           <div className="bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-700">
-            <h3 className="text-lg font-bold text-slate-200 mb-6">Marge Nette (BÃ©nÃ©fice)</h3>
+            <h3 className="text-lg font-bold text-slate-200 mb-6">Marge Nette (Bénéfice)</h3>
             <div className="h-80 w-full">
               {loading ? (
                 <div className="h-full w-full bg-slate-800 rounded-xl animate-pulse"></div>
