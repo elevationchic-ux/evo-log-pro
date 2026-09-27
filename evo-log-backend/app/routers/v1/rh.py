@@ -507,15 +507,19 @@ def soumettre_demande_conge_portail(
     db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user)
 ):
-    """
-    Submits an official leave request directly into database.
+    """Depose la demande de conge du salarie connecte dans la table ``conges``.
+
+    La reponse est la ligne reellement enregistree, serialisee par
+    ``_conge_dict`` : meme contrat que ``GET /portail/conges``, donc l'historique
+    affiche immediatement la demande fraiche sans modele intermediaire. Le motif
+    reste vide si le salarie ne l'a pas rempli : rien n'est invente a sa place.
     """
     if payload.date_fin < payload.date_debut:
         raise HTTPException(status_code=400, detail="La date de fin ne peut pas être antérieure à la date de début.")
 
-    # Calculate days
+    # Calcul du nombre de jours demandes, puis estimation des jours ouvrables
+    # (seuls les jours de travail comptent dans le droit a conge).
     delta_days = (payload.date_fin - payload.date_debut).days + 1
-    # Rough estimate of business days
     jours_ouvrables = max(1, int(delta_days * 5 / 7))
 
     conge_type_enum = TypeConge.CONGE_ANNUEL
