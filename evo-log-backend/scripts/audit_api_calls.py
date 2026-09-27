@@ -71,7 +71,12 @@ def segments_gabarit(path: str):
 
 @lru_cache(maxsize=4096)
 def correspond(call: tuple, route: tuple) -> bool:
-    """Match segment a segment, joker = 1..n segments cotes appel comme gabarit."""
+    """Match segment a segment. Un joker represente TOUJOURS au moins un segment :
+
+    `/x/{id}` ne matche pas `/x` (la route collecte n'est pas la route detail), et
+    `/x/${id}/pdf` ne matche pas `/x` non plus. Autoriser le joker vide faisait
+    disparaitre de vrais orphelins du rapport.
+    """
     call, route = list(call), list(route)
     memo = {}
 
@@ -79,18 +84,10 @@ def correspond(call: tuple, route: tuple) -> bool:
         cle = (i, j)
         if cle in memo:
             return memo[cle]
-        if i == len(call) and j == len(route):
-            memo[cle] = True
-            return True
         if i == len(call) or j == len(route):
-            # Le joker final peut absorber le reste (ex. /api/v1/X vs /a/b/c).
-            reste_appel = call[i:]
-            reste_gabarit = route[j:]
-            vide = (not reste_appel or reste_appel == [PLACEHOLDER]) and (
-                not reste_gabarit or reste_gabarit == [PLACEHOLDER]
-            )
-            memo[cle] = vide
-            return vide
+            ok = i == len(call) and j == len(route)
+            memo[cle] = ok
+            return ok
         a, b = call[i], route[j]
         if a == PLACEHOLDER:
             for k in range(i + 1, len(call) + 1):
@@ -108,6 +105,27 @@ def correspond(call: tuple, route: tuple) -> bool:
         return ok
 
     return suit(0, 0)
+
+
+def methode_reelle(meth: str, seg: tuple):
+    """Routes declarant explicitement cette methode et matchant le chemin."""
+    return {p for m, g, p in ROUTES if m == meth and correspond(seg, g)}
+
+
+def chemin_existant(seg: tuple):
+    return {p for m, g, p in ROUTES if correspond(seg, g)}
+
+
+def suggestions(seg: tuple, n: int = 3):
+    """Gabarits reales les plus proches, pour recabler plutot que creer ex nihilo."""
+    cible = "/" + "/".join(s if s != PLACEHOLDER else "{x}" for s in seg)
+    candidats = sorted({p for m, g, p in ROUTES}, key=len)
+    note = sorted(candidats, key=lambda p: -rapport(cible, p))[:n]
+    return [(p, round(rapport(cible, p) * 100)) for p in note if rapport(cible, p) > 0.55]
+
+
+def rapport(a: str, b: str) -> float:
+    return difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 
 def methodes_reelles():
