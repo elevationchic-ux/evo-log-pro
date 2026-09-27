@@ -25,14 +25,15 @@ Contexte / pourquoi cette revision :
         montant -> montant_debit/montant_credit, factures.numero ->
         numero_facture.
 
-    Ces colonnes n'ont ete creees AUCUNE fois par la chaine : sur toute base
+    Aucune de ces colonnes n'est creee par la chaine 001..026 : sur toute base
     pilotee par Alembic -- donc la production, ou app/main.py desactive
     create_all() -- le premier SELECT qui les traverse leve
     "no such column: camions.company_id" et la page meurt en 500. La base de
     developpement sqlite, bootstrappee par create_all puis completee par des
     ALTER manuels, possede l'union des deux formes : elle ne revele rien. D'ou
     le caractere invisible du defaut pour un audit de chemins frontend/backend,
-    qui ne valide que des routes -- toutes repondent, toutes cassent apr.
+    qui ne valide que des routes : chaque route repond, et chacune casse a la
+    premiere lecture de la colonne qui manque.
 
 Proprietes :
     - IDEMPOTENT et DYNAMIQUE : le manque est recalcule depuis la metadata ORM a
@@ -40,11 +41,12 @@ Proprietes :
       n'est figee dans ce fichier ; si un modele change encore, cette revision
       le rattrape. No-op total sur une base deja alignee (create_all).
     - NON DESTRUCTIVE : ajoute, ne droppe rien. Les colonnes heritees restent en
-      place et leur contenu est recopie dans la colonne équivalente quand il y a
-      equivalence (voir RENOMMES). Elles sont seulement rendues NULLables (voir
-      ASSOUPLIR) : sans cela le modele, qui ne les alimente plus, ne pourrait
-      plus inserer une seule ligne ("NOT NULL constraint failed").
-    - Les colonnees ajoutees le sont NULLables meme si le modele les declare
+      place et leur contenu est recopie dans la colonne qui la remplace dans le
+      modele, quand une equivalence existe (voir RENOMMES). Elles sont seulement
+      rendues NULLables (voir ASSOUPLIR) : sans cela le modele, qui ne les
+      alimente plus, ne pourrait plus inserer une seule ligne
+      ("NOT NULL constraint failed").
+    - Les colonnes ajoutees le sont NULLables meme si le modele les declare
       NOT NULL (ex. factures.numero_facture) : une table deja peuplee ne peut
       pas recevoir une contrainte que ses lignes existantes violent.
 """
@@ -140,8 +142,9 @@ def _ajouter_colonnes(bind, insp, tables_en_base):
 def _recopier(insp, table, depuis, vers):
     """`UPDATE t SET vers = depuis WHERE vers IS NULL AND depuis IS NOT NULL`.
 
-    Garde : les deux colonnes doivent exister, et la table est videe de son
-    obsolete. Rejouable sans jamais ecraser une valeur deja renseignee.
+    Garde : les deux colonnes doivent exister, sinon la recopie n'a pas de sens
+    (base creee par create_all : l'heritee n'y a jamais existe). La clause WHERE
+    ne touche jamais une valeur deja renseignee, donc l'operation est rejouable.
     """
     colonnes = _colonnes(insp, table)
     if depuis not in colonnes or vers not in colonnes:
@@ -176,7 +179,7 @@ def _assouplir(insp, tables_en_base):
     """Rend NULLables les colonnes heritees que l'ORM n'alimente plus.
 
     Postgres connait `ALTER COLUMN ... DROP NOT NULL` : simple ALTER natif.
-    SQLite ne sait pas modifier une colonne -> `batch_alter_table` recrée la
+    SQLite ne sait pas modifier une colonne -> `batch_alter_table` recree la
     table en copiant les donnees (recette documentaire d'Alembic), d'ou la
     convention de nommage fournie pour que contraintes et index ressortent avec
     leur nom d'origine au lieu de noms generes.
