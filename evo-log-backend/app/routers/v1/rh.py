@@ -9,6 +9,7 @@ from sqlalchemy import or_, and_, desc, extract
 from typing import List, Optional, Dict, Any
 from datetime import date, datetime, timedelta
 import calendar
+from html import escape
 
 from app.core.database import get_db
 from app.core.security import get_current_user
@@ -204,7 +205,7 @@ def get_portail_bulletins(
     """Bulletins de paie reellement enregistres pour le salarie connecte.
 
     La liste est vide tant qu'aucune fiche n'a ete creee par la paie : rien
-    n'est genére a la volee pour remplir l'ecran. L'appel equivaut a
+    n'est invente pour remplir l'ecran. L'appel equivaut a
     ``GET /rh/paie/bulletin`` limite a soi-meme.
     """
     salaires = db.query(Salaire).filter(
