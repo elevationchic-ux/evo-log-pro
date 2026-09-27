@@ -457,11 +457,12 @@ autre nature** que celle decrite par erreur.
 
 Il n'y a donc **aucun trou d'auth** sur ces routes. L'affirmation du batch 12 etait fausse.
 
-**Cause probable de l'erreur du batch 12** : le run qui a produit ces chiffres etait lance
-en **arriere-plan** (`is_background=true`) pendant que d'autres commandes tournaient. La
-base SQLite `StaticPool` partage UNE connexion entre threads (voir commentaire conftest
-`l.14-18`) : sous contention, un `dependency_overrides.clear()` peut se retrouver execute
-apres un autre `TestClient(...)`, rendant l'evaluation d'un test d'auth non deterministe.
+**Cause probable de l'erreur du batch 12** : *[RETRACTEE EN BATCH 14 — voir §16. La
+« contention arriere-plan » etait une hypothese fausse : la cause reelle etait un
+trou d'isolation dans le harnais pytest (`dependency_overrides.clear()` en milieu
+de test supprimait l'override `get_db`, et les requetes suivantes touchaient la
+VRAIE base de dev `kamlog_erp.db`). Trace material : le fichier a ete mute a
+02:37 pendant un run.]*
 
 **Mesures prises** :
 - Table « Verifications finales » en-tete du rapport : remplacee par le chiffre exact
