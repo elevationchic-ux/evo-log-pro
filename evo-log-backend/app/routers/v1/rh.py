@@ -730,7 +730,7 @@ def telecharger_attestation_travail(
           <div><strong>Lieu de travail&nbsp;:</strong> {lieu}</div>
         </div>
 
-        <p>Est employé(e) au sein de notre entreprise de manière continue et régulière à ce jour, et donne entière satisfaction dans l'accomplissement de ses devoirs professionnels.</p>
+        <p>{phrase_emple}</p>
 
         <p>La présente attestation lui est délivrée à sa demande pour servir et valoir ce que de droit.</p>
 
