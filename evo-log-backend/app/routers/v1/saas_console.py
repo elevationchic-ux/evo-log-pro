@@ -127,6 +127,7 @@ def _accred_dict(a: Accreditation) -> Dict[str, Any]:
         "statut": a.statut,
         "motif": a.motif,
         "octroye_par": a.octroye_par,
+        "created_at": a.created_at,
         "valide": a.est_valide(),
     }
 
