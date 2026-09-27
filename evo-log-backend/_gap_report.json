@@ -1,21 +1,5 @@
 [
  {
-  "appel": "/api/v1/auth/2fa/recovery-codes",
-  "brut": "/api/v1/auth/2fa/recovery-codes",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 242,
-  "genre": "404_reel",
-  "route": null
- },
- {
-  "appel": "/api/v1/auth/2fa/recovery-codes",
-  "brut": "/api/v1/auth/2fa/recovery-codes",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 244,
-  "genre": "404_reel",
-  "route": null
- },
- {
   "appel": "/api/v1/purchase/requisitions/{p}/{p}",
   "brut": "/api/v1/purchase/requisitions/{p}/{p}",
   "fichier": "evo-log-frontend/src/app/(app)/purchase/page.tsx",
@@ -110,6 +94,14 @@
   "ligne": 69,
   "genre": "repond_501",
   "route": "/api/v1/real-customs/camcis/teletransmettre"
+ },
+ {
+  "appel": "/api/v1/parc/ocr-extract",
+  "brut": "/api/parc/ocr-extract",
+  "fichier": "evo-log-frontend/src/lib/api-client.ts",
+  "ligne": 381,
+  "genre": "repond_501",
+  "route": "/api/v1/parc/ocr-extract"
  },
  {
   "appel": "/api/v1/ai/assistant/chat",

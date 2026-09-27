@@ -513,6 +513,32 @@
    ],
    "enums": {}
   },
+  "ArchivageLegalDetailResponse": {
+   "champs": [
+    "autorite_archivage",
+    "certificat_conformite",
+    "classification",
+    "conformite",
+    "created_at",
+    "date_archivage",
+    "date_expiration",
+    "date_restauration",
+    "document_id",
+    "document_numero",
+    "document_titre",
+    "document_type",
+    "duree_conservation",
+    "id",
+    "motif_restauration",
+    "numero_archivage",
+    "reference_archivage",
+    "statut",
+    "type_archivage",
+    "updated_at",
+    "verification_conformite"
+   ],
+   "enums": {}
+  },
   "ArchivageLegalResponse": {
    "champs": [
     "autorite_archivage",
@@ -1196,6 +1222,12 @@
    "enums": {}
   },
   "Body_process_ocr_paper_document_api_v1_sectoral_ocr_ingest_post": {
+   "champs": [
+    "file"
+   ],
+   "enums": {}
+  },
+  "Body_upload_company_logo_api_v1_saas_console_companies__company_id__logo_post": {
    "champs": [
     "file"
    ],
@@ -2109,23 +2141,35 @@
    "champs": [],
    "enums": {}
   },
-  "CompanyCreate": {
+  "CompanyAccreditationCreate": {
    "champs": [
-    "adresse",
-    "agrement_douane",
-    "agrement_pad",
-    "agrement_pak",
-    "capital_social",
-    "code",
+    "date_debut",
+    "date_fin",
+    "libelle",
+    "module",
+    "motif",
+    "user_id"
+   ],
+   "enums": {}
+  },
+  "CompanyAdminCreate": {
+   "champs": [
     "email",
-    "legal_form",
+    "full_name",
+    "job_title",
+    "matricule",
+    "password",
+    "phone",
+    "username"
+   ],
+   "enums": {}
+  },
+  "CompanyProfileUpdate": {
+   "champs": [
+    "email",
     "nom",
-    "pays",
-    "rccm",
-    "rib",
+    "primary_color",
     "sigle",
-    "subscription_plan_id",
-    "tax_id",
     "telephone",
     "ville",
     "website"
@@ -2170,6 +2214,29 @@
     "telephone",
     "updated_at",
     "verification_date",
+    "ville",
+    "website"
+   ],
+   "enums": {}
+  },
+  "CompanyUpdate": {
+   "champs": [
+    "agrement_douane",
+    "email",
+    "is_active",
+    "is_verified",
+    "legal_form",
+    "logo_url",
+    "max_users",
+    "nom",
+    "pays",
+    "primary_color",
+    "rccm",
+    "sigle",
+    "subdomain",
+    "subscription_plan_id",
+    "tax_id",
+    "telephone",
     "ville",
     "website"
    ],
@@ -2470,13 +2537,17 @@
   "ConducteurResponse": {
    "champs": [
     "adresse",
+    "categorie_permis",
     "created_at",
     "date_embauche",
     "date_expiration_permis",
+    "date_naissance",
     "email",
+    "expiration_visite_medicale",
     "id",
     "is_active",
     "nom",
+    "numero_cnps",
     "numero_permis",
     "prenom",
     "telephone",
@@ -5833,7 +5904,9 @@
     "journal_comptable",
     "nb_articles_controles",
     "nb_ecarts_detectes",
+    "note",
     "pv_reference",
+    "statut",
     "valeur_totale_ecarts_xaf"
    ],
    "enums": {}
@@ -6529,6 +6602,13 @@
    ],
    "enums": {}
   },
+  "LogoResponse": {
+   "champs": [
+    "company_id",
+    "logo_url"
+   ],
+   "enums": {}
+  },
   "MagasinCreate": {
    "champs": [
     "adresse",
@@ -6719,6 +6799,39 @@
    ],
    "enums": {}
   },
+  "MemberCreate": {
+   "champs": [
+    "department_id",
+    "email",
+    "full_name",
+    "job_title",
+    "matricule",
+    "password",
+    "phone",
+    "role",
+    "role_level",
+    "username"
+   ],
+   "enums": {}
+  },
+  "MemberRoles": {
+   "champs": [
+    "roles"
+   ],
+   "enums": {}
+  },
+  "MemberUpdate": {
+   "champs": [
+    "department_id",
+    "email",
+    "full_name",
+    "is_active",
+    "job_title",
+    "matricule",
+    "phone"
+   ],
+   "enums": {}
+  },
   "MiseConsommationCreate": {
    "champs": [
     "declaration_entrepot_id",
@@ -6826,6 +6939,20 @@
     "point_arrivee",
     "point_depart",
     "statut"
+   ],
+   "enums": {}
+  },
+  "ModuleRequestCreate": {
+   "champs": [
+    "libelle",
+    "module",
+    "motif"
+   ],
+   "enums": {}
+  },
+  "ModulesAllocation": {
+   "champs": [
+    "modules"
    ],
    "enums": {}
   },
@@ -8033,6 +8160,25 @@
    ],
    "enums": {}
   },
+  "PlanCreate": {
+   "champs": [
+    "code",
+    "description",
+    "devise",
+    "is_active",
+    "max_apis_per_day",
+    "max_modules",
+    "max_storage_mb",
+    "max_users",
+    "modules_inclus",
+    "nom",
+    "prix_annuel",
+    "prix_mensuel",
+    "trial_days",
+    "type_plan"
+   ],
+   "enums": {}
+  },
   "PlanMaintenanceCreate": {
    "champs": [
     "date_debut",
@@ -8139,6 +8285,24 @@
     "risques_identifies",
     "statut",
     "valide_par"
+   ],
+   "enums": {}
+  },
+  "PlanUpdate": {
+   "champs": [
+    "description",
+    "devise",
+    "is_active",
+    "max_apis_per_day",
+    "max_modules",
+    "max_storage_mb",
+    "max_users",
+    "modules_inclus",
+    "nom",
+    "prix_annuel",
+    "prix_mensuel",
+    "trial_days",
+    "type_plan"
    ],
    "enums": {}
   },
@@ -8450,27 +8614,6 @@
    ],
    "enums": {}
   },
-  "PrestataireCreate": {
-   "champs": [
-    "adresse",
-    "agrement_portuaire",
-    "conditions_reglement",
-    "contact_email",
-    "contact_nom",
-    "contact_telephone",
-    "observations",
-    "raison_sociale",
-    "rccm",
-    "sigle",
-    "specialite",
-    "taux_journalier_indicatif",
-    "tax_id",
-    "telephone_astreinte_24h",
-    "ville",
-    "zone_portuaire"
-   ],
-   "enums": {}
-  },
   "PrestataireOut": {
    "champs": [
     "adresse",
@@ -8496,6 +8639,28 @@
     "taux_conformite_qhse",
     "taux_journalier_indicatif",
     "taux_ponctualite",
+    "tax_id",
+    "telephone_astreinte_24h",
+    "ville",
+    "zone_portuaire"
+   ],
+   "enums": {}
+  },
+  "PrestataireUpdate": {
+   "champs": [
+    "adresse",
+    "agrement_portuaire",
+    "company_id",
+    "contact_email",
+    "contact_nom",
+    "contact_telephone",
+    "est_actif",
+    "observations",
+    "raison_sociale",
+    "rccm",
+    "sigle",
+    "specialite",
+    "statut_agrement",
     "tax_id",
     "telephone_astreinte_24h",
     "ville",
@@ -10688,6 +10853,7 @@
     "distance_totale_m",
     "lignes",
     "nb_lignes",
+    "note",
     "regle_appliquee",
     "temps_estime_min",
     "vague_code"
@@ -11071,6 +11237,72 @@
    ],
    "enums": {}
   },
+  "app__routers__v1__prestataires__PrestataireCreate": {
+   "champs": [
+    "adresse",
+    "agrement_portuaire",
+    "conditions_reglement",
+    "contact_email",
+    "contact_nom",
+    "contact_telephone",
+    "observations",
+    "raison_sociale",
+    "rccm",
+    "sigle",
+    "specialite",
+    "taux_journalier_indicatif",
+    "tax_id",
+    "telephone_astreinte_24h",
+    "ville",
+    "zone_portuaire"
+   ],
+   "enums": {}
+  },
+  "app__routers__v1__saas_console__CompanyCreate": {
+   "champs": [
+    "agrement_douane",
+    "code",
+    "email",
+    "is_active",
+    "legal_form",
+    "max_users",
+    "modules_actives",
+    "nom",
+    "pays",
+    "rccm",
+    "sigle",
+    "subdomain",
+    "subscription_plan_id",
+    "tax_id",
+    "telephone",
+    "ville",
+    "website"
+   ],
+   "enums": {}
+  },
+  "app__routers__v1__saas_console__PrestataireCreate": {
+   "champs": [
+    "adresse",
+    "agrement_portuaire",
+    "code",
+    "company_id",
+    "contact_email",
+    "contact_nom",
+    "contact_telephone",
+    "est_actif",
+    "observations",
+    "raison_sociale",
+    "rccm",
+    "sigle",
+    "specialite",
+    "statut_agrement",
+    "tax_id",
+    "telephone_astreinte_24h",
+    "ville",
+    "zone_portuaire"
+   ],
+   "enums": {}
+  },
   "app__schemas__magasin_store__ClientCreate": {
    "champs": [
     "address",
@@ -11164,6 +11396,29 @@
     "salaire_base",
     "salaire_brut",
     "total_cnps"
+   ],
+   "enums": {}
+  },
+  "app__schemas__tenant__CompanyCreate": {
+   "champs": [
+    "adresse",
+    "agrement_douane",
+    "agrement_pad",
+    "agrement_pak",
+    "capital_social",
+    "code",
+    "email",
+    "legal_form",
+    "nom",
+    "pays",
+    "rccm",
+    "rib",
+    "sigle",
+    "subscription_plan_id",
+    "tax_id",
+    "telephone",
+    "ville",
+    "website"
    ],
    "enums": {}
   },
@@ -11334,6 +11589,9 @@
   "/api/v1/auth/login": {
    "post": []
   },
+  "/api/v1/auth/session": {
+   "get": []
+  },
   "/api/v1/auth/refresh": {
    "post": [
     "Token"
@@ -11359,13 +11617,15 @@
   "/api/v1/auth/2fa/enable": {
    "post": []
   },
+  "/api/v1/auth/2fa/recovery-codes": {
+   "get": [],
+   "post": []
+  },
   "/api/v1/auth/2fa/disable": {
    "post": []
   },
   "/api/v1/auth/2fa/verify": {
-   "post": [
-    "Token"
-   ]
+   "post": []
   },
   "/api/v1/auth/revoke-sessions": {
    "post": []
@@ -11579,17 +11839,6 @@
     "TiersType"
    ]
   },
-  "/api/v1/tiers/{tiers_id}": {
-   "get": [
-    "TiersResponse",
-    "TiersType"
-   ],
-   "put": [
-    "TiersResponse",
-    "TiersType"
-   ],
-   "delete": []
-  },
   "/api/v1/tiers/clients": {
    "post": [
     "TiersType",
@@ -11613,6 +11862,17 @@
     "FournisseurResponse",
     "TiersType"
    ]
+  },
+  "/api/v1/tiers/{tiers_id}": {
+   "get": [
+    "TiersResponse",
+    "TiersType"
+   ],
+   "put": [
+    "TiersResponse",
+    "TiersType"
+   ],
+   "delete": []
   },
   "/api/v1/transport/camions": {
    "get": [
@@ -11874,10 +12134,10 @@
    ]
   },
   "/api/v1/finance/factures": {
-   "get": [],
    "post": [
     "FactureResponse"
-   ]
+   ],
+   "get": []
   },
   "/api/v1/finance/factures/{facture_id}/lignes": {
    "post": [
@@ -11885,9 +12145,7 @@
    ]
   },
   "/api/v1/finance/factures/{facture_id}": {
-   "put": [
-    "FactureResponse"
-   ]
+   "put": []
   },
   "/api/v1/finance/factures/{facture_id}/pdf": {
    "get": []
@@ -11988,7 +12246,8 @@
    ]
   },
   "/api/v1/finance/encaissements": {
-   "get": []
+   "get": [],
+   "post": []
   },
   "/api/v1/finance/kpis": {
    "get": []
@@ -12136,6 +12395,9 @@
    ]
   },
   "/api/v1/documents/archivages-legal": {
+   "get": [
+    "ArchivageLegalDetailResponse"
+   ],
    "post": [
     "ArchivageLegalResponse"
    ]
@@ -13993,12 +14255,13 @@
     "DeclarationEntrepotResponse"
    ]
   },
-  "/api/v1/magasin-douane/declarations/{declaration_id}/accepter": {
+  "/api/v1/magasin-douane/declarations/{declaration_id}": {
+   "get": [],
    "put": [
     "DeclarationEntrepotResponse"
    ]
   },
-  "/api/v1/magasin-douane/declarations/{declaration_id}": {
+  "/api/v1/magasin-douane/declarations/{declaration_id}/accepter": {
    "put": [
     "DeclarationEntrepotResponse"
    ]
@@ -14029,6 +14292,7 @@
    ]
   },
   "/api/v1/magasin-douane/inventaires": {
+   "get": [],
    "post": [
     "InventaireDouanierResponse"
    ]
@@ -14129,6 +14393,9 @@
    ]
   },
   "/api/v1/transport-international/ordres-transport": {
+   "get": [
+    "OrdreTransportResponse"
+   ],
    "post": [
     "OrdreTransportResponse"
    ]
@@ -14154,6 +14421,9 @@
    ]
   },
   "/api/v1/transport-international/carnets-tir": {
+   "get": [
+    "CarnetTIRResponse"
+   ],
    "post": [
     "CarnetTIRResponse"
    ]
@@ -14224,6 +14494,7 @@
    ]
   },
   "/api/v1/transport-international/preuves-livraison": {
+   "get": [],
    "post": [
     "PreuveLivraisonResponse"
    ]
@@ -14680,7 +14951,8 @@
    ]
   },
   "/api/v1/tenant/company-profile": {
-   "get": []
+   "get": [],
+   "put": []
   },
   "/api/v1/tenant/company-profile/legal": {
    "put": []
@@ -15290,6 +15562,82 @@
   "/api/v1/shared-access/initialiser": {
    "post": []
   },
+  "/api/v1/saas/console/modules-catalog": {
+   "get": []
+  },
+  "/api/v1/saas/console/companies": {
+   "get": [],
+   "post": []
+  },
+  "/api/v1/saas/console/companies/{company_id}": {
+   "get": [],
+   "patch": [],
+   "delete": []
+  },
+  "/api/v1/saas/console/companies/{company_id}/logo": {
+   "post": [
+    "LogoResponse"
+   ]
+  },
+  "/api/v1/saas/console/companies/{company_id}/modules": {
+   "put": []
+  },
+  "/api/v1/saas/console/companies/{company_id}/admins": {
+   "get": [],
+   "post": []
+  },
+  "/api/v1/saas/console/accreditations/demandes": {
+   "get": []
+  },
+  "/api/v1/saas/console/companies/{company_id}/accreditations": {
+   "get": [],
+   "post": []
+  },
+  "/api/v1/saas/console/companies/{company_id}/accreditations/{accred_id}": {
+   "delete": []
+  },
+  "/api/v1/saas/console/plans": {
+   "get": [],
+   "post": []
+  },
+  "/api/v1/saas/console/plans/{plan_id}": {
+   "patch": [],
+   "delete": []
+  },
+  "/api/v1/saas/console/prestataires": {
+   "get": [],
+   "post": []
+  },
+  "/api/v1/saas/console/prestataires/{prestataire_id}": {
+   "patch": [],
+   "delete": []
+  },
+  "/api/v1/company-admin/profil": {
+   "get": [],
+   "patch": []
+  },
+  "/api/v1/company-admin/utilisateurs": {
+   "get": [],
+   "post": []
+  },
+  "/api/v1/company-admin/utilisateurs/{member_id}": {
+   "put": []
+  },
+  "/api/v1/company-admin/utilisateurs/{member_id}/responsabilites": {
+   "patch": []
+  },
+  "/api/v1/company-admin/utilisateurs/{member_id}/statut": {
+   "patch": []
+  },
+  "/api/v1/company-admin/modules": {
+   "get": []
+  },
+  "/api/v1/company-admin/modules/demandes": {
+   "post": []
+  },
+  "/api/v1/company-admin/modules/demandes/{request_id}": {
+   "delete": []
+  },
   "/api/v1/shift-planning/": {
    "get": []
   },
@@ -15782,6 +16130,9 @@
   "/api/auth/login": {
    "post": []
   },
+  "/api/auth/session": {
+   "get": []
+  },
   "/api/auth/refresh": {
    "post": [
     "Token"
@@ -15807,13 +16158,15 @@
   "/api/auth/2fa/enable": {
    "post": []
   },
+  "/api/auth/2fa/recovery-codes": {
+   "get": [],
+   "post": []
+  },
   "/api/auth/2fa/disable": {
    "post": []
   },
   "/api/auth/2fa/verify": {
-   "post": [
-    "Token"
-   ]
+   "post": []
   },
   "/api/auth/revoke-sessions": {
    "post": []
@@ -15827,17 +16180,6 @@
     "TiersResponse",
     "TiersType"
    ]
-  },
-  "/api/tiers/{tiers_id}": {
-   "get": [
-    "TiersResponse",
-    "TiersType"
-   ],
-   "put": [
-    "TiersResponse",
-    "TiersType"
-   ],
-   "delete": []
   },
   "/api/tiers/clients": {
    "post": [
@@ -15862,6 +16204,17 @@
     "FournisseurResponse",
     "TiersType"
    ]
+  },
+  "/api/tiers/{tiers_id}": {
+   "get": [
+    "TiersResponse",
+    "TiersType"
+   ],
+   "put": [
+    "TiersResponse",
+    "TiersType"
+   ],
+   "delete": []
   },
   "/api/transport/camions": {
    "get": [
@@ -15990,10 +16343,10 @@
    ]
   },
   "/api/finance/factures": {
-   "get": [],
    "post": [
     "FactureResponse"
-   ]
+   ],
+   "get": []
   },
   "/api/finance/factures/{facture_id}/lignes": {
    "post": [
@@ -16001,9 +16354,7 @@
    ]
   },
   "/api/finance/factures/{facture_id}": {
-   "put": [
-    "FactureResponse"
-   ]
+   "put": []
   },
   "/api/finance/factures/{facture_id}/pdf": {
    "get": []
@@ -16104,7 +16455,8 @@
    ]
   },
   "/api/finance/encaissements": {
-   "get": []
+   "get": [],
+   "post": []
   },
   "/api/finance/kpis": {
    "get": []
@@ -16209,6 +16561,9 @@
    ]
   },
   "/api/documents/archivages-legal": {
+   "get": [
+    "ArchivageLegalDetailResponse"
+   ],
    "post": [
     "ArchivageLegalResponse"
    ]

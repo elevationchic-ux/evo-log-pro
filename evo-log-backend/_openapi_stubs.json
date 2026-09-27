@@ -49,6 +49,7 @@
  "/api/v1/k-modules/transit/dossiers",
  "/api/v1/marketplace/api-keys",
  "/api/v1/notifications/sms",
+ "/api/v1/parc/ocr-extract",
  "/api/v1/privacy/notify-breach",
  "/api/v1/projects/",
  "/api/v1/real-customs/camcis/circuits/{numero_dum}",
@@ -63,5 +64,6 @@
  "/api/v1/sectoral/export-certificates/{dossier_id}",
  "/api/v1/sectoral/hazmat-fds/{article_code}",
  "/api/v1/sectoral/ocr-ingest",
- "/api/v1/sectoral/qualified-signature"
+ "/api/v1/sectoral/qualified-signature",
+ "/api/v1/whatsapp/send"
 ]
