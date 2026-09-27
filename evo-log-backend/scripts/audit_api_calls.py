@@ -151,10 +151,24 @@ def rapport(a: str, b: str) -> float:
 
 
 def methodes_reelles():
+    """Routes reelslement enregistrees dans l'app, et non l'OpenAPI.
+
+    L'OpenAPI omet les routes declarees `include_in_schema=False` (celles du
+    pont S3, des websockets, etc.) : les ignorer ferait passer des endpoints
+    existants pour des orphelins. On itere donc `app.routes`, en excluant nos
+    propres catch-all (`pending_modules`), qui matcheront tout par definition.
+    """
     out = []
-    for path, item in app.openapi()["paths"].items():
+    catch_all = {"/api/v1/{full_path:path}"}
+    for route in app.routes:
+        path = getattr(route, "path", None)
+        if not path or path in catch_all:
+            continue
+        methodes = getattr(route, "methods", None) or set()
         gabarit = tuple(segments_gabarit(path))
-        for meth in item:
+        for meth in sorted(methodes):
+            if meth in ("HEAD", "OPTIONS"):
+                continue
             out.append((meth.upper(), gabarit, path))
     return out
 
