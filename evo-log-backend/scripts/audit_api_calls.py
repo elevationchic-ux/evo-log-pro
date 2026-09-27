@@ -9,7 +9,6 @@ Usage:  python scripts/audit_api_calls.py
 """
 from __future__ import annotations
 
-import json
 import re
 import sys
 from collections import defaultdict
@@ -17,15 +16,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 FRONT = ROOT / "evo-log-frontend" / "src"
-BACKEND = ROOT / "evo-log-frontend"  # placeholder, replaced below
-
 BACKEND_APP_DIR = ROOT / "evo-log-backend"
 
 # 1. Routes reelles du backend (OpenAPI genere en direct, sans serveur).
 sys.path.insert(0, str(BACKEND_APP_DIR))
 from app.main import app  # noqa: E402
-
-CHEMIN = re.compile(r"^\{full_path:path\}$")
 
 
 def routes_reelles():
@@ -86,8 +81,6 @@ def main():
             meth = (match.group(1) or "get").upper()
             cible = match.group(2) or match.group(3) or match.group(4)
             if not cible or cible.startswith("/api/docs") or cible.startswith("/api/health"):
-                continue
-            if "auth-refresh" in str(fichier) and False:
                 continue
             chemin = normaliser(cible)
             ok = any(m == meth and rx.match(chemin) for m, rx in motifs)
