@@ -19,9 +19,16 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
     
     def __init__(self, app, redis_url: str):
         super().__init__(app)
+        if not redis_url or redis_url.lower() in ("none", "disabled", ""):
+            self.redis_client = None
+            logger.info("Idempotency middleware: Redis desactive, no-op.")
+            return
         self.redis_client = redis.from_url(redis_url, decode_responses=True)
     
     async def dispatch(self, request: Request, call_next):
+        # If Redis is disabled, skip idempotency enforcement entirely.
+        if self.redis_client is None:
+            return await call_next(request)
         # Only apply to POST, PUT, PATCH requests
         if request.method not in ["POST", "PUT", "PATCH"]:
             return await call_next(request)
