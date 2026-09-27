@@ -25,9 +25,21 @@ import app.models  # noqa: F401,E402  (enregistre toutes les tables)
 
 def colonnes_base(cur, table: str):
     try:
-        return {r[1] for r in cur.execute(f'PRAGMA table_info("{table}")')}
+        return {r[1] for r in cur.execute("PRAGMA table_info('{}')".format(table))}
     except sqlite3.Error:
         return None
+
+
+def surplus_bloquants(cur, table: str, surplus):
+    """Colonnes presentes en base mais absentes du modele, qui rendent toute
+    ecriture impossible : NOT NULL sans valeur par defaut, le modele ne les
+    alimente jamais et l'INSERT echoue. Un surplus NULLable est inoffensif."""
+    bloquants = []
+    for ligne in cur.execute("PRAGMA table_info('{}')".format(table)):
+        nom, notnull, dflt = ligne[1], ligne[3], ligne[4]
+        if nom in surplus and notnull and dflt is None:
+            bloquants.append(nom)
+    return bloquants
 
 
 def main():
@@ -67,6 +79,21 @@ def main():
             print(f"      modele seulement : {' '.join(manque)}")
         if surplus:
             print(f"      base seulement   : {' '.join(surplus)}")
+            bloquants = surplus_bloquants(cur, table, set(surplus))
+            if bloquants:
+                print(f"      -> BLOQUANT : {' '.join(bloquants)} "
+                      "(NOT NULL sans defaut, le modele ne les remplit pas)")
+
+    print()
+    critiques = sum(1 for _, manque, _ in derives if manque) + len(absentes)
+    print("Verdict : " + (
+        f"{critiques} situation(s) ou le modele reclame des colonnes absentes "
+        "de la base (erreur SQL garantie)."
+        if critiques else
+        "aucun modele ne reclame de colonne absente de la base : les derives "
+        "constatees sont des surplus NULLables, inoffensifs en lecture comme "
+        "en ecriture."
+    ))
 
     con.close()
 
