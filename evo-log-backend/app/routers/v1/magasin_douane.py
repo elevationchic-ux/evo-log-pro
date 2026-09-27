@@ -31,7 +31,10 @@ from app.services.magasin_douane_service import (
     EntretienStockService, AssuranceStockService, CompteRenduManutentionService,
     MagasinDouaneReportingService
 )
-from app.models.magasin_douane import EntrepotDouane, DeclarationEntrepot, FicheMagasin
+from app.models.magasin_douane import (
+    EntrepotDouane, DeclarationEntrepot, FicheMagasin,
+    InventaireDouanier, LigneInventaireDouanier,
+)
 
 router = APIRouter(tags=["Magasin Douane"])
 
@@ -256,6 +259,53 @@ def enregistrer_mouvement(
 
 
 # ============ INVENTAIRES DOUANIERS ============
+@router.get("/inventaires")
+def lister_inventaires(
+    skip: int = 0,
+    limit: int = Query(100, le=500),
+    statut: Optional[str] = None,
+    entrepot_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Lister les inventaires douaniers reellement enregistres.
+
+    Le nombre de lignes est compte dans `lignes_inventaires` : un inventaire sans
+    ligne reste visible avec 0 ligne, il n'est jamais fabrique.
+    """
+    q = db.query(InventaireDouanier)
+    if statut:
+        q = q.filter(InventaireDouanier.statut == statut)
+    if entrepot_id:
+        q = q.filter(InventaireDouanier.entrepot_id == entrepot_id)
+    total = q.count()
+    rows = q.order_by(InventaireDouanier.id.desc()).offset(skip).limit(limit).all()
+    return {
+        "items": [
+            {
+                "id": i.id,
+                "numero_inventaire": i.numero_inventaire,
+                "entrepot_id": i.entrepot_id,
+                "type_inventaire": i.type_inventaire,
+                "date_debut": i.date_debut.isoformat() if i.date_debut else None,
+                "date_fin": i.date_fin.isoformat() if i.date_fin else None,
+                "operateur": i.operateur,
+                "inspecteur_douane": i.inspecteur_douane,
+                "resultat": i.resultat,
+                "ecart_tonnage": float(i.ecart_tonnage) if i.ecart_tonnage is not None else None,
+                "ecart_valeur": float(i.ecart_valeur) if i.ecart_valeur is not None else None,
+                "statut": i.statut,
+                "lignes": db.query(LigneInventaireDouanier).filter(
+                    LigneInventaireDouanier.inventaire_id == i.id
+                ).count(),
+            }
+            for i in rows
+        ],
+        "total": total,
+        "pending": False,
+    }
+
+
 @router.post("/inventaires", response_model=InventaireDouanierResponse, status_code=status.HTTP_201_CREATED)
 def creer_inventaire(
     inventaire: InventaireDouanierCreate,
