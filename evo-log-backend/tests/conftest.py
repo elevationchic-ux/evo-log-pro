@@ -1,6 +1,4 @@
 """Pytest configuration and fixtures for the EVO-LOG backend."""
-import types
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -41,15 +39,14 @@ def db():
 
 @pytest.fixture(scope="function")
 def client(db):
-    """Provide a FastAPI client bound to the test database with superuser auth."""
-    from app.main import app
-    from app.core.security import get_current_user
+    """Provide a FastAPI client bound to the test database.
 
-    # Fake superuser that bypasses all permission checks
-    _fake_user = types.SimpleNamespace(
-        id=1, email="admin@test.local", is_active=True,
-        is_superuser=True, company_id=None, role_level=0,
-    )
+    Non authentifie par defaut : `get_current_user` garde sa vraie dépendance,
+    donc un appel sans token renvoie bien 401/403 (contrat des tests
+    `*_requires_auth` / `*_exige_auth`). Les tests qui ont besoin d'une
+    identité posent leur propre `app.dependency_overrides[get_current_user]`.
+    """
+    from app.main import app
 
     def override_get_db():
         try:
@@ -57,11 +54,7 @@ def client(db):
         finally:
             pass
 
-    def override_get_current_user():
-        return _fake_user
-
     app.dependency_overrides[get_db] = override_get_db
-    app.dependency_overrides[get_current_user] = override_get_current_user
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
