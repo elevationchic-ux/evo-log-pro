@@ -87,6 +87,43 @@ def require_company_admin(current_user: User = Depends(get_current_user)) -> Use
     )
 
 
+def require_department_head(current_user: User = Depends(get_current_user)) -> User:
+    """Chef de departement (level 2) or above.
+
+    Perimetre (plan Phase 3) : un niveau 2 n'operre QUE son propre departement,
+    donc il DOIT y etre rattache (``department_id`` non nul) pour agir ; sinon
+    403 (compte mal configure, sinon ilerait un scope vide silencieux).
+
+    - Super Admin (0) : passe (pilote n'importe quel departement via un
+      ``department_id`` explicite ; le router verifie la parite entreprise).
+    - Admin Entreprise (1) : passe (gere tous les departements de SON
+      entreprise ; le router verifie ``Department.company_id``).
+    - Chef de departement (2) : passe seulement s'il porte un ``department_id``.
+    - Utilisateur (3) : refuse.
+    """
+    if _is_superadmin(current_user):
+        return current_user
+    level = getattr(current_user, "role_level", 99)
+    if level <= LEVEL_COMPANY_ADMIN:
+        if not getattr(current_user, "company_id", None):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Aucune entreprise associee a ce compte",
+            )
+        return current_user
+    if level == LEVEL_DEPARTMENT_HEAD:
+        if not getattr(current_user, "department_id", None):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Aucun departement associe a ce compte (chef de departement requis)",
+            )
+        return current_user
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Acces reserve : chef de departement ou superiore",
+    )
+
+
 def require_min_role_level(max_level: int) -> Callable:
     """Allow users whose ``role_level`` is at or above the requested authority.
 

@@ -585,7 +585,7 @@ def get_portail_documents(
         documents.append({
             "id": d.id,
             "reference": f"DOC-{d.id}",
-            "titre": f"{d.type_document} — {d.nom_fichier}",
+            "titre": f"{d.type_document} / {d.nom_fichier}",
             "type": d.type_document,
             "nom_fichier": d.nom_fichier,
             "numero_document": d.numero_document,
@@ -605,7 +605,9 @@ def get_portail_documents(
     documents.append({
         "id": "ATTESTATION-TRAVAIL",
         "reference": "ATTESTATION-TRAVAIL",
-        "titre": "Attestation de travail",
+        # Pas de libelle francais : l'ecran traduit le type de piece, conforme
+        # a la regle FR/EN. Seules les pieces versees ont un titre calcule.
+        "titre": None,
         "type": "ATTESTATION",
         "nom_fichier": None,
         "numero_document": None,
