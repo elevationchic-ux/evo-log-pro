@@ -159,20 +159,24 @@ def _scinder_montant(insp):
         return 0
     bind = op.get_bind()
     total = 0
-    if "compte_debit_id" in colonnes or "compte_debit" in colonnes:
+    for sens, cotes in (("debit", ("compte_debit", "compte_debit_id")),
+                        ("credit", ("compte_credit", "compte_credit_id"))):
+        # On ne COALESCE que ce qui existe : viser une colonne absente ferait
+        # echouer l'UPDATE entier, et la revision doit rester jouable sur les
+        # deux formes de base (migree et create_all).
+        existantes = [c for c in cotes if c in colonnes]
+        if not existantes:
+            continue
+        cible = "montant_%s" % sens
+        if cible not in colonnes:
+            continue
+        deja_rempli = ' AND "montant_debit" IS NULL' if sens == "credit" else ""
         total += bind.execute(sa.text(
-            'UPDATE "%s" SET "montant_debit" = "montant" '
-            'WHERE "montant_debit" IS NULL AND "montant" IS NOT NULL '
-            'AND COALESCE("compte_debit", "compte_debit_id") IS NOT NULL'
-            % table
-        )).rowcount
-    if "compte_credit_id" in colonnes or "compte_credit" in colonnes:
-        total += bind.execute(sa.text(
-            'UPDATE "%s" SET "montant_credit" = "montant" '
-            'WHERE "montant_credit" IS NULL AND "montant_debit" IS NULL '
-            'AND "montant" IS NOT NULL '
-            'AND COALESCE("compte_credit", "compte_credit_id") IS NOT NULL'
-            % table
+            'UPDATE "%s" SET "%s" = "montant" '
+            'WHERE "%s" IS NULL%s AND "montant" IS NOT NULL '
+            'AND COALESCE(%s) IS NOT NULL'
+            % (table, cible, cible, deja_rempli,
+               ", ".join('"%s"' % c for c in existantes))
         )).rowcount
     return total
 
