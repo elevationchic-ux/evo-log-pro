@@ -125,6 +125,44 @@ def lister_declarations_entrepot(
     }
 
 
+@router.get("/declarations/{declaration_id}")
+def detail_declaration_entrepot(
+    declaration_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Détail d'une mise en entrepôt, lignes incluses.
+
+    La déclaration doit exister : un identifiant inconnu répond par un 404, au
+    lieu d'une page vide déguisée en succès.
+    """
+    d = db.query(DeclarationEntrepot).filter(DeclarationEntrepot.id == declaration_id).first()
+    if not d:
+        raise HTTPException(status_code=404, detail="Déclaration d'entrepôt introuvable")
+    return {
+        "id": d.id,
+        "numero_declaration": d.numero_declaration,
+        "entrepot_id": d.entrepot_id,
+        "dossier_transit_id": d.dossier_transit_id,
+        "conteneur_id": d.conteneur_id,
+        "numero_bl": d.numero_bl,
+        "regime": d.regime.value if d.regime else None,
+        "date_declaration": d.date_declaration.isoformat() if d.date_declaration else None,
+        "date_acceptation": d.date_acceptation.isoformat() if d.date_acceptation else None,
+        "date_limite": d.date_limite.isoformat() if d.date_limite else None,
+        "valide_par": d.valide_par,
+        "fonction": d.fonction,
+        "valeur_marchandise": float(d.valeur_marchandise) if d.valeur_marchandise is not None else None,
+        "devise": d.devise,
+        "numero_reference_sygdonia": d.numero_reference_sygdonia,
+        "statut": d.statut,
+        "motifs_refus": d.motifs_refus,
+        "notes": d.notes,
+        "lignes": [LigneEntrepotResponse.model_validate(l).model_dump() for l in d.lignes_entrepot],
+        "pending": False,
+    }
+
+
 @router.post("/declarations", response_model=DeclarationEntrepotResponse, status_code=status.HTTP_201_CREATED)
 def creer_declaration_entrepot(
     declaration: DeclarationEntrepotCreate,
@@ -268,10 +306,10 @@ def lister_inventaires(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Lister les inventaires douaniers reellement enregistres.
+    """Lister les inventaires douaniers réellement enregistrés.
 
-    Le nombre de lignes est compte dans `lignes_inventaires` : un inventaire sans
-    ligne reste visible avec 0 ligne, il n'est jamais fabrique.
+    Le nombre de lignes est compté dans `lignes_inventaires` : un inventaire sans
+    ligne reste visible avec 0 ligne, il n'est jamais fabriqué.
     """
     q = db.query(InventaireDouanier)
     if statut:
