@@ -1,4 +1,4 @@
-"""Tests Phase 2 — Admin Entreprise (niveau 1).
+﻿"""Tests Phase 2 — Admin Entreprise (niveau 1).
 
 Couvre :
   * designation d'un admin entreprise PAR le CADC (role_level=1, rattaché,
@@ -219,10 +219,10 @@ def test_module_request_creates_pending_accreditation(client, db, company_admin,
     _as(company_admin)
     resp = client.post(
         "/api/v1/company-admin/modules/demandes",
-        json={"module": "finance", "motif": "Besoin comptabilite"},
+        json={"module": "comptabilite", "motif": "Besoin comptabilite"},
     )
     assert resp.status_code == 201
-    req = db.query(Accreditation).filter(Accreditation.module == "finance").first()
+    req = db.query(Accreditation).filter(Accreditation.module == "comptabilite").first()
     assert req is not None
     assert req.statut == "demande"
     assert req.company_id == company.id
@@ -234,19 +234,19 @@ def test_module_request_creates_pending_accreditation(client, db, company_admin,
 
 def test_module_request_appears_in_overview(client, db, company_admin, company):
     _as(company_admin)
-    client.post("/api/v1/company-admin/modules/demandes", json={"module": "finance"})
+    client.post("/api/v1/company-admin/modules/demandes", json={"module": "comptabilite"})
     data = client.get("/api/v1/company-admin/modules").json()
     etats = {m["key"]: m["etat"] for m in data["modules"]}
-    assert etats.get("finance") == "demande"
-    assert any(d["module"] == "finance" for d in data["demandes"])
+    assert etats.get("comptabilite") == "demande"
+    assert any(d["module"] == "comptabilite" for d in data["demandes"])
     _clear()
 
 
 def test_module_request_duplicate_rejected(client, db, company_admin, company):
     _as(company_admin)
-    first = client.post("/api/v1/company-admin/modules/demandes", json={"module": "finance"})
+    first = client.post("/api/v1/company-admin/modules/demandes", json={"module": "comptabilite"})
     assert first.status_code == 201
-    dup = client.post("/api/v1/company-admin/modules/demandes", json={"module": "finance"})
+    dup = client.post("/api/v1/company-admin/modules/demandes", json={"module": "comptabilite"})
     assert dup.status_code == 400
     _clear()
 
@@ -261,10 +261,10 @@ def test_module_request_for_already_allocated_rejected(client, db, company_admin
 
 def test_cadc_lists_pending_requests(client, db, superadmin, company_admin, company):
     _as(company_admin)
-    client.post("/api/v1/company-admin/modules/demandes", json={"module": "finance"})
+    client.post("/api/v1/company-admin/modules/demandes", json={"module": "comptabilite"})
     _as(superadmin)
     resp = client.get("/api/v1/saas/console/accreditations/demandes")
     assert resp.status_code == 200
     rows = resp.json()
-    assert any(r["module"] == "finance" and r["company_nom"] == company.nom for r in rows)
+    assert any(r["module"] == "comptabilite" and r["company_nom"] == company.nom for r in rows)
     _clear()
