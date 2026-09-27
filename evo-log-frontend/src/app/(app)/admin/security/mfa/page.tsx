@@ -431,7 +431,7 @@ export default function AdminSecurityMfaPage() {
               {enAttente && (
                 <p className="text-sm text-on-surface-variant leading-relaxed">
                   {t(
-                    'Une clé est déjà en attente sur ce compte mais na jamais été confirmée. Générez-en une nouvelle pour repartir de zéro.',
+                    'Une clé est déjà en attente sur ce compte mais n’a jamais été confirmée. Générez-en une nouvelle pour repartir de zéro.',
                     'A key is already pending on this account but was never confirmed. Generate a new one to start over.',
                   )}
                 </p>
@@ -531,7 +531,7 @@ export default function AdminSecurityMfaPage() {
                 <div className="space-y-3">
                   <p className="text-sm text-on-surface-variant leading-relaxed">
                     {t(
-                      'Aucun second facteur actif. Lactivation génère une clé, que vous confirmez avec un code de votre application.',
+                      'Aucun second facteur actif. L’activation génère une clé, que vous confirmez avec un code de votre application.',
                       'No second factor active. Enabling generates a key, which you confirm with a code from your app.',
                     )}
                   </p>
@@ -653,7 +653,7 @@ export default function AdminSecurityMfaPage() {
                   ) : (
                     <p className="text-[11px] text-on-surface-variant">
                       {t(
-                        'Les codes sont émis automatiquement à lactivation de la 2FA.',
+                        'Les codes sont émis automatiquement à l’activation de la 2FA.',
                         'Codes are issued automatically when 2FA is enabled.',
                       )}
                     </p>
@@ -725,8 +725,8 @@ export default function AdminSecurityMfaPage() {
           {/* Notes d’honnêteté : ce que les chiffres de cette page ne disent pas */}
           <p className="text-[11px] text-on-surface-variant leading-relaxed">
             {t(
-              'Fenêtre de validité TOTP : ±30 secondes autour du code courant (réglage serveur). Le jeton intermédiaire délivré à la connexion expire au bout de 5 minutes. Les codes de secours sont stockés sous forme de hachages : le serveur ne peut reluer que le solde, jamais le détail — un code consommé na donc pas de date affichable ici. Cette page règle le compte connecté ; le 2FA des autres collaborateurs se configure depuis leur propre session.',
-              'TOTP validity window: ±30 seconds around the current code (server setting). The intermediate token issued at sign-in expires after 5 minutes. Recovery codes are stored as hashes: the server can only re-read the balance, never the detail — so a consumed code has no date to show here. This page configures the signed-in account; colleagues set 2FA from their own session.',
+              'Fenêtre de validité TOTP : ±30 secondes autour du code courant (réglage serveur). Le jeton intermédiaire délivré à la connexion expire au bout de 5 minutes. Les codes de secours sont stockés sous forme de hachages : l’API ne renvoie que le solde utilisable, jamais la liste — un code déjà consommé ne peut donc pas être représenté ici. Cette page règle le compte connecté ; le 2FA des autres collaborateurs se configure depuis leur propre session.',
+              'TOTP validity window: ±30 seconds around the current code (server setting). The intermediate token issued at sign-in expires after 5 minutes. Recovery codes are stored as hashes: the API returns only the usable balance, never the list — so an already consumed code cannot be shown here. This page configures the signed-in account; colleagues set 2FA from their own session.',
             )}
           </p>
         </>
