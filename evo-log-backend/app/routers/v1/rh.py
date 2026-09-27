@@ -692,21 +692,24 @@ def telecharger_attestation_travail(
     <html lang="fr">
     <head>
       <meta charset="UTF-8">
-      <title>Attestation de Travail - {current_user.full_name or current_user.username}</title>
+      <title>Attestation de travail - {nom_salarie}</title>
       <style>
         body {{ font-family: 'Times New Roman', Times, serif; margin: 60px 80px; color: #000; line-height: 1.6; }}
         .header {{ text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; }}
         .title {{ font-size: 24px; font-weight: bold; text-decoration: underline; margin: 40px 0; text-align: center; }}
         .content {{ font-size: 16px; text-align: justify; }}
-        .signature-block {{ margin-top: 60px; display: flex; justify-content: space-between; }}
-        .stamp {{ border: 2px solid #0f766e; color: #0f766e; padding: 15px; border-radius: 8px; font-size: 12px; text-align: center; }}
+        .signature-block {{ margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end; }}
+        .signature-line {{ border-bottom: 1px solid #000; height: 70px; width: 260px; margin-bottom: 8px; }}
+        .legal {{ font-size: 12px; color: #444; margin-top: 6px; }}
+        .fields {{ margin-left: 30px; }}
+        .fields div {{ margin-bottom: 4px; }}
+        .note {{ margin-top: 36px; font-size: 11px; color: #444; }}
       </style>
     </head>
     <body>
       <div class="header">
-        <h2 style="margin: 0; text-transform: uppercase;">Logistique Portuaire du Cameroun (LPC SA)</h2>
-        <p style="margin: 5px 0; font-size: 13px;">Société Anonyme au Capital de 500 000 000 FCFA</p>
-        <p style="margin: 0; font-size: 12px;">Port Autonome de Douala • Quai 14 • B.P. 2489 Douala - Cameroun</p>
+        <h2 style="margin: 0; text-transform: uppercase;">{raison_sociale}</h2>
+        <p class="legal" style="margin: 5px 0;">{mentions_legales}</p>
       </div>
 
       <div class="title">ATTESTATION DE TRAVAIL & D'EMPLOI</div>
