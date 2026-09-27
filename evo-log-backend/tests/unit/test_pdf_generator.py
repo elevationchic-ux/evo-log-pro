@@ -192,5 +192,9 @@ def test_endpoint_facture_pdf(client, db):
 
 def test_endpoint_facture_pdf_exige_auth(client):
     # Sans utilisateur authentifie, la facture n'est pas telechargeable.
+    # `client` authentifie par defaut : retirer l'override pour tester l'appel anonyme.
+    from app.core.security import get_current_user
+    from app.main import app
+    app.dependency_overrides.pop(get_current_user, None)
     resp = client.get("/api/v1/finance/factures/1/pdf")
     assert resp.status_code in (401, 403)
