@@ -11,6 +11,8 @@ router = APIRouter(tags=["WhatsApp Business"])
 logger = logging.getLogger(__name__)
 
 WHATSAPP_VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN", "evo-log-whatsapp-verify-token-2026")
+WHATSAPP_CLOUD_API_TOKEN = os.getenv("WHATSAPP_CLOUD_API_TOKEN", "")
+WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
 
 class SendWhatsAppMessageSchema(BaseModel):
     to_number: str = Field(..., example="+237699001122")
@@ -73,13 +75,52 @@ async def receive_whatsapp_notification(request: Request):
 def send_whatsapp_template_message(payload: SendWhatsAppMessageSchema):
     """
     Send outbound WhatsApp Business notification (Transport orders, delivery updates, alert notifications).
+    Requires WHATSAPP_CLOUD_API_TOKEN + WHATSAPP_PHONE_NUMBER_ID env vars.
     """
-    logger.info(f"Sending WhatsApp notification template '{payload.template_name}' to {payload.to_number}")
+    if not WHATSAPP_CLOUD_API_TOKEN or not WHATSAPP_PHONE_NUMBER_ID:
+        raise HTTPException(
+            status_code=501,
+            detail=(
+                "WhatsApp Business Cloud API non configure : definir les variables "
+                "d'environnement WHATSAPP_CLOUD_API_TOKEN et WHATSAPP_PHONE_NUMBER_ID "
+                "pour activer l'envoi reel de notifications."
+            ),
+        )
+
+    # Real dispatch via Meta Graph API (executed only when credentials present)
+    import httpx
+
+    url = f"https://graph.facebook.com/v21.0/{WHATSAPP_PHONE_NUMBER_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {WHATSAPP_CLOUD_API_TOKEN}",
+        "Content-Type": "application/json",
+    }
+    body = {
+        "messaging_product": "whatsapp",
+        "to": payload.to_number,
+        "type": "template",
+        "template": {
+            "name": payload.template_name,
+            "language": {"code": "fr"},
+            "components": [{
+                "type": "body",
+                "parameters": [{"type": "text", "text": p} for p in payload.parameters],
+            }],
+        },
+    }
+    try:
+        resp = httpx.post(url, json=body, headers=headers, timeout=15)
+        resp.raise_for_status()
+        meta_data = resp.json()
+    except Exception as exc:
+        logger.error(f"WhatsApp dispatch failed: {exc}")
+        raise HTTPException(status_code=502, detail=f"Meta API erreur: {exc}")
+
+    messages = meta_data.get("messages", [])
     return {
         "status": "sent",
         "to": payload.to_number,
         "template": payload.template_name,
-        "parameters": payload.parameters,
-        "message_id": f"wmid.HBgM{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
-        "sent_at": datetime.utcnow().isoformat()
+        "message_id": messages[0]["id"] if messages else None,
+        "meta_response": meta_data,
     }
