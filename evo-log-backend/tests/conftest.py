@@ -1,4 +1,6 @@
 """Pytest configuration and fixtures for the EVO-LOG backend."""
+import types
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
