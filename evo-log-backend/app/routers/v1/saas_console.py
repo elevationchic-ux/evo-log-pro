@@ -33,10 +33,11 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.permission_catalog import DOMAINS
+from app.core.security import get_password_hash, validate_password_strength
 from app.models.accreditation import ACC_TYPE_PERMISSION, Accreditation
 from app.models.prestataire import Prestataire
 from app.models.tenant import Company, SubscriptionPlan, SubscriptionPlanType
-from app.models.user import User
+from app.models.user import Role, User
 from app.utils.rbac import require_superadmin
 
 router = APIRouter(dependencies=[Depends(require_superadmin)])
@@ -373,6 +374,143 @@ def allocate_modules(company_id: int, payload: ModulesAllocation, db: Session = 
     db.commit()
     db.refresh(c)
     return {"company_id": c.id, "modules_actives": _loads(c.modules_actives, []), "max_modules": cap}
+
+
+# ── Admins d'entreprise (Phase 2) : cree par le CADC ─────────────────────────
+class CompanyAdminCreate(BaseModel):
+    username: str = Field(..., max_length=50)
+    email: str = Field(..., max_length=100)
+    password: Optional[str] = Field(
+        None,
+        description="Mot de passe temporaire ; genere automatiquement si absent. "
+                    "must_change_password est toujours force a True.",
+    )
+    full_name: Optional[str] = None
+    matricule: Optional[str] = None
+    job_title: Optional[str] = None
+    phone: Optional[str] = None
+
+
+def _safe_user_dict(u: User) -> Dict[str, Any]:
+    """Representation d'un utilisateur sans aucun champ sensible."""
+    return {
+        "id": u.id,
+        "username": u.username,
+        "email": u.email,
+        "full_name": u.full_name,
+        "matricule": u.matricule,
+        "job_title": u.job_title,
+        "phone": u.phone,
+        "company_id": u.company_id,
+        "role_level": u.role_level,
+        "is_active": u.is_active,
+        "is_superuser": bool(u.is_superuser),
+        "must_change_password": bool(u.must_change_password),
+        "roles": [r.name for r in (u.roles or [])],
+        "created_at": u.created_at,
+    }
+
+
+@router.get("/companies/{company_id}/admins", summary="Lister les admins de l'entreprise")
+def list_company_admins(company_id: int, db: Session = Depends(get_db)):
+    _get_company(db, company_id)
+    rows = (
+        db.query(User)
+        .filter(User.company_id == company_id, User.role_level == 1)
+        .order_by(User.id.asc())
+        .all()
+    )
+    return [_safe_user_dict(u) for u in rows]
+
+
+@router.post(
+    "/companies/{company_id}/admins",
+    status_code=status.HTTP_201_CREATED,
+    summary="Creer un admin entreprise (niveau 1)",
+)
+def create_company_admin(
+    company_id: int,
+    payload: CompanyAdminCreate,
+    db: Session = Depends(get_db),
+):
+    """Le CADC designe un administrateur pour SON entreprise.
+
+    Regles metier (plan Phase 2) :
+    - ``role_level=1``, rattle a l'entreprise ciblee, jamais super-utilisateur ;
+    - ``must_change_password=True`` : le mot de passe (temporaire, eventuellement
+      genere) doit etre changee a la premiere connexion ;
+    - quota du plan ``max_users`` respecte ;
+    - unicite username/email verifiee.
+    """
+    company = _get_company(db, company_id)
+    if db.query(User).filter(User.username == payload.username).first():
+        raise HTTPException(status_code=400, detail="Ce nom d'utilisateur existe deja")
+    if db.query(User).filter(User.email == payload.email).first():
+        raise HTTPException(status_code=400, detail="Cet email est deja utilise")
+
+    # Quota utilisateurs du plan d'abonnement (NULL/absent = pas de limite).
+    plan = None
+    if company.subscription_plan_id:
+        plan = db.query(SubscriptionPlan).filter(
+            SubscriptionPlan.id == company.subscription_plan_id
+        ).first()
+    if plan is not None and plan.max_users:
+        current_users = db.query(User).filter(User.company_id == company.id).count()
+        if current_users >= plan.max_users:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Quota du plan atteint ({plan.max_users} utilisateurs) ; "
+                       "augmentez le plan avant d'ajouter un admin.",
+            )
+
+    temp_password = payload.password or f"Adm-{secrets.token_hex(6)}!"
+    try:
+        validate_password_strength(temp_password, payload.username)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    admin = User(
+        username=payload.username,
+        email=payload.email,
+        hashed_password=get_password_hash(temp_password),
+        full_name=payload.full_name or payload.username,
+        matricule=payload.matricule,
+        job_title=payload.job_title or "Administrateur Entreprise",
+        phone=payload.phone,
+        company_id=company.id,
+        role_level=1,
+        is_active=True,
+        is_superuser=False,
+        must_change_password=True,
+    )
+    db_role = db.query(Role).filter(Role.name == "ADMIN").first()
+    if db_role:
+        admin.roles.append(db_role)
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    out = _safe_user_dict(admin)
+    out["temporary_password"] = temp_password
+    return out
+
+
+@router.get("/accreditations/demandes", summary="Demandes d'accreditation en attente (toutes entreprises)")
+def list_pending_accreditation_requests(db: Session = Depends(get_db)):
+    """File de lecture CADC : demandes emises par les admins entreprise (statut
+    ``demande``). L'octroi effectif reste datee via POST /companies/{id}/accreditations."""
+    rows = (
+        db.query(Accreditation)
+        .filter(Accreditation.statut == "demande")
+        .order_by(Accreditation.id.desc())
+        .all()
+    )
+    out = []
+    for a in rows:
+        d = _accred_dict(a)
+        company = db.query(Company).filter(Company.id == a.company_id).first()
+        d["company_nom"] = company.nom if company else None
+        out.append(d)
+    return out
 
 
 # ── Accreditations d'entreprise (delai) ───────────────────────────────────────
