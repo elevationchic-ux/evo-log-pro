@@ -7,12 +7,17 @@ import redis
 
 class RedisSignalingStore:
     def __init__(self, redis_url: str):
+        if not redis_url or redis_url.lower() in ("none", "disabled", ""):
+            self.redis = None
+            return
         self.redis = redis.Redis.from_url(redis_url, decode_responses=True)
 
     def _key(self, company_id, room_uuid, suffix):
         return f"evo-log:webrtc:{company_id}:{room_uuid}:{suffix}"
 
     def _ensure(self):
+        if self.redis is None:
+            raise RuntimeError("Redis WebRTC signaling desactive (REDIS_URL=disabled)")
         try:
             self.redis.ping()
         except Exception as exc:
