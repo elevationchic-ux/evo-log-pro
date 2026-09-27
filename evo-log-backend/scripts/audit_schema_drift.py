@@ -30,6 +30,7 @@ Usage :
 """
 from __future__ import annotations
 
+import os
 import sqlite3
 import subprocess
 import sys
@@ -161,7 +162,7 @@ def afficher(r):
              "(INSERT impossible)", r["notnull_imposes"],
              lambda e: f"{e[0]}.{e[1]} [{e[2]}] - {e[3]}")
     _section("4. DEFAULTS EN BASE SANS EQUIVALENT DANS LE MODELE "
-             "(relecture Apache apres INSERT)", r["defauts_orphelins"],
+             "(relecture de la valeur apres INSERT)", r["defauts_orphelins"],
              lambda e: f"{e[0]}.{e[1]} defaut={e[2]} - {e[3]}")
     _section("5. DESACCORDS DE TYPE Date / DateTime", r["conflits_type"],
              lambda e: f"{e[0]}.{e[1]} : modele={e[2]} base={e[3]}")
