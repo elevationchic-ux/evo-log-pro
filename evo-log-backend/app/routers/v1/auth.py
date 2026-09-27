@@ -407,7 +407,12 @@ async def enable_2fa(
     db: Session = Depends(get_db),
 ):
     """Active la 2FA seulement si le code TOTP correspond au secret en attente."""
-    body = await request.json()
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
     code = body.get("code")
     secret = getattr(current_user, "two_factor_secret", None)
     if not secret:
@@ -498,7 +503,12 @@ async def disable_2fa(
 ):
     """Desactive la 2FA. Exige le mot de passe pour eviter toute desactivation
     par detournement de session."""
-    body = await request.json()
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
     password = body.get("password")
     if not password or not verify_password(password, current_user.hashed_password):
         raise HTTPException(
