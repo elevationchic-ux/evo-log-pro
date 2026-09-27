@@ -510,9 +510,10 @@ def soumettre_demande_conge_portail(
     """Depose la demande de conge du salarie connecte dans la table ``conges``.
 
     La reponse est la ligne reellement enregistree, serialisee par
-    ``_conge_dict`` : meme contrat que ``GET /portail/conges``, donc l'historique
-    affiche immediatement la demande fraiche sans modele intermediaire. Le motif
-    reste vide si le salarie ne l'a pas rempli : rien n'est invente a sa place.
+    ``_conge_dict`` : le contrat est identique a celui de
+    ``GET /portail/conges``, donc l'historique affiche immediatement la demande
+    fraiche sans modele intermediaire. Le motif reste vide si le salarie ne l'a
+    pas rempli : rien n'est invente a sa place.
     """
     if payload.date_fin < payload.date_debut:
         raise HTTPException(status_code=400, detail="La date de fin ne peut pas être antérieure à la date de début.")
@@ -542,25 +543,20 @@ def soumettre_demande_conge_portail(
         date_fin=payload.date_fin,
         nombre_jours=jours_ouvrables,
         statut=StatutConge.EN_ATTENTE,
-        motif=payload.motif or "Demande soumise via Espace Personnel Salarié",
+        motif=(payload.motif or "").strip() or None,
         date_demande=date.today()
     )
     db.add(nouvelle_demande)
     db.commit()
     db.refresh(nouvelle_demande)
 
-    return {
-        "id": f"LV-2026-{str(nouvelle_demande.id).zfill(3)}",
-        "db_id": nouvelle_demande.id,
-        "type": payload.type_conge,
-        "dateDebut": nouvelle_demande.date_debut.strftime("%d/%m/%Y"),
-        "dateFin": nouvelle_demande.date_fin.strftime("%d/%m/%Y"),
-        "joursOuvrables": jours_ouvrables,
-        "motif": nouvelle_demande.motif,
-        "statut": "EN_ATTENTE",
-        "dateSoumission": nouvelle_demande.date_demande.strftime("%d/%m/%Y"),
-        "message": "Demande de congé enregistrée avec succès. Elle a été transmise à votre responsable N+1 et à la DRH."
-    }
+    enregistre = _conge_dict(nouvelle_demande)
+    enregistre["jours_ouvrables_estimes"] = jours_ouvrables
+    enregistre["message"] = (
+        "Demande enregistree et transmise a votre responsable N+1 et a la DRH "
+        "pour decision."
+    )
+    return enregistre
 
 
 @router.get("/portail/documents")

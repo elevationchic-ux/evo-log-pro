@@ -49,7 +49,7 @@ def main() -> int:
             for c in text_cols:
                 v = row[c]
                 if isinstance(v, str) and RE.search(v):
-                    hits.append((row["rowid"], c, v[:60]))
+                    hits.append((row[0], c, v[:60]))
                     break
         if hits:
             total_hits += len(hits)
