@@ -426,6 +426,61 @@ exactement celui du bug `echeance_km` (batch 10) mais a plus grande echelle.
 
 ---
 
+## 15. Batch 13  Rectification : les 2 « failures d'auth » du batch 12 n'existaient pas
+
+**Declencheur** : la derniere ligne utile du backlog herite du batch 12 annoncait
+« 2 failures preexistantes, veritable trou de securite a traiter en batch suivant ».
+En Zero-Mock, on ne peut pas laisser une affirmation fausse trainer dans un rapport —
+surtout quand elle accuse un systeme d'auth d'etre troue alors qu'il ne l'est pas.
+
+**Reproduction tentative** (dans l'ordre) :
+
+| Commande | Resultat |
+|---|---|
+| `pytest tests/unit/test_parc_purchase_store.py::test_requisition_requires_auth tests/unit/test_pdf_generator.py::test_endpoint_facture_pdf_exige_auth` | ✅ 2 passed (reproduce 3/3) |
+| `pytest tests/unit/test_parc_purchase_store.py tests/unit/test_pdf_generator.py` (2 fichiers complets) | ✅ 34 passed |
+| `pytest tests` ( commande exacte de la CI, `.github/workflows/ci-cd.yml::Run tests`) | ✅ **446 passed, 2 xfailed, 0 failed** en 958 s |
+| `pytest tests/unit` (sous-selection qui **n'est pas** la commande CI) | Run 1 : 431 passed / Run 2 : 13 failed, 414 passed |
+
+**Verdict** : les 2 tests incrimines **reussissent systematiquement** sous la commande
+que la CI execute reellement. Le `pytest tests/unit` intermediaire echoue sur un autre
+ensemble de tests (`test_magasin_stock_analytics.py`) mais **jamais** sur les 2 tests
+cites par le batch 12. La « fragilite » de la suite est donc reelle mais **d'une toute
+autre nature** que celle decrite par erreur.
+
+**Ce que le code dit reellement** (verifie en lecture) :
+
+| Route | Protegee par | Preuve |
+|---|---|---|
+| `GET /api/v1/purchase/requisitions` | `Depends(get_current_user)` (declare au niveau `APIRouter(dependencies=[...])`, `parc_purchase_store.py:210`) | `TestClient(app).get(...)` sans token → **401** body `"Not authenticated"` (verifie en direct) |
+| `GET /api/v1/finance/factures/{id}/pdf` | `Depends(get_current_user)` (`finance.py:250`) | `TestClient(app).get('/api/v1/finance/factures/1/pdf')` sans token → **401** body `"Not authenticated"` (verifie en direct) |
+
+Il n'y a donc **aucun trou d'auth** sur ces routes. L'affirmation du batch 12 etait fausse.
+
+**Cause probable de l'erreur du batch 12** : le run qui a produit ces chiffres etait lance
+en **arriere-plan** (`is_background=true`) pendant que d'autres commandes tournaient. La
+base SQLite `StaticPool` partage UNE connexion entre threads (voir commentaire conftest
+`l.14-18`) : sous contention, un `dependency_overrides.clear()` peut se retrouver execute
+apres un autre `TestClient(...)`, rendant l'evaluation d'un test d'auth non deterministe.
+
+**Mesures prises** :
+- Table « Verifications finales » en-tete du rapport : remplacee par le chiffre exact
+  `446 passed, 2 xfailed, 0 failed` + lien vers §15.
+- § « Verification batch 12 » : la claim des 2 failures est explicitement retractee.
+
+**Ce qu'il reste vraiment a faire** (recatgorise) :
+- **Non bloquant, qualite** : la suite presente une fragilite d'ordre d'execution sous
+  `pytest tests/unit`. Elle ne touche PAS les routes d'auth (les 2 tests restent verts)
+  mais fait fluctuer 13 tests de `test_magasin_stock_analytics.py` selon l'ordre de
+  collecte. A traiter sous forme de tâche dedicated "isolation des fixtures pytest" —
+  **pas** sous forme de security P0 comme le laissait entendre le batch 12.
+- **Aucune action immediate** sur les 2 tests cites.
+
+➡️ Le principe Zero-Mock s'applique aussi aux **rapports** : une fausse accusation de
+trou de securite coutera plus cher a corriger plus tard qu'une retractation immediate.
+
+---
+
 * Aucun acte à valeur légale (validation CNCC, dépôt GUCE/SYDONIA, quittance, bulletin CNPS,
   paiement mobile money) n'est jamais affiché comme "fait" s'il ne l'est pas : soit c'est réel,
   soit l'API répond **501 avec la raison exacte**.

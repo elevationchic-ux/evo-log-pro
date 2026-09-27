@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Warehouse, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MagasinSubPage() {
@@ -30,13 +31,7 @@ export default function MagasinSubPage() {
           </div>
         </div>
 
-        <div className="p-8 bg-slate-950 border border-slate-800 rounded-2xl flex items-center gap-4">
-          <ShieldCheck className="w-8 h-8 text-emerald-400 shrink-0" />
-          <div>
-            <h4 className="font-bold text-slate-200">Système K-Magasin Connecté</h4>
-            <p className="text-xs text-slate-400 mt-0.5">Toutes les données d'inventaire sont synchronisées en temps réel avec le serveur central.</p>
-          </div>
-        </div>
+        <div className="p-8 bg-slate-950 border border-slate-800 rounded-2xl flex items-center gap-4"> <AlertTriangle className="w-8 h-8 text-amber-400 shrink-0" /> <div>  <h4 className="font-bold text-amber-200">Fonctionnalité non déployée</h4>  <p className="text-xs text-slate-400 mt-0.5">   Cet écran affiche un espace réservé : la logique backend liee à cette vue n’est pas encore câblée. Revenez après déploiement ou consultez <a href="/magasin/dashboard" className="text-sky-400 underline">le tableau de bord magasin</a>.  </p> </div></div>
       </div>
     </div>
   );

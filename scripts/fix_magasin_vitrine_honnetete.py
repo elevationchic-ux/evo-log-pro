@@ -63,7 +63,6 @@ def fix_file(path: pathlib.Path) -> bool:
             "from 'lucide-react';\nimport { AlertTriangle } from 'lucide-react';",
             new_text,
             count=1,
-            replace=True,
         )
         # Remove duplicate import if ShieldCheck was the only lucide import
         new_text = new_text.replace(

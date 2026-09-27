@@ -1140,6 +1140,26 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: 'Modules ouverts à tous les collaborateurs authentifiés (portail RH self-service, messagerie interne)',
         businessProcess: 'Gouvernance des accès',
         requiredRoles: ['ADMIN', 'SUPER_ADMIN']
+      },
+      {
+        label: 'Modules alloués & demandes SaaS',
+        path: '/admin-entreprise/modules',
+        icon: Layers,
+        badge: 'Paliers',
+        tcode: 'KADM_MOD',
+        description: 'Modules alloués par le CADC, modules verrouillés et demandes d\'accréditation',
+        businessProcess: 'Abonnement SaaS',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN']
+      },
+      {
+        label: 'Profil Entreprise (SaaS)',
+        path: '/admin-entreprise/profil',
+        icon: Building,
+        badge: 'Société',
+        tcode: 'KADM_PFE',
+        description: 'Informations de la société, plan d\'abonnement, quotas et admins désignés par le CADC',
+        businessProcess: 'Identité du tenant',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN']
       }
     ]
   },
