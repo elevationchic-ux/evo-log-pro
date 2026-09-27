@@ -4,6 +4,7 @@ Finance models - Facturation, Paiements, Comptabilité
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Float, ForeignKey, Enum, Date, Numeric, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from datetime import date
 import enum
 from app.core.database import Base
 
@@ -37,7 +38,12 @@ class Facture(Base):
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     numero_facture = Column(String(50), nullable=False, index=True)
     client_id = Column(Integer, ForeignKey("clients.id"))
-    date_emission = Column(Date, nullable=False, default=func.now())
+    # default=date.today et surtout PAS func.now() : la colonne est Date, func.now()
+    # rend un horodatage complet ('2026-09-27 19:24:12'). SQLAlchemy lie alors
+    # l'expression SQL dans une colonne DATETIME cote base migrante, et a la
+    # relecture le processeur de resultat Date echoue sur
+    # "Invalid isoformat string" : toute creation de facture explosait.
+    date_emission = Column(Date, nullable=False, default=date.today)
     date_echeance = Column(Date)
     montant_ht = Column(Numeric(15, 2), nullable=False)
     montant_tva = Column(Numeric(15, 2), default=0)
