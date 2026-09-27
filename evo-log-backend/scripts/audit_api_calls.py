@@ -112,8 +112,13 @@ def correspond(call: tuple, route: tuple) -> bool:
             memo[cle] = True
             return True
         if a == PLACEHOLDER:
+            # Le joker d'appel avale 1..n segments. Si le gabarit a lui aussi un
+            # joker ici (`/x/${id}` vs `/x/{id}`), il doit consommer exactement un
+            # segment : sans ce decalage, les routes de detail ne matchaient
+            # jamais et toute l'API passait pour orpheline.
+            avance = j + 1 if b in (PLACEHOLDER,) else j
             for k in range(i + 1, len(call) + 1):
-                if suit(k, j):
+                if suit(k, avance):
                     memo[cle] = True
                     return True
             memo[cle] = False

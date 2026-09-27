@@ -6,12 +6,13 @@ les modules alloues par le CADC, mais uniquement a l'interieur de son perimetre.
 
 Gardes (invisibilite double, cf. plan) :
 - ``require_company_admin`` (utils/rbac.py) : niveau 1 rattache a une entreprise,
-  ou Super Admin (level 0) qui agit显 sur TOUTES les entrepriseS via ``company_id``
-  explicite — le CADC doit pouvoir debloquer une entreprise sans compte admin.
+  ou Super Admin (level 0) qui agit sur n'importe quelle entreprise via un
+  ``company_id`` explicite — le CADC doit pouvoir piloter une entreprise meme
+  avant la designation de son admin.
 - ``resolve_scope_company_id`` : un admin entreprise est epingle a son
   ``company_id`` ; toute tentative d'agir sur une autre entreprise -> 403.
-  NB : un Super Admin sans entreprise (compte CADC) doit passer ?company_id=?
-  explicite sur chaque appel, sinon 400.
+  NB : un Super Admin sans entreprise (compte CADC) doit passer un
+  ``company_id`` explicite en query, sinon 400.
 
 Les routes generalistes ``/api/v1/admin/users`` (admin.py) restent en place et
 sont deja scopees ; ce routeur ajoute la surface CADC-visible (profil, modules
@@ -513,8 +514,9 @@ def cancel_module_request(
     req = db.query(Accreditation).filter(Accreditation.id == request_id).first()
     if not req or req.statut != ACC_STATUT_DEMANDE:
         raise HTTPException(status_code=404, detail="Demande introuvable ou deja traitee")
-    company = _scoped_company(db, current, req.company_id)
-    if req.company_id != company.id:
+    # Un admin entreprise ne retire que les demandes de SON entreprise ; le CADC
+    # (level 0 / superuser) arbitre sur toutes.
+    if not _is_superadmin(current) and req.company_id != current.company_id:
         raise HTTPException(status_code=403, detail="Demande d'une autre entreprise")
     db.delete(req)
     db.commit()
