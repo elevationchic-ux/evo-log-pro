@@ -47,6 +47,22 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+
+    # La chaine Alembic doit jouer jusqu'au bout sur le moteur de la prod :
+    # en production create_all() est desactive, le schema vient des seules
+    # migrations. Un echec ici = des tables que plus aucun endpoint ne peut lire.
+    - name: Replay Alembic chain on Postgres
+      working-directory: ./evo-log-backend
+      env:
+        DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+      run: python -m alembic upgrade head
+
+    # Parite ORM <-> migrations : une colonne que le modele reclame et qu'aucune
+    # migration ne cree tue la page en 500 sans qu'aucun test de route ne le voie
+    # (cf. migration 027). Sortie non nulle si divergence bloquante.
+    - name: Schema parity gate (ORM vs migrations)
+      working-directory: ./evo-log-backend
+      run: python scripts/audit_schema_drift.py --replay
     
     - name: Run tests
       working-directory: ./evo-log-backend
