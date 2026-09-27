@@ -1,6 +1,6 @@
 {
   "totals": {
-    "broken_links": 1,
+    "broken_links": 0,
     "dead_buttons": 0,
     "fake_data": 0,
     "api_gaps": 32,
@@ -69,18 +69,6 @@
           "detail": "/api/auth/forgot-password"
         }
       ],
-      "ghost_routes": []
-    },
-    "config": {
-      "broken_links": [
-        {
-          "file": "config/navigationRegistry.ts",
-          "detail": "/admin-entreprise/profil"
-        }
-      ],
-      "dead_buttons": [],
-      "fake_data": [],
-      "api_gaps": [],
       "ghost_routes": []
     },
     "lib": {

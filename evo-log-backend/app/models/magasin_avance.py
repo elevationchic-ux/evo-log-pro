@@ -5,6 +5,7 @@ Includes all missing warehouse functionality for professional logistics
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Float, ForeignKey, Enum, Date, Numeric
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from datetime import datetime
 import enum
 from app.core.database import Base
 
@@ -41,23 +42,28 @@ class Peremption(Base):
 
 
 class ReservationStock(Base):
-    """Stock reservation model for future orders"""
+    """Reservation d'un stock pour une affectation ulterieure.
+
+    Colonnes = contrat reellement migre (migration 004) et reellement present en
+    base. Une version anterieure de cette classe avait ete reecrite avec
+    `numero_reservation`, `client_id`, `quantite_reservee`, `date_validite` et
+    `priorite`, sans migration correspondante : le service, le routeur et le
+    schema, eux, parlaient le langage de la table. Ecrire une reservation levait
+    donc une erreur SQL ("no such column") sur chaque creation.
+    """
     __tablename__ = "reservations_stock"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     stock_id = Column(Integer, ForeignKey('stocks.id'), nullable=False)
-    numero_reservation = Column(String(50), unique=True, nullable=False)
-    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
-    quantite_reservee = Column(Numeric, nullable=False)
-    date_reservation = Column(Date, server_default=func.current_date())
-    date_validite = Column(Date, nullable=False)
-    statut = Column(String(20), default="en_attente")  # en_attente, confirme, annule, livre
-    priorite = Column(String(20), default="normale")  # basse, normale, haute, critique
-    commande_reference = Column(String(100))
-    notes = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    
+    type_reservation = Column(String(50), nullable=False)
+    reference_id = Column(Integer, nullable=False)
+    quantite = Column(Float, nullable=False)
+    date_reservation = Column(DateTime, nullable=False, default=datetime.utcnow)
+    date_expiration = Column(Date)
+    statut = Column(String(20), nullable=False, default="active")  # active, libere, consomme
+    date_liberation = Column(DateTime)
+    date_consommation = Column(DateTime)
+
     # Relationships
     stock = relationship("Stock")
 

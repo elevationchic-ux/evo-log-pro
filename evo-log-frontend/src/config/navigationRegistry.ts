@@ -1153,7 +1153,12 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       },
       {
         label: 'Profil Entreprise (SaaS)',
-        path: '/admin-entreprise/profil',
+        // Batch 13 Zero-Mock : `/admin-entreprise/profil` n'existait pas
+        // (page.tsx absent) alors que la fiche legale du tenant est deja
+        // rendue par `src/app/(app)/company/page.tsx` (GET/PUT
+        // `/api/v1/tenant/company-profile`). On reorient donc l'entree vers
+        // la page reelle plutot que de laisser un lien mort dans la sidebar.
+        path: '/company',
         icon: Building,
         badge: 'Société',
         tcode: 'KADM_PFE',
