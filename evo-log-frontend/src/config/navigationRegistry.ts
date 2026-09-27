@@ -1184,6 +1184,38 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   },
 
   // ============================================================================
+  // 🧑‍💼 MODULE 12-C: ESPACE DÉPARTEMENT (CHEF DE DÉPARTEMENT — NIVEAU 2)
+  // ============================================================================
+  // Plan Phase 3 : espace dédié au chef de département. Visible par les rôles
+  // d'encadrement (MANAGER) et l'administration ; le garde route-level
+  // /departement/layout.tsx (roleLevel <= 2) et le backend
+  // require_department_head + _scoped_department font la vraie enforcement
+  // (un niveau 3 est 403 ; un chef ne télécharge que SON département).
+  'departement': {
+    key: 'departement',
+    title: '🧑\u200d💼 Mon Département',
+    path: '/departement',
+    icon: Building,
+    color: '#0ea5e9',
+    glow: 'shadow-sky-500/50 border-sky-500/60',
+    bgGradient: 'from-sky-600 to-cyan-600',
+    businessArea: 'Encadrement Opérationnel',
+    processPhase: 'Pilotage d un Département',
+    requiredRoles: ['MANAGER', 'ADMIN', 'SUPER_ADMIN', 'COMPANY_ADMIN'],
+    subModules: [
+      {
+        label: 'Collaborateurs du département',
+        path: '/departement',
+        icon: Users,
+        badge: 'Équipe',
+        tcode: 'KDEP_EQP',
+        description: 'Fiche du département (modules autorisés, effectif) et roster des collaborateurs rattachés',
+        businessProcess: 'Périmètre départemental'
+      }
+    ]
+  },
+
+  // ============================================================================
   // 💬 MODULE 13: CHAT & FORUM D'ENTREPRISE EN TEMPS RÉEL (TOUS RÔLES)
   // ============================================================================
   'chat': {

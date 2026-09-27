@@ -17,13 +17,21 @@ DOCS = Path(__file__).resolve().parent.parent / "docs"
 DYNAMIC_SIGNALS = re.compile(
     r"api-client|apiClient|axios|fetch\(|useQuery|useSWR|\w+API\.(get|post|put|delete|patch)|/api/v1/",
 )
+REDIRECT_SIGNAL = re.compile(
+    r"import\s*\{[^}]*\bredirect\b[^}]*\}\s*from\s*['\"]next/navigation['\"]"
+    r"|router\.(replace|push)\("
+    r"|<Redirect\s",
+)
 MOCK_SIGNAL = re.compile(r"\bmock|useState\(\[|const\s+\w*[Dd]ata\w*\s*=\s*\[", re.IGNORECASE)
 
 
 def classify(content: str) -> tuple[str, bool]:
     dynamic = bool(DYNAMIC_SIGNALS.search(content))
+    is_redirect = bool(REDIRECT_SIGNAL.search(content))
     has_local_data = bool(MOCK_SIGNAL.search(content))
-    return ("DYNAMIQUE" if dynamic else "STATIQUE"), has_local_data
+    if dynamic or is_redirect:
+        return ("DYNAMIQUE" if dynamic else "REDIRECT"), has_local_data
+    return "STATIQUE", has_local_data
 
 
 def main() -> None:

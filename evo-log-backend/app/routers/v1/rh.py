@@ -9,10 +9,12 @@ from sqlalchemy import or_, and_, desc, extract
 from typing import List, Optional, Dict, Any
 from datetime import date, datetime, timedelta
 import calendar
+import secrets
 from html import escape
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.security import get_current_user, get_password_hash, validate_password_strength
+from app.utils.rbac import require_role
 from app.models.user import User, Role
 from app.models.rh import (
     Conge, TypeConge, StatutConge, Absence, TempsTravail,
@@ -41,10 +43,15 @@ from app.services.rh_service import (
     OrganigrammeService, CompetenceService
 )
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 router = APIRouter(tags=["RH"])
 security_scheme = HTTPBearer(auto_error=True)
+
+# Ecritures RH (paie, creation d'un salarie, decisions sur les conges) :
+# casquette RH/DRH, admin entreprise (niveau 1) ou Super Admin. La lecture du
+# portail personnel reste ouverte a tout salarie.
+requireRH = require_role(["RH", "DRH", "ADMIN", "1"])
 
 
 def resolve_rh_user(current_user: User = Depends(get_current_user)) -> User:
@@ -796,6 +803,39 @@ def demander_conge(
         db, current_user.id, conge.type_conge, conge.date_debut,
         conge.date_fin, conge.motif
     )
+
+
+@router.get("/conges")
+def lister_conges(
+    statut: Optional[str] = None,
+    employe_id: Optional[int] = None,
+    annee: Optional[int] = None,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user),
+):
+    """Demandes de conge enregistrees, limitees a l'entreprise du demandeur.
+
+    Un salarie ordinaire (niveau 3) ne voit que ses propres demandes ; un chef
+    de departement, un admin entreprise ou la DRH voit celles de son tenant.
+    La liste est vide si aucune demande n'a ete deposee : aucun historique
+    n'est genere pour meubler l'ecran.
+    """
+    q = db.query(Conge).join(User, User.id == Conge.employe_id)
+    scope = _employee_scope_company_id(current_user)
+    if scope is not None:
+        q = q.filter(User.company_id == scope)
+    if not current_user.is_superuser and (current_user.role_level or 99) >= 3:
+        q = q.filter(Conge.employe_id == current_user.id)
+    if employe_id:
+        q = q.filter(Conge.employe_id == employe_id)
+    if statut:
+        q = q.filter(Conge.statut == statut.strip().lower())
+    if annee:
+        q = q.filter(extract("year", Conge.date_debut) == annee)
+    conges = q.order_by(Conge.date_debut.desc()).offset(skip).limit(limit).all()
+    return [_conge_dict(c) for c in conges]
 
 
 @router.get("/conges/solde/{employe_id}/{annee}", response_model=SoldeCongeResponse)
