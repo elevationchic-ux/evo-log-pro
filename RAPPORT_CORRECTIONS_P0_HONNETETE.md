@@ -10,7 +10,7 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app` | ✅ EXIT=0 |
-| `python -m pytest tests` (suite complète, batches 2 à 12 inclus) | ⚠️ **444 passed, 2 xfailed, 2 failed** (1072 s). Les 2 failures (`test_requisition_requires_auth`, `test_endpoint_facture_pdf_exige_auth`) préexistent au batch 12 : elles proviennent du commit RBAC `8c49a9d` et signalent un vrai trou d'auth sur 2 routes, à traiter en batch séparé. |
+| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 13) | ✅ **446 passed, 2 xfailed, 0 failed** (958 s). Voir §15 : les 2 « failures » annoncees a tort en batch 12 (`test_requisition_requires_auth`, `test_endpoint_facture_pdf_exige_auth`) ne se reproduisent ni en isolement (3/3 runs) ni sous la commande CI reellement executable. Elles provenaient d'un run background contamine et non d'un trou d'auth. |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1082 routes OpenAPI) |
 | `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
 

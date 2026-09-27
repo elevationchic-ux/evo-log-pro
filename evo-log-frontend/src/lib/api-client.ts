@@ -165,6 +165,17 @@ export const saasConsoleAPI = {
   },
   allocateModules: (id: number, modules: string[]) =>
     apiClient.put(`${CADC_BASE}/companies/${id}/modules`, { modules }),
+
+  // Admins entreprise (designes par le CADC - Phase 2)
+  listCompanyAdmins: (id: number) =>
+    apiClient.get(`${CADC_BASE}/companies/${id}/admins`),
+  createCompanyAdmin: (id: number, data: Record<string, unknown>) =>
+    apiClient.post(`${CADC_BASE}/companies/${id}/admins`, data),
+
+  // File des demandes d'accreditation emises par les admins entreprise
+  listPendingAccreditationRequests: () =>
+    apiClient.get(`${CADC_BASE}/accreditations/demandes`),
+
   listCompanyAccreditations: (id: number) =>
     apiClient.get(`${CADC_BASE}/companies/${id}/accreditations`),
   grantCompanyAccreditation: (id: number, data: Record<string, unknown>) =>
