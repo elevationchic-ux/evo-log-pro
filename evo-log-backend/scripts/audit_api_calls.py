@@ -153,33 +153,45 @@ def rapport(a: str, b: str) -> float:
 def methodes_reelles():
     """Routes reelslement enregistrees, y compris celles hors schema.
 
-    L'OpenAPI omet les routes declarees `include_in_schema=False`, et `app.routes`
-    n'est pas plat dans cette version de FastAPI : chaque `include_router()` produit
-    un `_IncludedRouter` qui emballe ses propres routes. On parcourt donc
-    recursivement, en sautant nos catch-all (`pending_modules`), qui matchent tout
+    FastAPI 0.141 n'aplatit plus l'API : chaque `include_router()` produit un
+    `_IncludedRouter` qui emballe l'`APIRouter` d'origine (`original_router`) et le
+    prefixe applique (`include_context.prefix`). Parcourir `app.routes` sans
+    descendre dans ces conteneurs ne remonte que les 13 routes declarees en dur
+    sur l'app, et fait passer toute l'API metier pour orpheline. L'OpenAPI, elle,
+    masque les routes `include_in_schema=False` : on construit donc la liste从这里
+    recursivement, en excluant nos catch-all (`pending_modules`) qui matchent tout
     par definition et videraient le rapport de son sens.
     """
     out = []
     catch_all = {"/api/v1/{full_path:path}"}
 
-    def collects(routes):
+    def chemins(routes, prefixe):
         for route in routes:
-            enfants = getattr(route, "routes", None)
-            if enfants:
-                collects(enfants)
+            inner = getattr(route, "original_router", None)
+            if inner is not None:
+                ctx = getattr(route, "include_context", None)
+                sous = prefixe + getattr(ctx, "prefix", "")
+                chemins(inner.routes, sous)
+                continue
             path = getattr(route, "path", None)
-            if not path or path in catch_all:
+            if path is None:
+                enfants = getattr(route, "routes", None)
+                if enfants:
+                    chemins(enfants, prefixe)
+                continue
+            complet = prefixe + path
+            if complet in catch_all:
                 continue
             methodes = getattr(route, "methods", None)
             if not methodes:
                 continue
-            gabarit = tuple(segments_gabarit(path))
+            gabarit = tuple(segments_gabarit(complet))
             for meth in sorted(methodes):
                 if meth in ("HEAD", "OPTIONS"):
                     continue
-                out.append((meth.upper(), gabarit, path))
+                out.append((meth.upper(), gabarit, complet))
 
-    collects(app.routes)
+    chemins(app.routes, "")
     return out
 
 
