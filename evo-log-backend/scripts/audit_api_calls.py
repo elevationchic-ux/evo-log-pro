@@ -107,6 +107,10 @@ def correspond(call: tuple, route: tuple) -> bool:
             memo[cle] = ok
             return ok
         a, b = call[i], route[j]
+        if b == RESTE:
+            # {x:path}: le gabarit avale tout le reste de l'appel.
+            memo[cle] = True
+            return True
         if a == PLACEHOLDER:
             for k in range(i + 1, len(call) + 1):
                 if suit(k, j):
