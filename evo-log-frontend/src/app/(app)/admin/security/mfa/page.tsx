@@ -16,7 +16,7 @@
  * aucune liste « déjà utilisée » n’est reconstituée ici.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ShieldCheck, ShieldOff, RefreshCw, KeyRound, QrCode, Copy, Download,
   Smartphone, Loader2, AlertTriangle, CheckCircle2, Eye, EyeOff,
@@ -95,7 +95,6 @@ export default function AdminSecurityMfaPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-  const passwordRef = useRef<HTMLInputElement | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -126,14 +125,13 @@ export default function AdminSecurityMfaPage() {
     setQrError(null);
     QRCode.toDataURL(provision.otpauth_uri, { width: 320, margin: 1, errorCorrectionLevel: 'M' })
       .then((url) => { if (!annule) setQrDataUrl(url); })
-      .catch((err) => {
+      .catch(() => {
         if (!annule) {
           setQrDataUrl(null);
           setQrError(t(
             'Le QR n’a pas pu être dessiné localement. Saisissez la clé manuellement dans l’application.',
             'The QR could not be rendered locally. Enter the key manually in your app.',
           ));
-          void err;
         }
       });
     return () => { annule = true; };
@@ -627,7 +625,6 @@ export default function AdminSecurityMfaPage() {
                       </label>
                       <input
                         id="regen-password"
-                        ref={passwordRef}
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
