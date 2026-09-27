@@ -479,6 +479,34 @@ apres un autre `TestClient(...)`, rendant l'evaluation d'un test d'auth non dete
 ➡️ Le principe Zero-Mock s'applique aussi aux **rapports** : une fausse accusation de
 trou de securite coutera plus cher a corriger plus tard qu'une retractation immediate.
 
+**Bonus : 2 vraies regressions front capturees par le verrou CI batch 11**
+
+En re-activant `python scripts/audit_frontend.py --strict-honesty` et `npx tsc --noEmit`
+en toute fin de batch 13, deux bugs reels sont tombes — preuve que le gate CI place en
+batch 11 n'etait pas decoratif :
+
+| Fichier | Bug | Correction |
+|---|---|---|
+| `src/config/navigationRegistry.ts` (l.1156) | Le lien "Profil Entreprise (SaaS)" pointait vers `/admin-entreprise/profil` ; **aucun `page.tsx` n'existait** a ce chemin. Le clic dans la sidebar partait en 404. | Repointe vers `/company` (page existante qui rend deja `GET/PUT /api/v1/tenant/company-profile` avec bouton "Enregistrer le Profil Entreprise"). Commentaire Zero-Mock dans le registre. |
+| `src/app/(app)/admin-entreprise/modules/page.tsx` (l.149) | (a) chaine `'Votre demande est en cours d'examen.'` **cassait la syntaxe JS** (apostrophe non escapee a l'interieur d'un single-quote) — `tsc` sortait en TS1005/TS1381 ; (b) comparaison `m.etat === 'alloué' \|\| m.etat === 'alloue'` : la premiere branche etait **morte** (le backend `company_admin.py:421` renvoie systematiquement `alloue` sans accent), TS2367 le signale. | (a) remplacee par double-quote `"Votre demande est en cours d'examen."` ; (b) branche accentuee supprimee + commentaire Zero-Mock. |
+
+Les deux bugs etaient presents **avant** batch 13 : `tsc` et l'audit du batch 12
+n'ont pas ete re-execute en fin de course (seule l'audit `--strict-honesty` global
+avait passe, sans re-run de `tsc`). Le batch 13 les rattrape et verrouille : `tsc` +
+audit passent desormais EXIT=0 tous les deux.
+
+**Verifications batch 13 (re-cap)** :
+- `python -m compileall -q app` (backend) → **EXIT=0**
+- `python -m pytest tests` (CI-equivalent) → **446 passed, 2 xfailed, 0 failed**
+- `npx tsc --noEmit` (frontend) → **EXIT=0** (etait EXIT=2 avant correction)
+- `python scripts/audit_frontend.py --strict-honesty` → **EXIT=0** avec `broken_links=0`
+  (etait 1 avant reorientation du lien `admin-entreprise/profil`)
+
+➡️ Le batch 13 est le premier ou le **verrou CI herite du batch 11** fait son travail
+tout seul : je n'avais aucune raison de re-auditer le frontend, le gate m'est tombe
+dessus et m'a force a comprendre, corriger et tracer. C'est exactement le scenario
+pour lequel le flag `--strict-honesty` a ete ecrit.
+
 ---
 
 * Aucun acte à valeur légale (validation CNCC, dépôt GUCE/SYDONIA, quittance, bulletin CNPS,

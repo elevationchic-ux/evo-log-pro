@@ -146,7 +146,11 @@ export default function AdminEntrepriseModulesPage() {
                 </span>
               </div>
               <div className="text-xs text-slate-400">
-                {m.etat === 'alloué' || m.etat === 'alloue' ? 'Inclus dans votre abonnement.' :
+                {/* Batch 13 Zero-Mock : la variante accentuee 'alloué' ne pouvait
+                    jamais matcher — le backend renvoie systematiquement 'alloue'
+                    sans accent (company_admin.py l.421). Comparaison dead-code
+                    retirée, tsc/TS2367 ne tombe plus dessus. */}
+                {m.etat === 'alloue' ? 'Inclus dans votre abonnement.' :
                  m.etat === 'accredite' ? 'Débloqué par une accréditation CADC datée.' :
                  m.etat === 'demande' ? "Votre demande est en cours d'examen." :
                  'Non accessible — demandez une accréditation au CADC.'}
