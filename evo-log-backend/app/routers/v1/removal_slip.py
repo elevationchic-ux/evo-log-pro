@@ -13,7 +13,8 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
 from app.models.magasin_avance import BonSortie, LigneBonSortie
-from app.models.magasin import Stock, Entrepot
+from app.models.magasin import Stock, Entrepot, MouvementStock, MouvementType
+from app.models.tiers import Client
 
 router = APIRouter()
 
@@ -127,10 +128,41 @@ async def create_removal_slip(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Crée un nouveau bon d'enlèvement avec ses lignes d'articles"""
+    """Crée un nouveau bon d'enlèvement avec ses lignes d'articles.
+
+    Batch 16 : validations d'existence explicites (client, entrepot, stocks) —
+    SQLite n'impose PAS les FK par defaut, sans controle un bon pointerait sur
+    des ids inexistants. Numeration provisoire `BE-YYYYMMDD-NNNN` : sequence
+    par jour, boucle anti-collision (les suppressions de brouillons laissent
+    des trous ; UNIQUE sur numero_bon ne doit jamais exploiter en 500).
+    """
+    client = db.query(Client).filter(Client.id == payload.client_id).first()
+    if not client:
+        raise HTTPException(status_code=400,
+                            detail=f"Client {payload.client_id} inexistant")
+    entrepot = db.query(Entrepot).filter(Entrepot.id == payload.entrepot_id).first()
+    if not entrepot:
+        raise HTTPException(status_code=400,
+                            detail=f"Entrepot {payload.entrepot_id} inexistant")
+
+    stocks = {}
+    for item in payload.lignes:
+        if item.quantite_sortie is None or float(item.quantite_sortie) <= 0:
+            raise HTTPException(status_code=400,
+                                detail=f"Quantite invalide pour la ligne stock {item.stock_id}")
+        stock = db.query(Stock).filter(Stock.id == item.stock_id).first()
+        if not stock:
+            raise HTTPException(status_code=400,
+                                detail=f"Stock {item.stock_id} inexistant")
+        stocks[stock.id] = stock
+
     today_str = datetime.now().strftime("%Y%m%d")
-    count_today = db.query(func.count(BonSortie.id)).scalar() or 0
-    numero_bon = f"BE-{today_str}-{count_today + 1:04d}"
+    seq = (db.query(func.count(BonSortie.id))
+             .filter(BonSortie.numero_bon.like(f"BE-{today_str}-%")).scalar() or 0) + 1
+    numero_bon = f"BE-{today_str}-{seq:04d}"
+    while db.query(BonSortie.id).filter(BonSortie.numero_bon == numero_bon).first() is not None:
+        seq += 1
+        numero_bon = f"BE-{today_str}-{seq:04d}"
 
     bon = BonSortie(
         numero_bon=numero_bon,
@@ -220,12 +252,34 @@ async def update_removal_slip(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Met à jour un bon d'enlèvement"""
+    """Met a jour l'en-tete d'un bon d'enlevement NON signe.
+
+    Batch 16 — circuit de signature :
+    - `statut` n'est PLUS modifiable ici : passez par /validate (signature =
+      decrement reel du stock) ou /refuse. Le PUT allowait jadis de poser
+      statut='valide' sans aucun decript — faux document signe.
+    - un bon valide ou refuse est IMMUABLE (le magasinier ne peut que valider,
+      pas corriger a posteriori un document signe).
+    - les LIGNES ne sont jamais modifiables par cette voie (aucun endpoint de
+      modification de ligne n'existe, et n'existera pas apres signature).
+    """
     bon = db.query(BonSortie).filter(BonSortie.id == id).first()
     if not bon:
         raise HTTPException(status_code=404, detail=f"Bon d'enlèvement #{id} non trouvé")
 
     data = payload.dict(exclude_unset=True)
+    if "statut" in data:
+        raise HTTPException(
+            status_code=400,
+            detail="Le statut ne se modifie pas par PUT : utilisez /validate ou /refuse "
+                   "(circuit de signature).",
+        )
+    if bon.statut in ("valide", "refuse"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Bon #{bon.numero_bon} deja signe ({bon.statut}) : document immuable.",
+        )
+
     for field, value in data.items():
         setattr(bon, field, value)
 

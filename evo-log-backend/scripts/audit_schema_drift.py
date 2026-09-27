@@ -42,8 +42,40 @@ sys.path.insert(0, str(ROOT))
 
 import sqlalchemy as sa  # noqa: E402
 from app.core.database import Base  # noqa: E402
-import app.models  # noqa: F401,E402  (enregistre toutes les tables)
-import app.models.acconage  # noqa: F401,E402  (navires, escales, conteneurs)
+
+
+def charger_tous_les_modeles():
+    """Importe CHAQUE module de app/models, sans exception.
+
+    `import app.models` ne suffit pas : app/models/__init__.py n'en declare
+    qu'une partie. Les modeles RH (conges, salaires, contrats_travail,
+    documents_employe, primes, absences, formations, organigramme,
+    competences, evaluations) n'y figurent pas -- ils ne sont charges que quand
+    un router les importe. Un audit limite a __init__ voit donc 124 tables et
+    crie a la parite complete pendant que dix tables RH reclament des colonnes
+    inexistantes : le garde-fou le plus important du projet etait aveugle sur
+    le module le plus consulte.
+
+    Un module qui refuse de s'importer est une erreur, pas un succes partiel :
+    on remonte la tracee au lieu de l'avaler.
+    """
+    import importlib
+    dossier = ROOT / "app" / "models"
+    charges, echecs = [], []
+    for fichier in sorted(dossier.glob("*.py")):
+        if fichier.name == "__init__.py":
+            continue
+        nom = "app.models.%s" % fichier.name[:-3]
+        try:
+            importlib.import_module(nom)
+            charges.append(nom)
+        except Exception as exc:
+            echecs.append((nom, exc))
+    import app.models  # noqa: F401 - complete les eventuels oublies du paquet
+    return charges, echecs
+
+
+MODELES_CHARGES, MODELES_EN_ECHEC = charger_tous_les_modeles()
 
 
 FAMILLE_DATE = {"DATE"}
@@ -179,7 +211,18 @@ def _section(titre, elements, ligne):
 
 def afficher(r) -> int:
     print(f"base analysee : {r['db']}")
+    print(f"modules de modeles charges : {len(MODELES_CHARGES)}")
     print(f"tables declarees par les modeles : {len(Base.metadata.tables)}")
+    if MODELES_EN_ECHEC:
+        print()
+        print("=" * 74)
+        print(f"0. MODULES DE MODELES INIMPORTABLES ({len(MODELES_EN_ECHEC)})")
+        print("=" * 74)
+        for nom, exc in MODELES_EN_ECHEC:
+            print(f"   {nom} : {type(exc).__name__}: {exc}")
+        print()
+        print("Ces tables echappent a l'audit : la parite annoncee ci-dessous")
+        print("est INVALIDE tant qu'un module ne s'importe pas.")
     print()
     _section("1. TABLES ABSENTES DE LA BASE", r["absentes"],
              lambda e: f"{e[0]}  ({len(e[1])} colonnes attendues)")
