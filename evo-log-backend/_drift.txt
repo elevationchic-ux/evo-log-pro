@@ -1,0 +1,22 @@
+﻿base analysee : C:\Users\chris\Documents\Projet\Documents\evo-log pro\evo-log-backend\kamlog_erp.db
+tables declarees par les modeles : 106
+
+========================================================================
+TABLES ABSENTES DE LA BASE (0)
+========================================================================
+
+========================================================================
+DRIFT DE COLONNES (4)
+========================================================================
+
+   comptes
+      base seulement   : compte_parent_id description nom numero sous_type
+
+   ecritures_comptables
+      base seulement   : compte_credit_id compte_debit_id created_by devise journal lettrage montant numero_piece periode_comptable reference_facture reference_paiement
+
+   factures
+      base seulement   : conditions_paiement montant_paye numero penalites_retard reference_client reste_a_payer taux_change
+
+   paiements
+      base seulement   : banque reference_paiement
