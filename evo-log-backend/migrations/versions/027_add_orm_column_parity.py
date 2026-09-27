@@ -198,9 +198,9 @@ def _assouplir(insp, tables_en_base):
                 op.alter_column(table, nom, existing_type=info["type"],
                                 nullable=True)
             else:
+                # Pas de copy_from : batch_alter_table reflechit la table elle-meme.
                 with op.batch_alter_table(
                     table, naming_convention=NAMING_CONVENTION,
-                    copy_from=sa.table(table, sa.MetaData(), autoload_with=op.get_bind()),
                 ) as batch:
                     batch.alter_column(nom, existing_type=info["type"],
                                        nullable=True)
