@@ -510,6 +510,70 @@ pour lequel le flag `--strict-honesty` a ete ecrit.
 
 ---
 
+## 16. Batch 14  L'isolation des tests ecrivait dans la VRAIE base de dev
+
+**Declencheur** : la tache « isolation des fixtures pytest » heritee du batch 13.
+Reponse a la question la plus importante du lot : la « fragilite » signalee etait le
+symptome visible d'un bien pire — **les runs de tests mutaient `kamlog_erp.db`, la
+base SQLite reelle de developpement**.
+
+**Preuve materielle** : `LastWriteTime` du fichier = **28/09 02:37:47**, soit EN PLEIN
+run pytest (avant ce batch, le fichier ne devait plus bouger que par l'app en local).
+
+**Chaine causale complete** :
+
+1. La fixture `client` du conftest surcharge `get_db` (base memoire) ET
+   `get_current_user` (faux super-utilisateur) — contrat en vigueur depuis le
+   commit `a18e78f` (28/09 00:44), **respecte et documente, pas revert**e.
+2. Plusieurs tests appelaient `app.dependency_overrides.clear()` **en cours
+   d'execution** pour simuler un anonyme. `clear()` est atomique : il emporte
+   AUSSI l'override `get_db`.
+3. La requete suivante resolution alors l'engine REEL de l'app, dont le defaut
+   `Settings.DATABASE_URL` est `sqlite:///./kamlog_erp.db`.
+4. Pire cas : `test_rbac_permissions_engine.py::test_rbac_router_requires_superadmin`
+   faisait 3 `clear()` en milieu de test ; son assertion finale
+   « SuperAdmin → 200 list tenants » **listait les tenants de la base de dev**.
+5. La suite restait verte car les assertions 401/403 abortent avant toute lecture
+   DB : la pollution etait **invisible par construction**. C'est la classe exacte
+   de faux-vert que le Zero-Mock interdit — appliquee ici a l'infra de test.
+6. Les 13 fluctuations de `test_magasin_stock_analytics.py` (batch 13) et la
+   fausse « contention arriere-plan » (retractee en §15) partagent cette cause.
+
+**Corrections** :
+
+| Fichier | Probleme | Correction |
+|---|---|---|
+| `tests/conftest.py` | Aucun garde-fou : tout override `get_db` perdu partait sur le fichier de dev | **Guard Zero-Pollution** : `os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")` AVANT l'import de l'app (une requete perdue echoue bruyamment « no such table » au lieu d'ecrire dans la base de dev) ; docstring CONTRAT ; nouvelle fixture `unauthenticated` (ne pop QUE `get_current_user`, la restaure en finally) |
+| `test_rbac_permissions_engine.py` | 3 `dependency_overrides.clear()` en milieu de test — source material de la mutation du fichier | Helper local `_anonyme()` qui ne pop que `get_current_user` |
+| `test_cadc_arbitrage_phase3.py`, `test_company_admin_phase2.py`, `test_saas_console_cadc.py`, `test_tenant_console_rbac.py` | Helper `_clear()` = `.clear()` (mine endormie : aucun test ne requetait apres, mais suffisait d'un futur ajout) | Corps de `_clear()` → `pop(get_current_user, None)` + commentaire |
+| `test_transport_international.py` | `test_endpoint_exige_auth` creait un `TestClient(app)` **nu** apres clear : aucun override `get_db` du tout | Fixture `unauthenticated` |
+| `test_parc_purchase_store.py`, `test_pdf_generator.py` | Patterns manuels de pop pour les tests 401 | Migres vers `unauthenticated` |
+| `tests/unit/test_isolation_guards.py` (**nouveau**) | Le contrat n'etait verrouille par rien | 3 meta-tests : `client` porte les 2 overrides ; `unauthenticated` CONSERVE `get_db` (verifie avant ET apres une requete 401) ; l'engine/`settings` applicatifs ne pointent JAMAIS sur `kamlog_erp.db` |
+| `test_real_backend.py`, `test_simple_real.py` | `test_database_tables_exist` inspectait l'engine global : vert uniquement parce qu'il lisait le fichier de dev (et dependant de l'ordre apres le garde-fou) | Fixture `client` : le startup du TestClient (lifespan → `create_all`) rend l'assertion hermetique et reellement executee. Variante `skipif` (test toujour saute en local/CI) ecartee : **un test saute n'est pas un test** |
+
+**Verification** :
+- Subset 8 fichiers (les plus touches) : **112 passed**, `DB_CHANGED=False`
+  (mtime 02:37:47 identique avant/apres le run).
+- `test_isolation_guards.py` : 3 passed.
+- Premier run complet posterieur aux correctifs : 3 failed / 479 passed — les 3
+  echecs sont des tests non hermetiques dependant de l'etat de l'engine global
+  (corriges ci-dessus, dont 1 deja en cours de reprise par la session parallele).
+- Run complet definitif (commande CI `pytest tests`) : A COMPLETER.
+
+**Laisse-pour-compte honnete** : `kamlog_erp.db` a bien ete ecrit par des runs AVANT
+la correction (02:37, possiblement avant). La base de dev peut donc contenir des
+**residus de tests** (lignes creees par les requetes parties hors override). Action
+recommandee hors perimetre : purger/ verifier la base de dev locale (regarder du cote
+de `scripts/seed_data.py` pour la reconstruire proprement si necessaire).
+
+➡️ Zero-Mock applique a l'infra : un test vert qui lit/ecrit la base de prod-dev
+reelle est un faux-vert avec effet de bord reel. Le contrat des fixtures est
+desormais (1) force par l'environnement (`DATABASE_URL` memoire), (2) documente
+(docstring du conftest), et (3) verrouille par des meta-tests qui rougissent des
+qu'un maillon saute.
+
+---
+
 * Aucun acte à valeur légale (validation CNCC, dépôt GUCE/SYDONIA, quittance, bulletin CNPS,
   paiement mobile money) n'est jamais affiché comme "fait" s'il ne l'est pas : soit c'est réel,
   soit l'API répond **501 avec la raison exacte**.

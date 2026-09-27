@@ -12,12 +12,20 @@ export default function ChatOpsDashboard() {
   const [testSender, setTestSender] = useState('+237690000000');
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  const [botStatus, setBotStatus] = useState<'unknown' | 'online' | 'offline'>('unknown');
+
   const fetchLogs = async () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/webhooks/chatops/logs`);
-      const data = await res.json();
-      setLogs(data.logs || []);
+      if (res.ok) {
+        setBotStatus('online');
+        const data = await res.json();
+        setLogs(data.logs || []);
+      } else {
+        setBotStatus('offline');
+      }
     } catch (err) {
+      setBotStatus('offline');
       console.error(err);
     } finally {
       setLoading(false);

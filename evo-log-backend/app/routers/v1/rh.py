@@ -215,27 +215,98 @@ def get_portail_bulletins(
 
 
 @router.get("/portail/bulletins/{bulletin_id}/telecharger")
-def telecharger_bulletin_officiel(
+def telecharger_bulletin(
     bulletin_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user)
 ):
+    """Bulletin imprimable etabli sur la ligne ``salaires`` designee.
+
+    Le document ne peut representer que ce qui a ete paye : chaque montant est
+    lu sur l'enregistrement, la reference du bulletin est resolue en cle
+    primaire et la fiche d'un autre salarie renvoie un 404. Une fiche absente
+    vaut mieux qu'un document de complaisance.
+
+    La mention « signe electriquement » a ete retiree : aucune signature
+    electronique n'est apposee par l'application. Le cachet et la signature de
+    la DRH restent manuscrits pour que le bulletin fasse foi.
     """
-    Generates a printable, certified official OHADA pay slip with legal Cameroon disclosures.
-    """
-    matricule = f"LPC-EMP-{str(current_user.id).zfill(4)}"
-    role_label = get_user_role_label(current_user)
+    cle = bulletin_id.strip().upper().replace("SAL-", "").replace("PAY-", "")
+    try:
+        numero = int(cle)
+    except ValueError:
+        raise HTTPException(
+            status_code=404,
+            detail="Reference de bulletin non reconnue : aucun enregistrement correspondant.",
+        )
+
+    salaire = db.query(Salaire).filter(
+        Salaire.id == numero,
+        Salaire.employe_id == current_user.id,
+    ).first()
+    if not salaire:
+        raise HTTPException(
+            status_code=404,
+            detail="Aucun bulletin de paie a ce numero pour votre compte.",
+        )
+
+    b = _bulletin_dict(salaire)
+
+    def _mt(v: float) -> str:
+        return f"{float(v or 0):,.0f}".replace(",", " ")
+
+    def _col(v: float) -> str:
+        return _mt(v) if v else "&mdash;"
+
+    lignes = [
+        ("Salaire de base", b["salaire_base"], 0.0),
+        ("Indemnite d'heures supplementaires", b["indemnite_heures_sup"], 0.0),
+        ("Primes et avantages", b["primes"], 0.0),
+        ("Cotisations CNPS salariales", 0.0, b["cotisations_cnps"]),
+        ("Impot general sur le revenu (IRGM)", 0.0, b["retenues_fiscales"]),
+        ("Autres retenues (avances, divers)", 0.0, b["autres_deductions"]),
+    ]
+    lignes_html = "\n".join(
+        '          <tr><td>{}</td><td class="text-right">{}</td>'
+        '<td class="text-right">{}</td></tr>'.format(
+            libelle, _col(gain), _col(retenue)
+        )
+        for libelle, gain, retenue in lignes
+    )
+
+    comp = current_user.company
+    raison_sociale = escape((comp.nom if comp else None) or "Employeur non rattache a ce compte")
+    identifiants = " &bull; ".join(x for x in [
+        (f"Forme : {escape(comp.legal_form)}" if comp and comp.legal_form else None),
+        (f"Capital : {escape(comp.capital_social)}" if comp and comp.capital_social else None),
+        (f"RCCM : {escape(comp.rccm)}" if comp and comp.rccm else None),
+        (f"NUI : {escape(comp.tax_id)}" if comp and comp.tax_id else None),
+        (escape(comp.adresse) if comp and comp.adresse else None),
+    ] if x) or "Identifiants legaux de l'employeur non renseignes dans la fiche entreprise."
+
+    taux_cnps_affiche = (
+        f"{b['taux_cnps'] * 100:.2f} %" if b["taux_cnps"] else "non decompte"
+    )
+    periode = escape(b["periode"] or "periode indeterminée")
+    nom_salarie = escape(current_user.full_name or current_user.username)
+    matricule = escape(current_user.matricule or "non attribue")
+    poste = escape(current_user.job_title or "non renseigne")
+    cnps_salarie = "non renseigné par la DRH"
+    banque = "compte bancaire non renseigne"
+    date_paiement = escape(b["date_paiement"] or "date de paiement non renseignée")
+    statut = escape(b["statut"] or "inconnu")
 
     html_content = f"""
     <!DOCTYPE html>
     <html lang="fr">
     <head>
       <meta charset="UTF-8">
-      <title>Bulletin de Paie Officiel OHADA - {bulletin_id}</title>
+      <title>Bulletin de paie {b['reference']} - {nom_salarie}</title>
       <style>
         body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; color: #1e293b; }}
         .header {{ display: flex; justify-content: space-between; border-bottom: 2px solid #0f766e; padding-bottom: 15px; }}
         .company {{ font-size: 20px; font-weight: bold; color: #0f766e; }}
+        .legal {{ font-size: 12px; color: #64748b; margin-top: 6px; max-width: 480px; }}
         .badge {{ background: #f0fdf4; color: #166534; padding: 4px 12px; border-radius: 9999px; font-weight: bold; border: 1px solid #bbf7d0; }}
         .emp-box {{ background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; margin: 20px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; }}
         table {{ width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }}
@@ -243,81 +314,69 @@ def telecharger_bulletin_officiel(
         th {{ background: #f1f5f9; font-weight: bold; }}
         .text-right {{ text-align: right; }}
         .total-box {{ margin-top: 20px; background: #f8fafc; border-top: 3px solid #0f766e; padding: 15px; font-size: 16px; font-weight: bold; display: flex; justify-content: space-between; }}
-        .stamp {{ border: 2px dashed #0f766e; padding: 15px; text-align: center; border-radius: 10px; color: #0f766e; font-weight: bold; margin-top: 40px; display: inline-block; }}
+        .signature {{ margin-top: 48px; display: flex; justify-content: space-between; font-size: 13px; }}
+        .signature div {{ width: 45%; }}
+        .signature .line {{ border-bottom: 1px solid #94a3b8; height: 60px; margin-bottom: 6px; }}
+        .note {{ margin-top: 32px; font-size: 11px; color: #64748b; }}
       </style>
     </head>
     <body>
       <div class="header">
         <div>
-          <div class="company">LOGISTIQUE PORTUAIRE DU CAMEROUN (LPC SA)</div>
-          <div style="font-size: 12px; color: #64748b;">RC Douala B-2020-1492 • NUI : M09201489201F • Port Autonome de Douala Quai 14</div>
-          <div style="font-size: 12px; color: #64748b;">Affiliation CNPS Employeur : 89402-990-DLA</div>
+          <div class="company">{raison_sociale}</div>
+          <div class="legal">{identifiants}</div>
         </div>
         <div style="text-align: right;">
-          <span class="badge">BULLETIN DE PAIE OHADA</span>
-          <div style="font-size: 12px; color: #64748b; margin-top: 8px;">Référence : {bulletin_id}</div>
+          <span class="badge">BULLETIN DE PAIE</span>
+          <div style="font-size: 12px; color: #64748b; margin-top: 8px;">Reference : {escape(b['reference'])}</div>
+          <div style="font-size: 12px; color: #64748b;">Periode : {periode}</div>
         </div>
       </div>
 
       <div class="emp-box">
-        <div><strong>Salarié :</strong> {current_user.full_name or current_user.username}</div>
+        <div><strong>Salarie :</strong> {nom_salarie}</div>
         <div><strong>Matricule :</strong> {matricule}</div>
-        <div><strong>Poste :</strong> {role_label}</div>
-        <div><strong>N° Sécurité Sociale CNPS :</strong> CNPS-CM-{str(current_user.id * 8374).zfill(8)}</div>
-        <div><strong>Convention Collective :</strong> Transport & Manutention Portuaire</div>
-        <div><strong>Mode de Règlement :</strong> Virement Bancaire (Afriland First Bank)</div>
+        <div><strong>Emploi :</strong> {poste}</div>
+        <div><strong>N&deg; securite sociale :</strong> {escape(cnps_salarie)}</div>
+        <div><strong>Mode de reglement :</strong> {escape(banque)}</div>
+        <div><strong>Statut du paiement :</strong> {statut}</div>
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>Désignation des Éléments de Salaire</th>
-            <th class="text-right">Base</th>
-            <th class="text-right">Part Salariale</th>
-            <th class="text-right">Retenues</th>
-            <th class="text-right">Net</th>
+            <th>Designation des elements de remuneration</th>
+            <th class="text-right">Gains (XAF)</th>
+            <th class="text-right">Retenues (XAF)</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Salaire de Base Conventionnel</td>
-            <td class="text-right">173.33 h</td>
-            <td class="text-right">380 000 XAF</td>
-            <td class="text-right">-</td>
-            <td class="text-right">380 000 XAF</td>
-          </tr>
-          <tr>
-            <td>Primes de Technicité & Indemnité de Transport</td>
-            <td class="text-right">Forfait</td>
-            <td class="text-right">+55 000 XAF</td>
-            <td class="text-right">-</td>
-            <td class="text-right">55 000 XAF</td>
-          </tr>
-          <tr>
-            <td>Cotisation Retraite CNPS Salariée (4.2%)</td>
-            <td class="text-right">435 000 XAF</td>
-            <td class="text-right">-</td>
-            <td class="text-right">-18 270 XAF</td>
-            <td class="text-right">-18 270 XAF</td>
-          </tr>
-          <tr>
-            <td>Retenue à la Source IRPP Cameroun (Barème 2026)</td>
-            <td class="text-right">416 730 XAF</td>
-            <td class="text-right">-</td>
-            <td class="text-right">-25 400 XAF</td>
-            <td class="text-right">-25 400 XAF</td>
-          </tr>
+{lignes_html}
         </tbody>
       </table>
 
       <div class="total-box">
-        <span>NET À PAYER PAR VIREMENT :</span>
-        <span style="color: #0f766e;">391 330 XAF</span>
+        <span>Salaire brut : {_mt(b['salaire_brut'])} XAF &nbsp;|&nbsp; Retenues : {_mt(b['total_deductions'])} XAF</span>
+        <span style="color: #0f766e;">NET A PAYER : {_mt(b['net_a_payer'])} XAF</span>
       </div>
 
-      <div class="stamp">
-        ✅ CERTIFIÉ PAR LA DIRECTION DES RESSOURCES HUMAINES & AFFAIRES SOCIALES<br>
-        <small>Signé électroniquement selon la législation camerounaise • Date de paiement : 28 du mois</small>
+      <div class="signature">
+        <div>
+          <div class="line"></div>
+          Signature et cachet de l'employeur
+        </div>
+        <div>
+          <div class="line"></div>
+          Remis au salarie le {date_paiement}
+        </div>
+      </div>
+
+      <div class="note">
+        Bulletin etabli a partir des donnees enregistrees dans le module Paie
+        (table <code>salaires</code>, ligne n&deg; {numero}). Cotisations
+        CNPS constatees sur cette fiche : {taux_cnps_affiche}. En l'absence de
+        signature manuscrite et de cachet, le present document n'a pas valeur
+        d'attestation.
       </div>
     </body>
     </html>
