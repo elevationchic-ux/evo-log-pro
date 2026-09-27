@@ -219,7 +219,7 @@ export default function MfaPage() {
     return (
       <Shell>
         <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl">
-          <TriangleAlert className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <p className="text-sm font-bold text-amber-300">
               {t('Aucune vérification en attente', 'No verification pending')}
@@ -399,8 +399,8 @@ export default function MfaPage() {
           href="/forgot-password"
           className="min-h-11 inline-flex items-center gap-2 text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
         >
-          <CircleHelp className="w-4 h-4" />
-          {t('Plusieurs appareils perdus ?', 'Lost several devices?')}
+          <HelpCircle className="w-4 h-4" />
+          {t('Mot de passe oublié ?', 'Forgot your password?')}
         </Link>
       </div>
 
