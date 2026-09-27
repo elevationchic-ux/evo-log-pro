@@ -148,7 +148,7 @@ export default function AdminEntrepriseModulesPage() {
               <div className="text-xs text-slate-400">
                 {m.etat === 'alloué' || m.etat === 'alloue' ? 'Inclus dans votre abonnement.' :
                  m.etat === 'accredite' ? 'Débloqué par une accréditation CADC datée.' :
-                 m.etat === 'demande' ? 'Votre demande est en cours d'examen.' :
+                 m.etat === 'demande' ? "Votre demande est en cours d'examen." :
                  'Non accessible — demandez une accréditation au CADC.'}
               </div>
               {canRequest && (

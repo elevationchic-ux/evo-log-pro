@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Warehouse, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MagasinSubPage() {
@@ -25,18 +26,12 @@ export default function MagasinSubPage() {
             <Warehouse className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-black">Import / Export DonnÃ©es Magasin</h1>
-            <p className="text-sm text-slate-400">Transfert de donnÃ©es CSV/Excel des stocks et articles.</p>
+            <h1 className="text-2xl font-black">Import / Export Données Magasin</h1>
+            <p className="text-sm text-slate-400">Transfert de données CSV/Excel des stocks et articles.</p>
           </div>
         </div>
 
-        <div className="p-8 bg-slate-950 border border-slate-800 rounded-2xl flex items-center gap-4">
-          <ShieldCheck className="w-8 h-8 text-emerald-400 shrink-0" />
-          <div>
-            <h4 className="font-bold text-slate-200">SystÃ¨me EVO-Magasin ConnectÃ©</h4>
-            <p className="text-xs text-slate-400 mt-0.5">Toutes les donnÃ©es d'inventaire sont synchronisÃ©es en temps rÃ©el avec le serveur central.</p>
-          </div>
-        </div>
+        <div className="p-8 bg-slate-950 border border-slate-800 rounded-2xl flex items-center gap-4"> <AlertTriangle className="w-8 h-8 text-amber-400 shrink-0" /> <div>  <h4 className="font-bold text-amber-200">Fonctionnalité non déployée</h4>  <p className="text-xs text-slate-400 mt-0.5">   Cet écran affiche un espace réservé : la logique backend liee à cette vue n’est pas encore câblée. Revenez après déploiement ou consultez <a href="/magasin/dashboard" className="text-sky-400 underline">le tableau de bord magasin</a>.  </p> </div></div>
       </div>
     </div>
   );
