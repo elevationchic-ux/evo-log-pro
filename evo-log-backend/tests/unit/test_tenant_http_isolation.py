@@ -70,6 +70,24 @@ def test_known_business_entities_are_scoped():
 # --------------------------------------------------------------------------- #
 # 2. Middleware : un vrai JWT positionne (puis efface) le contexte tenant
 # --------------------------------------------------------------------------- #
+@pytest.fixture(scope="module", autouse=True)
+def _ensure_app_schema():
+    """Crée le schema sur l'engine REEL de l'app (StaticPool :memory:), la meme
+    base que le middleware ouvre pour resoudre le tenant ET que get_db utilise.
+
+    Doit tourner AVANT toute seed : l'isolation echoue bruyamment ("no such
+    table") si un test inserait avant que le schema existe. Le shutdown du
+    TestClient (app.main.lifespan) appelle engine.dispose(), ce qui detruit
+    cette base en memoire — d'ou l'absence volontaire de nettoyage de lignes
+    ici : tout est deja volatil et cloisonne par module.
+    """
+    import app.main  # noqa: F401 - enregistre tous les modeles
+    Base.metadata.create_all(bind=engine)
+    clear_current_tenant()
+    yield
+    clear_current_tenant()
+
+
 def test_middleware_scopes_context_from_real_jwt():
     """Sonde ASGI minimale : on capture get_current_tenant() PENDANT le
     traitement, ce qui prouve que le middleware a resolu la societe depuis
@@ -139,21 +157,17 @@ def test_middleware_scopes_context_from_real_jwt():
 @pytest.fixture(scope="module")
 def tenant_http_client():
     """TestClient sans AUCUN override d'auth : middleware + get_current_user +
-    enforcement reels, sur la base en memoire partagee de l'app (StaticPool)."""
+    enforcement reels, sur la base en memoire partagee de l'app (StaticPool).
+
+    Pas de purge de lignes a la sortie : le __exit__ du TestClient declenche le
+    shutdown lifespan (engine.dispose()) qui detruit deja la base :memory:.
+    Tenter un DELETE apres coup echouerait ("no such table") sans rien nettoyer.
+    """
     Base.metadata.create_all(bind=engine)
     clear_current_tenant()
     with TestClient(app.main.app) as c:
         yield c
     clear_current_tenant()
-    # Purge des lignes creées par ce module (enforcement inactif hors requete).
-    db = SessionLocal()
-    try:
-        db.query(Department).delete()
-        db.query(User).delete()
-        db.query(Company).delete()
-        db.commit()
-    finally:
-        db.close()
 
 
 @pytest.fixture(scope="module")
