@@ -243,20 +243,17 @@ class TestPreuvesLivraisonListEndpoint:
         assert "items" in body and isinstance(body["items"], list)
         assert body["total"] == len(body["items"])
 
-    def test_endpoint_exige_auth(self):
-        """Sans JWT, la route ne doit pas repondre (protegee par get_current_user)."""
-        from app.main import app
-        from fastapi.testclient import TestClient as TC
+    def test_endpoint_exige_auth(self, unauthenticated):
+        """Sans JWT, la route ne doit pas repondre (protegee par get_current_user).
 
-        # Clear overrides to test raw auth
-        old = dict(app.dependency_overrides)
-        app.dependency_overrides.clear()
-        try:
-            bare = TC(app)
-            r = bare.get("/api/v1/transport-international/preuves-livraison")
-            assert r.status_code in (401, 403)
-        finally:
-            app.dependency_overrides.update(old)
+        `unauthenticated` retire uniquement l'override get_current_user de la
+        fixture client ; get_db reste surcharge sur la base memoire de test.
+        (L'ancien pattern create()ait un TestClient nu apres un
+        dependency_overrides.clear() : sans override get_db, la requete
+        partait sur l'engine reel de l'application.)
+        """
+        r = unauthenticated.get("/api/v1/transport-international/preuves-livraison")
+        assert r.status_code in (401, 403)
 
 
 class TestConducteurResponseFields:

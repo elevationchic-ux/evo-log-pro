@@ -177,7 +177,7 @@ def _section(titre, elements, ligne):
     print()
 
 
-def afficher(r):
+def afficher(r) -> int:
     print(f"base analysee : {r['db']}")
     print(f"tables declarees par les modeles : {len(Base.metadata.tables)}")
     print()
@@ -213,6 +213,7 @@ def afficher(r):
         "contrainte NOT NULL n'entrave une ecriture, aucun defaut ne heurte un "
         "type."
     ))
+    return critiques
 
 
 def rejouer_chaine() -> str:

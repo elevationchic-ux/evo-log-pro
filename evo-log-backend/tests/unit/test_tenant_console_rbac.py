@@ -72,7 +72,10 @@ def _as(client, user):
 
 
 def _clear(client):
-    app.dependency_overrides.clear()
+    # Pop ciblé : `dependency_overrides.clear()` supprimerait AUSSI l'override
+    # get_db de la fixture client → les requêtes suivantes partiraient sur
+    # l'engine réel de l'app (base de dev). On ne retire que l'identité.
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 # --------------------------------------------------------------------------- #

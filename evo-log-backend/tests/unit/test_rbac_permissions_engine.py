@@ -209,20 +209,25 @@ def test_rbac_router_requires_superadmin(client, db):
     company = _mk_company(db)
     chef = _mk_user(db, username="chefhttp", level=2, company=company)
 
-    # anonyme -> 401 (aucune dépendance d'auth retirée)
-    app.dependency_overrides.clear()
+    # Zero-isolation : ne JAMAIS dependency_overrides.clear() en cours de test,
+    # cela emporterait l'override get_db de la fixture client et les requetes
+    # suivantes liraient/écriraient la base réelle (kamlog_erp.db par défaut).
+    # On ne manipule que la clé get_current_user.
+    def _anonyme():
+        app.dependency_overrides.pop(get_current_user, None)
+
+    # anonyme -> 401
+    _anonyme()
     assert client.get("/api/v1/rbac/tenants").status_code == 401
 
     # chef de département (level 2) -> 403 (réservé au SuperAdmin)
     app.dependency_overrides[get_current_user] = lambda: chef
     assert client.get("/api/v1/rbac/tenants").status_code == 403
-    app.dependency_overrides.clear()
 
     # SuperAdmin -> 200
     sa = _mk_user(db, username="sahttp", level=0, superuser=True)
     app.dependency_overrides[get_current_user] = lambda: sa
     assert client.get("/api/v1/rbac/tenants").status_code == 200
-    app.dependency_overrides.clear()
 
 
 def test_permissions_catalog_endpoint_ok_for_admin(client, db):
