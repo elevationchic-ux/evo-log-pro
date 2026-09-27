@@ -619,11 +619,10 @@ def get_portail_documents(
         "url_telechargement": (
             "/api/v1/rh/portail/documents/attestation-travail" if contrat else None
         ),
-        "commentaire": None if contrat else (
-            "Aucun contrat enregistre dans le module RH : l'attestation de "
-            "travail ne peut pas etre delivree. Rapprochez la DRH pour la "
-            "saisie de votre contrat."
-        ),
+        "commentaire": None,
+        # Cle machine traduite par l'ecran : « aucun contrat enregistre », sans
+        # texte francais embarque dans l'API.
+        "raison_indisponibilite": None if contrat else "AUCUN_CONTRAT_ENREGISTRE",
     })
 
     return documents
@@ -631,14 +630,62 @@ def get_portail_documents(
 
 @router.get("/portail/documents/attestation-travail")
 def telecharger_attestation_travail(
+    db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user)
 ):
+    """Attestation de travail etablie sur les seules donnees RH enregistrees.
+
+    Un contrat absent renvoie un 404 : l'application ne peut pas attester une
+    relation de travail qu'aucune piece du dossier n'etablit. Les informations
+    qui n'ont jamais ete saisies (numero CNPS, compte bancaire) portent la
+    mention « non renseigne » au lieu d'un numero calcule de toute piece.
+
+    Le nom du signataire et la mention « certifie electroniquement » ont ete
+    retires : aucun mecanisme de signature electronique n'existe ici. Le cadre
+    reste ouvert au cachet et a la signature manuscrite du responsable RH, seuls
+    elements qui font foi.
     """
-    Generates and returns an official employment certificate (Attestation de Travail).
-    """
-    matricule = f"LPC-EMP-{str(current_user.id).zfill(4)}"
-    role_label = get_user_role_label(current_user)
-    today_str = date.today().strftime("%d %B %Y")
+    contrat = db.query(ContratTravail).filter(
+        ContratTravail.employe_id == current_user.id
+    ).order_by(ContratTravail.date_debut.desc()).first()
+    if not contrat:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Aucun contrat de travail enregistre a votre nom : l'attestation "
+                "ne peut pas etre delivree. Rapprochez la DRH."
+            ),
+        )
+
+    comp = current_user.company
+    raison_sociale = escape(
+        (comp.nom if comp else None) or "Employeur non rattache a un compte entreprise"
+    )
+    mentions_legales = " &bull; ".join(x for x in [
+        (f"Forme : {escape(comp.legal_form)}" if comp and comp.legal_form else None),
+        (f"Capital : {escape(comp.capital_social)}" if comp and comp.capital_social else None),
+        (f"RCCM : {escape(comp.rccm)}" if comp and comp.rccm else None),
+        (f"NIF : {escape(comp.tax_id)}" if comp and comp.tax_id else None),
+        (escape(comp.adresse) if comp and comp.adresse else None),
+    ] if x) or "Identifiants legaux de l'employeur non renseignes dans la fiche entreprise."
+
+    nom_salarie = escape(current_user.full_name or current_user.username)
+    matricule = escape(current_user.matricule or "non attribue")
+    poste = escape(current_user.job_title or contrat.poste or "non renseigne")
+    departement = escape(contrat.departement or (
+        current_user.department.nom if current_user.department else None) or "non renseigne")
+    type_contrat = escape(contrat.type_contrat or "non renseigne")
+    horaire = escape(contrat.horaire_travail or "non renseigne")
+    lieu = escape(contrat.lieu_travail or "non renseigne")
+    date_embauche = contrat.date_debut.strftime("%d/%m/%Y") if contrat.date_debut else "non renseignee"
+    date_fin_contrat = (
+        contrat.date_fin.strftime("%d/%m/%Y")
+        if contrat.date_fin else "sans terme (contrat a duree indeterminee)"
+    )
+    statut_contrat = escape(contrat.statut or "actif")
+    cnps = "non renseigne par la DRH"
+    fait_a = escape((comp.ville if comp and comp.ville else None) or "le")
+    today_str = date.today().strftime("%d/%m/%Y")
 
     html_content = f"""
     <!DOCTYPE html>

@@ -10,10 +10,10 @@ print("par host (top 8):")
 for row in q("SELECT substr(url, 1, instr(substr(url,12), '/')+11) AS host, COUNT(*) "
              "FROM audit_logs GROUP BY host ORDER BY 2 DESC LIMIT 8"):
     print("  ", row)
-print("date range testserver:", q("SELECT MIN(created_at), MAX(created_at) FROM audit_logs WHERE url LIKE 'http://testserver%'"))
-print("date range autres:", q("SELECT MIN(created_at), MAX(created_at) FROM audit_logs WHERE url NOT LIKE 'http://testserver%'"))
+print("date range testserver:", q("SELECT MIN(timestamp), MAX(timestamp) FROM audit_logs WHERE url LIKE 'http://testserver%'"))
+print("date range autres:", q("SELECT MIN(timestamp), MAX(timestamp) FROM audit_logs WHERE url NOT LIKE 'http://testserver%'"))
 print("dernieres lignes non-testserver (8):")
-for row in q("SELECT id, method, substr(url,1,70), status_code, created_at FROM audit_logs "
+for row in q("SELECT id, method, substr(url,1,70), status_code, timestamp FROM audit_logs "
              "WHERE url NOT LIKE 'http://testserver%' ORDER BY id DESC LIMIT 8"):
     print("  ", row)
 print()

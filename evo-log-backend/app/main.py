@@ -443,6 +443,17 @@ except ImportError as e:
     logger.critical(f"Administration Entreprise router failed to load: {e}")
     raise
 
+# Espace departement (Phase 3, niveau 2) : fiche du departement + roster des
+# collaborateurs. require_department_head + _scoped_department : un chef de
+# departement est epingle a SON departement (403 sur tout autre) ; l'admin
+# entreprise et le CADC ciblent un departement de leur entreprise seulement.
+try:
+    from app.routers.v1 import chef_departement
+    safe_include_router(chef_departement.router, prefix="/api/v1/departement", tags=["Espace Departement"])
+except ImportError as e:
+    logger.critical(f"Espace Departement router failed to load: {e}")
+    raise
+
 # New Version 2.0 Modules
 try:
     from app.routers.v1 import shift_planning, port_pricing, gps_tracking, real_customs, port_incidents, auto_invoicing, port_performance, notification_system, container_lifecycle, partner_api

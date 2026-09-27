@@ -17,7 +17,7 @@ du perimetre humain du departement. L'octroi d'accreditation interne et le
 planning sont des tranches suivantes (cf. plan Phase 3 / Phase 4).
 """
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -149,4 +149,22 @@ def list_members(
     """Roster humain du departement, scope par ``department_id`` ET ``company_id``.
 
     Le chef de departement (2) ne peut jamais telecharger un autre departement :
-    ``_scoped_department`
+    ``_scoped_department`` l'y epingle. On filtre aussi sur ``company_id`` pour
+    qu'un identifiant de departement devine ne fuite jamais une autre entreprise.
+    """
+    dept = _scoped_department(db, current, department_id)
+    q = db.query(User).filter(
+        User.department_id == dept.id,
+        User.company_id == dept.company_id,
+    )
+    if not include_inactive:
+        q = q.filter(User.is_active.is_(True))
+    if search:
+        like = f"%{search.strip()}%"
+        q = q.filter(
+            (User.username.ilike(like))
+            | (User.email.ilike(like))
+            | (User.full_name.ilike(like))
+            | (User.matricule.ilike(like))
+        )
+    return [_member_dict(u) for u in q.order_by(User.id.asc()).all()]

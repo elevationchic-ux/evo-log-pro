@@ -90,11 +90,13 @@ def _seed_cadc():
         sa.text("SELECT id FROM roles WHERE name = :n"), {"n": "CADC"}
     ).scalar()
     if role_id is None:
+        # Booleens TRUE/FALSE (jamais 1/0) : PostgreSQL rejette un entier dans
+        # une colonne boolean (DatatypeMismatch), contrairement a SQLite.
         bind.execute(
             sa.text(
                 "INSERT INTO roles (name, description, level, company_id, "
                 "modules_allowed, is_active, is_system) VALUES (:n, :d, 0, NULL, "
-                "NULL, 1, 1)"
+                "NULL, TRUE, TRUE)"
             ),
             {"n": "CADC", "d": "Super Administrateur plateforme CADC"},
         )
@@ -109,17 +111,23 @@ def _seed_cadc():
     if existing is not None:
         user_id = existing[0]
     else:
-        # Email de repli si CADC_EMAIL est deja pris par un autre compte.
+        # Email de repli si CADC_EMAIL est deja pris par un autre compte
+        # (users.email est NOT NULL cote PostgreSQL : jamais inserer NULL).
         email_taken = bind.execute(
             sa.text("SELECT 1 FROM users WHERE email = :e"), {"e": CADC_EMAIL}
         ).first()
-        email = None if email_taken else CADC_EMAIL
+        if email_taken:
+            import uuid
+            email = f"cadctechnique+{uuid.uuid4().hex[:8]}@evolog.cm"
+        else:
+            email = CADC_EMAIL
         bind.execute(
             sa.text(
                 "INSERT INTO users (username, email, hashed_password, full_name, "
                 "is_active, is_superuser, must_change_password, role_level, "
                 "company_id, language, timezone, two_factor_enabled) VALUES "
-                "(:u, :e, :h, :f, 1, 1, 0, 0, NULL, 'fr', 'Africa/Douala', 0)"
+                "(:u, :e, :h, :f, TRUE, TRUE, FALSE, 0, NULL, 'fr', "
+                "'Africa/Douala', FALSE)"
             ),
             {
                 "u": CADC_USERNAME,
@@ -149,10 +157,19 @@ def _seed_cadc():
 
 def upgrade():
     _ensure_columns()
+    # Le seed ne doit jamais bloquer un deploiement. Sur PostgreSQL, une
+    # simple capture d'exception ne suffit pas : la transaction courante est
+    # "aborted" et l'UPDATE alembic_version suivant echoue (InFailedSql-
+    # Transaction). On encapsule donc le seed dans un SAVEPOINT : en cas
+    # d'echec, seul le savepoint est annule, la migration passe.
+    import logging
+    bind = op.get_bind()
+    nested = bind.begin_nested()
     try:
         _seed_cadc()
-    except Exception as exc:  # noqa: BLE001 - le seed ne doit jamais bloquer un deploiement
-        import logging
+        nested.commit()
+    except Exception as exc:  # noqa: BLE001
+        nested.rollback()
         logging.getLogger("alembic").warning("Seed CADC 025 ignore : %s", exc)
 
 
