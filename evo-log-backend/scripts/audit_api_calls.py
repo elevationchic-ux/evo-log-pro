@@ -37,6 +37,8 @@ APPEL = re.compile(
 )
 VAR = re.compile(r"\$\{[^{}]*\}")
 PLACEHOLDER = "\u0000"   # segment inconnu (variable ou {param}) -> joker
+RESTE = "\u0001"         # {x:path} de FastAPI -> joker multi-segments
+SEG_GABARIT = re.compile(r"\{[^/{}]+(:path)?\}")
 ROUTES: list = []        # (METHODE, segments gabarit, chemin brut), rempli dans main()
 
 
@@ -67,8 +69,22 @@ def segments_chemin(url: str):
 
 
 def segments_gabarit(path: str):
-    """Gabarit de route FastAPI -> segments (`{param}` devient le joker)."""
-    return [s for s in path.split("/") if s != ""]
+    """Gabarit de route FastAPI -> segments, `{param}` converti en joker.
+
+    Sans cette conversion, `/magasin/articles/{article_id}` restait un segment
+    litteral `{article_id}` : TOUTES les routes de detail du backend (soit la
+    moitie de l'API) etaient signalees a tort comme orphelines.
+    """
+    out = []
+    for seg in path.split("/"):
+        if seg == "":
+            continue
+        if SEG_GABARIT.fullmatch(seg):
+            # `{x:path}` avale plusieurs segments, `{x}` exactement un.
+            out.append(RESTE if seg.endswith(":path}") else PLACEHOLDER)
+        else:
+            out.append(seg)
+    return out
 
 
 @lru_cache(maxsize=4096)
