@@ -82,6 +82,25 @@ def famille_modele(colonne):
     return None
 
 
+def analyseur_types(cur, nom, colonne):
+    """Nombre de lignes qu'une colonne Date du modele NE PEUT PAS relire.
+
+    Le modele declare Date, la base porte une colonne DATETIME heritee : la
+    divergence de type ne casse en elle-meme rien, des lors que la valeur
+    stockee tient sur dix caracteres ('2026-09-27'). Elle casse tout si la
+    valeur porte une heure, le processeur de resultat Date levant
+    "Invalid isoformat string". On compte donc les valeurs reellement
+    illisibles, non les declarations : c'est la donnee qui decide.
+    """
+    try:
+        return cur.execute(
+            'SELECT count(*) FROM "{}" WHERE "{}" IS NOT NULL '
+            'AND length("{}") > 10'.format(nom, colonne, colonne)
+        ).fetchone()[0]
+    except sqlite3.Error:
+        return -1
+
+
 def analyser(db: str):
     con = sqlite3.connect(db)
     cur = con.cursor()
