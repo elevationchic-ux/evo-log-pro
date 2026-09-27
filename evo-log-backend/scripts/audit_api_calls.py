@@ -158,9 +158,10 @@ def methodes_reelles():
     prefixe applique (`include_context.prefix`). Parcourir `app.routes` sans
     descendre dans ces conteneurs ne remonte que les 13 routes declarees en dur
     sur l'app, et fait passer toute l'API metier pour orpheline. L'OpenAPI, elle,
-    masque les routes `include_in_schema=False` : on construit donc la liste从这里
-    recursivement, en excluant nos catch-all (`pending_modules`) qui matchent tout
-    par definition et videraient le rapport de son sens.
+    masque les routes `include_in_schema=False` : on construit donc la liste en
+    descendant recursivement dans les conteneurs, en excluant nos catch-all
+    (`pending_modules`) qui matchent tout par definition et videraient le rapport
+    de son sens.
     """
     out = []
     catch_all = {"/api/v1/{full_path:path}"}
