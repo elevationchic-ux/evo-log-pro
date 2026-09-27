@@ -1,112 +1,182 @@
-"""Audit: quels appels API du frontend ne touchent AUCUNE route reelle du backend ?
+"""Audit : quels appels API du frontend ne touchent AUCUNE route reelle du backend ?
 
 Un appel qui ne matche rien tombe dans le catch-all de pending_modules.py, qui
 repond une enveloppe « pending » 200 au lieu d'un 404. Ce rapport liste ces
 appels pour qu'ils soient relies a une route existante (ou que la route soit
-creee), seul pre-requis pour supprimer l'enveloppe factice sans casser une page.
+creee) : c'est le seul pre-requis pour supprimer l'enveloppe factice sans
+laisser une page sur un echec brut.
 
-Usage:  python scripts/audit_api_calls.py
+Les chemins du front sont ecrits en litteraux ou en modeles (`${API_PREFIX}`,
+`/tiers/${id}`) : les variables deviennent des jokers, et le rapprochement avec
+les gabarits de routes FastAPI (`/tiers/{tier_id}`) se segment par segment.
+
+Usage :  python scripts/audit_api_calls.py          (depuis evo-log-backend)
 """
 from __future__ import annotations
 
 import re
 import sys
 from collections import defaultdict
+from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 FRONT = ROOT / "evo-log-frontend" / "src"
 BACKEND_APP_DIR = ROOT / "evo-log-backend"
 
-# 1. Routes reelles du backend (OpenAPI genere en direct, sans serveur).
 sys.path.insert(0, str(BACKEND_APP_DIR))
 from app.main import app  # noqa: E402
 
-
-def routes_reelles():
-    out = []
-    for p, item in app.openapi()["paths"].items():
-        for meth in item:
-            out.append((meth.upper(), p))
-    return out
-
-
-def segment_to_regex(path: str):
-    """Chemin OpenAPI -> regex annee (FastAPI rend {param} en [^/]+).
-
-    Le slash final est normalise : les collections sont declarees « /tiers/ »
-    alors que le front appelle « /tiers » (axios normalise differemment selon
-    les pages). Sans ca, tout serait annonce orphelin a tort.
-    """
-    motif = re.sub(r"\{[^/]+\}", "[^/]+", path)
-    motif = motif.replace(".", r"\.")
-    motif = motif.rstrip("/")
-    return re.compile("^" + motif + "/?$")
-
-
-# 2. Appels du frontend.
+# appelClient.get('/tiers/12') | apiClient.post(`/x/${id}`) | apiUrl('/y') | fetch('/z')
 APPEL = re.compile(
     r"""api(?:Client|)\s*\.\s*(get|post|put|patch|delete)\s*\(\s*[`'"]([^`'"]+)[`'"]"""
     r"""|apiUrl\s*\(\s*[`'"]([^`'"]+)[`'"]"""
     r"""|\bfetch\s*\(\s*[`'"]([^`'"]+)[`'"]""",
     re.IGNORECASE,
 )
-TEMPLATE_VAR = re.compile(r"\$\{[^}]*\}")
+VAR = re.compile(r"\$\{[^{}]*\}")
+PLACEHOLDER = "\u0000"   # segment inconnu (variable ou {param}) -> joker
 
 
-def normaliser(url: str) -> str:
-    url = TEMPLATE_VAR.sub("X", url)
-    url = re.sub(r"\{[^}]*\}", "X", url)
+def segments_chemin(url: str):
+    """Chemin d'appel -> liste de segments, variables remplacees par le joker.
+
+    Les modeles de chaine sont ambigus (${API_PREFIX} vaut « /api/v1 », soit 2
+    segments ; ${id} vaut 1 segment). On garde donc le joker et le rapprochement
+    accepte qu'il couvre un ou plusieurs segments.
+    """
     if url.startswith("http"):
         from urllib.parse import urlparse
 
         url = urlparse(url).path
+    url = url.split("?")[0]
+    url = VAR.sub(PLACEHOLDER, url)
+    url = re.sub(r"\{[^/{}]+\}", PLACEHOLDER, url)
+    if not url.startswith("/"):
+        url = "/" + url
     if url.startswith("/api/v1/"):
         pass
     elif url.startswith("/api/"):
         url = "/api/v1/" + url[len("/api/"):]
-    elif url.startswith("/"):
+    elif not url.startswith("/api/v1"):
         url = "/api/v1" + url
-    else:
-        url = "/api/v1/" + url.lstrip("/")
-    # retire la query string
-    url = url.split("?")[0]
-    # `${BASE}` ou `${API_PREFIX}` devenus X : le segment X en tete est la
-    # base d'URL, pas un identifiant -> on le retire pour revenir au chemin.
-    url = re.sub(r"^/api/v1/X(?=/)", "", url)
-    return url
+    seg = [s for s in url.split("/") if s != ""]
+    return seg
+
+
+def segments_gabarit(path: str):
+    """Gabarit de route FastAPI -> segments (`{param}` devient le joker)."""
+    return [s for s in path.split("/") if s != ""]
+
+
+@lru_cache(maxsize=4096)
+def correspond(call: tuple, route: tuple) -> bool:
+    """Match segment a segment, joker = 1..n segments cotes appel comme gabarit."""
+    call, route = list(call), list(route)
+    memo = {}
+
+    def suit(i: int, j: int) -> bool:
+        cle = (i, j)
+        if cle in memo:
+            return memo[cle]
+        if i == len(call) and j == len(route):
+            memo[cle] = True
+            return True
+        if i == len(call) or j == len(route):
+            # Le joker final peut absorber le reste (ex. /api/v1/X vs /a/b/c).
+            reste_appel = call[i:]
+            reste_gabarit = route[j:]
+            vide = (not reste_appel or reste_appel == [PLACEHOLDER]) and (
+                not reste_gabarit or reste_gabarit == [PLACEHOLDER]
+            )
+            memo[cle] = vide
+            return vide
+        a, b = call[i], route[j]
+        if a == PLACEHOLDER:
+            for k in range(i + 1, len(call) + 1):
+                if suit(k, j):
+                    memo[cle] = True
+                    return True
+            memo[cle] = False
+            return False
+        if b == PLACEHOLDER:
+            ok = suit(i + 1, j + 1)
+            memo[cle] = ok
+            return ok
+        ok = a == b and suit(i + 1, j + 1)
+        memo[cle] = ok
+        return ok
+
+    return suit(0, 0)
+
+
+def methodes_reelles():
+    out = []
+    for path, item in app.openapi()["paths"].items():
+        gabarit = tuple(segments_gabarit(path))
+        for meth in item:
+            out.append((meth.upper(), gabarit, path))
+    return out
 
 
 def main():
-    routes = routes_reelles()
-    motifs = [(m, segment_to_regex(p)) for m, p in routes]
+    routes = methodes_reelles()
+    orphelins = defaultdict(set)
+    ambigus = defaultdict(set)
 
-    appels_par_fichier = defaultdict(list)
-    for fichier in FRONT.rglob("*.ts*"):
+    for fichier in sorted(FRONT.rglob("*.ts*")):
         if "node_modules" in str(fichier):
             continue
         texte = fichier.read_text(encoding="utf-8", errors="ignore")
         for match in APPEL.finditer(texte):
-            meth = (match.group(1) or "get").upper()
+            meth = (match.group(1) or "").upper()
             cible = match.group(2) or match.group(3) or match.group(4)
-            if not cible or cible.startswith("/api/docs") or cible.startswith("/api/health"):
+            if not cible:
                 continue
-            chemin = normaliser(cible)
-            ok = any(m == meth and rx.match(chemin) for m, rx in motifs)
-            if not ok:
-                appels_par_fichier[str(fichier.relative_to(ROOT))].append(f"{meth} {chemin}")
+            if cible.startswith("/api/docs") or cible.startswith("/api/health"):
+                continue
+            seg = tuple(segments_chemin(cible))
+            if not seg:
+                continue
+            vues = {p for m, g, p in routes if correspond(seg, g)}
+            si_methodes = {p for m, g, p in routes if m == meth and correspond(seg, g)}
+            entete = f"{'ANY' if not meth else meth} {'/' + '/'.join(seg)}"
+            if si_methodes:
+                continue
+            if vues:
+                # Le chemin existe mais pas pour cette methode : a verifier.
+                ambigus[str(fichier.relative_to(ROOT))].add(f"{entete}  -> route existe: {sorted(vues)}")
+            else:
+                orphelins[str(fichier.relative_to(ROOT))].add(entete)
 
-    if not appels_par_fichier:
+    if not orphelins and not ambigus:
         print("AUCUN appel orphelin : tout correspond a une route reelle.")
         return
+
+    print("=" * 72)
+    print("APPELS SANS ROUTE EQUIVALENTE (servis par le catch-all « pending »)")
+    print("=" * 72)
     total = 0
-    for fichier in sorted(appels_par_fichier):
-        lignes = sorted(set(appels_par_fichier[fichier]))
+    for fichier in sorted(orphelins):
+        lignes = sorted(orphelins[fichier])
         total += len(lignes)
         print(f"\n{fichier}")
         for l in lignes:
             print(f"   {l}")
-    print(f"\nTOTAL appels sans route reelle : {total}")
+    print(f"\nsous-total : {total}")
+
+    print()
+    print("=" * 72)
+    print("CHEMINS EXISTANTS MAIS METHODE NON DECLAREE")
+    print("=" * 72)
+    sous = 0
+    for fichier in sorted(ambigus):
+        lignes = sorted(ambigus[fichier])
+        sous += len(lignes)
+        print(f"\n{fichier}")
+        for l in lignes:
+            print(f"   {l}")
+    print(f"\nsous-total : {sous}")
 
 
 if __name__ == "__main__":
