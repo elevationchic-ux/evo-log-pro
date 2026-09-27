@@ -175,6 +175,14 @@ export const saasConsoleAPI = {
   // File des demandes d'accreditation emises par les admins entreprise
   listPendingAccreditationRequests: () =>
     apiClient.get(`${CADC_BASE}/accreditations/demandes`),
+  // Phase 3 — arbitrage CADC : conversion en place de la demande
+  // (approuver -> accreditation active datee) ou refus trace (refuser).
+  approveAccreditationRequest: (
+    requestId: number,
+    data: { date_debut?: string; date_fin?: string; motif?: string },
+  ) => apiClient.post(`${CADC_BASE}/accreditations/demandes/${requestId}/approuver`, data),
+  rejectAccreditationRequest: (requestId: number, data?: { motif?: string }) =>
+    apiClient.post(`${CADC_BASE}/accreditations/demandes/${requestId}/refuser`, data || {}),
 
   listCompanyAccreditations: (id: number) =>
     apiClient.get(`${CADC_BASE}/companies/${id}/accreditations`),
