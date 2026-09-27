@@ -151,25 +151,35 @@ def rapport(a: str, b: str) -> float:
 
 
 def methodes_reelles():
-    """Routes reelslement enregistrees dans l'app, et non l'OpenAPI.
+    """Routes reelslement enregistrees, y compris celles hors schema.
 
-    L'OpenAPI omet les routes declarees `include_in_schema=False` (celles du
-    pont S3, des websockets, etc.) : les ignorer ferait passer des endpoints
-    existants pour des orphelins. On itere donc `app.routes`, en excluant nos
-    propres catch-all (`pending_modules`), qui matcheront tout par definition.
+    L'OpenAPI omet les routes declarees `include_in_schema=False`, et `app.routes`
+    n'est pas plat dans cette version de FastAPI : chaque `include_router()` produit
+    un `_IncludedRouter` qui emballe ses propres routes. On parcourt donc
+    recursivement, en sautant nos catch-all (`pending_modules`), qui matchent tout
+    par definition et videraient le rapport de son sens.
     """
     out = []
     catch_all = {"/api/v1/{full_path:path}"}
-    for route in app.routes:
-        path = getattr(route, "path", None)
-        if not path or path in catch_all:
-            continue
-        methodes = getattr(route, "methods", None) or set()
-        gabarit = tuple(segments_gabarit(path))
-        for meth in sorted(methodes):
-            if meth in ("HEAD", "OPTIONS"):
+
+    def collects(routes):
+        for route in routes:
+            enfants = getattr(route, "routes", None)
+            if enfants:
+                collects(enfants)
+            path = getattr(route, "path", None)
+            if not path or path in catch_all:
                 continue
-            out.append((meth.upper(), gabarit, path))
+            methodes = getattr(route, "methods", None)
+            if not methodes:
+                continue
+            gabarit = tuple(segments_gabarit(path))
+            for meth in sorted(methodes):
+                if meth in ("HEAD", "OPTIONS"):
+                    continue
+                out.append((meth.upper(), gabarit, path))
+
+    collects(app.routes)
     return out
 
 
