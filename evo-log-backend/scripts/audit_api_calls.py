@@ -32,9 +32,15 @@ def routes_reelles():
 
 
 def segment_to_regex(path: str):
-    """Chemin OpenAPI -> regex annee (FastAPI rend {param} en [^/]+)."""
+    """Chemin OpenAPI -> regex annee (FastAPI rend {param} en [^/]+).
+
+    Le slash final est normalise : les collections sont declarees « /tiers/ »
+    alors que le front appelle « /tiers » (axios normalise differemment selon
+    les pages). Sans ca, tout serait annonce orphelin a tort.
+    """
     motif = re.sub(r"\{[^/]+\}", "[^/]+", path)
     motif = motif.replace(".", r"\.")
+    motif = motif.rstrip("/")
     return re.compile("^" + motif + "/?$")
 
 
@@ -65,6 +71,9 @@ def normaliser(url: str) -> str:
         url = "/api/v1/" + url.lstrip("/")
     # retire la query string
     url = url.split("?")[0]
+    # `${BASE}` ou `${API_PREFIX}` devenus X : le segment X en tete est la
+    # base d'URL, pas un identifiant -> on le retire pour revenir au chemin.
+    url = re.sub(r"^/api/v1/X(?=/)", "", url)
     return url
 
 
