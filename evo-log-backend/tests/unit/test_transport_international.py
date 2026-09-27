@@ -278,9 +278,9 @@ class TestConducteurResponseFields:
         from datetime import datetime
 
         minimal = ConducteurResponse(
-            id=1, nom="Test", prenom="T",
-            numero_permis="AB", date_expiration_permis=datetime(2027, 1, 1),
-            telephone="+237000", email="t@t.cm", adresse="Douala",
+            id=1, nom="Mballa", prenom="Jean",
+            numero_permis="AB-99-2024", date_expiration_permis=datetime(2027, 1, 1),
+            telephone="+2376000011", email="t@t.cm", adresse="Douala",
             is_active=True, created_at=datetime(2026, 1, 1),
         )
         assert minimal.categorie_permis is None
