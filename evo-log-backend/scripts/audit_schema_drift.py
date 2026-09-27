@@ -192,7 +192,6 @@ def rejouer_chaine() -> str:
     chemin = Path(tempfile.gettempdir()) / "kamlog_replay.db"
     if chemin.exists():
         chemin.unlink()
-    import os
     environ = dict(os.environ, DATABASE_URL=f"sqlite:///{chemin}")
     subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"],
                    cwd=str(ROOT), env=environ, check=True,

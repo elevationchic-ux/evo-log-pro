@@ -2,7 +2,7 @@
 
 // Route-level guard for the entire Super-Admin CADC console subtree
 // (/admin/super-admin, /admin/super-admin/entreprises, /plans-abonnement,
-// /prestataires, /accreditations-entreprises).
+// /prestataires, /accreditations-entreprises, /demandes-accreditation).
 //
 // La sidebar masque déjà ce groupe pour tout non-super-admin, mais le masquage
 // du menu ne suffit pas : les routes resteraient atteignables en tapant l'URL.

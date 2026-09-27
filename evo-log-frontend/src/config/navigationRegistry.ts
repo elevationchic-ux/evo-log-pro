@@ -12,7 +12,7 @@ import {
   BarChart3, PieChart, LineChart, FileText, BookOpen,
   Radio, Wifi, MessageSquare, Bell,
   LayoutDashboard, Layers, Grid, FileCheck, ShoppingCart, RotateCcw,
-  ArrowRightLeft, Bot, CheckCircle2
+  ArrowRightLeft, Bot, CheckCircle2, Inbox
 } from 'lucide-react';
 import { getModulePalette } from './modulePalette';
 import { MODULE_TITLES_EN } from './navI18n';
@@ -1040,6 +1040,19 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         badge: 'Délais',
         tcode: 'KCADC_ACR',
         description: 'Accords module datés débloquant un accès au-delà de l\'allocation',
+        businessProcess: 'Conformité & délais',
+        requiredRoles: ['SUPER_ADMIN', 'CADC']
+      },
+      {
+        label: 'Demandes d\'Accréditation',
+        // Phase 3 : file d'arbitrage CADC des demandes émises par les admins
+        // entreprise (module verrouillé -> demande). Approuver convertit la
+        // demande en accréditation active datée ; Refuser la marque refusée.
+        path: '/admin/super-admin/demandes-accreditation',
+        icon: Inbox,
+        badge: 'Arbitrage',
+        tcode: 'KCADC_REQ',
+        description: 'File d\'attente des demandes de modules des entreprises à approuver ou refuser',
         businessProcess: 'Conformité & délais',
         requiredRoles: ['SUPER_ADMIN', 'CADC']
       }
