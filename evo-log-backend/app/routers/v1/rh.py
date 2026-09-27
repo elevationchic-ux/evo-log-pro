@@ -79,24 +79,30 @@ def get_portail_mon_profil(
     db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user)
 ):
-    """
-    Returns full self-service HR profile of the logged-in employee:
-    Matricule, Job title, Department, Agency, Leave balance, CNPS number, etc.
-    """
-    matricule = f"LPC-EMP-{str(current_user.id).zfill(4)}"
-    role_label = get_user_role_label(current_user)
-    agency_name = current_user.agency.name if current_user.agency else "Siège Portuaire Douala (Quai 14 PAD)"
-    dept_name = current_user.department.name if current_user.department else (
-        "Opérations Maritimes & Quai" if "DOCKER" in role_label.upper() or "MAGASIN" in role_label.upper() else "Exploitation & Logistique Portuaire"
-    )
+    """Profil RH du salarie connecte, en donnees reellement enregistrees uniquement.
 
-    # Calculate leave balance (standard OHADA: 24 working days/year)
+    Ce qui n'a jamais ete saisi par la DRH remonte a ``null`` (matricule, numero
+    CNPS, compte bancaire, date d'embauche) et l'ecran affiche « Non renseigne ».
+    Inventer un numero de securite sociale ou un RIB sur un portail social n'est
+    pas un remplissage : c'est un faux document.
+
+    Le droit a conges de 24 jours ouvrables par annee revolue est une regle de
+    valeur du Code du travail camerounais, pas une donnee locale.
+    """
+    droit_conge_annuel = 24
+    annee_courante = date.today().year
+
+    contrat = db.query(ContratTravail).filter(
+        ContratTravail.employe_id == current_user.id
+    ).order_by(ContratTravail.date_debut.desc()).first()
+
     conges_pris = db.query(Conge).filter(
         Conge.employe_id == current_user.id,
-        Conge.statut == StatutConge.APPROUVE
+        Conge.statut == StatutConge.APPROUVE,
+        extract('year', Conge.date_debut) == annee_courante,
     ).all()
-    jours_utilises = sum(c.nombre_jours for c in conges_pris)
-    solde_restant = max(0, 24 - jours_utilises)
+    jours_utilises = sum(int(c.nombre_jours or 0) for c in conges_pris)
+    solde_restant = max(0, droit_conge_annuel - jours_utilises)
 
     # Last paid salary
     last_salaire = db.query(Salaire).filter(
