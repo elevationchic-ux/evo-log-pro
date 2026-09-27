@@ -231,3 +231,59 @@ class TestPositionGPSService:
         assert float(position.latitude) == pytest.approx(4.0581)
         assert float(position.longitude) == pytest.approx(9.7043)
         assert position.statut == "en_mouvement"
+
+
+class TestPreuvesLivraisonListEndpoint:
+    """GET /api/v1/transport-international/preuves-livraison (endpoint ajoute session 2026-09-27)."""
+
+    def test_liste_vide_retourne_items_et_total(self, client: TestClient):
+        r = client.get("/api/v1/transport-international/preuves-livraison")
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert "items" in body and isinstance(body["items"], list)
+        assert body["total"] == len(body["items"])
+
+    def test_endpoint_exige_auth(self):
+        """Sans JWT, la route ne doit pas repondre (protegee par get_current_user)."""
+        from app.main import app
+        from fastapi.testclient import TestClient as TC
+
+        # Clear overrides to test raw auth
+        old = dict(app.dependency_overrides)
+        app.dependency_overrides.clear()
+        try:
+            bare = TC(app)
+            r = bare.get("/api/v1/transport-international/preuves-livraison")
+            assert r.status_code in (401, 403)
+        finally:
+            app.dependency_overrides.update(old)
+
+
+class TestConducteurResponseFields:
+    """ConducteurResponse exposes optional fields that exist in the model."""
+
+    def test_champs_optionnels_exposes(self):
+        from app.schemas.transport import ConducteurResponse
+
+        fields = ConducteurResponse.model_fields
+        # Fields added this session (were missing before)
+        assert "categorie_permis" in fields, "categorie_permis absent du schema"
+        assert "expiration_visite_medicale" in fields, "expiration_visite_medicale absent"
+        assert "date_naissance" in fields, "date_naissance absent"
+        assert "numero_cnps" in fields, "numero_cnps absent"
+
+    def test_champs_sont_optionnels(self):
+        """All added fields default to None so existing JSON without them still validates."""
+        from app.schemas.transport import ConducteurResponse
+        from datetime import datetime
+
+        minimal = ConducteurResponse(
+            id=1, nom="Test", prenom="T",
+            numero_permis="AB", date_expiration_permis=datetime(2027, 1, 1),
+            telephone="+237000", email="t@t.cm", adresse="Douala",
+            is_active=True, created_at=datetime(2026, 1, 1),
+        )
+        assert minimal.categorie_permis is None
+        assert minimal.expiration_visite_medicale is None
+        assert minimal.date_naissance is None
+        assert minimal.numero_cnps is None

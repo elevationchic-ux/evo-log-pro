@@ -158,8 +158,9 @@ def main():
             if cible.startswith("/api/docs") or cible.startswith("/api/health"):
                 continue
             where = str(fichier.relative_to(ROOT))
-            if "${" in cible or "$" in VAR.sub("", cible):
-                # Gabarit imbrique (${a || b}) : non resolvable statiquement.
+            if "'" in cible or '"' in cible:
+                # Litteral tronque par l'expression capturee (${a || b}) :
+                # non resolvable statiquement, a controler a la main.
                 indetermine[where].add(f"{meth or 'ANY'} {cible}")
                 continue
             seg = tuple(segments_chemin(cible))
@@ -167,8 +168,15 @@ def main():
                 continue
             entete = f"{'ANY' if not meth else meth} {'/' + '/'.join(s if s != PLACEHOLDER else '{x}' for s in seg)}"
             if not meth:
-                # fetch() : la methode est portee par l'objet d'options, inconnu ici.
-                meth = "GET"
+                # fetch() : la methode est portee par l'objet d'options. Des qu'une
+                # route existe sur ce chemin, l'appel est considere vivant.
+                if chemin_existant(seg):
+                    continue
+                proches = "; ".join(f"{p} ({d}%)" for p, d in suggestions(seg))
+                orphelins[where].add(f"ANY {entete.split(' ', 1)[1]} (fetch) " + (
+                    f"\n        proche: {proches}" if proches else ""
+                ))
+                continue
             if methode_reelle(meth, seg):
                 continue
             vues = chemin_existant(seg)
