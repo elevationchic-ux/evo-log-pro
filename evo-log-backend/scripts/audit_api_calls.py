@@ -56,6 +56,13 @@ def segments_chemin(url: str):
     url = url.split("?")[0]
     url = VAR.sub(PLACEHOLDER, url)
     url = re.sub(r"\{[^/{}]+\}", PLACEHOLDER, url)
+    # `${API_ORIGIN}/api/v1/auth/login` : le prefixe versionne est deja dans le
+    # litteral, precedede d'un joker. On l'aligne ici, sinon la reecriture
+    # « /api/v1 » ci-dessous produirait un chemin a deux prefixes impossible.
+    if "/api/v1/" in url:
+        url = "/api/v1/" + url.split("/api/v1/", 1)[1]
+    elif url.endswith("/api/v1"):
+        url = "/api/v1"
     if not url.startswith("/"):
         url = "/" + url
     if url.startswith("/api/v1/"):
