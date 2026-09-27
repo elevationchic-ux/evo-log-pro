@@ -5,7 +5,7 @@ Accessible to any employee (non-RH included: Chauffeurs, Magasiniers, Déclarant
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_, desc
+from sqlalchemy import or_, and_, desc, extract
 from typing import List, Optional, Dict, Any
 from datetime import date, datetime, timedelta
 import calendar
@@ -104,12 +104,10 @@ def get_portail_mon_profil(
     jours_utilises = sum(int(c.nombre_jours or 0) for c in conges_pris)
     solde_restant = max(0, droit_conge_annuel - jours_utilises)
 
-    # Last paid salary
+    # Dernier bulletin reellement paye : rien n'est evalue en l'absence de paie
     last_salaire = db.query(Salaire).filter(
         Salaire.employe_id == current_user.id
     ).order_by(Salaire.periode_fin.desc()).first()
-
-    dernier_net = float(last_salaire.salaire_net) if last_salaire else 385000.0
 
     return {
         "id": current_user.id,
@@ -117,19 +115,26 @@ def get_portail_mon_profil(
         "username": current_user.username,
         "email": current_user.email,
         "phone": current_user.phone,
-        "matricule": matricule,
-        "poste": role_label,
-        "departement": dept_name,
-        "agence": agency_name,
-        "statut_contrat": "CDI Cadre / Agent de Maîtrise",
-        "date_embauche": "12 Janvier 2022",
-        "cnps_matricule": f"CNPS-CM-{str(current_user.id * 8374).zfill(8)}",
-        "couverture_sociale": "CNPS Conforme & Assurance Maladie AXA Cameroun (80%)",
+        "matricule": current_user.matricule,
+        "poste": current_user.job_title or (contrat.poste if contrat else None),
+        "departement": current_user.department.nom if current_user.department else None,
+        "agence": current_user.agency.name if current_user.agency else None,
+        "statut_contrat": contrat.type_contrat if contrat else None,
+        "date_embauche": contrat.date_debut.isoformat() if contrat and contrat.date_debut else None,
+        # Aucun champ dedie n'existe pour ces informations : elles remontent
+        # null plutot qu'un numero CNPS ou un RIB calcule arbitrairement.
+        "cnps_matricule": None,
+        "couverture_sociale": None,
+        "compte_bancaire": None,
         "solde_conges": solde_restant,
         "jours_pris": jours_utilises,
-        "dernier_net_paye": dernier_net,
-        "prochain_jour_paie": "28 du mois en cours",
-        "compte_bancaire": f"Afriland First Bank CM - 10005-00{str(current_user.id).zfill(4)}-78"
+        "droit_conge_annuel": droit_conge_annuel,
+        "annee_reference": annee_courante,
+        "dernier_net_paye": float(last_salaire.salaire_net) if last_salaire else None,
+        "derniere_periode_paie": (
+            last_salaire.periode_fin.isoformat()
+            if last_salaire and last_salaire.periode_fin else None
+        ),
     }
 
 
