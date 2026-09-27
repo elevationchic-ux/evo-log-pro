@@ -513,6 +513,88 @@ def list_pending_accreditation_requests(db: Session = Depends(get_db)):
     return out
 
 
+# ── Arbitrage CADC des demandes d'accreditation (file d'attente) ──────────────
+# Un admin entreprise emet une demande (statut ``demande``) via
+# POST /company-admin/modules/demandes. Le CADC l'arbitre ici :
+#   - APPROUVER  : conversion EN PLACE demande -> accreditation active datee
+#     (meme ligne, pas de doublon) ; octroye_par trace l'arbitre.
+#   - REFUSER    : statut ``refuse`` (trace preservee, pas de suppression),
+#     non valide pour le moteur, et retiree de la file ``demande``.
+# La route ``demande`` elle-meme n'accorde aucun droit (statut != actif).
+ACC_STATUT_DEMANDE = "demande"
+ACC_STATUT_REFUSE = "refuse"
+
+
+class DemandeApprobation(BaseModel):
+    date_debut: Optional[str] = None  # ISO AAAA-MM-JJ (defaut : aujourd'hui)
+    date_fin: Optional[str] = None    # ISO AAAA-MM-JJ (duree ; NULL = illimite)
+    motif: Optional[str] = None
+
+
+class DemandeRefus(BaseModel):
+    motif: Optional[str] = Field(None, description="Motif de refus (affiche a l'entreprise)")
+
+
+def _get_pending_demande(db: Session, request_id: int) -> Accreditation:
+    req = db.query(Accreditation).filter(Accreditation.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="Demande introuvable")
+    if (req.statut or "").lower() != ACC_STATUT_DEMANDE:
+        raise HTTPException(
+            status_code=400,
+            detail="Cette demande a deja ete traitee (approuvee ou refusee).",
+        )
+    return req
+
+
+@router.post(
+    "/accreditations/demandes/{request_id}/approuver",
+    summary="Approuver une demande d'accreditation (conversion en place)",
+)
+def approve_accreditation_request(
+    request_id: int,
+    payload: DemandeApprobation,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_superadmin),
+):
+    from datetime import date as _date
+    req = _get_pending_demande(db, request_id)
+    date_debut = _parse_date(payload.date_debut) or _date.today()
+    date_fin = _parse_date(payload.date_fin)
+    if date_fin and date_fin < date_debut:
+        raise HTTPException(status_code=400, detail="La date de fin precede la date de debut")
+    # Conversion en place : la ligne demande devient l'accreditation active datee.
+    req.statut = "actif"
+    req.date_debut = date_debut
+    req.date_fin = date_fin
+    req.octroye_par = current.id
+    if payload.motif:
+        req.motif = payload.motif
+    db.commit()
+    db.refresh(req)
+    return _accred_dict(req)
+
+
+@router.post(
+    "/accreditations/demandes/{request_id}/refuser",
+    summary="Refuser une demande d'accreditation",
+)
+def reject_accreditation_request(
+    request_id: int,
+    payload: DemandeRefus,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_superadmin),
+):
+    req = _get_pending_demande(db, request_id)
+    req.statut = ACC_STATUT_REFUSE
+    req.octroye_par = current.id
+    if payload.motif:
+        req.motif = payload.motif
+    db.commit()
+    db.refresh(req)
+    return _accred_dict(req)
+
+
 # ── Accreditations d'entreprise (delai) ───────────────────────────────────────
 class CompanyAccreditationCreate(BaseModel):
     user_id: int
