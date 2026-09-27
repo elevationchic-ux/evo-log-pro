@@ -1,8 +1,8 @@
 # Inventaire des pages statiques (aucun branchement API)
 
 - Genere le : 2026-09-28
-- Total pages scannees : 346
-- Pages branchees sur le backend : 232
+- Total pages scannees : 347
+- Pages branchees sur le backend : 233
 - Pages encore statiques : 114
 
 ## Pages statiques

@@ -90,12 +90,27 @@ export default function ChatOpsDashboard() {
             </h1>
             <p className="text-sm text-slate-400 dark:text-slate-400 mt-1">Supervisez en temps réel les interactions WhatsApp entre les chauffeurs et l'IA K-Bot.</p>
           </div>
-          <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/40 dark:border-emerald-800/40 px-4 py-2 rounded-xl">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-            </span>
-            K-Bot Actif & Connecté
+          <div className={`flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl border ${
+            botStatus === 'online'
+              ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/40'
+              : 'text-amber-300 bg-amber-500/10 border-amber-500/40'
+          }`}>
+            {botStatus === 'online' ? (
+              <>
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                K-Bot Actif & Connecte
+              </>
+            ) : (
+              <>
+                <span className="relative flex h-3 w-3">
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                </span>
+                K-Bot Hors Ligne
+              </>
+            )}
           </div>
         </div>
 

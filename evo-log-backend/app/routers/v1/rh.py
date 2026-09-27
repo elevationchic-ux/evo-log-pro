@@ -386,71 +386,72 @@ def telecharger_bulletin(
 
 @router.get("/portail/calendrier-paie")
 def get_calendrier_paie(
+    db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user)
 ):
-    """
-    Returns official corporate payroll calendar, wire transfer cutoff dates, and public holidays.
+    """Calendrier de paie etabli sur les versements reellement enregistres.
+
+    La date de prochaine paie n'est pas une convention affichee : elle est
+    projettee a partir des jours de paiement constates dans la table
+    ``salaires`` pour l'entreprise du salarie. Sans aucun versement enregistre,
+    ``prochaine_paie`` reste null et le message l'explique, plutot que
+    d'annoncer un virement bancaire invente (banque, heure, telecompensation).
+
+    Les fetes chomees et payees listees sont les fetes a date fixe du Code du
+    travail camerounais ; les fetes mobiles (Paques, Ascension, Pentecote, Aï-el
+    Kébir, Fin Ramadan) dependent du calendrier lunaire et ne sont pas calculées
+    ici.
     """
     today = date.today()
-    current_year = today.year
 
-    # Determine next pay date (usually 28th of current month)
-    target_month = today.month
-    target_year = current_year
-    if today.day > 28:
-        if target_month == 12:
-            target_month = 1
-            target_year += 1
-        else:
-            target_month += 1
+    jour_paiement = db.query(Salaire).join(User, User.id == Salaire.employe_id).filter(
+        Salaire.date_paiement.isnot(None)
+    )
+    if not current_user.is_superuser:
+        jour_paiement = jour_paiement.filter(User.company_id == current_user.company_id)
+    versements = jour_paiement.all()
 
-    next_payday = date(target_year, target_month, 28)
-    days_left = (next_payday - today).days
+    jours_observes = sorted({v.date_paiement.day for v in versements})
+    dernier = max((v.date_paiement for v in versements), default=None)
+
+    prochaine = None
+    if jours_observes:
+        jour_cible = jours_observes[len(jours_observes) // 2]
+        mois, annee = today.month, today.year
+        candidate = date(annee, mois, min(jour_cible, calendar.monthrange(annee, mois)[1]))
+        if candidate <= today:
+            mois += 1
+            if mois > 12:
+                mois, annee = 1, annee + 1
+            candidate = date(annee, mois, min(jour_cible, calendar.monthrange(annee, mois)[1]))
+        prochaine = {
+            "date": candidate.isoformat(),
+            "jours_restants": (candidate - today).days,
+            "jour_paiement_constate": jour_cible,
+            "base": "jour median des versements enregistres",
+        }
 
     return {
-        "annee": current_year,
-        "prochaine_paie": {
-            "date": next_payday.strftime("%d/%m/%Y"),
-            "jours_restants": max(0, days_left),
-            "statut": "EN_PREPARATION_RH",
-            "banque_emettrice": "Afriland First Bank Cameroun",
-            "heure_mise_a_disposition": "11h00 GMT+1"
-        },
-        "cycle_mensuel_standard": [
-            {
-                "etape": "Clôture des relevés de pointage & vacations quai",
-                "jour_cible": "Le 20 de chaque mois",
-                "responsable": "Chefs de quart & Chef du Personnel"
-            },
-            {
-                "etape": "Calcul des majorations de nuit (+50%) et heures supplémentaires",
-                "jour_cible": "Le 23 de chaque mois",
-                "responsable": "Service Paie & Contrôle de Gestion RH"
-            },
-            {
-                "etape": "Transmission de l'ordre de virement global aux banques",
-                "jour_cible": "Le 27 de chaque mois",
-                "responsable": "Direction Financière & Comptable"
-            },
-            {
-                "etape": "Crédit effectif sur les comptes bancaires des salariés",
-                "jour_cible": "Le 28 de chaque mois",
-                "responsable": "Système Bancaire BEAC"
-            },
-            {
-                "etape": "Mise à disposition des bulletins PDF certifiés sur le portail",
-                "jour_cible": "Le 29 de chaque mois",
-                "responsable": "Portail Collaborateur EVO-LOG"
-            }
-        ],
+        "annee": today.year,
+        "entreprise": current_user.company.nom if current_user.company else None,
+        "fiches_enregistrees": len(versements),
+        "jours_paiement_observes": jours_observes,
+        "derniere_date_paiement": dernier.isoformat() if dernier else None,
+        "prochaine_paie": prochaine,
+        "message": (
+            None if versements
+            else "Aucun versement de salaire enregistre : aucune date de paie ne peut etre annoncee."
+        ),
         "jours_feries_cameroun": [
-            {"date": f"{current_year}-01-01", "nom": "Jour de l'An", "statut": "Chômé et payé"},
-            {"date": f"{current_year}-02-11", "nom": "Fête de la Jeunesse", "statut": "Chômé et payé"},
-            {"date": f"{current_year}-05-01", "nom": "Fête du Travail", "statut": "Chômé et payé"},
-            {"date": f"{current_year}-05-20", "nom": "Fête Nationale de l'Unité", "statut": "Chômé et payé"},
-            {"date": f"{current_year}-08-15", "nom": "Assomption", "statut": "Chômé et payé"},
-            {"date": f"{current_year}-12-25", "nom": "Noël", "statut": "Chômé et payé"}
-        ]
+            {"date": f"{today.year}-01-01", "nom": "Jour de l'An", "statut": "Chômé et payé"},
+            {"date": f"{today.year}-02-11", "nom": "Fête de la Jeunesse", "statut": "Chômé et payé"},
+            {"date": f"{today.year}-05-01", "nom": "Fête du Travail", "statut": "Chômé et payé"},
+            {"date": f"{today.year}-05-20", "nom": "Fête Nationale de l'Unité", "statut": "Chômé et payé"},
+            {"date": f"{today.year}-08-15", "nom": "Assomption", "statut": "Chômé et payé"},
+            {"date": f"{today.year}-11-01", "nom": "Toussaint", "statut": "Chômé et payé"},
+            {"date": f"{today.year}-12-25", "nom": "Noël", "statut": "Chômé et payé"},
+        ],
+        "fetes_mobiles_incluses": False,
     }
 
 
