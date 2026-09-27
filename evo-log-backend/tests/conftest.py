@@ -27,7 +27,7 @@ import types
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -45,22 +45,41 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Tables are created ONCE per pytest session (expensive with 100+ tables);
+# individual tests receive a clean session and DELETE all rows on teardown.
+_tables_created = False
 
-@pytest.fixture(scope="function")
-def db():
-    """Create a fresh in-memory database for each test."""
+
+def _ensure_tables():
+    global _tables_created
+    if _tables_created:
+        return
     # Importer l'application complete enregistre TOUS les modeles SQLAlchemy
     # (les routers importent des modeles qui ne sont pas tous exposes via
     # app.models.__init__, ex. 'navires' via le module acconage). Sans cela,
     # Base.metadata.create_all() echoue sur des cles etrangeres non resolvees.
     import app.main  # noqa: F401
     Base.metadata.create_all(bind=engine)
+    _tables_created = True
+
+
+@pytest.fixture(scope="function")
+def db():
+    """Provide a clean DB session per test (tables created once per session)."""
+    _ensure_tables()
     session = TestingSessionLocal()
     try:
         yield session
     finally:
+        session.rollback()
         session.close()
-        Base.metadata.drop_all(bind=engine)
+        # Fast data cleanup: DELETE all rows (much cheaper than drop+create).
+        with engine.connect() as conn:
+            conn.execute(text("PRAGMA foreign_keys=OFF"))
+            for table in Base.metadata.tables.values():
+                conn.execute(table.delete())
+            conn.execute(text("PRAGMA foreign_keys=ON"))
+            conn.commit()
 
 
 @pytest.fixture(scope="function")
