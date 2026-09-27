@@ -1,6 +1,6 @@
 {
   "totals": {
-    "broken_links": 2,
+    "broken_links": 1,
     "dead_buttons": 0,
     "fake_data": 0,
     "api_gaps": 32,
@@ -73,10 +73,6 @@
     },
     "config": {
       "broken_links": [
-        {
-          "file": "config/navigationRegistry.ts",
-          "detail": "/admin-entreprise/modules"
-        },
         {
           "file": "config/navigationRegistry.ts",
           "detail": "/admin-entreprise/profil"
