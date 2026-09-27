@@ -176,6 +176,12 @@ def methodes_reelles():
 def main():
     global ROUTES
     ROUTES = methodes_reelles()
+    if "--dump-routes" in sys.argv:
+        for m, g, p in sorted(ROUTES, key=lambda r: (r[2], r[0])):
+            print(f"{m:6} {p}")
+        chemins = len({p for m, g, p in ROUTES})
+        print(f"# {chemins} chemins, {len(ROUTES)} methodes")
+        return
     orphelins = defaultdict(set)
     ambigus = defaultdict(set)
     indetermine = defaultdict(set)
