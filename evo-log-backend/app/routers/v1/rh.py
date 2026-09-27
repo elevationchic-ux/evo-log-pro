@@ -712,19 +712,23 @@ def telecharger_attestation_travail(
         <p class="legal" style="margin: 5px 0;">{mentions_legales}</p>
       </div>
 
-      <div class="title">ATTESTATION DE TRAVAIL & D'EMPLOI</div>
+      <div class="title">ATTESTATION DE TRAVAIL</div>
 
       <div class="content">
-        <p>Je soussigné, <strong>Monsieur le Directeur des Ressources Humaines</strong> de la société <em>Logistique Portuaire du Cameroun (LPC SA)</em>, atteste par la présente que :</p>
+        <p>La soci&eacute;t&eacute; <em>{raison_sociale}</em> atteste que&nbsp;:</p>
         
-        <p style="margin-left: 30px;">
-          <strong>Monsieur / Madame :</strong> {current_user.full_name or current_user.username}<br>
-          <strong>Matricule Entreprise :</strong> {matricule}<br>
-          <strong>Affiliation CNPS :</strong> CNPS-CM-{str(current_user.id * 8374).zfill(8)}<br>
-          <strong>Fonction / Poste :</strong> {role_label}<br>
-          <strong>Type de Contrat :</strong> Contrat à Durée Indéterminée (CDI)<br>
-          <strong>Date d'embauche :</strong> 12 Janvier 2022<br>
-        </p>
+        <div class="fields">
+          <div><strong>Nom et pr&eacute;noms&nbsp;:</strong> {nom_salarie}</div>
+          <div><strong>Matricule entreprise&nbsp;:</strong> {matricule}</div>
+          <div><strong>Num&eacute;ro s&eacute;curit&eacute; sociale (CNPS)&nbsp;:</strong> {escape(cnps)}</div>
+          <div><strong>Fonction / poste&nbsp;:</strong> {poste}</div>
+          <div><strong>D&eacute;partement&nbsp;:</strong> {departement}</div>
+          <div><strong>Type de contrat&nbsp;:</strong> {type_contrat} (statut&nbsp;: {statut_contrat})</div>
+          <div><strong>Date d'embauche&nbsp;:</strong> {date_embauche}</div>
+          <div><strong>Fin de contrat pr&eacute;vue&nbsp;:</strong> {escape(date_fin_contrat)}</div>
+          <div><strong>Dur&eacute;e hebdomadaire&nbsp;:</strong> {horaire}</div>
+          <div><strong>Lieu de travail&nbsp;:</strong> {lieu}</div>
+        </div>
 
         <p>Est employé(e) au sein de notre entreprise de manière continue et régulière à ce jour, et donne entière satisfaction dans l'accomplissement de ses devoirs professionnels.</p>
 
