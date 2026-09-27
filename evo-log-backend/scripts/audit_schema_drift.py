@@ -107,6 +107,7 @@ def analyser(db: str):
 
     absentes, colonnes_manquantes = [], []
     notnull_imposes, defauts_orphelins, conflits_type = [], [], []
+    dates_illisibles = []
     surplus_inoffensifs = []
 
     for nom, table in sorted(Base.metadata.tables.items()):
@@ -146,6 +147,13 @@ def analyser(db: str):
                 fm, fb = famille_modele(colonne), famille(type_sql)
                 if fb and fm and fb != fm:
                     conflits_type.append((nom, nom_col, fm, fb))
+                    # Une divergence Date/DateTime n'est un defaut que si la
+                    # base contient vraiment des valeurs a relire.
+                    if fm == "Date":
+                        illisibles = analyseur_types(cur, nom, nom_col)
+                        if illisibles:
+                            dates_illisibles.append(
+                                (nom, nom_col, illisibles, fb))
 
     con.close()
     return {
@@ -155,6 +163,7 @@ def analyser(db: str):
         "notnull_imposes": notnull_imposes,
         "defauts_orphelins": defauts_orphelins,
         "conflits_type": conflits_type,
+        "dates_illisibles": dates_illisibles,
         "surplus_inoffensifs": surplus_inoffensifs,
     }
 
@@ -183,14 +192,19 @@ def afficher(r):
     _section("4. DEFAULTS EN BASE SANS EQUIVALENT DANS LE MODELE "
              "(relecture de la valeur apres INSERT)", r["defauts_orphelins"],
              lambda e: f"{e[0]}.{e[1]} defaut={e[2]} - {e[3]}")
-    _section("5. DESACCORDS DE TYPE Date / DateTime", r["conflits_type"],
-             lambda e: f"{e[0]}.{e[1]} : modele={e[2]} base={e[3]}")
-    _section("6. COLONNES EN SURPLUS DANS LA BASE (inoffensives)",
+    _section("5. DIVERGENCES DE TYPE Date / DateTime (signalement, sans effet "
+             "tant que les valeurs tiennent sur dix caracteres)",
+             r["conflits_type"], lambda e: f"{e[0]}.{e[1]} : modele={e[2]} base={e[3]}")
+    _section("6. VALEURS DE DATE ILLISIBLES PAR LE MODELE (lecture en erreur)",
+             r["dates_illisibles"],
+             lambda e: f"{e[0]}.{e[1]} : {e[2]} ligne(s) horodatee(s) dans une "
+                       f"colonne {e[3]}")
+    _section("7. COLONNES EN SURPLUS DANS LA BASE (inoffensives)",
              r["surplus_inoffensifs"], lambda e: f"{e[0]}.{e[1]}")
 
     critiques = (len(r["absentes"]) + len(r["colonnes_manquantes"])
                  + len(r["notnull_imposes"]) + len(r["defauts_orphelins"])
-                 + len(r["conflits_type"]))
+                 + len(r["dates_illisibles"]))
     print("VERDICT : " + (
         f"{critiques} divergence(s) bloquante(s) : ces tables font echouer une "
         "lecture, une ecriture ou une relecture."

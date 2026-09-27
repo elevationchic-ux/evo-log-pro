@@ -33,7 +33,10 @@ class ReactiveEventBus:
         """Connect to Redis. On failure, run in degraded mode (in-process delivery only)."""
         if self.redis is not None:
             return
-        client = aioredis.from_url(self.redis_url, decode_responses=True)
+        client = aioredis.from_url(
+            self.redis_url, decode_responses=True,
+            socket_connect_timeout=2, socket_timeout=2,
+        )
         try:
             await client.ping()
             pubsub = client.pubsub()

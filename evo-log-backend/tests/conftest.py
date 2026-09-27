@@ -1,4 +1,25 @@
-"""Pytest configuration and fixtures for the EVO-LOG backend."""
+"""Pytest configuration and fixtures for the EVO-LOG backend.
+
+CONTRAT DE LA FIXTURE `client` (a lire avant d'ecrire un test d'auth) :
+- `client` authentifie TOUT par defaut : elle surcharge `get_current_user` avec
+  un faux super-utilisateur. Un test qui verifie un refus anonyme (401/403)
+  doit utiliser la fixture `unauthenticated` ci-dessous.
+- NE JAMAIS appeler `app.dependency_overrides.clear()` en cours de test : cela
+  supprime aussi l'override `get_db` et les requetes suivantes partent sur
+  l'engine reel de l'application. Le garde-fou `DATABASE_URL` en tete de fichier
+  transforme ce scenario en echec bruyant ("no such table") au lieu d'une
+  ecriture silencieuse dans la base de dev.
+"""
+import os
+
+# Guard Zero-Pollution : le defaut de Settings est sqlite:///./kamlog_erp.db,
+# la VRAIE base de developpement. Sans ce setdefault, toute requise emise hors
+# override get_db (ex. dependency_overrides.clear() en milieu de test) lit et
+# ECrit dans ce fichier reel. On force une base memoire ephemeraite pour la
+# session de test ; setdefault respecte une DATABASE_URL exportee explicitement
+# (CI Postgres, debug local volontaire).
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
+
 import types
 
 import pytest
@@ -65,6 +86,27 @@ def client(db):
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="function")
+def unauthenticated(client):
+    """Meme client que la fixture `client`, mais SANS identite surcharge :
+    les routes Protegees repondent 401/403, ce qui permet d'auditer le vrai
+    comportement anonyme.
+
+    On ne fait PAS `dependency_overrides.clear()` : cela emporterait aussi
+    l'override get_db et les requetes suivantes toucheraient l'engine reel.
+    On ne retire que get_current_user, et on le remet ensuite.
+    """
+    from app.main import app
+    from app.core.security import get_current_user
+
+    saved = app.dependency_overrides.pop(get_current_user, None)
+    try:
+        yield client
+    finally:
+        if saved is not None:
+            app.dependency_overrides[get_current_user] = saved
 
 
 @pytest.fixture
