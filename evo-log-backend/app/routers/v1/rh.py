@@ -561,44 +561,70 @@ def soumettre_demande_conge_portail(
 
 @router.get("/portail/documents")
 def get_portail_documents(
+    db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user)
 ):
+    """Documents RH reellement verses au dossier du salarie connecte.
+
+    La liste est construite sur la table ``documents_employe`` : une piece
+    absente du dossier n'apparait pas, et aucun document type (reglement
+    interieur, convention collective) n'est annonce comme telechargeable sans
+    fichier reel derriere.
+
+    L'attestation de travail est le seul document delivre par l'application
+    elle-meme : elle n'est proposee que si un contrat est enregistre, faute de
+    quoi elle affirmerait une relation de travail que rien n'etablit.
     """
-    Lists all certified legal and administrative HR documents available to this employee.
-    """
-    matricule = f"LPC-EMP-{str(current_user.id).zfill(4)}"
-    return [
-        {
-            "id": "DOC-ATT-001",
-            "titre": "Attestation de Travail & d'Emploi Officielle",
-            "description": "Document certifié avec signature numérique du Directeur des Ressources Humaines",
-            "type": "ATTESTATION",
-            "date_emission": "Valide en cours",
-            "format": "PDF / Format A4 Officiel",
-            "telechargeable": True,
-            "url_telechargement": "/api/v1/rh/portail/documents/attestation-travail"
-        },
-        {
-            "id": "DOC-REG-002",
-            "titre": "Règlement Intérieur & Consignes de Sécurité Portuaire ISPS",
-            "description": "Charte d'hygiène, port obligatoire des EPI sur les quais et consignes d'exploitation",
-            "type": "REGLEMENT",
-            "date_emission": "01/01/2026",
-            "format": "PDF Officiel",
-            "telechargeable": True,
-            "url_telechargement": "/api/v1/rh/portail/documents/attestation-travail"
-        },
-        {
-            "id": "DOC-CONV-003",
-            "titre": "Convention Collective Nationale du Transport & Transit CEMAC",
-            "description": "Grilles indiciaires de salaires, primes de panier de nuit, droits syndicaux et indemnités de départ",
-            "type": "CONVENTION",
-            "date_emission": "Version 2026",
-            "format": "Document Légal",
-            "telechargeable": True,
-            "url_telechargement": "/api/v1/rh/portail/documents/attestation-travail"
-        }
-    ]
+    fichiers = db.query(DocumentEmploye).filter(
+        DocumentEmploye.employe_id == current_user.id
+    ).order_by(DocumentEmploye.date_emission.desc()).all()
+
+    documents: List[Dict[str, Any]] = []
+    for d in fichiers:
+        url = (d.url_fichier or "").strip()
+        documents.append({
+            "id": d.id,
+            "reference": f"DOC-{d.id}",
+            "titre": f"{d.type_document} — {d.nom_fichier}",
+            "type": d.type_document,
+            "nom_fichier": d.nom_fichier,
+            "numero_document": d.numero_document,
+            "organisme_emetteur": d.organisme_emetteur,
+            "date_emission": d.date_emission.isoformat() if d.date_emission else None,
+            "date_expiration": d.date_expiration.isoformat() if d.date_expiration else None,
+            "statut": d.statut,
+            "commentaire": d.commentaire,
+            "telechargeable": bool(url),
+            "url_telechargement": url or None,
+        })
+
+    contrat = db.query(ContratTravail).filter(
+        ContratTravail.employe_id == current_user.id
+    ).order_by(ContratTravail.date_debut.desc()).first()
+
+    documents.append({
+        "id": "ATTESTATION-TRAVAIL",
+        "reference": "ATTESTATION-TRAVAIL",
+        "titre": "Attestation de travail",
+        "type": "ATTESTATION",
+        "nom_fichier": None,
+        "numero_document": None,
+        "organisme_emetteur": (current_user.company.nom if current_user.company else None),
+        "date_emission": date.today().isoformat(),
+        "date_expiration": None,
+        "statut": "en_cours" if contrat else "indisponible",
+        "telechargeable": bool(contrat),
+        "url_telechargement": (
+            "/api/v1/rh/portail/documents/attestation-travail" if contrat else None
+        ),
+        "commentaire": None if contrat else (
+            "Aucun contrat enregistre dans le module RH : l'attestation de "
+            "travail ne peut pas etre delivree. Rapprochez la DRH pour la "
+            "saisie de votre contrat."
+        ),
+    })
+
+    return documents
 
 
 @router.get("/portail/documents/attestation-travail")
