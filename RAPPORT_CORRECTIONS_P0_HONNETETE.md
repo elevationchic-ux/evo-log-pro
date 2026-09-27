@@ -567,12 +567,67 @@ la correction (02:37, possiblement avant). La base de dev peut donc contenir des
 **residus de tests** (lignes creees par les requetes parties hors override). Action
 recommandee hors perimetre : purger/ verifier la base de dev locale (regarder du cote
 de `scripts/seed_data.py` pour la reconstruire proprement si necessaire).
+→ **Traite au batch 15 (voir §17)** : pollution confirmee mais circonscrite a
+`audit_logs` ; residus purges, donnees de dev intactes.
 
 ➡️ Zero-Mock applique a l'infra : un test vert qui lit/ecrit la base de prod-dev
 reelle est un faux-vert avec effet de bord reel. Le contrat des fixtures est
 desormais (1) force par l'environnement (`DATABASE_URL` memoire), (2) documente
 (docstring du conftest), et (3) verrouille par des meta-tests qui rougissent des
 qu'un maillon saute.
+
+---
+
+## 17. Batch 15  Purge des residus de tests dans la base de dev
+
+**Declencheur** : le laisse-pour-compte signale en fin de §16 — « la base de dev
+peut contenir des residus ecrits par les runs d'avant correction ». Plutot que de
+le laisser en note d'execution, on a **verifie dans les donnees**.
+
+**Metodologie** (scriptes dans `evo-log-backend/scripts/scratch_dev_db_residue.py`,
+`scratch_b15_audit_quant.py`, `scratch_b15_purge.py`, `scratch_b15_verify.py`) :
+backup via l'API SQLite `backup()` (jamais le fichier actif), puis scan
+**lecture seule** de la copie : 332 tables, regex des signatures de fixtures
+(`@test.local`, `sonde*`, `sahttp`, `acme`, `testserver`…).
+
+**Ce qu'on a trouve** :
+
+| Constat | Chiffre | Lecture |
+|---|---|---|
+| Tables metier presque toutes vides | 323/332 vides ; users=21, companies=2, agencies=5 | **aucune contamination metier** : les pollutions du batch 14 etaient des GET (lecture seule) — les users/companies sont les seeds legitimes (`@evolog.cm`, LPC/TCL) |
+| `audit_logs` explose | **16 237 lignes dont 15 663 (96 %) en `http://testserver/...`** | Chaque requete TestClient d'un run pytest ecrivait une ligne d'audit dans la base de dev |
+
+**Le canal que le batch 14 n'avait pas identifie** : `app/middleware/audit.py`
+(AuditMiddleware) n'utilise PAS `get_db` — il ouvre son propre `SessionLocal()` du
+module `app.core.database`. Donc meme avec l'override `get_db` intact, **chaque
+requete de test passait par l'engine reel** et ecrivait dans `kamlog_erp.db`.
+Bonne nouvelle : ce canal est lui aussi ferme par le garde-fou batch 14 — le
+middleware est lie au MEME engine singleton construit depuis `DATABASE_URL`,
+desormais `:memory:` pendant les tests. Preuve en §Verification ci-dessous.
+
+**Purge executee** :
+- Critere cible, chirurgical : `url LIKE 'http://testserver%'` (host fixe du
+  TestClient). CONSERVES : 511 lignes `127.0.0.1:8000` (sonde dev/openapi), 60
+  `loadtest` (`scripts/load_test.py`), 3 `localhost:8000` (navigateur) = 574 lignes.
+- Dry-run d'abord (16 237 → 574), puis `--apply` avec backup requis + invariant
+  `assert restant == attendu` ; resultat : **16 237 → 574**, `PRAGMA integrity_check=ok`,
+  fichier 6,0 MB → 4,0 MB.
+- Filet de securite conserve : `kamlog_erp.db.bak-pre-b15` (a supprimer manuellement
+  une fois la confiance installee).
+
+**Verification** :
+- Post-purge : `testserver restants=0`, users=21 / companies=2 intacts.
+- Smoke boot applicatif (`TestClient`, `/api/health` → **200 OK**) avec le meme
+  garde-fou `DATABASE_URL=:memory:` que le conftest : mtime de `kamlog_erp.db`
+  **inchange** (`DB_TOUCHED=False`) → le canal AuditMiddleware est bien coupe aussi.
+- Aucun code applicatif ou de test modifie dans ce batch → suite pytest inchangee
+  (485 passed, 2 xfailed du batch 14 toujours valable).
+
+➡️ Ce batch illustre la limite d'une correction « par les overrides » : le Zero-Mock
+d'isolation doit couvrir **tous** les chemins d'acces a la base — middleware inclus.
+L'environnement (`DATABASE_URL`) est le seul garde-fou qui les couvre tous, puisqu'il
+agit a la source de l'engine — raison pour laquelle le batch 14 l'avait choisi comme
+premiere ligne de defense.
 
 ---
 

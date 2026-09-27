@@ -1008,22 +1008,193 @@ def renouveler_contrat(
 
 
 # ============ PAIE ============
-@router.post("/paie/bulletin", response_model=BulletinPaieResponse)
-def preparer_bulletin(
-    employe_id: int,
-    mois: int,
-    annee: int,
-    salaire_base: float,
-    heures_sup: float = 0,
-    primes: List[dict] = [],
-    deductions: List[dict] = [],
+class FichePaieIn(BaseModel):
+    """Saisie d'une fiche de paie.
+
+    Seules les donnees que la paie est censee frapper sont attendues ici : le
+    calcul des cotisations sociales et de l'IRGM reste dans ``PaieService``,
+    source unique des baremes Cameroun/CEMAC.
+    """
+    employe_id: int
+    mois: int
+    annee: int
+    salaire_base: float
+    heures_supplementaires: float = 0
+    primes: List[Dict[str, Any]] = Field(default_factory=list)
+    deductions: List[Dict[str, Any]] = Field(default_factory=list)
+    date_paiement: Optional[date] = None
+    statut: str = "en_attente"
+
+
+STATUTS_PAIE = ("en_attente", "paye", "annule")
+
+_CATEGORIES_PRIMES = {
+    "anciennete": "prime_anciennete",
+    "performance": "prime_performance",
+    "responsabilite": "prime_responsabilite",
+    "logement": "prime_logement",
+    "transport": "prime_transport",
+}
+
+
+def _montant(entry: Any) -> float:
+    if isinstance(entry, dict):
+        return float(entry.get("montant") or 0)
+    return float(getattr(entry, "montant", 0) or 0)
+
+
+def _categorie(entry: Any) -> str:
+    if isinstance(entry, dict):
+        raw = entry.get("type") or entry.get("type_prime") or entry.get("categorie") or ""
+    else:
+        raw = getattr(entry, "type", "") or getattr(entry, "type_prime", "") or ""
+    return str(raw).strip().lower()
+
+
+@router.post("/paie/bulletin", status_code=status.HTTP_201_CREATED)
+def creer_fiche_paie(
+    payload: FichePaieIn,
     db: Session = Depends(get_db),
-    current_user: User = Depends(resolve_rh_user)
+    current_user: User = Depends(requireRH),
 ):
-    """Prepare payroll bulletin - Configuration-driven for Cameroon"""
-    return PaieService.preparer_bulletin(
-        db, employe_id, mois, annee, salaire_base, heures_sup, primes, deductions
+    """Calcule puis ENREGISTRE la fiche de paie dans la table ``salaires``.
+
+    La version precedente se bornait a renvoyer le calcul sans jamais ecrire la
+    ligne : le portail n'avait donc rien a lister, ce qui avait conduit a
+    seeded des bulletins fictifs. La fiche est desormais persistee, une seule
+    fois par employe et par periode.
+
+    Les primes saisies sont reparties sur les colonnes dedicatees du modele
+    (anciennete, performance, responsabilite, logement, transport) ; une prime
+    hors nomenclature est portee en ``prime_autre`` et reste visible sur le
+    bulletin. Les deductions suivent la meme logique : « avance » est separe du
+    reste.
+    """
+    if not 1 <= payload.mois <= 12 or not 1900 <= payload.annee <= 2999:
+        raise HTTPException(
+            status_code=400,
+            detail="Periode de paie invalide : mois entre 1 et 12, annee explicite.",
+        )
+    if payload.statut not in STATUTS_PAIE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Statut de paie inconnu. Valeurs admises : {', '.join(STATUTS_PAIE)}.",
+        )
+    if payload.salaire_base < 0:
+        raise HTTPException(status_code=400, detail="Le salaire de base ne peut pas etre negatif.")
+
+    employe = db.query(User).filter(User.id == payload.employe_id).first()
+    if not employe:
+        raise HTTPException(status_code=404, detail="Aucun employe a cet identifiant.")
+    scope = _employee_scope_company_id(current_user)
+    if scope is not None and employe.company_id != scope:
+        raise HTTPException(
+            status_code=403,
+            detail="Cet employe n'appartient pas a votre entreprise.",
+        )
+
+    debut = date(payload.annee, payload.mois, 1)
+    fin = date(payload.annee, payload.mois, calendar.monthrange(payload.annee, payload.mois)[1])
+    if db.query(Salaire).filter(
+        Salaire.employe_id == employe.id,
+        Salaire.periode_debut == debut,
+    ).first():
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Une fiche de paie existe deja pour cet employe sur la periode "
+                f"{debut.strftime('%m/%Y')}."
+            ),
+        )
+
+    calcul = PaieService.preparer_bulletin(
+        db, employe.id, payload.mois, payload.annee, payload.salaire_base,
+        payload.heures_supplementaires, payload.primes, payload.deductions,
     )
+
+    repartition = {col: 0.0 for col in _CATEGORIES_PRIMES.values()}
+    repartition["prime_autre"] = 0.0
+    for entry in payload.primes:
+        colonne = _CATEGORIES_PRIMES.get(_categorie(entry), "prime_autre")
+        repartition[colonne] += _montant(entry)
+
+    avances = 0.0
+    autres_retenues = 0.0
+    for entry in payload.deductions:
+        if "avance" in _categorie(entry):
+            avances += _montant(entry)
+        else:
+            autres_retenues += _montant(entry)
+
+    brut = float(calcul["salaire_brut"])
+    cnps = float(calcul["cotisations"]["cnps"])
+    irgm = float(calcul["impot_revenu"])
+
+    fiche = Salaire(
+        employe_id=employe.id,
+        periode_debut=debut,
+        periode_fin=fin,
+        salaire_base=payload.salaire_base,
+        heures_supplementaires=payload.heures_supplementaires,
+        taux_horaire_sup=float(calcul["indemnite_heures_sup"]),
+        deductions_cnps=round(cnps, 2),
+        deductions_impot=round(irgm, 2),
+        deductions_avances=round(avances, 2),
+        autres_deductions=round(autres_retenues, 2),
+        salaire_net=round(float(calcul["salaire_net"]), 2),
+        devise="XAF",
+        date_paiement=payload.date_paiement,
+        statut=payload.statut,
+        nombre_heures_travaillees=173.33 if payload.heures_supplementaires else 0,
+        taux_imposition=round(irgm / brut, 6) if brut else 0,
+        **repartition,
+    )
+    db.add(fiche)
+    db.commit()
+    db.refresh(fiche)
+
+    bulletin = _bulletin_dict(fiche)
+    bulletin["message"] = (
+        f"Fiche de paie {debut.strftime('%m/%Y')} enregistree pour "
+        f"{employe.full_name or employe.username}."
+    )
+    return bulletin
+
+
+@router.get("/paie/bulletin")
+def lister_fiches_paie(
+    employe_id: Optional[int] = None,
+    statut: Optional[str] = None,
+    annee: Optional[int] = None,
+    mois: Optional[int] = None,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user),
+):
+    """Fiches de paie reellement enregistrees dans l'entreprise du demandeur.
+
+    Le salaire d'un autre tenant n'est jamais accessible : la requete est
+    jointee sur ``users.company_id``. Un salarie peut appeler cette route pour
+    lui-meme, ce qui remplace le mecanisme de donnees factices qui avait ete
+    branche sur le portail.
+    """
+    q = db.query(Salaire).join(User, User.id == Salaire.employe_id)
+    scope = _employee_scope_company_id(current_user)
+    if scope is not None:
+        q = q.filter(User.company_id == scope)
+    if not current_user.is_superuser and (current_user.role_level or 99) >= 3:
+        q = q.filter(Salaire.employe_id == current_user.id)
+    if employe_id:
+        q = q.filter(Salaire.employe_id == employe_id)
+    if statut:
+        q = q.filter(Salaire.statut == statut.strip().lower())
+    if annee:
+        q = q.filter(extract("year", Salaire.periode_debut) == annee)
+    if mois:
+        q = q.filter(extract("month", Salaire.periode_debut) == mois)
+    fiches = q.order_by(Salaire.periode_debut.desc()).offset(skip).limit(limit).all()
+    return [_bulletin_dict(s) for s in fiches]
 
 
 # ============ DOCUMENTS EMPLOYÉ ============
