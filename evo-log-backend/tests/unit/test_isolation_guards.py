@@ -13,9 +13,6 @@ casser silencieusement l'isolation :
 2. L'engine applicatif ne doit JAMAIS pointer sur le fichier sqlite de dev.
 3. Un test d'auth anonyme doit utiliser `unauthenticated`, pas `clear()`.
 """
-import pytest
-from sqlalchemy.engine import Engine
-
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import get_current_user

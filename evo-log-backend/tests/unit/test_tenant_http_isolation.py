@@ -116,6 +116,9 @@ def test_middleware_scopes_context_from_real_jwt():
         db.commit()
         db.refresh(admin)
         token = create_access_token({"sub": str(admin.id)})
+        # Figer les identifiants en ints : apres db.close(), 'company'/'admin'
+        # sont detaches et tout acces a . declencherait DetachedInstanceError.
+        company_id = int(company.id)
     finally:
         db.close()
 
@@ -135,7 +138,7 @@ def test_middleware_scopes_context_from_real_jwt():
     }
     try:
         asyncio.run(mw(scope, _receive, _send))
-        assert seen["tenant"] == company.id
+        assert seen["tenant"] == company_id
         # Apres la requete, le contexte est nettoye (pas de fuite entre requetes).
         assert get_current_tenant() is None
     finally:
@@ -143,9 +146,9 @@ def test_middleware_scopes_context_from_real_jwt():
         clear_current_tenant()
         db = SessionLocal()
         try:
-            db.query(User).filter(User.company_id == company.id).delete()
-            db.query(Department).filter(Department.company_id == company.id).delete()
-            db.query(Company).filter(Company.id == company.id).delete()
+            db.query(User).filter(User.company_id == company_id).delete()
+            db.query(Department).filter(Department.company_id == company_id).delete()
+            db.query(Company).filter(Company.id == company_id).delete()
             db.commit()
         finally:
             db.close()
