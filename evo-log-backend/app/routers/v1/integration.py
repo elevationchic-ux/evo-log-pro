@@ -67,6 +67,43 @@ def lister_synchronisations(
     return db.query(Synchronisation).order_by(Synchronisation.id.desc()).offset(skip).limit(limit).all()
 
 
+@router.get("/sydonia", response_model=List[SYDONIAPlusResponse])
+def lister_dossiers_sydonia(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Dossiers SYDONIA++ réellement enregistrés.
+
+    La page d'integration affiche l'etat du guichet douanier : sans cette
+    lecture, elle ne pouvait qu'afficher une erreur ou un message d'attente.
+    """
+    return db.query(SYDONIAPlus).order_by(SYDONIAPlus.id.desc()).offset(skip).limit(limit).all()
+
+
+@router.get("/guichet-unique", response_model=List[GuichetUniqueResponse])
+def lister_transactions_guichet_unique(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Transactions du Guichet Unique réellement enregistrées (suivi de cargaison)."""
+    return db.query(GuichetUnique).order_by(GuichetUnique.id.desc()).offset(skip).limit(limit).all()
+
+
+@router.get("/pcs", response_model=List[PCSResponse])
+def lister_operations_pcs(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Operations du Port Community System réellement enregistrées."""
+    return db.query(PCS).order_by(PCS.id.desc()).offset(skip).limit(limit).all()
+
+
 
 # ============ INTEGRATIONS ============
 @router.post("/integrations", response_model=IntegrationResponse, status_code=status.HTTP_201_CREATED)
