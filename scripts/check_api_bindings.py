@@ -35,6 +35,8 @@ orphans = []
 resolved = 0
 
 for method_name, url in method_calls:
+    # Strip query parameters before matching (OpenAPI paths don't include ?key=val)
+    url = url.split("?")[0]
     # Normalize: replace ${id}, ${...} with {param}
     url_clean = re.sub(r"\$\{[^}]+\}", "{p}", url)
     url_clean = url_clean.rstrip("/")

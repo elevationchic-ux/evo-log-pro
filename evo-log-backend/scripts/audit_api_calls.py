@@ -112,13 +112,15 @@ def correspond(call: tuple, route: tuple) -> bool:
             memo[cle] = True
             return True
         if a == PLACEHOLDER:
-            # Le joker d'appel avale 1..n segments. Si le gabarit a lui aussi un
-            # joker ici (`/x/${id}` vs `/x/{id}`), il doit consommer exactement un
-            # segment : sans ce decalage, les routes de detail ne matchaient
-            # jamais et toute l'API passait pour orpheline.
-            avance = j + 1 if b == PLACEHOLDER else j
-            for k in range(i + 1, len(call) + 1):
-                if suit(k, avance):
+            # Le joker d'appel represente 1..n segments CONCRETES (CADC_BASE vaut
+            # « saas/console », deux segments) : il consomme n segments du gabarit
+            # et l'index d'appel n'avance que d'un. Un parametre FastAPI ne
+            # chevauchant pas un « / », n>1 ne peut pas couvrir plusieurs {param}.
+            for n in range(1, len(route) - j + 1):
+                couverts = route[j:j + n]
+                if n > 1 and any(c in (PLACEHOLDER, RESTE) for c in couverts):
+                    continue
+                if suit(i + 1, j + n):
                     memo[cle] = True
                     return True
             memo[cle] = False
