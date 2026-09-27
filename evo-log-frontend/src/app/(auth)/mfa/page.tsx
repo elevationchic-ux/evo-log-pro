@@ -447,6 +447,8 @@ function Field({
   placeholder,
   reveal,
   onToggleReveal,
+  autoComplete,
+  toggleLabel,
 }: {
   label: string;
   value: string;
@@ -454,6 +456,8 @@ function Field({
   placeholder: string;
   reveal: boolean;
   onToggleReveal?: () => void;
+  autoComplete: 'current-password' | 'new-password';
+  toggleLabel?: string;
 }) {
   return (
     <div>
@@ -464,14 +468,14 @@ function Field({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          autoComplete={value === '' ? 'new-password' : 'off'}
+          autoComplete={autoComplete}
           className="w-full min-h-11 px-4 pr-11 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 font-mono"
         />
         {onToggleReveal && (
           <button
             type="button"
             onClick={onToggleReveal}
-            aria-label={reveal ? 'Masquer' : 'Afficher'}
+            aria-label={toggleLabel}
             className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 inline-flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors"
           >
             {reveal ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
