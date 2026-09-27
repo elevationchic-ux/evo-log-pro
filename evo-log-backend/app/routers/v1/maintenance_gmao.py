@@ -84,7 +84,7 @@ def detail_ordre(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Un ordre inconnu repond 404 : rien n'est invente pour remplir la page."""
+    """Un ordre inconnu répond par un 404 : rien n'est inventé pour remplir la page."""
     o = db.query(OrdreMaintenance).filter(OrdreMaintenance.id == ordre_id).first()
     if not o:
         raise HTTPException(status_code=404, detail="Ordre de maintenance introuvable")
