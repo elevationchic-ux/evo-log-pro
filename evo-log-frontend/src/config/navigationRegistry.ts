@@ -1153,12 +1153,13 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       },
       {
         label: 'Profil Entreprise (SaaS)',
-        // Batch 13 Zero-Mock : `/admin-entreprise/profil` n'existait pas
-        // (page.tsx absent) alors que la fiche legale du tenant est deja
-        // rendue par `src/app/(app)/company/page.tsx` (GET/PUT
-        // `/api/v1/tenant/company-profile`). On reorient donc l'entree vers
-        // la page reelle plutot que de laisser un lien mort dans la sidebar.
-        path: '/company',
+        // Phase 2 : la page /admin-entreprise/profil expose l'IDENTITE SAAS du
+        // tenant (plan CADC, verrous max_modules/max_users, modules alloues,
+        // admins designes niveau 1) via /api/v1/company-admin/profil.
+        // /company (fiche legale OHADA : NIF, RCCM, agrements, RIB) reste la
+        // page gemme pour les declarages fiscaux — les deux ecrans restent
+        // volontairement distincts (contrats backend differents).
+        path: '/admin-entreprise/profil',
         icon: Building,
         badge: 'Société',
         tcode: 'KADM_PFE',
