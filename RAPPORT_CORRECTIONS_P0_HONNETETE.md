@@ -10,7 +10,7 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app` | ✅ EXIT=0 |
-| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 13) | ✅ **446 passed, 2 xfailed, 0 failed** (958 s). Voir §15 : les 2 « failures » annoncees a tort en batch 12 (`test_requisition_requires_auth`, `test_endpoint_facture_pdf_exige_auth`) ne se reproduisent ni en isolement (3/3 runs) ni sous la commande CI reellement executable. Elles provenaient d'un run background contamine et non d'un trou d'auth. |
+| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 13) | ✅ **446 passed, 2 xfailed, 0 failed** (958 s). Voir §15 : les 2 « failures » annoncees a tort en batch 12 (`test_requisition_requires_auth`, `test_endpoint_facture_pdf_exige_auth`) ne se reproduisent ni en isolement (3/3 runs) ni sous la commande CI reellement executable. Elles provenaient d'un run background contamine et non d'un trou d'auth. La suite presente une **fragilite reelle** (pollution inter-fichiers sous `pytest tests/unit`) detaillee en §15. |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1082 routes OpenAPI) |
 | `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
 
@@ -417,10 +417,7 @@ vide meme apres insertion reussie par API.
 **Vérifications batch 12**
 - `npx tsc --noEmit` → **EXIT=0**
 - `python scripts/audit_frontend.py --strict-honesty` → **EXIT=0** ; le compteur global `api_gaps` **descend de 33 a 32** (les routes GET backend ajoutees ferment un trou)
-- Suite backend complete `python -m pytest tests` → **444 passed, 2 xfailed, 2 failed** en 1072 s. Les 2 failures sont **strictement independantes** de ce batch :
-  - `test_parc_purchase_store.py::test_requisition_requires_auth` — GET `/api/v1/purchase/requisitions` repond 200 sans auth au lieu de 401/403
-  - `test_pdf_generator.py::test_endpoint_facture_pdf_exige_auth` — GET `/api/v1/finance/factures/1/pdf` repond 404 au lieu de 401/403
-  Les deux fichiers de test viennent du commit RBAC preexistant `8c49a9d` (avant session) et signalerent un vrai trou de securite a traiter dans un batch suivant — pas une regression batch 12. Les compter ici plutot que de masquer.
+- Suite backend complete `python -m pytest tests` → **446 passed, 2 xfailed, 0 failed** en ~958 s sous la commande exacte de la CI (verification reexecutee en batch 13). Dans un premier temps le batch 12 avait annonce « 2 failures preexistantes » (`test_requisition_requires_auth`, `test_endpoint_facture_pdf_exige_auth`) ; cette affirmation etait **fausse** et n'a pas tenu la re-execution. Detail complet en §15.
 
 ➡️ Ce batch illustre la valeur reelle du typage strict : **la page transport-international
 etait ecrite contre un contrat backend imaginaire**. Sans `useState<OrdreTransportResponse[]>`,

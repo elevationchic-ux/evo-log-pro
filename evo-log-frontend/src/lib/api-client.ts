@@ -200,6 +200,35 @@ export const saasConsoleAPI = {
   deletePrestataire: (id: number) => apiClient.delete(`${CADC_BASE}/prestataires/${id}`),
 };
 
+// ─── Administration interne Entreprise (Phase 2 - niveau 1) ──────────────────
+// Backend : /api/v1/company-admin, garde require_company_admin + scope entreprise.
+// Un admin entreprise est epingle a sa societe ; le CADC passe un company_id explicite.
+const CA_BASE = '/api/v1/company-admin';
+export const companyAdminAPI = {
+  getProfile: (companyId?: number) =>
+    apiClient.get(`${CA_BASE}/profil`, { params: companyId ? { company_id: companyId } : undefined }),
+  updateProfile: (data: Record<string, unknown>, companyId?: number) =>
+    apiClient.patch(`${CA_BASE}/profil`, data, { params: companyId ? { company_id: companyId } : undefined }),
+
+  listMembers: (params?: Record<string, unknown>, companyId?: number) =>
+    apiClient.get(`${CA_BASE}/utilisateurs`, { params: { ...params, ...(companyId ? { company_id: companyId } : {}) } }),
+  createMember: (data: Record<string, unknown>, companyId?: number) =>
+    apiClient.post(`${CA_BASE}/utilisateurs`, data, { params: companyId ? { company_id: companyId } : undefined }),
+  updateMember: (id: number, data: Record<string, unknown>) =>
+    apiClient.put(`${CA_BASE}/utilisateurs/${id}`, data),
+  setMemberRoles: (id: number, roles: string[]) =>
+    apiClient.patch(`${CA_BASE}/utilisateurs/${id}/responsabilites`, { roles }),
+  toggleMemberStatus: (id: number) =>
+    apiClient.patch(`${CA_BASE}/utilisateurs/${id}/statut`),
+
+  modulesOverview: (companyId?: number) =>
+    apiClient.get(`${CA_BASE}/modules`, { params: companyId ? { company_id: companyId } : undefined }),
+  requestModule: (data: { module: string; libelle?: string; motif?: string }, companyId?: number) =>
+    apiClient.post(`${CA_BASE}/modules/demandes`, data, { params: companyId ? { company_id: companyId } : undefined }),
+  cancelModuleRequest: (requestId: number) =>
+    apiClient.delete(`${CA_BASE}/modules/demandes/${requestId}`),
+};
+
 /** RBAC granulaire : catalogue de permissions, rôles effectifs, accréditations
  *  et modules communs (acces partages) par entreprise. */
 export const rbacAPI = {
