@@ -138,9 +138,11 @@ def methodes_reelles():
 
 
 def main():
-    routes = methodes_reelles()
+    global ROUTES
+    ROUTES = methodes_reelles()
     orphelins = defaultdict(set)
     ambigus = defaultdict(set)
+    indetermine = defaultdict(set)
 
     for fichier in sorted(FRONT.rglob("*.ts*")):
         if "node_modules" in str(fichier):
@@ -153,48 +155,62 @@ def main():
                 continue
             if cible.startswith("/api/docs") or cible.startswith("/api/health"):
                 continue
+            where = str(fichier.relative_to(ROOT))
+            if "${" in cible or "$" in VAR.sub("", cible):
+                # Gabarit imbrique (${a || b}) : non resolvable statiquement.
+                indetermine[where].add(f"{meth or 'ANY'} {cible}")
+                continue
             seg = tuple(segments_chemin(cible))
             if not seg:
                 continue
-            vues = {p for m, g, p in routes if correspond(seg, g)}
-            si_methodes = {p for m, g, p in routes if m == meth and correspond(seg, g)}
-            entete = f"{'ANY' if not meth else meth} {'/' + '/'.join(seg)}"
-            if si_methodes:
+            entete = f"{'ANY' if not meth else meth} {'/' + '/'.join(s if s != PLACEHOLDER else '{x}' for s in seg)}"
+            if not meth:
+                # fetch() : la methode est portee par l'objet d'options, inconnu ici.
+                meth = "GET"
+            if methode_reelle(meth, seg):
                 continue
+            vues = chemin_existant(seg)
             if vues:
                 # Le chemin existe mais pas pour cette methode : a verifier.
-                ambigus[str(fichier.relative_to(ROOT))].add(f"{entete}  -> route existe: {sorted(vues)}")
+                ambigus[where].add(f"{entete}  -> route existe: {sorted(vues)}")
             else:
-                orphelins[str(fichier.relative_to(ROOT))].add(entete)
+                proches = "; ".join(f"{p} ({d}%)" for p, d in suggestions(seg))
+                orphelins[where].add(f"{entete}" + (f"\n        proche: {proches}" if proches else ""))
 
+    total = sum(len(v) for v in orphelins.values())
+    sous = sum(len(v) for v in ambigus.values())
     if not orphelins and not ambigus:
         print("AUCUN appel orphelin : tout correspond a une route reelle.")
+        if indetermine:
+            print("(restent resoudre manuellement: gabarits de chaine imbriques)")
         return
 
     print("=" * 72)
-    print("APPELS SANS ROUTE EQUIVALENTE (servis par le catch-all « pending »)")
+    print(f"APPELS SANS ROUTE EQUIVALENTE ({total}) — servis par le catch-all pending")
     print("=" * 72)
-    total = 0
     for fichier in sorted(orphelins):
-        lignes = sorted(orphelins[fichier])
-        total += len(lignes)
         print(f"\n{fichier}")
-        for l in lignes:
+        for l in sorted(orphelins[fichier]):
             print(f"   {l}")
-    print(f"\nsous-total : {total}")
 
     print()
     print("=" * 72)
-    print("CHEMINS EXISTANTS MAIS METHODE NON DECLAREE")
+    print(f"CHEMINS EXISTANTS MAIS METHODE NON DECLAREE ({sous})")
     print("=" * 72)
-    sous = 0
     for fichier in sorted(ambigus):
-        lignes = sorted(ambigus[fichier])
-        sous += len(lignes)
         print(f"\n{fichier}")
-        for l in lignes:
+        for l in sorted(ambigus[fichier]):
             print(f"   {l}")
-    print(f"\nsous-total : {sous}")
+
+    if indetermine:
+        print()
+        print("=" * 72)
+        print("LITTERAUX NON RESOLUS STATIQUEMENT (a controls manuels)")
+        print("=" * 72)
+        for fichier in sorted(indetermine):
+            print(f"\n{fichier}")
+            for l in sorted(indetermine[fichier]):
+                print(f"   {l}")
 
 
 if __name__ == "__main__":
