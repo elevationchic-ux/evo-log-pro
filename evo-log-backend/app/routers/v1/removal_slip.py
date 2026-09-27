@@ -39,9 +39,10 @@ class RemovalSlipCreate(BaseModel):
 
 
 class RemovalSlipUpdate(BaseModel):
+    # Batch 16 : `statut` n'est plus un champ editable — les transitions
+    # d'etat passent UNIQUEMENT par /validate et /refuse (circuit signature).
     client_id: Optional[int] = None
     entrepot_id: Optional[int] = None
-    statut: Optional[str] = None
     notes: Optional[str] = None
 
 
@@ -294,22 +295,83 @@ async def validate_removal_slip(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Valide l'enlèvement et déduit automatiquement les quantités des stocks de l'entrepôt"""
+    """Signe le bon d'enlevement et deduit reellement les stocks.
+
+    Batch 16 — sortie de stock reelle et auditable :
+    - rupture REFUSEE : l'ancien code faisait `max(0, dispo - qte)`, soit un
+    stock qui ne descend jamais sous 0 quel que soit l'ecart demande. Desormais
+    un 400 enumerant les lignes en rupture, SANS aucun decript (tout-ou-rien).
+    - chaque ligne validee est tracee dans le registre `MouvementStock`
+      (SORTIE, quantite_avant/apres, document_reference=numero_bon) : le
+      mouvement physique a desormais une ecriture comptable matiere.
+    - la signature enregistre le validateur (deja fait) et exige >=1 ligne.
+    """
     bon = db.query(BonSortie).filter(BonSortie.id == id).first()
     if not bon:
         raise HTTPException(status_code=404, detail=f"Bon d'enlèvement #{id} non trouvé")
 
     if bon.statut == "valide":
         raise HTTPException(status_code=400, detail="Ce bon d'enlèvement est déjà validé")
+    if bon.statut == "refuse":
+        raise HTTPException(status_code=400,
+                            detail=f"Bon #{bon.numero_bon} refuse : non revalidable")
 
-    # Déduire les stocks
-    for ligne in (bon.lignes_bon or []):
+    lignes = list(bon.lignes_bon or [])
+    if not lignes:
+        raise HTTPException(status_code=400,
+                            detail=f"Bon #{bon.numero_bon} sans ligne : rien a sortir")
+
+    # Phase 1 : verification tout-ou-rien AVANT toute ecriture.
+    manquants = []
+    stock_par_ligne = {}
+    for ligne in lignes:
         stock = db.query(Stock).filter(Stock.id == ligne.stock_id).first()
-        if stock:
-            qte = float(ligne.quantite_sortie or 0)
-            dispo = float(stock.quantite_disponible or 0)
-            stock.quantite_disponible = max(0, dispo - qte)
-            stock.date_derniere_sortie = datetime.utcnow()
+        if not stock:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Ligne {ligne.id} : stock {ligne.stock_id} inexistant")
+        qte = float(ligne.quantite_sortie or 0)
+        dispo = float(stock.quantite_disponible or 0)
+        if qte <= 0:
+            raise HTTPException(status_code=400,
+                                detail=f"Ligne {ligne.id} : quantite invalide ({qte})")
+        if qte > dispo:
+            manquants.append({
+                "stock_id": stock.id,
+                "code_article": stock.code_article,
+                "designation": stock.designation,
+                "quantite_demandee": qte,
+                "quantite_disponible": dispo,
+            })
+        stock_par_ligne[ligne.id] = (stock, qte, dispo)
+    if manquants:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Rupture de stock : bon non valide, aucun decript effectue",
+                "lignes_en_rupture": manquants,
+            },
+        )
+
+    # Phase 2 : decript reel + ecriture du registre des mouvements.
+    for ligne in lignes:
+        stock, qte, dispo = stock_par_ligne[ligne.id]
+        stock.quantite_disponible = dispo - qte
+        stock.date_derniere_sortie = datetime.utcnow()
+        db.add(MouvementStock(
+            company_id=stock.company_id,
+            reference=f"{bon.numero_bon}/L{ligne.id}",
+            stock_id=stock.id,
+            type_mouvement=MouvementType.SORTIE,
+            quantite=qte,
+            quantite_avant=dispo,
+            quantite_apres=dispo - qte,
+            prix_unitaire=ligne.prix_unitaire,
+            valeur_totale=(ligne.prix_unitaire or 0) and qte * float(ligne.prix_unitaire or 0),
+            raison="Bon de sortie valide",
+            document_reference=bon.numero_bon,
+            operateur_id=current_user.id,
+        ))
 
     bon.statut = "valide"
     bon.validateur = current_user.id
@@ -319,8 +381,47 @@ async def validate_removal_slip(
     return {
         "message": "Bon d'enlèvement validé et stock décrémenté avec succès",
         "id": bon.id,
-        "statut": bon.statut
+        "numero_bon": bon.numero_bon,
+        "statut": bon.statut,
+        "mouvements_enregistres": len(lignes),
     }
+
+
+class RemovalSlipRefus(BaseModel):
+    motif: str
+
+
+@router.post("/{id}/refuse")
+async def refuse_removal_slip(
+    id: int,
+    payload: RemovalSlipRefus,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Refuse (signe negatives) le bon : statut `refuse`, AUCUN decript.
+
+    Le motif est obligatoire et trace dans `notes` — un refus sans raison
+    n'est pas opposable. La liste/stats filtraient deja sur `refuse` ; seuls
+    les endpoints de signature font desormais passer a cet etat.
+    """
+    bon = db.query(BonSortie).filter(BonSortie.id == id).first()
+    if not bon:
+        raise HTTPException(status_code=404, detail=f"Bon d'enlèvement #{id} non trouvé")
+    if bon.statut != "en_attente":
+        raise HTTPException(status_code=400,
+                            detail=f"Bon #{bon.numero_bon} deja signe ({bon.statut})")
+    motif = (payload.motif or "").strip()
+    if not motif:
+        raise HTTPException(status_code=400, detail="Un refus exige un motif non vide")
+
+    bon.statut = "refuse"
+    bon.validateur = current_user.id
+    bon.date_validation = date.today()
+    bon.notes = f"{bon.notes + chr(10) if bon.notes else ''}[REFUS {date.today().isoformat()}] {motif}"
+
+    db.commit()
+    return {"message": "Bon d'enlèvement refusé", "id": bon.id,
+            "numero_bon": bon.numero_bon, "statut": bon.statut}
 
 
 @router.delete("/{id}")

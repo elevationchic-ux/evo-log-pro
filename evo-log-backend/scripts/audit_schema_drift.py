@@ -247,7 +247,7 @@ def afficher(r) -> int:
 
     critiques = (len(r["absentes"]) + len(r["colonnes_manquantes"])
                  + len(r["notnull_imposes"]) + len(r["defauts_orphelins"])
-                 + len(r["dates_illisibles"]))
+                 + len(r["dates_illisibles"]) + len(MODELES_EN_ECHEC))
     print("VERDICT : " + (
         f"{critiques} divergence(s) bloquante(s) : ces tables font echouer une "
         "lecture, une ecriture ou une relecture."
