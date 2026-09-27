@@ -424,6 +424,64 @@ async def refuse_removal_slip(
             "numero_bon": bon.numero_bon, "statut": bon.statut}
 
 
+@router.get("/{id}/pdf")
+async def telecharger_bon_sortie_pdf(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Editer le bon de sortie en PDF (P2 #10 : impression + circuit signature).
+
+    Les blocs signataires sont IMPRIMES (nom/date reels quand le bon est
+    signe, zone vierge sinon) : le systeme ne simule jamais une signature
+    manuscrite numerique. 501 honnete si la chaine WeasyPrint est absente
+    (convention app/core/not_implemented.py, cf. facture PDF batch 2).
+    """
+    from fastapi import Response
+    from app.models.tenant import Company
+    from app.utils.pdf_generator import generer_pdf
+
+    bon = db.query(BonSortie).filter(BonSortie.id == id).first()
+    if not bon:
+        raise HTTPException(status_code=404, detail=f"Bon d'enlèvement #{id} non trouvé")
+
+    client = db.query(Client).filter(Client.id == bon.client_id).first() if bon.client_id else None
+    company = db.query(Company).filter(Company.id == current_user.company_id).first() \
+        if getattr(current_user, "company_id", None) else None
+
+    def _user_nom(user_id):
+        if not user_id:
+            return None
+        u = db.query(User).filter(User.id == user_id).first()
+        return f"{u.last_name or ''} {u.first_name or ''}".strip() or u.username if u else f"#{user_id}"
+
+    lignes = []
+    for ligne in (bon.lignes_bon or []):
+        stock = ligne.stock
+        lignes.append({
+            "designation": stock.designation if stock else "(stock supprime)",
+            "code_article": stock.code_article if stock else None,
+            "quantite": float(ligne.quantite_sortie or 0),
+            "unite": (stock.unite_mesure if stock and stock.unite_mesure else ""),
+            "numero_lot": ligne.numero_lot,
+            "prix_unitaire": float(ligne.prix_unitaire or 0),
+        })
+
+    pdf = generer_pdf("bon_sortie.html.j2", {
+        "bon": bon,
+        "client": client,
+        "company": company,
+        "lignes": lignes,
+        "nom_operateur": _user_nom(bon.operateur),
+        "nom_validateur": _user_nom(bon.validateur) if bon.statut == "valide" else None,
+    })
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="bon-sortie-{bon.numero_bon}.pdf"'},
+    )
+
+
 @router.delete("/{id}")
 async def delete_removal_slip(
     id: int,
