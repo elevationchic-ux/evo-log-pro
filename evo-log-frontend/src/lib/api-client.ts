@@ -257,6 +257,11 @@ export const departmentAPI = {
     apiClient.get(`${DEPT_BASE}/candidats`, { params: { ...params, ...(departmentId ? { department_id: departmentId } : {}) } }),
   setModules: (modules: string[], departmentId?: number) =>
     apiClient.put(`${DEPT_BASE}/modules`, { modules }, { params: departmentId ? { department_id: departmentId } : undefined }),
+  // Phase 4 (lecture scopee departement) : planning des tours de garde et presence.
+  getPlanning: (params?: { semaine?: string; departmentId?: number }) =>
+    apiClient.get(`${DEPT_BASE}/planning`, { params: { semaine: params?.semaine, ...(params?.departmentId ? { department_id: params.departmentId } : {}) } }),
+  getPresence: (params?: { date?: string; departmentId?: number }) =>
+    apiClient.get(`${DEPT_BASE}/presence`, { params: { date: params?.date, ...(params?.departmentId ? { department_id: params.departmentId } : {}) } }),
 };
 
 /** RBAC granulaire : catalogue de permissions, rôles effectifs, accréditations

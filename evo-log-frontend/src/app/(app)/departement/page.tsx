@@ -20,7 +20,7 @@
 // renvoyée par le backend plutôt que des données inventées.
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Users, Building2, Mail, Phone, BadgeCheck, UserCog, CircleSlash, UserPlus, UserMinus, Search } from 'lucide-react';
+import { Users, Building2, Mail, Phone, BadgeCheck, UserCog, CircleSlash, UserPlus, UserMinus, Search, CalendarDays, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { departmentAPI } from '@/lib/api-client';
 
@@ -50,6 +50,56 @@ interface Member {
   department_id?: number | null;
   roles: string[];
 }
+
+interface PlanningLine {
+  id: number;
+  employe_id: number;
+  employe_username: string;
+  employe_nom: string;
+  date_jour: string | null;
+  quart: string;
+  poste_assigne: string;
+  statut: string;
+  observations?: string | null;
+}
+
+interface PlanningData {
+  departement_id: number;
+  departement_nom: string;
+  semaine: string;
+  du: string;
+  au: string;
+  lignes: PlanningLine[];
+}
+
+interface PresenceRow {
+  employe_id: number;
+  username: string;
+  full_name: string;
+  planifie: boolean;
+  quart: string | null;
+  poste_assigne: string | null;
+  pointe: boolean;
+  heure_arrivee: string | null;
+  heure_depart: string | null;
+  heures_effectives: number | null;
+  est_valide: boolean | null;
+  presence: 'PRESENT' | 'ATTENDU' | 'NON_PLANIFIE';
+}
+
+interface PresenceData {
+  departement_id: number;
+  departement_nom: string;
+  date: string;
+  collaborateurs: PresenceRow[];
+  synthese: { effectif: number; presents: number; attendus: number; non_planifies: number };
+}
+
+const PRESENCE_STYLE: Record<PresenceRow['presence'], string> = {
+  PRESENT: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+  ATTENDU: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+  NON_PLANIFIE: 'bg-slate-800 text-slate-400 border-slate-700',
+};
 
 const LEVEL_LABEL: Record<number, string> = {
   0: 'Super Admin',
