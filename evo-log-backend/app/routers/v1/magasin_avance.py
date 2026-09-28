@@ -18,14 +18,13 @@ from app.schemas.magasin_avance import (
     InventaireTournantCreate, InventaireTournantResponse,
     LigneInventaireCreate, LigneInventaireResponse,
     FournisseurStockCreate, FournisseurStockResponse,
-    CommandeFournisseurCreate, CommandeFournisseurResponse,
-    LigneCommandeFournisseurCreate, LigneCommandeFournisseurResponse,
     BonReceptionCreate, BonReceptionResponse,
     LigneBonReceptionCreate, LigneBonReceptionResponse,
     RetourClientCreate, RetourClientUpdate, RetourClientTraitement, RetourClientResponse,
     LitigeTransporteurCreate, LitigeTransporteurUpdate, LitigeTransporteurResolution, LitigeTransporteurResponse,
     ColisCreate, ColisUpdate, ColisResponse,
-    RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse
+    RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse,
+    ReapproAutomatiqueResponse
 )
 from app.services.magasin_avance_service import (
     ColisService

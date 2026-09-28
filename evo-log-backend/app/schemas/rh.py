@@ -70,10 +70,10 @@ class SoldeCongeResponse(BaseModel):
 
 # Absence schemas
 class AbsenceBase(BaseModel):
-    type_absence: str = Field(..., description="Type d'absence: maladie, familiale, autre")
+    type_absence: str = Field(..., description="Type d'absence: maladie, famille, personnelle, autre")
     date_debut: date
     date_fin: date
-    motif: str
+    motif: Optional[str] = None
     justifie: bool = False
 
 
@@ -91,17 +91,29 @@ class AbsenceResponse(AbsenceBase):
     employe_id: int
     nombre_jours: int
     date_enregistrement: datetime
+    # Demi-journee : bornes de saisie "HH:MM" et duree calculee, NULL si
+    # l'absence couvre la journee entiere.
+    heure_debut: Optional[str] = None
+    heure_fin: Optional[str] = None
+    nombre_heures: Optional[float] = None
     
     class Config:
         from_attributes = True
 
 
 # TempsTravail schemas
+HEURE_PATRON = r"^([01]\d|2[0-3]):[0-5]\d$"
+
+
 class TempsTravailBase(BaseModel):
     date: date
-    heure_arrivee: datetime
-    heure_depart: Optional[datetime] = None
-    statut: str = "present"
+    # "HH:MM" : colonne VARCHAR(5) en base, pas un horodatage.
+    heure_arrivee: str = Field(..., pattern=HEURE_PATRON,
+                               description="Heure d'arrivee au format HH:MM")
+    heure_depart: Optional[str] = Field(None, pattern=HEURE_PATRON,
+                                        description="Heure de depart au format HH:MM")
+    statut: str = "valide"
+    tache: Optional[str] = None
 
 
 class TempsTravailCreate(TempsTravailBase):
@@ -109,8 +121,9 @@ class TempsTravailCreate(TempsTravailBase):
 
 
 class TempsTravailUpdate(BaseModel):
-    heure_depart: Optional[datetime] = None
+    heure_depart: Optional[str] = Field(None, pattern=HEURE_PATRON)
     statut: Optional[str] = None
+    tache: Optional[str] = None
 
 
 class TempsTravailResponse(TempsTravailBase):
@@ -132,13 +145,14 @@ class HeuresMensuellesResponse(BaseModel):
 # Formation schemas
 class FormationBase(BaseModel):
     titre: str
-    description: str
+    description: Optional[str] = None
     date_debut: date
     date_fin: date
     duree_heures: int
-    cout: float
-    formateur: str
-    lieu: str
+    cout: float = 0
+    formateur: Optional[str] = None
+    lieu: Optional[str] = None
+
 
 
 class FormationCreate(FormationBase):
