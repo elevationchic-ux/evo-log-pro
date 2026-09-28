@@ -1115,7 +1115,10 @@ def inscrire_formation(
     current_user: User = Depends(resolve_rh_user)
 ):
     """Enroll employee in training"""
-    return FormationService.inscrire_employe(db, formation_id, employe_id)
+    try:
+        return FormationService.inscrire_employe(db, formation_id, employe_id)
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 @router.put("/formations/participations/{participation_id}")
@@ -1128,9 +1131,12 @@ def valider_participation(
     current_user: User = Depends(resolve_rh_user)
 ):
     """Validate training participation"""
-    return FormationService.valider_participation(
-        db, participation_id, present, certificat_obtenu, commentaire
-    )
+    try:
+        return FormationService.valider_participation(
+            db, participation_id, present, certificat_obtenu, commentaire
+        )
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 @router.get("/formations/expirantes")
