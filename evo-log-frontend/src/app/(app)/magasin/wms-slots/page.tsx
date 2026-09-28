@@ -1,133 +1,122 @@
-'use client'
+'use client';
 
-import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
-import { Button } from '@/components/ui/button'
-import { Plus, LayoutGrid, PackageSearch } from 'lucide-react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import React, { useState, useEffect, useCallback } from 'react';
+import { LayoutGrid, ArrowLeft, Package, Search } from 'lucide-react';
+import Link from 'next/link';
+import { toast } from 'sonner';
+import { apiClient } from '@/lib/api-client';
+
+interface SlotEntry {
+  emplacement: string;
+  articles: { code: string; designation: string; quantite: number; unite: string }[];
+  total_weight: number;
+}
 
 export default function WmsSlotsPage() {
-  // Static data representing StorageSlots
-  const slots = [
-    { id: 1, code: 'A-01-01', aisle: 'A', rack: '01', level: '1', status: 'OCCUPIED', maxWeight: 1000, currentWeight: 800 },
-    { id: 2, code: 'A-01-02', aisle: 'A', rack: '01', level: '2', status: 'AVAILABLE', maxWeight: 1000, currentWeight: 0 },
-    { id: 3, code: 'A-01-03', aisle: 'A', rack: '01', level: '3', status: 'AVAILABLE', maxWeight: 800, currentWeight: 0 },
-    { id: 4, code: 'B-01-01', aisle: 'B', rack: '01', level: '1', status: 'OCCUPIED', maxWeight: 1500, currentWeight: 1450 },
-    { id: 5, code: 'B-01-02', aisle: 'B', rack: '01', level: '2', status: 'MAINTENANCE', maxWeight: 1500, currentWeight: 0 },
-  ]
+  const [slots, setSlots] = useState<SlotEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  const fetchSlots = useCallback(async () => {
+    try {
+      const params: Record<string, unknown> = { limit: 500 };
+      if (search) params.q = search;
+      const res: any = await apiClient.get('/api/v1/magasin/stocks/search', { params });
+      const body = res.data ?? res;
+      const items: any[] = body.items || [];
+
+      // Group by emplacement
+      const map = new Map<string, SlotEntry>();
+      for (const item of items) {
+        const loc = item.emplacement || 'NON ASSIGNÉ';
+        if (!map.has(loc)) {
+          map.set(loc, { emplacement: loc, articles: [], total_weight: 0 });
+        }
+        const entry = map.get(loc)!;
+        entry.articles.push({
+          code: item.code_article,
+          designation: item.designation,
+          quantite: item.quantite_disponible,
+          unite: item.unite_mesure || 'U',
+        });
+        entry.total_weight += item.valeur || 0;
+      }
+
+      const sorted = [...map.values()].sort((a, b) => a.emplacement.localeCompare(b.emplacement));
+      setSlots(sorted);
+    } catch (err: any) {
+      if (err?.response?.status === 501 || err?.response?.status === 404) {
+        toast.warning('Module stocks/emplacements non configuré');
+      } else {
+        toast.error('Erreur chargement emplacements');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [search]);
+
+  useEffect(() => { fetchSlots(); }, [fetchSlots]);
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-white animate-in fade-in duration-300">
+      <Link href="/magasin/dashboard" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white mb-4">
+        <ArrowLeft className="w-4 h-4" /> Retour au Dashboard
+      </Link>
+
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-100">Magasin: Cartographie WMS</h1>
-          <p className="text-muted-foreground mt-1">
-            Gérez les emplacements physiques (Allées, Racks, Niveaux) et le "Directed Put-away".
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline">
-            <LayoutGrid className="w-4 h-4 mr-2" />
-            Vue 3D
-          </Button>
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvel Emplacement
-          </Button>
+          <h1 className="text-2xl font-black flex items-center gap-3">
+            <LayoutGrid className="w-7 h-7 text-purple-400" />
+            Slots & Emplacements WMS
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">{slots.length} emplacement(s) occupé(s)</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Total Emplacements</CardTitle>
-            <PackageSearch className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,240</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Libres</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">450</div>
-            <p className="text-xs text-muted-foreground mt-1">36% de la capacité</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Occupés</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">785</div>
-            <p className="text-xs text-muted-foreground mt-1">63% de la capacité</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Maintenance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">5</div>
-          </CardContent>
-        </Card>
+      <div className="relative mb-4 max-w-md">
+        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher un emplacement ou article…"
+          className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+        />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Liste des Emplacements</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Code Emplacement</TableHead>
-                  <TableHead>Allée</TableHead>
-                  <TableHead>Rack</TableHead>
-                  <TableHead>Niveau</TableHead>
-                  <TableHead>Poids Max (kg)</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {slots.map((slot) => (
-                  <TableRow key={slot.id}>
-                    <TableCell className="font-mono font-medium">{slot.code}</TableCell>
-                    <TableCell>{slot.aisle}</TableCell>
-                    <TableCell>{slot.rack}</TableCell>
-                    <TableCell>{slot.level}</TableCell>
-                    <TableCell>
-                      {slot.currentWeight} / {slot.maxWeight}
-                      <div className="w-full bg-slate-700 rounded-full h-1.5 mt-1">
-                        <div 
-                          className={`h-1.5 rounded-full ${slot.currentWeight / slot.maxWeight > 0.9 ? 'bg-red-500' : 'bg-blue-500'}`} 
-                          style={{ width: `${(slot.currentWeight / slot.maxWeight) * 100}%` }}
-                        ></div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={
-                        slot.status === 'AVAILABLE' ? 'default' : 
-                        slot.status === 'OCCUPIED' ? 'secondary' : 'destructive'
-                      }>
-                        {slot.status === 'AVAILABLE' ? 'Libre' : slot.status === 'OCCUPIED' ? 'Occupé' : 'Maintenance'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">Détails</Button>
-                    </TableCell>
-                  </TableRow>
+      {loading ? (
+        <div className="text-center py-12 text-slate-400">Chargement…</div>
+      ) : slots.length === 0 ? (
+        <div className="text-center py-12 bg-slate-900 border border-slate-800 rounded-2xl">
+          <LayoutGrid className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+          <p className="text-slate-400">Aucun emplacement avec du stock</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {slots.map((slot) => (
+            <div key={slot.emplacement} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-purple-500/40 transition-colors">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-mono font-bold text-purple-400">{slot.emplacement}</h3>
+                <span className="text-xs text-slate-500">{slot.articles.length} article(s)</span>
+              </div>
+              <div className="space-y-1.5">
+                {slot.articles.slice(0, 5).map((a, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2 truncate">
+                      <Package className="w-3 h-3 text-slate-500 shrink-0" />
+                      <span className="truncate">{a.designation}</span>
+                    </div>
+                    <span className="font-mono text-slate-400 shrink-0 ml-2">{a.quantite} {a.unite}</span>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                {slot.articles.length > 5 && (
+                  <p className="text-xs text-slate-500 italic">+ {slot.articles.length - 5} autre(s)</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  )
+  );
 }
