@@ -922,6 +922,12 @@ export const removalSlipAPI = {
   create: (data: unknown) => apiClient.post('/api/v1/magasin/removal-slips', data),
   update: (id: number, data: unknown) => apiClient.put(`/api/v1/magasin/removal-slips/${id}`, data),
   validate: (id: number) => apiClient.post(`/api/v1/magasin/removal-slips/${id}/validate`),
+  // Batch 16 (circuit de signature) : refus motivé obligatoire et édition PDF.
+  // Un bon ne se « valide » JAMAIS par update() : statut figé côté backend.
+  refuse: (id: number, motif: string) =>
+    apiClient.post(`/api/v1/magasin/removal-slips/${id}/refuse`, { motif }),
+  getPdf: (id: number) =>
+    apiClient.get(`/api/v1/magasin/removal-slips/${id}/pdf`, { responseType: 'blob' }),
   delete: (id: number) => apiClient.delete(`/api/v1/magasin/removal-slips/${id}`),
 };
 

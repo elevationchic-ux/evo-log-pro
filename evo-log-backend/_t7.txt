@@ -1,0 +1,58 @@
+﻿motif_refus                : app\schemas\acquisition(3), app\services\rh_service(3), app\routers\v1\rh(2), app\schemas\rh(2)
+commentaire_approbation    : app\schemas\rh(2), app\routers\v1\rh(1), app\services\rh_service(1)
+commentaires_approbation   : app\routers\v1\chef_personnel(3), app\routers\v1\shift_planning(2), app\routers\v1\rh(1)
+pieces_jointes             : app\schemas\notifications(2), app\models\magasin_avance(1), app\models\notifications(1), app\models\transport_avance(1)
+solde_conge                : INUTILISE
+nom_fichier                : app\services\documents_service(6), app\routers\v1\rh(4), app\routers\v1\documents(3), app\models\documents(2)
+url_fichier                : app\models\transport_avance(1), app\routers\v1\rh(1), app\schemas\transport_avance(1)
+chemin_fichier             : app\services\cameroun_cemac_service(4), app\services\rh_service(3), app\schemas\rh(2), app\routers\v1\rh(1)
+date_ajout                 : app\schemas\rh(1), app\services\rh_service(1)
+justifie                   : app\services\rh_service(3), app\schemas\rh(2), app\routers\v1\rh(1), app\schemas\transport_exploitation(1)
+justifiee                  : app\routers\v1\shift_planning(9)
+nombre_heures              : app\routers\v1\shift_planning(5)
+heure_debut                : app\routers\v1\shift_planning(4), app\services\transport_international_service(3), app\models\transport_international(1), app\routers\v1\transport_international(1)
+heure_fin                  : app\routers\v1\shift_planning(4), app\services\transport_international_service(3), app\models\transport_international(1), app\routers\v1\transport_international(1)
+heure_arrivee              : app\routers\v1\chef_personnel(9), app\routers\v1\shift_planning(4), app\services\rh_service(4), app\routers\v1\rh(2)
+heure_depart               : app\routers\v1\chef_personnel(8), app\services\rh_service(5), app\routers\v1\shift_planning(4), app\routers\v1\transport_avance(3)
+heures_sup                 : app\services\rh_service(8), app\schemas\rh(4), app\services\cameroun_cemac_service(4), app\services\compliance_service(4)
+heures_supplementaires     : app\routers\v1\rh(7), app\routers\v1\shift_planning(7), app\services\rh_avance_service(2), app\routers\v1\chef_personnel(1)
+date_prime                 : app\schemas\rh(1)
+date_octroi                : INUTILISE
+periode                    : app\services\rh_avance_service(27), app\services\comptabilite_avance_service(26), app\services\finance_service(15), app\services\finance_avance_service(14)
+niveau_maitrise            : INUTILISE
+niveau_requis              : app\services\rh_service(3), app\schemas\rh(2), app\routers\v1\rh(1)
+date_debut_poste           : INUTILISE
+sous_ordinates             : INUTILISE
+est_actif                  : app\routers\v1\suppliers(12), app\routers\v1\port_pricing(9), app\routers\v1\port_performance(4), app\routers\v1\saas_console(4)
+est_valide                 : app\routers\v1\chef_personnel(6), app\core\permissions(2), app\models\accreditation(1), app\models\chef_personnel(1)
+numero_document            : app\services\documents_service(6), app\routers\v1\rh(3), app\routers\v1\documents(2), app\models\documents(1)
+organisme_emetteur         : app\routers\v1\rh(3)
+date_validation            : app\routers\v1\goods_declaration(9), app\models\finance_ohada(8), app\routers\v1\bill_of_loading(7), app\schemas\finance(6)
+validateur_id              : app\routers\v1\magasin_avance(3), app\services\magasin_avance_service(3), app\schemas\magasin_avance(1)
+projet_id                  : INUTILISE
+tache                      : app\routers\v1\shift_planning(4)
+certification_obtenue      : INUTILISE
+certificat_obtenu          : app\services\rh_service(3), app\routers\v1\rh(2), app\schemas\rh(2), app\services\reporting_avance_service(1)
+certificat_valide_jusque   : app\schemas\rh(2), app\services\reporting_avance_service(2), app\services\rh_service(2)
+objectifs_atteints         : app\services\rh_service(3), app\routers\v1\rh(1), app\schemas\rh(1)
+objectifs_total            : app\services\rh_service(3), app\routers\v1\rh(1), app\schemas\rh(1)
+commentaires               : app\routers\v1\reception_mag3(5), app\routers\v1\removal_slip(5), app\schemas\acquisition(5), app\models\magasin_avance(4)
+date_enregistrement        : app\models\qhse(1), app\models\transit(1), app\models\transit_avance(1), app\routers\v1\acconage_avance(1)
+date_demande               : app\routers\v1\chef_personnel(5), app\routers\v1\rh(4), app\routers\v1\shift_planning(4), app\models\douane_cameroun(2)
+periode_essai              : app\services\compliance_service(2)
+coefficient                : app\services\rh_service(3), app\routers\v1\rh(1), app\schemas\rh(1)
+classification             : app\services\documents_service(4), app\schemas\documents(3), app\services\rh_service(3), app\models\documents(1)
+nombre_renouvellements     : app\services\rh_service(2), app\schemas\rh(1)
+preavis                    : INUTILISE
+convention_collective      : INUTILISE
+horaire_travail            : app\routers\v1\rh(1)
+lieu_travail               : app\routers\v1\rh(1)
+duree_jours                : app\services\acconage_service(3)
+nombre_places              : INUTILISE
+competences_visees         : INUTILISE
+type_formation             : app\routers\v1\qhse(3), app\services\compliance_service(3), app\services\qhse_service(3), app\models\qhse(1)
+formateur                  : app\routers\v1\qhse(3), app\services\qhse_service(3), app\services\rh_service(3), app\models\qhse(1)
+agency_id                  : app\services\rh_service(3), app\routers\v1\auth(2), app\routers\v1\privacy(2), app\schemas\rh(2)
+est_active                 : app\models\port_cameroun(1)
+salaire_brut               : app\services\rh_avance_service(14), app\services\rh_service(8), app\services\cameroun_cemac_service(4), app\routers\v1\rh(3)
+salaire_base               : app\routers\v1\rh(9), app\services\rh_service(9), app\schemas\rh(3), app\schemas\rh_avance(2)

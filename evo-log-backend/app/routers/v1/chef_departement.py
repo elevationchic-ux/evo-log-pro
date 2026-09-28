@@ -12,18 +12,24 @@ Garde (invisibilite double, cf. plan) :
   doit passer un ``department_id`` explicite et l'appartenance d'entreprise est
   controlee.
 
-Ce routeur n'accorde AUCUN module : la liste des collaborateurs est une lecture
-du perimetre humain du departement. L'octroi d'accreditation interne et le
-planning sont des tranches suivantes (cf. plan Phase 3 / Phase 4).
+Tranche A (lecture) : roster humain + fiche du departement. Tranche B (ecriture) :
+- un chef (2) AFFECTE / RETIRE des COLLABORATEURS (niveau 3) de SON departement ;
+  il ne touche jamais un niveau 1/2, ni un compte d'une autre entreprise, ni un
+  Super Admin ;
+- l'ALLOCATION des modules d'un departement releve de l'Admin Entreprise (1) /
+  CADC (0) UNIQUEMENT (un chef ne se auto-grantit pas de module) et reste STRICTEMENT
+  bornee par ``Company.modules_actives`` (un departement ne peut pas depasser son
+  entreprise). Le planning/presence reste une tranche suivante (cf. plan Phase 4).
 """
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models.tenant import Department
+from app.models.tenant import Company, Department
 from app.models.user import User
 from app.utils.rbac import _is_superadmin, require_department_head
 
