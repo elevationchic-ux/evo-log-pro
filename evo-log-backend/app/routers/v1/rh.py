@@ -1684,18 +1684,565 @@ def detail_employe(
     return _fiches_employes(db, [emp])[0]
 
 
-@router.post("/employes/import-excel", status_code=status.HTTP_202_ACCEPTED)
-def import_employes_excel(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(resolve_rh_user),
-):
-    """Import massif d'employes depuis Excel  non implemente cote serveur.
+class EmployeCreateIn(BaseModel):
+    """Creation d'un collaborateur, telle que la saisit l'ecran RH.
 
-    Reponse honnete 202 ``pending`` (aucune donnee inventee) tant que l'import
-    n'est pas branche, pour que l'ecran n'affiche pas une erreur 404/500.
+    Un seul champ d'identite est stocke : `full_name`. Le formulaire peut envoyer
+    `nom` et `prenom` (deux champs cote UI), ils sont recomposes ; la base ne
+    dissocie pas l'un de l'autre, et reconstituer un nom de famille a partir
+    d'un prenom serait une fausse donnee d'etat civil.
+
+    `statut` n'existe volontairement pas ici : le statut d'un salarie se LIT
+    (compte actif, contrat en vigueur, conge approuve en cours), il ne se
+    saisit pas. Le laisser saisir produirait un agent « ACTIF » sans contrat.
     """
+    email: str
+    full_name: Optional[str] = None
+    nom: Optional[str] = None
+    prenom: Optional[str] = None
+    phone: Optional[str] = None
+    matricule: Optional[str] = Field(None, max_length=50)
+    poste: Optional[str] = None
+    departement: Optional[str] = None
+    date_embauche: Optional[date] = None
+    type_contrat: str = Field("CDI", description="Types admis : CDI, CDD, STAGE, APPRENTISSAGE")
+    date_fin_contrat: Optional[date] = None
+    salaire_base: Optional[float] = None
+    coefficient: Optional[int] = None
+    classification: Optional[str] = None
+    horaire_travail: Optional[str] = Field(None, description="Ex: 40h, 35h")
+    lieu_travail: Optional[str] = None
+    manager_email: Optional[str] = None
+    role: Optional[str] = Field(None, description="Casquette (Role) a attacher au compte")
+
+
+# ---------------------------------------------------------------------------
+# Import massif : lecture CSV / XLSX a la bibliotheque standard
+# ---------------------------------------------------------------------------
+# Un .xlsx est une archive ZIP de XML : openpyxl n'est pas une dependance du
+# projet et l'ajouter pour lire un tableau ne se justifie pas. Le .xls binaire
+# (Excel 97-2003), lui, ne se lit pas sans moteur : il est refuse explicitement
+# plutot que d'importer partiellement en silence.
+_TAILLE_MAX_IMPORT = 5_000_000  # ~10 000 lignes
+
+# Entetes admissibles, par ordre de priorite. Un en-tete est ramene a ses mots
+# normalises, et le premier champ dont un candidat est contenu dans ces mots est
+# retenu. "Date de fin du contrat" porte {date, de, fin, du, contrat} : teste
+# avant "contrat", il ne peut pas atterrir dans la colonne du type de contrat.
+_CHAMPS_IMPORT: List[Tuple[str, Tuple[Tuple[str, ...], ...]]] = [
+    ("email", (("email",), ("courriel",), ("mail",))),
+    ("phone", (("telephone",), ("phone",), ("tel",))),
+    ("matricule", (("matricule",), ("identification",))),
+    ("date_fin_contrat", (("fin", "contrat"), ("date", "fin"), ("end", "date"))),
+    ("date_embauche", (("embauche",), ("entree",), ("engagement",), ("hire", "date"))),
+    ("type_contrat", (("type", "contrat"), ("contrat",), ("contract",))),
+    ("salaire_base", (("salaire",), ("salary",), ("paie",), ("remuneration",))),
+    ("horaire_travail", (("horaire",), ("horaires",), ("working", "hours"))),
+    ("lieu_travail", (("lieu",), ("affectation",), ("site",), ("location",))),
+    ("departement", (("departement",), ("department",), ("dpt",), ("service",))),
+    ("poste", (("poste",), ("position",), ("fonction",), ("job", "title"))),
+    ("full_name", (("nom", "complet"), ("complet",), ("full", "name"), ("nom", "prenom"),
+                   ("agent",), ("collaborateur",), ("salarie",))),
+    ("prenom", (("prenom",), ("first", "name"))),
+    ("nom", (("nom",), ("famille",), ("last", "name"), ("surname",))),
+]
+
+
+def _mots(txt: Any) -> Tuple[str, ...]:
+    """En-tete reduit a ses mots, sans accents ni ponctuation.
+
+    "Email professionnel" -> ("email", "professionnel") ; "Prénom" ->
+    ("prenom",). Le decoupage en mots (et non la sous-chaine) evite que
+    "prenom" ne soit range dans la colonne "nom".
+    """
+    plie = unicodedata.normalize("NFKD", str(txt or ""))
+    plie = "".join(c for c in plie if not unicodedata.combining(c))
+    return tuple(w for w in re.split(r"[^a-z0-9]+", plie.lower()) if w)
+
+
+def _champ_depuis_entete(entete: Any) -> Optional[str]:
+    mots = set(_mots(entete))
+    if not mots:
+        return None
+    for champ, candidats in _CHAMPS_IMPORT:
+        if any(mots.issuperset(candidat) for candidat in candidats):
+            return champ
+    return None
+
+
+def _index_colonnes(ref: str) -> int:
+    """("B12" -> 1, "AA4" -> 26) : la colonne d'une cellule XLSX."""
+    lettres = re.match(r"[A-Za-z]+", ref or "")
+    n = 0
+    for c in (lettres.group(0).upper() if lettres else ""):
+        n = n * 26 + (ord(c) - 64)
+    return n - 1
+
+
+def _lignes_xlsx(blob: bytes) -> List[List[Any]]:
+    """Premiere feuille d'un classeur .xlsx, lu sans dependance externe."""
+    try:
+        archive = zipfile.ZipFile(io.BytesIO(blob))
+    except zipfile.BadZipFile:
+        raise ValueError("Classeur .xlsx illisible : archive ZIP invalide.")
+    with archive:
+        noms = archive.namelist()
+        feuilles = sorted(
+            (n for n in noms if n.startswith("xl/worksheets/") and n.endswith(".xml")),
+            key=lambda n: (n != "xl/worksheets/sheet1.xml", n),
+        )
+        if not feuilles:
+            raise ValueError("Aucune feuille de calcul dans ce classeur .xlsx.")
+        chaines: List[str] = []
+        if "xl/sharedStrings.xml" in noms:
+            racine = ET.fromstring(archive.read("xl/sharedStrings.xml"))
+            for si in racine.findall("{*}si"):
+                chaines.append("".join(t.text or "" for t in si.iter("{*}t")))
+        racine = ET.fromstring(archive.read(feuilles[0]))
+        lignes: List[List[Any]] = []
+        for row in racine.iter("{*}row"):
+            cellules: Dict[int, Any] = {}
+            for c in row.findall("{*}c"):
+                i = _index_colonnes(c.get("r") or "")
+                type_cellule = (c.get("t") or "").lower()
+                valeur = None
+                if type_cellule == "inlineStr":
+                    is_el = c.find("{*}is")
+                    if is_el is not None:
+                        valeur = "".join(x.text or "" for x in is_el.iter("{*}t"))
+                else:
+                    v = c.find("{*}v")
+                    if v is not None and v.text is not None:
+                        valeur = chaines[int(v.text)] if type_cellule == "s" and v.text.isdigit() \
+                            and int(v.text) < len(chaines) else v.text
+                if i >= 0 and valeur not in (None, ""):
+                    cellules[i] = valeur
+            if cellules:
+                lignes.append([cellules.get(i) for i in range(max(cellules) + 1)])
+        return lignes
+
+
+def _lignes_csv(blob: bytes) -> List[List[str]]:
+    texte = None
+    for encodage in ("utf-8-sig", "cp1252", "latin-1"):
+        try:
+            texte = blob.decode(encodage)
+            break
+        except UnicodeDecodeError:
+            continue
+    if texte is None:
+        raise ValueError("Encodage du CSV non reconnu : UTF-8 ou Windows-1252 attendus.")
+    # Les exports francais d'Excel separent par point-virgule, les exports
+    # anglophones par virgule : le detecteur evite d'imposer l'un des deux.
+    try:
+        dialecte = csv.Sniffer().sniff(texte[:4096], delimiters=",;\t")
+    except csv.Error:
+        dialecte = csv.excel
+    return [list(ligne) for ligne in csv.reader(io.StringIO(texte), dialecte)]
+
+
+def _table_depuis_fichier(blob: bytes, nom_fichier: str) -> List[List[Any]]:
+    extension = Path(nom_fichier or "").suffix.lower()
+    if extension == ".xlsx":
+        return _lignes_xlsx(blob)
+    if extension in (".csv", ".txt", ""):
+        return _lignes_csv(blob)
+    if extension == ".xls":
+        raise ValueError(
+            "Le format .xls (Excel 97-2003) n'est pas lisible par le serveur. "
+            "Enregistrez le fichier en .xlsx ou en .csv."
+        )
+    raise ValueError(
+        f"Extension non prise en charge : {extension}. Formats acceptes : .csv, .xlsx."
+    )
+
+
+def _date_import(champ: str, valeur: Any) -> Optional[date]:
+    if valeur is None or valeur == "":
+        return None
+    if isinstance(valeur, datetime):
+        return valeur.date()
+    if isinstance(valeur, date):
+        return valeur
+    txt = str(valeur).strip()
+    if not txt:
+        return None
+    # Une date Excel est stockee en numero de serie (jours depuis 1899-12-30) :
+    # sans cette conversion, la colonne embauche arrivait vide a l'import.
+    if re.fullmatch(r"\d+(?:\.0+)?", txt) and 1 <= int(float(txt)) <= 2958466:
+        return (datetime(1899, 12, 30) + timedelta(days=int(float(txt)))).date()
+    for patron in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%d/%m/%y", "%d-%m-%y"):
+        try:
+            return datetime.strptime(txt, patron).date()
+        except ValueError:
+            continue
+    raise ValueError(
+        f"{champ} : date non reconnue ('{txt}'). Formats acceptes : JJ/MM/AAAA ou AAAA-MM-JJ."
+    )
+
+
+def _nombre_import(champ: str, valeur: Any) -> Optional[float]:
+    if valeur is None or valeur == "":
+        return None
+    txt = str(valeur).replace("\u00a0", "").replace("\u202f", "").strip()
+    if "," in txt and "." in txt:
+        if txt.rfind(",") > txt.rfind("."):
+            txt = txt.replace(".", "").replace(",", ".")   # 1.234,56
+        else:
+            txt = txt.replace(",", "")                      # 1,234.56
+    elif "," in txt:
+        txt = txt.replace(",", ".")
+    txt = txt.replace(" ", "")
+    try:
+        return float(txt)
+    except ValueError:
+        raise ValueError(f"{champ} : valeur numerique invalide ('{valeur}').")
+
+
+def _nom_complet(data: EmployeCreateIn) -> str:
+    """Identite stockee : un seul champ, recompose depuis le formulaire."""
+    complet = (data.full_name or "").strip()
+    if complet:
+        return complet
+    pieces = [(data.prenom or "").strip(), (data.nom or "").strip()]
+    return " ".join(p for p in pieces if p)
+
+
+def _employe_depuis_brut(brut: Dict[str, Any]) -> EmployeCreateIn:
+    """Une ligne du tableau -> une fiche. Les rejets sont des ValueError."""
+    nom = str(brut.get("nom") or "").strip()
+    prenom = str(brut.get("prenom") or "").strip()
+    complet = str(brut.get("full_name") or "").strip() or " ".join(
+        p for p in (prenom, nom) if p
+    )
+    return EmployeCreateIn(
+        email=str(brut.get("email") or "").strip(),
+        full_name=complet or None,
+        phone=str(brut.get("phone") or "").strip() or None,
+        matricule=str(brut.get("matricule") or "").strip() or None,
+        poste=str(brut.get("poste") or "").strip() or None,
+        departement=str(brut.get("departement") or "").strip() or None,
+        date_embauche=_date_import("Date d'embauche", brut.get("date_embauche")),
+        type_contrat=str(brut.get("type_contrat") or "CDI").strip() or "CDI",
+        date_fin_contrat=_date_import("Date de fin du contrat", brut.get("date_fin_contrat")),
+        salaire_base=_nombre_import("Salaire de base", brut.get("salaire_base")),
+        horaire_travail=str(brut.get("horaire_travail") or "").strip() or None,
+        lieu_travail=str(brut.get("lieu_travail") or "").strip() or None,
+    )
+
+
+def _lignes_vers_employes(
+    lignes: List[List[Any]],
+) -> Tuple[List[Tuple[int, EmployeCreateIn]], List[Dict[str, Any]]]:
+    """Tableau (entete + lignes) -> fiches, avec les rejets detailles.
+
+    Une ligne rejetee ne fait pas echouer l'import : la raison est remontee
+    ligne par ligne et le reste du fichier est quand meme importe.
+    """
+    pleines = [
+        l for l in lignes
+        if any(str(c).strip() for c in l if c is not None)
+    ]
+    if not pleines:
+        return [], [{"ligne": 1, "raison": "Fichier vide : aucune ligne."}]
+    colonnes: Dict[int, str] = {}
+    for i, entete in enumerate(pleines[0]):
+        champ = _champ_depuis_entete(entete)
+        if champ:
+            colonnes[i] = champ
+    if "email" not in colonnes.values():
+        return [], [{
+            "ligne": 1,
+            "raison": (
+                "Aucune colonne Email reconnue. Entetes attendus : Nom, Prenom, "
+                "Email, Telephone, Poste, Departement, Date embauche, Type contrat, "
+                "Salaire de base, Matricule."
+            ),
+        }]
+    fiches: List[Tuple[int, EmployeCreateIn]] = []
+    rejets: List[Dict[str, Any]] = []
+    for numero, ligne in enumerate(pleines[1:], start=2):
+        brut: Dict[str, Any] = {}
+        for i, champ in colonnes.items():
+            if i < len(ligne) and ligne[i] not in (None, ""):
+                brut[champ] = ligne[i]
+        try:
+            fiches.append((numero, _employe_depuis_brut(brut)))
+        except ValueError as exc:
+            rejets.append({"ligne": numero, "raison": str(exc)})
+    return fiches, rejets
+
+
+def _username_disponible(db: Session, email: str) -> str:
+    """Identifiant de connexion derive de l'email, rendu unique par suffixe."""
+    base = re.sub(r"[^a-z0-9._-]", "", (email.split("@")[0] or "").lower())[:40]
+    base = base or "collaborateur"
+    candidat = base
+    rang = 1
+    while db.query(User).filter(User.username == candidat).first():
+        rang += 1
+        candidat = f"{base}{rang}"[:50]
+    return candidat
+
+
+def _matricule_suivant(db: Session, company_id: int) -> str:
+    """Matricule sequence par entreprise, quand l'import n'en apporte pas.
+
+    Ce n'est pas une donnee inventee : c'est une cle metier attribuee puis
+    persistee, reprise telle quelle partout ou le salarie est cite. Une serie
+    par entreprise evite les collisions entre tenants.
+    """
+    prefix = f"EMP-{company_id}-"
+    plus_grand = 0
+    for (matricule,) in db.query(User.matricule).filter(User.matricule.like(f"{prefix}%")):
+        suffixe = (matricule or "")[len(prefix):]
+        if suffixe.isdigit():
+            plus_grand = max(plus_grand, int(suffixe))
+    return f"{prefix}{plus_grand + 1:04d}"
+
+
+def _departement_ou_cree(db: Session, company_id: int, nom: Optional[str]) -> Optional[Department]:
+    """Departement de l'entreprise, cree au passage s'il n'existe pas encore.
+
+    Un nom saisi par le RH vaut enregistrement dans le registre : le refuser
+    obligerait a creer les departements ailleurs, a la main.
+    """
+    nom_propre = (nom or "").strip()
+    if not nom_propre:
+        return None
+    dept = db.query(Department).filter(
+        and_(Department.company_id == company_id, func.upper(Department.nom) == nom_propre.upper())
+    ).first()
+    if dept:
+        return dept
+    dept = Department(
+        company_id=company_id,
+        code=re.sub(r"[^A-Z0-9]+", "_", nom_propre.upper())[:50].strip("_") or "DEPT",
+        nom=nom_propre[:100],
+    )
+    db.add(dept)
+    db.flush()
+    return dept
+
+
+def _entreprise_verifiee(db: Session, company_id: int) -> Company:
+    entreprise = db.query(Company).filter(Company.id == company_id).first()
+    if not entreprise:
+        raise HTTPException(status_code=404, detail="Entreprise inconnue.")
+    return entreprise
+
+
+def _creer_employe(
+    db: Session,
+    data: EmployeCreateIn,
+    company_id: int,
+    createur: User,
+) -> Dict[str, Any]:
+    """Ecrit le compte, puis le contrat, puis la position hierarchique.
+
+    L'ordre est celui du metier et le contrat est verifie AVANT d'ecrire quoi
+    que ce soit : un type de contrat errone ne doit pas laisser dans la base un
+    salarie sans contrat, moitie importe. Le mot de passe temporaire est genere
+    (jamais choisi pour l'interesse), n'est jamais stocke en clair, et
+    l'agent doit le changer au premier login.
+    """
+    email = (data.email or "").strip().lower()
+    if not email or "@" not in email or email.endswith("@"):
+        raise HTTPException(status_code=400, detail="Adresse email invalide.")
+    if db.query(User).filter(func.lower(User.email) == email).first():
+        raise HTTPException(status_code=409, detail=f"Cet email est deja utilise : {email}")
+
+    full_name = _nom_complet(data)
+    if not full_name:
+        raise HTTPException(status_code=400, detail="Nom ou prenom requis.")
+
+    poste = (data.poste or "").strip()
+    departement = (data.departement or "").strip()
+    salaire = float(data.salaire_base or 0)
+    contrat_attendu = bool(poste) or salaire > 0
+    if contrat_attendu:
+        try:
+            ContratService.valider_contrat(
+                data.type_contrat, data.date_embauche, data.date_fin_contrat,
+                salaire if salaire > 0 else 0,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=f"Contrat refuse : {exc}")
+        if not poste:
+            raise HTTPException(
+                status_code=400,
+                detail="Poste requis pour etablir le contrat de travail.",
+            )
+
+    manager_id: Optional[int] = None
+    if (data.manager_email or "").strip():
+        manager = db.query(User).filter(
+            func.lower(User.email) == data.manager_email.strip().lower()
+        ).first()
+        if not manager:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Aucun collaborateur avec l'email {data.manager_email.strip()} (superieur hierarchique).",
+            )
+        manager_id = manager.id
+
+    username = _username_disponible(db, email)
+    temp_password = f"Emb-{secrets.token_hex(6)}!"
+    try:
+        validate_password_strength(temp_password, username)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    matricule = (data.matricule or "").strip() or _matricule_suivant(db, company_id)
+    if db.query(User).filter(User.matricule == matricule).first():
+        raise HTTPException(status_code=409, detail=f"Matricule deja attribue : {matricule}")
+
+    dept = _departement_ou_cree(db, company_id, departement or None)
+
+    member = User(
+        username=username,
+        email=email,
+        hashed_password=get_password_hash(temp_password),
+        full_name=full_name[:100],
+        matricule=matricule[:50],
+        job_title=poste[:100] or None,
+        phone=(data.phone or "").strip()[:20] or None,
+        company_id=company_id,
+        department_id=dept.id if dept else None,
+        role_level=3,
+        is_active=True,
+        is_superuser=False,
+        must_change_password=True,
+        created_by=createur.id,
+        language=(createur.language or "fr"),
+    )
+    if data.role:
+        db_role = db.query(Role).filter(Role.name == data.role.strip().upper()).first()
+        if db_role:
+            member.roles = [db_role]
+    db.add(member)
+    db.commit()
+    db.refresh(member)
+
+    avertissements: List[str] = []
+    try:
+        if contrat_attendu:
+            ContratService.creer_contrat(
+                db, member.id, data.type_contrat, data.date_embauche,
+                data.date_fin_contrat, poste, salaire,
+                data.coefficient, (data.classification or "").strip() or None,
+                90, departement or None,
+                (data.horaire_travail or "").strip() or None,
+                (data.lieu_travail or "").strip() or None,
+            )
+        else:
+            avertissements.append(
+                "Compte cree sans contrat de travail : le poste et le salaire de "
+                "base sont requis pour l'etablir."
+            )
+        if poste and departement:
+            OrganigrammeService.definir_hierarchie(
+                db, member.id, manager_id, departement[:100], poste[:100]
+            )
+    except ValueError as exc:
+        # Le compte existe deja : le signaler sans faire croire a un echec.
+        avertissements.append(f"Compte cree mais contrat non enregistre : {exc}")
+
     return {
-        "accepted": False,
-        "pending": True,
-        "message": "L'import Excel des employes n'est pas encore actif cote serveur.",
+        "fiche": _fiches_employes(db, [member])[0],
+        "temporary_password": temp_password,
+        "avertissements": avertissements,
+    }
+
+
+@router.post("/employes", status_code=status.HTTP_201_CREATED,
+             summary="Creer un collaborateur")
+def creer_employe(
+    data: EmployeCreateIn,
+    company_id: Optional[int] = Query(None, description="Requis pour un Super Admin"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(requireRH),
+):
+    """Annuaire : creation reelle d'un salarie (compte + contrat + organigramme).
+
+    L'ecran appelait cette route depuis le premier jour ; elle n'existait pas,
+    le bouton « Ajouter un Employe » echouait donc en 404.
+    """
+    cible = resolve_scope_company_id(current_user, company_id)
+    _entreprise_verifiee(db, cible)
+    resultat = _creer_employe(db, data, cible, current_user)
+    fiche = dict(resultat["fiche"])
+    fiche["temporary_password"] = resultat["temporary_password"]
+    if resultat["avertissements"]:
+        fiche["avertissements"] = resultat["avertissements"]
+    return fiche
+
+
+@router.post("/employes/import-excel", summary="Importer des collaborateurs (CSV ou XLSX)")
+async def import_employes_excel(
+    file: UploadFile = File(...),
+    company_id: Optional[int] = Query(None, description="Requis pour un Super Admin"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(requireRH),
+):
+    """Import massif reel : lit le depot, cree chaque salarie, rend compte.
+
+    La version precedente renvoyait un 202 « pending » : l'ecran affichait un
+    succes sans rien importer. Chaque ligne est ecrite ou rejetee avec sa
+    raison ; un fichier partiellement valide est importe partiellement, jamais
+    abandonne en bloc.
+    """
+    cible = resolve_scope_company_id(current_user, company_id)
+    _entreprise_verifiee(db, cible)
+
+    blob = await file.read()
+    if not blob:
+        raise HTTPException(status_code=400, detail="Fichier vide.")
+    if len(blob) > _TAILLE_MAX_IMPORT:
+        raise HTTPException(
+            status_code=413,
+            detail="Fichier trop volumineux (5 Mo au plus, soit environ 10 000 lignes).",
+        )
+    try:
+        lignes = _table_depuis_fichier(blob, file.filename or "")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    fiches, rejets = _lignes_vers_employes(lignes)
+    if not fiches and rejets:
+        raise HTTPException(
+            status_code=400,
+            detail=rejets[0]["raison"],
+        )
+
+    importes: List[Dict[str, Any]] = []
+    for numero, data in fiches:
+        try:
+            resultat = _creer_employe(db, data, cible, current_user)
+        except HTTPException as exc:
+            rejets.append({"ligne": numero, "raison": str(exc.detail)})
+            continue
+        except Exception as exc:  # une ligne hsse ne doit pas casser l'import
+            db.rollback()
+            rejets.append({"ligne": numero, "raison": f"Ecriture impossible : {exc}"})
+            continue
+        importes.append({
+            "ligne": numero,
+            "matricule": resultat["fiche"]["matricule"],
+            "full_name": resultat["fiche"]["full_name"],
+            "email": resultat["fiche"]["email"],
+            "temporary_password": resultat["temporary_password"],
+            "avertissements": resultat["avertissements"],
+        })
+
+    rejets.sort(key=lambda r: r["ligne"])
+    return {
+        "importes": importes,
+        "rejets": rejets,
+        "total_lignes": max(0, len(lignes) - 1),
+        "message": (
+            f"{len(importes)} collaborateur(s) importe(s), {len(rejets)} ligne(s) "
+            f"rejetee(s) sur {max(0, len(lignes) - 1)}."
+        ),
+        "fichier": file.filename,
     }
