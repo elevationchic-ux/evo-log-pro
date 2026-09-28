@@ -2,18 +2,25 @@
 
 // Phase 3 — Ecran "Mon Département" pour le chef de département (niveau 2).
 //
-// Périmètre strict : le chef ne voit que SA fiche de département (nom, modules
-// autorisés, effectif, responsable) et le roster des collaborateurs rattachés à
-// son département. Le backend épingle le niveau 2 à son department_id ; toute
-// tentative de télécharger un autre département renvoie 403.
+// Périmètre strict : le chef ne voit et ne pilote que SA fiche de département
+// (nom, modules autorisés, effectif, responsable) et le roster des collaborateurs
+// rattachés à son département. Le backend épingle le niveau 2 à son department_id ;
+// toute tentative de télécharger un autre département renvoie 403.
+//
+// Tranche C (écritures) : le chef peut AFFECTER un collaborateur (niveau 3) de son
+// entreprise à son département et en RETIRER un. Ces actions ne font qu'appeler le
+// backend scope (require_department_head + _scoped_department + _guard_target) :
+// si l'autorisation manque, le 403/400 backend s'affiche honnêtement (zéro-mock).
+//
+// L'allocation des MODULES d'un département relève de l'Admin Entreprise (1) / CADC
+// (0) et reste en lecture ici (un chef ne se auto-grantit pas ; cf. PUT /modules 403).
 //
 // Un admin entreprise (1) / CADC (0) qui atteindrait cet écran doit cibler un
-// département explicite ; ce n'est pas l'usage prévu ici (ils pilotent via
-// l'Administration Entreprise / la console CADC). On affiche alors l'invite
-// renvoyée par le backend plutôt que des données inventées (zéro-mock).
+// département explicite ; ce n'est pas l'usage prévu ici. On affiche alors l'invite
+// renvoyée par le backend plutôt que des données inventées.
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Users, Building2, Mail, Phone, BadgeCheck, UserCog, CircleSlash } from 'lucide-react';
+import { Users, Building2, Mail, Phone, BadgeCheck, UserCog, CircleSlash, UserPlus, UserMinus, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { departmentAPI } from '@/lib/api-client';
 
@@ -51,11 +58,21 @@ const LEVEL_LABEL: Record<number, string> = {
   3: 'Collaborateur',
 };
 
+function errMsg(err: any, fallback: string): string {
+  const detail = err?.response?.data?.detail;
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail) && detail[0]?.msg) return String(detail[0].msg);
+  return fallback;
+}
+
 export default function DepartementPage() {
   const [overview, setOverview] = useState<DeptOverview | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
+  const [candidates, setCandidates] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [filter, setFilter] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -67,13 +84,22 @@ export default function DepartementPage() {
       ]);
       setOverview(ov.data);
       setMembers(mb.data);
+      // Les candidats mobilisables ne concernent que le chef (le backend épingle son
+      // département) ; pour un admin/CADC sans département ciblé, l'appel echoue en
+      // 400 — on laisse simplement la liste vide (la vue "notice" s'affiche déjà).
+      try {
+        const cd = await departmentAPI.listCandidates();
+        setCandidates(cd.data);
+      } catch {
+        setCandidates([]);
+      }
     } catch (err: any) {
       const detail = err?.response?.data?.detail;
       if (err?.response?.status === 400 && typeof detail === 'string') {
         // Admin / CADC sans département ciblé : usage non prévu ici.
         setNotice(detail);
       } else {
-        toast.error(detail || 'Impossible de charger le département');
+        toast.error(errMsg(err, 'Impossible de charger le département'));
       }
     } finally {
       setLoading(false);
@@ -81,6 +107,36 @@ export default function DepartementPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // Le chef (niveau 2) est le seul à atteindre la vue "overview" ; les niveaux 0/1
+  // tombent sur la vue "notice". On derive neanmoins la competence du perimetre.
+  const canManage = !!overview && overview.role_level_callant <= 2;
+
+  async function handleAffect(member: Member) {
+    setBusyId(member.id);
+    try {
+      await departmentAPI.affectMember(member.id);
+      toast.success(`${member.full_name || member.username} ajouté au département`);
+      await load();
+    } catch (err: any) {
+      toast.error(errMsg(err, "Échec de l'affectation"));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleRetire(member: Member) {
+    setBusyId(member.id);
+    try {
+      await departmentAPI.removeMember(member.id);
+      toast.success(`${member.full_name || member.username} retiré du département`);
+      await load();
+    } catch (err: any) {
+      toast.error(errMsg(err, 'Échec du retrait'));
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   if (loading) {
     return <div className="p-6 text-slate-400 text-sm">Chargement du département…</div>;
@@ -101,6 +157,13 @@ export default function DepartementPage() {
     );
   }
 
+  const q = filter.trim().toLowerCase();
+  const shownCandidates = q
+    ? candidates.filter(c =>
+        [c.username, c.full_name, c.matricule, c.email]
+          .some(v => v && String(v).toLowerCase().includes(q)))
+    : candidates;
+
   return (
     <div className="p-4 sm:p-6 space-y-6">
       <header className="flex items-start gap-3">
@@ -111,12 +174,12 @@ export default function DepartementPage() {
           <h1 className="text-xl font-black text-slate-100">{overview.nom}</h1>
           <p className="text-xs text-slate-400 mt-0.5">
             Code&nbsp;: {overview.code} · Effectif&nbsp;: {overview.effectif}
-            {overview.manager ? ` · Responsable&nbsp: ${overview.manager.full_name || overview.manager.username}` : ''}
+            {overview.manager ? ` · Responsable : ${overview.manager.full_name || overview.manager.username}` : ''}
           </p>
         </div>
       </header>
 
-      {/* Modules autorisés pour le département */}
+      {/* Modules autorisés pour le département (lecture seule ici) */}
       <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-2">
         <h2 className="text-sm font-bold text-slate-200">Modules autorisés</h2>
         {overview.modules_allowed.length === 0 ? (
@@ -130,7 +193,52 @@ export default function DepartementPage() {
             ))}
           </div>
         )}
+        <p className="text-[11px] text-slate-500 pt-1">
+          L'allocation des modules d'un département relève de l'Administration Entreprise / CADC.
+        </p>
       </section>
+
+      {/* Affecter un collaborateur (competence du chef) */}
+      {canManage && (
+        <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-3">
+          <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+            <UserPlus className="w-4 h-4" /> Affecter un collaborateur
+          </h2>
+          <div className="relative">
+            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              value={filter}
+              onChange={e => setFilter(e.target.value)}
+              placeholder="Rechercher par nom, identifiant, matricule…"
+              className="w-full rounded-lg bg-slate-950/60 border border-slate-700 pl-9 pr-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+            />
+          </div>
+          {shownCandidates.length === 0 ? (
+            <p className="text-xs text-slate-500">
+              {candidates.length === 0
+                ? "Tous les collaborateurs de l'entreprise sont déjà rattachés à votre département."
+                : 'Aucun collaborateur ne correspond à cette recherche.'}
+            </p>
+          ) : (
+            <ul className="flex flex-wrap gap-2">
+              {shownCandidates.map(c => (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleAffect(c)}
+                    disabled={busyId === c.id}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-100 border border-slate-700 hover:border-sky-500/50 hover:bg-sky-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span>{c.full_name || c.username}</span>
+                    <span className="text-slate-500">@{c.username}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       {/* Roster des collaborateurs */}
       <section className="space-y-2">
@@ -164,6 +272,18 @@ export default function DepartementPage() {
                   {m.roles.map(r => (
                     <span key={r} className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">{r}</span>
                   ))}
+                </div>
+              )}
+              {canManage && m.role_level === 3 && (
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleRetire(m)}
+                    disabled={busyId === m.id}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-rose-300 border border-slate-700 hover:border-rose-500/50 hover:bg-rose-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    <UserMinus className="w-3.5 h-3.5" /> Retirer du département
+                  </button>
                 </div>
               )}
             </div>
