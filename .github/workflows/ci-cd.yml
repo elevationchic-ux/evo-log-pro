@@ -82,7 +82,15 @@ jobs:
     - name: Run tests
       working-directory: ./evo-log-backend
       run: |
-        pytest tests/ -v --cov=app --cov-report=xml
+        set +e
+        pytest tests/ -v --cov=app --cov-report=xml > pytest_out.log 2>&1
+        rc=$?
+        set -e
+        if [ $rc -ne 0 ]; then
+          echo "::error::pytest rc=$rc :: $(grep -E '^(FAILED|ERROR)' pytest_out.log | head -n 8 | tr '\n' ' ' | tr -d ';')"
+          tail -n 60 pytest_out.log
+          exit $rc
+        fi
     
     - name: Upload coverage
       uses: codecov/codecov-action@v3

@@ -987,9 +987,8 @@ def rejeter_conge(
 class DecisionCongePortail(BaseModel):
     """Decision sur une demande de conge, telle que la saisit l'ecran.
 
-    `commentaire` est libre : approving sans commentaire comme rejecting sans
-    commentaire sont acceptes, l'application n'oblige personne a produire une
-    reason qu'il n'a pas.
+    `commentaire` reste libre : approuver comme refuser sans commentaire est
+    admis. L'application n'oblige personne a produire une raison qu'il n'a pas.
     """
     approuve: bool
     commentaire: Optional[str] = None
@@ -1053,23 +1052,33 @@ def obtenir_taux_absenteisme(
 @router.post("/pointage/arrivee", response_model=TempsTravailResponse, status_code=status.HTTP_201_CREATED)
 def pointer_arrivee(
     date_pointage: date,
-    heure_arrivee: datetime,
+    # Heure de saisie "HH:MM" (champ <input type="time"> du portail), pas un
+    # horodatage : la colonne est un VARCHAR(5) en base.
+    heure_arrivee: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user)
 ):
     """Clock in"""
-    return TempsTravailService.pointer_arrivee(db, current_user.id, date_pointage, heure_arrivee)
+    try:
+        return TempsTravailService.pointer_arrivee(
+            db, current_user.id, date_pointage, heure_arrivee)
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 @router.post("/pointage/depart", response_model=TempsTravailResponse)
 def pointer_depart(
     date_pointage: date,
-    heure_depart: datetime,
+    heure_depart: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user)
 ):
     """Clock out"""
-    return TempsTravailService.pointer_depart(db, current_user.id, date_pointage, heure_depart)
+    try:
+        return TempsTravailService.pointer_depart(
+            db, current_user.id, date_pointage, heure_depart)
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 @router.get("/heures/{employe_id}/{mois}/{annee}", response_model=HeuresMensuellesResponse)
