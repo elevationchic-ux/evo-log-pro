@@ -10,7 +10,7 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app tests` | ✅ EXIT=0 |
-| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 16) | ✅ **516 passed, 2 xfailed, 0 failed** (427 s). Historique : les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`** — corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17 et §18). |
+| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 17) | ✅ **527 passed, 2 xfailed, 0 failed** (370 s). Historique : les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`** — corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17, §18 et §19). |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1082 routes OpenAPI) |
 | `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
 
@@ -703,6 +703,92 @@ Lignes critiques de la route vivante (avant correction) :
 reellement le stock est une ecriture mensongere ; un refus sans motif n'est pas
 opposable ; une signature que le systeme ne peut pas imprimer avec un nom et une
 date reels n'existe pas.
+
+---
+
+## 19. Batch 17 — Retours clients, litiges transporteurs et KPI : 6 endpoints morts reconstruits sur le modele reel
+
+Annonces au §18 (« Reste ») : `/magasin-avance/retours` et `/litiges` etaient morts
+du meme syndrome « champs fantomes » que le trio `/sorties` du batch 16. A la
+difference de ces derniers, ils n'avaient **aucun equivalent live** : la seule
+option honnete etait la **reconstruction sur le modele reel**, pas la suppression.
+
+### Constat (audit)
+
+| Endpoint | Cause de mort | Ce qui se passait vraiment |
+|---|---|---|
+| `POST /retours` | Schema inventait `article_id`, `etat` | `RetourClient(article_id=…)` → TypeError → 500 garanti a chaque appel |
+| `PUT /retours/{id}/traiter` | Ecrivait `date_traitement`, `action_effectuee` | Colonnes inexistantes : l'ORM accepte l'attribut non declare mais **ne le persiste jamais** → perte silencieuse |
+| `POST /litiges` | `date_litige` (reel : `date_incident`) | TypeError → 500 garanti |
+| `PUT /litiges/{id}/resoudre` | Champs fantomes + code inatteignable | 500 |
+| `GET /kpi/rotation/{article_id}` | `Stock.quantite`, `MouvementStock.article_id` | AttributeError → 500 (reels : `quantite_disponible`, `stock_id`) |
+| `GET /kpi/precision/{entrepot_id}` | `InventaireTournant.date_inventaire` (reel : `date_debut`) + statut `"valide"` | 500 ; et meme corrige, le workflow reel est `planifie/en_cours/termine/annule` → `"valide"` ne matchait **jamais** |
+
+Modeles reels : `RetourClient` (numero_retour unique, client_id NOT NULL,
+bon_sortie_id FK, **aucun stock_id**), `LitigeTransporteur` (transporteur_id FK
+`fournisseurs.id`, statut `en_cours → resolu/refuse/justice`, date_resolution reel).
+
+### Corrections
+
+| Fichier | Correction |
+|---|---|
+| `schemas/magasin_avance.py` | Schemas Retour/Litige remplaces par des versions **alignees modele** (`RetourClientCreate/Traitement/Response`, `LitigeTransporteurCreate/Resolution/Response`) ; `RotationStockResponse` enrichi (`sorties`, `stock_actuel`, `rotation: Optional[float]`) |
+| `routers/v1/magasin_avance.py` | 8 endpoints reconstruits : GET/POST/PATCH + `/traiter` pour les retours, GET/POST/PATCH + `/resoudre` pour les litiges, 2 KPI recalculs sur le registre reel ; numerotation anti-collision `RT-/LI-YYYYMMDD-NNNN` ; verifications d'existence Client/BonSortie/Fournisseur en explicite (FK SQLite desactivees par defaut) |
+| tests | `tests/unit/test_magasin_avance_retours_litiges.py` : 9 tests reels (400 de validation, immunite apres decision, decision unique, KPI calculees sur mouvements seeds) |
+
+Circuit de decision (meme patron que le batch 16) : `statut` jamais modifiable
+par PATCH ; transitions uniquement via `/traiter` (accepte **exige** une action
+remplacement/remboursement/destruction ; refuse l'interdit ; cout >= 0) et
+`/resoudre` (resolution ecrite obligatoire, montant_indemnise seulement si
+`resolu`, double cloture = 400).
+
+### Decisions d'honnetete
+
+- **Aucun mouvement de stock invente** a la reception d'un retour : le modele
+  RetourClient n'a pas de stock_id, la reintegration stock n'est pas modelisee.
+  Un test assertion `MouvementStock.count() == 0` apres traitement — si quelqu'un
+  «oublie» ce garde-fou, le test rouge.
+- Date de traitement tracee dans `notes` (`[TRAITE {date} par utilisateur {id}]`) :
+  pas de colonne `date_traitement` → pas de migration inventee pour l'occase.
+- `montant_indemnise` remplace `montant_reclame` lors d'une resolution partielle :
+  seule representation honnete sans migration ; documente dans le schema.
+- KPI : `rotation = None` si stock a zero (pas de division par zero deguisee en
+  0.0) ; `precision = None` + message « non mesuree » si aucun inventaire
+  `termine` — un KPI jamais mesure n'est pas un KPI a 0 %.
+
+### Pitfall annexe decouvert (Python 3.14 / pydantic 2.13)
+
+`Optional` non importe dans le router → `PydanticUserError: TypeAdapter[…
+ForwardRef('Optional[str]')…] is not fully defined` **seulement quand le query
+param est fourni** (un param absent saute la validation : les GET filtres
+plantaient, les GET simples passaient). Correction : `from typing import
+List, Optional`. A retenir : ce n'est pas un probleme de lazy annotations, c'est
+un nom simplement pas importe.
+
+### Verification
+
+- `python -m pytest tests/unit/test_magasin_avance_retours_litiges.py -q` : ✅ **9 passed**.
+- Suite complete (commande CI) : ✅ **527 passed, 2 xfailed, 0 failed** (370 s),
+  `PYTEST_EXIT=0`, **`DB_CHANGED=False`** (mtime/taille `kamlog_erp.db` identiques).
+- `python -m compileall app` : ✅ EXIT=0 ; `import app.main` : ✅ OK.
+- Batch **sans aucun changement frontend** (aucun ecran ne consomme ces routes) ;
+  `npx tsc --noEmit` ✅ EXIT=0 et `audit_frontend.py --strict-honesty` ✅ OK
+  re-lances en simple confirmation de non-regression.
+
+### Reste (hors perimetre du batch, signale)
+
+- `POST /magasin-avance/reapprovisionnement/automatique/{fournisseur_id}` est
+  **mort autrement** : `stock.article_id` n'existe pas sur Stock (lien reel :
+  `code_article`) → AttributeError 500 des qu'un stock passe sous le seuil ;
+  et `prix_unitaire=0.0` invente dans la ligne de commande.
+- `GET /magasin-avance/fournisseurs/{id}/performance` rend `note: 0` quand il n'y
+  a aucune commande — faux zero (devrait etre `null` + « non evalue ») ; aucune
+  verification d'existence du fournisseur.
+- Signature manuscrite numerisee (report du §18, toujours d'actualite).
+
+➡️ Zero-Mock applique aux KPI : un taux de precision a 0 % calcule sur un
+inventaire qui ne porte jamais le statut « valide » attendu n'est pas une mesure,
+c'est un chiffre invente. `None` + « non mesure » est la seule reponse honnete.
 
 ---
 
