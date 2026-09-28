@@ -704,8 +704,12 @@ export const rhAPI = {
   getMyProfile: () => apiClient.get('/api/rh/employes/me'),
   getConges: (params?: Record<string, unknown>) => apiClient.get('/api/rh/conges', { params }),
   createConge: (data: unknown) => apiClient.post('/api/rh/conges', data),
-  updateCongeStatut: (id: number, statut: string) =>
-    apiClient.post(`/api/rh/conges/${id}/${statut.toUpperCase() === 'APPROUVE' ? 'approuver' : 'rejeter'}`),
+  // Decision sur une demande : le backend expose PUT /conges/{id}/approuver et
+  // PUT /conges/{id}/rejeter, le motif de refus étant obligatoire au rejet.
+  deciderConge: (id: number, approuve: boolean, commentaire = '') =>
+    approuve
+      ? apiClient.put(`/api/rh/conges/${id}/approuver`, null, { params: { commentaire } })
+      : apiClient.put(`/api/rh/conges/${id}/rejeter`, null, { params: { motif_refus: commentaire } }),
   getPaie: (params?: Record<string, unknown>) => apiClient.get('/api/rh/paie/bulletin', { params }),
   createFichePaie: (data: unknown) => apiClient.post('/api/rh/paie/bulletin', data),
   importEmployesExcel: (data: FormData) => apiClient.post('/api/rh/employes/import-excel', data, {
