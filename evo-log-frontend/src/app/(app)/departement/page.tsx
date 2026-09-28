@@ -119,6 +119,8 @@ export default function DepartementPage() {
   const [overview, setOverview] = useState<DeptOverview | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [candidates, setCandidates] = useState<Member[]>([]);
+  const [planning, setPlanning] = useState<PlanningData | null>(null);
+  const [presence, setPresence] = useState<PresenceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -137,11 +139,22 @@ export default function DepartementPage() {
       // Les candidats mobilisables ne concernent que le chef (le backend épingle son
       // département) ; pour un admin/CADC sans département ciblé, l'appel echoue en
       // 400 — on laisse simplement la liste vide (la vue "notice" s'affiche déjà).
+      // Lectures Phase 4 scopees (planning + presence) : meme perimetre chef. Elles
+      // echouent en 400 pour un admin/CADC sans département ciblé — on laisse alors
+      // les sections vides (la vue "notice" s'affiche déjà pour ces rôles).
       try {
-        const cd = await departmentAPI.listCandidates();
+        const [cd, pl, pr] = await Promise.all([
+          departmentAPI.listCandidates(),
+          departmentAPI.getPlanning(),
+          departmentAPI.getPresence(),
+        ]);
         setCandidates(cd.data);
+        setPlanning(pl.data);
+        setPresence(pr.data);
       } catch {
         setCandidates([]);
+        setPlanning(null);
+        setPresence(null);
       }
     } catch (err: any) {
       const detail = err?.response?.data?.detail;
