@@ -595,7 +595,40 @@ class PerformanceService:
 
 class ContratService:
     """Employment contract management service - Cameroon labor law compliant"""
-    
+
+    @staticmethod
+    def valider_contrat(
+        type_contrat: str,
+        date_debut: date,
+        date_fin: Optional[date],
+        salaire_base: float,
+    ) -> str:
+        """Regles du contrat, sans ecrire : le type normalise retenu.
+
+        Separee de la creation parce qu'un ecran a besoin de refuser une saisie
+        AVANT d'avoir cree le compte de l'agent : sans ce test prealable, un
+        type de contrat errone laissait dans la base un salarie sans contrat,
+        moitie importe. Les regles restent dans une seule implementation,
+        appelee aussi par creer_contrat.
+        """
+        type_normalise = (type_contrat or "").strip().upper()
+        if type_normalise not in TYPES_CONTRAT:
+            raise ValueError(
+                "Type de contrat inconnu : %s (attendu : %s)"
+                % (type_contrat, ", ".join(sorted(TYPES_CONTRAT)))
+            )
+        if date_debut is None:
+            raise ValueError("La date de debut (embauche) du contrat est requise")
+        if date_fin is None and type_normalise in ("CDD", "STAGE", "APPRENTISSAGE"):
+            raise ValueError(f"Un {type_normalise} doit porter une date de fin")
+        if date_fin is not None and type_normalise == "CDI":
+            raise ValueError("Un CDI ne peut pas porter de date de fin")
+        if date_fin is not None and date_fin < date_debut:
+            raise ValueError("La date de fin precede la date de debut")
+        if float(salaire_base or 0) <= 0:
+            raise ValueError("Le salaire de base doit etre positif")
+        return type_normalise
+
     @staticmethod
     def creer_contrat(
         db: Session,
@@ -626,29 +659,18 @@ class ContratService:
         Les trois dernieres colonnees (departement, horaire, lieu) alimentent
         l'attestation de travail et l'assiette des heures supplementaires.
         """
-        type_contrat = (type_contrat or "").strip().upper()
-        if type_contrat not in TYPES_CONTRAT:
-            raise ValueError(
-                "Type de contrat inconnu : %s (attendu : %s)"
-                % (type_contrat, ", ".join(sorted(TYPES_CONTRAT)))
-            )
+        type_normalise = ContratService.valider_contrat(
+            type_contrat, date_debut, date_fin, salaire_base
+        )
         if not db.query(User).filter(User.id == employe_id).first():
             raise ValueError(f"Aucun employe a l'identifiant {employe_id}")
-        if date_fin is None and type_contrat in ("CDD", "STAGE", "APPRENTISSAGE"):
-            raise ValueError(f"Un {type_contrat} doit porter une date de fin")
-        if date_fin is not None and type_contrat == "CDI":
-            raise ValueError("Un CDI ne peut pas porter de date de fin")
-        if date_fin is not None and date_fin < date_debut:
-            raise ValueError("La date de fin precede la date de debut")
-        if float(salaire_base or 0) <= 0:
-            raise ValueError("Le salaire de base doit etre positif")
 
         contrat = ContratTravail(
             employe_id=employe_id,
-            type_contrat=type_contrat,
+            type_contrat=type_normalise,
             date_debut=date_debut,
             date_fin=date_fin,
-            poste=poste,
+            poste=(poste or "").strip(),
             salaire_base=salaire_base,
             coefficient=coefficient,
             classification=classification,

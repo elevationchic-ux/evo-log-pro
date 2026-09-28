@@ -66,19 +66,19 @@ async def get_all_conducteurs(skip: int = 0, limit: int = 100, db: Session = Dep
 
 
 @router.get("/chauffeurs", response_model=List[ConducteurResponse])
-async def get_all_chauffeurs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def get_all_chauffeurs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.read"))):
     """Compatibility alias for the frontend's driver terminology."""
     return db.query(Conducteur).offset(skip).limit(limit).all()
 
 
 @router.post("/chauffeurs", response_model=ConducteurResponse, status_code=status.HTTP_201_CREATED)
-async def create_chauffeur(conducteur_data: ConducteurCreate, db: Session = Depends(get_db)):
+async def create_chauffeur(conducteur_data: ConducteurCreate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.create"))):
     """Compatibility alias that persists drivers in the conducteurs table."""
     return await create_conducteur(conducteur_data, db)
 
 
 @router.post("/conducteurs", response_model=ConducteurResponse, status_code=status.HTTP_201_CREATED)
-async def create_conducteur(conducteur_data: ConducteurCreate, db: Session = Depends(get_db)):
+async def create_conducteur(conducteur_data: ConducteurCreate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.create"))):
     """Create a new driver"""
     if db.query(Conducteur).filter(Conducteur.numero_permis == conducteur_data.numero_permis).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="License number already exists")
@@ -98,14 +98,14 @@ async def create_conducteur(conducteur_data: ConducteurCreate, db: Session = Dep
 
 
 @router.get("/missions", response_model=List[MissionResponse])
-async def get_all_missions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def get_all_missions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.read"))):
     """Get all missions"""
     missions = db.query(Mission).offset(skip).limit(limit).all()
     return missions
 
 
 @router.get("/missions/{mission_id}", response_model=MissionResponse)
-async def get_mission(mission_id: int, db: Session = Depends(get_db)):
+async def get_mission(mission_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.read"))):
     mission = db.query(Mission).filter(Mission.id == mission_id).first()
     if not mission:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mission not found")
@@ -113,12 +113,12 @@ async def get_mission(mission_id: int, db: Session = Depends(get_db)):
 
 
 @router.patch("/missions/{mission_id}/statut", response_model=MissionResponse)
-async def update_mission_status(mission_id: int, mission_data: MissionUpdate, db: Session = Depends(get_db)):
+async def update_mission_status(mission_id: int, mission_data: MissionUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.modify"))):
     return await update_mission(mission_id, mission_data, db)
 
 
 @router.post("/missions", response_model=MissionResponse, status_code=status.HTTP_201_CREATED)
-async def create_mission(mission_data: MissionCreate, db: Session = Depends(get_db)):
+async def create_mission(mission_data: MissionCreate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.create"))):
     """Create a new mission"""
     db_mission = Mission(**mission_data.model_dump())
     db.add(db_mission)
@@ -128,7 +128,7 @@ async def create_mission(mission_data: MissionCreate, db: Session = Depends(get_
 
 
 @router.put("/missions/{mission_id}", response_model=MissionResponse)
-async def update_mission(mission_id: int, mission_data: MissionUpdate, db: Session = Depends(get_db)):
+async def update_mission(mission_id: int, mission_data: MissionUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.modify"))):
     """Update a mission"""
     mission = db.query(Mission).filter(Mission.id == mission_id).first()
     if not mission:
@@ -144,14 +144,14 @@ async def update_mission(mission_id: int, mission_data: MissionUpdate, db: Sessi
 
 @router.get("", response_model=List[MissionResponse])
 @router.get("/", response_model=List[MissionResponse])
-async def list_missions_root(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def list_missions_root(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.read"))):
     """List all transport missions from root endpoint"""
     return db.query(Mission).offset(skip).limit(limit).all()
 
 
 # ============ TMS VRP ROUTE OPTIMIZER ============
 @router.post("/vrp-optimize")
-async def optimiser_tournees_vrp(payload: dict = None):
+async def optimiser_tournees_vrp(payload: dict = None, current_user: User = Depends(require_perm("transport.dispatch.read"))):
     """Run VRP route optimizer with backhaul reduction and quai time-window constraints"""
     from app.services.transport_international_service import TMSAdvancedOptimizerService
     return TMSAdvancedOptimizerService.optimiser_tournees_vrp(payload or {})
@@ -159,7 +159,7 @@ async def optimiser_tournees_vrp(payload: dict = None):
 
 # ============ CORRIDORS INTERNATIONAUX CEMAC ============
 @router.get("/corridors-cemac")
-async def obtenir_statut_corridors_cemac(db: Session = Depends(get_db)):
+async def obtenir_statut_corridors_cemac(db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.dispatch.read"))):
     """Live status of international CEMAC transit corridors with TIR carnet & customs convoys"""
     from app.services.transport_international_service import TMSAdvancedOptimizerService
     return TMSAdvancedOptimizerService.get_corridor_cemac_status(db)
@@ -167,7 +167,7 @@ async def obtenir_statut_corridors_cemac(db: Session = Depends(get_db)):
 
 # ============ TCO FLOTTE & MAINTENANCE PRÉDICTIVE ============
 @router.get("/flotte/tco")
-async def obtenir_tco_flotte(db: Session = Depends(get_db)):
+async def obtenir_tco_flotte(db: Session = Depends(get_db), current_user: User = Depends(require_perm("parc.flotte.read"))):
     """TCO cost per km and maintenance alerts for the fleet (agregats reels)"""
     from app.services.transport_international_service import TMSAdvancedOptimizerService
     return TMSAdvancedOptimizerService.get_tco_fleet_analytics(db)
@@ -175,7 +175,7 @@ async def obtenir_tco_flotte(db: Session = Depends(get_db)):
 
 # ============ KPIS TRANSPORT ============
 @router.get("/kpis")
-async def get_transport_kpis(db: Session = Depends(get_db)):
+async def get_transport_kpis(db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.read"))):
     """KPIs consolidés de la flotte et des opérations de transport.
 
     Filtres alignés sur les enums réels du modèle (CamionStatus, MissionStatus) :
