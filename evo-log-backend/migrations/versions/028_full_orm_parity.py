@@ -226,10 +226,13 @@ def _reconvertir_heures(insp, tables_en_base):
             if dialect == "postgresql":
                 sens = ("to_char(\"%s\", 'HH24:MI')" % col.name
                         if fam in _FAMILLES_HORODATE else "\"%s\"::text" % col.name)
+                # Le type cible est compile depuis le dialecte REEL de la
+                # migration : la declaration sort exactement comme un create()
+                # de l'ORM l'aurait emise, sans dialecte importe a la main.
+                type_cible = col.type.compile(dialect=op.get_context().dialect)
                 op.get_bind().execute(sa.text(
                     'ALTER TABLE "%s" ALTER COLUMN "%s" TYPE %s USING %s'
-                    % (nom, col.name, col.type.compile(dialect=sa.dialects.postgresql.dialect()),
-                       sens)))
+                    % (nom, col.name, type_cible, sens)))
             else:
                 # SQLite : la donnee est deja une chaine, on garde les cinq
                 # caracteres de l'heure avant de changer la declaration.
