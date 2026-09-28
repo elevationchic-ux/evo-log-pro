@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Warehouse, Package, CheckCircle2, Clock, AlertTriangle,
   RefreshCw, Check, ArrowRight, ShieldCheck, Box, Search,
-  QrCode, ClipboardList, Layers, Truck, X
+  QrCode, ClipboardList, Layers, Truck, X, FileDown, XCircle
 } from 'lucide-react';
 import { removalSlipAPI, receptionMag3API, magasinAPI } from '@/lib/api-client';
 import api from '@/lib/api';

@@ -149,13 +149,16 @@ def downgrade():
     op.drop_index(op.f('ix_tiers_code'), table_name='tiers')
     op.drop_table('tiers')
     
+    # Drop dans l'ordre inverse des dependances FK : les tables filles
+    # (user_roles, role_permissions) avant leurs parents (users, roles),
+    # sinon PostgreSQL refuse (dependeur vivant).
+    op.drop_table('user_roles')
+    op.drop_table('role_permissions')
+
     op.drop_index(op.f('ix_users_username'), table_name='users')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
-    
-    op.drop_table('role_permissions')
-    op.drop_table('user_roles')
     
     op.drop_index(op.f('ix_permissions_id'), table_name='permissions')
     op.drop_table('permissions')

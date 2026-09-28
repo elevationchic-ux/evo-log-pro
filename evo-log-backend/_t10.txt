@@ -1,0 +1,83 @@
+﻿## _replay.db
+   conges.statut              : {}
+   conges.type_conge          : {}
+   absences.type_absence      : {}
+   salaires                   : pas de colonne statut
+   salaires.date_paiement     : {}
+   contrats_travail.statut    : {}
+   contrats_travail.type_contrat : {}
+   primes.type_prime          : {}
+   participations_formation.statut : {}
+   temps_travail.statut       : {}
+   absences.date_debut        : {}
+## kamlog_erp.db
+   conges.statut              : {}
+   conges.type_conge          : {}
+   absences.type_absence      : {}
+   salaires                   : pas de colonne statut
+   salaires.date_paiement     : {}
+   contrats_travail.statut    : {}
+   contrats_travail.type_contrat : {}
+   primes.type_prime          : {}
+   participations_formation.statut : {}
+   temps_travail.statut       : {}
+   absences.date_debut        : {}
+
+## ecritures Python (extrait)
+--- StatutConge.  (10 lignes)
+   app/routers/v1/chef_personnel.py:298:    new_statut = StatutConge.APPROUVE if data.decision.upper() in ["APPROUVER", "VALIDE", "APPROUVE"] else StatutConge.REFU
+   app/routers/v1/rh.py:20:    Conge, TypeConge, StatutConge, Absence, TempsTravail,
+   app/routers/v1/rh.py:109:        Conge.statut == StatutConge.APPROUVE,
+   app/routers/v1/rh.py:552:        statut=StatutConge.EN_ATTENTE,
+   app/routers/v1/shift_planning.py:134:            query = query.filter(Conge.statut == StatutConge(statut))
+   app/routers/v1/shift_planning.py:191:    conges_en_attente = query_cong.filter(Conge.statut == StatutConge.EN_ATTENTE).count()
+   app/routers/v1/shift_planning.py:192:    conges_approuves = query_cong.filter(Conge.statut == StatutConge.APPROUVE).count()
+   scripts/seed_data.py:34:from app.models.rh import Conge, TypeConge, StatutConge
+   scripts/seed_data.py:1153:            "statut": StatutConge.EN_ATTENTE
+   scripts/seed_data.py:1162:            "statut": StatutConge.EN_ATTENTE
+--- TypeConge.  (11 lignes)
+   app/routers/v1/chef_personnel.py:19:from app.models.rh import Conge, TypeConge, StatutConge
+   app/routers/v1/rh.py:20:    Conge, TypeConge, StatutConge, Absence, TempsTravail,
+   app/routers/v1/rh.py:533:    conge_type_enum = TypeConge.CONGE_ANNUEL
+   app/routers/v1/rh.py:536:        conge_type_enum = TypeConge.CONGE_MALADIE
+   app/routers/v1/rh.py:538:        conge_type_enum = TypeConge.CONGE_MATERNITE
+   app/routers/v1/rh.py:540:        conge_type_enum = TypeConge.CONGE_PATERNITE
+   app/routers/v1/rh.py:542:        conge_type_enum = TypeConge.CONGE_SANS_SOLDE
+   app/routers/v1/rh.py:544:        conge_type_enum = TypeConge.CONGE_EXCEPTIONNEL
+   scripts/seed_data.py:34:from app.models.rh import Conge, TypeConge, StatutConge
+   scripts/seed_data.py:1148:            "type_conge": TypeConge.CONGE_ANNUEL,
+   scripts/seed_data.py:1157:            "type_conge": TypeConge.CONGE_EXCEPTIONNEL,
+--- statut="  (152 lignes)
+   app/routers/v1/bill_of_loading.py:168:        statut="en_attente",
+   app/routers/v1/chef_personnel.py:383:        statut="PLANIFIE",
+   app/routers/v1/frais_missions.py:85:        statut="SOUMIS",
+   app/routers/v1/frais_missions.py:146:        statut="DEMANDEE",
+   app/routers/v1/goods_declaration.py:232:        statut="en_attente",
+   app/routers/v1/integration_cameroun.py:63:        statut="en_attente",
+   app/routers/v1/integration_cameroun.py:118:        statut="en_attente",
+   app/routers/v1/integration_cameroun.py:165:        statut="en_attente",
+   app/routers/v1/integration_cameroun.py:215:        statut="en_attente",
+   app/routers/v1/magasin_avance.py:382:        statut="en_attente"
+   app/routers/v1/magasin_avance.py:457:        statut="en_cours"
+   app/routers/v1/magasin_avance.py:641:            statut="en_attente"
+   app/routers/v1/magasin_avance.py:677:        statut="en_cours"
+   app/routers/v1/magasin_store.py:383:        statut="en_preparation",
+   app/routers/v1/master_data.py:130:        statut="actif",
+   app/routers/v1/notification_system.py:150:        statut="envoye",
+   app/routers/v1/partner_api.py:109:        statut="actif"
+   app/routers/v1/partner_api.py:197:        statut="ouverte"
+   app/routers/v1/prestataires.py:233:        statut="TRANSMIS"
+   app/routers/v1/reception_mag3.py:140:        statut="en_attente",
+   app/routers/v1/removal_slip.py:177:        statut="en_attente",
+   app/routers/v1/removal_slip.py:194:            statut="conforme"
+   app/routers/v1/saas_console.py:659:        statut="actif",
+   app/routers/v1/transport_avance.py:46:        statut="planifie"
+   app/routers/v1/transport_avance.py:70:        statut="en_attente"
+--- statut='  (2 lignes)
+   app/routers/v1/acconage_avance.py:630:            statut='ACTIF',
+   app/routers/v1/removal_slip.py:264:      statut='valide' sans aucun decript ÔÇö faux document signe.
+--- type_conge=  (4 lignes)
+   app/routers/v1/chef_personnel.py:273:            type_conge=t_conge.upper(),
+   app/routers/v1/chef_personnel.py:319:        type_conge=t_conge.upper(),
+   app/routers/v1/rh.py:548:        type_conge=conge_type_enum,
+   app/services/rh_service.py:69:            type_conge=type_conge,
