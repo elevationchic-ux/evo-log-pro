@@ -617,8 +617,40 @@ class ContratService:
 
 
 class PaieService:
-    """Payroll service - Cameroon specific with configuration-driven rules"""
-    
+    """Payroll service - Cameroon specific with configuration-driven rules
+
+    Les taux ne sont pas redéfinis ici : CNPS et barème IRGM viennent de
+    PaieOHADAService, source unique du backend. Ce que cette classe ajoute est
+    la structure du bulletin (brut, cotisations, net), pas une deuxieme table de
+    taux qui pourrait contredire la première.
+    """
+
+    # Base de conversion mensuelle : la duree légale camerounaise ramenée en
+    # heures par mois (2 080 h/an / 12). Un contrat portant un horaire explicite
+    # (35h, 38h, 40h par semaine) prend neanmoins la priorité : c'est la durée
+    # réellement convenue, pas la valeur par défaut du code du travail.
+    HEURES_MENSUELLES_FORFAIT = 173.33
+
+    @staticmethod
+    def heures_mensuelles_contrat(db: Session, employe_id: int) -> float:
+        """Heures mensuelles de référence : l'horaire du contrat, sinon le forfait."""
+        contrat = db.query(ContratTravail).filter(
+            and_(
+                ContratTravail.employe_id == employe_id,
+                ContratTravail.statut == "actif",
+            )
+        ).order_by(ContratTravail.date_debut.desc()).first()
+        horaire = (contrat.horaire_travail if contrat else None) or ""
+        chiffre = "".join(c for c in str(horaire) if (c.isdigit() or c == "."))
+        if chiffre:
+            try:
+                hebdo = float(chiffre)
+                if 0 < hebdo <= 80:
+                    return round(hebdo * 52 / 12, 2)
+            except ValueError:
+                pass
+        return PaieService.HEURES_MENSUELLES_FORFAIT
+
     @staticmethod
     def preparer_bulletin(
         db: Session,
@@ -631,11 +663,7 @@ class PaieService:
         deductions: List[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
-        Prepare payroll bulletin - Configuration-driven for Cameroon
-        
-        NOTE: Actual tax rates and social contributions must be configured
-        and validated against current Cameroon/CEMAC regulations before
-        production use. This is a template structure.
+        Prepare payroll bulletin - Cameroon/CEMAC, rates from PaieOHADAService
         """
         primes = primes or []
         deductions = deductions or []
@@ -645,14 +673,15 @@ class PaieService:
         
         # Overtime pay (Cameroon: +25% for first 8h, +50% beyond)
         taux_heures_sup = 1.25 if heures_sup <= 8 else 1.5
-        indemnite_heures_sup = heures_sup * (salaire_base / 173.33) * taux_heures_sup
+        heures_ref = PaieService.heures_mensuelles_contrat(db, employe_id)
+        taux_horaire = salaire_base / heures_ref
+        indemnite_heures_sup = heures_sup * taux_horaire * taux_heures_sup
         salaire_brut += indemnite_heures_sup
         
         # Add bonuses
         total_primes = sum(p["montant"] for p in primes)
         salaire_brut += total_primes
         
-        # Social contributions (CONFIGURATION REQUIRED - rates subject to change)
         # CNPS: source unique = PaieOHADAService (plus de taux 7% divergent ici).
         from app.services.rh_avance_service import PaieOHADAService
         taux_cnps = PaieOHADAService.TAUX_CNPS_PENSION + PaieOHADAService.TAUX_CNPS_ACCIDENTS
@@ -676,19 +705,22 @@ class PaieService:
             "periode": f"{annee}-{mois:02d}",
             "salaire_base": salaire_base,
             "heures_sup": heures_sup,
-            "indemnite_heures_sup": indemnite_heures_sup,
+            "heures_mensuelles_reference": heures_ref,
+            "taux_horaire": round(taux_horaire, 2),
+            "taux_majoration_heures_sup": taux_heures_sup,
+            "indemnite_heures_sup": round(indemnite_heures_sup, 2),
             "primes": primes,
             "total_primes": total_primes,
-            "salaire_brut": salaire_brut,
+            "salaire_brut": round(salaire_brut, 2),
             "cotisations": {
-                "cnps": cotisation_cnps,
+                "cnps": round(cotisation_cnps, 2),
                 "taux_cnps": taux_cnps
             },
-            "impot_revenu": impot_revenu,
+            "base_imposable": round(base_imposable, 2),
+            "impot_revenu": round(impot_revenu, 2),
             "deductions": deductions,
-            "total_deductions": total_deductions,
-            "salaire_net": salaire_net,
-            "note": "Règles fiscales à configurer selon législation Cameroun actuelle"
+            "total_deductions": round(total_deductions, 2),
+            "salaire_net": round(salaire_net, 2),
         }
 
 

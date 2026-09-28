@@ -1255,12 +1255,23 @@ def creer_fiche_paie(
     cnps = float(calcul["cotisations"]["cnps"])
     irgm = float(calcul["impot_revenu"])
 
+    # Duree reellement pointee sur la periode. L'ancienne valeur (173,33 des
+    # qu'une heure supplementaire etait saisie) inscrivait un forfait legal la
+    # ou un releve horaires existe : le bulletin affichait alors des heures que
+    # personne n'avait pointees. Sans pointage, la colonne reste vide -- une
+    # inconnue affichee vaut mieux qu'une moyenne legale presente comme un fait.
+    relevés = TempsTravailService.calculer_heures_mois(
+        db, employe.id, payload.mois, payload.annee)
+    heures_pointees = float(relevés["heures_travaillees"] or 0)
+
     fiche = Salaire(
         employe_id=employe.id,
         periode_debut=debut,
         periode_fin=fin,
         salaire_base=payload.salaire_base,
         heures_supplementaires=payload.heures_supplementaires,
+        # La colonne porte l'indemnite d'heures sup. (ce que _bulletin_dict relit
+        # comme montant) et non un taux : le nom est herite de la base.
         taux_horaire_sup=float(calcul["indemnite_heures_sup"]),
         deductions_cnps=round(cnps, 2),
         deductions_impot=round(irgm, 2),
@@ -1270,7 +1281,7 @@ def creer_fiche_paie(
         devise="XAF",
         date_paiement=payload.date_paiement,
         statut=payload.statut,
-        nombre_heures_travaillees=173.33 if payload.heures_supplementaires else 0,
+        nombre_heures_travaillees=heures_pointees or None,
         taux_imposition=round(irgm / brut, 6) if brut else 0,
         **repartition,
     )

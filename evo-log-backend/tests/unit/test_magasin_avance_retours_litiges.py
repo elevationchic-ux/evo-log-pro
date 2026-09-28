@@ -133,7 +133,7 @@ def test_retour_traitement_decision_unique_et_sans_stock_invente(client, db):
     # decision unique : re-traiter un retour traité → 400
     rep = client.put(f"{BASE}/retours/{ret_id}/traiter",
                      json={"decision": "refuse"})
-    assert rep.status_code == 400 and "déjà traité" in rep.json()["detail"]
+    assert rep.status_code == 400 and "deja traite" in rep.json()["detail"]
     # document traité immuable (PATCH aussi)
     assert client.patch(f"{BASE}/retours/{ret_id}",
                         json={"motif": "retouche"}).status_code == 400
