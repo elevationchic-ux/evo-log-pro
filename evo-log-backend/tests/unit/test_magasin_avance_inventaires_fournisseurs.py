@@ -150,7 +150,8 @@ def test_valider_inventaire_ajuste_stock_et_journalise(client, db):
     mvts = db.query(MouvementStock).filter(
         MouvementStock.document_reference == inv.numero_inventaire).all()
     assert len(mvts) == 1
-    assert str(mvts[0].type_mouvement).endswith("inventaire")
+    type_mvt = getattr(mvts[0].type_mouvement, "value", mvts[0].type_mouvement)
+    assert type_mvt == "inventaire"
     assert float(mvts[0].quantite_avant) == 50.0
     assert float(mvts[0].quantite_apres) == 46.0
 

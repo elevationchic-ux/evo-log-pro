@@ -37,8 +37,7 @@ from app.schemas.rh import (
     DocumentEmployeCreate, DocumentEmployeUpdate, DocumentEmployeResponse,
     OrganigrammeCreate, OrganigrammeUpdate, OrganigrammeResponse,
     CompetenceCreate, CompetenceUpdate, CompetenceResponse,
-    CompetenceEmployeCreate, CompetenceEmployeUpdate, CompetenceEmployeResponse,
-    BulletinPaieResponse
+    CompetenceEmployeCreate, CompetenceEmployeUpdate, CompetenceEmployeResponse
 )
 from app.services.rh_service import (
     CongeService, AbsenceService, TempsTravailService, FormationService,

@@ -14,8 +14,8 @@ exactement celles que l'API renvoie et que la base contient ; le NOM du membre
 d'enum n'apparait jamais sur le fil.
 """
 from datetime import datetime, date
-from typing import Optional, List
-from pydantic import BaseModel, Field, EmailStr
+from typing import Optional
+from pydantic import BaseModel, Field
 
 
 TYPES_CONGE = (
