@@ -5,7 +5,7 @@ Contrôle d'accès strict : CHEF_PERSONNEL, RH, ADMIN, SUPER_ADMIN
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_, desc
+from sqlalchemy import or_, and_, desc, func
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime, date
@@ -63,8 +63,12 @@ class EffectifOut(BaseModel):
     email: str
     telephone: Optional[str] = None
     role: str
-    agency_name: str
-    statut_presence: str # EN_POSTE, EN_REPOS, EN_CONGE, ABSENT
+    # Agence, quart et presence peuvent rester vides : un agent sans rattachement
+    # materialise une information manquante, alors qu'une valeur par defaut ("Siège
+    # Douala", "Standard (08h-17h)") serait une donnee inventee, reprise telle
+    # quelle par l'ecran et par toute decision prise dessus.
+    agency_name: Optional[str] = None
+    statut_presence: Optional[str] = None  # EN_POSTE, EN_REPOS, EN_CONGE
     quart_actuel: Optional[str] = None
     dernier_pointage: Optional[str] = None
 
@@ -200,6 +204,43 @@ def get_effectifs_supervises(
     users = users_query.all()
     results = []
     today = date.today()
+    ids = [u.id for u in users]
+
+    # Trois lectures groupees plutot que trois queries par agent : planning du
+    # jour, conge approuve couvrant le jour, dernier emargement.
+    plannings = {}
+    if ids:
+        for p in db.query(PlanningGarde).filter(
+            PlanningGarde.employe_id.in_(ids), PlanningGarde.date_jour == today
+        ).all():
+            plannings[p.employe_id] = p
+
+    en_conge = set()
+    if ids:
+        en_conge = {
+            r[0] for r in db.query(Conge.employe_id).filter(
+                Conge.employe_id.in_(ids),
+                Conge.date_debut <= today,
+                Conge.date_fin >= today,
+                Conge.statut.in_([StatutConge.APPROUVE, StatutConge.EN_COURS]),
+            ).distinct().all()
+        }
+
+    derniers_pointages = {}
+    if ids:
+        bornes = db.query(
+            PointageVacation.employe_id,
+            func.max(PointageVacation.date_pointage).label("date_pointage"),
+        ).filter(PointageVacation.employe_id.in_(ids)).group_by(
+            PointageVacation.employe_id
+        ).all()
+        bornes_par_id = {e: d for e, d in bornes}
+        if bornes_par_id:
+            for p in db.query(PointageVacation).filter(
+                PointageVacation.employe_id.in_(list(bornes_par_id))
+            ).all():
+                if p.date_pointage == bornes_par_id.get(p.employe_id):
+                    derniers_pointages.setdefault(p.employe_id, p)
 
     for u in users:
         u_roles = [r.name.upper() for r in u.roles] if u.roles else []
@@ -210,21 +251,23 @@ def get_effectifs_supervises(
         if role and active_role != role:
             continue
 
-        agency_name = (getattr(u.agency, 'name', None) or getattr(u.agency, 'nom', None)) if u.agency else "Siège Douala"
+        agency_name = (getattr(u.agency, 'name', None) or getattr(u.agency, 'nom', None)) if u.agency else None
 
-        # Chercher planning du jour
-        planning = db.query(PlanningGarde).filter(
-            PlanningGarde.employe_id == u.id,
-            PlanningGarde.date_jour == today
-        ).first()
+        planning = plannings.get(u.id)
+        pointage = derniers_pointages.get(u.id)
 
-        # Chercher dernier pointage
-        pointage = db.query(PointageVacation).filter(
-            PointageVacation.employe_id == u.id
-        ).order_by(PointageVacation.date_pointage.desc()).first()
-
-        presence = "EN_POSTE" if planning and planning.statut in ["CONFIRME", "EN_POSTE"] else "EN_REPOS"
-        quart_text = planning.quart if planning else "Standard (08h-17h)"
+        # Presence : EN_CONGE et EN_POSTE viennent de donnees ecrites. Sans
+        # planning du jour, aucun element ne permet d'affirmer que l'agent est
+        # "en repos" : la cellule reste vide.
+        if u.id in en_conge:
+            presence = "EN_CONGE"
+        elif planning is None:
+            presence = None
+        elif planning.statut in ["CONFIRME", "EN_POSTE"]:
+            presence = "EN_POSTE"
+        else:
+            presence = "EN_REPOS"
+        quart_text = planning.quart if planning else None
         dernier_p = f"{pointage.date_pointage} {pointage.heure_arrivee}" if pointage else "Aucun émargement"
 
         if statut and presence != statut:
@@ -235,7 +278,10 @@ def get_effectifs_supervises(
             username=u.username,
             full_name=u.full_name or u.username,
             email=u.email,
-            telephone=getattr(u, 'phone', None) or "+237 699 00 12 34",
+            # Le numero de telephone est celui du compte, rien d'autre : un
+            # "+237 699 00 12 34" de secours etait compose par l'annuaire pour
+            # tout agent sans telephone saisi, et l'appel partait dans le vide.
+            telephone=u.phone,
             role=active_role,
             agency_name=agency_name,
             statut_presence=presence,
