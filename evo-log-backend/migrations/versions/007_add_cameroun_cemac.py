@@ -286,7 +286,7 @@ def upgrade():
         sa.Column('motif_refus', sa.Text()),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['dossier_import_id'], ['dossiers_transit_avance.id'], ),
+
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('numero_ape')
     )
@@ -330,7 +330,7 @@ def upgrade():
         sa.Column('notes', sa.Text()),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['dossier_transit_id'], ['dossiers_transit_avance.id'], ),
+
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('numero_dum')
     )
@@ -443,7 +443,7 @@ def upgrade():
         sa.Column('reference_iru', sa.String(length=50)),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['dossier_transit_id'], ['dossiers_transit_avance.id'], ),
+
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('numero_carnet')
     )
@@ -470,7 +470,7 @@ def upgrade():
         sa.Column('observations', sa.Text()),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['dossier_transit_id'], ['dossiers_transit_avance.id'], ),
+
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('numero_tsd')
     )
@@ -518,7 +518,7 @@ def upgrade():
         sa.Column('photo', sa.String(length=255)),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['dossier_transit_id'], ['dossiers_transit_avance.id'], ),
+
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('numero_scelle')
     )
@@ -702,6 +702,42 @@ def upgrade():
     )
     op.create_index(op.f('ix_inspections_conteneur_id'), 'inspections_conteneur', ['id'], unique=False)
 
+
+
+# [fix_fk_order] FK deferees pour compatibilite PostgreSQL
+    # [fix_fk_order] FK deferees pour compatibilite PostgreSQL
+    _ensure_fk_postgres()
+def _ensure_fk_postgres():
+    # Les tables parentes peuvent ne pas exister sur une base deja
+    # bootstrapee : garde par introspection (convention du projet).
+    import sqlalchemy as sa
+    insp = sa.inspect(op.get_bind())
+    tables = set(insp.get_table_names())
+    pairs = [
+        ("ape", "dossiers_transit_avance", "fk_ape_dossier_id", "id"),
+        ("dum", "dossiers_transit_avance", "fk_dum_dossier_id", "id"),
+        ("procedures_tir", "dossiers_transit_avance", "fk_procedures_tir_dossier_id", "id"),
+        ("procedures_tsd", "dossiers_transit_avance", "fk_procedures_tsd_dossier_id", "id"),
+        ("scelles_routiers", "dossiers_transit_avance", "fk_scelles_dossier_id", "id"),
+    ]
+    for child, ref, fkname, refcol in pairs:
+        if child not in tables or ref not in tables:
+            continue
+        cols = {c['name'] for c in insp.get_columns(child)}
+        fkcol = None
+        # colonne enfant referencing ref.id : premiere colonne nommee
+        # comme un indice de la table parente, sinon la cle FK evidente.
+        for cand in (ref + '_id', 'id_' + ref, ref.rstrip('s') + '_id'):
+            if cand in cols:
+                fkcol = cand
+                break
+        if fkcol is None:
+            continue
+        try:
+            with op.batch_alter_table(child) as batch:
+                batch.create_foreign_key(fkname, ref, [fkcol], [refcol])
+        except Exception:  # deja presente ou ref introuvable
+            pass
 
 def downgrade():
     # 'conteneurs' est re-declare par cette revision UNIQUEMENT si absent

@@ -98,11 +98,11 @@ class Conge(Base):
 class Absence(Base):
     """Absence tracking model
 
-    La base raisonnera toujours enperiode (`date_debut`/`date_fin`,
-    `nombre_jours`), pas en jour unique : le modele herite declare `date` et
-    `justifiee`, deux colonnes qui n'existent nulle part, ce qui fit echouer
-    chaque lecture d'absences. Les releves d'horaires (arrivee/departee)
-    restent porteurs, mais sur des colonnes que 028 cree.
+    La base raisonne en periode (`date_debut`/`date_fin`, `nombre_jours`), pas en
+    jour unique : le modele herite declarait `date` et `justifiee`, deux colonnes
+    qui n'existent nulle part, et chaque lecture d'absences echouait en
+    "no such column". Les releves d'horaire (demi-journee) restent possibles, sur
+    des colonnes que la migration 028 cree.
     """
     __tablename__ = "absences"
 
@@ -254,12 +254,11 @@ class Salaire(Base):
     """Salary management model - CEMAC compliant
 
     Deux generations cohabitent dans la meme table. L'heritee (mois, annee,
-    salaire_brut, heures_sup, primes, deductions) est NOT NULL et filtree par
-    d'anciens services ; la generation détaillée (CNPS, IRGM, primes par
-    categorie) est celle que la loi camerounaise rend controlee. Le modele
-    conserve les deux et les tient coherentles : _synchroniser_herite() recopie
-    le detail vers l'herite a chaque ecriture, un seul endroit sachant ce
-    qu'est un brut.
+    salaire_brut, heures_sup, primes, deductions) est NOT NULL en base et filtree
+    par d'anciens services ; la generation detaillee (CNPS, IRGM, primes par
+    categorie) est celle que la loi camerounaise rend controlee. Le modele garde
+    les deux et les tient coherentes : _synchroniser_herite recopie le detail vers
+    l'herite a chaque ecriture, un seul endroit sachant ce qu'est un brut.
     """
     __tablename__ = "salaires"
 

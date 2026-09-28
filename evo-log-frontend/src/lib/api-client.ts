@@ -247,6 +247,14 @@ export const departmentAPI = {
     apiClient.get(`${DEPT_BASE}/overview`, { params: departmentId ? { department_id: departmentId } : undefined }),
   listMembers: (params?: Record<string, unknown>, departmentId?: number) =>
     apiClient.get(`${DEPT_BASE}/membres`, { params: { ...params, ...(departmentId ? { department_id: departmentId } : {}) } }),
+  // Tranche B (ecritures scopees) : un chef affecte/retire des collaborateurs de
+  // SON departement ; l'allocation des modules releve de l'admin entreprise / CADC.
+  affectMember: (memberId: number, departmentId?: number) =>
+    apiClient.post(`${DEPT_BASE}/membres/${memberId}/affecter`, undefined, { params: departmentId ? { department_id: departmentId } : undefined }),
+  removeMember: (memberId: number, departmentId?: number) =>
+    apiClient.post(`${DEPT_BASE}/membres/${memberId}/retirer`, undefined, { params: departmentId ? { department_id: departmentId } : undefined }),
+  setModules: (modules: string[], departmentId?: number) =>
+    apiClient.put(`${DEPT_BASE}/modules`, { modules }, { params: departmentId ? { department_id: departmentId } : undefined }),
 };
 
 /** RBAC granulaire : catalogue de permissions, rôles effectifs, accréditations

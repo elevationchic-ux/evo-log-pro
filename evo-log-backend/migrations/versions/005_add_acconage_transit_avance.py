@@ -62,7 +62,7 @@ def upgrade():
         sa.Column('reefer', sa.Boolean(), nullable=True, server_default='false'),
         sa.Column('temperature', sa.Float(), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.ForeignKeyConstraint(['conteneur_id'], ['conteneurs.id'], ),
+
         sa.ForeignKeyConstraint(['stowage_plan_id'], ['stowage_plans.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
@@ -494,7 +494,7 @@ def upgrade():
         sa.Column('date_validation', sa.Date(), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['contrat_cadre_id'], ['contrats_cadre.id'], ),
+
         sa.ForeignKeyConstraint(['fournisseur_id'], ['tiers.id'], ),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('numero_bc')
@@ -1342,7 +1342,7 @@ def upgrade():
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['destinataire_id'], ['users.id'], ),
-        sa.ForeignKeyConstraint(['template_id'], ['templates_notification.id'], ),
+
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('numero_notification')
     )
@@ -1637,6 +1637,41 @@ def upgrade():
     op.create_index(op.f('ix_indicateurs_douaniers_id'), 'indicateurs_douaniers', ['id'], unique=False)
     op.create_index(op.f('ix_indicateurs_douaniers_code'), 'indicateurs_douaniers', ['code'], unique=True)
 
+
+
+# [fix_fk_order] FK deferees pour compatibilite PostgreSQL
+    # [fix_fk_order] FK deferees pour compatibilite PostgreSQL
+    _ensure_fk_postgres()
+def _ensure_fk_postgres():
+    # Les tables parentes peuvent ne pas exister sur une base deja
+    # bootstrapee : garde par introspection (convention du projet).
+    import sqlalchemy as sa
+    insp = sa.inspect(op.get_bind())
+    tables = set(insp.get_table_names())
+    pairs = [
+        ("positions_conteneur", "conteneurs", "fk_positions_conteneur_conteneur_id", "id"),
+        ("bons_commande", "contrats_cadre", "fk_bons_commande_contrat_cadre_id", "id"),
+        ("ecritures_comptables", "exercices_comptables", "fk_ecritures_exercice_id", "id"),
+        ("notifications", "templates_notification", "fk_notifications_template_id", "id"),
+    ]
+    for child, ref, fkname, refcol in pairs:
+        if child not in tables or ref not in tables:
+            continue
+        cols = {c['name'] for c in insp.get_columns(child)}
+        fkcol = None
+        # colonne enfant referencing ref.id : premiere colonne nommee
+        # comme un indice de la table parente, sinon la cle FK evidente.
+        for cand in (ref + '_id', 'id_' + ref, ref.rstrip('s') + '_id'):
+            if cand in cols:
+                fkcol = cand
+                break
+        if fkcol is None:
+            continue
+        try:
+            with op.batch_alter_table(child) as batch:
+                batch.create_foreign_key(fkname, ref, [fkcol], [refcol])
+        except Exception:  # deja presente ou ref introuvable
+            pass
 
 def downgrade():
     # Snapshot des tables presentes a l'entree de CE downgrade. Cette revision
