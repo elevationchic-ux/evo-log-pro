@@ -2,23 +2,30 @@
 RH router - Complete HR management & Employee Self-Service (Portail Collaborateur) endpoints
 Accessible to any employee (non-RH included: Chauffeurs, Magasiniers, Déclarants, Dispatchers, IT, etc.)
 """
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Response, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_, desc, extract
-from typing import List, Optional, Dict, Any
+from sqlalchemy import or_, and_, desc, extract, func
+from typing import List, Optional, Dict, Any, Iterable, Tuple
 from datetime import date, datetime, timedelta
 from pathlib import Path
 import calendar
+import csv
+import io
 import mimetypes
+import re
 import secrets
+import unicodedata
+import zipfile
+from xml.etree import ElementTree as ET
 from html import escape
 
 from app.core.database import get_db
 from app.core.config import settings
 from app.core.security import get_current_user, get_password_hash, validate_password_strength
-from app.utils.rbac import require_role
+from app.utils.rbac import require_role, resolve_scope_company_id
 from app.models.user import User, Role
+from app.models.tenant import Company, Department
 from app.models.rh import (
     Conge, TypeConge, StatutConge, Absence, TempsTravail,
     Formation, ParticipationFormation, EvaluationPerformance,
