@@ -45,8 +45,8 @@ class Conge(Base):
     date_demande = Column(Date, server_default=func.current_date())
     date_approbation = Column(Date)
     approbateur_id = Column(Integer, ForeignKey('users.id'))
-    commentaires_approbation = Column(Text)
-    solde_conge = Column(Integer, default=0)  # Remaining leave days
+    commentaire_approbation = Column(Text)
+    motif_refus = Column(Text)
     pieces_jointes = Column(Text)  # Medical certificates, etc.
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

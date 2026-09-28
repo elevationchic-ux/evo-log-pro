@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <title>Bon de sortie {{ bon.numero_bon }}</title>
+  <style>
+    @page { size: A4; margin: 18mm 15mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 10.5pt; color: #1a1a2e; }
+    .entete { display: flex; justify-content: space-between; align-items: flex-start;
+              border-bottom: 3px solid #0f4c81; padding-bottom: 12px; margin-bottom: 18px; }
+    .emetteur h1 { font-size: 15pt; color: #0f4c81; margin-bottom: 2px; }
+    .emetteur .details { font-size: 8.5pt; color: #444; line-height: 1.45; }
+    .titre { text-align: right; }
+    .titre .doc { font-size: 17pt; font-weight: bold; color: #0f4c81; text-transform: uppercase; }
+    .titre .numero { font-size: 11pt; margin-top: 3px; }
+    .badge { display: inline-block; margin-top: 6px; padding: 3px 10px; border-radius: 10px;
+             font-size: 8pt; font-weight: bold; text-transform: uppercase; }
+    .badge-valide { background: #d9f2e3; color: #1e7d3e; }
+    .badge-attente { background: #fff3d6; color: #9a6b00; }
+    .badge-refuse { background: #fde3e3; color: #a02020; }
+    .dates { font-size: 8.5pt; color: #444; margin-top: 6px; line-height: 1.5; }
+    .parties { display: flex; justify-content: space-between; margin-bottom: 18px; gap: 24px; }
+    .bloc { flex: 1; border: 1px solid #d8dce3; border-radius: 4px; padding: 10px 12px; }
+    .bloc .label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: .5px;
+                   color: #0f4c81; font-weight: bold; margin-bottom: 4px; }
+    .bloc .contenu { font-size: 9.5pt; line-height: 1.5; }
+    table.lignes { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+    table.lignes th { background: #0f4c81; color: #fff; font-size: 8pt; text-transform: uppercase;
+                      padding: 6px 8px; text-align: left; }
+    table.lignes td { padding: 6px 8px; font-size: 9pt; border-bottom: 1px solid #e3e6ea; }
+    table.lignes .num { text-align: right; white-space: nowrap; }
+    table.lignes th.num { text-align: right; }
+    .notes { font-size: 8.5pt; color: #444; line-height: 1.5; margin-bottom: 14px; }
+    .mentions { font-size: 7.5pt; color: #666; line-height: 1.5; border-top: 1px solid #d8dce3;
+                padding-top: 8px; margin-top: 10px; }
+    .signatures { display: flex; justify-content: space-between; margin-top: 34px; gap: 18px; }
+    .sig { flex: 1; text-align: center; font-size: 9pt; color: #444; }
+    .sig .zone { display: block; border: 1px dashed #999; border-top: none; height: 62px; }
+    .sig .nom { display: block; border-top: 1px solid #999; padding-top: 4px; min-height: 16px; }
+    .vide { text-align: center; color: #888; font-style: italic; padding: 14px; }
+  </style>
+</head>
+<body>
+  <div class="entete">
+    <div class="emetteur">
+      {% if company %}
+        <h1>{{ company.nom or company.sigle or 'Entreprise' }}</h1>
+        <div class="details">
+          {% if company.sigle and company.nom and company.sigle != company.nom %}({{ company.sigle }})<br/>{% endif %}
+          {% if company.adresse %}{{ company.adresse }}{% if company.ville %}, {{ company.ville }}{% endif %}<br/>{% endif %}
+          {% if company.telephone %}Tél. : {{ company.telephone }}<br/>{% endif %}
+          {% if company.tax_id %}NIF : {{ company.tax_id }}<br/>{% endif %}
+        </div>
+      {% else %}
+        <h1>Bon de sortie</h1>
+        <div class="details">Profil émetteur (entreprise) non renseigné dans le système.</div>
+      {% endif %}
+    </div>
+    <div class="titre">
+      <div class="doc">Bon de sortie</div>
+      <div class="numero">N° {{ bon.numero_bon }}</div>
+      {% if bon.statut == 'valide' %}
+        <span class="badge badge-valide">Validé — marchandises sorties</span>
+      {% elif bon.statut == 'refuse' %}
+        <span class="badge badge-refuse">Refusé</span>
+      {% else %}
+        <span class="badge badge-attente">En attente de validation</span>
+      {% endif %}
+      <div class="dates">
+        Date de sortie : {{ bon.date_sortie or '' }}<br/>
+        Type : {{ bon.type_sortie or 'enlevement' }}<br/>
+        {% if bon.commande_reference %}Référence commande : {{ bon.commande_reference }}<br/>{% endif %}
+        {% if bon.statut == 'valide' and bon.date_validation %}Signé le : {{ bon.date_validation }}<br/>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="parties">
+    <div class="bloc">
+      <div class="label">Destinataire / Client</div>
+      <div class="contenu">
+        {% if client %}
+          <strong>{{ client.name or '' }}</strong><br/>
+          {% if client.legal_form %}{{ client.legal_form }}<br/>{% endif %}
+          {% if client.address %}{{ client.address }}{% if client.city %}, {{ client.city }}{% endif %}<br/>{% endif %}
+          {% if client.tax_id %}NIF : {{ client.tax_id }}<br/>{% endif %}
+          {% if client.phone %}Tél. : {{ client.phone }}{% endif %}
+        {% else %}
+          <em>Client non renseigné</em>
+        {% endif %}
+      </div>
+    </div>
+    <div class="bloc">
+      <div class="label">Entrepôt</div>
+      <div class="contenu">
+        {% if bon.entrepot and bon.entrepot.nom %}
+          <strong>{{ bon.entrepot.nom }}</strong>
+        {% else %}
+          <em>Entrepôt non renseigné</em>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <table class="lignes">
+    <thead>
+      <tr>
+        <th style="width: 34%">Désignation</th>
+        <th>Code article</th>
+        <th>Lot</th>
+        <th class="num">Qté sortie</th>
+        <th>Unité</th>
+        <th class="num">P.U.</th>
+        <th class="num">Montant</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set ns = namespace(total=0.0, tous_prix_renseignes=true) %}
+      {% for ligne in lignes %}
+        {% if ligne.prix_unitaire %}
+          {% set ns.total = ns.total + (ligne.quantite * ligne.prix_unitaire) %}
+        {% else %}
+          {% set ns.tous_prix_renseignes = false %}
+        {% endif %}
+      <tr>
+        <td>{{ ligne.designation or 'Non renseigné' }}</td>
+        <td>{{ ligne.code_article or '' }}</td>
+        <td>{{ ligne.numero_lot or '' }}</td>
+        <td class="num">{{ "{:g}".format(ligne.quantite | float) }}</td>
+        <td>{{ ligne.unite or '' }}</td>
+        <td class="num">{% if ligne.prix_unitaire %}{{ "{:,.2f}".format(ligne.prix_unitaire | float) }}{% else %}—{% endif %}</td>
+        <td class="num">{% if ligne.prix_unitaire %}{{ "{:,.2f}".format((ligne.quantite | float) * (ligne.prix_unitaire | float)) }}{% else %}—{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="vide">Aucune ligne sur ce bon.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if ns.tous_prix_renseignes and lignes %}
+  <div class="notes"><strong>Montant total indicatif :</strong> {{ "{:,.2f}".format(ns.total) }} XAF
+    (prix unitaires saisis sur les lignes du bon — valeur indicative de sortie de stock, ne constitue pas une facture).</div>
+  {% endif %}
+
+  {% if bon.notes %}
+  <div class="notes"><strong>Notes :</strong> {{ bon.notes }}</div>
+  {% endif %}
+
+  <div class="mentions">
+    {% if bon.statut != 'valide' %}
+      <strong>Document NON validé : les quantités ci-dessus ne sont pas encore sorties du stock.</strong><br/>
+    {% endif %}
+    Le présent bon justifie la sortie physique des marchandises désignées ci-dessus. Toute sortie est
+    enregistrée dans le registre des mouvements de stock (quantités avant/après) et opposable en cas
+    d'inventaire ou de contrôle.
+  </div>
+
+  <div class="signatures">
+    <div class="sig">
+      <span class="zone"></span>
+      <span class="nom">Opérateur magasin{% if nom_operateur %} — {{ nom_operateur }}{% endif %}</span>
+    </div>
+    <div class="sig">
+      <span class="zone"></span>
+      <span class="nom">Responsable magasin{% if nom_validateur %} — {{ nom_validateur }}{% endif %}</span>
+    </div>
+    <div class="sig">
+      <span class="zone"></span>
+      <span class="nom">Récépissé destinataire</span>
+    </div>
+  </div>
+</body>
+</html>
