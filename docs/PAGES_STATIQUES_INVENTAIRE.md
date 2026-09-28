@@ -2,8 +2,8 @@
 
 - Genere le : 2026-09-29
 - Total pages scannees : 348
-- Pages branchees sur le backend : 287
-- Pages encore statiques : 61
+- Pages branchees sur le backend : 289
+- Pages encore statiques : 59
 
 ## Pages statiques
 
@@ -31,8 +31,6 @@
 | `/integration-cameroun` | non (vitrine/maintenance) | - |
 | `/logout` | non (vitrine/maintenance) | - |
 | `/magasin/ia-chat` | non (vitrine/maintenance) | - |
-| `/magasin/saisie-inventaire-physique` | non (vitrine/maintenance) | - |
-| `/magasin/wms-slots` | non (vitrine/maintenance) | - |
 | `/maintenance-gmao/dashboard` | non (vitrine/maintenance) | - |
 | `/mobile-chauffeur/epod-signature` | non (vitrine/maintenance) | - |
 | `/mobile-chauffeur/mission-active` | non (vitrine/maintenance) | - |

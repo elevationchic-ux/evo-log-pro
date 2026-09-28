@@ -19,10 +19,15 @@ Tranche A (lecture) : roster humain + fiche du departement. Tranche B (ecriture)
 - l'ALLOCATION des modules d'un departement releve de l'Admin Entreprise (1) /
   CADC (0) UNIQUEMENT (un chef ne se auto-grantit pas de module) et reste STRICTEMENT
   bornee par ``Company.modules_actives`` (un departement ne peut pas depasser son
-  entreprise). Le planning/presence reste une tranche suivante (cf. plan Phase 4).
+  entreprise). Phase 4 (Tranche A, lecture) ajoute le PLANNING et la PRESENCE du
+  departement, scopes par le MEME ``_scoped_department`` : un chef ne voit que les
+  tours de garde et les pointages de SES collaborateurs (modeles chef_personnel
+  PlanningGarde / PointageVacation). L'ecriture du planning departemental reste une
+  tranche suivante.
 """
 import json
-from typing import Any, Dict, List, Optional
+from datetime import date as _date
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -30,6 +35,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.models.chef_personnel import PlanningGarde, PointageVacation
 from app.models.tenant import Company, Department
 from app.models.user import User
 from app.utils.rbac import _is_superadmin, require_department_head
@@ -44,6 +50,46 @@ def _loads(raw: Optional[str], default: Any) -> Any:
         return json.loads(raw)
     except (json.JSONDecodeError, TypeError):
         return default
+
+
+def _week_bounds(semaine: Optional[str]) -> Tuple[_date, _date]:
+    """Borne [lundi, dimanche] d'une semaine ISO ``AAAA-WNN`` (defaut : semaine courante).
+
+    ``date.fromisocalendar`` evite le piege du format ``%W`` (semaine non-ISO) :
+    une semaine invalide ou un format inattendu renvoient un 400 explicite plutot
+    qu'une plage silencieusement faaussee.
+    """
+    if not semaine:
+        today = _date.today()
+        iso = today.isocalendar()
+        start = _date.fromisocalendar(iso[0], iso[1], 1)
+        end = _date.fromisocalendar(iso[0], iso[1], 7)
+        return start, end
+    try:
+        year_s, week_s = semaine.upper().split("-W", 1)
+        year = int(year_s)
+        week = int(week_s)
+        start = _date.fromisocalendar(year, week, 1)
+        end = _date.fromisocalendar(year, week, 7)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=400,
+            detail="Format de semaine invalide (attendu AAAA-WNN, ex. 2026-W40)",
+        )
+    return start, end
+
+
+def _parse_date(value: Optional[str]) -> _date:
+    """Date ``AAAA-MM-JJ`` (defaut : aujourd'hui). Refuse un format invalide (400)."""
+    if not value:
+        return _date.today()
+    try:
+        return _date.fromisoformat(value.strip())
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=400,
+            detail="Format de date invalide (attendu AAAA-MM-JJ)",
+        )
 
 
 def _scoped_department(db: Session, current: User, requested: Optional[int]) -> Department:
