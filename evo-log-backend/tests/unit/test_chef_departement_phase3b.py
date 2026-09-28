@@ -85,11 +85,13 @@ def sandbox(write_client):
         chef_fin = _mk_user(2, company_id=co.id, department_id=fin.id, username="chef-w2")
         admin = _mk_user(1, company_id=co.id, department_id=None, username="admin-w")
         float_a = _mk_user(3, company_id=co.id, department_id=None, username="float-a")
+        float_b = _mk_user(3, company_id=co.id, department_id=None, username="float-b")
         membre_ops = _mk_user(3, company_id=co.id, department_id=ops.id, username="membre-ops")
-        db.add_all([chef, chef_fin, admin, float_a, membre_ops])
+        db.add_all([chef, chef_fin, admin, float_a, float_b, membre_ops])
         db.commit()
         db.refresh(chef)
         db.refresh(float_a)
+        db.refresh(float_b)
         db.refresh(membre_ops)
         db.refresh(chef_fin)
 
@@ -113,6 +115,7 @@ def sandbox(write_client):
             "chef_token": create_access_token({"sub": str(chef.id)}),
             "admin_token": create_access_token({"sub": str(admin.id)}),
             "float_a_id": int(float_a.id),
+            "float_b_id": int(float_b.id),
             "membre_ops_id": int(membre_ops.id),
             "chef_fin_id": int(chef_fin.id),
             "outsider_id": int(outsider.id),

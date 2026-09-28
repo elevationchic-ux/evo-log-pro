@@ -432,17 +432,41 @@ export default function PortailMagasinierPage() {
                     <h2 className="text-xl font-black text-white">#{selectedOrder.reference}</h2>
                     <p className="text-xs text-slate-500">Client : {selectedOrder.client}</p>
                   </div>
-                  <button
-                    onClick={handleValidateBonSortie}
-                    disabled={validatingBon || selectedOrder.statut === 'valide'}
-                    className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition-colors shadow-sm self-start sm:self-auto"
-                  >
-                    {validatingBon
-                      ? 'Validation…'
-                      : selectedOrder.statut === 'valide'
-                        ? 'Bon déjà validé'
-                        : 'Valider le Bon de Sortie'}
-                  </button>
+                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                    <button
+                      onClick={handlePdfBonSortie}
+                      disabled={pdfBon}
+                      title="Éditer le bon de sortie en PDF (zones de signature imprimées)"
+                      className="px-3 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition-colors shadow-sm"
+                    >
+                      <FileDown className="w-3.5 h-3.5 inline mr-1" />
+                      {pdfBon ? 'PDF…' : 'PDF'}
+                    </button>
+                    {selectedOrder.statut !== 'valide' && selectedOrder.statut !== 'refuse' && (
+                      <button
+                        onClick={handleRefuserBonSortie}
+                        disabled={refusantBon || validatingBon}
+                        title="Refus motivé : aucun mouvement de stock, motif tracé sur le bon"
+                        className="px-3 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition-colors shadow-sm"
+                      >
+                        <XCircle className="w-3.5 h-3.5 inline mr-1" />
+                        {refusantBon ? 'Refus…' : 'Refuser'}
+                      </button>
+                    )}
+                    <button
+                      onClick={handleValidateBonSortie}
+                      disabled={validatingBon || selectedOrder.statut === 'valide' || selectedOrder.statut === 'refuse'}
+                      className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition-colors shadow-sm"
+                    >
+                      {validatingBon
+                        ? 'Validation…'
+                        : selectedOrder.statut === 'valide'
+                          ? 'Bon déjà validé'
+                          : selectedOrder.statut === 'refuse'
+                            ? 'Bon refusé'
+                            : 'Valider le Bon de Sortie'}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-3">
