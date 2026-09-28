@@ -1,0 +1,309 @@
+{
+ "Conge": {
+  "constructeur": {
+   "employe_id": 4,
+   "type_conge": 4,
+   "date_debut": 4,
+   "date_fin": 4,
+   "nombre_jours": 4,
+   "statut": 4,
+   "motif": 4,
+   "date_demande": 4
+  },
+  "attributs": {
+   "statut": 30,
+   "approbateur_id": 18,
+   "commentaires_approbation": 4,
+   "date_approbation": 18,
+   "filter": 145,
+   "date_fin": 12,
+   "date_debut": 12,
+   "type_conge": 12,
+   "id": 4,
+   "employe_id": 12,
+   "motif": 4,
+   "date_demande": 4,
+   "order_by": 40,
+   "count": 12,
+   "commentaire_approbation": 7,
+   "motif_refus": 7
+  },
+  "classes": {
+   "statut": 14,
+   "id": 6,
+   "created_at": 2,
+   "employe_id": 14,
+   "date_debut": 14,
+   "date_demande": 2,
+   "type_conge": 2,
+   "nombre_jours": 2
+  }
+ },
+ "Absence": {
+  "constructeur": {
+   "employe_id": 4,
+   "date": 2,
+   "type_absence": 4,
+   "motif": 4,
+   "justifiee": 2,
+   "heure_debut": 2,
+   "heure_fin": 2,
+   "nombre_heures": 2,
+   "date_debut": 2,
+   "date_fin": 2,
+   "nombre_jours": 2,
+   "justifie": 2,
+   "date_enregistrement": 2
+  },
+  "attributs": {
+   "count": 26,
+   "id": 2,
+   "filter": 62,
+   "order_by": 20
+  },
+  "classes": {
+   "employe_id": 4,
+   "justifiee": 4,
+   "date": 10,
+   "date_debut": 4,
+   "date_fin": 4,
+   "nombre_jours": 2
+  }
+ },
+ "TempsTravail": {
+  "constructeur": {
+   "employe_id": 4,
+   "date": 4,
+   "heure_arrivee": 4,
+   "heure_depart": 2,
+   "heures_travaillees": 2,
+   "heures_supplementaires": 2,
+   "tache": 2,
+   "statut": 4
+  },
+  "attributs": {
+   "count": 16,
+   "id": 2,
+   "filter": 42,
+   "with_entities": 12,
+   "order_by": 16,
+   "heure_depart": 9,
+   "heures_travaillees": 27,
+   "heures_sup": 9,
+   "total": 12,
+   "sup": 12,
+   "jours": 12,
+   "heure_arrivee": 9
+  },
+  "classes": {
+   "employe_id": 8,
+   "date": 16,
+   "heures_travaillees": 4,
+   "heures_supplementaires": 2,
+   "heure_depart": 2,
+   "heures_sup": 2,
+   "id": 2
+  }
+ },
+ "Formation": {
+  "constructeur": {
+   "titre": 2,
+   "description": 2,
+   "date_debut": 2,
+   "date_fin": 2,
+   "duree_heures": 2,
+   "cout": 2,
+   "formateur": 2,
+   "lieu": 2,
+   "agency_id": 2,
+   "statut": 2
+  },
+  "attributs": {},
+  "classes": {
+   "date_debut": 4,
+   "date_fin": 4,
+   "certificat_valide_jusque": 8
+  }
+ },
+ "ParticipationFormation": {
+  "constructeur": {
+   "formation_id": 2,
+   "employe_id": 2,
+   "date_inscription": 2,
+   "statut": 2
+  },
+  "attributs": {
+   "present": 5,
+   "certificat_obtenu": 5,
+   "commentaire": 5,
+   "statut": 5
+  },
+  "classes": {
+   "id": 2
+  }
+ },
+ "EvaluationPerformance": {
+  "constructeur": {
+   "employe_id": 2,
+   "evaluateur_id": 2,
+   "periode_debut": 2,
+   "periode_fin": 2,
+   "note_globale": 2,
+   "commentaires": 2,
+   "objectifs_atteints": 2,
+   "objectifs_total": 2,
+   "date_evaluation": 2
+  },
+  "attributs": {},
+  "classes": {
+   "periode_fin": 2,
+   "employe_id": 2
+  }
+ },
+ "ContratTravail": {
+  "constructeur": {
+   "employe_id": 2,
+   "type_contrat": 2,
+   "date_debut": 2,
+   "date_fin": 2,
+   "poste": 2,
+   "salaire_base": 2,
+   "coefficient": 2,
+   "classification": 2,
+   "periode_essai_jours": 2,
+   "statut": 2
+  },
+  "attributs": {
+   "date_debut": 57,
+   "date_fin": 38,
+   "employe_id": 9,
+   "type_contrat": 33,
+   "poste": 33,
+   "salaire_base": 14,
+   "coefficient": 9,
+   "classification": 9,
+   "periode_essai_jours": 9,
+   "departement": 12,
+   "horaire_travail": 12,
+   "lieu_travail": 12,
+   "statut": 36,
+   "id": 12,
+   "nombre_renouvellements": 10,
+   "date_dernier_renouvellement": 5
+  },
+  "classes": {
+   "date_debut": 6,
+   "employe_id": 6,
+   "date_fin": 8,
+   "statut": 4,
+   "id": 2
+  }
+ },
+ "Salaire": {
+  "constructeur": {
+   "employe_id": 2,
+   "periode_debut": 2,
+   "periode_fin": 2,
+   "salaire_base": 2,
+   "heures_supplementaires": 2,
+   "taux_horaire_sup": 2,
+   "deductions_cnps": 2,
+   "deductions_impot": 2,
+   "deductions_avances": 2,
+   "autres_deductions": 2,
+   "salaire_net": 2,
+   "devise": 2,
+   "date_paiement": 2,
+   "statut": 2,
+   "nombre_heures_travaillees": 2,
+   "taux_imposition": 2
+  },
+  "attributs": {
+   "all": 6,
+   "filter": 125,
+   "salaire_net": 6,
+   "periode_fin": 12,
+   "order_by": 21,
+   "taux_horaire_sup": 16,
+   "heures_supplementaires": 16,
+   "employe_id": 16,
+   "salaire_base": 8
+  },
+  "classes": {
+   "employe_id": 18,
+   "date_paiement": 2,
+   "statut": 2,
+   "id": 2,
+   "periode_debut": 14,
+   "periode_fin": 10,
+   "mois": 2,
+   "annee": 2
+  }
+ },
+ "Prime": {
+  "constructeur": {},
+  "attributs": {},
+  "classes": {
+   "employe_id": 2,
+   "periode": 2,
+   "statut": 2,
+   "montant": 2
+  }
+ },
+ "DocumentEmploye": {
+  "constructeur": {
+   "employe_id": 2,
+   "type_document": 2,
+   "chemin_fichier": 2,
+   "date_emission": 2,
+   "date_expiration": 2,
+   "date_ajout": 2
+  },
+  "attributs": {},
+  "classes": {
+   "date_emission": 2,
+   "employe_id": 2,
+   "date_expiration": 8
+  }
+ },
+ "Organigramme": {
+  "constructeur": {
+   "employe_id": 2,
+   "manager_id": 2,
+   "departement": 2,
+   "poste": 2
+  },
+  "attributs": {
+   "manager_id": 6,
+   "departement": 6,
+   "poste": 6,
+   "date_mise_a_jour": 6
+  },
+  "classes": {
+   "employe_id": 2,
+   "manager_id": 2
+  }
+ },
+ "Competence": {
+  "constructeur": {
+   "nom": 2,
+   "categorie": 2,
+   "description": 2,
+   "niveau_requis": 2
+  },
+  "attributs": {},
+  "classes": {}
+ },
+ "CompetenceEmploye": {
+  "constructeur": {
+   "employe_id": 2,
+   "competence_id": 2,
+   "niveau": 2,
+   "date_evaluation": 2
+  },
+  "attributs": {},
+  "classes": {
+   "employe_id": 2
+  }
+ }
+}

@@ -67,15 +67,6 @@ def upgrade():
     op.create_index(op.f('ix_permissions_id'), 'permissions', ['id'], unique=False)
 
     op.create_table(
-        'user_roles',
-        sa.Column('user_id', sa.Integer(), nullable=False),
-        sa.Column('role_id', sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
-        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-        sa.PrimaryKeyConstraint('user_id', 'role_id')
-    )
-
-    op.create_table(
         'role_permissions',
         sa.Column('role_id', sa.Integer(), nullable=False),
         sa.Column('permission_id', sa.Integer(), nullable=False),
@@ -108,6 +99,18 @@ def upgrade():
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=False)
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=False)
+
+    # user_roles est declare APRES users : PostgreSQL exige que la table
+    # referenceee existe au moment du CREATE TABLE ... FOREIGN KEY (SQLite
+    # tolerate l'inverse, d'ou l'echec du replay CI uniquement sur Postgres).
+    op.create_table(
+        'user_roles',
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('role_id', sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+        sa.PrimaryKeyConstraint('user_id', 'role_id')
+    )
 
     # Add many more tables for all models...
     # This is a simplified version - in a real migration you'd include all tables

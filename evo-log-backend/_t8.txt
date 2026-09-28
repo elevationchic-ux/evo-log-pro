@@ -1,0 +1,44 @@
+﻿=== Conge
+   attributs    : filter(145) order_by(40) statut(30) approbateur_id(18) date_approbation(18) date_fin(12) date_debut(12) type_conge(12) employe_id(12) count(12) commentaire_approbation(7) motif_refus(7) commentaires_approbation(4) id(4) motif(4) date_demande(4)
+   constructeur : employe_id(4) type_conge(4) date_debut(4) date_fin(4) nombre_jours(4) statut(4) motif(4) date_demande(4)
+   classes      : statut(14) employe_id(14) date_debut(14) id(6) created_at(2) date_demande(2) type_conge(2) nombre_jours(2)
+=== Absence
+   attributs    : filter(62) count(26) order_by(20) id(2)
+   constructeur : employe_id(4) type_absence(4) motif(4) date(2) justifiee(2) heure_debut(2) heure_fin(2) nombre_heures(2) date_debut(2) date_fin(2) nombre_jours(2) justifie(2) date_enregistrement(2)
+   classes      : date(10) employe_id(4) justifiee(4) date_debut(4) date_fin(4) nombre_jours(2)
+=== TempsTravail
+   attributs    : filter(42) heures_travaillees(27) count(16) order_by(16) with_entities(12) total(12) sup(12) jours(12) heure_depart(9) heures_sup(9) heure_arrivee(9) id(2)
+   constructeur : employe_id(4) date(4) heure_arrivee(4) statut(4) heure_depart(2) heures_travaillees(2) heures_supplementaires(2) tache(2)
+   classes      : date(16) employe_id(8) heures_travaillees(4) heures_supplementaires(2) heure_depart(2) heures_sup(2) id(2)
+=== Formation
+   constructeur : titre(2) description(2) date_debut(2) date_fin(2) duree_heures(2) cout(2) formateur(2) lieu(2) agency_id(2) statut(2)
+   classes      : certificat_valide_jusque(8) date_debut(4) date_fin(4)
+=== ParticipationFormation
+   attributs    : present(5) certificat_obtenu(5) commentaire(5) statut(5)
+   constructeur : formation_id(2) employe_id(2) date_inscription(2) statut(2)
+   classes      : id(2)
+=== EvaluationPerformance
+   constructeur : employe_id(2) evaluateur_id(2) periode_debut(2) periode_fin(2) note_globale(2) commentaires(2) objectifs_atteints(2) objectifs_total(2) date_evaluation(2)
+   classes      : periode_fin(2) employe_id(2)
+=== ContratTravail
+   attributs    : date_debut(57) date_fin(38) statut(36) type_contrat(33) poste(33) salaire_base(14) departement(12) horaire_travail(12) lieu_travail(12) id(12) nombre_renouvellements(10) employe_id(9) coefficient(9) classification(9) periode_essai_jours(9) date_dernier_renouvellement(5)
+   constructeur : employe_id(2) type_contrat(2) date_debut(2) date_fin(2) poste(2) salaire_base(2) coefficient(2) classification(2) periode_essai_jours(2) statut(2)
+   classes      : date_fin(8) date_debut(6) employe_id(6) statut(4) id(2)
+=== Salaire
+   attributs    : filter(125) order_by(21) taux_horaire_sup(16) heures_supplementaires(16) employe_id(16) periode_fin(12) salaire_base(8) all(6) salaire_net(6)
+   constructeur : employe_id(2) periode_debut(2) periode_fin(2) salaire_base(2) heures_supplementaires(2) taux_horaire_sup(2) deductions_cnps(2) deductions_impot(2) deductions_avances(2) autres_deductions(2) salaire_net(2) devise(2) date_paiement(2) statut(2) nombre_heures_travaillees(2) taux_imposition(2)
+   classes      : employe_id(18) periode_debut(14) periode_fin(10) date_paiement(2) statut(2) id(2) mois(2) annee(2)
+=== Prime
+   classes      : employe_id(2) periode(2) statut(2) montant(2)
+=== DocumentEmploye
+   constructeur : employe_id(2) type_document(2) chemin_fichier(2) date_emission(2) date_expiration(2) date_ajout(2)
+   classes      : date_expiration(8) date_emission(2) employe_id(2)
+=== Organigramme
+   attributs    : manager_id(6) departement(6) poste(6) date_mise_a_jour(6)
+   constructeur : employe_id(2) manager_id(2) departement(2) poste(2)
+   classes      : employe_id(2) manager_id(2)
+=== Competence
+   constructeur : nom(2) categorie(2) description(2) niveau_requis(2)
+=== CompetenceEmploye
+   constructeur : employe_id(2) competence_id(2) niveau(2) date_evaluation(2)
+   classes      : employe_id(2)

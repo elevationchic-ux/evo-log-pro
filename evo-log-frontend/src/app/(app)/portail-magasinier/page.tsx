@@ -64,6 +64,8 @@ export default function PortailMagasinierPage() {
   const [pickingOrders, setPickingOrders] = useState<PickingOrder[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<PickingOrder | null>(null);
   const [validatingBon, setValidatingBon] = useState(false);
+  const [refusantBon, setRefusantBon] = useState(false);
+  const [pdfBon, setPdfBon] = useState(false);
 
   // Reception state
   const [receptions, setReceptions] = useState<ReceptionItem[]>([]);
@@ -201,9 +203,67 @@ export default function PortailMagasinierPage() {
       toast.success(`Bon #${selectedOrder.reference} validé : stock décrémenté en entrepôt`);
       await fetchData();
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Erreur lors de la validation du bon de sortie');
+      // Batch 16 : en cas de rupture, le backend renvoie un detail STRUCTURÉ
+      // ({ message, lignes_en_rupture[] }) — l'afficher sans le réduire à un
+      // string (le magasinier doit voir quoi manque).
+      const detail = err?.response?.data?.detail;
+      const msg = typeof detail === 'string'
+        ? detail
+        : detail?.message
+          ? `${detail.message} : ${
+              (detail.lignes_en_rupture || [])
+                .map((l: any) => `${l.designation || l.code_article || 'stock ' + l.stock_id} (demandé ${l.quantite_demandee}, dispo ${l.quantite_disponible})`)
+                .join(' | ') || 'voir détail'
+            }`
+          : 'Erreur lors de la validation du bon de sortie';
+      toast.error(msg);
     } finally {
       setValidatingBon(false);
+    }
+  };
+
+  // Refus MOTIVÉ (circuit de signature) : le motif est obligatoire, tracé
+  // côté backend, et aucun stock n'est bougé.
+  const handleRefuserBonSortie = async () => {
+    if (!selectedOrder) return;
+    const motif = window.prompt(
+      `Motif du refus du bon #${selectedOrder.reference} (obligatoire, tracé sur le document) :`
+    );
+    if (motif === null) return; // annulé : ne rien faire
+    if (!motif.trim()) {
+      toast.error('Un refus exige un motif non vide.');
+      return;
+    }
+    setRefusantBon(true);
+    try {
+      await removalSlipAPI.refuse(selectedOrder.id, motif.trim());
+      toast.success(`Bon #${selectedOrder.reference} refusé — motif enregistré, aucun mouvement de stock`);
+      await fetchData();
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+      toast.error(typeof detail === 'string' ? detail : 'Erreur lors du refus du bon de sortie');
+    } finally {
+      setRefusantBon(false);
+    }
+  };
+
+  // Édition PDF du bon (zones de signature imprimées, jamais simulées).
+  const handlePdfBonSortie = async () => {
+    if (!selectedOrder) return;
+    setPdfBon(true);
+    try {
+      const res = await removalSlipAPI.getPdf(selectedOrder.id);
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bon-sortie-${selectedOrder.reference}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+      toast.error(typeof detail === 'string' ? detail : 'Édition PDF indisponible');
+    } finally {
+      setPdfBon(false);
     }
   };
 
