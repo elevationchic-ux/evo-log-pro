@@ -2114,7 +2114,7 @@ def _creer_employe(
         is_superuser=False,
         must_change_password=True,
         created_by=createur.id,
-        language=(createur.language or "fr"),
+        language=getattr(createur, "language", None) or "fr",
     )
     if data.role:
         db_role = db.query(Role).filter(Role.name == data.role.strip().upper()).first()

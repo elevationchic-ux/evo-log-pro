@@ -5,6 +5,7 @@ from typing import List
 from datetime import date, datetime
 
 from app.core.database import get_db
+from app.core.permissions import require_perm
 from app.core.security import get_current_user
 from app.models.user import User
 from app.schemas.transport_avance import (
@@ -33,7 +34,7 @@ router = APIRouter(tags=["Transport Avancé"])  # monte sur /api/v1/transport-av
 def creer_tournee(
     tournee: TourneeCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Create delivery tour/route"""
     from app.models.transport_avance import Tournée
@@ -56,7 +57,7 @@ def ajouter_livraison(
     tournee_id: int,
     livraison: LivraisonCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Add delivery stop to tour"""
     from app.models.transport_avance import Livraison
@@ -79,7 +80,7 @@ def ajouter_livraison(
 def optimiser_tournee(
     tournee_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.modify"))
 ):
     """Optimize route (placeholder for actual routing algorithm)"""
     from app.models.transport_avance import Tournée, Livraison
@@ -103,7 +104,7 @@ def optimiser_tournee(
 def demarrer_tournee(
     tournee_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.modify"))
 ):
     """Start tour execution"""
     from app.models.transport_avance import Tournée
@@ -124,7 +125,7 @@ def demarrer_tournee(
 def completer_tournee(
     tournee_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.modify"))
 ):
     """Complete tour"""
     from app.models.transport_avance import Tournée
@@ -149,7 +150,7 @@ def completer_tournee(
 def enregistrer_frais_kilometrique(
     frais: FraisKilometriqueCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Record mileage expense"""
     from app.models.transport_avance import FraisKilometrique
@@ -173,7 +174,7 @@ def calculer_cout_km(
     mois: int,
     annee: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Calculate cost per kilometer for month"""
     from app.models.transport_avance import FraisKilometrique
@@ -215,7 +216,7 @@ def enregistrer_plein_carburant(
     kilometrage: int,
     station: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Record fuel fill-up and calculate consumption"""
     return {
@@ -235,7 +236,7 @@ def detecter_anomalie_carburant(
     consommation_theorique: float,
     tolerance: float = 0.2,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Detect fuel fraud/anomaly"""
     difference = abs(consommation_actuelle - consommation_theorique)
@@ -257,7 +258,7 @@ def detecter_anomalie_carburant(
 def enregistrer_temps_conduite(
     temps: TempsConduiteCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Record driving period"""
     from app.models.transport_avance import TempsConduite
@@ -283,7 +284,7 @@ def verifier_conformite_temps(
     conducteur_id: int,
     date_verif: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Check driving time compliance"""
     from app.models.transport_avance import TempsConduite
@@ -317,7 +318,7 @@ def verifier_conformite_temps(
 def creer_sous_traitant(
     sous_traitant: SousTraitantCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Create subcontractor record"""
     from app.models.transport_avance import SousTraitant
@@ -341,7 +342,7 @@ def creer_sous_traitant(
 def creer_contrat_sous_traitant(
     contrat: ContratSousTraitantCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Create subcontractor contract"""
     from app.models.transport_avance import ContratSousTraitant
@@ -365,7 +366,7 @@ def creer_contrat_sous_traitant(
 def attribuer_mission_sous_traitant(
     mission: MissionSousTraitantCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Assign mission to subcontractor"""
     from app.models.transport_avance import MissionSousTraitant
@@ -388,7 +389,7 @@ def evaluer_performance_sous_traitant(
     debut_periode: date,
     fin_periode: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Evaluate subcontractor performance"""
     from app.models.transport_avance import MissionSousTraitant, ContratSousTraitant
@@ -432,7 +433,7 @@ def evaluer_performance_sous_traitant(
 def declarer_accident(
     accident: AccidentTransportCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Report transport accident"""
     from app.models.transport_avance import AccidentTransport
@@ -462,7 +463,7 @@ def ajouter_enquete(
     conclusions: str,
     actions_correctives: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.modify"))
 ):
     """Add investigation findings"""
     from app.models.transport_avance import AccidentTransport
@@ -488,7 +489,7 @@ def obtenir_statistiques_accidents(
     debut_periode: date,
     fin_periode: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Get accident statistics for period"""
     from app.models.transport_avance import AccidentTransport
@@ -518,7 +519,7 @@ def obtenir_statistiques_accidents(
 def planifier_maintenance_preventive(
     maintenance: MaintenancePreventiveCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Schedule preventive maintenance"""
     from app.models.transport_avance import MaintenancePreventive
@@ -546,7 +547,7 @@ def executer_maintenance(
     technicien: str,
     observations: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.modify"))
 ):
     """Execute preventive maintenance"""
     from app.models.transport_avance import MaintenancePreventive
@@ -571,7 +572,7 @@ def executer_maintenance(
 def obtenir_maintenances_urgentes(
     jours_critique: int = 7,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Get maintenance due within critical period"""
     from app.models.transport_avance import MaintenancePreventive
@@ -594,7 +595,7 @@ def obtenir_maintenances_urgentes(
 def enregistrer_position(
     position: PositionGPSCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Record GPS position"""
     from app.models.transport_avance import PositionGPS
@@ -617,7 +618,7 @@ def enregistrer_position(
 def obtenir_derniere_position(
     vehicule_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Get last known position of vehicle"""
     from app.models.transport_avance import PositionGPS
@@ -637,7 +638,7 @@ def obtenir_trajectoire(
     debut: datetime,
     fin: datetime,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Get vehicle trajectory for time period"""
     from app.models.transport_avance import PositionGPS
@@ -657,7 +658,7 @@ def obtenir_trajectoire(
 def creer_zone_geofencing(
     zone: ZoneGeofencingCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Create geofencing zone"""
     from app.models.transport_avance import ZoneGeofencing
@@ -682,7 +683,7 @@ def verifier_violation_geofencing(
     latitude: float,
     longitude: float,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Check if position violates any geofencing zones"""
     from app.models.transport_avance import ZoneGeofencing
@@ -704,7 +705,7 @@ def verifier_violation_geofencing(
 def enregistrer_evenement_vehicule(
     evenement: EvenementVehiculeCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Record vehicle event (geofence violation, speeding, etc.)"""
     from app.models.transport_avance import EvenementVehicule
@@ -730,7 +731,7 @@ def evaluer_conducteur(
     debut_periode: date,
     fin_periode: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Evaluate driver behavior score"""
     from app.models.transport_avance import TempsConduite, AccidentTransport, EvenementVehicule
@@ -790,7 +791,7 @@ def calculer_taux_livraison_ponctuelle(
     debut_periode: date,
     fin_periode: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Calculate on-time delivery rate"""
     taux = KPITransportService.calculer_taux_livraison_ponctuelle(db, debut_periode, fin_periode)
@@ -802,7 +803,7 @@ def calculer_taux_utilisation_vehicules(
     vehicule_id: int,
     jours: int = 30,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Calculate vehicle utilization rate"""
     taux = KPITransportService.calculer_taux_utilisation_vehicules(db, vehicule_id, jours)
@@ -815,7 +816,7 @@ def calculer_variance_carburant(
     debut_periode: date,
     fin_periode: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
     """Calculate fuel variance (actual vs theoretical)"""
     return KPITransportService.calculer_variance_carburant(

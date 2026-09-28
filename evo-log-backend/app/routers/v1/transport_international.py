@@ -5,6 +5,7 @@ from typing import List, Optional
 from datetime import datetime, date
 
 from app.core.database import get_db
+from app.core.permissions import require_perm
 from app.core.security import get_current_user
 from app.models.user import User
 from app.schemas.transport_international import (
@@ -41,7 +42,7 @@ def lister_ordres_transport(
     offset: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_perm("transport.mission.read")),
 ):
     """Liste des Ordres de Transport international.
 
@@ -57,7 +58,7 @@ def lister_ordres_transport(
 def creer_ordre_transport(
     ot: OrdreTransportCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Create transport order"""
     return OrdreTransportService.creer_ordre_transport(
@@ -72,7 +73,7 @@ def creer_ordre_transport(
 def mettre_en_transit(
     ot_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Mark transport as in transit"""
     return OrdreTransportService.mettre_en_transit(db, ot_id)
@@ -82,7 +83,7 @@ def mettre_en_transit(
 def marquer_livre(
     ot_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Mark transport as delivered"""
     return OrdreTransportService.marquer_livre(db, ot_id)
@@ -93,7 +94,7 @@ def mettre_a_jour_ordre(
     ot_id: int,
     ot: OrdreTransportUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Update transport order"""
     o = db.query(OrdreTransport).filter(OrdreTransport.id == ot_id).first()
@@ -112,7 +113,7 @@ def mettre_a_jour_ordre(
 def rapport_transport(
     ot_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.read"))
 ):
     """Generate transport report"""
     return TransportInternationalReportingService.rapport_transport(db, ot_id)
@@ -125,7 +126,7 @@ def lister_carnets_tir(
     offset: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_perm("transport.mission.read")),
 ):
     """Liste des carnets TIR (batch 12). Meme raison que
     lister_ordres_transport : l'ecran fetch deja cette URL, l'endpoint
@@ -137,7 +138,7 @@ def lister_carnets_tir(
 def creer_carnet_tir(
     carnet: CarnetTIRCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Create TIR Carnet"""
     return CarnetTIRService.creer_carnet_tir(
@@ -152,7 +153,7 @@ def mettre_a_jour_carnet(
     carnet_id: int,
     carnet: CarnetTIRUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Update TIR Carnet"""
     c = db.query(CarnetTIR).filter(CarnetTIR.id == carnet_id).first()
@@ -172,7 +173,7 @@ def mettre_a_jour_carnet(
 def emettre_cmr(
     cmr: CMRCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Issue CMR"""
     return CMRService.emettre_cmr(
@@ -188,7 +189,7 @@ def signer_cmr(
     cmr_id: int,
     type_signature: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Sign CMR"""
     return CMRService.signer_cmr(db, cmr_id, type_signature)
@@ -199,7 +200,7 @@ def mettre_a_jour_cmr(
     cmr_id: int,
     cmr: CMRUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Update CMR"""
     c = db.query(CMR).filter(CMR.id == cmr_id).first()
@@ -219,7 +220,7 @@ def mettre_a_jour_cmr(
 def poser_scelle(
     scelle: ScelleRoutierCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Apply road seal"""
     return ScelleRoutierService.poser_scelle(
@@ -234,7 +235,7 @@ def verifier_scelle(
     intact: bool,
     motif_bris: str = "",
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Verify road seal"""
     return ScelleRoutierService.verifier_scelle(
@@ -247,7 +248,7 @@ def mettre_a_jour_scelle(
     scelle_id: int,
     scelle: ScelleRoutierUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Update road seal"""
     s = db.query(ScelleRoutier).filter(ScelleRoutier.id == scelle_id).first()
@@ -267,7 +268,7 @@ def mettre_a_jour_scelle(
 def enregistrer_position(
     position: PositionTransportCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Record transport position"""
     return PositionTransportService.enregistrer_position(
@@ -281,7 +282,7 @@ def enregistrer_position(
 def enregistrer_controle_cet(
     cet: CETSuiviCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Record CET control"""
     return CETSuiviService.enregistrer_controle_cet(
@@ -295,7 +296,7 @@ def enregistrer_controle_cet(
 def creer_assurance_fap(
     assurance: AssuranceFAPCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Create FAP insurance"""
     return AssuranceFAPService.creer_assurance_fap(
@@ -310,7 +311,7 @@ def mettre_a_jour_assurance_fap(
     assurance_id: int,
     assurance: AssuranceFAPUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Update FAP insurance"""
     a = db.query(AssuranceFAP).filter(AssuranceFAP.id == assurance_id).first()
@@ -330,7 +331,7 @@ def mettre_a_jour_assurance_fap(
 def creer_planning(
     planning: PlanningLivraisonCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Create delivery planning"""
     return PlanningLivraisonService.creer_planning(
@@ -346,7 +347,7 @@ def mettre_a_jour_planning(
     planning_id: int,
     planning: PlanningLivraisonUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Update delivery planning"""
     p = db.query(PlanningLivraison).filter(PlanningLivraison.id == planning_id).first()
@@ -369,7 +370,7 @@ def list_preuves_livraison(
     destinataire: Optional[str] = None,
     statut: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_perm("transport.mission.read")),
 ):
     """Lister les preuves de livraison (e-POD)."""
     q = db.query(PreuveLivraison)
@@ -389,7 +390,7 @@ def list_preuves_livraison(
 def enregistrer_premiere_livraison(
     pod: PreuveLivraisonCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Record proof of delivery"""
     return PreuveLivraisonService.enregistrer_premiere_livraison(
@@ -404,7 +405,7 @@ def mettre_a_jour_premiere_livraison(
     pod_id: int,
     pod: PreuveLivraisonUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Update proof of delivery"""
     p = db.query(PreuveLivraison).filter(PreuveLivraison.id == pod_id).first()
@@ -424,7 +425,7 @@ def mettre_a_jour_premiere_livraison(
 def declarer_incident(
     incident: IncidentTransportCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Declare transport incident"""
     return IncidentTransportService.declarer_incident(
@@ -438,7 +439,7 @@ def mettre_a_jour_incident(
     incident_id: int,
     incident: IncidentTransportUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Update transport incident"""
     i = db.query(IncidentTransport).filter(IncidentTransport.id == incident_id).first()
@@ -458,7 +459,7 @@ def mettre_a_jour_incident(
 def enregistrer_controle(
     controle: ControleRoutierCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Record road control"""
     return ControleRoutierService.enregistrer_controle(
@@ -472,7 +473,7 @@ def enregistrer_controle(
 def enregistrer_taxe(
     taxe: TaxeRoutiereCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Record road tax"""
     return TaxeRoutiereService.enregistrer_taxe(
@@ -486,7 +487,7 @@ def enregistrer_taxe(
 def creer_corridor(
     corridor: CorridorCEMACCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Create CEMAC corridor"""
     return CorridorCEMACService.creer_corridor(
@@ -501,7 +502,7 @@ def mettre_a_jour_corridor(
     corridor_id: int,
     corridor: CorridorCEMACUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Update CEMAC corridor"""
     c = db.query(CorridorCEMAC).filter(CorridorCEMAC.id == corridor_id).first()

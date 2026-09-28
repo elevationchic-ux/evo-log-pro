@@ -29,7 +29,7 @@ router = APIRouter(tags=["Transport Avancé"])  # monte sur /api/v1/transport-av
 def optimisation_tournees(
     request: OptimisationTourneesRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Optimisation de tournées"""
     try:
@@ -47,7 +47,7 @@ def optimisation_tournees(
 def planification_automatique(
     date_jour: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Planification automatique des missions pour une journée"""
     dispatches = DispatchIntelligentService.planification_automatique(db, date_jour)
@@ -59,7 +59,7 @@ def equilibre_charge_chauffeurs(
     periode_debut: date,
     periode_fin: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.read"))
 ):
     """Équilibrage de la charge entre chauffeurs"""
     return DispatchIntelligentService.equilibre_charge_chauffeurs(db, periode_debut, periode_fin)
@@ -69,7 +69,7 @@ def equilibre_charge_chauffeurs(
 def attribution_intelligente(
     mission_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Attribution intelligente d'une mission"""
     try:
@@ -84,7 +84,7 @@ def recalcul_itineraire(
     dispatch_id: int,
     evenement: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Recalculer l'itinéraire suite à un événement"""
     try:
@@ -98,7 +98,7 @@ def recalcul_itineraire(
 def lister_dispatches(
     statut: str = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.read"))
 ):
     """Lister les dispatches"""
     query = db.query(Dispatch)
@@ -111,7 +111,7 @@ def lister_dispatches(
 def obtenir_dispatch(
     dispatch_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.read"))
 ):
     """Obtenir un dispatch par ID"""
     dispatch = db.query(Dispatch).filter(Dispatch.id == dispatch_id).first()
@@ -125,7 +125,7 @@ def modifier_dispatch(
     dispatch_id: int,
     dispatch_update: DispatchUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.modify"))
 ):
     """Modifier un dispatch"""
     dispatch = db.query(Dispatch).filter(Dispatch.id == dispatch_id).first()
@@ -146,7 +146,7 @@ def modifier_dispatch(
 def creer_arret(
     arret: ArretCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Créer un arrêt"""
     arret_db = Arret(**arret.model_dump())
@@ -160,7 +160,7 @@ def creer_arret(
 def lister_arrets_dispatch(
     dispatch_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.read"))
 ):
     """Lister les arrêts d'un dispatch"""
     return db.query(Arret).filter(Arret.dispatch_id == dispatch_id).order_by(Arret.ordre_sequence).all()
@@ -172,7 +172,7 @@ def lister_arrets_dispatch(
 def creer_pod(
     pod: PODCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Créer une preuve de livraison"""
     return EPODService.creer_pod(
@@ -189,7 +189,7 @@ def valider_pod(
     pod_id: int,
     valide_par: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Valider une preuve de livraison"""
     try:
@@ -202,7 +202,7 @@ def valider_pod(
 def integration_facturation(
     pod_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Intégration avec la facturation"""
     try:
@@ -215,7 +215,7 @@ def integration_facturation(
 def archivage_legal(
     pod_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Archivage légal des preuves"""
     try:
@@ -228,7 +228,7 @@ def archivage_legal(
 def lister_pods(
     statut: str = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.read"))
 ):
     """Lister les PODs"""
     query = db.query(POD)
@@ -243,7 +243,7 @@ def lister_pods(
 def ajouter_document_pod(
     document: DocumentPODCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.create"))
 ):
     """Ajouter un document POD"""
     doc_db = DocumentPOD(**document.model_dump(), upload_par=current_user.id)
@@ -257,7 +257,7 @@ def ajouter_document_pod(
 def lister_documents_pod(
     pod_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.read"))
 ):
     """Lister les documents d'un POD"""
     return db.query(DocumentPOD).filter(DocumentPOD.pod_id == pod_id).all()
@@ -269,7 +269,7 @@ def lister_documents_pod(
 def tableau_bord_transport(
     date_dashboard: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.read"))
 ):
     """Tableau de bord transport"""
     return AnalyticsTransportService.tableau_bord_transport(db, date_dashboard)
@@ -281,7 +281,7 @@ def kpi_transport(
     conducteur_id: int = None,
     camion_id: int = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.read"))
 ):
     """KPIs transport"""
     return AnalyticsTransportService.kpi_transport(db, periode, conducteur_id, camion_id)
@@ -290,7 +290,7 @@ def kpi_transport(
 @router.get("/analytics/alertes", response_model=List[AlertPerformanceResponse])
 def alertes_performance(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("transport.mission.read"))
 ):
     """Alertes de performance"""
     return AnalyticsTransportService.alertes_performance(db)
