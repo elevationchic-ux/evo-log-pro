@@ -404,6 +404,9 @@ class DocumentEmployeResponse(DocumentEmployeBase):
     id: int
     employe_id: int
     date_ajout: datetime
+    # Derive de chemin_fichier par le modele (propriete) : la base ne stocke
+    # qu'un chemin, un nom stocke une seconde fois pourrait le contredire.
+    nom_fichier: Optional[str] = None
     
     class Config:
         from_attributes = True
@@ -437,9 +440,10 @@ class OrganigrammeResponse(OrganigrammeBase):
 # Competence schemas
 class CompetenceBase(BaseModel):
     nom: str
-    categorie: str
-    description: str
-    niveau_requis: str
+    categorie: str = Field(..., description="technique, comportementale, linguistique")
+    description: Optional[str] = None
+    niveau_requis: str = Field(..., description="debutant, intermediaire, avance, expert")
+
 
 
 class CompetenceCreate(CompetenceBase):
@@ -480,19 +484,10 @@ class CompetenceEmployeResponse(CompetenceEmployeBase):
         from_attributes = True
 
 
-# Payroll bulletin schema
-class BulletinPaieResponse(BaseModel):
-    employe_id: int
-    periode: str
-    salaire_base: float
-    heures_sup: float
-    indemnite_heures_sup: float
-    primes: List[dict]
-    total_primes: float
-    salaire_brut: float
-    cotisations: dict
-    impot_revenu: float
-    deductions: List[dict]
-    total_deductions: float
-    salaire_net: float
-    note: str
+# Bulletin de paie : une seule definition, dans app/schemas/rh_avance.py
+# (BulletinPaieResponse), celle que le routeur /rh-avance/bulletin-paie renvoie
+# vraiment. Ce module en declarait un second, avec un champ `note` requis que
+# plus aucun service ne produit et un formalisme de cotisations qui ne
+# correspond a aucune reponse reelle : deux schemas pour un meme objet finissent
+# toujours par decrire deux API differentes.
+
