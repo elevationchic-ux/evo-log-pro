@@ -452,7 +452,24 @@ class FormationService:
     
     @staticmethod
     def inscrire_employe(db: Session, formation_id: int, employe_id: int) -> ParticipationFormation:
-        """Enroll employee in training"""
+        """Enroll employee in training
+
+        La session et le salarie sont verifies avant l'ecriture : une cle etrangere
+        inexistante passerait en base (Postgres la refuse, SQLite l'accepte et
+        laisse une participation orphanes sans nom d'agent ni intitule).
+        """
+        if not db.query(Formation).filter(Formation.id == formation_id).first():
+            raise ValueError(f"Aucune formation a l'identifiant {formation_id}")
+        if not db.query(User).filter(User.id == employe_id).first():
+            raise ValueError(f"Aucun employe a l'identifiant {employe_id}")
+        if db.query(ParticipationFormation).filter(
+            and_(
+                ParticipationFormation.formation_id == formation_id,
+                ParticipationFormation.employe_id == employe_id,
+            )
+        ).first():
+            raise ValueError("Cet employe est deja inscrit a cette formation")
+
         participation = ParticipationFormation(
             formation_id=formation_id,
             employe_id=employe_id,
@@ -470,7 +487,7 @@ class FormationService:
         participation_id: int,
         present: bool,
         certificat_obtenu: bool = False,
-        commentaire: str = ""
+        commentaire: Optional[str] = ""
     ) -> ParticipationFormation:
         """Validate training participation and certification"""
         participation = db.query(ParticipationFormation).filter(
@@ -481,8 +498,12 @@ class FormationService:
             raise ValueError("Participation non trouvée")
         
         participation.present = present
-        participation.certificat_obtenu = certificat_obtenu
-        participation.commentaire = commentaire
+        participation.certificat_obtenu = (
+            # Une certification ne s'attribue qu'a un participant présent :
+            # l'inverse inscrirait un diplome que personne n'a passe.
+            bool(certificat_obtenu) and present
+        )
+        participation.commentaire = (commentaire or "").strip() or None
         participation.statut = "complete" if present else "absent"
         
         db.commit()
