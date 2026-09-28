@@ -266,41 +266,11 @@ class LigneBonReceptionResponse(LigneBonReceptionBase):
         from_attributes = True
 
 
-# BonSortie schemas
-class BonSortieBase(BaseModel):
-    destinataire_id: int
-    type_sortie: str
-    date_sortie: date
-    statut: str = "en_cours"
-
-
-class BonSortieCreate(BonSortieBase):
-    pass
-
-
-class BonSortieResponse(BonSortieBase):
-    id: int
-    date_validation: Optional[datetime] = None
-    
-    class Config:
-        from_attributes = True
-
-
-class LigneBonSortieBase(BaseModel):
-    bon_id: int
-    stock_id: int
-    quantite: float
-
-
-class LigneBonSortieCreate(LigneBonSortieBase):
-    pass
-
-
-class LigneBonSortieResponse(LigneBonSortieBase):
-    id: int
-    
-    class Config:
-        from_attributes = True
+# BonSortie schemas — SUPPRIMÉS (Batch 16) : squelettes fantômes déconnectés du
+# modèle réel (destinataire_id, bon_id, quantite n'existent pas sur
+# BonSortie/LigneBonSortie ; stock.quantite non plus). Les VRAIS schémas du bon
+# de sortie vivent dans app/schemas/removal_slip.py (route live
+# /api/v1/magasin/removal-slips).
 
 
 # RetourClient schemas

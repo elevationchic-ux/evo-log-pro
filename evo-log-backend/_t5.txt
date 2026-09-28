@@ -1,0 +1,11 @@
+﻿python :   File "<string>", line 11
+At line:1 char:77
++ ... \Documents\Projet\Documents\evo-log pro\evo-log-backend"; python -c "
++                                                               ~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (  File "<string>", line 11:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    print('ALLTABLES', json.dumps([r[0] for r in c.execute(" select name from sqlite_master where 
+type=table\).fetchall()]))
+                                                           ^
+SyntaxError: unterminated string literal (detected at line 11)

@@ -51,11 +51,18 @@ jobs:
     # La chaine Alembic doit jouer jusqu'au bout sur le moteur de la prod :
     # en production create_all() est desactive, le schema vient des seules
     # migrations. Un echec ici = des tables que plus aucun endpoint ne peut lire.
+    # L'erreur brute est rejetee en ::error:: (annotation publique) car les
+    # logs bruts d'une workflow run ne sont pas lisibles sans authentification.
     - name: Replay Alembic chain on Postgres
       working-directory: ./evo-log-backend
       env:
         DATABASE_URL: postgresql://test:test@localhost:5432/test_db
-      run: python -m alembic upgrade head
+      run: |
+        python -m alembic upgrade head 2> alembic_err.log || {
+          echo "::error::Replay Alembic echoue: $(tail -n 12 alembic_err.log | tr '\n' ' ' | tr -d ';')"
+          tail -n 40 alembic_err.log
+          exit 1
+        }
 
     # Parite ORM <-> migrations : une colonne que le modele reclame et qu'aucune
     # migration ne cree tue la page en 500 sans qu'aucun test de route ne le voie
@@ -147,11 +154,25 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Deploy to Railway (Staging)
-      uses: railwayapp/cli-action@v1
-      with:
-        service: evo-log-backend
-        command: up
+    # L'ancienne railwayapp/cli-action@v1 est archivee et n'a JAMAIS recu de
+    # token dans ce workflow : le deploiement Railway etait structurellement
+    # mort (le service tournait sur un vieux `railway up` manuel). Le CLI
+    # officiel + RAILWAY_TOKEN (secret GitHub) font le vrai travail.
+    - name: Deploy backend to Railway (Staging)
+      working-directory: ./evo-log-backend
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        RAILWAY_PROJECT: ${{ vars.RAILWAY_PROJECT }}
+        RAILWAY_ENVIRONMENT: ${{ vars.RAILWAY_ENVIRONMENT }}
+      run: |
+        if [ -z "$RAILWAY_TOKEN" ]; then
+          echo "::error::Secret RAILWAY_TOKEN absent: create it in GitHub Settings > Secrets > Actions"
+          exit 1
+        fi
+        npm install -g @railway/cli
+        railway up --detach \
+          ${RAILWAY_PROJECT:+--project "$RAILWAY_PROJECT"} \
+          ${RAILWAY_ENVIRONMENT:+--environment "$RAILWAY_ENVIRONMENT"}
 
   deploy-production:
     needs: [test-backend, test-frontend, security-scan]
@@ -161,11 +182,21 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Deploy to Railway (Production)
-      uses: railwayapp/cli-action@v1
-      with:
-        service: evo-log-backend
-        command: up
+    - name: Deploy backend to Railway (Production)
+      working-directory: ./evo-log-backend
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        RAILWAY_PROJECT: ${{ vars.RAILWAY_PROJECT }}
+        RAILWAY_ENVIRONMENT: ${{ vars.RAILWAY_ENVIRONMENT }}
+      run: |
+        if [ -z "$RAILWAY_TOKEN" ]; then
+          echo "::error::Secret RAILWAY_TOKEN absent: create it in GitHub Settings > Secrets > Actions"
+          exit 1
+        fi
+        npm install -g @railway/cli
+        railway up --detach \
+          ${RAILWAY_PROJECT:+--project "$RAILWAY_PROJECT"} \
+          ${RAILWAY_ENVIRONMENT:+--environment "$RAILWAY_ENVIRONMENT"}
     
     - name: Deploy to Vercel (Production)
       uses: amondnet/vercel-action@v20

@@ -22,8 +22,6 @@ from app.schemas.magasin_avance import (
     LigneCommandeFournisseurCreate, LigneCommandeFournisseurResponse,
     BonReceptionCreate, BonReceptionResponse,
     LigneBonReceptionCreate, LigneBonReceptionResponse,
-    BonSortieCreate, BonSortieResponse,
-    LigneBonSortieCreate, LigneBonSortieResponse,
     RetourClientCreate, RetourClientUpdate, RetourClientResponse,
     LitigeTransporteurCreate, LitigeTransporteurUpdate, LitigeTransporteurResponse,
     ColisCreate, ColisUpdate, ColisResponse,
@@ -750,80 +748,14 @@ def valider_reception(
 
 
 # ============ SORTIES ============
-@router.post("/sorties", response_model=BonSortieResponse, status_code=status.HTTP_201_CREATED)
-def creer_bon_sortie(
-    bon: BonSortieCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Create goods issue note"""
-    from app.models.magasin_avance import BonSortie
-    b = BonSortie(
-        destinataire_id=bon.destinataire_id,
-        type_sortie=bon.type_sortie,
-        date_sortie=bon.date_sortie,
-        statut="en_cours"
-    )
-    db.add(b)
-    db.commit()
-    db.refresh(b)
-    return b
-
-
-@router.post("/sorties/{bon_id}/lignes", response_model=LigneBonSortieResponse, status_code=status.HTTP_201_CREATED)
-def ajouter_ligne_sortie(
-    bon_id: int,
-    ligne: LigneBonSortieCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Add item to issue note"""
-    from app.models.magasin_avance import LigneBonSortie
-    from app.models.magasin import Stock
-    
-    stock = db.query(Stock).filter(Stock.id == ligne.stock_id).first()
-    if not stock or stock.quantite_disponible < ligne.quantite:
-        raise HTTPException(status_code=400, detail="Stock insuffisant")
-    
-    l = LigneBonSortie(
-        bon_id=bon_id,
-        stock_id=ligne.stock_id,
-        quantite=ligne.quantite
-    )
-    db.add(l)
-    db.commit()
-    db.refresh(l)
-    return l
-
-
-@router.put("/sorties/{bon_id}/valider", response_model=BonSortieResponse)
-def valider_sortie(
-    bon_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Validate issue and deduct stock"""
-    from app.models.magasin_avance import BonSortie, LigneBonSortie
-    from app.models.magasin import Stock
-    
-    bon = db.query(BonSortie).filter(BonSortie.id == bon_id).first()
-    if not bon:
-        raise HTTPException(status_code=404, detail="Bon de sortie non trouvé")
-    
-    lignes = db.query(LigneBonSortie).filter(LigneBonSortie.bon_id == bon_id).all()
-    
-    for ligne in lignes:
-        stock = db.query(Stock).filter(Stock.id == ligne.stock_id).first()
-        if stock:
-            stock.quantite -= ligne.quantite
-            stock.quantite_disponible -= ligne.quantite
-    
-    bon.statut = "valide"
-    bon.date_validation = datetime.utcnow()
-    
-    db.commit()
-    db.refresh(bon)
-    return bon
+# SUPPRIMÉ (Batch 16) : l'ancien trio POST /sorties, POST /sorties/{id}/lignes,
+# PUT /sorties/{id}/valider était du code mort — il construisait
+# BonSortie(destinataire_id=...), LigneBonSortie(bon_id=..., quantite=...) et
+# lisait stock.quantite, champs qui n'existent pas sur les modèles
+# (TypeError systématique → 500). Le vrai circuit de bon de sortie (numérotation,
+# stock tout-ou-rien, registre MouvementStock, refus motivé, PDF signé) vit dans
+# app/routers/v1/removal_slip.py, monté sous /api/v1/magasin/removal-slips
+# et connecté au frontend (portail magasinier).
 
 
 # ============ RETOURS CLIENTS ============
