@@ -15,14 +15,14 @@ router = APIRouter()
 
 
 @router.get("/camions", response_model=List[CamionResponse])
-async def get_all_camions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def get_all_camions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.read"))):
     """Get all trucks"""
     camions = db.query(Camion).offset(skip).limit(limit).all()
     return camions
 
 
 @router.post("/camions", response_model=CamionResponse, status_code=status.HTTP_201_CREATED)
-async def create_camion(camion_data: CamionCreate, db: Session = Depends(get_db)):
+async def create_camion(camion_data: CamionCreate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.create"))):
     """Create a new truck"""
     if db.query(Camion).filter(Camion.immatriculation == camion_data.immatriculation).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Truck registration already exists")
@@ -35,7 +35,7 @@ async def create_camion(camion_data: CamionCreate, db: Session = Depends(get_db)
 
 
 @router.get("/camions/{camion_id}", response_model=CamionResponse)
-async def get_camion(camion_id: int, db: Session = Depends(get_db)):
+async def get_camion(camion_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.read"))):
     """Get a specific truck by ID"""
     camion = db.query(Camion).filter(Camion.id == camion_id).first()
     if not camion:
@@ -44,7 +44,7 @@ async def get_camion(camion_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/camions/{camion_id}", response_model=CamionResponse)
-async def update_camion(camion_id: int, camion_data: CamionUpdate, db: Session = Depends(get_db)):
+async def update_camion(camion_id: int, camion_data: CamionUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.modify"))):
     """Update a truck"""
     camion = db.query(Camion).filter(Camion.id == camion_id).first()
     if not camion:
@@ -59,7 +59,7 @@ async def update_camion(camion_id: int, camion_data: CamionUpdate, db: Session =
 
 
 @router.get("/conducteurs", response_model=List[ConducteurResponse])
-async def get_all_conducteurs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def get_all_conducteurs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.read"))):
     """Get all drivers"""
     conducteurs = db.query(Conducteur).offset(skip).limit(limit).all()
     return conducteurs

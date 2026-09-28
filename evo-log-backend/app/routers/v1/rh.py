@@ -1574,7 +1574,7 @@ def _employee_dict(
     Le nom reste un seul champ (`full_name`) : la table `users` ne dissocie pas
     nom et prenom, et les reconstituer par decoupage inventerait un etat civil.
     Type de contrat, date d'embauche et salaire de base viennent du contrat
-    portant ; sans contrat saisi ils sont null, l'ecran affiche « - ».
+    portant ; sans contrat saisi ils sont null, l'ecran affiche "-".
     """
     departement = (
         (contrat.departement if contrat else None)
