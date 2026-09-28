@@ -261,6 +261,98 @@ export default function DepartementPage() {
         </p>
       </section>
 
+      {/* Presence du jour (statuts deduits des lignes reelles) */}
+      <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+            <Clock className="w-4 h-4" /> Présence {presence ? `· ${presence.date}` : ''}
+          </h2>
+          {presence && (
+            <div className="flex flex-wrap gap-1.5 text-[11px]">
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                {presence.synthese.presents} présents
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                {presence.synthese.attendus} attendus
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                {presence.synthese.non_planifies} non planifiés
+              </span>
+            </div>
+          )}
+        </div>
+        {!presence ? (
+          <p className="text-xs text-slate-500">Aucune donnée de présence disponible.</p>
+        ) : presence.collaborateurs.length === 0 ? (
+          <p className="text-xs text-slate-500">Aucun collaborateur rattaché à ce département.</p>
+        ) : (
+          <ul className="divide-y divide-slate-800">
+            {presence.collaborateurs.map(c => (
+              <li key={c.employe_id} className="py-2 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm text-slate-100 truncate">{c.full_name}</p>
+                  <p className="text-[11px] text-slate-400 truncate">
+                    @{c.username}
+                    {c.planifie && c.quart ? ` · ${c.quart}${c.poste_assigne ? ` (${c.poste_assigne})` : ''}` : ''}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  {c.pointe && (
+                    <span className="text-[11px] font-mono text-slate-400">
+                      {c.heure_arrivee}{c.heure_depart ? ` → ${c.heure_depart}` : ''}
+                    </span>
+                  )}
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold border ${PRESENCE_STYLE[c.presence]}`}>
+                    {c.presence}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* Planning de la semaine (tours de garde des collaborateurs) */}
+      <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-3">
+        <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+          <CalendarDays className="w-4 h-4" /> Planning {planning ? `· ${planning.semaine} (${planning.du} → ${planning.au})` : ''}
+        </h2>
+        {!planning ? (
+          <p className="text-xs text-slate-500">Aucune donnée de planning disponible.</p>
+        ) : planning.lignes.length === 0 ? (
+          <p className="text-xs text-slate-500">Aucun tour de garde planifié cette semaine pour le département.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="text-slate-400">
+                <tr className="border-b border-slate-800">
+                  <th className="py-2 pr-3 font-semibold">Jour</th>
+                  <th className="py-2 pr-3 font-semibold">Collaborateur</th>
+                  <th className="py-2 pr-3 font-semibold">Quart</th>
+                  <th className="py-2 pr-3 font-semibold">Poste</th>
+                  <th className="py-2 font-semibold">Statut</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {planning.lignes.map(l => (
+                  <tr key={l.id}>
+                    <td className="py-2 pr-3 font-mono text-slate-300">{l.date_jour}</td>
+                    <td className="py-2 pr-3 text-slate-100">{l.employe_nom}</td>
+                    <td className="py-2 pr-3 text-slate-300">{l.quart}</td>
+                    <td className="py-2 pr-3 text-slate-400">{l.poste_assigne}</td>
+                    <td className="py-2">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                        {l.statut}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
       {/* Affecter un collaborateur (competence du chef) */}
       {canManage && (
         <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-3">
