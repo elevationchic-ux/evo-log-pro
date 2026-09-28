@@ -1,5 +1,5 @@
 """RH service - Complete HR management for Cameroon/CEMAC compliance"""
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, time, timedelta
 from typing import List, Optional, Dict, Any, Union
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func, case
@@ -41,6 +41,37 @@ def compter_jours_ouvrables(debut: date, fin: date) -> int:
 def _valeur_enum(valeur):
     """Membre d'enum ou chaine : la forme stockee en base (la valeur)."""
     return valeur.value if hasattr(valeur, "value") else valeur
+
+
+def _normaliser_heure(valeur: Union[datetime, time, str, None]) -> str:
+    """Heure de saisie au format "HH:MM", seule forme lisible par la base.
+
+    Trois formes se presentent selon l'appelant : l'heure HTML d'un champ
+    ``<input type="time">`` ("08:30"), un ``time``, ou un ``datetime`` herite
+    d'un ancien appel d'API. Elles se ramenent toutes ici, au lieu d'ecrire en
+    base une valeur que plus aucune lecture ne saurait reformater. Une saisie
+    illegible est refusee : une heure par defaut inventee par l'application
+    deviendrait une duree de travail fausse, donc une paye fausse.
+    """
+    if valeur is None:
+        raise ValueError("heure de pointage absente")
+    if isinstance(valeur, (datetime, time)):
+        return "%02d:%02d" % (valeur.hour, valeur.minute)
+    texte = str(valeur).strip()
+    for format_ in ("%H:%M", "%H:%M:%S"):
+        try:
+            parsed = datetime.strptime(texte, format_)
+        except ValueError:
+            continue
+        return "%02d:%02d" % (parsed.hour, parsed.minute)
+    raise ValueError(
+        f"heure invalide : {texte} (format attendu HH:MM)")
+
+
+def _minutes(heure: str) -> int:
+    """Minutes ecoulees depuis minuit pour une heure "HH:MM"."""
+    heures, minutes = heure.split(":")[:2]
+    return int(heures) * 60 + int(minutes)
 
 
 def _date_embauche(db: Session, employe_id: int) -> Optional[date]:
@@ -226,10 +257,22 @@ class AbsenceService:
         type_absence: str,
         date_debut: date,
         date_fin: date,
-        motif: str,
+        motif: Optional[str] = None,
         justifie: bool = False
     ) -> Absence:
-        """Record absence with justification tracking"""
+        """Record absence with justification tracking
+
+        La duree s'appuie sur le calendrier, jamais sur une saisie libre : une
+        absence du 3 au 5 dure trois jours, quel que soit ce qu'a tape l'agent.
+        Le caractere justifie reste une declaration de l'agent ou du superviseur,
+        pas une déduction de l'application.
+        """
+        if date_fin < date_debut:
+            raise ValueError("date_fin anterieure a date_debut")
+        if not type_absence:
+            # NOT NULL en base : une absence sans type connu n'est pas requalifiee
+            # d'office pour satisfaire la contrainte.
+            raise ValueError("type_absence est requis")
         nombre_jours = (date_fin - date_debut).days + 1
         
         absence = Absence(
@@ -238,9 +281,9 @@ class AbsenceService:
             date_debut=date_debut,
             date_fin=date_fin,
             nombre_jours=nombre_jours,
-            motif=motif,
+            motif=(motif or "").strip() or None,
             justifie=justifie,
-            date_enregistrement=datetime.utcnow()
+            date_enregistrement=datetime.now()
         )
         
         db.add(absence)
@@ -267,16 +310,41 @@ class AbsenceService:
 
 
 class TempsTravailService:
-    """Working time management service - Cameroon labor law compliant"""
-    
+    """Working time management service - Cameroon labor law compliant
+
+    L'heure de pointage est une heure de saisie ("08:30"), pas un horodatage :
+    la colonne `temps_travail.heure_arrivee` est un VARCHAR(5) en base. L'ancien
+    code y ecrivait un `datetime` complet, que plus aucune lecture ne savait
+    reformater, et calculait les heures par soustraction de deux datetime --
+    operation impossible sur des chaines, donc fausse des le premier releve.
+    """
+
     @staticmethod
-    def pointer_arrivee(db: Session, employe_id: int, date_pointage: date, heure_arrivee: datetime) -> TempsTravail:
+    def pointer_arrivee(db: Session, employe_id: int, date_pointage: date, heure_arrivee: Union[datetime, time, str]) -> TempsTravail:
         """Clock in - attendance tracking"""
+        heure = _normaliser_heure(heure_arrivee)
+        existant = db.query(TempsTravail).filter(
+            and_(
+                TempsTravail.employe_id == employe_id,
+                TempsTravail.date == date_pointage,
+            )
+        ).first()
+        if existant:
+            # Deux arrivees le meme jour rendraient le depart ambigu (lequel
+            # solder ?) et le cumul d'heures faux : le releve existant doit etre
+            # corrige, pas double.
+            raise ValueError(
+                f"Un pointage existe deja pour le {date_pointage.isoformat()} "
+                "(arrivee " + str(existant.heure_arrivee) + ")")
+
         pointage = TempsTravail(
             employe_id=employe_id,
             date=date_pointage,
-            heure_arrivee=heure_arrivee,
-            statut="present"
+            heure_arrivee=heure,
+            # "en_attente" = releve incomplet, aucune duree ne peut en etre tiree.
+            # La presence ne se deduit pas d'un statut invente : elle se lit sur
+            # l'existence de la ligne.
+            statut="en_attente"
         )
         db.add(pointage)
         db.commit()
@@ -284,8 +352,9 @@ class TempsTravailService:
         return pointage
     
     @staticmethod
-    def pointer_depart(db: Session, employe_id: int, date_pointage: date, heure_depart: datetime) -> TempsTravail:
+    def pointer_depart(db: Session, employe_id: int, date_pointage: date, heure_depart: Union[datetime, time, str]) -> TempsTravail:
         """Clock out - calculate hours worked"""
+        depart = _normaliser_heure(heure_depart)
         pointage = db.query(TempsTravail).filter(
             and_(
                 TempsTravail.employe_id == employe_id,
@@ -296,13 +365,23 @@ class TempsTravailService:
         
         if not pointage:
             raise ValueError("Pas de pointage d'arrivée trouvé")
-        
-        pointage.heure_depart = heure_depart
-        pointage.heures_travaillees = (heure_depart - pointage.heure_arrivee).total_seconds() / 3600
+
+        minutes = _minutes(depart) - _minutes(pointage.heure_arrivee)
+        if minutes < 0:
+            # Un depart avant l'arrivee n'est pas une duree negative en paye :
+            # c'est une saisie erronee, et elle doit rester visible comme telle.
+            raise ValueError(
+                f"Heure de depart ({depart}) anterieure a l'arrivee "
+                f"({pointage.heure_arrivee})")
+        heures = minutes / 60.0
+
+        pointage.heure_depart = depart
+        pointage.heures_travaillees = round(heures, 2)
+        pointage.statut = "valide"
         
         # Calculate overtime if > 8 hours (Cameroon standard)
-        if pointage.heures_travaillees > 8:
-            pointage.heures_sup = pointage.heures_travaillees - 8
+        if heures > 8:
+            pointage.heures_sup = round(heures - 8, 2)
         
         db.commit()
         db.refresh(pointage)
@@ -327,8 +406,10 @@ class TempsTravailService:
         ).first()
         
         return {
-            "heures_travaillees": result.total or 0,
-            "heures_sup": result.sup or 0,
+            # Les sommes sortent en Decimal de la base : le schema repond en
+            # float, et un Decimal non converti serait refuse a la validation.
+            "heures_travaillees": round(float(result.total or 0), 2),
+            "heures_sup": round(float(result.sup or 0), 2),
             "jours_presents": result.jours or 0
         }
 
