@@ -1779,6 +1779,25 @@ def _index_colonnes(ref: str) -> int:
     return n - 1
 
 
+def _elements_par_nom(el, nom: str):
+    """Descendants dont le nom local est `nom`, namespace oublie.
+
+    ElementTree ne comprend le joker '{*}' que dans find/findall, pas dans
+    iter() : comparer le nom local est la seule lecture qui reussisse avec ou
+    sans namespace declare. Excel declare toujours le sien -- sans ce detail la
+    feuille etait parcouree vide et l'import repondait « fichier vide ».
+    """
+    for enfant in el.iter():
+        tag = enfant.tag
+        if isinstance(tag, str) and (tag == nom or tag.endswith("}" + nom)):
+            yield enfant
+
+
+def _texte_case(el) -> str:
+    """Texte d'une case : la concatenation de ses runs <t>."""
+    return "".join(t.text or "" for t in _elements_par_nom(el, "t"))
+
+
 def _lignes_xlsx(blob: bytes) -> List[List[Any]]:
     """Premiere feuille d'un classeur .xlsx, lu sans dependance externe."""
     try:
@@ -1796,25 +1815,28 @@ def _lignes_xlsx(blob: bytes) -> List[List[Any]]:
         chaines: List[str] = []
         if "xl/sharedStrings.xml" in noms:
             racine = ET.fromstring(archive.read("xl/sharedStrings.xml"))
-            for si in racine.findall("{*}si"):
-                chaines.append("".join(t.text or "" for t in si.iter("{*}t")))
+            for si in _elements_par_nom(racine, "si"):
+                chaines.append(_texte_case(si))
         racine = ET.fromstring(archive.read(feuilles[0]))
         lignes: List[List[Any]] = []
-        for row in racine.iter("{*}row"):
+        for row in _elements_par_nom(racine, "row"):
             cellules: Dict[int, Any] = {}
-            for c in row.findall("{*}c"):
+            for c in _elements_par_nom(row, "c"):
                 i = _index_colonnes(c.get("r") or "")
                 type_cellule = (c.get("t") or "").lower()
                 valeur = None
                 if type_cellule == "inlineStr":
-                    is_el = c.find("{*}is")
+                    is_el = next(_elements_par_nom(c, "is"), None)
                     if is_el is not None:
-                        valeur = "".join(x.text or "" for x in is_el.iter("{*}t"))
+                        valeur = _texte_case(is_el)
                 else:
-                    v = c.find("{*}v")
+                    v = next(_elements_par_nom(c, "v"), None)
                     if v is not None and v.text is not None:
-                        valeur = chaines[int(v.text)] if type_cellule == "s" and v.text.isdigit() \
-                            and int(v.text) < len(chaines) else v.text
+                        rang = v.text.strip()
+                        if type_cellule == "s" and rang.isdigit() and int(rang) < len(chaines):
+                            valeur = chaines[int(rang)]
+                        else:
+                            valeur = v.text
                 if i >= 0 and valeur not in (None, ""):
                     cellules[i] = valeur
             if cellules:
@@ -1882,17 +1904,26 @@ def _date_import(champ: str, valeur: Any) -> Optional[date]:
 
 
 def _nombre_import(champ: str, valeur: Any) -> Optional[float]:
+    """Nombre tel que l'export l'ecrit : francais ("1.234,56") ou anglais ("1,234.56").
+
+    Le separateur de milliers n'est pas une decimale : un Salaire de base exporte
+    "1.234.560" vaut 1 234 560, pas un rejet "valeur numerique invalide".
+    """
     if valeur is None or valeur == "":
         return None
-    txt = str(valeur).replace("\u00a0", "").replace("\u202f", "").strip()
+    txt = str(valeur).replace("\u00a0", "").replace("\u202f", "").strip().replace(" ", "")
     if "," in txt and "." in txt:
         if txt.rfind(",") > txt.rfind("."):
             txt = txt.replace(".", "").replace(",", ".")   # 1.234,56
         else:
             txt = txt.replace(",", "")                      # 1,234.56
     elif "," in txt:
-        txt = txt.replace(",", ".")
-    txt = txt.replace(" ", "")
+        if re.fullmatch(r"-?\d{1,3}(?:,\d{3})+", txt):
+            txt = txt.replace(",", "")                      # 1,234,560
+        else:
+            txt = txt.replace(",", ".")                      # 1234,56
+    elif "." in txt and re.fullmatch(r"-?\d{1,3}(?:\.\d{3})+", txt):
+        txt = txt.replace(".", "")                          # 1.234.560
     try:
         return float(txt)
     except ValueError:
