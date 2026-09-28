@@ -18,6 +18,13 @@ from app.models.agency import Agency
 # 30 -- deux droits differents pour un meme salarie).
 DROIT_CONGE_ANNUEL_JOURS_OUVRABLES = 24
 
+# Contrats de travail : le vocabulaire du droit camerounais. Une valeur hors
+# liste est refusee a l'ecriture plutot que d'installer dans la base un type de
+# contrat que plus aucun etat, aucune attestation ni aucune paie ne sait
+# interpreter ("cdi", "CDI ", "Contrat duree indeterminee" : trois lectures
+# differentes pour un meme salarie).
+TYPES_CONTRAT = ("CDI", "CDD", "STAGE", "APPRENTISSAGE")
+
 
 def compter_jours_ouvrables(debut: date, fin: date) -> int:
     """Jours ouvrables entre deux dates, dimanche exclu (sens du Code du travail).
@@ -593,16 +600,49 @@ class ContratService:
     def creer_contrat(
         db: Session,
         employe_id: int,
-        type_contrat: str,  # CDI, CDD, Stage
+        type_contrat: str,  # CDI, CDD, STAGE, APPRENTISSAGE
         date_debut: date,
         date_fin: Optional[date],
         poste: str,
         salaire_base: float,
         coefficient: Optional[int] = None,
         classification: Optional[str] = None,
-        periode_essai_jours: int = 90  # Cameroon standard: 3 months for CDI
+        periode_essai_jours: int = 90,  # Cameroun: 3 mois pour un CDI
+        departement: Optional[str] = None,
+        horaire_travail: Optional[str] = None,
+        lieu_travail: Optional[str] = None
     ) -> ContratTravail:
-        """Create employment contract with Cameroon legal compliance"""
+        """Creer un contrat de travail, conforme au droit du travail camerounais.
+
+        Trois garde-fous, tous dictés par la loi plutôt que par la commodité :
+          - l'employe doit exister : une cle etrangere fantome passe en SQLite
+            et laisse un contrat sans salarie ;
+          - un contrat a terme (CDD, stage, apprentissage) DOIT porter sa date
+            de fin : sans terme ce n'est pas un CDD, c'est un CDI deguise ;
+          - un CDI ne peut pas en porter une ;
+          - la date de fin ne precede jamais la date de debut ;
+          - le salaire de base est reel : un contrat signe a 0 est une donnee
+            inventee, pas une donnee.
+        Les trois dernieres colonnees (departement, horaire, lieu) alimentent
+        l'attestation de travail et l'assiette des heures supplementaires.
+        """
+        type_contrat = (type_contrat or "").strip().upper()
+        if type_contrat not in TYPES_CONTRAT:
+            raise ValueError(
+                "Type de contrat inconnu : %s (attendu : %s)"
+                % (type_contrat, ", ".join(sorted(TYPES_CONTRAT)))
+            )
+        if not db.query(User).filter(User.id == employe_id).first():
+            raise ValueError(f"Aucun employe a l'identifiant {employe_id}")
+        if date_fin is None and type_contrat in ("CDD", "STAGE", "APPRENTISSAGE"):
+            raise ValueError(f"Un {type_contrat} doit porter une date de fin")
+        if date_fin is not None and type_contrat == "CDI":
+            raise ValueError("Un CDI ne peut pas porter de date de fin")
+        if date_fin is not None and date_fin < date_debut:
+            raise ValueError("La date de fin precede la date de debut")
+        if float(salaire_base or 0) <= 0:
+            raise ValueError("Le salaire de base doit etre positif")
+
         contrat = ContratTravail(
             employe_id=employe_id,
             type_contrat=type_contrat,
@@ -613,6 +653,9 @@ class ContratService:
             coefficient=coefficient,
             classification=classification,
             periode_essai_jours=periode_essai_jours,
+            departement=(departement or "").strip() or None,
+            horaire_travail=(horaire_travail or "").strip() or None,
+            lieu_travail=(lieu_travail or "").strip() or None,
             statut="actif"
         )
         db.add(contrat)
