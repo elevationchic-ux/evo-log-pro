@@ -137,7 +137,7 @@ def _ensure_deferred_fks(bind):
                     for fk in insp.get_foreign_keys(child)}
         except Exception:
             have = set()
-        if [col] in have:
+        if (col,) in have:
             continue
         try:
             with op.batch_alter_table(child) as batch:

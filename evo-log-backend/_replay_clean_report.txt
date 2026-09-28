@@ -1,0 +1,49 @@
+returncode=1
+--- stdout ---
+
+--- stderr (last 40) ---
+        ^^^^^^^
+        *[getattr(options, k, None) for k in positional],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        **{k: getattr(options, k, None) for k in kwarg},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\chris\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\alembic\command.py", line 487, in upgrade
+    script.run_env()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\chris\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\alembic\script\base.py", line 550, in run_env
+    util.load_python_file(self.dir, "env.py")
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\chris\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\alembic\util\pyfiles.py", line 114, in load_python_file
+    module = load_module_py(module_id, path)
+  File "C:\Users\chris\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\alembic\util\pyfiles.py", line 132, in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "C:\Users\chris\Documents\Projet\Documents\evo-log pro\evo-log-backend\migrations\env.py", line 108, in <module>
+    run_migrations_online()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\chris\Documents\Projet\Documents\evo-log pro\evo-log-backend\migrations\env.py", line 102, in run_migrations_online
+    context.run_migrations()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "<string>", line 8, in run_migrations
+  File "C:\Users\chris\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\alembic\runtime\environment.py", line 967, in run_migrations
+    self.get_context().run_migrations(**kw)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\chris\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\alembic\runtime\migration.py", line 621, in run_migrations
+    step.migration_fn(**kw)
+    ~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\chris\Documents\Projet\Documents\evo-log pro\evo-log-backend\migrations\versions\014_schema_parity_from_orm.py", line 223, in upgrade
+    _ensure_deferred_fks(bind)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\chris\Documents\Projet\Documents\evo-log pro\evo-log-backend\migrations\versions\014_schema_parity_from_orm.py", line 140, in _ensure_deferred_fks
+    if [col] in have:
+       ^^^^^^^^^^^^^
+TypeError: cannot use 'list' as a set element (unhashable type: 'list')
+--- db state ---
+alembic_version=[('013_retenues_source_ohada',)]
+tables=259
+cadc_users=[]
+cadc_roles=[]
