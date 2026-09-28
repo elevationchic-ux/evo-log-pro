@@ -453,7 +453,9 @@ async def telecharger_bon_sortie_pdf(
         if not user_id:
             return None
         u = db.query(User).filter(User.id == user_id).first()
-        return f"{u.last_name or ''} {u.first_name or ''}".strip() or u.username if u else f"#{user_id}"
+        if not u:
+            return f"#{user_id}"
+        return u.full_name or u.username
 
     lignes = []
     for ligne in (bon.lignes_bon or []):
