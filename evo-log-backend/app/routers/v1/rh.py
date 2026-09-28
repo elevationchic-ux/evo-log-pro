@@ -172,7 +172,8 @@ def _conge_dict(c: Conge) -> Dict[str, Any]:
         "date_demande": c.date_demande.isoformat() if c.date_demande else None,
         "approbateur_id": c.approbateur_id,
         "date_approbation": c.date_approbation.isoformat() if c.date_approbation else None,
-        "commentaire_approbation": c.commentaires_approbation,
+        "commentaire_approbation": c.commentaire_approbation,
+        "motif_refus": c.motif_refus,
     }
 
 
@@ -588,21 +589,25 @@ def get_portail_documents(
 
     documents: List[Dict[str, Any]] = []
     for d in fichiers:
-        url = (d.url_fichier or "").strip()
+        accessible, url = _acces_document_portail(d)
         documents.append({
             "id": d.id,
             "reference": f"DOC-{d.id}",
             "titre": f"{d.type_document} / {d.nom_fichier}",
             "type": d.type_document,
             "nom_fichier": d.nom_fichier,
-            "numero_document": d.numero_document,
-            "organisme_emetteur": d.organisme_emetteur,
+            # Aucun numero ni organisme emetteur n'est verse au dossier : la base
+            # ne stocke que le chemin de la piece. Rien n'est invente pour
+            # remplir la carte, l'ecran affiche « non renseigne ».
+            "numero_document": None,
+            "organisme_emetteur": None,
             "date_emission": d.date_emission.isoformat() if d.date_emission else None,
             "date_expiration": d.date_expiration.isoformat() if d.date_expiration else None,
-            "statut": d.statut,
-            "commentaire": d.commentaire,
-            "telechargeable": bool(url),
-            "url_telechargement": url or None,
+            "statut": None,
+            "commentaire": None,
+            "telechargeable": accessible,
+            "url_telechargement": url,
+            "raison_indisponibilite": None if accessible else "FICHIER_NON_DISPONIBLE",
         })
 
     contrat = db.query(ContratTravail).filter(
