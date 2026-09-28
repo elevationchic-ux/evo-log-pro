@@ -1,9 +1,9 @@
 # Inventaire des pages statiques (aucun branchement API)
 
-- Genere le : 2026-09-28
+- Genere le : 2026-09-29
 - Total pages scannees : 348
-- Pages branchees sur le backend : 279
-- Pages encore statiques : 69
+- Pages branchees sur le backend : 287
+- Pages encore statiques : 61
 
 ## Pages statiques
 
@@ -30,15 +30,7 @@
 | `/fuel-guard/alerts` | non (vitrine/maintenance) | - |
 | `/integration-cameroun` | non (vitrine/maintenance) | - |
 | `/logout` | non (vitrine/maintenance) | - |
-| `/magasin/advanced-analytics` | non (vitrine/maintenance) | - |
-| `/magasin/analytics` | non (vitrine/maintenance) | - |
-| `/magasin/history` | non (vitrine/maintenance) | - |
 | `/magasin/ia-chat` | non (vitrine/maintenance) | - |
-| `/magasin/import-export` | non (vitrine/maintenance) | - |
-| `/magasin/inventory/physical` | non (vitrine/maintenance) | - |
-| `/magasin/magasins` | non (vitrine/maintenance) | - |
-| `/magasin/rapports` | non (vitrine/maintenance) | - |
-| `/magasin/reception-mag3` | non (vitrine/maintenance) | - |
 | `/magasin/saisie-inventaire-physique` | non (vitrine/maintenance) | - |
 | `/magasin/wms-slots` | non (vitrine/maintenance) | - |
 | `/maintenance-gmao/dashboard` | non (vitrine/maintenance) | - |
