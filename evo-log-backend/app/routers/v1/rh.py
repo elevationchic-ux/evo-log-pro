@@ -930,7 +930,15 @@ def lister_conges(
     if employe_id:
         q = q.filter(Conge.employe_id == employe_id)
     if statut:
-        q = q.filter(Conge.statut == statut.strip().lower())
+        # Le filtre passe par l'enum : une valeur inconnue ne part pas en requete
+        # (elle leverait LookupError au bind, donc en 500).
+        try:
+            q = q.filter(Conge.statut == StatutConge(statut.strip().lower()))
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail="statut de conge inconnu : "
+                       + ", ".join(s.value for s in StatutConge))
     if annee:
         q = q.filter(extract("year", Conge.date_debut) == annee)
     conges = q.order_by(Conge.date_debut.desc()).offset(skip).limit(limit).all()
@@ -956,7 +964,10 @@ def approuver_conge(
     current_user: User = Depends(resolve_rh_user)
 ):
     """Approve leave request"""
-    return CongeService.approuver_conge(db, conge_id, current_user.id, commentaire)
+    try:
+        return CongeService.approuver_conge(db, conge_id, current_user.id, commentaire)
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 @router.put("/conges/{conge_id}/rejeter", response_model=CongeResponse)
@@ -967,7 +978,45 @@ def rejeter_conge(
     current_user: User = Depends(resolve_rh_user)
 ):
     """Reject leave request"""
-    return CongeService.rejeter_conge(db, conge_id, current_user.id, motif_refus)
+    try:
+        return CongeService.rejeter_conge(db, conge_id, current_user.id, motif_refus)
+    except ValueError as exc:
+        raise _refus_metier(exc)
+
+
+class DecisionCongePortail(BaseModel):
+    """Decision sur une demande de conge, telle que la saisit l'ecran.
+
+    `commentaire` est libre : approving sans commentaire comme rejecting sans
+    commentaire sont acceptes, l'application n'oblige personne a produire une
+    reason qu'il n'a pas.
+    """
+    approuve: bool
+    commentaire: Optional[str] = None
+
+
+@router.post("/conges/{conge_id}/decision", response_model=CongeResponse)
+def decider_conge_depuis_portail(
+    conge_id: int,
+    data: DecisionCongePortail,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user)
+):
+    """Meme decision, sous la forme du bouton flottant et du portail RH.
+
+    ``chef_personnel`` expose deja ``POST /conges/{id}/decision`` pour le N+1.
+    Cette route rend la meme decision au salarie habilite : l'ecran n'a pas a
+    connaitre la casquette de qui clique, et une liste qui n'offre que la
+    consultation laisserait le bouton "Approuver" sans destination.
+    """
+    try:
+        if data.approuve:
+            return CongeService.approuver_conge(
+                db, conge_id, current_user.id, data.commentaire)
+        return CongeService.rejeter_conge(
+            db, conge_id, current_user.id, data.commentaire)
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 # ============ ABSENCES ============
@@ -978,10 +1027,13 @@ def enregistrer_absence(
     current_user: User = Depends(resolve_rh_user)
 ):
     """Record absence"""
-    return AbsenceService.enregistrer_absence(
-        db, current_user.id, absence.type_absence, absence.date_debut,
-        absence.date_fin, absence.motif, absence.justifie
-    )
+    try:
+        return AbsenceService.enregistrer_absence(
+            db, current_user.id, absence.type_absence, absence.date_debut,
+            absence.date_fin, absence.motif, absence.justifie
+        )
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 @router.get("/absences/taux/{employe_id}/{mois}/{annee}")
