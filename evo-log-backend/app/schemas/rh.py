@@ -209,9 +209,10 @@ class EvaluationPerformanceBase(BaseModel):
     periode_debut: date
     periode_fin: date
     note_globale: float = Field(..., ge=0, le=5)
-    commentaires: str
-    objectifs_atteints: int
-    objectifs_total: int
+    # NULLable en base : une evaluation sans commentaire reste lisible.
+    commentaires: Optional[str] = None
+    objectifs_atteints: int = 0
+    objectifs_total: int = 0
 
 
 class EvaluationPerformanceCreate(EvaluationPerformanceBase):
@@ -235,15 +236,25 @@ class EvaluationPerformanceResponse(EvaluationPerformanceBase):
 
 
 # ContratTravail schemas
+TYPES_CONTRAT = "CDI, CDD, STAGE, APPRENTISSAGE"
+STATUTS_CONTRAT = "actif, expire, resilie, suspendu"
+
+
 class ContratTravailBase(BaseModel):
-    type_contrat: str = Field(..., description="CDI, CDD, Stage")
+    type_contrat: str = Field(..., description="Type de contrat: " + TYPES_CONTRAT)
     date_debut: date
     date_fin: Optional[date] = None
     poste: str
     salaire_base: float
     coefficient: Optional[int] = None
     classification: Optional[str] = None
+    # Droit du travail camerounais : 90 jours d'essai pour un CDI.
     periode_essai_jours: int = 90
+    # Trois champs que l'attestation de travail imprime et que la fiche salarie
+    # utilise (horaire de reference pour les heures supplementaires).
+    departement: Optional[str] = None
+    horaire_travail: Optional[str] = Field(None, description="Ex: 40h, 38h40, 35h")
+    lieu_travail: Optional[str] = None
 
 
 class ContratTravailCreate(ContratTravailBase):
@@ -253,7 +264,13 @@ class ContratTravailCreate(ContratTravailBase):
 class ContratTravailUpdate(BaseModel):
     date_fin: Optional[date] = None
     salaire_base: Optional[float] = None
-    statut: Optional[str] = None
+    statut: Optional[str] = Field(None, description="Statut: " + STATUTS_CONTRAT)
+    poste: Optional[str] = None
+    departement: Optional[str] = None
+    horaire_travail: Optional[str] = None
+    lieu_travail: Optional[str] = None
+    coefficient: Optional[int] = None
+    classification: Optional[str] = None
 
 
 class ContratTravailResponse(ContratTravailBase):
@@ -278,14 +295,62 @@ class SalaireBase(BaseModel):
     deductions: float = 0
 
 
-class SalaireCreate(SalaireBase):
+class SalaireCreate(BaseModel):
+    """Fiche de paie detaillee (generation OHADA), la seule que l'app ecrit.
+
+    mois / annee / salaire_brut / heures_sup / primes / deductions ne sont PAS
+    saisis : le modele les recalcule depuis le detail a chaque ecriture
+    (app/models/rh.py::_synchroniser_herite), pour que les deux generations de
+    colonnes de la table `salaires` ne se contredisent jamais.
+    """
     employe_id: int
+    periode_debut: date
+    periode_fin: date
+    salaire_base: float
+    heures_supplementaires: float = 0
+    taux_horaire_sup: float = 0
+    prime_anciennete: float = 0
+    prime_performance: float = 0
+    prime_responsabilite: float = 0
+    prime_logement: float = 0
+    prime_transport: float = 0
+    prime_autre: float = 0
+    deductions_cnps: float = 0
+    deductions_impot: float = 0
+    deductions_avances: float = 0
+    autres_deductions: float = 0
+    salaire_net: float
+    devise: str = "XAF"
+    statut: str = "en_attente"
+    nombre_heures_travaillees: Optional[float] = None
+    taux_imposition: Optional[float] = None
 
 
 class SalaireResponse(SalaireBase):
     id: int
     employe_id: int
     date_paiement: Optional[datetime] = None
+    # Detail OHADA : NULL sur les fiches heritees, renseigne sur les fiches
+    # emises par l'app.
+    periode_debut: Optional[date] = None
+    periode_fin: Optional[date] = None
+    salaire_base: Optional[float] = None
+    heures_supplementaires: Optional[float] = None
+    prime_anciennete: Optional[float] = None
+    prime_performance: Optional[float] = None
+    prime_responsabilite: Optional[float] = None
+    prime_logement: Optional[float] = None
+    prime_transport: Optional[float] = None
+    prime_autre: Optional[float] = None
+    deductions_cnps: Optional[float] = None
+    deductions_impot: Optional[float] = None
+    deductions_avances: Optional[float] = None
+    autres_deductions: Optional[float] = None
+    nombre_heures_travaillees: Optional[float] = None
+    taux_imposition: Optional[float] = None
+    devise: Optional[str] = None
+    statut: Optional[str] = None
+    created_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True
@@ -293,10 +358,13 @@ class SalaireResponse(SalaireBase):
 
 # Prime schemas
 class PrimeBase(BaseModel):
-    type_prime: str
+    type_prime: str = Field(..., description="performance, exceptionnelle, projet, logement")
     montant: float
-    motif: str
-    date_prime: date
+    # NULLable depuis 028 : pas de motif invente pour satisfaire NOT NULL.
+    motif: Optional[str] = None
+    # La base fournit CURRENT_DATE (defaut repose par 028) ; l'app peut rester
+    # muette sur la date sans que l'ecriture echoue.
+    date_prime: Optional[date] = None
 
 
 class PrimeCreate(PrimeBase):
@@ -306,6 +374,10 @@ class PrimeCreate(PrimeBase):
 class PrimeResponse(PrimeBase):
     id: int
     employe_id: int
+    # Circuit d'approbation et periodisation YYYY-MM (rh_avance_service).
+    periode: Optional[str] = None
+    statut: Optional[str] = None
+    approuve_par: Optional[int] = None
     
     class Config:
         from_attributes = True
