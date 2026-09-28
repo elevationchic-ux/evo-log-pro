@@ -39,8 +39,11 @@ class RemovalSlipCreate(BaseModel):
 
 
 class RemovalSlipUpdate(BaseModel):
-    # Batch 16 : `statut` n'est plus un champ editable — les transitions
+    # Batch 16 : `statut` n'est PAS un champ editable — les transitions
     # d'etat passent UNIQUEMENT par /validate et /refuse (circuit signature).
+    # Le champ est garde ici uniquement pour etre REJETE explicitement (400
+    # pedagogique) : sans lui, pydantic ignorerait la cle en silence.
+    statut: Optional[str] = None
     client_id: Optional[int] = None
     entrepot_id: Optional[int] = None
     notes: Optional[str] = None
