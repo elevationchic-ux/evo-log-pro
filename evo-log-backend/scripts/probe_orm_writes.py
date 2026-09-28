@@ -120,9 +120,13 @@ def sonde_lecture_globale(url: str) -> int:
 
 
 if __name__ == "__main__":
-    db = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / "kamlog_erp.db")
+    # Les flags ne sont pas des chemins : sans ce filtre, `--lecture` etait
+    # pris pour la base et la sonde creait un fichier SQLite vide nomme
+    # '--lecture' a cote du vrai depot.
+    options = [a for a in sys.argv[1:] if a.startswith("-")]
+    positions = [a for a in sys.argv[1:] if not a.startswith("-")]
+    lecture = "--lecture" in options
+    db = positions[0] if positions else str(ROOT / "kamlog_erp.db")
     url = db if db.startswith(("sqlite:", "postgresql")) else f"sqlite:///{db}"
-    ecarts = sonde_lecture_globale(url) if "--lecture" in sys.argv else 0
-    if "--lecture" not in sys.argv:
-        ecarts += sonder(url)
+    ecarts = sonde_lecture_globale(url) if lecture else sonder(url)
     sys.exit(1 if ecarts else 0)

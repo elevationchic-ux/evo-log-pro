@@ -135,7 +135,9 @@ class InventaireTournantBase(BaseModel):
     entrepot_id: int
     date_debut: date
     date_fin: Optional[date] = None
-    type_inventaire: str = "tournant"  # partiel, complet, cyclique, tournant
+    # colonne nullable sur le modèle → None admis à la lecture, jamais
+    # transformé en chaîne inventée
+    type_inventaire: Optional[str] = "tournant"  # partiel, complet, cyclique
     notes: Optional[str] = None
 
 
