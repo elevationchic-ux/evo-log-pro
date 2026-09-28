@@ -324,10 +324,9 @@ def decider_conge(
 
     conge.statut = StatutConge.APPROUVE if approuve else StatutConge.REFUSE
     conge.approbateur_id = current_user.id
-    # Un rejet sans motif ne laisse au salarie qu'une porte fermee sans raison :
-    # la colonne motif_refus est la pour le lui transmettre.
-    conge.motif_refus = None if approuve else (
-        (data.commentaire or "").strip() or "Motif non precise par le décideur.")
+    # Un rejet sans motif saisi reste SANS motif : l'ecran le dit. L'application
+    # n'invente pas une raison que le decideur n'a pas donnee.
+    conge.motif_refus = None if approuve else ((data.commentaire or "").strip() or None)
     conge.commentaire_approbation = data.commentaire or (
         f"Décision enregistrée par {current_user.full_name or current_user.username} (Chef du Personnel)")
     conge.date_approbation = datetime.now()

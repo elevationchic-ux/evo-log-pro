@@ -23,7 +23,9 @@ REV_RE = re.compile(r"^revision\s*(?::\s*str)?\s*=\s*[\"']([^\"']+)[\"']", re.M)
 DOWN_RE = re.compile(r"^down_revision\s*(?::\s*(?:str|None)\s*)?=\s*[\"']([^\"']+)[\"']", re.M)
 CREATE_RE = re.compile(r"op\.create_table\(\s*(?:sa\.text\([\"']|op\.f\([\"']|[\"'])%s?[\"']?", re.M)
 CREATE_NAME_RE = re.compile(r"op\.create_table\(\s*[\"']([a-zA-Z_][\w]*)[\"']")
-FK_REF_RE = re.compile(r"ForeignKeyConstraint\(\s*\[[^\]]*\]\s*,\s*\[[\"']([\w]+)\.")
+FK_REF_RE = re.compile(r"ForeignKeyConstraint\(\s*\[[^\]]*\]\s*,\s*\[\"']([\w]+)\.")
+# ForeignKey('table.col') inline au niveau colonne (meme cause d'echec PG).
+FK_COL_RE = re.compile(r"\bForeignKey\(\s*[\"']([\w]+)\.")
 FK_OP_RE = re.compile(r"op\.create_foreign_key\([^)]*?[\"']([\w]+)[\"']\s*,\s*[\"']([\w]+)\.|\bref_table\b", re.S)
 BATCH_RE = re.compile(r"op\.batch_alter_table\(\s*[\"']([\w]+)[\"']")
 ALTER_ADD_FK_RE = re.compile(r"batch\.add_foreign_key\([^)]*\[[\"']([\w]+)\.", re.S)
@@ -71,6 +73,8 @@ def main():
             # FK a l'interieur d'un create_table: la table en cours de creation
             # est celle creee juste avant cette position.
             events.append((m.start(), "fk", m.group(1)))
+        for m in FK_COL_RE.finditer(src):
+            events.append((m.start(), "fk", m.group(1)))
         events.sort()
         current_create = None
         for pos, kind, table in events:
@@ -86,6 +90,10 @@ def main():
         if is_parity:
             # approx: les tables ORM additionnelles deviennent connues.
             known.update(t for t in created_here)
+            # 014 cree aussi les tables ORM de PARITY_TABLES via create_all.
+            pm = re.search(r"PARITY_TABLES\s*=\s*\[(.*?)\]", src, re.S)
+            if pm:
+                known.update(re.findall(r"[\"'](\w+)[\"']", pm.group(1)))
     print(f"tables connues en fin de chaine: {len(known)}")
     if problems:
         print("PROBLEMES d'ordre FK pour PostgreSQL (table_cree -> ref manquante):")
