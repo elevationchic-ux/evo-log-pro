@@ -82,9 +82,12 @@ class CongeOut(BaseModel):
     date_fin: date
     jours_ouvrables: int
     motif: Optional[str] = None
-    statut: str # EN_ATTENTE, APPROUVE, REJETE
-    date_demande: Optional[date] = None
+    # Valeurs d'enum reelles : en_attente, approuve, refuse, en_cours, termine,
+    # annule. La colonne de base est un horodatage, pas une date simple.
+    statut: str
+    date_demande: Optional[datetime] = None
     commentaire_superviseur: Optional[str] = None
+    motif_refus: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -252,7 +255,15 @@ def get_demandes_conges(
     """Consulte les demandes de congés nécessitant validation N+1"""
     query = db.query(Conge)
     if statut:
-        query = query.filter(Conge.statut == statut)
+        # Le filtre passe par l'enum : une valeur inconnue ne doit pas partir en
+        # requete (elle leverait LookupError au bind, donc en 500).
+        try:
+            query = query.filter(Conge.statut == StatutConge(statut.lower()))
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail="statut de conge inconnu : "
+                       + ", ".join(s.value for s in StatutConge))
 
     conges = query.order_by(Conge.created_at.desc()).limit(50).all()
     results = []
@@ -261,7 +272,6 @@ def get_demandes_conges(
         emp = db.query(User).filter(User.id == c.employe_id).first()
         emp_name = emp.full_name if emp else f"Agent #{c.employe_id}"
         emp_role = emp.roles[0].name if emp and emp.roles else "EMPLOYE"
-        delta = (c.date_fin - c.date_debut).days + 1 if c.date_fin and c.date_debut else 1
         t_conge = c.type_conge.value if hasattr(c.type_conge, 'value') else str(c.type_conge)
         st_conge = c.statut.value if hasattr(c.statut, 'value') else str(c.statut)
 
@@ -270,14 +280,18 @@ def get_demandes_conges(
             employe_id=c.employe_id,
             employe_nom=emp_name,
             employe_role=emp_role,
-            type_conge=t_conge.upper(),
+            # Valeurs d'enum brutes ("conge_annuel", "en_attente") : l'ecran
+            # traduit, en francais comme en anglais. Le nombre de jours est celui
+            # demande et enregistre, pas un calcul de jours calendaires.
+            type_conge=t_conge,
             date_debut=c.date_debut,
             date_fin=c.date_fin,
-            jours_ouvrables=max(1, delta),
+            jours_ouvrables=c.nombre_jours,
             motif=c.motif,
-            statut=st_conge.upper(),
+            statut=st_conge,
             date_demande=c.date_demande,
-            commentaire_superviseur=getattr(c, 'commentaires_approbation', None)
+            commentaire_superviseur=c.commentaire_approbation,
+            motif_refus=c.motif_refus,
         ))
 
     return results
@@ -295,11 +309,28 @@ def decider_conge(
     if not conge:
         raise HTTPException(status_code=404, detail="Demande de congé introuvable")
 
-    new_statut = StatutConge.APPROUVE if data.decision.upper() in ["APPROUVER", "VALIDE", "APPROUVE"] else StatutConge.REFUSE
-    conge.statut = new_statut
+    approuve = data.decision.upper() in ["APPROUVER", "VALIDE", "APPROUVE"]
+    if not approuve and data.decision.upper() not in ["REJETER", "REFUSER", "REFUSE"]:
+        raise HTTPException(
+            status_code=400,
+            detail="decision attendue : APPROUVER ou REJETER")
+    if conge.statut not in (StatutConge.EN_ATTENTE, None):
+        # Une decision deja prise ne se recrit pas en passant : l'historique de
+        # la demande doit rester lisible pour le salarie concerne.
+        st = conge.statut.value if hasattr(conge.statut, 'value') else str(conge.statut)
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cette demande a deja ete tranchee (statut : {st}).")
+
+    conge.statut = StatutConge.APPROUVE if approuve else StatutConge.REFUSE
     conge.approbateur_id = current_user.id
-    conge.commentaires_approbation = data.commentaire or f"Décision enregistrée par {current_user.full_name or current_user.username} (Chef du Personnel)"
-    conge.date_approbation = date.today()
+    # Un rejet sans motif ne laisse au salarie qu'une porte fermee sans raison :
+    # la colonne motif_refus est la pour le lui transmettre.
+    conge.motif_refus = None if approuve else (
+        (data.commentaire or "").strip() or "Motif non precise par le décideur.")
+    conge.commentaire_approbation = data.commentaire or (
+        f"Décision enregistrée par {current_user.full_name or current_user.username} (Chef du Personnel)")
+    conge.date_approbation = datetime.now()
 
     db.commit()
     db.refresh(conge)
@@ -307,7 +338,6 @@ def decider_conge(
     emp = db.query(User).filter(User.id == conge.employe_id).first()
     emp_name = emp.full_name if emp else f"Agent #{conge.employe_id}"
     emp_role = emp.roles[0].name if emp and emp.roles else "EMPLOYE"
-    delta = (conge.date_fin - conge.date_debut).days + 1 if conge.date_fin and conge.date_debut else 1
     t_conge = conge.type_conge.value if hasattr(conge.type_conge, 'value') else str(conge.type_conge)
     st_conge = conge.statut.value if hasattr(conge.statut, 'value') else str(conge.statut)
 
@@ -316,14 +346,15 @@ def decider_conge(
         employe_id=conge.employe_id,
         employe_nom=emp_name,
         employe_role=emp_role,
-        type_conge=t_conge.upper(),
+        type_conge=t_conge,
         date_debut=conge.date_debut,
         date_fin=conge.date_fin,
-        jours_ouvrables=max(1, delta),
+        jours_ouvrables=conge.nombre_jours,
         motif=conge.motif,
-        statut=st_conge.upper(),
+        statut=st_conge,
         date_demande=conge.date_demande,
-        commentaire_superviseur=getattr(conge, 'commentaires_approbation', None)
+        commentaire_superviseur=conge.commentaire_approbation,
+        motif_refus=conge.motif_refus,
     )
 
 
