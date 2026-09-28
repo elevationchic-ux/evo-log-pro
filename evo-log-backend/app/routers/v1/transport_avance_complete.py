@@ -5,6 +5,7 @@ from typing import List
 from datetime import date
 
 from app.core.database import get_db
+from app.core.permissions import require_perm
 from app.core.auth import get_current_user
 from app.models.user import User
 from app.schemas.transport_avance import (
