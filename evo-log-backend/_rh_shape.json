@@ -1,0 +1,819 @@
+{
+ "absences": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "type_absence",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "date_debut",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "date_fin",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "nombre_jours",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "motif",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "justifie",
+   "notnull": true,
+   "pk": false,
+   "type": "BOOLEAN"
+  },
+  {
+   "defaut": null,
+   "nom": "date_enregistrement",
+   "notnull": true,
+   "pk": false,
+   "type": "DATETIME"
+  }
+ ],
+ "competences": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "nom",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "categorie",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "description",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "niveau_requis",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  }
+ ],
+ "competences_employe": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "competence_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "niveau",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "date_evaluation",
+   "notnull": false,
+   "pk": false,
+   "type": "DATE"
+  }
+ ],
+ "conges": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "type_conge",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "date_debut",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "date_fin",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "nombre_jours",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "motif",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "statut",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "date_demande",
+   "notnull": true,
+   "pk": false,
+   "type": "DATETIME"
+  },
+  {
+   "defaut": null,
+   "nom": "approbateur_id",
+   "notnull": false,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "date_approbation",
+   "notnull": false,
+   "pk": false,
+   "type": "DATETIME"
+  },
+  {
+   "defaut": null,
+   "nom": "commentaire_approbation",
+   "notnull": false,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "motif_refus",
+   "notnull": false,
+   "pk": false,
+   "type": "VARCHAR"
+  }
+ ],
+ "contrats_travail": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "type_contrat",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "date_debut",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "date_fin",
+   "notnull": false,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "poste",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "salaire_base",
+   "notnull": true,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "coefficient",
+   "notnull": false,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "classification",
+   "notnull": false,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "periode_essai_jours",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "statut",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "nombre_renouvellements",
+   "notnull": false,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "date_dernier_renouvellement",
+   "notnull": false,
+   "pk": false,
+   "type": "DATETIME"
+  }
+ ],
+ "documents_employe": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "type_document",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "chemin_fichier",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "date_emission",
+   "notnull": false,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "date_expiration",
+   "notnull": false,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "date_ajout",
+   "notnull": true,
+   "pk": false,
+   "type": "DATETIME"
+  }
+ ],
+ "evaluations_performance": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "evaluateur_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "periode_debut",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "periode_fin",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "note_globale",
+   "notnull": true,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "commentaires",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "objectifs_atteints",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "objectifs_total",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "date_evaluation",
+   "notnull": true,
+   "pk": false,
+   "type": "DATETIME"
+  }
+ ],
+ "formations": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "titre",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "description",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "date_debut",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "date_fin",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "duree_heures",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "cout",
+   "notnull": true,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "formateur",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "lieu",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "agency_id",
+   "notnull": false,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "statut",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "certificat_valide_jusque",
+   "notnull": false,
+   "pk": false,
+   "type": "DATE"
+  }
+ ],
+ "organigramme": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "manager_id",
+   "notnull": false,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "departement",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "poste",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "date_creation",
+   "notnull": false,
+   "pk": false,
+   "type": "DATETIME"
+  },
+  {
+   "defaut": null,
+   "nom": "date_mise_a_jour",
+   "notnull": false,
+   "pk": false,
+   "type": "DATETIME"
+  }
+ ],
+ "participations_formation": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "formation_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "date_inscription",
+   "notnull": true,
+   "pk": false,
+   "type": "DATETIME"
+  },
+  {
+   "defaut": null,
+   "nom": "present",
+   "notnull": false,
+   "pk": false,
+   "type": "BOOLEAN"
+  },
+  {
+   "defaut": null,
+   "nom": "certificat_obtenu",
+   "notnull": false,
+   "pk": false,
+   "type": "BOOLEAN"
+  },
+  {
+   "defaut": null,
+   "nom": "commentaire",
+   "notnull": false,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "statut",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  }
+ ],
+ "primes": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "type_prime",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "montant",
+   "notnull": true,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "motif",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  },
+  {
+   "defaut": null,
+   "nom": "date_prime",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  }
+ ],
+ "salaires": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "mois",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "annee",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "salaire_brut",
+   "notnull": true,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "salaire_net",
+   "notnull": true,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "heures_sup",
+   "notnull": true,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "primes",
+   "notnull": true,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "deductions",
+   "notnull": true,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "date_paiement",
+   "notnull": false,
+   "pk": false,
+   "type": "DATETIME"
+  }
+ ],
+ "temps_travail": [
+  {
+   "defaut": null,
+   "nom": "id",
+   "notnull": true,
+   "pk": true,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "employe_id",
+   "notnull": true,
+   "pk": false,
+   "type": "INTEGER"
+  },
+  {
+   "defaut": null,
+   "nom": "date",
+   "notnull": true,
+   "pk": false,
+   "type": "DATE"
+  },
+  {
+   "defaut": null,
+   "nom": "heure_arrivee",
+   "notnull": true,
+   "pk": false,
+   "type": "DATETIME"
+  },
+  {
+   "defaut": null,
+   "nom": "heure_depart",
+   "notnull": false,
+   "pk": false,
+   "type": "DATETIME"
+  },
+  {
+   "defaut": null,
+   "nom": "heures_travaillees",
+   "notnull": false,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "heures_sup",
+   "notnull": false,
+   "pk": false,
+   "type": "FLOAT"
+  },
+  {
+   "defaut": null,
+   "nom": "statut",
+   "notnull": true,
+   "pk": false,
+   "type": "VARCHAR"
+  }
+ ]
+}

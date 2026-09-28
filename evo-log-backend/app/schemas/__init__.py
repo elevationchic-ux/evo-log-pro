@@ -433,8 +433,6 @@ __all__ = [
     "LigneCommandeFournisseurCreate", "LigneCommandeFournisseurResponse",
     "BonReceptionCreate", "BonReceptionResponse",
     "LigneBonReceptionCreate", "LigneBonReceptionResponse",
-    "BonSortieCreate", "BonSortieResponse",
-    "LigneBonSortieCreate", "LigneBonSortieResponse",
     "RetourClientCreate", "RetourClientUpdate", "RetourClientResponse",
     "LitigeTransporteurCreate", "LitigeTransporteurUpdate", "LitigeTransporteurResponse",
     "ColisCreate", "ColisUpdate", "ColisResponse",
