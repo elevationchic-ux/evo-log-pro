@@ -583,7 +583,8 @@ def upgrade():
             sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
             sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
             sa.ForeignKeyConstraint(['compte_id'], ['plan_comptable_ohada.id'], ),
-            sa.ForeignKeyConstraint(['exercice_id'], ['exercices_comptables.id'], ),
+            # FK exercice_id -> exercices_comptables DEFEREE en fin d'upgrade
+            # (_ensure_fk_postgres) : PostgreSQL refuse la reference anticipee.
             sa.ForeignKeyConstraint(['tiers_id'], ['tiers.id'], ),
             sa.PrimaryKeyConstraint('id'),
             sa.UniqueConstraint('numero_ecriture')

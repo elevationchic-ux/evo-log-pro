@@ -3,16 +3,19 @@ RH router - Complete HR management & Employee Self-Service (Portail Collaborateu
 Accessible to any employee (non-RH included: Chauffeurs, Magasiniers, Déclarants, Dispatchers, IT, etc.)
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, desc, extract
 from typing import List, Optional, Dict, Any
 from datetime import date, datetime, timedelta
+from pathlib import Path
 import calendar
+import mimetypes
 import secrets
 from html import escape
 
 from app.core.database import get_db
+from app.core.config import settings
 from app.core.security import get_current_user, get_password_hash, validate_password_strength
 from app.utils.rbac import require_role
 from app.models.user import User, Role
@@ -567,6 +570,46 @@ def soumettre_demande_conge_portail(
     return enregistre
 
 
+def _racine_depot() -> Path:
+    """Dossier de depot autorise pour les pieces du dossier salarie.
+
+    `chemin_fichier` n'est pas une URL : c'est un chemin de stockage. Il n'est
+    jamais renvoye tel quel a l'ecran, et il n'est lu que sous cette racine --
+    sinon un chemin du type ../../.env permettrait de lire n'importe quel
+    fichier du serveur depuis le portail salarie.
+    """
+    return Path(settings.UPLOAD_DIR).resolve()
+
+
+def _chemin_document(d: DocumentEmploye):
+    """Chemin absolu du fichier, ou None s'il n'est pas servable.
+
+    Un chemin hors du depot autorise ou un fichier disparu du disque n'est pas
+    une erreur a afficher sur la liste : la piece reste visible -- elle est bien
+    verse au dossier -- elle n'est simplement pas telechargeable.
+    """
+    brut = (d.chemin_fichier or "").strip()
+    if not brut:
+        return None
+    racine = _racine_depot()
+    chemin = Path(brut)
+    if not chemin.is_absolute():
+        chemin = racine / chemin
+    try:
+        resolus = chemin.resolve()
+        resolus.relative_to(racine)
+    except (OSError, ValueError):
+        return None
+    return resolus if resolus.is_file() else None
+
+
+def _acces_document_portail(d: DocumentEmploye):
+    """(telechargeable, url) : l'URL interne n'existe que si le fichier existe."""
+    if _chemin_document(d) is None:
+        return False, None
+    return True, f"/api/v1/rh/portail/documents/{d.id}/fichier"
+
+
 @router.get("/portail/documents")
 def get_portail_documents(
     db: Session = Depends(get_db),
@@ -638,6 +681,43 @@ def get_portail_documents(
     })
 
     return documents
+
+
+@router.get("/portail/documents/{document_id}/fichier")
+def telecharger_document_portail(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(resolve_rh_user)
+):
+    """Renvoie une piece du dossier DU SALARIE CONNECTE, et d'elle seule.
+
+    Le filtre porte sur employe_id dans la requete meme : un salarie qui connait
+    l'identifiant numerique du diplome d'un collegue recoit un 404, pas le
+    document. Aucun chemin n'est accepte depuis l'URL, seul celui enregistre par
+    la DRH est lu, et uniquement sous le depot autorise.
+    """
+    d = db.query(DocumentEmploye).filter(
+        DocumentEmploye.id == document_id,
+        DocumentEmploye.employe_id == current_user.id,
+    ).first()
+    if not d:
+        raise HTTPException(
+            status_code=404,
+            detail="Document absent de votre dossier. Rapprochez la DRH.")
+
+    chemin = _chemin_document(d)
+    if chemin is None:
+        raise HTTPException(
+            status_code=404,
+            detail=("Le fichier de cette piece n'est plus accessible sur le "
+                    "serveur : rapprochez la DRH pour un nouveau depot."))
+
+    type_mime, _ = mimetypes.guess_type(str(chemin))
+    return FileResponse(
+        path=str(chemin),
+        media_type=type_mime or "application/octet-stream",
+        filename=d.nom_fichier,
+    )
 
 
 @router.get("/portail/documents/attestation-travail")
