@@ -26,6 +26,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -201,6 +202,39 @@ def list_members(
             | (User.matricule.ilike(like))
         )
     return [_member_dict(u) for u in q.order_by(User.id.asc()).all()]
+
+
+@router.get("/candidats", summary="Collaborateurs mobilisables pour mon departement")
+def list_candidates(
+    department_id: Optional[int] = Query(None, description="Reserve admin/CADC ; ignore pour un chef"),
+    search: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_department_head),
+):
+    """Niveaux 3 de l'entreprise pas encore rattaches au departement resolu.
+
+    Lit le MEME perimetre que l'action d'affectation : uniquement des
+    collaborateurs (niveau 3) de la propre entreprise du departement, jamais un
+    niveau 1/2/Super Admin, et jamais deja dans ce departement. Le chef ne fait
+    que remonter la liste vers laquelle sa propre competence d'affectation
+    l'autorise a ecrire.
+    """
+    dept = _scoped_department(db, current, department_id)
+    q = db.query(User).filter(
+        User.company_id == dept.company_id,
+        User.role_level == 3,
+        User.is_active.is_(True),
+        or_(User.department_id.is_(None), User.department_id != dept.id),
+    )
+    if search:
+        like = f"%{search.strip()}%"
+        q = q.filter(
+            (User.username.ilike(like))
+            | (User.email.ilike(like))
+            | (User.full_name.ilike(like))
+            | (User.matricule.ilike(like))
+        )
+    return [_member_dict(u) for u in q.order_by(User.username.asc()).all()]
 
 
 # ── Tranche B : ecritures (affectation / retrait de membres, allocation modules) ──

@@ -55,7 +55,7 @@ def upgrade():
         sa.Column('dispatch_id', Integer, ForeignKey('dispatches.id'), nullable=False),
         sa.Column('type_arret', String(20)),
         sa.Column('ordre_sequence', Integer, nullable=False),
-        sa.Column('client_id', Integer, ForeignKey('clients.id')),
+        sa.Column('client_id', Integer),  # FK -> clients DEFEREE en 014 (table ORM ; PostgreSQL refuse la reference anticipee)
         sa.Column('adresse', String(200), nullable=False),
         sa.Column('latitude', Numeric),
         sa.Column('longitude', Numeric),

@@ -273,59 +273,79 @@ class LigneBonReceptionResponse(LigneBonReceptionBase):
 # /api/v1/magasin/removal-slips).
 
 
-# RetourClient schemas
-class RetourClientBase(BaseModel):
+# RetourClient schemas — Batch 17 : ALIGNES SUR LE MODELE REEL
+# (app/models/magasin_avance.RetourClient). Les anciens squelettes inventaient
+# article_id / etat / action_effectuee / date_traitement : champs qui
+# n'existent PAS sur le modele → TypeError 500 a la creation, perte silencieuse
+# au traitement. Le numero de retour est genere cote route (RT-YYYYMMDD-NNNN).
+class RetourClientCreate(BaseModel):
     client_id: int
-    article_id: int
-    quantite: float
+    bon_sortie_id: Optional[int] = None
+    type_retour: Optional[str] = None  # defectif, mauvais_quantite, refus, erreur_livraison
     motif: str
-    etat: str = "a_reparer"
+    quantite: Optional[float] = None
+    notes: Optional[str] = None
 
 
-class RetourClientCreate(RetourClientBase):
-    pass
+class RetourClientTraitement(BaseModel):
+    decision: str  # accepte | refuse
+    action: Optional[str] = None  # obligatoire si accepte: remplacement|remboursement|destruction
+    cout_traitement: Optional[float] = None
+    notes: Optional[str] = None
 
 
-class RetourClientUpdate(BaseModel):
-    action_effectuee: Optional[str] = None
-    statut: Optional[str] = None
-
-
-class RetourClientResponse(RetourClientBase):
+class RetourClientResponse(BaseModel):
     id: int
-    date_retour: datetime
-    action_effectuee: Optional[str] = None
-    date_traitement: Optional[datetime] = None
+    numero_retour: str
+    client_id: int
+    bon_sortie_id: Optional[int] = None
+    date_retour: Optional[date] = None
+    type_retour: Optional[str] = None
+    motif: Optional[str] = None
+    quantite: Optional[float] = None
     statut: str
-    
+    action: Optional[str] = None
+    cout_traitement: Optional[float] = None
+    notes: Optional[str] = None
+    operateur: Optional[int] = None
+
     class Config:
         from_attributes = True
 
 
-# LitigeTransporteur schemas
-class LitigeTransporteurBase(BaseModel):
+# LitigeTransporteur schemas — Batch 17 : alignés sur le modèle réel
+# (date_litige → date_incident, statut/colonnes assureur et police reels).
+class LitigeTransporteurCreate(BaseModel):
     transporteur_id: int
-    type_litige: str
+    mission_id: Optional[int] = None
+    type_litige: str  # retard, avarie, perte, erreur_livraison
     description: str
     montant_reclame: Optional[float] = None
+    assureur: Optional[str] = None
+    numero_police: Optional[str] = None
 
 
-class LitigeTransporteurCreate(LitigeTransporteurBase):
-    pass
+class LitigeTransporteurResolution(BaseModel):
+    statut: str  # resolu | refuse | justice
+    resolution: str
+    montant_indemnise: Optional[float] = None  # maj montant_reclame si accord partiel
 
 
-class LitigeTransporteurUpdate(BaseModel):
-    resolution: Optional[str] = None
-    statut: Optional[str] = None
-
-
-class LitigeTransporteurResponse(LitigeTransporteurBase):
+class LitigeTransporteurResponse(BaseModel):
     id: int
-    date_litige: datetime
-    resolution: Optional[str] = None
-    date_resolution: Optional[datetime] = None
+    numero_litige: str
+    transporteur_id: int
+    mission_id: Optional[int] = None
+    date_incident: Optional[date] = None
+    type_litige: Optional[str] = None
+    description: Optional[str] = None
+    montant_reclame: Optional[float] = None
     statut: str
-    
+    resolution: Optional[str] = None
+    date_resolution: Optional[date] = None
+    assureur: Optional[str] = None
+    numero_police: Optional[str] = None
+
     class Config:
         from_attributes = True
 

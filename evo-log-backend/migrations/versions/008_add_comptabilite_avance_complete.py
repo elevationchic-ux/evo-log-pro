@@ -38,7 +38,7 @@ def upgrade():
     op.create_table(
         'lignes_journal',
         sa.Column('id', Integer, primary_key=True, index=True),
-        sa.Column('ecriture_id', Integer, ForeignKey('ecritures_comptables_ohada.id'), nullable=False),
+        sa.Column('ecriture_id', Integer, nullable=False),  # FK -> ecritures_comptables_ohada DEFEREE en 014 (table ORM ; PostgreSQL refuse la reference anticipee)
         sa.Column('journal_id', Integer, ForeignKey('journaux_auxiliaires.id'), nullable=False),
         sa.Column('compte_id', Integer, ForeignKey('plan_comptable_ohada.id'), nullable=False),
         sa.Column('compte_numero', String(20)),
@@ -75,7 +75,7 @@ def upgrade():
         'ecritures_lettrees',
         sa.Column('id', Integer, primary_key=True, index=True),
         sa.Column('lettrage_id', Integer, ForeignKey('lettrages.id'), nullable=False),
-        sa.Column('ecriture_id', Integer, ForeignKey('ecritures_comptables_ohada.id'), nullable=False),
+        sa.Column('ecriture_id', Integer, nullable=False),  # FK -> ecritures_comptables_ohada DEFEREE en 014 (table ORM ; PostgreSQL refuse la reference anticipee)
         sa.Column('montant_lettre', Numeric(15, 2), nullable=False),
         sa.Column('devise', String(3), default='XAF'),
         sa.Column('created_at', DateTime(timezone=True), server_default=func.now())
@@ -86,7 +86,7 @@ def upgrade():
         'grand_livre_lignes',
         sa.Column('id', Integer, primary_key=True, index=True),
         sa.Column('compte_id', Integer, ForeignKey('plan_comptable_ohada.id'), nullable=False),
-        sa.Column('ecriture_id', Integer, ForeignKey('ecritures_comptables_ohada.id'), nullable=False),
+        sa.Column('ecriture_id', Integer, nullable=False),  # FK -> ecritures_comptables_ohada DEFEREE en 014 (table ORM ; PostgreSQL refuse la reference anticipee)
         sa.Column('date_ecriture', Date, nullable=False),
         sa.Column('libelle', String(500)),
         sa.Column('debit', Numeric(15, 2), default=0),
