@@ -877,6 +877,17 @@ def telecharger_attestation_travail(
 # ============================================================================
 
 # ============ CONGÉS ============
+def _refus_metier(exc: ValueError) -> HTTPException:
+    """Une regle metier refusee n'est pas un plantage technique.
+
+    Un solde insuffisant, un type de conge inconnu ou une heure de saisie
+    invalide sont des refus attendus, donc explicites : sans ce pont, ils
+    remontaient en 500 "Internal Server Error", l'ecran ne pouvant rien afficher
+    d'exploitable alors que la raison tenait en une phrase.
+    """
+    return HTTPException(status_code=400, detail=str(exc))
+
+
 @router.post("/conges", response_model=CongeResponse, status_code=status.HTTP_201_CREATED)
 def demander_conge(
     conge: CongeCreate,
@@ -884,10 +895,13 @@ def demander_conge(
     current_user: User = Depends(resolve_rh_user)
 ):
     """Submit leave request"""
-    return CongeService.demander_conge(
-        db, current_user.id, conge.type_conge, conge.date_debut,
-        conge.date_fin, conge.motif
-    )
+    try:
+        return CongeService.demander_conge(
+            db, current_user.id, conge.type_conge, conge.date_debut,
+            conge.date_fin, conge.motif
+        )
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 @router.get("/conges")
@@ -1260,9 +1274,9 @@ def creer_fiche_paie(
     # ou un releve horaires existe : le bulletin affichait alors des heures que
     # personne n'avait pointees. Sans pointage, la colonne reste vide -- une
     # inconnue affichee vaut mieux qu'une moyenne legale presente comme un fait.
-    relevés = TempsTravailService.calculer_heures_mois(
+    releve_mois = TempsTravailService.calculer_heures_mois(
         db, employe.id, payload.mois, payload.annee)
-    heures_pointees = float(relevés["heures_travaillees"] or 0)
+    heures_pointees = float(releve_mois["heures_travaillees"] or 0)
 
     fiche = Salaire(
         employe_id=employe.id,
