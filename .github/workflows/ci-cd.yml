@@ -137,7 +137,7 @@ jobs:
       working-directory: ./evo-log-backend
       run: |
         pip install safety
-        safety check || echo "::warning::safety a trouve des vulnepatilibites (advisory, non bloquant)"
+        safety check || echo "::warning::safety a trouve des vulnerabilites (advisory, non bloquant)"
 
   deploy-staging:
     needs: [test-backend, test-frontend, security-scan]

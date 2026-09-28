@@ -186,11 +186,15 @@ class ContratTravail(Base):
     horaire_travail = Column(String(50))  # 35h, 40h, etc.
     lieu_travail = Column(String(200))
     convention_collective = Column(String(100))
-    periode_essai = Column(Integer)  # Essai en mois
+    periode_essai_jours = Column(Integer, default=90)  # Cameroun : 90 jours pour un CDI
+    coefficient = Column(Integer)
+    classification = Column(String(50))
     statut = Column(String(20), default="actif")  # actif, expire, resilie, suspendu
     motif_fin = Column(Text)
     date_fin_reelle = Column(Date)
     preavis = Column(Integer)  # Jours de préavis
+    nombre_renouvellements = Column(Integer, default=0)
+    date_dernier_renouvellement = Column(Date)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
