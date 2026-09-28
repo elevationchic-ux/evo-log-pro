@@ -1157,12 +1157,15 @@ def creer_evaluation(
     current_user: User = Depends(resolve_rh_user)
 ):
     """Create performance evaluation"""
-    return PerformanceService.creer_evaluation(
-        db, evaluation.employe_id, evaluation.evaluateur_id,
-        evaluation.periode_debut, evaluation.periode_fin,
-        evaluation.note_globale, evaluation.commentaires,
-        evaluation.objectifs_atteints, evaluation.objectifs_total
-    )
+    try:
+        return PerformanceService.creer_evaluation(
+            db, evaluation.employe_id, evaluation.evaluateur_id,
+            evaluation.periode_debut, evaluation.periode_fin,
+            evaluation.note_globale, evaluation.commentaires,
+            evaluation.objectifs_atteints, evaluation.objectifs_total
+        )
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 @router.get("/evaluations/{employe_id}")
@@ -1183,11 +1186,17 @@ def creer_contrat(
     current_user: User = Depends(resolve_rh_user)
 ):
     """Create employment contract"""
-    return ContratService.creer_contrat(
-        db, contrat.employe_id, contrat.type_contrat, contrat.date_debut,
-        contrat.date_fin, contrat.poste, contrat.salaire_base,
-        contrat.coefficient, contrat.classification, contrat.periode_essai_jours
-    )
+    try:
+        return ContratService.creer_contrat(
+            db, contrat.employe_id, contrat.type_contrat, contrat.date_debut,
+            contrat.date_fin, contrat.poste, contrat.salaire_base,
+            contrat.coefficient, contrat.classification, contrat.periode_essai_jours,
+            # Les trois champs que le service sait ecrire et que l'attestation
+            # de travail imprime ; les passer en position les laissait a NULL.
+            contrat.departement, contrat.horaire_travail, contrat.lieu_travail,
+        )
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 @router.get("/contrats/expirants")
@@ -1481,10 +1490,13 @@ def attribuer_competence(
     current_user: User = Depends(resolve_rh_user)
 ):
     """Assign skill to employee"""
-    return CompetenceService.attribuer_competence(
-        db, competence.employe_id, competence.competence_id,
-        competence.niveau, competence.date_evaluation
-    )
+    try:
+        return CompetenceService.attribuer_competence(
+            db, competence.employe_id, competence.competence_id,
+            competence.niveau, competence.date_evaluation
+        )
+    except ValueError as exc:
+        raise _refus_metier(exc)
 
 
 @router.get("/competences/{employe_id}")
