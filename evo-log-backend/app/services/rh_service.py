@@ -62,38 +62,72 @@ def _date_embauche(db: Session, employe_id: int) -> Optional[date]:
     return None
 
 
+def _mois_revolus(debut: date, fin: date) -> int:
+    """Mois entiers ecoules entre deux dates (base du prorata du droit a conge).
+
+    Un mois ne compte que s'il est reellement accompli : le 11e mois d'un salarie
+    entre le 15 ne s'acquiert que le 15 du mois suivant. Arrondi au mois plein,
+    jamais au mois entame -- un droit compte leger en faveur du salarie se
+    rattrape le mois suivant, un droit surcompte se paie en conges indus.
+    """
+    if fin < debut:
+        return 0
+    mois = (fin.year - debut.year) * 12 + (fin.month - debut.month)
+    if fin.day < debut.day:
+        mois -= 1
+    return max(0, mois)
+
+
 class CongeService:
     """Leave management service - Cameroon labor law compliant"""
     
     @staticmethod
     def calculer_solde_conge(db: Session, employe_id: int, annee: int) -> Dict[str, Any]:
-        """Calculate leave balance - Cameroon: 2.5 days/month of service"""
-        # Cameroon law: 2.5 working days per month of service
-        conges_accordes = db.query(func.sum(Conge.nombre_jours)).filter(
+        """Calculate leave balance - Cameroon: 24 working days per full year"""
+        conges_pris = db.query(func.sum(Conge.nombre_jours)).filter(
             and_(
                 Conge.employe_id == employe_id,
-                Conge.type_conge == "annuel",
+                Conge.type_conge == TypeConge.CONGE_ANNUEL,
                 Conge.date_debut.between(date(annee, 1, 1), date(annee, 12, 31)),
-                Conge.statut == "approuve"
+                # Un conge en cours ou termine a consomme son droit au meme titre
+                # qu'un conge approuve : ne compter que "approuve" laisserait un
+                # salarie parti demander un second conge sur le meme solde.
+                Conge.statut.in_([
+                    StatutConge.APPROUVE,
+                    StatutConge.EN_COURS,
+                    StatutConge.TERMINE,
+                ]),
             )
         ).scalar() or 0
-        
-        # Get employment start date to calculate accrued days
-        employe = db.query(User).filter(User.id == employe_id).first()
-        if not employe:
-            return {"solde": 0, "utilise": 0, "reste": 0}
-        
-        # Calculate months of service in current year
-        date_entree = employe.date_creation or date(annee, 1, 1)
-        mois_service = min(12, max(1, (date(annee, 12, 31) - date_entree).days // 30))
-        solde_accorde = mois_service * 2.5  # Cameroon standard
-        
+
+        # Le droit se prorata sur les mois reellement travailles dans l'annee
+        # consideree : une entree en service en septembre ne donne pas droit aux
+        # douze mois. L'ancienne regle (2,5 jours par mois, soit 30 jours par an)
+        # contredisait les 24 jours que l'application annonce par ailleurs.
+        droit = CongeService.droit_conge(db, employe_id, annee)
+
         return {
-            "solde": solde_accorde,
-            "utilise": conges_accordes,
-            "reste": solde_accorde - conges_accordes,
+            "solde": droit,
+            "utilise": float(conges_pris),
+            "reste": round(droit - float(conges_pris), 1),
             "annee": annee
         }
+
+    @staticmethod
+    def droit_conge(db: Session, employe_id: int, annee: int) -> float:
+        """Jours ouvrables acquis sur l'annee : 24 pour douze mois revolus."""
+        if annee > date.today().year:
+            # Une annee future n'a pas encore ete travaille : rien n'est du.
+            return 0.0
+        entree = _date_embauche(db, employe_id)
+        borne = min(date(annee, 12, 31), date.today())
+        if entree and entree > borne:
+            return 0.0
+        # Une entree anterieure a l'annee consideree ne prorata rien : les douze
+        # mois de cette annee-la sont dus dans leur integralite.
+        debut_ref = max(entree, date(annee, 1, 1)) if entree else date(annee, 1, 1)
+        mois = min(12, _mois_revolus(debut_ref, borne))
+        return round(DROIT_CONGE_ANNUEL_JOURS_OUVRABLES * mois / 12, 1)
     
     @staticmethod
     def demander_conge(
@@ -102,27 +136,41 @@ class CongeService:
         type_conge: str,
         date_debut: date,
         date_fin: date,
-        motif: str,
+        motif: Optional[str] = None,
         approbateur_id: Optional[int] = None
     ) -> Conge:
         """Submit leave request with automatic workflow"""
-        nombre_jours = (date_fin - date_debut).days + 1
-        
+        if date_fin < date_debut:
+            raise ValueError("date_fin anterieure a date_debut")
+        try:
+            type_retenu = TypeConge(type_conge)
+        except ValueError:
+            # Une valeur hors enum ne part pas en base : la colonne est contrainte
+            # et l'ecran n'a aucun libelle a afficher pour un type invente.
+            raise ValueError(
+                "type de conge inconnu : "
+                + ", ".join(t.value for t in TypeConge))
+
+        nombre_jours = compter_jours_ouvrables(date_debut, date_fin)
+
         # Check leave balance for annual leave
-        if type_conge == "annuel":
+        if type_retenu == TypeConge.CONGE_ANNUEL:
             solde = CongeService.calculer_solde_conge(db, employe_id, date_debut.year)
             if solde["reste"] < nombre_jours:
-                raise ValueError(f"Solde insuffisant: {solde['reste']} jours disponibles")
+                raise ValueError(
+                    f"Solde insuffisant: {solde['reste']} jours ouvrables "
+                    f"disponibles sur {date_debut.year}")
         
         conge = Conge(
             employe_id=employe_id,
-            type_conge=type_conge,
+            type_conge=type_retenu,
             date_debut=date_debut,
             date_fin=date_fin,
             nombre_jours=nombre_jours,
-            motif=motif,
-            statut="en_attente",
-            date_demande=datetime.utcnow()
+            motif=(motif or "").strip() or None,
+            approbateur_id=approbateur_id,
+            statut=StatutConge.EN_ATTENTE,
+            date_demande=datetime.now()
         )
         
         db.add(conge)
@@ -137,10 +185,13 @@ class CongeService:
         if not conge:
             raise ValueError("Congé non trouvé")
         
-        conge.statut = "approuve"
+        conge.statut = StatutConge.APPROUVE
         conge.approbateur_id = approbateur_id
-        conge.date_approbation = datetime.utcnow()
-        conge.commentaire_approbation = commentaire
+        conge.date_approbation = datetime.now()
+        conge.commentaire_approbation = (commentaire or "").strip() or None
+        # Une approbation n'efface pas le motif d'un refus anterieur : la colonne
+        # garde la trace de la decision precedente tant qu'elle n'est pas vide.
+        conge.motif_refus = None
         
         db.commit()
         db.refresh(conge)
@@ -153,10 +204,12 @@ class CongeService:
         if not conge:
             raise ValueError("Congé non trouvé")
         
-        conge.statut = "refuse"
+        conge.statut = StatutConge.REFUSE
         conge.approbateur_id = approbateur_id
-        conge.date_approbation = datetime.utcnow()
-        conge.motif_refus = motif_refus
+        conge.date_approbation = datetime.now()
+        # Un refus sans motif saisi reste SANS motif : le decideur peut refuser,
+        # l'application n'invente pas la raison qu'il n'a pas donnee.
+        conge.motif_refus = (motif_refus or "").strip() or None
         
         db.commit()
         db.refresh(conge)
