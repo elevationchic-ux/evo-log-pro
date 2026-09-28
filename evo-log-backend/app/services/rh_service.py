@@ -421,30 +421,39 @@ class FormationService:
     def creer_formation(
         db: Session,
         titre: str,
-        description: str,
+        # Optionnels SANS defaut : l'appel routeur passe les dix arguments en
+        # position, un defaut ici deroulerait les suivants. "Optionnel" veut
+        # dire NULL autorise, pas "vide par defaut".
+        description: Optional[str],
         date_debut: date,
         date_fin: date,
         duree_heures: int,
         cout: float,
-        formateur: str,
-        lieu: str,
+        formateur: Optional[str],
+        lieu: Optional[str],
         agency_id: Optional[int] = None
     ) -> Formation:
-        """Create training session"""
+        """Creer une session de formation.
+
+        description / formateur / lieu sont NULLables en base : un blanc ne
+        devient pas un texte, il reste absent (une formation sans formateur
+        designe est une information, un formateur invente en est une fausse).
+        """
         formation = Formation(
             titre=titre,
-            description=description,
+            description=(description or "").strip() or None,
             date_debut=date_debut,
             date_fin=date_fin,
             duree_heures=duree_heures,
-            cout=cout,
-            formateur=formateur,
-            lieu=lieu,
+            cout=cout or 0,
+            formateur=(formateur or "").strip() or None,
+            lieu=(lieu or "").strip() or None,
             agency_id=agency_id,
             # Vocabulaire du modele : "planifiee". Les deux orthographes auraient
             # fait deux etats differents pour une meme realite dans les requetes.
             statut="planifiee"
         )
+
         db.add(formation)
         db.commit()
         db.refresh(formation)
@@ -536,22 +545,34 @@ class PerformanceService:
         periode_debut: date,
         periode_fin: date,
         note_globale: float,
-        commentaires: str,
+        # NULLable en base : une note sans commentaire reste une note.
+        commentaires: Optional[str],
         objectifs_atteints: int,
         objectifs_total: int
     ) -> EvaluationPerformance:
-        """Create performance evaluation"""
+        """Creer une evaluation de performance.
+
+        Garde de coherence : un compteur d'objectifs atteints superieur au total
+        des objectifs est une contradiction arithmetique, pas une donnee.
+        """
+        atteints = objectifs_atteints or 0
+        total = objectifs_total or 0
+        if atteints > total > 0:
+            raise ValueError(
+                "Objectifs atteints (%d) superieurs au total (%d)" % (atteints, total)
+            )
         evaluation = EvaluationPerformance(
             employe_id=employe_id,
             evaluateur_id=evaluateur_id,
             periode_debut=periode_debut,
             periode_fin=periode_fin,
             note_globale=note_globale,
-            commentaires=commentaires,
-            objectifs_atteints=objectifs_atteints,
-            objectifs_total=objectifs_total,
+            commentaires=(commentaires or "").strip() or None,
+            objectifs_atteints=atteints,
+            objectifs_total=total,
             date_evaluation=datetime.now()
         )
+
         db.add(evaluation)
         db.commit()
         db.refresh(evaluation)
