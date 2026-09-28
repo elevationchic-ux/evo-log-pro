@@ -390,13 +390,47 @@ class RotationStockResponse(BaseModel):
 
 
 class PrecisionInventaireResponse(BaseModel):
+    # Batch 18 : precision None + message quand aucune ligne comptee — un
+    # inventaire jamais mesure n'est pas un inventaire a 0 %.
     inventaire_id: int
-    precision: float
+    lignes_total: int = 0
+    lignes_correctes: int = 0
+    precision: Optional[float] = None
+    message: Optional[str] = None
 
 
 class PerformanceFournisseurResponse(BaseModel):
+    # Batch 18 : note/taux/delai None quand la mesure est impossible
+    # (aucune commande, aucune date de livraison mesurable) — plus de faux zero.
     fournisseur_id: int
-    note: float
-    commandes: int
-    taux_livraison: float
-    delai_moyen_jours: float
+    commandes: int = 0
+    commandes_livrees: int = 0
+    taux_livraison: Optional[float] = None
+    delai_moyen_jours: Optional[float] = None
+    note: Optional[float] = None
+    message: Optional[str] = None
+
+
+class ReapproLigneInfo(BaseModel):
+    stock_id: int
+    code_article: Optional[str] = None
+    designation: Optional[str] = None
+    quantite_commandee: float
+    prix_unitaire: float
+    prix_total: float
+
+
+class ReapproIgnoreInfo(BaseModel):
+    stock_id: int
+    code_article: Optional[str] = None
+    raison: str
+
+
+class ReapproAutomatiqueResponse(BaseModel):
+    # Batch 18 : une seule commande groupee (modele reel : lignes -> stock_id,
+    # prix NOT NULL — les stocks sans prix sont IGNOREES et declarees, jamais
+    # pricees a 0.0 invente).
+    commande_id: int
+    numero_commande: str
+    lignes: List[ReapproLigneInfo]
+    ignorees: List[ReapproIgnoreInfo]

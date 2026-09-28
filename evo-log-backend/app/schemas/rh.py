@@ -1,15 +1,36 @@
-"""Pydantic schemas for RH module"""
+"""Pydantic schemas for RH module
+
+Contrat avec la base (app/models/rh.py, schema produit par la chaine Alembic) :
+un champ requis correspond a une colonne NOT NULL, un champ optionnel a une
+colonne NULLable. Une valeur absente reste absente -- aucun schema ne devine un
+motif, une heure d'arrivee ou une raison de refus.
+
+Heures de saisie (`heure_arrivee`, `heure_depart`, `heure_debut`, `heure_fin`) :
+chaine "HH:MM", pas `datetime`. La colonne est un VARCHAR(5) depuis la revision
+028, et un pointage n'est pas un horodatage complet.
+
+Statuts et types : les valeurs enum STOCKEES ("conge_annuel", "en_attente"),
+exactement celles que l'API renvoie et que la base contient ; le NOM du membre
+d'enum n'apparait jamais sur le fil.
+"""
 from datetime import datetime, date
 from typing import Optional, List
 from pydantic import BaseModel, Field, EmailStr
 
 
+TYPES_CONGE = (
+    "conge_annuel, conge_maladie, conge_maternite, conge_paternite, "
+    "conge_exceptionnel, conge_sans_solde, absence_autorisee")
+STATUTS_CONGE = "en_attente, approuve, refuse, en_cours, termine, annule"
+
+
 # Conge schemas
 class CongeBase(BaseModel):
-    type_conge: str = Field(..., description="Type de congé: annuel, maladie, exceptionnel")
+    type_conge: str = Field(..., description="Type de conge: " + TYPES_CONGE)
     date_debut: date
     date_fin: date
-    motif: str
+    # NULLable en base depuis 028 : une raison forcee n'est pas une raison.
+    motif: Optional[str] = None
 
 
 class CongeCreate(CongeBase):
@@ -17,7 +38,7 @@ class CongeCreate(CongeBase):
 
 
 class CongeUpdate(BaseModel):
-    statut: Optional[str] = None
+    statut: Optional[str] = Field(None, description="Statut: " + STATUTS_CONGE)
     approbateur_id: Optional[int] = None
     date_approbation: Optional[datetime] = None
     commentaire_approbation: Optional[str] = None
@@ -34,7 +55,8 @@ class CongeResponse(CongeBase):
     date_approbation: Optional[datetime] = None
     commentaire_approbation: Optional[str] = None
     motif_refus: Optional[str] = None
-    
+    created_at: Optional[datetime] = None
+
     class Config:
         from_attributes = True
 

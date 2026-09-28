@@ -219,14 +219,13 @@ from app.schemas.magasin_avance import (
     InventaireTournantCreate, InventaireTournantResponse,
     LigneInventaireCreate, LigneInventaireResponse,
     FournisseurStockCreate, FournisseurStockResponse,
-    CommandeFournisseurCreate, CommandeFournisseurResponse,
-    LigneCommandeFournisseurCreate, LigneCommandeFournisseurResponse,
     BonReceptionCreate, BonReceptionResponse,
     LigneBonReceptionCreate, LigneBonReceptionResponse,
     RetourClientCreate, RetourClientUpdate, RetourClientTraitement, RetourClientResponse,
     LitigeTransporteurCreate, LitigeTransporteurUpdate, LitigeTransporteurResolution, LitigeTransporteurResponse,
     ColisCreate, ColisUpdate, ColisResponse,
-    RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse
+    RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse,
+    ReapproLigneInfo, ReapproIgnoreInfo, ReapproAutomatiqueResponse
 )
 from app.schemas.transport_avance import (
     DispatchBase, DispatchCreate, DispatchUpdate, DispatchResponse,
@@ -429,14 +428,13 @@ __all__ = [
     "InventaireTournantCreate", "InventaireTournantResponse",
     "LigneInventaireCreate", "LigneInventaireResponse",
     "FournisseurStockCreate", "FournisseurStockResponse",
-    "CommandeFournisseurCreate", "CommandeFournisseurResponse",
-    "LigneCommandeFournisseurCreate", "LigneCommandeFournisseurResponse",
     "BonReceptionCreate", "BonReceptionResponse",
     "LigneBonReceptionCreate", "LigneBonReceptionResponse",
     "RetourClientCreate", "RetourClientUpdate", "RetourClientTraitement", "RetourClientResponse",
     "LitigeTransporteurCreate", "LitigeTransporteurUpdate", "LitigeTransporteurResolution", "LitigeTransporteurResponse",
     "ColisCreate", "ColisUpdate", "ColisResponse",
     "RotationStockResponse", "PrecisionInventaireResponse", "PerformanceFournisseurResponse",
+    "ReapproLigneInfo", "ReapproIgnoreInfo", "ReapproAutomatiqueResponse",
     "TourneeCreate", "TourneeUpdate", "TourneeResponse",
     "LivraisonCreate", "LivraisonUpdate", "LivraisonResponse",
     "FraisKilometriqueCreate", "FraisKilometriqueResponse",

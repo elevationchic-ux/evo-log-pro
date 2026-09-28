@@ -47,9 +47,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        # pytest, pytest-asyncio, pytest-cov : sans ce fichier, l'etape tests
-        # meurt avec un rc=4 (options --cov inconnues) et bloque le deploiement.
-        pip install -r requirements-dev.txt
+        # pytest-only : NE PAS installer requirements-dev.txt ici. safety==3.0.1
+        # tire pydantic v1 et degrade le runtime -> "No module named pydantic._internal"
+        # qui cassait le replay Alembic (et tout le job). Le job security-scan
+        # installe bandit/safety dans SON propre environnement, independant.
+        pip install pytest==8.0.0 pytest-asyncio==0.23.5 "pytest-cov>=4.1.0" httpx==0.26.0
 
     # La chaine Alembic doit jouer jusqu'au bout sur le moteur de la prod :
     # en production create_all() est desactive, le schema vient des seules
