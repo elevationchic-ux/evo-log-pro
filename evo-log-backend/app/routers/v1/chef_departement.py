@@ -57,7 +57,7 @@ def _week_bounds(semaine: Optional[str]) -> Tuple[_date, _date]:
 
     ``date.fromisocalendar`` evite le piege du format ``%W`` (semaine non-ISO) :
     une semaine invalide ou un format inattendu renvoient un 400 explicite plutot
-    qu'une plage silencieusement faaussee.
+    qu'une plage silencieusement faussée.
     """
     if not semaine:
         today = _date.today()
@@ -392,3 +392,155 @@ def set_department_modules(
     db.commit()
     db.refresh(dept)
     return {"id": dept.id, "modules_allowed": requested}
+
+
+# ── Phase 4 (Tranche A, lecture) : planning + presence du departement, scopes ──
+def _department_member_ids(db: Session, dept: Department) -> List[int]:
+    """Identifiants des collaborateurs rattaches au departement (meme entreprise).
+
+    La liste des MEMBRES est la source de verite du perimetre : PlanningGarde /
+    PointageVacation sont filtres sur ces ids, ce qui cloisonne automatiquement un
+    autre departement (et une autre entreprise) hors du champ.
+    """
+    return [
+        uid for (uid,) in db.query(User.id).filter(
+            User.department_id == dept.id,
+            User.company_id == dept.company_id,
+        ).all()
+    ]
+
+
+@router.get(
+    "/planning",
+    summary="Planning (tours de garde) des collaborateurs de mon departement",
+)
+def department_planning(
+    semaine: Optional[str] = Query(None, description="Semaine ISO AAAA-WNN ; defaut : semaine courante"),
+    department_id: Optional[int] = Query(None, description="Reserve admin/CADC ; ignore pour un chef"),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_department_head),
+):
+    """Tours de garde (``PlanningGarde``) des membres du departement sur la semaine.
+
+    Scope identique au reste de l'espace : un chef est epingle a SON departement ;
+    un admin/CADC cible un departement de son entreprise. Aucun employe hors du
+    departement n'apparait (filtre sur les identifiants des membres).
+    """
+    dept = _scoped_department(db, current, department_id)
+    start, end = _week_bounds(semaine)
+    member_ids = _department_member_ids(db, dept)
+
+    lignes: List[Dict[str, Any]] = []
+    if member_ids:
+        rows = (
+            db.query(PlanningGarde, User)
+            .join(User, User.id == PlanningGarde.employe_id)
+            .filter(
+                PlanningGarde.employe_id.in_(member_ids),
+                PlanningGarde.date_jour >= start,
+                PlanningGarde.date_jour <= end,
+            )
+            .order_by(PlanningGarde.date_jour.asc(), User.username.asc())
+            .all()
+        )
+        for pg, emp in rows:
+            lignes.append({
+                "id": pg.id,
+                "employe_id": emp.id,
+                "employe_username": emp.username,
+                "employe_nom": emp.full_name or emp.username,
+                "date_jour": pg.date_jour.isoformat() if pg.date_jour else None,
+                "quart": pg.quart,
+                "poste_assigne": pg.poste_assigne,
+                "statut": pg.statut,
+                "observations": pg.observations,
+            })
+
+    iso = start.isocalendar()
+    return {
+        "departement_id": dept.id,
+        "departement_nom": dept.nom,
+        "semaine": semaine or f"{iso[0]}-W{iso[1]:02d}",
+        "du": start.isoformat(),
+        "au": end.isoformat(),
+        "lignes": lignes,
+    }
+
+
+@router.get(
+    "/presence",
+    summary="Presence / pointage du jour des collaborateurs de mon departement",
+)
+def department_presence(
+    date: Optional[str] = Query(None, description="Date AAAA-MM-JJ ; defaut : aujourd'hui"),
+    department_id: Optional[int] = Query(None, description="Reserve admin/CADC ; ignore pour un chef"),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_department_head),
+):
+    """Etat de presence par collaborateur du departement, pour une journee donnee.
+
+    Le statut est DEDUIT des lignes reelles, jamais invente :
+      - ``PRESENT``      : une pointe (``PointageVacation``) existe ce jour ;
+      - ``ATTENDU``      : un tour de garde est planifie mais pas encore pointe ;
+      - ``NON_PLANIFIE`` : ni pointe ni planification ce jour.
+    Perimetre = membres du departement resolu uniquement (cloisonnement departement
+    et entreprise garanti par le filtre sur les identifiants des membres).
+    """
+    dept = _scoped_department(db, current, department_id)
+    day = _parse_date(date)
+    members = (
+        db.query(User)
+        .filter(User.department_id == dept.id, User.company_id == dept.company_id)
+        .order_by(User.username.asc())
+        .all()
+    )
+    ids = [u.id for u in members]
+
+    plan_map: Dict[int, PlanningGarde] = {}
+    point_map: Dict[int, PointageVacation] = {}
+    if ids:
+        for pg in db.query(PlanningGarde).filter(
+            PlanningGarde.employe_id.in_(ids), PlanningGarde.date_jour == day
+        ).all():
+            plan_map.setdefault(pg.employe_id, pg)
+        for pv in db.query(PointageVacation).filter(
+            PointageVacation.employe_id.in_(ids), PointageVacation.date_pointage == day
+        ).all():
+            point_map.setdefault(pv.employe_id, pv)
+
+    collaborateurs: List[Dict[str, Any]] = []
+    synthese = {"effectif": len(members), "presents": 0, "attendus": 0, "non_planifies": 0}
+    for u in members:
+        pg = plan_map.get(u.id)
+        pv = point_map.get(u.id)
+        if pv is not None:
+            presence = "PRESENT"
+            synthese["presents"] += 1
+        elif pg is not None:
+            presence = "ATTENDU"
+            synthese["attendus"] += 1
+        else:
+            presence = "NON_PLANIFIE"
+            synthese["non_planifies"] += 1
+        collaborateurs.append({
+            "employe_id": u.id,
+            "username": u.username,
+            "full_name": u.full_name or u.username,
+            "planifie": pg is not None,
+            "quart": pg.quart if pg is not None else None,
+            "poste_assigne": pg.poste_assigne if pg is not None else None,
+            "pointe": pv is not None,
+            "heure_arrivee": pv.heure_arrivee if pv is not None else None,
+            "heure_depart": pv.heure_depart if pv is not None else None,
+            "heures_effectives": float(pv.heures_effectives) if (pv is not None and pv.heures_effectives is not None) else None,
+            "est_valide": bool(pv.est_valide) if pv is not None else None,
+            "presence": presence,
+        })
+
+    return {
+        "departement_id": dept.id,
+        "departement_nom": dept.nom,
+        "date": day.isoformat(),
+        "collaborateurs": collaborateurs,
+        "synthese": synthese,
+    }
