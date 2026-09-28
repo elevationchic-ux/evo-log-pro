@@ -68,7 +68,61 @@ def sonder(url: str) -> int:
     return echecs
 
 
+def sonde_lecture_globale(url: str) -> int:
+    """LIT une ligne de CHAQUE table mappee, avec les modeles de l'app.
+
+    Complement indispensable de l'audit de parite : l'audit compare des
+    declarations, la sonde execute la requete. Un lien `relationship()` casse,
+    une table mappee deux fois ou une colonne absente ne se voient qu'en
+    levant la question a la base. C'est aussi le plus court chemin vers un 500 :
+    `list(x)=Select(...)` echoue avant la moindre logique metier.
+
+    Chaque module de app/models est importe (memo que audit_schema_drift.py et
+    la migration 028) : app.models.__init__ seul ne declare qu'une partie des
+    modeles, et le reste resterait silencieusement non sonde.
+    """
+    import importlib
+
+    for fichier in sorted((ROOT / "app" / "models").glob("*.py")):
+        if fichier.name == "__init__.py":
+            continue
+        try:
+            importlib.import_module("app.models.%s" % fichier.name[:-3])
+        except Exception as exc:  # noqa: BLE001 - le rapport le dira
+            print("   MODULE NON IMPORTABLE app/models/%s : %s" % (fichier.name, exc))
+
+    from sqlalchemy.orm import configure_mappers
+
+    engine = create_engine(url)
+    from sqlalchemy.orm import sessionmaker as _fab
+    session = _fab(bind=engine)()
+    echecs = 0
+    try:
+        configure_mappers()
+    except Exception as exc:  # noqa: BLE001
+        print("   MAPPAGE IMPOSSIBLE : %s" % str(exc).splitlines()[0][:200])
+        echecs += 1
+
+    from app.core.database import Base
+    mappers = list(Base.registry.mappers)
+    print("tables mappees sondees : %d" % len(mappers))
+    for mapper in sorted(mappers, key=lambda m: m.local_table.name):
+        nom = mapper.local_table.name
+        try:
+            session.query(mapper.class_).limit(1).all()
+        except Exception as exc:  # noqa: BLE001
+            session.rollback()
+            print("   ECHEC LECTURE %-34s %s" % (nom, str(exc).splitlines()[0][:150]))
+            echecs += 1
+    session.close()
+    print("\nSonde de lecture : %d echec(s)." % echecs)
+    return echecs
+
+
 if __name__ == "__main__":
     db = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / "kamlog_erp.db")
     url = db if db.startswith(("sqlite:", "postgresql")) else f"sqlite:///{db}"
-    sys.exit(1 if sonder(url) else 0)
+    ecarts = sonde_lecture_globale(url) if "--lecture" in sys.argv else 0
+    if "--lecture" not in sys.argv:
+        ecarts += sonder(url)
+    sys.exit(1 if ecarts else 0)

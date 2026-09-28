@@ -206,9 +206,11 @@ from app.schemas.rh import (
     DocumentEmployeCreate, DocumentEmployeUpdate, DocumentEmployeResponse,
     OrganigrammeCreate, OrganigrammeUpdate, OrganigrammeResponse,
     CompetenceCreate, CompetenceUpdate, CompetenceResponse,
-    CompetenceEmployeCreate, CompetenceEmployeUpdate, CompetenceEmployeResponse,
-    BulletinPaieResponse
+    CompetenceEmployeCreate, CompetenceEmployeUpdate, CompetenceEmployeResponse
 )
+# Bulletin de paie : la definition unique est celle du module RH avance, celle
+# que le routeur renvoie vraiment (schemas/rh.py en doublonnait une obsolete).
+from app.schemas.rh_avance import BulletinPaieResponse
 from app.schemas.magasin_avance import (
     PeremptionCreate, PeremptionResponse,
     ReservationStockCreate, ReservationStockResponse,
