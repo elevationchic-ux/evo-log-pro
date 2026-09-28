@@ -857,14 +857,14 @@ class CompetenceService:
         db: Session,
         nom: str,
         categorie: str,
-        description: str,
+        description: Optional[str],
         niveau_requis: str
     ) -> Competence:
-        """Create skill/competency definition"""
+        """Creer une fiche de competence."""
         competence = Competence(
             nom=nom,
             categorie=categorie,
-            description=description,
+            description=(description or "").strip() or None,
             niveau_requis=niveau_requis
         )
         db.add(competence)
@@ -880,14 +880,32 @@ class CompetenceService:
         niveau: str,
         date_evaluation: Optional[date] = None
     ) -> CompetenceEmploye:
-        """Assign skill to employee with proficiency level"""
-        date_eval = date_evaluation or date.today()
-        
+        """Attribuer une competence a un employe, au niveau evalue.
+
+        Deux gardes :
+          - l'existence de l'employe ET de la competence : SQLite accepte une
+            cle etrangere fantome et laisse une attribution que plus aucun
+            rapport ne sait relire ;
+          - la date : NULL quand personne ne l'a saisie. Mettre aujourd'hui
+            ferait croire qu'une evaluation a eu lieu ce jour-la.
+        """
+        if not db.query(User).filter(User.id == employe_id).first():
+            raise ValueError(f"Aucun employe a l'identifiant {employe_id}")
+        if not db.query(Competence).filter(Competence.id == competence_id).first():
+            raise ValueError(f"Aucune competence a l'identifiant {competence_id}")
+        if db.query(CompetenceEmploye).filter(
+            and_(
+                CompetenceEmploye.employe_id == employe_id,
+                CompetenceEmploye.competence_id == competence_id,
+            )
+        ).first():
+            raise ValueError("Cette competence est deja attribuee a cet employe")
+
         competence_emp = CompetenceEmploye(
             employe_id=employe_id,
             competence_id=competence_id,
             niveau=niveau,
-            date_evaluation=date_eval
+            date_evaluation=date_evaluation
         )
         db.add(competence_emp)
         db.commit()
