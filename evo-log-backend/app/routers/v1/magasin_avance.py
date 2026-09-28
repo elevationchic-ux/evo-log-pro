@@ -1,5 +1,5 @@
 """Advanced warehouse router - FEFO, reservations, transfers, cycle counting"""
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from typing import List
@@ -783,10 +783,10 @@ def _prochaine_rotation_numero(db, modele, champ, prefix):
 
 @router.get("/retours", response_model=List[RetourClientResponse])
 def lister_retours(
-    statut: Optional[str] = None,
-    client_id: Optional[int] = None,
-    skip: int = 0,
-    limit: int = 50,
+    statut: Optional[str] = Query(None),
+    client_id: Optional[int] = Query(None),
+    skip: int = Query(0),
+    limit: int = Query(50),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -940,10 +940,10 @@ def traiter_retour(
 
 @router.get("/litiges", response_model=List[LitigeTransporteurResponse])
 def lister_litiges(
-    statut: Optional[str] = None,
-    transporteur_id: Optional[int] = None,
-    skip: int = 0,
-    limit: int = 50,
+    statut: Optional[str] = Query(None),
+    transporteur_id: Optional[int] = Query(None),
+    skip: int = Query(0),
+    limit: int = Query(50),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):

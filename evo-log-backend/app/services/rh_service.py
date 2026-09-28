@@ -441,7 +441,9 @@ class FormationService:
             formateur=formateur,
             lieu=lieu,
             agency_id=agency_id,
-            statut="planifie"
+            # Vocabulaire du modele : "planifiee". Les deux orthographes auraient
+            # fait deux etats differents pour une meme realite dans les requetes.
+            statut="planifiee"
         )
         db.add(formation)
         db.commit()
@@ -454,7 +456,7 @@ class FormationService:
         participation = ParticipationFormation(
             formation_id=formation_id,
             employe_id=employe_id,
-            date_inscription=datetime.utcnow(),
+            date_inscription=datetime.now(),
             statut="inscrit"
         )
         db.add(participation)
@@ -527,7 +529,7 @@ class PerformanceService:
             commentaires=commentaires,
             objectifs_atteints=objectifs_atteints,
             objectifs_total=objectifs_total,
-            date_evaluation=datetime.utcnow()
+            date_evaluation=datetime.now()
         )
         db.add(evaluation)
         db.commit()
@@ -607,7 +609,7 @@ class ContratService:
         if nouveau_salaire:
             contrat.salaire_base = nouveau_salaire
         contrat.nombre_renouvellements = (contrat.nombre_renouvellements or 0) + 1
-        contrat.date_dernier_renouvellement = datetime.utcnow()
+        contrat.date_dernier_renouvellement = datetime.now()
         
         db.commit()
         db.refresh(contrat)
@@ -709,7 +711,7 @@ class DocumentEmployeService:
             chemin_fichier=chemin_fichier,
             date_emission=date_emission,
             date_expiration=date_expiration,
-            date_ajout=datetime.utcnow()
+            date_ajout=datetime.now()
         )
         db.add(document)
         db.commit()
@@ -751,7 +753,7 @@ class OrganigrammeService:
             org.manager_id = manager_id
             org.departement = departement
             org.poste = poste
-            org.date_mise_a_jour = datetime.utcnow()
+            org.date_mise_a_jour = datetime.now()
         else:
             org = Organigramme(
                 employe_id=employe_id,
