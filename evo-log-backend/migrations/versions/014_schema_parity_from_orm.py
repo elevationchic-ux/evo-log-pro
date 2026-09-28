@@ -111,6 +111,41 @@ def _orm_metadata():
     return Base.metadata
 
 
+def _ensure_deferred_fks(bind):
+    """Rejoue les FK dont la table parente ne nait qu'ici (parite ORM).
+
+    008/009 declaraient ces FK inline vers ecritures_comptables_ohada/clients :
+    PostgreSQL refuse la reference vers une table inexistante (SQLite tolere,
+    d'ou l'echec du replay CI vierge uniquement sur Postgres). Les colonnes
+    existent ; on ajoute juste la contrainte, garde par introspection pour
+    rester no-op sur une base deja complete (prod via create_all)."""
+    insp = sa.inspect(bind)
+    tables = set(insp.get_table_names())
+    for child, col, parent, pcol, fkname in [
+        ("lignes_journal", "ecriture_id", "ecritures_comptables_ohada", "id",
+         "fk_lignes_journal_ecriture_id"),
+        ("ecritures_lettrees", "ecriture_id", "ecritures_comptables_ohada", "id",
+         "fk_ecritures_lettrees_ecriture_id"),
+        ("grand_livre_lignes", "ecriture_id", "ecritures_comptables_ohada", "id",
+         "fk_grand_livre_lignes_ecriture_id"),
+        ("arrets", "client_id", "clients", "id", "fk_arrets_client_id"),
+    ]:
+        if child not in tables or parent not in tables:
+            continue
+        try:
+            have = {tuple(fk.get("constrained_columns") or [])
+                    for fk in insp.get_foreign_keys(child)}
+        except Exception:
+            have = set()
+        if [col] in have:
+            continue
+        try:
+            with op.batch_alter_table(child) as batch:
+                batch.create_foreign_key(fkname, parent, [col], [pcol])
+        except Exception:  # pragma: no cover - parite best-effort, ne casse jamais
+            _log.warning("014: FK %s non ajoutee sur %s (%s)", fkname, child, parent)
+
+
 def upgrade() -> None:
     bind = op.get_bind()
     metadata = _orm_metadata()
@@ -175,15 +210,17 @@ def upgrade() -> None:
             name, ", ".join(sorted(set(unresolved))),
         )
 
-    if not creatable:
-        return
-
     # create_all(tables=<sous-ensemble creatible>, checkfirst=True) : meme code
     # que le create_all() de l'app (tri topologique interne, emission DDL par
     # SQLAlchemy) => parite stricte avec le modele ORM, idempotent.
-    metadata.create_all(
-        bind=bind, tables=list(creatable.values()), checkfirst=True
-    )
+    if creatable:
+        metadata.create_all(
+            bind=bind, tables=list(creatable.values()), checkfirst=True
+        )
+
+    # FK differees de 008/009 : leurs parentes (tables ORM pures) n'existent
+    # qu'a partir d'ici -> a rejouer meme quand 014 ne cree aucune table.
+    _ensure_deferred_fks(bind)
 
 
 def downgrade() -> None:

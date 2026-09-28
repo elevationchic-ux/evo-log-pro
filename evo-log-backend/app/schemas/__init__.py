@@ -223,8 +223,8 @@ from app.schemas.magasin_avance import (
     LigneCommandeFournisseurCreate, LigneCommandeFournisseurResponse,
     BonReceptionCreate, BonReceptionResponse,
     LigneBonReceptionCreate, LigneBonReceptionResponse,
-    RetourClientCreate, RetourClientUpdate, RetourClientResponse,
-    LitigeTransporteurCreate, LitigeTransporteurUpdate, LitigeTransporteurResponse,
+    RetourClientCreate, RetourClientTraitement, RetourClientResponse,
+    LitigeTransporteurCreate, LitigeTransporteurResolution, LitigeTransporteurResponse,
     ColisCreate, ColisUpdate, ColisResponse,
     RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse
 )
@@ -433,8 +433,8 @@ __all__ = [
     "LigneCommandeFournisseurCreate", "LigneCommandeFournisseurResponse",
     "BonReceptionCreate", "BonReceptionResponse",
     "LigneBonReceptionCreate", "LigneBonReceptionResponse",
-    "RetourClientCreate", "RetourClientUpdate", "RetourClientResponse",
-    "LitigeTransporteurCreate", "LitigeTransporteurUpdate", "LitigeTransporteurResponse",
+    "RetourClientCreate", "RetourClientTraitement", "RetourClientResponse",
+    "LitigeTransporteurCreate", "LitigeTransporteurResolution", "LitigeTransporteurResponse",
     "ColisCreate", "ColisUpdate", "ColisResponse",
     "RotationStockResponse", "PrecisionInventaireResponse", "PerformanceFournisseurResponse",
     "TourneeCreate", "TourneeUpdate", "TourneeResponse",

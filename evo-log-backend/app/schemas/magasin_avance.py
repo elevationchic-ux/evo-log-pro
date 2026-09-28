@@ -287,6 +287,13 @@ class RetourClientCreate(BaseModel):
     notes: Optional[str] = None
 
 
+class RetourClientUpdate(BaseModel):
+    type_retour: Optional[str] = None
+    motif: Optional[str] = None
+    quantite: Optional[float] = None
+    notes: Optional[str] = None
+
+
 class RetourClientTraitement(BaseModel):
     decision: str  # accepte | refuse
     action: Optional[str] = None  # obligatoire si accepte: remplacement|remboursement|destruction
@@ -320,6 +327,14 @@ class LitigeTransporteurCreate(BaseModel):
     mission_id: Optional[int] = None
     type_litige: str  # retard, avarie, perte, erreur_livraison
     description: str
+    montant_reclame: Optional[float] = None
+    assureur: Optional[str] = None
+    numero_police: Optional[str] = None
+
+
+class LitigeTransporteurUpdate(BaseModel):
+    type_litige: Optional[str] = None
+    description: Optional[str] = None
     montant_reclame: Optional[float] = None
     assureur: Optional[str] = None
     numero_police: Optional[str] = None

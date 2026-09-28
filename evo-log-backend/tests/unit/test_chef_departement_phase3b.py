@@ -136,6 +136,23 @@ def test_writes_require_auth(write_client):
     assert resp.status_code in (401, 403)
 
 
+def test_candidats_requires_auth(write_client):
+    resp = write_client.get("/api/v1/departement/candidats")
+    assert resp.status_code in (401, 403)
+
+
+def test_chef_candidates_are_level3_outside_own_dept(write_client, sandbox):
+    # Invariants stables quelle que soit l'ordre d'execution des tests precedents :
+    # seuls des niveaux 3 de l'entreprise, jamais deja dans le departement du chef.
+    resp = write_client.get(
+        "/api/v1/departement/candidats", headers=_auth(sandbox["chef_token"])
+    )
+    assert resp.status_code == 200, resp.text
+    for c in resp.json():
+        assert c["role_level"] == 3
+        assert c["department_id"] != sandbox["ops_id"]
+
+
 def test_chef_affects_collaborator_into_own_department(write_client, sandbox):
     resp = write_client.post(
         f"/api/v1/departement/membres/{sandbox['float_b_id']}/affecter",

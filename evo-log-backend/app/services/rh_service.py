@@ -1,15 +1,65 @@
 """RH service - Complete HR management for Cameroon/CEMAC compliance"""
 from datetime import datetime, date, timedelta
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func, case
 from app.models.rh import (
     Conge, Absence, TempsTravail, Formation, ParticipationFormation,
     EvaluationPerformance, ContratTravail, Salaire, Prime, DocumentEmploye,
-    Organigramme, Competence, CompetenceEmploye
+    Organigramme, Competence, CompetenceEmploye, TypeConge, StatutConge
 )
 from app.models.user import User
 from app.models.agency import Agency
+
+# Droit a conge annuel : 24 jours ouvrables par annee revolue (Code du travail
+# camerounais, art. 33). La regle est de valeur legale, pas une donnee locale :
+# elle vit ici, unique, pour que l'acces portail et le service ne puissent plus
+# se contredire (l'acces annoncait 24 jours, le service 2,5 jours par mois, soit
+# 30 -- deux droits differents pour un meme salarie).
+DROIT_CONGE_ANNUEL_JOURS_OUVRABLES = 24
+
+
+def compter_jours_ouvrables(debut: date, fin: date) -> int:
+    """Jours ouvrables entre deux dates, dimanche exclu (sens du Code du travail).
+
+    Les fetes chomees ne sont pas retranchees : l'application ne possede aucun
+    calendrier national en base. C'est une limite affichee, pas une valeur
+    inventee pour faire juste -- un conge compte leger superieur, jamais
+    inferieur au reel, ce qui protege le salarie comme la paye.
+    """
+    if fin < debut:
+        raise ValueError("date_fin anterieure a date_debut")
+    total = 0
+    courant = debut
+    while courant <= fin:
+        if courant.weekday() != 6:  # 6 = dimanche
+            total += 1
+        courant += timedelta(days=1)
+    return total
+
+
+def _valeur_enum(valeur):
+    """Membre d'enum ou chaine : la forme stockee en base (la valeur)."""
+    return valeur.value if hasattr(valeur, "value") else valeur
+
+
+def _date_embauche(db: Session, employe_id: int) -> Optional[date]:
+    """Date d'entree en service : le contrat, a defaut la creation du compte.
+
+    `User.date_creation` etait utilisee par l'ancien code -- l'attribut n'existe
+    pas, ce qui faisait echouer tout calcul de solde. Le contrat de travail est
+    le seul document qui etablit la date d'embauche.
+    """
+    contrat = db.query(ContratTravail).filter(
+        ContratTravail.employe_id == employe_id
+    ).order_by(ContratTravail.date_debut.asc()).first()
+    if contrat:
+        return contrat.date_debut
+    employe = db.query(User).filter(User.id == employe_id).first()
+    if employe and getattr(employe, "created_at", None):
+        return employe.created_at.date() if isinstance(
+            employe.created_at, datetime) else employe.created_at
+    return None
 
 
 class CongeService:
