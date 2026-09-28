@@ -1524,13 +1524,87 @@ def _employee_scope_company_id(user: User) -> Optional[int]:
     return None if user.is_superuser else user.company_id
 
 
-def _employee_dict(u: User) -> Dict[str, Any]:
+def _contrats_de_reference(db: Session, employe_ids: Iterable[int]) -> Dict[int, ContratTravail]:
+    """Contrat qui fait foi pour chaque employe, en UNE requete pour la page.
+
+    Regle de lecture : le contrat "actif" le plus recent ; a defaut, le plus
+    recent tout court. Un employe sans contrat n'entre pas dans la carte -- ses
+    colonnes contrat restent vides a l'ecran, ce qui est une information (aucun
+    contrat saisi) et non un CDI par defaut.
+    """
+    ids = [i for i in employe_ids if i is not None]
+    if not ids:
+        return {}
+    ref: Dict[int, ContratTravail] = {}
+    for c in db.query(ContratTravail).filter(
+        ContratTravail.employe_id.in_(ids)
+    ).order_by(ContratTravail.date_debut.desc()).all():
+        courant = ref.get(c.employe_id)
+        if courant is None or (c.statut == "actif" and courant.statut != "actif"):
+            ref[c.employe_id] = c
+    return ref
+
+
+def _employes_en_conge(db: Session, employe_ids: Iterable[int]) -> set:
+    """Employes dont un conge approuve couvre la date du jour.
+
+    La presence en conge n'est pas un statut du compte : elle se lit dans les
+    demandes reellement validees, sur la periode en cours.
+    """
+    ids = [i for i in employe_ids if i is not None]
+    if not ids:
+        return set()
+    auj = date.today()
+    lignes = db.query(Conge.employe_id).filter(
+        Conge.employe_id.in_(ids),
+        Conge.date_debut <= auj,
+        Conge.date_fin >= auj,
+        Conge.statut.in_([StatutConge.APPROUVE.value, StatutConge.EN_COURS.value]),
+    ).distinct().all()
+    return {l[0] for l in lignes}
+
+
+def _employee_dict(
+    u: User,
+    contrat: Optional[ContratTravail] = None,
+    en_conge: bool = False,
+) -> Dict[str, Any]:
+    """Fiche d'un collaborateur : identite du compte + contrat reel + presence.
+
+    Le nom reste un seul champ (`full_name`) : la table `users` ne dissocie pas
+    nom et prenom, et les reconstituer par decoupage inventerait un etat civil.
+    Type de contrat, date d'embauche et salaire de base viennent du contrat
+    portant ; sans contrat saisi ils sont null, l'ecran affiche « - ».
+    """
+    departement = (
+        (contrat.departement if contrat else None)
+        or (u.department.nom if getattr(u, "department", None) else None)
+    )
+    poste = (contrat.poste if contrat else None) or u.job_title
+    if not u.is_active:
+        statut = "inactif"
+    else:
+        statut = contrat.statut if contrat else None
     return {
         "id": u.id,
         "username": u.username,
         "email": u.email,
         "full_name": u.full_name or u.username,
+        "matricule": u.matricule,
         "phone": u.phone,
+        "poste": poste,
+        "job_title": u.job_title,
+        "departement": departement,
+        "date_embauche": contrat.date_debut.isoformat() if contrat and contrat.date_debut else None,
+        "type_contrat": contrat.type_contrat if contrat else None,
+        "date_fin_contrat": contrat.date_fin.isoformat() if contrat and contrat.date_fin else None,
+        "salaire_base": float(contrat.salaire_base) if contrat and contrat.salaire_base is not None else None,
+        "devise": "XAF",
+        "horaire_travail": contrat.horaire_travail if contrat else None,
+        "lieu_travail": contrat.lieu_travail if contrat else None,
+        "statut": statut,
+        "en_conge": bool(en_conge),
+        "contrat_id": contrat.id if contrat else None,
         "is_active": u.is_active,
         "role_level": u.role_level,
         "role": get_user_role_label(u),
@@ -1545,13 +1619,21 @@ def _employee_dict(u: User) -> Dict[str, Any]:
     }
 
 
+def _fiches_employes(db: Session, users: List[User]) -> List[Dict[str, Any]]:
+    """Annuaire enrichi, sans N+1 : contrat et conge en deux requetes groupees."""
+    ids = [u.id for u in users]
+    contrats = _contrats_de_reference(db, ids)
+    en_conge = _employes_en_conge(db, ids)
+    return [_employee_dict(u, contrats.get(u.id), u.id in en_conge) for u in users]
+
+
 @router.get("/employes/me")
 def employe_actuel(
     db: Session = Depends(get_db),
     current_user: User = Depends(resolve_rh_user),
 ):
     """Profil du collaborateur connecte."""
-    return _employee_dict(current_user)
+    return _fiches_employes(db, [current_user])[0]
 
 
 @router.get("/employes")
@@ -1575,10 +1657,15 @@ def lister_employes(
         query = query.filter(User.department_id == department_id)
     if search:
         s = f"%{search.strip()}%"
-        query = query.filter(or_(User.username.ilike(s), User.email.ilike(s), User.full_name.ilike(s)))
+        query = query.filter(or_(
+            User.username.ilike(s), User.email.ilike(s), User.full_name.ilike(s),
+            # Le matricule est la cle metier affichee dans l'annuaire : le champ
+            # de recherche le mentionne, la requete doit donc le couvrir.
+            User.matricule.ilike(s),
+        ))
     total = query.count()
     users = query.order_by(User.full_name.asc().nullslast()).offset(skip).limit(limit).all()
-    return {"items": [_employee_dict(u) for u in users], "total": total}
+    return {"items": _fiches_employes(db, users), "total": total}
 
 
 @router.get("/employes/{employe_id}")
@@ -1594,7 +1681,7 @@ def detail_employe(
     scope = _employee_scope_company_id(current_user)
     if scope is not None and emp.company_id != scope:
         raise HTTPException(status_code=403, detail="Employe hors de votre entreprise")
-    return _employee_dict(emp)
+    return _fiches_employes(db, [emp])[0]
 
 
 @router.post("/employes/import-excel", status_code=status.HTTP_202_ACCEPTED)

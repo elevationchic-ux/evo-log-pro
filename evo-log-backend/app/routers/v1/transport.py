@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.core.database import get_db
+from app.core.permissions import require_perm
+from app.models.user import User
 from app.schemas.transport import CamionCreate, CamionUpdate, CamionResponse, ConducteurCreate, ConducteurResponse, MissionCreate, MissionUpdate, MissionResponse
 from app.models.transport import Camion, Conducteur, Mission
 
