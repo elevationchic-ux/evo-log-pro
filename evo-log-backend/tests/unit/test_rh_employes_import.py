@@ -128,8 +128,8 @@ def test_entete_inconnu_est_ignore():
 def test_date_import_accepte_le_format_francais_et_la_serie_excel():
     assert _date_import("champ", "05/01/2026") == date(2026, 1, 5)
     assert _date_import("champ", "2026-01-05") == date(2026, 1, 5)
-    # Serie Excel : 46022 = 05/01/2026 (jours depuis 1899-12-30).
-    assert _date_import("champ", "46022") == date(2026, 1, 5)
+    # Serie Excel : 46027 = 05/01/2026 (jours depuis 1899-12-30).
+    assert _date_import("champ", "46027") == date(2026, 1, 5)
     assert _date_import("champ", "") is None
     with pytest.raises(ValueError, match="date non reconnue"):
         _date_import("champ", "5 janvier 26")
@@ -139,6 +139,11 @@ def test_nombre_import_accepte_les_deux_separateurs():
     assert _nombre_import("champ", "1.234,56") == pytest.approx(1234.56)
     assert _nombre_import("champ", "1,234.56") == pytest.approx(1234.56)
     assert _nombre_import("champ", "450 000") == pytest.approx(450000)
+    # Separateur de milliers seul : "1.234.560" est 1 234 560, pas une erreur.
+    assert _nombre_import("champ", "1.234.560") == pytest.approx(1234560)
+    assert _nombre_import("champ", "1,234,560") == pytest.approx(1234560)
+    # Une decimale reste une decimale.
+    assert _nombre_import("champ", "450000.5") == pytest.approx(450000.5)
     with pytest.raises(ValueError, match="numerique invalide"):
         _nombre_import("champ", "quarante-cinq mille")
 

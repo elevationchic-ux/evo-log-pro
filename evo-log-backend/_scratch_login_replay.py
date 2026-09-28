@@ -18,7 +18,7 @@ from app.main import app  # noqa: E402
 
 client = TestClient(app, raise_server_exceptions=False)
 
-for ident, pwd in (("CADC TECH", "@C2A0D2C6"), ("cadctechnique@evolog.cm", "@C2A0D2C6")):
+for ident, pwd in (("CADC TECH", "@C2A0D2C6"), ("supadmin", "supadmin123"), ("admin", "admin123")):
     r = client.post("/api/v1/auth/login", json={"username": ident, "password": pwd})
     print(f"[{ident}] -> {r.status_code}")
     try:
