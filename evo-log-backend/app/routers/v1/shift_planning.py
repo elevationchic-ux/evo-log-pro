@@ -57,7 +57,7 @@ async def get_shift_planning(
                 "heure_arrivee": s.heure_arrivee,
                 "heure_depart": s.heure_depart,
                 "heures_travaillees": float(s.heures_travaillees) if s.heures_travaillees else None,
-                "heures_supplementaires": float(s.heures_supplementaires) if s.heures_supplementaires else None,
+                "heures_supplementaires": float(s.heures_sup) if s.heures_sup is not None else None,
                 "tache": s.tache,
                 "statut": s.statut,
             }
@@ -70,7 +70,7 @@ async def get_shift_planning(
 async def get_absences(
     employe_id: Optional[int] = Query(None),
     mois: Optional[str] = Query(None, description="Format: YYYY-MM"),
-    justifiee: Optional[bool] = Query(None),
+    justifie: Optional[bool] = Query(None),
     skip: int = 0,
     limit: int = 50,
     db: Session = Depends(get_db),
@@ -81,20 +81,22 @@ async def get_absences(
 
     if employe_id:
         query = query.filter(Absence.employe_id == employe_id)
-    if justifiee is not None:
-        query = query.filter(Absence.justifiee == justifiee)
+    if justifie is not None:
+        query = query.filter(Absence.justifie == justifie)
     if mois:
         try:
             year, month = mois.split("-")
+            # La base raisonne en periode d'absence, pas en jour unique :
+            # le rattachement au mois se fait sur la date de debut.
             query = query.filter(
-                extract("year", Absence.date) == int(year),
-                extract("month", Absence.date) == int(month)
+                extract("year", Absence.date_debut) == int(year),
+                extract("month", Absence.date_debut) == int(month)
             )
         except ValueError:
             pass
 
     total = query.count()
-    absences = query.order_by(desc(Absence.date)).offset(skip).limit(limit).all()
+    absences = query.order_by(desc(Absence.date_debut)).offset(skip).limit(limit).all()
 
     return {
         "total": total,
@@ -102,10 +104,12 @@ async def get_absences(
             {
                 "id": a.id,
                 "employe_id": a.employe_id,
-                "date": a.date.isoformat() if a.date else None,
+                "date_debut": a.date_debut.isoformat() if a.date_debut else None,
+                "date_fin": a.date_fin.isoformat() if a.date_fin else None,
+                "nombre_jours": a.nombre_jours,
                 "type_absence": a.type_absence,
                 "motif": a.motif,
-                "justifiee": a.justifiee,
+                "justifie": a.justifie,
                 "heure_debut": a.heure_debut,
                 "heure_fin": a.heure_fin,
                 "nombre_heures": float(a.nombre_heures) if a.nombre_heures else 0.0,
@@ -151,7 +155,8 @@ async def get_conges(
                 "statut": c.statut.value if hasattr(c.statut, "value") else str(c.statut),
                 "motif": c.motif,
                 "date_demande": c.date_demande.isoformat() if c.date_demande else None,
-                "commentaires_approbation": c.commentaires_approbation,
+                "commentaire_approbation": c.commentaire_approbation,
+                "motif_refus": c.motif_refus,
             }
             for c in conges
         ]

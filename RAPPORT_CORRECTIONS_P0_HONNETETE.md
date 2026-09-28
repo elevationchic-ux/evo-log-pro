@@ -631,6 +631,81 @@ premiere ligne de defense.
 
 ---
 
+## 18. Batch 16  Bon de sortie & circuit de signature (backlog P2 #10)
+
+**Declencheur** : item 10 du backlog structurel §3 — « Edition de bon de sortie /
+bon de livraison et circuit de signature (le magasinier ne peut que valider, pas
+corriger une ligne) ». Les items P1 restants exigeront des donnees externes
+(GUCE, operateurs mobiles reels) ; celui-ci est 100 % executable et verifiable
+en interne.
+
+### Constat
+
+Deux implementations paralleles du bon de sortie coexistaient (même pattern que
+les arbres de routes transport dupliques) :
+
+| Voie | Etat | Realite |
+|---|---|---|
+| `/api/v1/magasin-avance/sorties` (trio creer/ligne/valider) | **MORTE** | construisait `BonSortie(destinataire_id=...)`, `LigneBonSortie(bon_id=..., quantite=...)`, lisait `stock.quantite` — champs **inexistants** sur les modeles → TypeError systematique, 500 garanti a chaque appel. Jamais appelee par le frontend. |
+| `/api/v1/magasin/removal-slips` (route connectee au portail magasinier) | VIVANTE mais **non sure** | voir lignes critiques ci-dessous. |
+
+Lignes critiques de la route vivante (avant correction) :
+- `valider` faisait `max(0, dispo - qte)` : le stock ne descendait **jamais** sous
+  0 quel que soit l'ecart demande — une sortie de 1 000 sacs sur 5 disponibles
+  « passait » en silence avec un faux 200.
+- **Aucune ecriture dans `MouvementStock`** : le mouvement physique n'avait aucune
+  trace comptable matiere (quantite_avant/apres inexistantes).
+- Le `PUT` acceptait un champ `statut` : n'importe qui pouvait poser
+  `statut="valide"` **sans aucun decript** — faux document signe.
+- Pas de `/refuse` : l'etat `refuse` etait filtre dans la liste/stats mais
+  aucune porte n'y menait.
+- Numeration `BE-YYYYMMDD-<count>+1` avec trous de suppression → collision UNIQUE
+  possible en 500.
+- Aucun controle d'existence des FK (SQLite n'applique pas les FK par defaut) :
+  bons pointant vers clients/entrepots/stocks fantomes.
+- Pas d'edition PDF du bon.
+
+### Corrections
+
+| Fichier | Action |
+|---|---|
+| `app/routers/v1/removal_slip.py` | Durcissement complet : validations d'existence (client/entrepot/stock, quantite > 0) ; numeration avec boucle anti-collision ; `PUT` refuse tout `statut` explicite (400 pedagogique) et tout document deja signe (**immuabilite**) ; `validate` = **tout-ou-rien** (400 avec detail structure `lignes_en_rupture[]`, zero decript partiel) + decreel reel + une ecriture `MouvementStock` (SORTIE, avant/apres, document_reference) par ligne ; nouveau `POST /{id}/refuse` (motif obligatoire, trace dans notes, zero mouvement, non revalidable) ; nouveau `GET /{id}/pdf`. |
+| `app/templates/pdf/bon_sortie.html.j2` | **Cree** : A4 complete, badge de statut, avertissement explicite « document NON valide : quantites pas encore sorties », montant indicatif (jamais facture), **3 zones de signature IMPRIMEES** (operateur, responsable — nom/date reels si signe, recipisse destinataire) : le systeme ne simule aucune signature. |
+| `app/routers/v1/magasin_avance.py` | Trio mort `/sorties` **supprime** (commentaire pointant vers la route vivante). Imports schemas nettoyes. |
+| `app/schemas/magasin_avance.py` + `__init__.py` | Schemas fantomes `BonSortie*`/`LigneBonSortie*` (champs inventes) **supprimes** de defs, imports et `__all__`. |
+| `tests/unit/test_removal_slips.py` | **Cree** (10 tests) : seeds reels via fixtures `client`/`db`, verification du decreel exact et du registre, rupture tout-ou-rien (aucun decript, meme sur la ligne qui passait), double validation, PUT-bypass statut, immuabilite apres signature, refus motive (0 mouvement, non revalidable), garde DELETE, numeration unique, PDF = 200 reel **ou** 501 honnete. |
+| `src/lib/api-client.ts` | `removalSlipAPI.refuse(id, motif)` + `getPdf(id)` (blob). |
+| `src/app/(app)/portail-magasinier/page.tsx` | Boutons **Refuser** (motif obligatoire, cache si deja signe) et **PDF** a cote de Valider ; toast adapte au detail structure de rupture (affiche article demande/dispo) ; bouton Valider desactive aussi sur `refuse`. |
+
+### Verification
+
+- `python -m pytest tests/unit/test_removal_slips.py -v` : ✅ **10 passed**, EXIT=0.
+- Suite complete (commande CI `pytest tests`) : ✅ **516 passed, 2 xfailed,
+  0 failed** (427 s), `PYTEST_EXIT=0` et **`DB_CHANGED=False`** (mtime/taille de
+  `kamlog_erp.db` identiques avant/apres — le garde-fou du batch 14 tient).
+- `python -m compileall app` : ✅ EXIT=0 ; `import app.main` apres suppression du
+  trio mort : ✅ OK.
+- `npx tsc --noEmit` : ✅ EXIT=0.
+- `python scripts/audit_frontend.py --strict-honesty` : ✅ OK (dead_buttons /
+  fake_data / ghost_routes = 0).
+
+### Reste (hors perimetre du batch, signale)
+
+- `/magasin-avance/retours` et `/magasin-avance/litiges` sont **morts de la meme
+  facon** (champs fantomes dans les schemas modeles) : supprimes ou reconstruits
+  au prochain batch magasin, sur le meme modele.
+- Signature manuscrite numerisee (canvas → base64 → PDF) : le circuit
+  d'habilitation (qui a signe, quand, pourquoi refuse) est reel ; la signature
+  griffonnee reste a imprimer/emarger — conformement a Zero-Mock, rien n'est
+  simule a l'ecran.
+
+➡️ Le Zero-Mock applique au magasin : un « bon valide » qui ne decremente pas
+reellement le stock est une ecriture mensongere ; un refus sans motif n'est pas
+opposable ; une signature que le systeme ne peut pas imprimer avec un nom et une
+date reels n'existe pas.
+
+---
+
 * Aucun acte à valeur légale (validation CNCC, dépôt GUCE/SYDONIA, quittance, bulletin CNPS,
   paiement mobile money) n'est jamais affiché comme "fait" s'il ne l'est pas : soit c'est réel,
   soit l'API répond **501 avec la raison exacte**.
