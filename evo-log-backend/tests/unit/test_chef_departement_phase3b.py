@@ -138,7 +138,7 @@ def test_writes_require_auth(write_client):
 
 def test_chef_affects_collaborator_into_own_department(write_client, sandbox):
     resp = write_client.post(
-        f"/api/v1/departement/membres/{sandbox['float_a_id']}/affecter",
+        f"/api/v1/departement/membres/{sandbox['float_b_id']}/affecter",
         headers=_auth(sandbox["chef_token"]),
     )
     assert resp.status_code == 200, resp.text
@@ -149,7 +149,7 @@ def test_chef_affects_collaborator_into_own_department(write_client, sandbox):
     roster = write_client.get(
         "/api/v1/departement/membres", headers=_auth(sandbox["chef_token"])
     ).json()
-    assert "float-a" in {m["username"] for m in roster}
+    assert "float-b" in {m["username"] for m in roster}
 
 
 def test_chef_cannot_affect_a_fellow_department_head(write_client, sandbox):
