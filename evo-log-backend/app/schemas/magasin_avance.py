@@ -396,8 +396,14 @@ class ColisResponse(ColisBase):
 
 # KPI Response schemas
 class RotationStockResponse(BaseModel):
+    # Batch 17 : expose les composantes reelles (sorties cumulees, stock
+    # actuel) — rotation None quand le stock est a zero (indefinie, pas un 0
+    # mensonger).
     article_id: int
-    rotation: float
+    jours: int = 90
+    sorties: float = 0.0
+    stock_actuel: float = 0.0
+    rotation: Optional[float] = None
 
 
 class PrecisionInventaireResponse(BaseModel):

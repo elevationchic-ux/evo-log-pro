@@ -253,6 +253,8 @@ export const departmentAPI = {
     apiClient.post(`${DEPT_BASE}/membres/${memberId}/affecter`, undefined, { params: departmentId ? { department_id: departmentId } : undefined }),
   removeMember: (memberId: number, departmentId?: number) =>
     apiClient.post(`${DEPT_BASE}/membres/${memberId}/retirer`, undefined, { params: departmentId ? { department_id: departmentId } : undefined }),
+  listCandidates: (params?: Record<string, unknown>, departmentId?: number) =>
+    apiClient.get(`${DEPT_BASE}/candidats`, { params: { ...params, ...(departmentId ? { department_id: departmentId } : {}) } }),
   setModules: (modules: string[], departmentId?: number) =>
     apiClient.put(`${DEPT_BASE}/modules`, { modules }, { params: departmentId ? { department_id: departmentId } : undefined }),
 };

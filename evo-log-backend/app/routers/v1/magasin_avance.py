@@ -1,7 +1,7 @@
 """Advanced warehouse router - FEFO, reservations, transfers, cycle counting"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from typing import List
 from datetime import date, datetime, timedelta
 
@@ -22,8 +22,8 @@ from app.schemas.magasin_avance import (
     LigneCommandeFournisseurCreate, LigneCommandeFournisseurResponse,
     BonReceptionCreate, BonReceptionResponse,
     LigneBonReceptionCreate, LigneBonReceptionResponse,
-    RetourClientCreate, RetourClientUpdate, RetourClientResponse,
-    LitigeTransporteurCreate, LitigeTransporteurUpdate, LitigeTransporteurResponse,
+    RetourClientCreate, RetourClientUpdate, RetourClientTraitement, RetourClientResponse,
+    LitigeTransporteurCreate, LitigeTransporteurUpdate, LitigeTransporteurResolution, LitigeTransporteurResponse,
     ColisCreate, ColisUpdate, ColisResponse,
     RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse
 )
