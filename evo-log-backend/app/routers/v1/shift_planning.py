@@ -182,16 +182,16 @@ async def get_shift_stats(
                 extract("month", TempsTravail.date) == int(month)
             )
             query_abs = query_abs.filter(
-                extract("year", Absence.date) == int(year),
-                extract("month", Absence.date) == int(month)
+                extract("year", Absence.date_debut) == int(year),
+                extract("month", Absence.date_debut) == int(month)
             )
         except ValueError:
             pass
 
     heures_totales = query_tt.with_entities(func.sum(TempsTravail.heures_travaillees)).scalar() or 0.0
-    heures_supp = query_tt.with_entities(func.sum(TempsTravail.heures_supplementaires)).scalar() or 0.0
+    heures_supp = query_tt.with_entities(func.sum(TempsTravail.heures_sup)).scalar() or 0.0
     nb_absences = query_abs.count()
-    absences_injustifiees = query_abs.filter(Absence.justifiee == False).count()  # noqa
+    absences_injustifiees = query_abs.filter(Absence.justifie == False).count()  # noqa
 
     conges_en_attente = query_cong.filter(Conge.statut == StatutConge.EN_ATTENTE).count()
     conges_approuves = query_cong.filter(Conge.statut == StatutConge.APPROUVE).count()
@@ -216,6 +216,10 @@ async def create_shift(
     """Enregistrer du temps de travail"""
     if not data.get("employe_id") or not data.get("date"):
         raise HTTPException(status_code=400, detail="employe_id et date sont requis")
+    if not data.get("heure_arrivee"):
+        # La colonne est NOT NULL en base : une arrivee inconnue ne doit pas
+        # devenir une heure inventee par l'application.
+        raise HTTPException(status_code=400, detail="heure_arrivee est requis")
 
     shift = TempsTravail(
         employe_id=data["employe_id"],
@@ -223,7 +227,7 @@ async def create_shift(
         heure_arrivee=data.get("heure_arrivee"),
         heure_depart=data.get("heure_depart"),
         heures_travaillees=data.get("heures_travaillees"),
-        heures_supplementaires=data.get("heures_supplementaires", 0),
+        heures_sup=data.get("heures_supplementaires", 0),
         tache=data.get("tache"),
         statut=data.get("statut", "valide"),
     )
@@ -239,16 +243,37 @@ async def create_absence(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Enregistrer une absence"""
-    if not data.get("employe_id") or not data.get("date"):
-        raise HTTPException(status_code=400, detail="employe_id et date sont requis")
+    """Enregistrer une absence
+
+    La table raisonne en periode : `date_debut`, `date_fin`, `nombre_jours`. Une
+    journee unique reste acceptee via `date`, etendue a elle-meme ; le nombre de
+    jours se deduit du calendrier, il n'est jamais laisse au hasard.
+    """
+    debut_brut = data.get("date_debut") or data.get("date")
+    if not data.get("employe_id") or not debut_brut:
+        raise HTTPException(
+            status_code=400,
+            detail="employe_id et date_debut (ou date) sont requis")
+    if not data.get("type_absence"):
+        # NOT NULL en base : une absence sans type connu n'est pas requalifiee
+        # d'office par l'application pour satisfaire la contrainte.
+        raise HTTPException(status_code=400, detail="type_absence est requis")
+
+    debut = datetime.strptime(debut_brut, "%Y-%m-%d").date()
+    fin = datetime.strptime(
+        data.get("date_fin") or debut_brut, "%Y-%m-%d").date()
+    if fin < debut:
+        raise HTTPException(
+            status_code=400, detail="date_fin anterieure a date_debut")
 
     absence = Absence(
         employe_id=data["employe_id"],
-        date=datetime.strptime(data["date"], "%Y-%m-%d").date(),
-        type_absence=data.get("type_absence"),
+        date_debut=debut,
+        date_fin=fin,
+        nombre_jours=data.get("nombre_jours") or ((fin - debut).days + 1),
+        type_absence=data["type_absence"],
         motif=data.get("motif"),
-        justifiee=data.get("justifiee", False),
+        justifie=bool(data.get("justifie", data.get("justifiee", False))),
         heure_debut=data.get("heure_debut"),
         heure_fin=data.get("heure_fin"),
         nombre_heures=data.get("nombre_heures", 0),

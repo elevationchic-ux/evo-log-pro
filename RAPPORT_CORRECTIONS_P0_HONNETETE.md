@@ -10,7 +10,7 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app tests` | ✅ EXIT=0 |
-| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 14) | ✅ **485 passed, 2 xfailed, 0 failed** (305 s). Historique : les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`** — corrige, verrouille par meta-tests et `DB_CHANGED=False` sur le run definitif (§16). |
+| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 16) | ✅ **516 passed, 2 xfailed, 0 failed** (427 s). Historique : les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`** — corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17 et §18). |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1082 routes OpenAPI) |
 | `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
 
@@ -669,11 +669,11 @@ Lignes critiques de la route vivante (avant correction) :
 
 | Fichier | Action |
 |---|---|
-| `app/routers/v1/removal_slip.py` | Durcissement complet : validations d'existence (client/entrepot/stock, quantite > 0) ; numeration avec boucle anti-collision ; `PUT` refuse tout `statut` explicite (400 pedagogique) et tout document deja signe (**immuabilite**) ; `validate` = **tout-ou-rien** (400 avec detail structure `lignes_en_rupture[]`, zero decript partiel) + decreel reel + une ecriture `MouvementStock` (SORTIE, avant/apres, document_reference) par ligne ; nouveau `POST /{id}/refuse` (motif obligatoire, trace dans notes, zero mouvement, non revalidable) ; nouveau `GET /{id}/pdf`. |
-| `app/templates/pdf/bon_sortie.html.j2` | **Cree** : A4 complete, badge de statut, avertissement explicite « document NON valide : quantites pas encore sorties », montant indicatif (jamais facture), **3 zones de signature IMPRIMEES** (operateur, responsable — nom/date reels si signe, recipisse destinataire) : le systeme ne simule aucune signature. |
+| `app/routers/v1/removal_slip.py` | Durcissement complet : validations d'existence (client/entrepot/stock, quantite > 0) ; numeration avec boucle anti-collision ; `PUT` refuse tout `statut` explicite (400 pedagogique) et tout document deja signe (**immuabilite**) ; `validate` = **tout-ou-rien** (400 avec detail structure `lignes_en_rupture[]`, zero decript partiel) + decret reel + une ecriture `MouvementStock` (SORTIE, avant/apres, document_reference) par ligne ; nouveau `POST /{id}/refuse` (motif obligatoire, trace dans notes, zero mouvement, non revalidable) ; nouveau `GET /{id}/pdf`. |
+| `app/templates/pdf/bon_sortie.html.j2` | **Cree** : A4 complete, badge de statut, avertissement explicite « document NON valide : quantites pas encore sorties », montant indicatif (jamais facture), **3 zones de signature IMPRIMEES** (operateur, responsable — nom/date reels si signe, recepisse destinataire) : le systeme ne simule aucune signature. |
 | `app/routers/v1/magasin_avance.py` | Trio mort `/sorties` **supprime** (commentaire pointant vers la route vivante). Imports schemas nettoyes. |
 | `app/schemas/magasin_avance.py` + `__init__.py` | Schemas fantomes `BonSortie*`/`LigneBonSortie*` (champs inventes) **supprimes** de defs, imports et `__all__`. |
-| `tests/unit/test_removal_slips.py` | **Cree** (10 tests) : seeds reels via fixtures `client`/`db`, verification du decreel exact et du registre, rupture tout-ou-rien (aucun decript, meme sur la ligne qui passait), double validation, PUT-bypass statut, immuabilite apres signature, refus motive (0 mouvement, non revalidable), garde DELETE, numeration unique, PDF = 200 reel **ou** 501 honnete. |
+| `tests/unit/test_removal_slips.py` | **Cree** (10 tests) : seeds reels via fixtures `client`/`db`, verification du decret exact et du registre, rupture tout-ou-rien (aucun decript, meme sur la ligne qui passait), double validation, PUT-bypass statut, immuabilite apres signature, refus motive (0 mouvement, non revalidable), garde DELETE, numeration unique, PDF = 200 reel **ou** 501 honnete. |
 | `src/lib/api-client.ts` | `removalSlipAPI.refuse(id, motif)` + `getPdf(id)` (blob). |
 | `src/app/(app)/portail-magasinier/page.tsx` | Boutons **Refuser** (motif obligatoire, cache si deja signe) et **PDF** a cote de Valider ; toast adapte au detail structure de rupture (affiche article demande/dispo) ; bouton Valider desactive aussi sur `refuse`. |
 
