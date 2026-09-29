@@ -70,7 +70,13 @@ self.addEventListener('fetch', (event) => {
           fetch(request).then((res) => {
             if (res.ok) {
               const clone = res.clone();
-              caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
+              // cache.put peut echouer (reseau interrompt la lecture du corps,
+              // reponse opaque) : on l'isole pour ne JAMAIS lever une promesse
+              // rejetee non geree ("Uncaught NetworkError: Cache.put").
+              caches
+                .open(STATIC_CACHE)
+                .then((cache) => cache.put(request, clone))
+                .catch(() => {});
             }
             return res;
           })
