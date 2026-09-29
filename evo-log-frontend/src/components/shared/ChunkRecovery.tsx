@@ -52,7 +52,7 @@ export default function ChunkRecovery() {
         reloadOnce();
         return;
       }
-      if (looksLikeChunkFailure(event?.message || '', event?.name)) reloadOnce();
+      if (looksLikeChunkFailure(event?.message || '', event?.error?.name)) reloadOnce();
     };
 
     // Les echecs d'import dynamique (App Router / webpack) remontent en promesse
