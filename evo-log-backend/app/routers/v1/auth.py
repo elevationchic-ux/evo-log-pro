@@ -19,6 +19,7 @@ from app.core.security import (
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserResponse, Token, TokenData
 from app.models.user import User, Role
+from app.utils.pointage import auto_pointage_arrivee, pointer_depart
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
