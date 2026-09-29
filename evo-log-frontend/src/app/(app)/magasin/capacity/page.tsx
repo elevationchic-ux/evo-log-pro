@@ -1,13 +1,13 @@
 'use client';
 
 /**
- * K-Magasin — Taux d'occupation des entrepôts.
+ * K-Magasin  Taux d'occupation des entrepôts.
  *
  * Source unique : GET /api/magasin/entrepots/occupation, qui agrège les
  * stockages réellement persistés. L'API ne connaît pas la surface occupée :
  * elle renvoie `occupancy = null` dès qu'aucune capacité n'a été enregistrée
  * sur l'entrepôt. Dans ce cas on affiche l'article et la valeur stockée
- * réels, et on le dit — aucun pourcentage n'est inventé.
+ * réels, et on le dit  aucun pourcentage n'est inventé.
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -202,7 +202,7 @@ export default function MagasinCapacityPage() {
             </div>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="text-2xl font-bold text-on-surface tabular-nums">
-                {kpis.tauxMoyen === null ? '—' : `${kpis.tauxMoyen.toFixed(1)} %`}
+                {kpis.tauxMoyen === null ? '' : `${kpis.tauxMoyen.toFixed(1)} %`}
               </span>
               {kpis.satures.length > 0 && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-400">
@@ -303,8 +303,8 @@ export default function MagasinCapacityPage() {
                           <Gauge className="w-4 h-4 text-slate-500" />
                           <span>
                             {t(
-                              "Capacité d'entreposage non enregistrée — pourcentage non calculable.",
-                              'Storage capacity not registered — percentage cannot be computed.',
+                              "Capacité d'entreposage non enregistrée  pourcentage non calculable.",
+                              'Storage capacity not registered  percentage cannot be computed.',
                             )}
                           </span>
                           <Link
@@ -322,7 +322,7 @@ export default function MagasinCapacityPage() {
                             aria-valuenow={Math.round(rate)}
                             aria-valuemin={0}
                             aria-valuemax={100}
-                            aria-label={`${z.zone} — ${t('occupation', 'occupancy')}`}
+                            aria-label={`${z.zone}  ${t('occupation', 'occupancy')}`}
                           >
                             <div
                               className={`h-full rounded-full ${occupancyTone(rate)} transition-all`}

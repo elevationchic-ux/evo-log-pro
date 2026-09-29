@@ -1,4 +1,4 @@
-"""Tests Phase 1 — Console Super-Admin CADC (SaaS).
+"""Tests Phase 1  Console Super-Admin CADC (SaaS).
 
 Couvre les regles non-regression de la console :
   * exemption de changement de mot de passe pour un Super Admin (compte CADC) ;

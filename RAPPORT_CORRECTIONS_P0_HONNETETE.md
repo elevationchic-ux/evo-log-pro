@@ -10,7 +10,7 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app tests` | ✅ EXIT=0 |
-| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 17) | ✅ **527 passed, 2 xfailed, 0 failed** (370 s) au run du batch 17. ATTENTION batch 18 : la suite complete est **rouge de cause externe** (48 failed / 240 errors sur les clusters transport/rh/saas/rbac) — commits WIP d'une session concurrente posterieurs a 01:12, attribution prouvee par worktree temoin (baseline 42b7c6b = 539 passed, 0 failed). Le batch 18 lui-meme est vert sur 35 tests cibles ; re-run global du a faire quand le WIP concurrent sera stabilise (§20). Historique : les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`** — corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17, §18 et §20). |
+| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 17) | ✅ **527 passed, 2 xfailed, 0 failed** (370 s) au run du batch 17. ATTENTION batch 18 : la suite complete est **rouge de cause externe** (48 failed / 240 errors sur les clusters transport/rh/saas/rbac)  commits WIP d'une session concurrente posterieurs a 01:12, attribution prouvee par worktree temoin (baseline 42b7c6b = 539 passed, 0 failed). Le batch 18 lui-meme est vert sur 35 tests cibles ; re-run global du a faire quand le WIP concurrent sera stabilise (§20). Historique : les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`**  corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17, §18 et §20). |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1082 routes OpenAPI) |
 | `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
 
@@ -68,7 +68,7 @@ pas des correctifs. Ils sont listés ici pour ne pas être oubliés :
 11. ~~**PWA hors-ligne réel**~~ → **CORRIGÉ (batch 2, voir §4)** : `sw.js` créé et enregistré, `Authorization` ajoutée aux syncs, base d'API corrigée, page `/offline`.
 
 ### Qualité de vie (quick wins restants)
-- ~~Remplacer les `any` des pages branchées cette semaine par les types existants de `src/types/`.~~ → **PARTIELLEMENT FAIT (batch 10, voir §12)** : `src/types/transport.ts` était un **contrat mort** dont les champs ne correspondaient à aucun schéma backend — réaligné sur le vrai contrat et adopté par `transport/planning` + `transport/control`. Les ~700 `any` restants dans `src/` exigent la même réécriture module par module.
+- ~~Remplacer les `any` des pages branchées cette semaine par les types existants de `src/types/`.~~ → **PARTIELLEMENT FAIT (batch 10, voir §12)** : `src/types/transport.ts` était un **contrat mort** dont les champs ne correspondaient à aucun schéma backend  réaligné sur le vrai contrat et adopté par `transport/planning` + `transport/control`. Les ~700 `any` restants dans `src/` exigent la même réécriture module par module.
 - ~~Ajouter un linteau CI (`tsc --noEmit` + `pytest`) sur les rapports de coverage par module.~~ → **VERROU ZERO-MOCK AJOUTE (batch 11, voir §13)** : `audit_frontend.py --strict-honesty` est désormais une étape bloquante de `test-frontend` dans `.github/workflows/ci-cd.yml`. `pytest` (backend) et `tsc --noEmit` (frontend) y étaient déjà ; la regression sur `fake_data` / `dead_buttons` / `broken_links` / `ghost_routes` est ce qui manquait. Le coverage par module (codecov) reste a affiner.
 
 ---
@@ -239,8 +239,8 @@ signature d'un run effectué pendant que des fichiers étaient encore en cours d
 ## 10. Batch 8  Chaîne documentaire close par liens saisis (P1 : fin des 4 étapes « non liciables »)
 
 **Problème** : la vue consolidée du dossier de marchandise (batch 6) affichait honnêtement
-4 étapes en `non_liciable_en_base` — **déclaration douanière, magasin sous douane, mission de
-livraison, facture** — faute de tout chemin les rattachant au conteneur/B/L de l'ancre. Ces tables
+4 étapes en `non_liciable_en_base`  **déclaration douanière, magasin sous douane, mission de
+livraison, facture**  faute de tout chemin les rattachant au conteneur/B/L de l'ancre. Ces tables
 (`declarations_douaniere_avance`, `declarations_entrepot`, `missions`, `factures_ohada`) ne
 portaient **aucune colonne** `conteneur_id` / `escale_id` / `numero_bl` : le chaînon manquant était
 structurel, pas logique.
@@ -303,8 +303,8 @@ P1-gap (xfail strict = si le service est réparé sans activer le test, pytest l
 
 ## 12. Batch 10  Frontend transport : suppression des `any` (quick win)
 
-**Problème** : `src/types/transport.ts::Mission` était un type **mort** — 0 import
-dans tout `src/` (`grep "from '@/types/transport'"` → 0 résultat) — dont les champs
+**Problème** : `src/types/transport.ts::Mission` était un type **mort**  0 import
+dans tout `src/` (`grep "from '@/types/transport'"` → 0 résultat)  dont les champs
 (`id: string`, `origin`, `destination`, `merchandise`, `status: 'pending' | 'in_progress' | …`)
 ne correspondaient à **aucun** schéma backend. Le vrai `MissionResponse`
 (`app/schemas/transport.py`) expose `id: number`, `point_depart`, `point_arrivee`,
@@ -325,7 +325,7 @@ le JSX affichait `-{alt.echeance_km} km` dans le panneau des alertes TCO. Le bac
 ne renvoie **jamais** de champ `echeance_km` : les deux branches de
 `get_tco_fleet_analytics` exposent `echeance: string | null` (ISO date pour
 maintenance périodique, `None` pour panne) et `priorite: 'CRITIQUE' | 'HAUTE' | 'MOYENNE'`.
-Sans typage, le rendu affichait `undefined km` — un faux chiffre. **Correction** :
+Sans typage, le rendu affichait `undefined km`  un faux chiffre. **Correction** :
 badge coloré sur `alt.priorite` (rouge CRITIQUE / ambre HAUTE / ardoise MOYENNE)
 + libellé "Echeance : {date fr-FR}" uniquement quand `alt.echeance != null`.
 Aucun km n'est inventé ; le champ fantôme disparaît du type.
@@ -336,7 +336,7 @@ Les 33 `api_gaps` restants sont des endpoints backend non implémentés (`/api/p
 `/api/v1/customers`, `/api/v1/telematics/positions`…) : hors périmètre d'un batch de typage.
 
 ➡️ Ce n'est qu'une **première brique** : 717 occurrences d'`any` restent dans `src/`.
-Le vrai gain structurel est que `src/types/transport.ts` est désormais **adoptable** —
+Le vrai gain structurel est que `src/types/transport.ts` est désormais **adoptable** 
 avant ce batch, aucun consumer n'aurait pu l'utiliser sans réécrire tous ses appels,
 ce qui explique pourquoi le fichier est resté mort si longtemps.
 
@@ -354,7 +354,7 @@ script d'audit.
 
 | Fichier | Ce qui a été fait |
 |---|---|
-| `evo-log-frontend/scripts/audit_frontend.py` | Ajout du flag `--strict-honesty` : exit 1 **uniquement** si l'une des 4 metriques d'honnetete (`broken_links`, `dead_buttons`, `fake_data`, `ghost_routes`) repasse au-dessus de 0. Les `api_gaps` restent affiches et enregistres dans `audit_report.json` mais ne font plus echouer le script. Justification consignee dans le `help` : un appel frontend vers un endpoint backend non implemente est un **trou de couverture** (reponse 501 explicite du backend), pas une regression Zero-Mock — l'inverse d'un faux succes. |
+| `evo-log-frontend/scripts/audit_frontend.py` | Ajout du flag `--strict-honesty` : exit 1 **uniquement** si l'une des 4 metriques d'honnetete (`broken_links`, `dead_buttons`, `fake_data`, `ghost_routes`) repasse au-dessus de 0. Les `api_gaps` restent affiches et enregistres dans `audit_report.json` mais ne font plus echouer le script. Justification consignee dans le `help` : un appel frontend vers un endpoint backend non implemente est un **trou de couverture** (reponse 501 explicite du backend), pas une regression Zero-Mock  l'inverse d'un faux succes. |
 | `.github/workflows/ci-cd.yml` | Nouvelle etape **"Honesty gate (Zero-Mock)"** dans le job `test-frontend`, placee **apres** `tsc --noEmit` et **avant** `next build` : `python scripts/audit_frontend.py --strict-honesty`. Le job echoue donc si une PR reintroduit une donnee inventee, avant meme de tenter le build. Un commentaire dans le YAML rattache l'etape au present rapport (§13). |
 
 **Vérification batch 11** (localement) :
@@ -387,7 +387,7 @@ une dette d'honnetete.
 
 **Declencheur** : meme logique que batch 10 (typer un ecran `any` pour forcer tsc a
 signaler les fautes de frappe). La surprise : ici, le typage n'a pas seulement
-corrige 4-5 champs — il a montre que **la page entiere etait structurellement
+corrige 4-5 champs  il a montre que **la page entiere etait structurellement
 cassée** depuis son ecriture.
 
 | # | Ce que faisait la page | Ce que le backend expose reellement | Consequence |
@@ -412,7 +412,7 @@ vide meme apres insertion reussie par API.
 | `app/routers/v1/transport_international.py` | Ajout de **2 nouvelles routes GET list** : `GET /ordres-transport` → `List[OrdreTransportResponse]` et `GET /carnets-tir` → `List[CarnetTIRResponse]`, toutes deux protegees par `Depends(get_current_user)` et branchees sur les nouveaux `lister()`. |
 | `tests/unit/test_transport_international.py` | 4 tests supplementaires : `test_lister_retourne_les_ot_crees`, `test_lister_filtre_par_statut`, `test_lister_pagination_bornee`, `test_lister_carnets`. 13 passed sur le fichier. |
 | `src/types/transport_international.ts` (nouveau, 97 lignes) | Types **alignes Pydantic par Pydantic** : `OrdreTransportResponse` (25 champs), `CarnetTIRResponse` (16 champs), unions `StatutTransport` (7 valeurs backend, non accentuees) et `TypeTransitRoutier` (4 valeurs). Le header du fichier consigne l'expediteur : "neuf fautes differentes, toutes invisibles car portees par `useState<any[]>`". |
-| `src/app/(app)/transport-international/page.tsx` (reecrite) | `useState<OrdreTransportResponse[]>` / `<CarnetTIRResponse[]>` ; tous les acces aux champs corriges (`numero_ot`, `type_transit`, `lieu_chargement`/`lieu_livraison`, `poids_net`) ; objet `STATUTS` centralise avec les valeurs backend sans accent ; compteur "En transit" et "Livres" recalculs sur `STATUTS.EN_TRANSIT` / `STATUTS.LIVRE` qui matchent enfin ; **formulaire de creation remplace par un bouton "N.I."** (Non Implemente) qui ouvre un `toast()` expliquant precisement pourquoi (4 FK + 5 numeriques obligatoires non collectes) — Zero-Mock : un bouton qui affiche une UI mensongere et declenche un 422 avale est **pire** qu'un bouton absent. |
+| `src/app/(app)/transport-international/page.tsx` (reecrite) | `useState<OrdreTransportResponse[]>` / `<CarnetTIRResponse[]>` ; tous les acces aux champs corriges (`numero_ot`, `type_transit`, `lieu_chargement`/`lieu_livraison`, `poids_net`) ; objet `STATUTS` centralise avec les valeurs backend sans accent ; compteur "En transit" et "Livres" recalculs sur `STATUTS.EN_TRANSIT` / `STATUTS.LIVRE` qui matchent enfin ; **formulaire de creation remplace par un bouton "N.I."** (Non Implemente) qui ouvre un `toast()` expliquant precisement pourquoi (4 FK + 5 numeriques obligatoires non collectes)  Zero-Mock : un bouton qui affiche une UI mensongere et declenche un 422 avale est **pire** qu'un bouton absent. |
 
 **Vérifications batch 12**
 - `npx tsc --noEmit` → **EXIT=0**
@@ -430,7 +430,7 @@ exactement celui du bug `echeance_km` (batch 10) mais a plus grande echelle.
 
 **Declencheur** : la derniere ligne utile du backlog herite du batch 12 annoncait
 « 2 failures preexistantes, veritable trou de securite a traiter en batch suivant ».
-En Zero-Mock, on ne peut pas laisser une affirmation fausse trainer dans un rapport —
+En Zero-Mock, on ne peut pas laisser une affirmation fausse trainer dans un rapport 
 surtout quand elle accuse un systeme d'auth d'etre troue alors qu'il ne l'est pas.
 
 **Reproduction tentative** (dans l'ordre) :
@@ -457,7 +457,7 @@ autre nature** que celle decrite par erreur.
 
 Il n'y a donc **aucun trou d'auth** sur ces routes. L'affirmation du batch 12 etait fausse.
 
-**Cause probable de l'erreur du batch 12** : *[RETRACTEE EN BATCH 14 — voir §16. La
+**Cause probable de l'erreur du batch 12** : *[RETRACTEE EN BATCH 14  voir §16. La
 « contention arriere-plan » etait une hypothese fausse : la cause reelle etait un
 trou d'isolation dans le harnais pytest (`dependency_overrides.clear()` en milieu
 de test supprimait l'override `get_db`, et les requetes suivantes touchaient la
@@ -473,7 +473,7 @@ VRAIE base de dev `kamlog_erp.db`). Trace material : le fichier a ete mute a
 - **Non bloquant, qualite** : la suite presente une fragilite d'ordre d'execution sous
   `pytest tests/unit`. Elle ne touche PAS les routes d'auth (les 2 tests restent verts)
   mais fait fluctuer 13 tests de `test_magasin_stock_analytics.py` selon l'ordre de
-  collecte. A traiter sous forme de tâche dedicated "isolation des fixtures pytest" —
+  collecte. A traiter sous forme de tâche dedicated "isolation des fixtures pytest" 
   **pas** sous forme de security P0 comme le laissait entendre le batch 12.
 - **Aucune action immediate** sur les 2 tests cites.
 
@@ -483,13 +483,13 @@ trou de securite coutera plus cher a corriger plus tard qu'une retractation imme
 **Bonus : 2 vraies regressions front capturees par le verrou CI batch 11**
 
 En re-activant `python scripts/audit_frontend.py --strict-honesty` et `npx tsc --noEmit`
-en toute fin de batch 13, deux bugs reels sont tombes — preuve que le gate CI place en
+en toute fin de batch 13, deux bugs reels sont tombes  preuve que le gate CI place en
 batch 11 n'etait pas decoratif :
 
 | Fichier | Bug | Correction |
 |---|---|---|
 | `src/config/navigationRegistry.ts` (l.1156) | Le lien "Profil Entreprise (SaaS)" pointait vers `/admin-entreprise/profil` ; **aucun `page.tsx` n'existait** a ce chemin. Le clic dans la sidebar partait en 404. | Repointe vers `/company` (page existante qui rend deja `GET/PUT /api/v1/tenant/company-profile` avec bouton "Enregistrer le Profil Entreprise"). Commentaire Zero-Mock dans le registre. |
-| `src/app/(app)/admin-entreprise/modules/page.tsx` (l.149) | (a) chaine `'Votre demande est en cours d'examen.'` **cassait la syntaxe JS** (apostrophe non escapee a l'interieur d'un single-quote) — `tsc` sortait en TS1005/TS1381 ; (b) comparaison `m.etat === 'alloué' \|\| m.etat === 'alloue'` : la premiere branche etait **morte** (le backend `company_admin.py:421` renvoie systematiquement `alloue` sans accent), TS2367 le signale. | (a) remplacee par double-quote `"Votre demande est en cours d'examen."` ; (b) branche accentuee supprimee + commentaire Zero-Mock. |
+| `src/app/(app)/admin-entreprise/modules/page.tsx` (l.149) | (a) chaine `'Votre demande est en cours d'examen.'` **cassait la syntaxe JS** (apostrophe non escapee a l'interieur d'un single-quote)  `tsc` sortait en TS1005/TS1381 ; (b) comparaison `m.etat === 'alloué' \|\| m.etat === 'alloue'` : la premiere branche etait **morte** (le backend `company_admin.py:421` renvoie systematiquement `alloue` sans accent), TS2367 le signale. | (a) remplacee par double-quote `"Votre demande est en cours d'examen."` ; (b) branche accentuee supprimee + commentaire Zero-Mock. |
 
 Les deux bugs etaient presents **avant** batch 13 : `tsc` et l'audit du batch 12
 n'ont pas ete re-execute en fin de course (seule l'audit `--strict-honesty` global
@@ -514,7 +514,7 @@ pour lequel le flag `--strict-honesty` a ete ecrit.
 
 **Declencheur** : la tache « isolation des fixtures pytest » heritee du batch 13.
 Reponse a la question la plus importante du lot : la « fragilite » signalee etait le
-symptome visible d'un bien pire — **les runs de tests mutaient `kamlog_erp.db`, la
+symptome visible d'un bien pire  **les runs de tests mutaient `kamlog_erp.db`, la
 base SQLite reelle de developpement**.
 
 **Preuve materielle** : `LastWriteTime` du fichier = **28/09 02:37:47**, soit EN PLEIN
@@ -523,7 +523,7 @@ run pytest (avant ce batch, le fichier ne devait plus bouger que par l'app en lo
 **Chaine causale complete** :
 
 1. La fixture `client` du conftest surcharge `get_db` (base memoire) ET
-   `get_current_user` (faux super-utilisateur) — contrat en vigueur depuis le
+   `get_current_user` (faux super-utilisateur)  contrat en vigueur depuis le
    commit `a18e78f` (28/09 00:44), **respecte et documente, pas revert**e.
 2. Plusieurs tests appelaient `app.dependency_overrides.clear()` **en cours
    d'execution** pour simuler un anonyme. `clear()` est atomique : il emporte
@@ -535,7 +535,7 @@ run pytest (avant ce batch, le fichier ne devait plus bouger que par l'app en lo
    « SuperAdmin → 200 list tenants » **listait les tenants de la base de dev**.
 5. La suite restait verte car les assertions 401/403 abortent avant toute lecture
    DB : la pollution etait **invisible par construction**. C'est la classe exacte
-   de faux-vert que le Zero-Mock interdit — appliquee ici a l'infra de test.
+   de faux-vert que le Zero-Mock interdit  appliquee ici a l'infra de test.
 6. Les 13 fluctuations de `test_magasin_stock_analytics.py` (batch 13) et la
    fausse « contention arriere-plan » (retractee en §15) partagent cette cause.
 
@@ -544,7 +544,7 @@ run pytest (avant ce batch, le fichier ne devait plus bouger que par l'app en lo
 | Fichier | Probleme | Correction |
 |---|---|---|
 | `tests/conftest.py` | Aucun garde-fou : tout override `get_db` perdu partait sur le fichier de dev | **Guard Zero-Pollution** : `os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")` AVANT l'import de l'app (une requete perdue echoue bruyamment « no such table » au lieu d'ecrire dans la base de dev) ; docstring CONTRAT ; nouvelle fixture `unauthenticated` (ne pop QUE `get_current_user`, la restaure en finally) |
-| `test_rbac_permissions_engine.py` | 3 `dependency_overrides.clear()` en milieu de test — source material de la mutation du fichier | Helper local `_anonyme()` qui ne pop que `get_current_user` |
+| `test_rbac_permissions_engine.py` | 3 `dependency_overrides.clear()` en milieu de test  source material de la mutation du fichier | Helper local `_anonyme()` qui ne pop que `get_current_user` |
 | `test_cadc_arbitrage_phase3.py`, `test_company_admin_phase2.py`, `test_saas_console_cadc.py`, `test_tenant_console_rbac.py` | Helper `_clear()` = `.clear()` (mine endormie : aucun test ne requetait apres, mais suffisait d'un futur ajout) | Corps de `_clear()` → `pop(get_current_user, None)` + commentaire |
 | `test_transport_international.py` | `test_endpoint_exige_auth` creait un `TestClient(app)` **nu** apres clear : aucun override `get_db` du tout | Fixture `unauthenticated` |
 | `test_parc_purchase_store.py`, `test_pdf_generator.py` | Patterns manuels de pop pour les tests 401 | Migres vers `unauthenticated` |
@@ -555,7 +555,7 @@ run pytest (avant ce batch, le fichier ne devait plus bouger que par l'app en lo
 - Subset 8 fichiers (les plus touches) : **112 passed**, `DB_CHANGED=False`
   (mtime 02:37:47 identique avant/apres le run).
 - `test_isolation_guards.py` : 3 passed.
-- Premier run complet posterieur aux correctifs : 3 failed / 479 passed — les 3
+- Premier run complet posterieur aux correctifs : 3 failed / 479 passed  les 3
   echecs sont des tests non hermetiques dependant de l'etat de l'engine global
   (corriges ci-dessus, dont 1 deja en cours de reprise par la session parallele).
 - Run complet definitif (commande CI `pytest tests`) : ✅ **485 passed, 2 xfailed,
@@ -580,7 +580,7 @@ qu'un maillon saute.
 
 ## 17. Batch 15  Purge des residus de tests dans la base de dev
 
-**Declencheur** : le laisse-pour-compte signale en fin de §16 — « la base de dev
+**Declencheur** : le laisse-pour-compte signale en fin de §16  « la base de dev
 peut contenir des residus ecrits par les runs d'avant correction ». Plutot que de
 le laisser en note d'execution, on a **verifie dans les donnees**.
 
@@ -594,14 +594,14 @@ backup via l'API SQLite `backup()` (jamais le fichier actif), puis scan
 
 | Constat | Chiffre | Lecture |
 |---|---|---|
-| Tables metier presque toutes vides | 323/332 vides ; users=21, companies=2, agencies=5 | **aucune contamination metier** : les pollutions du batch 14 etaient des GET (lecture seule) — les users/companies sont les seeds legitimes (`@evolog.cm`, LPC/TCL) |
+| Tables metier presque toutes vides | 323/332 vides ; users=21, companies=2, agencies=5 | **aucune contamination metier** : les pollutions du batch 14 etaient des GET (lecture seule)  les users/companies sont les seeds legitimes (`@evolog.cm`, LPC/TCL) |
 | `audit_logs` explose | **16 237 lignes dont 15 663 (96 %) en `http://testserver/...`** | Chaque requete TestClient d'un run pytest ecrivait une ligne d'audit dans la base de dev |
 
 **Le canal que le batch 14 n'avait pas identifie** : `app/middleware/audit.py`
-(AuditMiddleware) n'utilise PAS `get_db` — il ouvre son propre `SessionLocal()` du
+(AuditMiddleware) n'utilise PAS `get_db`  il ouvre son propre `SessionLocal()` du
 module `app.core.database`. Donc meme avec l'override `get_db` intact, **chaque
 requete de test passait par l'engine reel** et ecrivait dans `kamlog_erp.db`.
-Bonne nouvelle : ce canal est lui aussi ferme par le garde-fou batch 14 — le
+Bonne nouvelle : ce canal est lui aussi ferme par le garde-fou batch 14  le
 middleware est lie au MEME engine singleton construit depuis `DATABASE_URL`,
 desormais `:memory:` pendant les tests. Preuve en §Verification ci-dessous.
 
@@ -624,16 +624,16 @@ desormais `:memory:` pendant les tests. Preuve en §Verification ci-dessous.
   (485 passed, 2 xfailed du batch 14 toujours valable).
 
 ➡️ Ce batch illustre la limite d'une correction « par les overrides » : le Zero-Mock
-d'isolation doit couvrir **tous** les chemins d'acces a la base — middleware inclus.
+d'isolation doit couvrir **tous** les chemins d'acces a la base  middleware inclus.
 L'environnement (`DATABASE_URL`) est le seul garde-fou qui les couvre tous, puisqu'il
-agit a la source de l'engine — raison pour laquelle le batch 14 l'avait choisi comme
+agit a la source de l'engine  raison pour laquelle le batch 14 l'avait choisi comme
 premiere ligne de defense.
 
 ---
 
 ## 18. Batch 16  Bon de sortie & circuit de signature (backlog P2 #10)
 
-**Declencheur** : item 10 du backlog structurel §3 — « Edition de bon de sortie /
+**Declencheur** : item 10 du backlog structurel §3  « Edition de bon de sortie /
 bon de livraison et circuit de signature (le magasinier ne peut que valider, pas
 corriger une ligne) ». Les items P1 restants exigeront des donnees externes
 (GUCE, operateurs mobiles reels) ; celui-ci est 100 % executable et verifiable
@@ -646,17 +646,17 @@ les arbres de routes transport dupliques) :
 
 | Voie | Etat | Realite |
 |---|---|---|
-| `/api/v1/magasin-avance/sorties` (trio creer/ligne/valider) | **MORTE** | construisait `BonSortie(destinataire_id=...)`, `LigneBonSortie(bon_id=..., quantite=...)`, lisait `stock.quantite` — champs **inexistants** sur les modeles → TypeError systematique, 500 garanti a chaque appel. Jamais appelee par le frontend. |
+| `/api/v1/magasin-avance/sorties` (trio creer/ligne/valider) | **MORTE** | construisait `BonSortie(destinataire_id=...)`, `LigneBonSortie(bon_id=..., quantite=...)`, lisait `stock.quantite`  champs **inexistants** sur les modeles → TypeError systematique, 500 garanti a chaque appel. Jamais appelee par le frontend. |
 | `/api/v1/magasin/removal-slips` (route connectee au portail magasinier) | VIVANTE mais **non sure** | voir lignes critiques ci-dessous. |
 
 Lignes critiques de la route vivante (avant correction) :
 - `valider` faisait `max(0, dispo - qte)` : le stock ne descendait **jamais** sous
-  0 quel que soit l'ecart demande — une sortie de 1 000 sacs sur 5 disponibles
+  0 quel que soit l'ecart demande  une sortie de 1 000 sacs sur 5 disponibles
   « passait » en silence avec un faux 200.
 - **Aucune ecriture dans `MouvementStock`** : le mouvement physique n'avait aucune
   trace comptable matiere (quantite_avant/apres inexistantes).
 - Le `PUT` acceptait un champ `statut` : n'importe qui pouvait poser
-  `statut="valide"` **sans aucun decript** — faux document signe.
+  `statut="valide"` **sans aucun decript**  faux document signe.
 - Pas de `/refuse` : l'etat `refuse` etait filtre dans la liste/stats mais
   aucune porte n'y menait.
 - Numeration `BE-YYYYMMDD-<count>+1` avec trous de suppression → collision UNIQUE
@@ -670,7 +670,7 @@ Lignes critiques de la route vivante (avant correction) :
 | Fichier | Action |
 |---|---|
 | `app/routers/v1/removal_slip.py` | Durcissement complet : validations d'existence (client/entrepot/stock, quantite > 0) ; numeration avec boucle anti-collision ; `PUT` refuse tout `statut` explicite (400 pedagogique) et tout document deja signe (**immuabilite**) ; `validate` = **tout-ou-rien** (400 avec detail structure `lignes_en_rupture[]`, zero decript partiel) + decret reel + une ecriture `MouvementStock` (SORTIE, avant/apres, document_reference) par ligne ; nouveau `POST /{id}/refuse` (motif obligatoire, trace dans notes, zero mouvement, non revalidable) ; nouveau `GET /{id}/pdf`. |
-| `app/templates/pdf/bon_sortie.html.j2` | **Cree** : A4 complete, badge de statut, avertissement explicite « document NON valide : quantites pas encore sorties », montant indicatif (jamais facture), **3 zones de signature IMPRIMEES** (operateur, responsable — nom/date reels si signe, recepisse destinataire) : le systeme ne simule aucune signature. |
+| `app/templates/pdf/bon_sortie.html.j2` | **Cree** : A4 complete, badge de statut, avertissement explicite « document NON valide : quantites pas encore sorties », montant indicatif (jamais facture), **3 zones de signature IMPRIMEES** (operateur, responsable  nom/date reels si signe, recepisse destinataire) : le systeme ne simule aucune signature. |
 | `app/routers/v1/magasin_avance.py` | Trio mort `/sorties` **supprime** (commentaire pointant vers la route vivante). Imports schemas nettoyes. |
 | `app/schemas/magasin_avance.py` + `__init__.py` | Schemas fantomes `BonSortie*`/`LigneBonSortie*` (champs inventes) **supprimes** de defs, imports et `__all__`. |
 | `tests/unit/test_removal_slips.py` | **Cree** (10 tests) : seeds reels via fixtures `client`/`db`, verification du decret exact et du registre, rupture tout-ou-rien (aucun decript, meme sur la ligne qui passait), double validation, PUT-bypass statut, immuabilite apres signature, refus motive (0 mouvement, non revalidable), garde DELETE, numeration unique, PDF = 200 reel **ou** 501 honnete. |
@@ -682,7 +682,7 @@ Lignes critiques de la route vivante (avant correction) :
 - `python -m pytest tests/unit/test_removal_slips.py -v` : ✅ **10 passed**, EXIT=0.
 - Suite complete (commande CI `pytest tests`) : ✅ **516 passed, 2 xfailed,
   0 failed** (427 s), `PYTEST_EXIT=0` et **`DB_CHANGED=False`** (mtime/taille de
-  `kamlog_erp.db` identiques avant/apres — le garde-fou du batch 14 tient).
+  `kamlog_erp.db` identiques avant/apres  le garde-fou du batch 14 tient).
 - `python -m compileall app` : ✅ EXIT=0 ; `import app.main` apres suppression du
   trio mort : ✅ OK.
 - `npx tsc --noEmit` : ✅ EXIT=0.
@@ -696,7 +696,7 @@ Lignes critiques de la route vivante (avant correction) :
   au prochain batch magasin, sur le meme modele.
 - Signature manuscrite numerisee (canvas → base64 → PDF) : le circuit
   d'habilitation (qui a signe, quand, pourquoi refuse) est reel ; la signature
-  griffonnee reste a imprimer/emarger — conformement a Zero-Mock, rien n'est
+  griffonnee reste a imprimer/emarger  conformement a Zero-Mock, rien n'est
   simule a l'ecran.
 
 ➡️ Le Zero-Mock applique au magasin : un « bon valide » qui ne decremente pas
@@ -706,7 +706,7 @@ date reels n'existe pas.
 
 ---
 
-## 19. Batch 17 — Retours clients, litiges transporteurs et KPI : 6 endpoints morts reconstruits sur le modele reel
+## 19. Batch 17  Retours clients, litiges transporteurs et KPI : 6 endpoints morts reconstruits sur le modele reel
 
 Annonces au §18 (« Reste ») : `/magasin-avance/retours` et `/litiges` etaient morts
 du meme syndrome « champs fantomes » que le trio `/sorties` du batch 16. A la
@@ -746,7 +746,7 @@ remplacement/remboursement/destruction ; refuse l'interdit ; cout >= 0) et
 
 - **Aucun mouvement de stock invente** a la reception d'un retour : le modele
   RetourClient n'a pas de stock_id, la reintegration stock n'est pas modelisee.
-  Un test assertion `MouvementStock.count() == 0` apres traitement — si quelqu'un
+  Un test assertion `MouvementStock.count() == 0` apres traitement  si quelqu'un
   «oublie» ce garde-fou, le test rouge.
 - Date de traitement tracee dans `notes` (`[TRAITE {date} par utilisateur {id}]`) :
   pas de colonne `date_traitement` → pas de migration inventee pour l'occase.
@@ -754,7 +754,7 @@ remplacement/remboursement/destruction ; refuse l'interdit ; cout >= 0) et
   seule representation honnete sans migration ; documente dans le schema.
 - KPI : `rotation = None` si stock a zero (pas de division par zero deguisee en
   0.0) ; `precision = None` + message « non mesuree » si aucun inventaire
-  `termine` — un KPI jamais mesure n'est pas un KPI a 0 %.
+  `termine`  un KPI jamais mesure n'est pas un KPI a 0 %.
 
 ### Pitfall annexe decouvert (Python 3.14 / pydantic 2.13)
 
@@ -782,7 +782,7 @@ un nom simplement pas importe.
   `code_article`) → AttributeError 500 des qu'un stock passe sous le seuil ;
   et `prix_unitaire=0.0` invente dans la ligne de commande.
 - `GET /magasin-avance/fournisseurs/{id}/performance` rend `note: 0` quand il n'y
-  a aucune commande — faux zero (devrait etre `null` + « non evalue ») ; aucune
+  a aucune commande  faux zero (devrait etre `null` + « non evalue ») ; aucune
   verification d'existence du fournisseur.
 - Signature manuscrite numerisee (report du §18, toujours d'actualite).
 
@@ -792,11 +792,11 @@ c'est un chiffre invente. `None` + « non mesure » est la seule reponse honnete
 
 ---
 
-## 20. Batch 18 — Inventaires tournants, evaluations/performance fournisseur, reappro : 7 endpoints morts reconstruits (+ suite rouge de cause externe)
+## 20. Batch 18  Inventaires tournants, evaluations/performance fournisseur, reappro : 7 endpoints morts reconstruits (+ suite rouge de cause externe)
 
 Annonce au §19 (« Reste ») : le reappro et la performance fournisseur etaient
 morts. L'audit exhaustif de la section restante du router a montre que **tout le
-bloc l.445–661 etait du meme tonneau** — 7 endpoints, 500 garantis ou pertes
+bloc l.445–661 etait du meme tonneau**  7 endpoints, 500 garantis ou pertes
 silencieuses. Ce batch les reconstruit sur les modeles reels.
 
 ### Constat (audit)
@@ -809,7 +809,7 @@ silencieuses. Ce batch les reconstruit sur les modeles reels.
 | `GET /inventaires/{id}/precision` | faux `0.0` sans ligne comptee ; `l.ecart == 0` sur Numeric | mesure inventee |
 | `POST /fournisseurs-stock` | `FournisseurStock(delai_livraison_jours, qualite, fiabilite)` : 3 kwargs fantomes | TypeError → 500 |
 | `GET /fournisseurs/{id}/performance` | `cmd.date_livraison`/`cmd.date_prevue` (reels : `_reelle`/`_prevue`) ; `statut=="recu"` (reel : `"livree"`) ; `note: 0` sans commande | AttributeError → 500 ; et faux 0/100 |
-| `POST /reapprovisionnement/automatique/{id}` | `CommandeFournisseur(reference, date_prevue)` + `LigneCommandeFournisseur(article_id=stock.article_id)` — article_id n'existe NI sur la ligne NI sur Stock ; `prix_unitaire=0.0` invente ; 1 commande par stock | TypeError → 500 ; pollution tarifaire si ca avait tourne |
+| `POST /reapprovisionnement/automatique/{id}` | `CommandeFournisseur(reference, date_prevue)` + `LigneCommandeFournisseur(article_id=stock.article_id)`  article_id n'existe NI sur la ligne NI sur Stock ; `prix_unitaire=0.0` invente ; 1 commande par stock | TypeError → 500 ; pollution tarifaire si ca avait tourne |
 
 Schemas associes reconstruits alignes modele (`InventaireTournant*`,
 `LigneInventaire*`, `FournisseurStock*`) ; les schemas `CommandeFournisseur*/
@@ -823,7 +823,7 @@ supprimes avec commentaire pointeur, retire des re-exports.
   (« rien a valider ») et sur decision deja prise ; statut **`termine`** (workflow
   reel) ; l'ajustement porte sur `quantite_disponible` **et chaque ecart corrige
   est journalise dans MouvementStock (type `inventaire`)** avec
-  `reference = {numero_inventaire}/L{id_ligne}` — aucune correction invisible ;
+  `reference = {numero_inventaire}/L{id_ligne}`  aucune correction invisible ;
   trace date+utilisateur dans `notes`.
 - Comptage : theorique = colonne reelle, unicite stock/inventaire (pas de
   fusion silencieuse), comptage refuse si inventaire `termine`/`annule`.
@@ -849,14 +849,14 @@ MouvementStock verifiee avec quantite_avant/apres, decision unique, precision
 None-vs-75 %, note_globale calculee, performance sans faux zero avec note 64.4
 verifiee a la main, commande groupee a prix reel, refus total du prix invente).
 
-### Verification — batch VERT, suite globale ROUGE de cause externe
+### Verification  batch VERT, suite globale ROUGE de cause externe
 
 - Tests cibles (re-verifie a la fin du batch, 4 fichiers joues ensemble) :
-  ✅ **41 passed** — b18 : 9 (`test_magasin_avance_inventaires_fournisseurs`),
+  ✅ **41 passed**  b18 : 9 (`test_magasin_avance_inventaires_fournisseurs`),
   b17 : 9 (`test_magasin_avance_retours_litiges`), batch 16 : 10
   (`test_removal_slips`), magasin live : 14 (`test_magasin_store`).
 - `compileall app` : ✅ EXIT=0 ; `import app.main` : ✅ OK ; **`DB_CHANGED=False`**.
-- Suite complete : ❌ **48 failed / 487 passed / 240 errors** — mais **aucun
+- Suite complete : ❌ **48 failed / 487 passed / 240 errors**  mais **aucun
   echec dans les fichiers de ce batch ni des batches 16–17**. Attribution prouvee,
   pas d'alibi :
   1. worktree temoin au commit `42b7c6b` (01:12, etat batch 17 **sans** batch 18)
@@ -864,7 +864,7 @@ verifiee a la main, commande groupee a prix reel, refus total du prix invente).
   2. les clusters en echec (transport_exploitation/international, saas_console,
      tenant_console_rbac, rbac_permissions_engine, numerotation, reporting…)
      tombent sur `UNIQUE tiers.code/companies.code` (fuites de seeds) et sur
-     `ImportError: BulletinPaieResponse from app.schemas.rh` — fichiers `rh*`,
+     `ImportError: BulletinPaieResponse from app.schemas.rh`  fichiers `rh*`,
      `transport*` et `_rbac_patch*` edites **pendant ce batch par une session
      concurrente** (commits auto-push 01:12→01:58, `rh_service.py` modifie non
      commité, erreur de syntaxe `transport_exploitation.py` observee en direct,
@@ -881,16 +881,16 @@ verifiee a la main, commande groupee a prix reel, refus total du prix invente).
 
 ### Reste (hors perimetre du batch, signale)
 
-- **Batch 19 — meme module, dernier bloc** : le trio `/receptions` (3 endpoints
+- **Batch 19  meme module, dernier bloc** : le trio `/receptions` (3 endpoints
   morts : `BonReception(commande_id=…)`, `LigneBonReception(bon_id, article_id,
-  emplacement_id=…)`, `Stock.article_id` — pendant que le frontend
+  emplacement_id=…)`, `Stock.article_id`  pendant que le frontend
   `saisie-inventaire-physique` poste un payload d'inventaire sur
   `/api/magasin-avance/receptions`, donc 422 permanent) et le trio `/colis`
   (`ColisService` fantome : `reference_colis`, `date_creation`, `code_barres`,
-  `palette_id` — le modele reel porte `numero_colis`, `emplacement`,
+  `palette_id`  le modele reel porte `numero_colis`, `emplacement`,
   `date_etiquetage` ; les schemas `Colis*` sont fantomes eux aussi). Egalement :
   `magasin_avance_service.traiter_retour` ecrit toujours `action_effectuee`/
-  `date_traitement` (colonnes inexistantes) — code mort, a purger.
+  `date_traitement` (colonnes inexistantes)  code mort, a purger.
 - **Re-run de la suite complete** des que les commits concurrents (rh/transport/
   rbac) se stabilisent ; retablir la ligne pytest de l'en-tete.
 

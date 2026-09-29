@@ -94,7 +94,7 @@ async function lireDetail(res: Response): Promise<string> {
   const corps = await res.json().catch(() => null);
   if (typeof corps?.detail === 'string') return corps.detail;
   if (Array.isArray(corps?.detail)) {
-    return corps.detail.map((d: any) => d.msg || JSON.stringify(d)).join(' — ');
+    return corps.detail.map((d: any) => d.msg || JSON.stringify(d)).join('  ');
   }
   return `Le serveur a répondu ${res.status}.`;
 }
@@ -731,7 +731,7 @@ export default function ChefPersonnelPage() {
                     {congeNormalise(cg.statut) === 'approuve'
                       ? '✓ Arbitré & Notifié'
                       : cg.motif_refus
-                        ? `✗ Refusé — ${cg.motif_refus}`
+                        ? `✗ Refusé  ${cg.motif_refus}`
                         : '✗ Refusé sans motif'
                     }
                   </div>
@@ -994,7 +994,7 @@ export default function ChefPersonnelPage() {
                   onChange={e => setPlanAgentId(Number(e.target.value))}
                   className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-400"
                 >
-                  <option value={0}>— Sélectionner un agent —</option>
+                  <option value={0}> Sélectionner un agent </option>
                   {effectifs.map(a => (
                     <option key={a.id} value={a.id}>{a.full_name} ({a.role})</option>
                   ))}
@@ -1086,7 +1086,7 @@ export default function ChefPersonnelPage() {
                   onChange={e => setDotAgentId(Number(e.target.value))}
                   className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-400"
                 >
-                  <option value={0}>— Sélectionner un agent —</option>
+                  <option value={0}> Sélectionner un agent </option>
                   {effectifs.map(a => (
                     <option key={a.id} value={a.id}>{a.full_name} ({a.role})</option>
                   ))}

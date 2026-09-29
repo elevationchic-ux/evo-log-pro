@@ -1,6 +1,6 @@
 'use client';
 
-// src/app/(auth)/mfa/page.tsx — Second facteur de la connexion.
+// src/app/(auth)/mfa/page.tsx  Second facteur de la connexion.
 //
 // Cette page n'a jamais été une formalité : elle échange le jeton 2FA délivré
 // par POST /auth/login contre une vraie session via POST /auth/2fa/verify. Le

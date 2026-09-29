@@ -395,7 +395,7 @@ class TestDatabaseConnectionReal:
 
         Batch 14 : la fixture `client` est OBLIGATOIRE ici. Sans elle, ce test
         inspectait l'engine global de l'app dans l'etat ou les autres tests
-        l'avaient laisse — avant le garde-fou DATABASE_URL du conftest,
+        l'avaient laisse  avant le garde-fou DATABASE_URL du conftest,
         l'engine pointait sur le fichier de dev `kamlog_erp.db` et le vert
         dependait de la machine, pas du code. Avec la base memoire, seul le
         startup du TestClient (lifespan -> create_all) garantit les tables.

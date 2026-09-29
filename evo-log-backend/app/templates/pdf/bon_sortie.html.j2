@@ -61,7 +61,7 @@
       <div class="doc">Bon de sortie</div>
       <div class="numero">N° {{ bon.numero_bon }}</div>
       {% if bon.statut == 'valide' %}
-        <span class="badge badge-valide">Validé — marchandises sorties</span>
+        <span class="badge badge-valide">Validé  marchandises sorties</span>
       {% elif bon.statut == 'refuse' %}
         <span class="badge badge-refuse">Refusé</span>
       {% else %}
@@ -129,8 +129,8 @@
         <td>{{ ligne.numero_lot or '' }}</td>
         <td class="num">{{ "{:g}".format(ligne.quantite | float) }}</td>
         <td>{{ ligne.unite or '' }}</td>
-        <td class="num">{% if ligne.prix_unitaire %}{{ "{:,.2f}".format(ligne.prix_unitaire | float) }}{% else %}—{% endif %}</td>
-        <td class="num">{% if ligne.prix_unitaire %}{{ "{:,.2f}".format((ligne.quantite | float) * (ligne.prix_unitaire | float)) }}{% else %}—{% endif %}</td>
+        <td class="num">{% if ligne.prix_unitaire %}{{ "{:,.2f}".format(ligne.prix_unitaire | float) }}{% else %}{% endif %}</td>
+        <td class="num">{% if ligne.prix_unitaire %}{{ "{:,.2f}".format((ligne.quantite | float) * (ligne.prix_unitaire | float)) }}{% else %}{% endif %}</td>
       </tr>
       {% else %}
       <tr><td colspan="7" class="vide">Aucune ligne sur ce bon.</td></tr>
@@ -140,7 +140,7 @@
 
   {% if ns.tous_prix_renseignes and lignes %}
   <div class="notes"><strong>Montant total indicatif :</strong> {{ "{:,.2f}".format(ns.total) }} XAF
-    (prix unitaires saisis sur les lignes du bon — valeur indicative de sortie de stock, ne constitue pas une facture).</div>
+    (prix unitaires saisis sur les lignes du bon  valeur indicative de sortie de stock, ne constitue pas une facture).</div>
   {% endif %}
 
   {% if bon.notes %}
@@ -159,11 +159,11 @@
   <div class="signatures">
     <div class="sig">
       <span class="zone"></span>
-      <span class="nom">Opérateur magasin{% if nom_operateur %} — {{ nom_operateur }}{% endif %}</span>
+      <span class="nom">Opérateur magasin{% if nom_operateur %}  {{ nom_operateur }}{% endif %}</span>
     </div>
     <div class="sig">
       <span class="zone"></span>
-      <span class="nom">Responsable magasin{% if nom_validateur %} — {{ nom_validateur }}{% endif %}</span>
+      <span class="nom">Responsable magasin{% if nom_validateur %}  {{ nom_validateur }}{% endif %}</span>
     </div>
     <div class="sig">
       <span class="zone"></span>

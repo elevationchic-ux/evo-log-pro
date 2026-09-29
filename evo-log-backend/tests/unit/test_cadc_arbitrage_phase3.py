@@ -1,4 +1,4 @@
-"""Tests Phase 3 — Arbitrage CADC des demandes d'accreditation.
+"""Tests Phase 3  Arbitrage CADC des demandes d'accreditation.
 
 Boucle fermee sur la Phase 2 : l'admin entreprise emet une demande
 (Accreditation statut 'demande'), le Super Admin CADC l'arbitre :

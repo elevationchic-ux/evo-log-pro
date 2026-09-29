@@ -1170,7 +1170,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         // tenant (plan CADC, verrous max_modules/max_users, modules alloues,
         // admins designes niveau 1) via /api/v1/company-admin/profil.
         // /company (fiche legale OHADA : NIF, RCCM, agrements, RIB) reste la
-        // page gemme pour les declarages fiscaux — les deux ecrans restent
+        // page gemme pour les declarages fiscaux  les deux ecrans restent
         // volontairement distincts (contrats backend differents).
         path: '/admin-entreprise/profil',
         icon: Building,
@@ -1184,7 +1184,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   },
 
   // ============================================================================
-  // 🧑‍💼 MODULE 12-C: ESPACE DÉPARTEMENT (CHEF DE DÉPARTEMENT — NIVEAU 2)
+  // 🧑‍💼 MODULE 12-C: ESPACE DÉPARTEMENT (CHEF DE DÉPARTEMENT  NIVEAU 2)
   // ============================================================================
   // Plan Phase 3 : espace dédié au chef de département. Visible par les rôles
   // d'encadrement (MANAGER) et l'administration ; le garde route-level

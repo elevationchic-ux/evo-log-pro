@@ -273,7 +273,7 @@ def main():
         return
 
     print("=" * 72)
-    print(f"APPELS SANS ROUTE EQUIVALENTE ({total}) — servis par le catch-all pending")
+    print(f"APPELS SANS ROUTE EQUIVALENTE ({total})  servis par le catch-all pending")
     print("=" * 72)
     for fichier in sorted(orphelins):
         print(f"\n{fichier}")

@@ -1,6 +1,6 @@
 'use client';
 
-// Console Super-Admin CADC — Accréditations d'entreprise (délai).
+// Console Super-Admin CADC  Accréditations d'entreprise (délai).
 // Un accord module daté (permission_code "module.*.*", date_debut/date_fin) débloque
 // un module pour un collaborateur ciblé au-delà de l'allocation de base de son entreprise.
 
@@ -114,7 +114,7 @@ export default function CadcAccreditationsPage() {
           </div>
           <div className="flex items-center gap-2">
             <select value={companyId} onChange={e => setCompanyId(e.target.value)} className="px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-100 flex-1 sm:w-64">
-              <option value="">— Choisir une entreprise —</option>
+              <option value=""> Choisir une entreprise </option>
               {companies.map(c => <option key={c.id} value={c.id}>{c.nom} ({c.code})</option>)}
             </select>
             <button onClick={() => loadAccreditations(companyId)} disabled={!companyId} className="p-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-slate-300 disabled:opacity-40"><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-amber-400' : ''}`} /></button>
@@ -175,13 +175,13 @@ export default function CadcAccreditationsPage() {
             <div className="p-6 space-y-4">
               <Field label="Collaborateur">
                 <select value={form.user_id} onChange={e => setForm({ ...form, user_id: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100">
-                  <option value="">— Choisir —</option>
+                  <option value=""> Choisir </option>
                   {users.map(u => <option key={u.id} value={u.id}>{u.full_name} ({u.username})</option>)}
                 </select>
               </Field>
               <Field label="Module débloqué">
                 <select value={form.module} onChange={e => setForm({ ...form, module: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100">
-                  <option value="">— Choisir —</option>
+                  <option value=""> Choisir </option>
                   {modules.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
                 </select>
               </Field>

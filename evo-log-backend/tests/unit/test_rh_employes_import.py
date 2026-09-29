@@ -2,8 +2,8 @@
 
 Couvre ce que l'ecran « Annuaire & Gestion des Employes » appelait sans que le
 serveur le fournisse :
-  * POST /rh/employes — le bouton « Ajouter un Employe » partait en 404 ;
-  * POST /rh/employes/import-excel — il repondait un 202 « pending » sans rien
+  * POST /rh/employes  le bouton « Ajouter un Employe » partait en 404 ;
+  * POST /rh/employes/import-excel  il repondait un 202 « pending » sans rien
     importer, ce qui affichait un succes vide ;
   * la fiche d'un employe sans contrat : type_contrat null, pas un CDI par
     defaut (une donnee inventee se diffuse dans l'attestation de travail) ;

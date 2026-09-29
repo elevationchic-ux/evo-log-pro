@@ -278,7 +278,7 @@ export default function GlobalDashboard() {
             className="h-10 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold rounded-xl flex items-center gap-2 transition cursor-pointer text-slate-200"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-amber-400 ${isSyncing || loading ? 'animate-spin' : ''}`} />
-            {isSyncing || loading ? t.common.loading : `${t.dash.refreshed} (${lastSync ? new Date(lastSync).toLocaleTimeString(locale) : '—'})`}
+            {isSyncing || loading ? t.common.loading : `${t.dash.refreshed} (${lastSync ? new Date(lastSync).toLocaleTimeString(locale) : ''})`}
           </button>
 
           <Link

@@ -167,7 +167,7 @@ def client(db, _session_client):
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_current_user] = override_get_current_user
     yield _session_client
-    # Restore overrides to a clean state for the next test (do NOT clear all —
+    # Restore overrides to a clean state for the next test (do NOT clear all 
     # see docstring contract; just remove ours).
     app.dependency_overrides.pop(get_db, None)
     app.dependency_overrides.pop(get_current_user, None)

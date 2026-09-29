@@ -1,6 +1,6 @@
 'use client';
 
-// Console Super-Admin CADC — Entreprises (CRUD total + logo + allocation modules).
+// Console Super-Admin CADC  Entreprises (CRUD total + logo + allocation modules).
 // Source de vérité tenant : Company + SubscriptionPlan. Le verrou max_modules du
 // plan borne le nombre de modules sélectionnables (désactive les cases au-delà).
 
@@ -240,7 +240,7 @@ export default function CadcEntreprisesPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 font-sans">{plan ? `${plan.nom}` : '—'}</td>
+                    <td className="py-3.5 px-4 font-sans">{plan ? `${plan.nom}` : ''}</td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300">
                         {c.modules_actives?.length || 0}{plan?.max_modules ? ` / ${plan.max_modules}` : ''}
@@ -278,7 +278,7 @@ export default function CadcEntreprisesPage() {
           <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
           <div className="relative h-full w-full max-w-lg bg-slate-900 border-l border-slate-800 shadow-2xl overflow-y-auto">
             <div className="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="text-lg font-black text-slate-100">{editing ? `Éditer — ${editing.nom}` : 'Nouvelle entreprise'}</h2>
+              <h2 className="text-lg font-black text-slate-100">{editing ? `Éditer  ${editing.nom}` : 'Nouvelle entreprise'}</h2>
               <button onClick={() => setDrawerOpen(false)} className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-4">

@@ -1,6 +1,6 @@
 'use client';
 
-// Phase 3 — Ecran "Mon Département" pour le chef de département (niveau 2).
+// Phase 3  Ecran "Mon Département" pour le chef de département (niveau 2).
 //
 // Périmètre strict : le chef ne voit et ne pilote que SA fiche de département
 // (nom, modules autorisés, effectif, responsable) et le roster des collaborateurs
@@ -143,9 +143,9 @@ export default function DepartementPage() {
       setMembers(mb.data);
       // Les candidats mobilisables ne concernent que le chef (le backend épingle son
       // département) ; pour un admin/CADC sans département ciblé, l'appel echoue en
-      // 400 — on laisse simplement la liste vide (la vue "notice" s'affiche déjà).
+      // 400  on laisse simplement la liste vide (la vue "notice" s'affiche déjà).
       // Lectures Phase 4 scopees (planning + presence) : meme perimetre chef. Elles
-      // echouent en 400 pour un admin/CADC sans département ciblé — on laisse alors
+      // echouent en 400 pour un admin/CADC sans département ciblé  on laisse alors
       // les sections vides (la vue "notice" s'affiche déjà pour ces rôles).
       try {
         const [cd, pl, pr] = await Promise.all([
@@ -303,7 +303,7 @@ export default function DepartementPage() {
       <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-2">
         <h2 className="text-sm font-bold text-slate-200">Modules autorisés</h2>
         {overview.modules_allowed.length === 0 ? (
-          <p className="text-xs text-slate-500">Aucun module restreint — hérite de l'allocation entreprise.</p>
+          <p className="text-xs text-slate-500">Aucun module restreint  hérite de l'allocation entreprise.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {overview.modules_allowed.map(m => (
@@ -407,7 +407,7 @@ export default function DepartementPage() {
                   onChange={e => setPlanForm(f => ({ ...f, employe_id: e.target.value }))}
                   className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1.5 text-slate-100"
                 >
-                  <option value="">— choisir —</option>
+                  <option value=""> choisir </option>
                   {members.filter(m => m.role_level === 3).map(m => (
                     <option key={m.id} value={m.id}>{m.full_name || m.username}</option>
                   ))}

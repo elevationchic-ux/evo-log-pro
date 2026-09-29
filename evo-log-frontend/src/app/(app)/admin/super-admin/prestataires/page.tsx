@@ -1,6 +1,6 @@
 'use client';
 
-// Console Super-Admin CADC — Annuaire des prestataires. Écriture réservée au CADC
+// Console Super-Admin CADC  Annuaire des prestataires. Écriture réservée au CADC
 // (le backend exige require_superadmin) ; la consultation publique reste ailleurs.
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -114,7 +114,7 @@ export default function CadcPrestatairesPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-100 flex items-center gap-3"><Users className="w-8 h-8 text-amber-400" /> Annuaire des prestataires</h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">Référencement B2B — écriture strictement réservée au Super Administrateur CADC.</p>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">Référencement B2B  écriture strictement réservée au Super Administrateur CADC.</p>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={load} className="p-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-slate-300 transition-all"><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-amber-400' : ''}`} /></button>
@@ -151,10 +151,10 @@ export default function CadcPrestatairesPage() {
                   </td>
                   <td className="py-3.5 px-4 font-sans">{p.specialite}</td>
                   <td className="py-3.5 px-4">
-                    <div className="font-sans">{p.contact_nom || '—'}</div>
+                    <div className="font-sans">{p.contact_nom || ''}</div>
                     <div className="text-[11px] text-slate-500">{p.contact_telephone}</div>
                   </td>
-                  <td className="py-3.5 px-4 text-center font-mono text-[11px]">{p.agrement_portuaire || '—'}</td>
+                  <td className="py-3.5 px-4 text-center font-mono text-[11px]">{p.agrement_portuaire || ''}</td>
                   <td className="py-3.5 px-4 text-center">
                     <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${p.est_actif ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>{p.est_actif ? 'ACTIF' : 'INACTIF'}</span>
                   </td>
@@ -177,7 +177,7 @@ export default function CadcPrestatairesPage() {
           <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
           <div className="relative h-full w-full max-w-lg bg-slate-900 border-l border-slate-800 shadow-2xl overflow-y-auto">
             <div className="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="text-lg font-black text-slate-100">{editing ? `Éditer — ${editing.raison_sociale}` : 'Nouveau prestataire'}</h2>
+              <h2 className="text-lg font-black text-slate-100">{editing ? `Éditer  ${editing.raison_sociale}` : 'Nouveau prestataire'}</h2>
               <button onClick={() => setDrawerOpen(false)} className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-4">

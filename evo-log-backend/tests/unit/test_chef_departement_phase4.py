@@ -1,4 +1,4 @@
-"""Phase 4 Tranche A — Planning + Presence du departement (espace chef, niveau 2).
+"""Phase 4 Tranche A  Planning + Presence du departement (espace chef, niveau 2).
 
 Reutilise les modeles RH ``PlanningGarde`` (tours de garde) et ``PointageVacation``
 (emargements) mais les EXPOSE sous le perimetre departemental strict deja en place :

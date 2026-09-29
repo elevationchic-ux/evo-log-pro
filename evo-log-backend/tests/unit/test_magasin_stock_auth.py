@@ -34,7 +34,7 @@ def app_no_auth():
 
     Cela simule un appel client sans JWT : la reponse doit etre 401 ou 403.
     """
-    import app.main  # noqa: F401 — register all models
+    import app.main  # noqa: F401  register all models
     Base.metadata.create_all(bind=engine)
 
     from app.main import app as _app
@@ -84,6 +84,6 @@ def test_route_rejete_sans_jwt(app_no_auth, method, path):
     # FastAPI retourne 401 (pas de credentials) ou 403 (acces refuse) ou 422
     # (corps invalide) mais JAMAIS 200/201/204.
     assert resp.status_code in (401, 403, 422), (
-        f"{method} {path} a repondu {resp.status_code} sans JWT — "
+        f"{method} {path} a repondu {resp.status_code} sans JWT  "
         "route non protegee !"
     )

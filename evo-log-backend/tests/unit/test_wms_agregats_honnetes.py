@@ -1,4 +1,4 @@
-"""Tests d23 — services WMS avancé : politique zero-mock.
+"""Tests d23  services WMS avancé : politique zero-mock.
 
 Le service `magasin_wms_avance_service.py` fabriquait :
 - des lignes de vague inventees (ART-1000x, LOT-2026-x, quantite 12.5,
@@ -11,7 +11,7 @@ Le service `magasin_wms_avance_service.py` fabriquait :
   caracteres, avec l'emplacement invente A01-R04-N02.
 
 Chaque comportement est verrouille ici : either la valeur vient de la base,
-either elle est null et expliquee — jamais inventee.
+either elle est null et expliquee  jamais inventee.
 """
 from datetime import datetime
 

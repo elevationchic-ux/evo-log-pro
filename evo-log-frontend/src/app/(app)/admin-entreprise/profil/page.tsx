@@ -1,6 +1,6 @@
 'use client';
 
-// Phase 2 — Profil Entreprise (SaaS) pour l'admin entreprise (niveau 1).
+// Phase 2  Profil Entreprise (SaaS) pour l'admin entreprise (niveau 1).
 //
 // Contrats backend : /api/v1/company-admin/profil (GET/PATCH) et
 // /api/v1/company-admin/utilisateurs (GET), gardés require_company_admin +
@@ -9,9 +9,9 @@
 // l'entreprise ciblée via le sélecteur (paramètre company_id explicite).
 //
 // Distinction volontaire avec /company (fiche légale OHADA : NIF, RCCM,
-// agréments, RIB) : cet écran expose l'IDENTITÉ SAAS du tenant — plan
+// agréments, RIB) : cet écran expose l'IDENTITÉ SAAS du tenant  plan
 // d'abonnement, verrous max_modules / max_users, modules alloués par le CADC
-// et admins désignés (niveau 1) — et n'édite que les champs de marque
+// et admins désignés (niveau 1)  et n'édite que les champs de marque
 // autorisés par CompanyProfileUpdate (nom, sigle, coordonnées, couleur).
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -59,7 +59,7 @@ export default function AdminEntrepriseProfilPage() {
   const [saving, setSaving] = useState(false);
 
   // Le CADC doit cibler une entreprise (400 sinon côté backend) ; l'admin
-  // entreprise est épinglé à la sienne — pas de sélecteur pour lui.
+  // entreprise est épinglé à la sienne  pas de sélecteur pour lui.
   useEffect(() => {
     if (!isCadc) return;
     saasConsoleAPI.listCompanies().then(res => {
@@ -140,7 +140,7 @@ export default function AdminEntrepriseProfilPage() {
         <div className="flex-1 min-w-0">
           <h1 className="text-xl font-black text-slate-100 truncate">Profil Entreprise (SaaS)</h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Identité du tenant, abonnement CADC et admins désignés — distincte de la fiche légale (page « Fiche Entreprise »).
+            Identité du tenant, abonnement CADC et admins désignés  distincte de la fiche légale (page « Fiche Entreprise »).
           </p>
         </div>
         {isCadc && companies.length > 0 && (
@@ -198,7 +198,7 @@ export default function AdminEntrepriseProfilPage() {
         </h2>
         {admins.length === 0 ? (
           <p className="text-xs text-slate-500">
-            Aucun admin entreprise — le CADC doit en désigner un (console SaaS) pour l&apos;administration interne.
+            Aucun admin entreprise  le CADC doit en désigner un (console SaaS) pour l&apos;administration interne.
           </p>
         ) : (
           <ul className="divide-y divide-slate-800">

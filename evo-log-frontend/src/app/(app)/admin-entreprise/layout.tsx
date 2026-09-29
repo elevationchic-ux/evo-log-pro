@@ -1,6 +1,6 @@
 'use client';
 
-// Garde de périmètre pour l'arborescence /admin-entreprise (Phase 2 — niveau 1).
+// Garde de périmètre pour l'arborescence /admin-entreprise (Phase 2  niveau 1).
 //
 // La sidebar ne publie ce groupe qu'aux rôles ADMIN / SUPER_ADMIN ; ce garde
 // route-level ferme le trou « saisie directe de l'URL » pour que l'écran

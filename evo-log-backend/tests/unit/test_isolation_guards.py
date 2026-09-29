@@ -5,7 +5,7 @@ Zero-Mock applique aux TESTS : la fixture `client` authentifie tout par defaut
 verrouillent le contrat pour qu'une future modif de conftest ne puisse plus
 casser silencieusement l'isolation :
 
-1. `get_db` doit rester surcharge pendant TOUTE la duree d'un test — meme dans
+1. `get_db` doit rester surcharge pendant TOUTE la duree d'un test  meme dans
    la fixture `unauthenticated`. Un `app.dependency_overrides.clear()` en cours
    de test reinjecterait l'engine reel de l'application, donc la base de dev
    `kamlog_erp.db` (vue reelle : le fichier etait mutale par les runs avant le

@@ -1,6 +1,6 @@
 'use client';
 
-// Console Super-Admin CADC — File d'arbitrage des demandes d'accréditation.
+// Console Super-Admin CADC  File d'arbitrage des demandes d'accréditation.
 //
 // Boucle Phase 3 : un admin entreprise (niveau 1) demande l'ouverture d'un
 // module verrouillé (POST /company-admin/modules/demandes -> Accreditation
@@ -27,7 +27,7 @@ interface Demande {
 }
 
 const toISO = (d: Date) => d.toISOString().slice(0, 10);
-const fmtDate = (s?: string | null) => (s ? new Date(s).toLocaleDateString('fr-FR') : '—');
+const fmtDate = (s?: string | null) => (s ? new Date(s).toLocaleDateString('fr-FR') : '');
 
 export default function CadcDemandesAccreditationPage() {
   const [rows, setRows] = useState<Demande[]>([]);
@@ -152,7 +152,7 @@ export default function CadcDemandesAccreditationPage() {
                       <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-amber-300 font-mono text-[11px]">{d.module}</span>
                       <p className="text-[10px] text-slate-500 font-sans mt-0.5">{d.libelle}</p>
                     </td>
-                    <td className="py-3.5 px-4 font-sans text-slate-400 max-w-[240px] truncate" title={d.motif || ''}>{d.motif || '—'}</td>
+                    <td className="py-3.5 px-4 font-sans text-slate-400 max-w-[240px] truncate" title={d.motif || ''}>{d.motif || ''}</td>
                     <td className="py-3.5 px-4 text-[11px] text-slate-400">{fmtDate(d.created_at)}</td>
                     <td className="py-3.5 px-4">
                       <div className="flex justify-end gap-2">

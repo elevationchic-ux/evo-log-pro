@@ -39,7 +39,7 @@ class RemovalSlipCreate(BaseModel):
 
 
 class RemovalSlipUpdate(BaseModel):
-    # Batch 16 : `statut` n'est PAS un champ editable — les transitions
+    # Batch 16 : `statut` n'est PAS un champ editable  les transitions
     # d'etat passent UNIQUEMENT par /validate et /refuse (circuit signature).
     # Le champ est garde ici uniquement pour etre REJETE explicitement (400
     # pedagogique) : sans lui, pydantic ignorerait la cle en silence.
@@ -134,7 +134,7 @@ async def create_removal_slip(
 ):
     """Crée un nouveau bon d'enlèvement avec ses lignes d'articles.
 
-    Batch 16 : validations d'existence explicites (client, entrepot, stocks) —
+    Batch 16 : validations d'existence explicites (client, entrepot, stocks) 
     SQLite n'impose PAS les FK par defaut, sans controle un bon pointerait sur
     des ids inexistants. Numeration provisoire `BE-YYYYMMDD-NNNN` : sequence
     par jour, boucle anti-collision (les suppressions de brouillons laissent
@@ -258,10 +258,10 @@ async def update_removal_slip(
 ):
     """Met a jour l'en-tete d'un bon d'enlevement NON signe.
 
-    Batch 16 — circuit de signature :
+    Batch 16  circuit de signature :
     - `statut` n'est PLUS modifiable ici : passez par /validate (signature =
       decrement reel du stock) ou /refuse. Le PUT allowait jadis de poser
-      statut='valide' sans aucun decript — faux document signe.
+      statut='valide' sans aucun decript  faux document signe.
     - un bon valide ou refuse est IMMUABLE (le magasinier ne peut que valider,
       pas corriger a posteriori un document signe).
     - les LIGNES ne sont jamais modifiables par cette voie (aucun endpoint de
@@ -300,7 +300,7 @@ async def validate_removal_slip(
 ):
     """Signe le bon d'enlevement et deduit reellement les stocks.
 
-    Batch 16 — sortie de stock reelle et auditable :
+    Batch 16  sortie de stock reelle et auditable :
     - rupture REFUSEE : l'ancien code faisait `max(0, dispo - qte)`, soit un
     stock qui ne descend jamais sous 0 quel que soit l'ecart demande. Desormais
     un 400 enumerant les lignes en rupture, SANS aucun decript (tout-ou-rien).
@@ -403,7 +403,7 @@ async def refuse_removal_slip(
 ):
     """Refuse (signe negatives) le bon : statut `refuse`, AUCUN decript.
 
-    Le motif est obligatoire et trace dans `notes` — un refus sans raison
+    Le motif est obligatoire et trace dans `notes`  un refus sans raison
     n'est pas opposable. La liste/stats filtraient deja sur `refuse` ; seuls
     les endpoints de signature font desormais passer a cet etat.
     """

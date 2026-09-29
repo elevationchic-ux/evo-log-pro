@@ -42,7 +42,7 @@ import type {
 
 // Les chaines comparées à `statut` sortent de `StatutTransport` (backend,
 // sans accent). Toute comparaison avec 'créé', 'livré', 'annulé' serait du
-// code mort — elles sont explicitement retirées de la page batch 12.
+// code mort  elles sont explicitement retirées de la page batch 12.
 const STATUTS = {
   PLANIFIE: 'planifie',
   EN_CHARGEMENT: 'en_chargement',
@@ -117,7 +117,7 @@ export default function TransportInternationalPage() {
   };
 
   // Les clés de `parStatut` doivent correspondre EXACTÉMENT à `StatutTransport`
-  // backend (sans accent). Le switch précédent testait 'livré' / 'annulé' —
+  // backend (sans accent). Le switch précédent testait 'livré' / 'annulé' 
   // jamais égal, donc tous les OT tombaient dans le default ambre.
   const getStatutBadge = (s: string) => {
     switch (s) {
@@ -231,22 +231,22 @@ export default function TransportInternationalPage() {
                 {ordres.map((o) => (
                   <tr key={o.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-5 py-4 font-mono text-xs text-indigo-400">{o.numero_ot}</td>
-                    <td className="px-5 py-4 text-slate-300 uppercase">{String(o.type_transit || '—')}</td>
+                    <td className="px-5 py-4 text-slate-300 uppercase">{String(o.type_transit || '')}</td>
                     <td className="px-5 py-4 text-slate-300 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-slate-500" />{o.lieu_chargement || '—'}
+                      <MapPin className="w-3 h-3 text-slate-500" />{o.lieu_chargement || ''}
                       <ArrowRight className="w-3 h-3 text-slate-500 mx-1" />
-                      <MapPin className="w-3 h-3 text-cyan-500" />{o.lieu_livraison || '—'}
+                      <MapPin className="w-3 h-3 text-cyan-500" />{o.lieu_livraison || ''}
                     </td>
                     <td className="px-5 py-4 text-slate-300">
-                      {o.pays_destination || '—'}
+                      {o.pays_destination || ''}
                       {o.code_pays_destination ? ` (${o.code_pays_destination})` : ''}
                     </td>
                     <td className="px-5 py-4 text-slate-300">
-                      {o.poids_net != null ? Number(o.poids_net).toLocaleString('fr-FR') : '—'}
+                      {o.poids_net != null ? Number(o.poids_net).toLocaleString('fr-FR') : ''}
                     </td>
                     <td className="px-5 py-4">
                       <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border ${getStatutBadge(o.statut)}`}>
-                        {o.statut || '—'}
+                        {o.statut || ''}
                       </span>
                     </td>
                     <td className="px-5 py-4">

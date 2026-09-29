@@ -58,7 +58,7 @@ export default function LoginPage() {
     try {
       // /auth/login est appele par le navigateur, pas par NextAuth : seul le
       // backend sait si le compte exige un second facteur, et il le declare
-      // dans le corps de la reponse (`two_factor_required`) — une information
+      // dans le corps de la reponse (`two_factor_required`)  une information
       // que la plomberie signIn() de next-auth v4 ne peut pas remonter.
       const res = await apiClient.post('/auth/login', { username: email, password });
       const data = res.data || {};

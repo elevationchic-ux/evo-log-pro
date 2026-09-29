@@ -1,4 +1,4 @@
-"""Phase 3 Tranche A — Espace departement (niveau 2, chef de departement).
+"""Phase 3 Tranche A  Espace departement (niveau 2, chef de departement).
 
 Ferme le maillon "chef de departement" du roadmap (plan PHASE 3) : un niveau 2
 ne voit et ne pilote QUE son propre departement. Trois maillons couverts :

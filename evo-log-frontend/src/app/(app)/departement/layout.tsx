@@ -1,6 +1,6 @@
 'use client';
 
-// Garde de périmètre pour l'arborescence /departement (Phase 3 — niveau 2).
+// Garde de périmètre pour l'arborescence /departement (Phase 3  niveau 2).
 //
 // La sidebar ne publie ce groupe qu'aux rôles CHEF_DEPARTEMENT et supérieurs ;
 // ce garde route-level ferme le trou « saisie directe de l'URL » pour que

@@ -1,4 +1,4 @@
-"""Phase 4 — Certification de l'etancheite multi-tenant.
+"""Phase 4  Certification de l'etancheite multi-tenant.
 
 Le mecanisme d'isolation (app.core.tenant_enforcement + tenant_context) etait
 deja prouve au niveau ORM (tests/unit/test_tenant_isolation.py). Ce module ferme
@@ -9,7 +9,7 @@ les DEUX maillons jusque-la non couverts :
      oublierait company_id basculerait silencieusement en global / fail-open).
 
   2. CHAINE HTTP COMPLETE : un vrai JWT d'un utilisateur rattache a une
-     entreprise active l'isolation de bout en bout — middleware
+     entreprise active l'isolation de bout en bout  middleware
      (TenantContextMiddleware, qui lit l'en-tete Authorization et resout la
      societe) -> contexte contextvar -> moteur ORM -> router. Deux societes
      distinctes ne DOIVENT jamais voir leurs ressources reciproques via l'API
@@ -18,7 +18,7 @@ les DEUX maillons jusque-la non couverts :
 Contrairement a la fixture ``client`` (faux super-utilisateur, enforcement
 OFF par conception), ces tests exercent l'authentification REELLE et le
 middleware REEL, en partageant la base en memoire de l'application (StaticPool
-:memory:) via app.core.database.SessionLocal — la meme que celle que le
+:memory:) via app.core.database.SessionLocal  la meme que celle que le
 middleware ouvre pour resoudre le tenant.
 """
 from __future__ import annotations
@@ -78,7 +78,7 @@ def _ensure_app_schema():
     Doit tourner AVANT toute seed : l'isolation echoue bruyamment ("no such
     table") si un test inserait avant que le schema existe. Le shutdown du
     TestClient (app.main.lifespan) appelle engine.dispose(), ce qui detruit
-    cette base en memoire — d'ou l'absence volontaire de nettoyage de lignes
+    cette base en memoire  d'ou l'absence volontaire de nettoyage de lignes
     ici : tout est deja volatil et cloisonne par module.
     """
     import app.main  # noqa: F401 - enregistre tous les modeles

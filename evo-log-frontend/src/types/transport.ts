@@ -1,10 +1,10 @@
 /**
- * Types du module Transport — ALIGNED avec les vrais schémas backend.
+ * Types du module Transport  ALIGNED avec les vrais schémas backend.
  *
  * Historique (P1 #5 quick-win, batch 10) :
  *   ce fichier déclarait une interface `Mission` avec `id: string`,
  *   `origin`, `destination`, `merchandise`, `status: 'pending' |
- *   'in_progress' | ...` — AUCUN de ces champs n'existe dans
+ *   'in_progress' | ...`  AUCUN de ces champs n'existe dans
  *   `MissionResponse` backend (schemas/transport.py). Le type était du
  *   coup jamais importé (grep `from '@/types/transport'` : 0 résultat),
  *   et les pages roulaient en `any`. Résultat : une faute de frappe sur
@@ -33,7 +33,7 @@ export type CamionStatut =
   | 'reserved';
 
 /**
- * MissionResponse (schemas/transport.py::MissionResponse) — GET /missions
+ * MissionResponse (schemas/transport.py::MissionResponse)  GET /missions
  * inclut les colonnes de rattachement documentaire ajoutées par la
  * migration 024 (conteneur_id, numero_bl) : elles ne sont JAMAIS déduites,
  * seulement saisies explicitement sur la ligne.
@@ -64,7 +64,7 @@ export interface MissionResponse {
 
 /**
  * CamionResponse (schemas/transport.py::CamionResponse).
- * Attention : `c.status` (nom backend) et non `c.statut` — le backend
+ * Attention : `c.status` (nom backend) et non `c.statut`  le backend
  * mélange les deux selon les modules, celui-ci a retenu `status`.
  */
 export interface CamionResponse {

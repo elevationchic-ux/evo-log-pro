@@ -176,7 +176,7 @@ export const saasConsoleAPI = {
   // File des demandes d'accreditation emises par les admins entreprise
   listPendingAccreditationRequests: () =>
     apiClient.get(`${CADC_BASE}/accreditations/demandes`),
-  // Phase 3 — arbitrage CADC : conversion en place de la demande
+  // Phase 3  arbitrage CADC : conversion en place de la demande
   // (approuver -> accreditation active datee) ou refus trace (refuser).
   approveAccreditationRequest: (
     requestId: number,
@@ -579,7 +579,7 @@ export const magasinAPI = {
   deleteClient: (id: number) =>
     apiClient.delete(`/api/magasin/clients/${id}`),
   // Bons de réception fournisseur (Batch 19 : la route /magasin-avance/
-  // receptions existe enfin sur le modèle réel — payload : fournisseur_id,
+  // receptions existe enfin sur le modèle réel  payload : fournisseur_id,
   // entrepot_id, commande_fournisseur_id?, date_reception?, notes?).
   getReceptions: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin-avance/receptions', { params }),

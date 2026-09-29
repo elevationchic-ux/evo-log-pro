@@ -573,22 +573,22 @@ class ReapprovisionnementService:
 
 
 # ReceptionService / SortieService / RetourService / ColisService /
-# KPIStockService — SUPPRIMÉS (Batch 19). Ces cinq classes n'avaient AUCUN
+# KPIStockService  SUPPRIMÉS (Batch 19). Ces cinq classes n'avaient AUCUN
 # consommateur (le router ne retenait que ColisService, lui-même reconstruit
 # en direct) et écrivaient/isaient des colonnes fantômes :
 #   ReceptionService : BonReception(commande_id), LigneBonReception(bon_id,
 #     article_id, emplacement_id), Stock.article_id/quantite → TypeError ou
 #     perte silencieuse.
-#   SortieService : BonSortie(destinataire_id), stock.quantite — le VRAI
+#   SortieService : BonSortie(destinataire_id), stock.quantite  le VRAI
 #     circuit de sortie vit dans app/routers/v1/removal_slip.py (Batch 16).
 #   RetourService : RetourClient(article_id, etat), action_effectuee/
-#     date_traitement — le VRAI circuit retours est dans
+#     date_traitement  le VRAI circuit retours est dans
 #     app/routers/v1/magasin_avance.py (Batch 17).
 #   ColisService : reference_colis/date_creation (TypeError), code_barres/
-#     palette_id/date_palettisation (colonnes inexistantes) — routes /colis
+#     palette_id/date_palettisation (colonnes inexistantes)  routes /colis
 #     reconstruites Batch 19 sur le modèle réel.
 #   KPIStockService : MouvementStock.article_id, Stock.quantite/
-#     date_inventaire/statut "valide" (AttributError garantis) — KPI
+#     date_inventaire/statut "valide" (AttributError garantis)  KPI
 #     reconstruits Batch 17/18 dans le router.
 # Le ReceptionService encore consommé par les tests d'acquisition est une
 # AUTRE classe : app/services/acquisition_service.py.

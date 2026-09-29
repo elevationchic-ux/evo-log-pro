@@ -1,4 +1,4 @@
-// src/lib/login-session.ts — Ouverture de session NextAuth depuis un jalon
+// src/lib/login-session.ts  Ouverture de session NextAuth depuis un jalon
 // backend deja valide.
 //
 // Le formulaire de connexion et l'ecran 2FA appellent tous deux /api/v1/auth/*

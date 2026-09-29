@@ -180,7 +180,7 @@ export default function TransportControlPage() {
           annulee: <StatusBadge label="Annulée" variant="error" icon />,
           en_retard: <StatusBadge label="En Retard" variant="error" icon pulse />,
         };
-        return parStatut[item.status] || <StatusBadge label={item.status || '—'} />;
+        return parStatut[item.status] || <StatusBadge label={item.status || ''} />;
       }
     },
     { key: 'eta', header: 'ETA', sortable: true },
@@ -225,7 +225,7 @@ export default function TransportControlPage() {
         ))}
       </div>
 
-      {/* Stats Overview — calculees depuis les donnees API deja chargees.
+      {/* Stats Overview  calculees depuis les donnees API deja chargees.
           Les valeurs precedentes (42, 38, « 3,150 km », « 31.8 L/100km »)
           etaient des litteraux inventes dans le JSX, presents quelle que soit
           la base. */}
@@ -237,7 +237,7 @@ export default function TransportControlPage() {
           label="Distance Planifiée"
           value={(() => {
             const km = missions.map((m) => m.distance_km).filter((v): v is number => typeof v === 'number').reduce((a, b) => a + b, 0);
-            return missions.some((m) => typeof m.distance_km === 'number') ? `${km.toLocaleString('fr-FR')} km` : '—';
+            return missions.some((m) => typeof m.distance_km === 'number') ? `${km.toLocaleString('fr-FR')} km` : '';
           })()}
           color="warning"
           icon={<span className="material-symbols-outlined">speed</span>}

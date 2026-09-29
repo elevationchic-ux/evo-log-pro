@@ -1,4 +1,4 @@
-"""Espace departement (Phase 3/4 — niveau 2, Chef de departement).
+"""Espace departement (Phase 3/4  niveau 2, Chef de departement).
 
 Perimetre strict : un chef de departement (role_level 2) ne voit et ne pilote
 QUE les collaborateurs de SON departement. L'Admin Entreprise (1) et le CADC (0)
@@ -360,7 +360,7 @@ def set_department_modules(
     db: Session = Depends(get_db),
     current: User = Depends(require_department_head),
 ):
-    """Allocation des modules d'un departement — GARELEE aux niveaux <= 1.
+    """Allocation des modules d'un departement  GARELEE aux niveaux <= 1.
 
     Un chef (niveau 2) ne peut pas se auto-grantir un module : toute ecriture ici
     est refusee 403. Les modules demandes doivent etre SOUS-ENSEMBLE des modules
@@ -576,7 +576,7 @@ def _check_publication_deadline(date_jour: _date, new_statut: Optional[str]) -> 
     Un tour de garde dont la date_jour tombe dans une semaine ISO FUTURE ne peut
     passer en statut CONFIRME (publication) que si l'on est au plus mercredi de
     la semaine ISO precedente. Au-dela, la fenetre de publication est fermée ;
-    le tour reste en PLANIFIE (brouillon) — modification libre, mais pas validation.
+    le tour reste en PLANIFIE (brouillon)  modification libre, mais pas validation.
     """
     if (new_statut or "").upper() != "CONFIRME":
         return  # Seule la publication est concernee.

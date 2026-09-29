@@ -189,7 +189,7 @@ async def scanner_code_barres_rf(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("magasin.picking.create")),
 ):
-    """Scan barcode / QR code with RF handheld terminal — resolution reelle
+    """Scan barcode / QR code with RF handheld terminal  resolution reelle
     contre le master data (plus de « code >= 4 caracteres = conforme »)."""
     from app.services.magasin_wms_avance_service import RadioFrequencePDAService
     code = payload.get("code_scanne")

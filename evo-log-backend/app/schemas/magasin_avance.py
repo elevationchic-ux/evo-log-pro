@@ -126,7 +126,7 @@ class TransfertStockResponse(TransfertStockBase):
         from_attributes = True
 
 
-# InventaireTournant schemas — Batch 18 : ALIGNES SUR LE MODELE REEL
+# InventaireTournant schemas  Batch 18 : ALIGNES SUR LE MODELE REEL
 # (app/models/magasin_avance.InventaireTournant). L'ancien schema inventait
 # date_inventaire / validateur_id / date_validation : colonnes qui n'existent
 # PAS (reel : date_debut, date_fin, responsable, notes) → TypeError 500 garanti
@@ -179,7 +179,7 @@ class LigneInventaireResponse(BaseModel):
         from_attributes = True
 
 
-# FournisseurStock schemas — Batch 18 : alignés sur le modèle réel
+# FournisseurStock schemas  Batch 18 : alignés sur le modèle réel
 # (delai_livraison_jours/qualite/fiabilite étaient des fantaisies : le modèle
 # porte delai_moyen_livraison, taux_livraison_ponctuelle, qualite_produit,
 # prix_competitif, service_client, note_globale).
@@ -204,7 +204,7 @@ class FournisseurStockResponse(FournisseurStockCreate):
         from_attributes = True
 
 
-# CommandeFournisseur / LigneCommandeFournisseur schemas — SUPPRIMÉS
+# CommandeFournisseur / LigneCommandeFournisseur schemas  SUPPRIMÉS
 # (Batch 18) : squelettes fantômes jamais consommés par aucune route
 # (reference, date_prevue, date_livraison, article_id n'existent pas ; le
 # modèle réel porte numero_commande, date_livraison_prevue,
@@ -212,7 +212,7 @@ class FournisseurStockResponse(FournisseurStockCreate):
 # /reapprovisionnement/automatique qui les construit sur le modèle réel.
 
 
-# BonReception schemas — Batch 19 : ALIGNES SUR LE MODELE REEL
+# BonReception schemas  Batch 19 : ALIGNES SUR LE MODELE REEL
 # (app/models/magasin_avance.BonReception). L'ancien schema inventait
 # commande_id (reel : commande_fournisseur_id), imposait date_reception et
 # un statut "en_cours" hors workflow reel (en_attente/valide/refuse) ; le
@@ -227,7 +227,7 @@ class BonReceptionCreate(BaseModel):
 
 
 class BonReceptionUpdate(BaseModel):
-    # statut jamais modifiable ici — transitions uniquement via /valider
+    # statut jamais modifiable ici  transitions uniquement via /valider
     fournisseur_id: Optional[int] = None
     entrepot_id: Optional[int] = None
     date_reception: Optional[date] = None
@@ -251,7 +251,7 @@ class BonReceptionResponse(BaseModel):
         from_attributes = True
 
 
-# LigneBonReception schemas — Batch 19 : le fantaisiste
+# LigneBonReception schemas  Batch 19 : le fantaisiste
 # (bon_id, article_id, emplacement_id) remplace par les colonnes reelles
 # (bon_reception_id, stock_id, emplacement en String). quantite_commandee
 # n'est plus obligatoire (NULL admis si réception sans commande).
@@ -289,14 +289,14 @@ class RefusBonReception(BaseModel):
     motif: str
 
 
-# BonSortie schemas — SUPPRIMÉS (Batch 16) : squelettes fantômes déconnectés du
+# BonSortie schemas  SUPPRIMÉS (Batch 16) : squelettes fantômes déconnectés du
 # modèle réel (destinataire_id, bon_id, quantite n'existent pas sur
 # BonSortie/LigneBonSortie ; stock.quantite non plus). Les VRAIS schémas du bon
 # de sortie vivent dans app/schemas/removal_slip.py (route live
 # /api/v1/magasin/removal-slips).
 
 
-# RetourClient schemas — Batch 17 : ALIGNES SUR LE MODELE REEL
+# RetourClient schemas  Batch 17 : ALIGNES SUR LE MODELE REEL
 # (app/models/magasin_avance.RetourClient). Les anciens squelettes inventaient
 # article_id / etat / action_effectuee / date_traitement : champs qui
 # n'existent PAS sur le modele → TypeError 500 a la creation, perte silencieuse
@@ -343,7 +343,7 @@ class RetourClientResponse(BaseModel):
         from_attributes = True
 
 
-# LitigeTransporteur schemas — Batch 17 : alignés sur le modèle réel
+# LitigeTransporteur schemas  Batch 17 : alignés sur le modèle réel
 # (date_litige → date_incident, statut/colonnes assureur et police reels).
 class LitigeTransporteurCreate(BaseModel):
     transporteur_id: int
@@ -388,10 +388,10 @@ class LitigeTransporteurResponse(BaseModel):
         from_attributes = True
 
 
-# Colis schemas — Batch 19 : alignés sur le modèle réel (Colis porte
+# Colis schemas  Batch 19 : alignés sur le modèle réel (Colis porte
 # numero_colis / emplacement / date_etiquetage(Date) / operateur ;
 # reference_colis, code_barres, palette_id, date_creation, date_palettisation
-# N'EXISTENT PAS — l'ancien ColisService y écrivait en silence ou levait
+# N'EXISTENT PAS  l'ancien ColisService y écrivait en silence ou levait
 # TypeError). La palettisation n'étant pas modélisée (aucune colonne), elle
 # est tracée dans `emplacement` (l'unique colonne de localisation réelle).
 class ColisCreate(BaseModel):
@@ -438,7 +438,7 @@ class ColisResponse(BaseModel):
 # KPI Response schemas
 class RotationStockResponse(BaseModel):
     # Batch 17 : expose les composantes reelles (sorties cumulees, stock
-    # actuel) — rotation None quand le stock est a zero (indefinie, pas un 0
+    # actuel)  rotation None quand le stock est a zero (indefinie, pas un 0
     # mensonger).
     article_id: int
     jours: int = 90
@@ -448,7 +448,7 @@ class RotationStockResponse(BaseModel):
 
 
 class PrecisionInventaireResponse(BaseModel):
-    # Batch 18 : precision None + message quand aucune ligne comptee — un
+    # Batch 18 : precision None + message quand aucune ligne comptee  un
     # inventaire jamais mesure n'est pas un inventaire a 0 %.
     inventaire_id: int
     lignes_total: int = 0
@@ -459,7 +459,7 @@ class PrecisionInventaireResponse(BaseModel):
 
 class PerformanceFournisseurResponse(BaseModel):
     # Batch 18 : note/taux/delai None quand la mesure est impossible
-    # (aucune commande, aucune date de livraison mesurable) — plus de faux zero.
+    # (aucune commande, aucune date de livraison mesurable)  plus de faux zero.
     fournisseur_id: int
     commandes: int = 0
     commandes_livrees: int = 0
@@ -486,7 +486,7 @@ class ReapproIgnoreInfo(BaseModel):
 
 class ReapproAutomatiqueResponse(BaseModel):
     # Batch 18 : une seule commande groupee (modele reel : lignes -> stock_id,
-    # prix NOT NULL — les stocks sans prix sont IGNOREES et declarees, jamais
+    # prix NOT NULL  les stocks sans prix sont IGNOREES et declarees, jamais
     # pricees a 0.0 invente).
     commande_id: int
     numero_commande: str

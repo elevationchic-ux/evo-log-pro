@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * K-Finance — Gestion des factures.
+ * K-Finance  Gestion des factures.
  *
  * Toutes les lignes viennent de GET /api/finance/factures (les deux tables de
  * factures de la base, `factures` d'exploitation et `factures_ohada`, fusionnées
@@ -164,7 +164,7 @@ export default function KFinanceBillingPage() {
   const dateFmt = useMemo(() => new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric' }), [locale]);
 
   const fmtDate = useCallback(
-    (iso: string | null) => (iso ? dateFmt.format(new Date(iso)) : '—'),
+    (iso: string | null) => (iso ? dateFmt.format(new Date(iso)) : ''),
     [dateFmt],
   );
 
@@ -552,7 +552,7 @@ export default function KFinanceBillingPage() {
                       <td className="px-4 py-3 text-right tabular-nums text-on-surface">
                         {(() => {
                           const r = resteDu(f);
-                          return r === null ? '—' : money.format(Math.round(r));
+                          return r === null ? '' : money.format(Math.round(r));
                         })()}
                       </td>
                       <td className="px-4 py-3"><StatutBadge statut={f.statut} t={t} /></td>
@@ -625,7 +625,7 @@ export default function KFinanceBillingPage() {
                       <dt className="text-on-surface-variant">{t('Montant TTC', 'Gross')}</dt>
                       <dd className="text-on-surface tabular-nums">{money.format(Math.round(f.montant_ttc || 0))} XAF</dd>
                       <dt className="text-on-surface-variant">{t('Reste dû', 'Balance')}</dt>
-                      <dd className="text-on-surface tabular-nums">{r === null ? '—' : `${money.format(Math.round(r))} XAF`}</dd>
+                      <dd className="text-on-surface tabular-nums">{r === null ? '' : `${money.format(Math.round(r))} XAF`}</dd>
                     </dl>
                     <div className="flex flex-wrap items-center gap-2 pt-1">
                       {f.source === 'ohada' && (
@@ -970,7 +970,7 @@ function CreateInvoiceModal({
             <select className={inputCls} value={form.client_id} onChange={(e) => set('client_id', e.target.value)}>
               {clients.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.code ? `${c.code} — ${c.name}` : c.name}
+                  {c.code ? `${c.code}  ${c.name}` : c.name}
                 </option>
               ))}
             </select>
@@ -1058,8 +1058,8 @@ function PaymentModal({
       });
       const apres = res.data?.statut_facture;
       toast.success(t(
-        `Encaissement enregistré${apres ? ` — facture « ${apres} »` : ''}.`,
-        `Payment recorded${apres ? ` — invoice "${apres}"` : ''}.`,
+        `Encaissement enregistré${apres ? `  facture « ${apres} »` : ''}.`,
+        `Payment recorded${apres ? `  invoice "${apres}"` : ''}.`,
       ));
       onSaved();
     } catch (err) {
@@ -1072,7 +1072,7 @@ function PaymentModal({
 
   return (
     <ModalShell
-      title={t(`Encaissement — ${facture.numero_facture}`, `Payment — ${facture.numero_facture}`)}
+      title={t(`Encaissement  ${facture.numero_facture}`, `Payment  ${facture.numero_facture}`)}
       onClose={onClose}
       footer={
         <div className="flex items-center justify-end gap-2">
@@ -1093,7 +1093,7 @@ function PaymentModal({
     >
       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
         <span className="text-on-surface-variant">{t('Client', 'Client')}</span>
-        <span className="text-on-surface">{facture.client_nom || '—'}</span>
+        <span className="text-on-surface">{facture.client_nom || ''}</span>
         <span className="text-on-surface-variant">{t('Montant TTC', 'Gross total')}</span>
         <span className="text-on-surface tabular-nums">{(facture.montant_ttc || 0).toLocaleString(locale)} XAF</span>
         <span className="text-on-surface-variant">{t('Reste dû connu', 'Known balance')}</span>

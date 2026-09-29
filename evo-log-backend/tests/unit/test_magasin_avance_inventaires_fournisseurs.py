@@ -1,11 +1,11 @@
-"""Batch 18 — Inventaires tournants, évaluations/performance fournisseur, réappro.
+"""Batch 18  Inventaires tournants, évaluations/performance fournisseur, réappro.
 
 Les sept endpoints de app/routers/v1/magasin_avance.py (sections Inventaires /
 Fournisseurs / Réapprovisionnement) étaient morts du syndrome « champs
 fantômes » : InventaireTournant(date_inventaire=…), stock.quantite (inexistant
 → AttributeError), FournisseurStock(delai_livraison_jours/qualite/fiabilite=…),
 cmd.date_livraison/date_prevue, CommandeFournisseur(reference=…),
-LigneCommandeFournisseur(article_id=stock.article_id…) — et le statut
+LigneCommandeFournisseur(article_id=stock.article_id…)  et le statut
 inventaire "valide" hors du workflow réel planifie/en_cours/termine/annule.
 
 Ces tests verrouillent le comportement NEUF, sur colonnes réelles :
@@ -16,7 +16,7 @@ Ces tests verrouillent le comportement NEUF, sur colonnes réelles :
 * évaluation fournisseur : notes 1-10 validées, note_globale calculée ou None ;
 * performance : aucune commande → note None (pas 0/100) ; statut réel « livree » ;
 * réappro : UNE commande groupée, prix réels de la fiche stock, stocks sans
-  prix IGNORES et déclarés — jamais de prix 0.0 inventé.
+  prix IGNORES et déclarés  jamais de prix 0.0 inventé.
 """
 from datetime import date
 

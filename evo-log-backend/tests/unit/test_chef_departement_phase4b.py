@@ -1,4 +1,4 @@
-"""Phase 4 Tranche B — Ecriture Planning + Validation Presence (espace chef, niveau 2).
+"""Phase 4 Tranche B  Ecriture Planning + Validation Presence (espace chef, niveau 2).
 
 Couvert :
   - POST /departement/planning (creation tour de garde, deadline "au mercredi") ;
@@ -167,7 +167,7 @@ def test_validate_presence_requires_auth(wb_client):
 
 
 # --------------------------------------------------------------------------- #
-# 2. POST /planning — creation
+# 2. POST /planning  creation
 # --------------------------------------------------------------------------- #
 def test_chef_creates_planning_for_own_member(wb_client, sandbox):
     resp = wb_client.post(
@@ -287,7 +287,7 @@ def test_create_planning_confirme_future_week_rejected_after_deadline(wb_client,
 
 
 # --------------------------------------------------------------------------- #
-# 4. PUT /planning/{id} — modification
+# 4. PUT /planning/{id}  modification
 # --------------------------------------------------------------------------- #
 def test_chef_updates_planning(wb_client, sandbox):
     resp = wb_client.put(
@@ -333,7 +333,7 @@ def test_update_planning_invalid_statut_is_400(wb_client, sandbox):
 
 
 # --------------------------------------------------------------------------- #
-# 5. DELETE /planning/{id} — suppression
+# 5. DELETE /planning/{id}  suppression
 # --------------------------------------------------------------------------- #
 def test_chef_deletes_planning(wb_client, sandbox):
     # First create one to delete (avoid deleting the module-scoped fixture row).
@@ -380,7 +380,7 @@ def test_delete_planning_cross_dept_is_403(wb_client, sandbox):
 
 
 # --------------------------------------------------------------------------- #
-# 6. POST /presence/{id}/valider — validation emargement
+# 6. POST /presence/{id}/valider  validation emargement
 # --------------------------------------------------------------------------- #
 def test_chef_validates_presence(wb_client, sandbox):
     resp = wb_client.post(

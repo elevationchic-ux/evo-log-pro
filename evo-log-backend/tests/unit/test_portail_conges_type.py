@@ -5,7 +5,7 @@ Le routeur acceptait le ``type_conge`` par rapprochement de sous-chaînes
 d'enum exactes rendues par l'API, et ``absence_autorisee`` ne contient aucune de
 ces sous-chaînes : la demande tombait silencieusement dans la branche par défaut
 et le salarié voyait un congé annuel enregistré à la place de son absence
-autorisée — sur un document social, ce n'est pas un détail d'affichage.
+autorisée  sur un document social, ce n'est pas un détail d'affichage.
 
 Couvre aussi le contrat de l'écran : les statuts doivent remonter dans leur
 valeur brute (``en_attente``) et non au nom de leur membre (``EN_ATTENTE``),

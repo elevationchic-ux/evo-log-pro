@@ -12,7 +12,7 @@ BACKUP = "kamlog_erp.db.bak-pre-b15"
 PREDICATE = "url LIKE 'http://testserver%'"
 
 if not os.path.exists(BACKUP):
-    print(f"ABORT: backup {BACKUP} manquant — ne pas purger sans filet.")
+    print(f"ABORT: backup {BACKUP} manquant  ne pas purger sans filet.")
     sys.exit(2)
 
 con = sqlite3.connect(DB, timeout=15)
@@ -22,7 +22,7 @@ kept = total - doomed
 print(f"audit_logs total={total} testserver={doomed} a conserver={kept}")
 
 if not APPLY:
-    print("DRY-RUN — rien n'a ete supprime. Relancer avec --apply.")
+    print("DRY-RUN  rien n'a ete supprime. Relancer avec --apply.")
     sys.exit(0)
 
 con.execute(f"DELETE FROM audit_logs WHERE {PREDICATE}")

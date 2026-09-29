@@ -154,7 +154,7 @@ export function RecentWorkingTabs() {
                     : 'bg-transparent text-on-surface-variant hover:bg-surface/60 hover:text-on-surface'
                 }
               `}
-              title={`${display} — ${tab.path}`}
+              title={`${display}  ${tab.path}`}
             >
               <span className={`material-symbols-outlined text-[14px] ${isActive ? 'text-primary' : 'text-on-surface-variant'}`}>
                 {tab.icon}

@@ -542,12 +542,12 @@ def valider_inventaire(
 ):
     """Valide l'inventaire et ajuste réellement le stock (Batch 18).
 
-    Anciens fantômes : stock.quantite (perte silencieuse — l'ajustement
+    Anciens fantômes : stock.quantite (perte silencieuse  l'ajustement
     n'était jamais persisté sur la bonne colonne), validateur_id /
     date_validation (colonnes inexistantes) et statut "valide" hors du
     workflow réel planifie/en_cours/termine/annule. Ici : l'ajustement porte
     sur quantite_disponible ET chaque écart corrigé est tracé dans le registre
-    MouvementStock (type inventaire) — aucune correction invisible.
+    MouvementStock (type inventaire)  aucune correction invisible.
     Le validateur est l'utilisateur authentifié (plus de query param
     validateur_id non vérifié).
     """
@@ -609,7 +609,7 @@ def calculer_precision_inventaire(
 ):
     """Taux de précision d'un inventaire (Batch 18).
 
-    Sans ligne comptée : precision = None + message « non mesurée » — un
+    Sans ligne comptée : precision = None + message « non mesurée »  un
     inventaire jamais compté n'est pas un inventaire à 0 % (l'ancien code
     rendait un faux 0.0 mensonger).
     """
@@ -620,7 +620,7 @@ def calculer_precision_inventaire(
     lignes = db.query(LigneInventaire).filter(LigneInventaire.inventaire_id == inventaire_id).all()
     if not lignes:
         return {"inventaire_id": inventaire_id, "precision": None,
-                "message": "aucune ligne comptée — précision non mesurée"}
+                "message": "aucune ligne comptée  précision non mesurée"}
     lignes_correctes = sum(1 for l in lignes if float(l.ecart or 0) == 0)
     return {
         "inventaire_id": inventaire_id,
@@ -725,7 +725,7 @@ def evaluer_performance_fournisseur(
     if not commandes:
         return {"fournisseur_id": fournisseur_id, "commandes": 0,
                 "note": None, "taux_livraison": None, "delai_moyen_jours": None,
-                "message": "aucune commande sur la période — performance non évaluée"}
+                "message": "aucune commande sur la période  performance non évaluée"}
 
     total = len(commandes)
     livrees = sum(1 for c in commandes if c.statut == "livree")
@@ -760,7 +760,7 @@ def generer_commande_automatique(
     """Génère UNE commande groupée pour les stocks sous le seuil (Batch 18).
 
     Anciens fantômes : CommandeFournisseur(reference=..., date_prevue=...)
-    et LigneCommandeFournisseur(article_id=stock.article_id) — reference,
+    et LigneCommandeFournisseur(article_id=stock.article_id)  reference,
     date_prevue et article_id n'existent pas, et Stock n'a pas d'article_id
     (lien réel : stock_id / code_article) → TypeError avant le premier
     commit. prix_unitaire est NOT NULL sur le modèle : un stock sans prix
@@ -779,7 +779,7 @@ def generer_commande_automatique(
     stocks_bas = db.query(Stock).filter(Stock.quantite_disponible < seuil_alerte).all()
     a_commander = [s for s in stocks_bas if s.prix_unitaire is not None]
     ignorees = [{"stock_id": s.id, "code_article": s.code_article,
-                 "raison": "prix_unitaire absent de la fiche stock — aucun prix inventé"}
+                 "raison": "prix_unitaire absent de la fiche stock  aucun prix inventé"}
                 for s in stocks_bas if s.prix_unitaire is None]
     if not a_commander:
         raise HTTPException(
@@ -797,7 +797,7 @@ def generer_commande_automatique(
         statut="en_cours",
         devise="XAF",
         createur=current_user.id,
-        notes=f"Générée automatiquement — seuil {seuil_alerte}",
+        notes=f"Générée automatiquement  seuil {seuil_alerte}",
     )
     db.add(commande)
     db.flush()
@@ -915,7 +915,7 @@ def modifier_bon_reception(
     current_user: User = Depends(get_current_user)
 ):
     """Corrige un bon EN ATTENTE uniquement. Un bon valide ou refuse est
-    immuable (decision unique) — passage par /valider ou /refuser."""
+    immuable (decision unique)  passage par /valider ou /refuser."""
     from app.models.magasin_avance import BonReception
     from app.models.magasin import Entrepot
     from app.models.tiers import Fournisseur
@@ -960,7 +960,7 @@ def ajouter_ligne_reception(
     stock_id (Fantome : article_id) ; emplacement est une chaine (Fantome :
     emplacement_id). Un bon deja valide ou refuse n'accepte plus de ligne.
     Le statut de conformite est CALCULE (conforme si quantite commandee
-    fournie et egale, sinon ecart) — jamais laisse a une saisie libre.
+    fournie et egale, sinon ecart)  jamais laisse a une saisie libre.
     """
     from app.models.magasin_avance import BonReception, LigneBonReception
     from app.models.magasin import Stock
@@ -1025,8 +1025,8 @@ def valider_reception(
     silencieuse de tout l'apport), inventait un Stock(...article_id=...)
     et signait date_validation=utcnow() sur une colonne Date. Ici :
     augmentation de quantite_disponible sur les lignes reellement comptees,
-    un mouvement MouvementStock (type entree) par ligne — aucun apport
-    invisible — decision unique, validateur = utilisateur authentifie.
+    un mouvement MouvementStock (type entree) par ligne  aucun apport
+    invisible  decision unique, validateur = utilisateur authentifie.
     """
     from app.models.magasin_avance import (
         BonReception, LigneBonReception, CommandeFournisseur,
@@ -1143,7 +1143,7 @@ def refuser_reception(
 
 # ============ SORTIES ============
 # SUPPRIMÉ (Batch 16) : l'ancien trio POST /sorties, POST /sorties/{id}/lignes,
-# PUT /sorties/{id}/valider était du code mort — il construisait
+# PUT /sorties/{id}/valider était du code mort  il construisait
 # BonSortie(destinataire_id=...), LigneBonSortie(bon_id=..., quantite=...) et
 # lisait stock.quantite, champs qui n'existent pas sur les modèles
 # (TypeError systématique → 500). Le vrai circuit de bon de sortie (numérotation,
@@ -1155,8 +1155,8 @@ def refuser_reception(
 # ============ RETOURS CLIENTS ============
 # Batch 17 : reconstruit sur le modele REEL RetourClient. L'ancienne version
 # inventait article_id/etat a la creation (TypeError 500 systematique) et
-# ecrivait action_effectuee/date_traitement — colonnes inexistantes, donc
-# perte silencieuse. Attention : le modele ne porte PAS de stock_id — la
+# ecrivait action_effectuee/date_traitement  colonnes inexistantes, donc
+# perte silencieuse. Attention : le modele ne porte PAS de stock_id  la
 # reintegration physique en stock n'est pas modelisee ; aucun mouvement de
 # stock n'est ici INVENTE (Zero-Mock).
 
@@ -1284,7 +1284,7 @@ def traiter_retour(
     remplacement/remboursement/destruction) ou `refuse`.
 
     La date de traitement est TRACEE dans notes (le modele n'a pas de colonne
-    date_traitement) — rien n'est ecrit dans des colonnes inventees. Aucun
+    date_traitement)  rien n'est ecrit dans des colonnes inventees. Aucun
     mouvement de stock : la reintegration physique n'est pas modelisee sur
     RetourClient (pas de stock_id) et ne sera pas inventee.
     """
@@ -1320,7 +1320,7 @@ def traiter_retour(
     trace = (f"[TRAITE {date.today().isoformat()} par utilisateur {current_user.id}] "
              f"{decision}" + (f" ({r.action})" if r.action else ""))
     if payload.notes:
-        trace += f" — {payload.notes}"
+        trace += f"  {payload.notes}"
     r.notes = f"{r.notes + chr(10) if r.notes else ''}{trace}"
     db.commit()
     db.refresh(r)
@@ -1436,7 +1436,7 @@ def resoudre_litige(
     La resolution ecrite est obligatoire et datee (date_resolution, colonne
     reelle). `montant_indemnise` (optionnel, cloture `resolu` uniquement)
     majore la trace de l'accord en remplacant montant_reclame par le montant
-    convenu — le modele n'a pas de colonne d'indemnite separee, c'est le seul
+    convenu  le modele n'a pas de colonne d'indemnite separee, c'est le seul
     rendu honest possible sans migration.
     """
     from app.models.magasin_avance import LitigeTransporteur
@@ -1483,7 +1483,7 @@ def resoudre_litige(
 # palette_id/date_palettisation (ecriture silencieuse sur objets Python sans
 # colonne → perte pure et simple). La palette n'ayant AUCUNE colonne, la
 # palettisation est tracee dans `emplacement` (seule localisation reelle) et
-# l'etiquetage date reellement (date_etiquetage) — rien de plus.
+# l'etiquetage date reellement (date_etiquetage)  rien de plus.
 
 
 @router.get("/colis", response_model=List[ColisResponse])
@@ -1598,7 +1598,7 @@ def etiqueter_colis(
 ):
     """Étiquette un colis : date_etiquetage (colonne Date reelle) = aujourdhui.
 
-    L'ancien service ecrivait code_barres — colonne inexistante → perte
+    L'ancien service ecrivait code_barres  colonne inexistante → perte
     silencieuse. Un colis deja etiquete ne repond pas deux fois : et
     operateur traces a la premiere etiquette.
     """
@@ -1660,7 +1660,7 @@ def calculer_rotation_stock(
     """Taux de rotation annualise d'une fiche article.
 
     Batch 17 : reecrit sur les COLONNES REELLES. L'ancien code filtrait sur
-    MouvementStock.article_id, Stock.quantite et Stock.article_id — trois
+    MouvementStock.article_id, Stock.quantite et Stock.article_id  trois
     colonnes qui n'existent pas (AttributeError 500 systematique). Les
     sorties sont desormais comptees dans le registre MouvementStock (via
     stock_id), le stock actuel sur Stock.quantite_disponible, et le resultat
@@ -1711,7 +1711,7 @@ def calculer_precision_stock(
 
     Batch 17 : l'ancien code triait sur `date_inventaire` (colonne inexistante
     → AttributeError 500) et cherchait le statut `valide` qui n'existe pas
-    dans ce workflow (planifie/en_cours/termine/annule) — il n'aurait donc
+    dans ce workflow (planifie/en_cours/termine/annule)  il n'aurait donc
     jamais rien trouve. Sans inventaire termine, reponse explicite : la
     precision est `None` (« non mesuree »), pas un 0.0 invente.
     """

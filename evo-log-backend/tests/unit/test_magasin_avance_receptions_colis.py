@@ -1,4 +1,4 @@
-"""Batch 19 — Réceptions (bons + lignes + validation) et Colis.
+"""Batch 19  Réceptions (bons + lignes + validation) et Colis.
 
 Les six endpoints de app/routers/v1/magasin_avance.py (sections Réceptions /
 Colis) étaient morts du syndrome « champs fantômes » :
@@ -14,7 +14,7 @@ Ces tests verrouillent le comportement NEUF, sur colonnes réelles :
 * réception : numérotation BR-, FK fournisseur/entrepot vérifiées, lignes sur
   stock_id, statut de conformité CALCULÉ (jamais saisi librement) ;
 * validation : stock réellement augmenté (quantite_disponible) ET journalisé
-  (MouvementStock type entree, avant/apres) — aucun 200 menteux ; decision
+  (MouvementStock type entree, avant/apres)  aucun 200 menteux ; decision
   unique ; refuse exige un motif ecrit ; bon vide refuse la validation ;
 * liaison commande : lignes de commande mise à jour (quantite_recue, statut
   recu) puis commande « livree » quand tout est reçu ;
@@ -200,7 +200,7 @@ def test_reception_valider_adjuste_et_journalise_reelement(client, db):
     assert data["date_validation"] == date.today().isoformat()  # colonne Date
     assert "[VALIDE" in data["notes"]
 
-    # stock reellement ajuste (quantite_disponible — pas la colonne fantome
+    # stock reellement ajuste (quantite_disponible  pas la colonne fantome
     # stock.quantite de l'ancienne version, qui perdait tout en silence)
     db.expire_all()
     assert float(db.query(Stock).get(stock.id).quantite_disponible) == 150.0

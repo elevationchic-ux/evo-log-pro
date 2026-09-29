@@ -142,8 +142,8 @@ export default function WMSDashboardPage() {
   // `emplacement` (chaine), le seuil bas est `quantite_minimum`.
   const stockItems = Array.isArray(stocksData) && stocksData.length > 0 
     ? stocksData.map((s: any) => ({
-        ref: s.code_article || '—',
-        desc: s.designation || s.description || '—',
+        ref: s.code_article || '',
+        desc: s.designation || s.description || '',
         emplacement: s.emplacement || '',
         qte: s.quantite_disponible ?? 0,
         unite: s.unite_mesure || '',
@@ -226,7 +226,7 @@ export default function WMSDashboardPage() {
         })}
       </div>
 
-      {/* Zone utilization bar — branches sur /magasin/entrepots/occupation.
+      {/* Zone utilization bar  branches sur /magasin/entrepots/occupation.
           Avant : 88/62/45/78/55% en dur dans le JSX, quels que soient la base
           et le tenant. L'occupation en % n'est affichee que si une capacite
           est enregistree (occupancy non-null), sinon articles + valeur reelles. */}
@@ -249,7 +249,7 @@ export default function WMSDashboardPage() {
                 ) : (
                   <>
                     <div className="flex-1 text-[11px] text-slate-500">{z.nb_articles} articles · {Number(z.valeur_stockee || 0).toLocaleString('fr-FR')} FCFA stockes</div>
-                    <div className="w-8 text-[11px] font-mono text-slate-500 text-right">—</div>
+                    <div className="w-8 text-[11px] font-mono text-slate-500 text-right"></div>
                   </>
                 )}
               </div>
@@ -308,7 +308,7 @@ export default function WMSDashboardPage() {
                   <tr key={item.ref} className="hover:bg-slate-800/30 transition-colors">
                     <td className="px-4 py-3 font-mono font-bold text-amber-300">{item.ref}</td>
                     <td className="px-4 py-3 text-slate-200 max-w-52 truncate font-medium">{item.desc}</td>
-                    <td className="px-4 py-3 font-mono text-slate-400">{item.emplacement || '—'}</td>
+                    <td className="px-4 py-3 font-mono text-slate-400">{item.emplacement || ''}</td>
                     <td className="px-4 py-3">
                       <div className={`font-mono font-bold ${item.statut === 'CRITIQUE' ? 'text-red-400' : item.statut === 'ALERTE' ? 'text-amber-400' : 'text-slate-200'}`}>
                         {item.qte.toLocaleString()} {item.unite}
@@ -373,21 +373,21 @@ export default function WMSDashboardPage() {
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
               <div className="text-xs text-slate-400">Stock de Sécurité Déterministe</div>
               <div className="text-2xl font-black text-amber-400 font-mono mt-1">
-                {ropData?.stock_securite_calcule ?? '—'} {ropData?.stock_securite_calcule != null ? 'Unités' : ''}
+                {ropData?.stock_securite_calcule ?? ''} {ropData?.stock_securite_calcule != null ? 'Unités' : ''}
               </div>
               <p className="text-[11px] text-slate-500 mt-1">Niveau de service 95% (Z = 1.645) sur délai fournisseur de 14j.</p>
             </div>
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
               <div className="text-xs text-slate-400">Point de Commande (ROP)</div>
               <div className="text-2xl font-black text-cyan-400 font-mono mt-1">
-                {ropData?.point_de_commande_rop ?? '—'} {ropData?.point_de_commande_rop != null ? 'Unités' : ''}
+                {ropData?.point_de_commande_rop ?? ''} {ropData?.point_de_commande_rop != null ? 'Unités' : ''}
               </div>
               <p className="text-[11px] text-slate-500 mt-1">Déclencheur automatique de bon de commande fournisseur.</p>
             </div>
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
               <div className="text-xs text-slate-400">Quantité Économique Wilson (EOQ)</div>
               <div className="text-2xl font-black text-emerald-400 font-mono mt-1">
-                {ropData?.quantite_economique_commande_wilson ?? '—'} {ropData?.quantite_economique_commande_wilson != null ? 'Unités' : ''}
+                {ropData?.quantite_economique_commande_wilson ?? ''} {ropData?.quantite_economique_commande_wilson != null ? 'Unités' : ''}
               </div>
               <p className="text-[11px] text-slate-500 mt-1">Minimisation des coûts de possession et passation.</p>
             </div>

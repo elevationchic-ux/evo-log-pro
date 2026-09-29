@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * K-Admin · Sécurité — Double authentification (2FA / TOTP).
+ * K-Admin · Sécurité  Double authentification (2FA / TOTP).
  *
  * Cette écran configure le second facteur du compte **connecté** : le backend
  * ne connaît la 2FA que par utilisateur (colonnes users.two_factor_*), il
@@ -10,7 +10,7 @@
  *
  * Source unique de vérité : /api/v1/auth/2fa/{status,setup,enable,disable} et
  * /api/v1/auth/2fa/recovery-codes. Le QR est généré localement à partir de
- * l’otpauth_uri renvoyée par le serveur — jamais une image distante, qui
+ * l’otpauth_uri renvoyée par le serveur  jamais une image distante, qui
  * divulguerait le secret à un tiers. Les codes de secours en clair n’existent
  * qu’au moment de leur émission : la base ne stocke que leurs hachages, donc
  * aucune liste « déjà utilisée » n’est reconstituée ici.
@@ -138,9 +138,9 @@ export default function AdminSecurityMfaPage() {
   }, [provision, t]);
 
   const formatDate = useCallback((iso: string | null | undefined): string => {
-    if (!iso) return '—';
+    if (!iso) return '';
     const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return '—';
+    if (Number.isNaN(d.getTime())) return '';
     return d.toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' });
   }, [locale]);
 
@@ -285,8 +285,8 @@ export default function AdminSecurityMfaPage() {
   const telechargerCodes = () => {
     if (!freshCodes?.length) return;
     const contenu = [
-      'EVO-LOG — codes de secours 2FA',
-      `Compte : ${labelDepuisUri(provision?.otpauth_uri || '') || '—'}`,
+      'EVO-LOG  codes de secours 2FA',
+      `Compte : ${labelDepuisUri(provision?.otpauth_uri || '') || ''}`,
       `Émis le : ${new Date().toLocaleString(locale)}`,
       '',
       ...freshCodes,
@@ -375,7 +375,7 @@ export default function AdminSecurityMfaPage() {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Carte 1 — Application d’authentification */}
+            {/* Carte 1  Application d’authentification */}
             <section className="lg:col-span-2 bg-surface border border-outline rounded-2xl p-4 sm:p-5 space-y-4">
               <header className="flex items-center gap-2">
                 <QrCode className="w-5 h-5 text-indigo-400" />
@@ -394,7 +394,7 @@ export default function AdminSecurityMfaPage() {
                   </p>
                   <form onSubmit={reinitialiserAvecCode} className="space-y-3 p-4 bg-surface-container-low rounded-xl border border-outline">
                     <label htmlFor="rotate-code" className="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
-                      {t('Changer d’appareil — code courant requis', 'Switch device — current code required')}
+                      {t('Changer d’appareil  code courant requis', 'Switch device  current code required')}
                     </label>
                     <p className="text-xs text-on-surface-variant leading-relaxed">
                       {t(
@@ -547,7 +547,7 @@ export default function AdminSecurityMfaPage() {
               ))}
             </section>
 
-            {/* Carte 2 — Codes de secours */}
+            {/* Carte 2  Codes de secours */}
             <section className="bg-surface border border-outline rounded-2xl p-4 sm:p-5 space-y-4">
               <header className="flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-indigo-400" />
@@ -659,7 +659,7 @@ export default function AdminSecurityMfaPage() {
               )}
             </section>
 
-            {/* Carte 3 — Désactivation (zone sensible) */}
+            {/* Carte 3  Désactivation (zone sensible) */}
             <section className="lg:col-span-3 bg-surface border border-red-500/30 rounded-2xl p-4 sm:p-5">
               <header className="flex items-center gap-2 mb-3">
                 <ShieldOff className="w-5 h-5 text-red-400" />
@@ -722,8 +722,8 @@ export default function AdminSecurityMfaPage() {
           {/* Notes d’honnêteté : ce que les chiffres de cette page ne disent pas */}
           <p className="text-[11px] text-on-surface-variant leading-relaxed">
             {t(
-              'Fenêtre de validité TOTP : ±30 secondes autour du code courant (réglage serveur). Le jeton intermédiaire délivré à la connexion expire au bout de 5 minutes. Les codes de secours sont stockés sous forme de hachages : l’API ne renvoie que le solde utilisable, jamais la liste — un code déjà consommé ne peut donc pas être représenté ici. Cette page règle le compte connecté ; le 2FA des autres collaborateurs se configure depuis leur propre session.',
-              'TOTP validity window: ±30 seconds around the current code (server setting). The intermediate token issued at sign-in expires after 5 minutes. Recovery codes are stored as hashes: the API returns only the usable balance, never the list — so an already consumed code cannot be shown here. This page configures the signed-in account; colleagues set 2FA from their own session.',
+              'Fenêtre de validité TOTP : ±30 secondes autour du code courant (réglage serveur). Le jeton intermédiaire délivré à la connexion expire au bout de 5 minutes. Les codes de secours sont stockés sous forme de hachages : l’API ne renvoie que le solde utilisable, jamais la liste  un code déjà consommé ne peut donc pas être représenté ici. Cette page règle le compte connecté ; le 2FA des autres collaborateurs se configure depuis leur propre session.',
+              'TOTP validity window: ±30 seconds around the current code (server setting). The intermediate token issued at sign-in expires after 5 minutes. Recovery codes are stored as hashes: the API returns only the usable balance, never the list  so an already consumed code cannot be shown here. This page configures the signed-in account; colleagues set 2FA from their own session.',
             )}
           </p>
         </>

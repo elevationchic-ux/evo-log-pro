@@ -204,7 +204,7 @@ export default function PortailMagasinierPage() {
       await fetchData();
     } catch (err: any) {
       // Batch 16 : en cas de rupture, le backend renvoie un detail STRUCTURÉ
-      // ({ message, lignes_en_rupture[] }) — l'afficher sans le réduire à un
+      // ({ message, lignes_en_rupture[] })  l'afficher sans le réduire à un
       // string (le magasinier doit voir quoi manque).
       const detail = err?.response?.data?.detail;
       const msg = typeof detail === 'string'
@@ -237,7 +237,7 @@ export default function PortailMagasinierPage() {
     setRefusantBon(true);
     try {
       await removalSlipAPI.refuse(selectedOrder.id, motif.trim());
-      toast.success(`Bon #${selectedOrder.reference} refusé — motif enregistré, aucun mouvement de stock`);
+      toast.success(`Bon #${selectedOrder.reference} refusé  motif enregistré, aucun mouvement de stock`);
       await fetchData();
     } catch (err: any) {
       const detail = err?.response?.data?.detail;

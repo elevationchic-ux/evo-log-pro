@@ -1,4 +1,4 @@
-// src/lib/2fa-challenge.ts — Transit de l'attente 2FA entre /login et /mfa.
+// src/lib/2fa-challenge.ts  Transit de l'attente 2FA entre /login et /mfa.
 //
 // Le jeton `two_factor_token` delivre par POST /auth/login n'est PAS un token
 // de session : il ne sert qu'a presenter une tentative de second facteur et

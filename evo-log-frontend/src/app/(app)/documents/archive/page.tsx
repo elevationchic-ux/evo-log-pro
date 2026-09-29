@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * K-Documents — Archivage légal.
+ * K-Documents  Archivage légal.
  *
  * Source unique : GET /api/v1/documents/archivages-legal, qui lit la table
  * `archivages_legal` et joint le document archivé (titre / numéro / type).
@@ -57,7 +57,7 @@ interface DocumentOption {
   type_document: string | null;
 }
 
-/** Libellés des énumérations du modèle — la base stocke des mots-clés, pas des phrases. */
+/** Libellés des énumérations du modèle  la base stocke des mots-clés, pas des phrases. */
 const LIBELLES: Record<string, { fr: string; en: string }> = {
   fiscal: { fr: 'Fiscal', en: 'Tax' },
   juridique: { fr: 'Juridique', en: 'Legal' },
@@ -76,7 +76,7 @@ const TYPES_ARCHIVAGE = ['fiscal', 'juridique', 'comptable', 'social', 'autre'];
 const CLASSIFICATIONS = ['confidentiel', 'prive', 'public'];
 const PAR_PAGE = 20;
 
-/** Durée de conservation en mois — propositions usuelles, saisie libre. */
+/** Durée de conservation en mois  propositions usuelles, saisie libre. */
 const DUREES = [60, 72, 120, 180, 240, 360];
 
 function isoToday() {
@@ -93,7 +93,7 @@ export default function DocumentsArchivePage() {
   const locale = lang === 'en' ? 'en-GB' : 'fr-FR';
   const lbl = useCallback(
     (v: string | null | undefined) => {
-      if (!v) return '—';
+      if (!v) return '';
       const cle = String(v).toLowerCase();
       return LIBELLES[cle] ? (lang === 'en' ? LIBELLES[cle].en : LIBELLES[cle].fr) : v;
     },
@@ -165,7 +165,7 @@ export default function DocumentsArchivePage() {
     [locale],
   );
   const fmtDate = useCallback(
-    (iso: string | null | undefined) => (iso ? dateFmt.format(new Date(iso)) : '—'),
+    (iso: string | null | undefined) => (iso ? dateFmt.format(new Date(iso)) : ''),
     [dateFmt],
   );
 
@@ -176,7 +176,7 @@ export default function DocumentsArchivePage() {
     [today],
   );
 
-  /** Types réellement présents dans les archivages — aucune catégorie inventée. */
+  /** Types réellement présents dans les archivages  aucune catégorie inventée. */
   const typesPresent = useMemo(() => {
     const m = new Map<string, number>();
     for (const r of rows) {
@@ -622,7 +622,7 @@ export default function DocumentsArchivePage() {
                   </div>
                   <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-[11px]">
                     <Cell label={t('Type', 'Type')} value={lbl(r.type_archivage)} />
-                    <Cell label={t('Autorité', 'Authority')} value={r.autorite_archivage || '—'} />
+                    <Cell label={t('Autorité', 'Authority')} value={r.autorite_archivage || ''} />
                     <Cell label={t('Archivé le', 'Archived on')} value={fmtDate(r.date_archivage)} />
                     <Cell label={t('Expire le', 'Expires on')} value={fmtDate(r.date_expiration)} />
                   </dl>
@@ -676,7 +676,7 @@ export default function DocumentsArchivePage() {
                       </td>
                       <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{lbl(r.type_archivage)}</td>
                       <td className="px-4 py-3 text-on-surface-variant max-w-[12rem] truncate" title={r.autorite_archivage || ''}>
-                        {r.autorite_archivage || '—'}
+                        {r.autorite_archivage || ''}
                       </td>
                       <td className="px-4 py-3 tabular-nums whitespace-nowrap">{fmtDate(r.date_archivage)}</td>
                       <td className="px-4 py-3 tabular-nums whitespace-nowrap">
@@ -1021,10 +1021,10 @@ function CreateModal({
               onChange={(e) => setDocumentId(e.target.value ? Number(e.target.value) : '')}
               className={INPUT}
             >
-              <option value="">{t('— Choisir —', '— Choose —')}</option>
+              <option value="">{t(' Choisir ', ' Choose ')}</option>
               {docs.map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.numero_document || `#${d.id}`} — {d.titre}
+                  {d.numero_document || `#${d.id}`}  {d.titre}
                   {alreadyArchived.has(d.id) ? t('  [déjà archivé]', '  [already archived]') : ''}
                 </option>
               ))}
@@ -1151,28 +1151,28 @@ function DetailModal({
 }) {
   const lignes: Array<{ label: string; value: string }> = [
     { label: t('Document', 'Document'), value: row.document_numero || `#${row.document_id}` },
-    { label: t('Titre', 'Title'), value: row.document_titre || '—' },
+    { label: t('Titre', 'Title'), value: row.document_titre || '' },
     { label: t('Type de document', 'Document type'), value: lbl(row.document_type) },
     { label: t('Type d’archivage', 'Archive type'), value: lbl(row.type_archivage) },
     { label: t('Classification', 'Classification'), value: lbl(row.classification) },
-    { label: t('Autorité', 'Authority'), value: row.autorite_archivage || '—' },
+    { label: t('Autorité', 'Authority'), value: row.autorite_archivage || '' },
     {
       label: t('Conservation', 'Retention'),
       value: row.duree_conservation
         ? t(`${row.duree_conservation} mois`, `${row.duree_conservation} months`)
-        : '—',
+        : '',
     },
     { label: t('Archivé le', 'Archived on'), value: fmtDate(row.date_archivage) },
     { label: t('Expire le', 'Expires on'), value: fmtDate(row.date_expiration) },
-    { label: t('Référence d’archivage', 'Archive reference'), value: row.reference_archivage || '—' },
+    { label: t('Référence d’archivage', 'Archive reference'), value: row.reference_archivage || '' },
     {
       label: t('Certificat de conformité', 'Compliance certificate'),
-      value: row.certificat_conformite || '—',
+      value: row.certificat_conformite || '',
     },
   ];
   if (row.statut === 'restaure') {
     lignes.push({ label: t('Restauré le', 'Restored on'), value: fmtDate(row.date_restauration) });
-    lignes.push({ label: t('Motif', 'Reason'), value: row.motif_restauration || '—' });
+    lignes.push({ label: t('Motif', 'Reason'), value: row.motif_restauration || '' });
   }
 
   return (

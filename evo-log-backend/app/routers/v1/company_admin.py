@@ -1,4 +1,4 @@
-"""Administration interne Enterprise (Phase 2 — niveau 1, Admin Entreprise).
+"""Administration interne Enterprise (Phase 2  niveau 1, Admin Entreprise).
 
 Surface scopee pour l'administrateur d'une entreprise SaaS : il gere LIBREMENT
 son capital humain (collaborateurs, roles/casquettes, responsabilites) et suit
@@ -7,7 +7,7 @@ les modules alloues par le CADC, mais uniquement a l'interieur de son perimetre.
 Gardes (invisibilite double, cf. plan) :
 - ``require_company_admin`` (utils/rbac.py) : niveau 1 rattache a une entreprise,
   ou Super Admin (level 0) qui agit sur n'importe quelle entreprise via un
-  ``company_id`` explicite — le CADC doit pouvoir piloter une entreprise meme
+  ``company_id`` explicite  le CADC doit pouvoir piloter une entreprise meme
   avant la designation de son admin.
 - ``resolve_scope_company_id`` : un admin entreprise est epingle a son
   ``company_id`` ; toute tentative d'agir sur une autre entreprise -> 403.
@@ -380,7 +380,7 @@ def modules_overview(
     - ``alloue``            : dans ``Company.modules_actives`` ;
     - ``accredite``         : une accreditation active (delai en cours) le debloque ;
     - ``demande``           : une demande est en attente d'arbitrage CADC ;
-    - ``verrouille``        : ni alloue ni accredite — visible mais non accessible.
+    - ``verrouille``        : ni alloue ni accredite  visible mais non accessible.
     """
     company = _scoped_company(db, current, company_id)
     allocated = {str(m).lower() for m in _loads(company.modules_actives, [])}

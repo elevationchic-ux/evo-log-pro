@@ -655,7 +655,7 @@ class TMSAdvancedOptimizerService:
         Avant : dict 100% codé en dur (23 camions, convois 14/9, points de
         passage inventés). Maintenant : agrégation réelle depuis
         corridors_cemac_transit / postes_frontaliers / procedures_tir. Sans
-        données en base, le service renvoie des vides honnêtes — jamais des
+        données en base, le service renvoie des vides honnêtes  jamais des
         chiffres décoratifs.
         """
         import json
@@ -855,7 +855,7 @@ class TMSAdvancedOptimizerService:
             "note": (
                 None if cout_km is not None
                 else "Aucun frais justifié rattaché à des missions terminées avec distance : "
-                     "coût/km non calculable — aucun chiffre n'est inventé."
+                     "coût/km non calculable  aucun chiffre n'est inventé."
             ),
             "date_analyse": datetime.now().isoformat(),
         }

@@ -250,7 +250,7 @@ export default function EmployesPage() {
       } else if (typeof detail === 'string') {
         toast.error(detail)
       } else if (Array.isArray(detail)) {
-        toast.error(detail.map((d: any) => d.msg || JSON.stringify(d)).join(' — '))
+        toast.error(detail.map((d: any) => d.msg || JSON.stringify(d)).join('  '))
       } else {
         toast.error(t('Création impossible.', 'Could not create the employee.'))
       }
@@ -676,8 +676,8 @@ export default function EmployesPage() {
               {t('collaborateur(s) affiché(s)', 'employee(s) shown')}
               {employes.length >= LIMITE_ANNUAIRE
                 ? t(
-                    ' — liste tronquée à 500, affinez la recherche.',
-                    ' — list capped at 500, refine your search.'
+                    '  liste tronquée à 500, affinez la recherche.',
+                    '  list capped at 500, refine your search.'
                   )
                 : ''}
             </p>
@@ -914,7 +914,7 @@ export default function EmployesPage() {
                   {importFile ? importFile.name : t('Cliquez ou déposez votre fichier', 'Click or drop your file')}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {t('Formats acceptés : CSV, XLSX — 5 Mo au plus', 'Accepted formats: CSV, XLSX — 5 MB max')}
+                  {t('Formats acceptés : CSV, XLSX  5 Mo au plus', 'Accepted formats: CSV, XLSX  5 MB max')}
                 </span>
               </label>
 

@@ -1,4 +1,4 @@
-"""Tests d22 — aggregats corridor CEMAC / TCO flotte : politique zero-mock.
+"""Tests d22  aggregats corridor CEMAC / TCO flotte : politique zero-mock.
 
 Le service renvoyait des dicts 100% codés en dur (23 camions en transit,
 convois 14/9, TCO 1240 XAF/km, immatriculations LT-TR-4021...). Ces tests

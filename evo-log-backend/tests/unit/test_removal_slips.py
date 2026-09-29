@@ -1,4 +1,4 @@
-"""Batch 16 — Bon de sortie / circuit de signature (P2 #10).
+"""Batch 16  Bon de sortie / circuit de signature (P2 #10).
 
 Valide le durcissement de app/routers/v1/removal_slip.py :
   * création : références existantes exigées (FK SQLite non appliquées),
@@ -284,7 +284,7 @@ def test_delete_garde_document_signe(client, db):
 
 
 # --------------------------------------------------------------------------- #
-# Édition PDF (200 réel ou 501 honnête — jamais de faux PDF)
+# Édition PDF (200 réel ou 501 honnête  jamais de faux PDF)
 # --------------------------------------------------------------------------- #
 
 def test_pdf_bon_sortie_statut_honnete(client, db):

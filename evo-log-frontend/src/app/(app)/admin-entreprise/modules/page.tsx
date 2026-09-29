@@ -1,13 +1,13 @@
 'use client';
 
-// Phase 2 — Ecran "Modules alloués / demandés" pour l'admin entreprise (niveau 1).
+// Phase 2  Ecran "Modules alloués / demandés" pour l'admin entreprise (niveau 1).
 //
 // Le CADC alloue un sous-ensemble de modules à l'entreprise (borne par le verrou
 // max_modules du plan). L'admin voit l'état de CHAQUE module du catalogue :
 //   - alloué      : dans Company.modules_actives ;
 //   - accrédité   : une accréditation CADC datée en cours le débloque ;
 //   - demande     : une demande est en attente d'arbitrage CADC ;
-//   - verrouillé  : ni alloué ni accrédité — visible mais non accessible (grisé).
+//   - verrouillé  : ni alloué ni accrédité  visible mais non accessible (grisé).
 // Il peut émettre une demande d'accréditation vers le CADC pour un module
 // verrouillé ; la demande n'accorde aucun droit tant qu'elle n'est pas convertie.
 
@@ -93,7 +93,7 @@ export default function AdminEntrepriseModulesPage() {
   }
 
   const capInfo = data.max_modules == null ? 'illimité' : String(data.max_modules);
-  const quotaUsers = data.max_users == null ? '—' : `${data.user_count}/${data.max_users}`;
+  const quotaUsers = data.max_users == null ? '' : `${data.user_count}/${data.max_users}`;
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
@@ -147,13 +147,13 @@ export default function AdminEntrepriseModulesPage() {
               </div>
               <div className="text-xs text-slate-400">
                 {/* Batch 13 Zero-Mock : la variante accentuee 'alloué' ne pouvait
-                    jamais matcher — le backend renvoie systematiquement 'alloue'
+                    jamais matcher  le backend renvoie systematiquement 'alloue'
                     sans accent (company_admin.py l.421). Comparaison dead-code
                     retirée, tsc/TS2367 ne tombe plus dessus. */}
                 {m.etat === 'alloue' ? 'Inclus dans votre abonnement.' :
                  m.etat === 'accredite' ? 'Débloqué par une accréditation CADC datée.' :
                  m.etat === 'demande' ? "Votre demande est en cours d'examen." :
-                 'Non accessible — demandez une accréditation au CADC.'}
+                 'Non accessible  demandez une accréditation au CADC.'}
               </div>
               {canRequest && (
                 <button onClick={() => openRequest(m.key)}

@@ -229,7 +229,7 @@ export default function SaisieInventairePhysiquePage() {
                         setRealQty(line.stock_id, v);
                       }}
                       className="w-20 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-center text-sm font-mono focus:outline-none focus:border-emerald-500"
-                      placeholder="—"
+                      placeholder=""
                     />
                   </td>
                   <td className="py-2 px-3 text-right font-mono">
@@ -241,7 +241,7 @@ export default function SaisieInventairePhysiquePage() {
                   </td>
                   <td className="py-2 px-3 text-center">
                     <span className={`px-2 py-0.5 rounded text-xs font-bold ${STATUS_STYLES[line.status]}`}>
-                      {line.status === 'pending' ? '—' : line.status}
+                      {line.status === 'pending' ? '' : line.status}
                     </span>
                   </td>
                 </tr>

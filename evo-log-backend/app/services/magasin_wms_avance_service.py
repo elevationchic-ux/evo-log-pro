@@ -134,7 +134,7 @@ class CrossDockingService:
         Cross-Dock #3 (PAD) ») et « gain_temps_heures: 18.5 » inventes, sans
         rien ecrire en base. Maintenant : aggregation reelle des colis soumis
         (quantites et poids réellement transmis), receipt NULL et statut
-        `non_persiste` tant qu'aucune table d'operation cross-dock n'existe —
+        `non_persiste` tant qu'aucune table d'operation cross-dock n'existe 
         un numero de recu ne doit pas etre fabrique.
         """
         transferred_items = []

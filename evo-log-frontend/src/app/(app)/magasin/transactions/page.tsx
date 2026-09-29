@@ -92,7 +92,7 @@ function MagasinTransactionsContent() {
       } catch (e) {
         console.error("Chargement du journal de stock impossible", e);
         if (!annule) {
-          setError("Journal indisponible — la liste vide affichée n'est pas une absence d'activité prouvée par le serveur.");
+          setError("Journal indisponible  la liste vide affichée n'est pas une absence d'activité prouvée par le serveur.");
           setItems([]);
         }
       } finally {
@@ -124,7 +124,7 @@ function MagasinTransactionsContent() {
             Journal des Mouvements de Stock
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Historique des entrées, sorties, transferts, inventaires et ajustements — source API /magasin/transactions
+            Historique des entrées, sorties, transferts, inventaires et ajustements  source API /magasin/transactions
           </p>
         </div>
         <button
@@ -198,16 +198,16 @@ function MagasinTransactionsContent() {
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${cfg.color}`}>{cfg.icon}{cfg.label}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">{t.designation || t.code_article || "—"}</div>
+                      <div className="font-medium text-foreground">{t.designation || t.code_article || ""}</div>
                       {t.code_article && t.designation && (
                         <div className="text-xs text-muted-foreground font-mono">{t.code_article}</div>
                       )}
                     </td>
                     <td className={`px-4 py-3 font-bold text-lg ${t.type_mouvement === "sortie" ? "text-red-400" : "text-emerald-400"}`}>{fmtNum(t.quantite)}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.valeur_totale != null ? `${fmtNum(t.valeur_totale)} FCFA` : "—"}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.destination || "—"}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.operateur_id != null ? `#${t.operateur_id}` : "—"}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{t.date_mouvement ? timeAgo(t.date_mouvement) : "—"}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.valeur_totale != null ? `${fmtNum(t.valeur_totale)} FCFA` : ""}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.destination || ""}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.operateur_id != null ? `#${t.operateur_id}` : ""}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{t.date_mouvement ? timeAgo(t.date_mouvement) : ""}</td>
                   </tr>
                 );
               })}

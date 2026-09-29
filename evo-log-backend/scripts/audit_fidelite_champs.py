@@ -7,7 +7,7 @@ reellement repondu par le backend (outil de audit, complementaire de
 Celui-ci repond a « une fois la reponse recue, les proprietes que l'ecran lit
 sont-elles bien dans le schema emis ? ». Les deux families de defauts sont
 differentes et la seconde est silencieuse : l'appel passe en HTTP 200, le
-tableau se remplit, et seule la colonne est vide — ou pire, fausse.
+tableau se remplit, et seule la colonne est vide  ou pire, fausse.
 
 Deux bugs reels de ce repertoire, trouve a la main puis mecanises ici :
   * `transport/drivers` testait `chauffeur.actif` ; l'API envoie `is_active`.
@@ -36,7 +36,7 @@ BACKEND = RACINE
 FRONT = RACINE.parent / "evo-log-frontend" / "src"
 CONTRAT = BACKEND / "_openapi_contrat.json"
 
-# `apiClient.get('/api/x')` — objet client + verbe + literal de chemin.
+# `apiClient.get('/api/x')`  objet client + verbe + literal de chemin.
 APPEL_DIRECT = re.compile(
     r"\b(apiClient|[\w$]*API)\.(get|post|put|patch|delete)\(\s*[`'\"](/[^`'\"]*)[`'\"]"
 )
@@ -58,7 +58,7 @@ ITERATION = re.compile(
 )
 # `rows.map((c) => ({ brand: c.marque, ... }))` : la page FABRIQUE un view-model.
 # Sans cette regle, l'outil signale `v.brand` comme champ invente alors que la
-# cle est definie deux cents lignes plus haut — c'etait le premier faux positif
+# cle est definie deux cents lignes plus haut  c'etait le premier faux positif
 # produit par cet outil, sur `transport/flotte`.
 CONSTRUCTION = re.compile(
     r"\.\s*map\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*(?::[^)]*)?\)?\s*=>\s*\(?\s*\{"
@@ -69,7 +69,7 @@ CONSTRUCTION = re.compile(
 COMPARAISON = (
     r"([\w$.]*\b%s\b[\w$.\[\]']*)\s*[=!]==?\s*([`'\"])([^`'\"]+)\2"
 )
-# `const res = await transportAPI.getMissions()` — le nom lie a l'appel est la
+# `const res = await transportAPI.getMissions()`  le nom lie a l'appel est la
 # seule facon de savoir QUI remplit quelle variable d'etat.
 AFFECTATION = re.compile(
     r"(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*([^;\n]{0,220})"
@@ -413,7 +413,7 @@ def formes_locales(texte):
         # `const missions = missionsData.map((m) => ({...}))` : le view-model est
         # aussi porte par une constante locale, pas seulement par un setter.
         # Sans quoi `m.status` (cle construite) etait signale comme lecture du
-        # contrat — premier signal faussement neuf sur `transport/control`.
+        # contrat  premier signal faussement neuf sur `transport/control`.
         consts = list(re.finditer(r"\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=", amont))
         if consts:
             ports.add(consts[-1].group(1))

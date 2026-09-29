@@ -129,7 +129,7 @@ def test_une_valeur_conforme_ne_rit_pas(audit):
 
 def test_une_valeur_sans_jumelle_restesignalee(audit):
     """'IMMOBILISE' n'existe dans aucun enum : a verifier a la main, mais le
-    silence serait un mensonge — la comparaison ne reussira jamais."""
+    silence serait un mensonge  la comparaison ne reussira jamais."""
     code = "const x = camions.filter((c: any) => c.status === 'IMMOBILISE');"
     suspects = audit.valeurs_hors_enum(CONTRAT, ["CamionResponse"], code)
     assert len(suspects) == 1
@@ -173,7 +173,7 @@ def test_un_commentaire_n_est_pas_du_code(audit):
 def test_useQuery_attribution_par_bloc_pas_par_fenetre(audit):
     """Deux useQuery adjacents : `kpisData` (endpoint sans response_model) ne
     doit pas heriter des champs de MissionResponse par proximite. La fenetre
-    ±300 caracteres le faisait — faux positif `corridorsData->corridors`."""
+    ±300 caracteres le faisait  faux positif `corridorsData->corridors`."""
     code = """
 const { data: missionsData } = useQuery({
   queryFn: async () => { const res = await transportAPI.getMissions(); return res.data; },
@@ -193,7 +193,7 @@ const v = kpisData.mouvements_jour + missionsData.length;
 def test_view_model_porte_par_une_constante(audit):
     """`const missions = missionsData.map((m) => ({ status: m.statut }))` puis
     `m.status === 'en_cours'` : la cle est construite par la page. Ni l'axe
-    noms ni l'axe valeurs ne doivent reagir — c'etait le signal fantome restant
+    noms ni l'axe valeurs ne doivent reagir  c'etait le signal fantome restant
     sur `transport/control` apres correction."""
     code = """
 const { data: missionsData } = useQuery({

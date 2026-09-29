@@ -1,6 +1,6 @@
 """
 Remplace les 9 pages vitrine "Système K-Magasin Connecté" par un message honnete
-"Fonctionnalite non deployee" — supprime le mensonge (ShieldCheck vert + "connecte")
+"Fonctionnalite non deployee"  supprime le mensonge (ShieldCheck vert + "connecte")
 sans casser la navigation ni les titres specifiques a chaque ecran.
 
 Pattern a remplacer (commun aux 9 fichiers):

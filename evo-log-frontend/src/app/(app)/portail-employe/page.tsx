@@ -940,7 +940,7 @@ export default function PortailEmployePage() {
               <Ligne libelle={t('Compte bancaire', 'Bank account')} valeur={champsValeur(profil?.compte_bancaire)} />
               <Ligne libelle={t('E-mail professionnel', 'Work email')} valeur={champsValeur(profil?.email || (user as any)?.email)} mono />
               <Ligne libelle={t('Téléphone', 'Phone')} valeur={champsValeur(profil?.phone)} mono />
-              <Ligne libelle={t('Solde de congés', 'Leave balance')} valeur={`${profil?.solde_conges ?? '—'} ${t('jours ouvrables', 'working days')}`} />
+              <Ligne libelle={t('Solde de congés', 'Leave balance')} valeur={`${profil?.solde_conges ?? ''} ${t('jours ouvrables', 'working days')}`} />
               <p className="text-[11px] text-slate-500 leading-relaxed pt-2 border-t border-slate-800">
                 {t(
                   'Le numéro CNPS, la mutuelle et le RIB ne sont pas stockés dans le dossier RH : ils restent « Non renseigné » tant que la DRH ne les a pas saisis. Aucun valeur de complaisance n’est affichée sur un document social.',

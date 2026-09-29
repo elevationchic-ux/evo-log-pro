@@ -33,4 +33,4 @@ m = sqlite3.connect("file:kamlog_erp.db?mode=ro", uri=True)
 ts2 = m.execute("SELECT COUNT(*) FROM audit_logs WHERE url LIKE 'http://testserver%'").fetchone()[0]
 m.close()
 assert ts2 == 0, "le smoke boot a re-ecrit dans la base de dev !"
-print("SMOKE OK — le boot applicatif n'a pas re-pollue kamlog_erp.db")
+print("SMOKE OK  le boot applicatif n'a pas re-pollue kamlog_erp.db")

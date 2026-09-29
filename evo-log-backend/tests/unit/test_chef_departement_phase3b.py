@@ -1,4 +1,4 @@
-"""Phase 3 Tranche B — Espace departement : ECRITURES scopees (niveau 2 / 1 / 0).
+"""Phase 3 Tranche B  Espace departement : ECRITURES scopees (niveau 2 / 1 / 0).
 
 Complete la Tranche A (lecture) par les operations d'ecriture, toujours sous
 ``_scoped_department`` + ``require_department_head`` :
@@ -180,7 +180,7 @@ def test_chef_cannot_affect_a_fellow_department_head(write_client, sandbox):
 
 def test_chef_cannot_touch_other_company_member(write_client, sandbox):
     # outsider appartient a une autre entreprise : 403 (garde) ou 404
-    # (cloisonnement ORM par contexte tenant) — les deux prouvent la non-fuite.
+    # (cloisonnement ORM par contexte tenant)  les deux prouvent la non-fuite.
     resp = write_client.post(
         f"/api/v1/departement/membres/{sandbox['outsider_id']}/affecter",
         headers=_auth(sandbox["chef_token"]),

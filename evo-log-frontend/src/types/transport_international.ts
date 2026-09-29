@@ -1,11 +1,11 @@
 /**
- * Types du module Transport International — alignés sur les vrais schémas
+ * Types du module Transport International  alignés sur les vrais schémas
  * backend (`app/schemas/transport_international.py`, `app/models/
  * transport_international.py::StatutTransport`).
  *
  * Historique (batch 12) :
  *   `transport-international/page.tsx` lisait `o.numero_ordre`, `o.mode_transport`,
- *   `o.pays_depart`, `o.incoterm`, `o.poids_kg` — **aucun** de ces champs
+ *   `o.pays_depart`, `o.incoterm`, `o.poids_kg`  **aucun** de ces champs
  *   n'existe dans `OrdreTransportResponse` (le backend a `numero_ot`,
  *   `type_transit`, `lieu_chargement`, pas d'incoterm, `poids_net` /
  *   `poids_brut`). Les comparaisons de statut utilisaient des chaînes
@@ -19,7 +19,7 @@
  * Date/DateTime Pydantic → string ISO côté JSON.
  */
 
-/** StatutTransport (models/transport_international.py::StatutTransport) —
+/** StatutTransport (models/transport_international.py::StatutTransport) 
  *  valeurs NON accentuées, telles que sérialisées par l'API. */
 export type StatutTransport =
   | 'planifie'

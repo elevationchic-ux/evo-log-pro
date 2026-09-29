@@ -1,4 +1,4 @@
-"""Batch 17 — Retours clients, litiges transporteurs et KPIs magasin.
+"""Batch 17  Retours clients, litiges transporteurs et KPIs magasin.
 
 Les six endpoints de app/routers/v1/magasin_avance.py étaient morts du même
 syndrome que le trio /sorties du batch 16 : kwargs/colonnes inventés
