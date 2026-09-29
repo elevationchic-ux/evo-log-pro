@@ -125,6 +125,10 @@ export default function DepartementPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [filter, setFilter] = useState('');
+  // Phase 4 Tranche B : planning create form toggle + fields.
+  const [showPlanForm, setShowPlanForm] = useState(false);
+  const [planForm, setPlanForm] = useState({ employe_id: '', date_jour: '', quart: 'STANDARD', poste_assigne: '' });
+  const [planBusy, setPlanBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
