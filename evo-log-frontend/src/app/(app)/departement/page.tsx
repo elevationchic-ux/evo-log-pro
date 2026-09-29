@@ -80,6 +80,7 @@ interface PresenceRow {
   quart: string | null;
   poste_assigne: string | null;
   pointe: boolean;
+  pointage_id: number | null;
   heure_arrivee: string | null;
   heure_depart: string | null;
   heures_effectives: number | null;

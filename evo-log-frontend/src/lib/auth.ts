@@ -5,7 +5,28 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
+// Base de l'API pour l'appel SERVEUR de NextAuth (authorize). Ce code s'execute
+// dans la fonction serverless Vercel, PAS dans le navigateur : `process.env` y
+// est lu au RUNTIME. Piege classique : si NEXT_PUBLIC_API_URL n'est pas defini
+// cote serveur (ou vaut localhost), authorize() part sur 127.0.0.1 -> le GET
+// /auth/session echoue -> NextAuth renvoie 401 alors que le login navigateur
+// (cote client) touche bien la prod. On aligne donc la resolution sur le meme
+// garde-fou que api-client, avec un defaut = le backend reellement en ligne.
+const PROD_API_BASE = 'https://evo-log-backend-production.up.railway.app'
+
+function resolveApiBase(): string {
+  let base =
+    process.env.API_URL || // prioritaire cote serveur si defini
+    process.env.NEXT_PUBLIC_API_URL ||
+    PROD_API_BASE
+  // En production, ne JAMAIS viser une boucle locale depuis le serveur.
+  if (process.env.NODE_ENV === 'production' && (base.includes('localhost') || base.includes('127.0.0.1'))) {
+    base = PROD_API_BASE
+  }
+  return base.replace(/\/+$/, '')
+}
+
+const API_BASE = resolveApiBase()
 
 interface BackendSession {
   access_token?: string

@@ -1474,39 +1474,177 @@ def resoudre_litige(
 
 
 # ============ COLIS ============
+# Batch 19 : reconstruit sur le modele REEL Colis (numero_colis, type_colis,
+# poids, dimensions, volume, contenu, fragile, empilable, emplacement,
+# date_etiquetage Date, operateur). L'ancien ColisService inventait
+# reference_colis / date_creation (TypeError a la creation), code_barres et
+# palette_id/date_palettisation (ecriture silencieuse sur objets Python sans
+# colonne → perte pure et simple). La palette n'ayant AUCUNE colonne, la
+# palettisation est tracee dans `emplacement` (seule localisation reelle) et
+# l'etiquetage date reellement (date_etiquetage) — rien de plus.
+
+
+@router.get("/colis", response_model=List[ColisResponse])
+def lister_colis(
+    bon_sortie_id: Optional[int] = Query(None),
+    type_colis: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Liste des colis (filtres sur colonnes reelles)."""
+    from app.models.magasin_avance import Colis
+
+    q = db.query(Colis)
+    if bon_sortie_id:
+        q = q.filter(Colis.bon_sortie_id == bon_sortie_id)
+    if type_colis:
+        q = q.filter(Colis.type_colis == type_colis)
+    return q.order_by(Colis.id.desc()).offset(skip).limit(limit).all()
+
+
 @router.post("/colis", response_model=ColisResponse, status_code=status.HTTP_201_CREATED)
 def creer_colis(
     colis: ColisCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Create package record"""
-    return ColisService.creer_colis(
-        db, colis.reference_colis, colis.poids,
-        colis.dimensions, colis.contenu
+    """Enregistre un colis (numero CO-YYYYMMDD-NNNN genere ici).
+
+    Poids/volume non negatifs, type dans la liste metier si fourni,
+    bon_sortie lie verifie existant (FK SQLite non contrôlée).
+    """
+    from app.models.magasin_avance import Colis, BonSortie
+
+    TYPES_COLIS = ("carton", "palette", "caisse", "sac")
+    if colis.type_colis is not None and colis.type_colis not in TYPES_COLIS:
+        raise HTTPException(status_code=400,
+                            detail=f"type_colis doit etre l'un de {list(TYPES_COLIS)}")
+    if colis.poids is not None and float(colis.poids) < 0:
+        raise HTTPException(status_code=400, detail="poids ne peut pas etre negatif")
+    if colis.volume is not None and float(colis.volume) < 0:
+        raise HTTPException(status_code=400, detail="volume ne peut pas etre negatif")
+    if colis.bon_sortie_id is not None:
+        if not db.query(BonSortie).filter(BonSortie.id == colis.bon_sortie_id).first():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Bon de sortie {colis.bon_sortie_id} inexistant")
+
+    c = Colis(
+        numero_colis=_prochaine_rotation_numero(db, Colis, "numero_colis", "CO"),
+        bon_sortie_id=colis.bon_sortie_id,
+        type_colis=colis.type_colis,
+        poids=colis.poids,
+        dimensions=colis.dimensions,
+        volume=colis.volume,
+        contenu=colis.contenu,
+        fragile=colis.fragile,
+        empilable=colis.empilable,
+        operateur=current_user.id,
     )
+    db.add(c)
+    db.commit()
+    db.refresh(c)
+    return c
+
+
+@router.patch("/colis/{colis_id}", response_model=ColisResponse)
+def modifier_colis(
+    colis_id: int,
+    data: ColisUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Met a jour les caracteres physiques d'un colis (numero immuable)."""
+    from app.models.magasin_avance import Colis
+
+    TYPES_COLIS = ("carton", "palette", "caisse", "sac")
+    c = db.query(Colis).filter(Colis.id == colis_id).first()
+    if not c:
+        raise HTTPException(status_code=404, detail="Colis non trouvé")
+    if data.type_colis is not None:
+        if data.type_colis not in TYPES_COLIS:
+            raise HTTPException(status_code=400,
+                                detail=f"type_colis doit etre l'un de {list(TYPES_COLIS)}")
+        c.type_colis = data.type_colis
+    if data.poids is not None:
+        if float(data.poids) < 0:
+            raise HTTPException(status_code=400,
+                                detail="poids ne peut pas etre negatif")
+        c.poids = data.poids
+    if data.volume is not None:
+        if float(data.volume) < 0:
+            raise HTTPException(status_code=400,
+                                detail="volume ne peut pas etre negatif")
+        c.volume = data.volume
+    for champ in ("dimensions", "contenu", "fragile", "empilable", "emplacement"):
+        valeur = getattr(data, champ)
+        if valeur is not None:
+            setattr(c, champ, valeur)
+
+    db.commit()
+    db.refresh(c)
+    return c
 
 
 @router.put("/colis/{colis_id}/etiqueter", response_model=ColisResponse)
 def etiqueter_colis(
     colis_id: int,
-    code_barres: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Label package with barcode"""
-    return ColisService.etiqueter_colis(db, colis_id, code_barres)
+    """Étiquette un colis : date_etiquetage (colonne Date reelle) = aujourdhui.
+
+    L'ancien service ecrivait code_barres — colonne inexistante → perte
+    silencieuse. Un colis deja etiquete ne repond pas deux fois : et
+    operateur traces a la premiere etiquette.
+    """
+    from app.models.magasin_avance import Colis
+
+    c = db.query(Colis).filter(Colis.id == colis_id).first()
+    if not c:
+        raise HTTPException(status_code=404, detail="Colis non trouvé")
+    if c.date_etiquetage is not None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Colis deja etiquete le {c.date_etiquetage.isoformat()}")
+
+    c.date_etiquetage = date.today()
+    c.operateur = current_user.id
+    db.commit()
+    db.refresh(c)
+    return c
 
 
 @router.put("/colis/{colis_id}/palettiser", response_model=ColisResponse)
 def palettiser_colis(
     colis_id: int,
-    palette_id: str,
+    palette: str = Query(..., min_length=1,
+                         description="Reference palette (ex: PAL-2026-014)"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Palletize package"""
-    return ColisService.palettiser_colis(db, colis_id, palette_id)
+    """Affecte le colis a une palette, tracee dans `emplacement`.
+
+    Pas de colonne palette_id/date_palettisation dans le modele : au lieu
+    d'inventer une donnee perduee en silence, la reference palette est
+    ecrite dans l'unique colonne de localisation reelle du modele.
+    """
+    from app.models.magasin_avance import Colis
+
+    c = db.query(Colis).filter(Colis.id == colis_id).first()
+    if not c:
+        raise HTTPException(status_code=404, detail="Colis non trouvé")
+    ref = (palette or "").strip()
+    if not ref:
+        raise HTTPException(status_code=400,
+                            detail="Reference palette non vide obligatoire")
+
+    c.emplacement = f"palette:{ref}"
+    db.commit()
+    db.refresh(c)
+    return c
 
 
 # ============ KPIs ============
