@@ -2,9 +2,10 @@
 // Toutes les pages doivent passer par ce client (apiClient ou les services *API exportés ici).
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
-let BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-83b1.up.railway.app';
+// Fallback = le backend Railway reellement en ligne (health/login prouves 200).
+let BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://evo-log-backend-production.up.railway.app';
 if (process.env.NODE_ENV === 'production' && BASE_URL.includes('localhost')) {
-  BASE_URL = 'https://backend-production-83b1.up.railway.app';
+  BASE_URL = 'https://evo-log-backend-production.up.railway.app';
 }
 
 /** Préfixe d'API versionné exposé par le backend FastAPI. */

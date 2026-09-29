@@ -381,9 +381,78 @@ export default function DepartementPage() {
 
       {/* Planning de la semaine (tours de garde des collaborateurs) */}
       <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-3">
-        <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-          <CalendarDays className="w-4 h-4" /> Planning {planning ? `· ${planning.semaine} (${planning.du} → ${planning.au})` : ''}
-        </h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+            <CalendarDays className="w-4 h-4" /> Planning {planning ? `· ${planning.semaine} (${planning.du} → ${planning.au})` : ''}
+          </h2>
+          {canManage && (
+            <button
+              type="button"
+              onClick={() => setShowPlanForm(v => !v)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition"
+            >
+              <Plus className="w-3.5 h-3.5" /> Nouveau tour
+            </button>
+          )}
+        </div>
+
+        {/* Inline create form */}
+        {canManage && showPlanForm && (
+          <div className="rounded-lg border border-sky-500/20 bg-sky-500/5 p-3 space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
+              <label className="space-y-1">
+                <span className="text-slate-400">Collaborateur</span>
+                <select
+                  value={planForm.employe_id}
+                  onChange={e => setPlanForm(f => ({ ...f, employe_id: e.target.value }))}
+                  className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1.5 text-slate-100"
+                >
+                  <option value="">— choisir —</option>
+                  {members.filter(m => m.role_level === 3).map(m => (
+                    <option key={m.id} value={m.id}>{m.full_name || m.username}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-1">
+                <span className="text-slate-400">Date</span>
+                <input
+                  type="date"
+                  value={planForm.date_jour}
+                  onChange={e => setPlanForm(f => ({ ...f, date_jour: e.target.value }))}
+                  className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1.5 text-slate-100"
+                />
+              </label>
+              <label className="space-y-1">
+                <span className="text-slate-400">Quart</span>
+                <select
+                  value={planForm.quart}
+                  onChange={e => setPlanForm(f => ({ ...f, quart: e.target.value }))}
+                  className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1.5 text-slate-100"
+                >
+                  {['STANDARD', 'MATIN', 'JOUR', 'SOIR', 'NUIT'].map(q => <option key={q}>{q}</option>)}
+                </select>
+              </label>
+              <label className="space-y-1">
+                <span className="text-slate-400">Poste</span>
+                <input
+                  value={planForm.poste_assigne}
+                  onChange={e => setPlanForm(f => ({ ...f, poste_assigne: e.target.value }))}
+                  placeholder="Ex. Quai 14"
+                  className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1.5 text-slate-100 placeholder:text-slate-500"
+                />
+              </label>
+            </div>
+            <button
+              type="button"
+              onClick={handleCreatePlanning}
+              disabled={planBusy}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 text-white hover:bg-sky-500 disabled:opacity-50 transition"
+            >
+              {planBusy ? 'Création…' : 'Créer le tour'}
+            </button>
+          </div>
+        )}
+
         {!planning ? (
           <p className="text-xs text-slate-500">Aucune donnée de planning disponible.</p>
         ) : planning.lignes.length === 0 ? (
@@ -397,7 +466,8 @@ export default function DepartementPage() {
                   <th className="py-2 pr-3 font-semibold">Collaborateur</th>
                   <th className="py-2 pr-3 font-semibold">Quart</th>
                   <th className="py-2 pr-3 font-semibold">Poste</th>
-                  <th className="py-2 font-semibold">Statut</th>
+                  <th className="py-2 pr-3 font-semibold">Statut</th>
+                  {canManage && <th className="py-2 font-semibold">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
@@ -407,11 +477,23 @@ export default function DepartementPage() {
                     <td className="py-2 pr-3 text-slate-100">{l.employe_nom}</td>
                     <td className="py-2 pr-3 text-slate-300">{l.quart}</td>
                     <td className="py-2 pr-3 text-slate-400">{l.poste_assigne}</td>
-                    <td className="py-2">
+                    <td className="py-2 pr-3">
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
                         {l.statut}
                       </span>
                     </td>
+                    {canManage && (
+                      <td className="py-2">
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePlanning(l)}
+                          disabled={busyId === l.id}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30 hover:bg-rose-500/25 disabled:opacity-50 transition"
+                        >
+                          <Trash2 className="w-3 h-3" /> Suppr.
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

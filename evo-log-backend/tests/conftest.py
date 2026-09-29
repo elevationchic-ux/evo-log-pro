@@ -33,7 +33,7 @@ import types
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event, text
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base, get_db

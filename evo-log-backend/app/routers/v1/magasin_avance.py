@@ -26,9 +26,11 @@ from app.schemas.magasin_avance import (
     RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse,
     ReapproAutomatiqueResponse
 )
-from app.services.magasin_avance_service import (
-    ColisService
-)
+
+# ColisService IMPORTÉ PUIS SUPPRIMÉ (Batch 19) : ses trois methodes
+# ecrivaient des colonnes fantomes (reference_colis, code_barres, palette_id,
+# date_creation, date_palettisation). Les routes /colis sont reconstruites
+# en direct sur le modele reel plus haut dans ce fichier.
 
 router = APIRouter(tags=["Magasin Avancé"])
 
