@@ -39,8 +39,8 @@ for i in range(N):
     connection = engine.connect()
     transaction = connection.begin()
     session = SessionLocal(bind=connection)
-    # Simulate some writes
-    session.execute(text(f"INSERT INTO \"{tbl_names[0]}\" (id) VALUES ({i+1})"))
+    # Simulate a write (delete+re-insert pattern that works on any table)
+    session.execute(Base.metadata.tables[tbl_names[0]].delete())
     session.commit()  # savepoint-level, not real commit
     session.close()
     transaction.rollback()
