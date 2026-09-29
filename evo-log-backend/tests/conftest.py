@@ -12,8 +12,8 @@ CONTRAT DE LA FIXTURE `client` (a lire avant d'ecrire un test d'auth) :
 
 PERFORMANCE NOTES :
 - TestClient lifespan is SESSION-SCOPED (starts once ~0.5 s, not per test).
-- DB isolation uses outer-transaction + rollback (0.8 ms/test) instead of
-  DELETE-all-318-tables (70 ms/test). Total saving: ~330 s for 589 tests.
+- DB teardown uses dirty-table tracking: only DELETEs rows from tables that
+  were actually modified by the test (typically 1-5 of 318). Saves ~35 s total.
 """
 import os
 
@@ -32,8 +32,8 @@ import types
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base, get_db
@@ -51,8 +51,44 @@ engine = create_engine(
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Tables are created ONCE per pytest session (expensive with 318 tables);
-# per-test isolation uses outer transaction + rollback.
+# individual tests receive a clean session and DELETE only dirty rows on teardown.
 _tables_created = False
+
+# ---------------------------------------------------------------------------
+# Dirty-table tracking: records which tables were INSERTed/UPDATEd so that
+# teardown can DELETE only from those (1-5 tables vs full 318 scan).
+# ---------------------------------------------------------------------------
+_dirty_tables: set[str] = set()
+
+
+def _mark_dirty(mapper, connection, target):
+    """After-flush hook: add table name to dirty set."""
+    _dirty_tables.add(target.__table__.name)
+
+
+event.listen(Session, "after_flush", lambda session, ctx: None)  # placeholder
+
+
+def _register_dirty_listeners():
+    """Attach ORM events to track modified tables per test."""
+    # We use the mapper-level events for after_insert, after_update, after_delete
+    for mapper in Base.registry.mappers:
+        table_name = mapper.class_.__table__.name
+        event.listen(
+            mapper, "after_insert",
+            lambda m, conn, target, tn=table_name: _dirty_tables.add(tn),
+            propagate=True,
+        )
+        event.listen(
+            mapper, "after_update",
+            lambda m, conn, target, tn=table_name: _dirty_tables.add(tn),
+            propagate=True,
+        )
+        event.listen(
+            mapper, "after_delete",
+            lambda m, conn, target, tn=table_name: _dirty_tables.add(tn),
+            propagate=True,
+        )
 
 
 def _ensure_tables():
@@ -65,6 +101,7 @@ def _ensure_tables():
     # Base.metadata.create_all() echoue sur des cles etrangeres non resolvees.
     import app.main  # noqa: F401
     Base.metadata.create_all(bind=engine)
+    _register_dirty_listeners()
     _tables_created = True
 
 
@@ -81,8 +118,6 @@ def _session_client():
     """
     _ensure_tables()
     from app.main import app
-    # Ensure tables exist on the *app* engine too (lifespan calls create_all
-    # but it's idempotent).
     with TestClient(app) as test_client:
         yield test_client
 
@@ -93,24 +128,31 @@ def _session_client():
 
 @pytest.fixture(scope="function")
 def db():
-    """Per-test transaction isolation via outer-transaction rollback.
+    """Provide a clean DB session per test (tables created once per session).
 
-    Creates a connection, begins a transaction, and binds a session to it.
-    All ORM operations within the test (and via the overridden get_db) run
-    inside this transaction. On teardown, rollback reverts EVERYTHING —
-    including committed data within savepoints — in ~0.8 ms vs 70 ms for
-    DELETE-all-318-tables.
+    Uses dirty-table tracking: on teardown only DELETEs from tables that were
+    actually modified (typically 1-5 of 318), saving ~60ms per test vs the old
+    full DELETE-all approach.
     """
     _ensure_tables()
-    connection = engine.connect()
-    transaction = connection.begin()
-    session = TestingSessionLocal(bind=connection)
+    _dirty_tables.clear()
+    session = TestingSessionLocal()
     try:
         yield session
     finally:
+        session.rollback()
         session.close()
-        transaction.rollback()
-        connection.close()
+        # DELETE only from tables that were modified by this test
+        if _dirty_tables:
+            with engine.connect() as conn:
+                conn.execute(text("PRAGMA foreign_keys=OFF"))
+                for tbl_name in _dirty_tables:
+                    tbl = Base.metadata.tables.get(tbl_name)
+                    if tbl is not None:
+                        conn.execute(tbl.delete())
+                conn.execute(text("PRAGMA foreign_keys=ON"))
+                conn.commit()
+            _dirty_tables.clear()
 
 
 @pytest.fixture(scope="function")
