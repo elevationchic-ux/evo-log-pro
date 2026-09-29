@@ -212,41 +212,73 @@ class FournisseurStockResponse(FournisseurStockCreate):
 # /reapprovisionnement/automatique qui les construit sur le modèle réel.
 
 
-# BonReception schemas
-class BonReceptionBase(BaseModel):
-    commande_id: int
+# BonReception schemas — Batch 19 : ALIGNES SUR LE MODELE REEL
+# (app/models/magasin_avance.BonReception). L'ancien schema inventait
+# commande_id (reel : commande_fournisseur_id), imposait date_reception et
+# un statut "en_cours" hors workflow reel (en_attente/valide/refuse) ; le
+# numero_bon (unique NOT NULL) etait oublie → TypeError 500 garanti.
+# Numero BR-YYYYMMDD-NNNN genere cote route.
+class BonReceptionCreate(BaseModel):
     fournisseur_id: int
-    date_reception: date
-    statut: str = "en_cours"
+    entrepot_id: int
+    commande_fournisseur_id: Optional[int] = None
+    date_reception: Optional[date] = None  # defaut = aujourd'hui cote route
+    notes: Optional[str] = None
 
 
-class BonReceptionCreate(BonReceptionBase):
-    pass
+class BonReceptionUpdate(BaseModel):
+    # statut jamais modifiable ici — transitions uniquement via /valider
+    fournisseur_id: Optional[int] = None
+    entrepot_id: Optional[int] = None
+    date_reception: Optional[date] = None
+    notes: Optional[str] = None
 
 
-class BonReceptionResponse(BonReceptionBase):
+class BonReceptionResponse(BaseModel):
     id: int
-    date_validation: Optional[datetime] = None
-    
+    numero_bon: str
+    commande_fournisseur_id: Optional[int] = None
+    fournisseur_id: int
+    entrepot_id: int
+    date_reception: Optional[date] = None
+    operateur: Optional[int] = None
+    validateur: Optional[int] = None
+    date_validation: Optional[date] = None  # colonne reelle de type Date
+    statut: str
+    notes: Optional[str] = None
+
     class Config:
         from_attributes = True
 
 
-class LigneBonReceptionBase(BaseModel):
-    bon_id: int
-    article_id: int
+# LigneBonReception schemas — Batch 19 : le fantaisiste
+# (bon_id, article_id, emplacement_id) remplace par les colonnes reelles
+# (bon_reception_id, stock_id, emplacement en String). quantite_commandee
+# n'est plus obligatoire (NULL admis si réception sans commande).
+class LigneBonReceptionCreate(BaseModel):
+    stock_id: int
     quantite_recue: float
-    quantite_commandee: float
-    emplacement_id: Optional[int] = None
+    quantite_commandee: Optional[float] = None
+    prix_unitaire: Optional[float] = None
+    emplacement: Optional[str] = None
+    numero_lot: Optional[str] = None
+    date_peremption: Optional[date] = None
+    commentaires: Optional[str] = None
 
 
-class LigneBonReceptionCreate(LigneBonReceptionBase):
-    pass
-
-
-class LigneBonReceptionResponse(LigneBonReceptionBase):
+class LigneBonReceptionResponse(BaseModel):
     id: int
-    
+    bon_reception_id: int
+    stock_id: int
+    quantite_recue: float
+    quantite_commandee: Optional[float] = None
+    prix_unitaire: Optional[float] = None
+    emplacement: Optional[str] = None
+    numero_lot: Optional[str] = None
+    date_peremption: Optional[date] = None
+    statut: str
+    commentaires: Optional[str] = None
+
     class Config:
         from_attributes = True
 
