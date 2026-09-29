@@ -206,11 +206,9 @@ from app.schemas.rh import (
     DocumentEmployeCreate, DocumentEmployeUpdate, DocumentEmployeResponse,
     OrganigrammeCreate, OrganigrammeUpdate, OrganigrammeResponse,
     CompetenceCreate, CompetenceUpdate, CompetenceResponse,
-    CompetenceEmployeCreate, CompetenceEmployeUpdate, CompetenceEmployeResponse
+    CompetenceEmployeCreate, CompetenceEmployeUpdate, CompetenceEmployeResponse,
+    BulletinPaieResponse
 )
-# Bulletin de paie : la definition unique est celle du module RH avance, celle
-# que le routeur renvoie vraiment (schemas/rh.py en doublonnait une obsolete).
-from app.schemas.rh_avance import BulletinPaieResponse
 from app.schemas.magasin_avance import (
     PeremptionCreate, PeremptionResponse,
     ReservationStockCreate, ReservationStockResponse,
@@ -221,13 +219,14 @@ from app.schemas.magasin_avance import (
     InventaireTournantCreate, InventaireTournantResponse,
     LigneInventaireCreate, LigneInventaireResponse,
     FournisseurStockCreate, FournisseurStockResponse,
+    CommandeFournisseurCreate, CommandeFournisseurResponse,
+    LigneCommandeFournisseurCreate, LigneCommandeFournisseurResponse,
     BonReceptionCreate, BonReceptionResponse,
     LigneBonReceptionCreate, LigneBonReceptionResponse,
     RetourClientCreate, RetourClientUpdate, RetourClientTraitement, RetourClientResponse,
     LitigeTransporteurCreate, LitigeTransporteurUpdate, LitigeTransporteurResolution, LitigeTransporteurResponse,
     ColisCreate, ColisUpdate, ColisResponse,
-    RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse,
-    ReapproLigneInfo, ReapproIgnoreInfo, ReapproAutomatiqueResponse
+    RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse
 )
 from app.schemas.transport_avance import (
     DispatchBase, DispatchCreate, DispatchUpdate, DispatchResponse,
@@ -430,13 +429,14 @@ __all__ = [
     "InventaireTournantCreate", "InventaireTournantResponse",
     "LigneInventaireCreate", "LigneInventaireResponse",
     "FournisseurStockCreate", "FournisseurStockResponse",
+    "CommandeFournisseurCreate", "CommandeFournisseurResponse",
+    "LigneCommandeFournisseurCreate", "LigneCommandeFournisseurResponse",
     "BonReceptionCreate", "BonReceptionResponse",
     "LigneBonReceptionCreate", "LigneBonReceptionResponse",
     "RetourClientCreate", "RetourClientUpdate", "RetourClientTraitement", "RetourClientResponse",
     "LitigeTransporteurCreate", "LitigeTransporteurUpdate", "LitigeTransporteurResolution", "LitigeTransporteurResponse",
     "ColisCreate", "ColisUpdate", "ColisResponse",
     "RotationStockResponse", "PrecisionInventaireResponse", "PerformanceFournisseurResponse",
-    "ReapproLigneInfo", "ReapproIgnoreInfo", "ReapproAutomatiqueResponse",
     "TourneeCreate", "TourneeUpdate", "TourneeResponse",
     "LivraisonCreate", "LivraisonUpdate", "LivraisonResponse",
     "FraisKilometriqueCreate", "FraisKilometriqueResponse",

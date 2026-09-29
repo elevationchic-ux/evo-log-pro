@@ -18,13 +18,14 @@ from app.schemas.magasin_avance import (
     InventaireTournantCreate, InventaireTournantResponse,
     LigneInventaireCreate, LigneInventaireResponse,
     FournisseurStockCreate, FournisseurStockResponse,
+    CommandeFournisseurCreate, CommandeFournisseurResponse,
+    LigneCommandeFournisseurCreate, LigneCommandeFournisseurResponse,
     BonReceptionCreate, BonReceptionResponse,
     LigneBonReceptionCreate, LigneBonReceptionResponse,
     RetourClientCreate, RetourClientUpdate, RetourClientTraitement, RetourClientResponse,
     LitigeTransporteurCreate, LitigeTransporteurUpdate, LitigeTransporteurResolution, LitigeTransporteurResponse,
     ColisCreate, ColisUpdate, ColisResponse,
-    RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse,
-    ReapproAutomatiqueResponse
+    RotationStockResponse, PrecisionInventaireResponse, PerformanceFournisseurResponse
 )
 from app.services.magasin_avance_service import (
     ColisService
@@ -447,30 +448,13 @@ def creer_inventaire(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Ouvre un inventaire tournant (Batch 18, modèle réel InventaireTournant).
-
-    L'ancienne version construisait InventaireTournant(date_inventaire=...) :
-    TypeError 500 garanti (colonne réelle : date_debut/date_fin/responsable).
-    numero_inventaire, unique NOT NULL, est généré ici (INV-YYYYMMDD-NNNN).
-    """
+    """Create cycle count inventory"""
     from app.models.magasin_avance import InventaireTournant
-    from app.models.magasin import Entrepot
-
-    if not db.query(Entrepot).filter(Entrepot.id == inventaire.entrepot_id).first():
-        raise HTTPException(status_code=404, detail="Entrepot inexistant")
-    if inventaire.date_fin and inventaire.date_fin < inventaire.date_debut:
-        raise HTTPException(status_code=400, detail="date_fin antérieure à date_debut")
-
     i = InventaireTournant(
-        numero_inventaire=_prochaine_rotation_numero(
-            db, InventaireTournant, "numero_inventaire", "INV"),
         entrepot_id=inventaire.entrepot_id,
-        date_debut=inventaire.date_debut,
-        date_fin=inventaire.date_fin,
+        date_inventaire=inventaire.date_inventaire,
         type_inventaire=inventaire.type_inventaire,
-        statut="en_cours",
-        responsable=current_user.id,
-        notes=inventaire.notes,
+        statut="en_cours"
     )
     db.add(i)
     db.commit()
@@ -485,46 +469,24 @@ def ajouter_ligne_inventaire(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Enregistre un comptage physique (Batch 18).
-
-    Théorique = Stock.quantite_disponible (colonne réelle ; l'ancien code
-    lisait stock.quantite → AttributeError 500). compteur_id (fantôme) →
-    operateur (réel). Un seul comptage par stock et par inventaire : le
-    second est refusé, pas fusionné en silence.
-    """
-    from app.models.magasin_avance import InventaireTournant, LigneInventaire
+    """Add counted item to inventory"""
+    from app.models.magasin_avance import LigneInventaire
     from app.models.magasin import Stock
-
-    inventaire = db.query(InventaireTournant).filter(InventaireTournant.id == inventaire_id).first()
-    if not inventaire:
-        raise HTTPException(status_code=404, detail="Inventaire non trouvé")
-    if inventaire.statut not in ("planifie", "en_cours"):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Inventaire {inventaire.statut} : plus aucun comptage possible")
+    
     stock = db.query(Stock).filter(Stock.id == ligne.stock_id).first()
     if not stock:
         raise HTTPException(status_code=404, detail="Stock non trouvé")
-    quantite_comptee = float(ligne.quantite_comptee)
-    if quantite_comptee < 0:
-        raise HTTPException(status_code=400, detail="quantite_comptee ne peut pas être négative")
-    if db.query(LigneInventaire).filter(
-            LigneInventaire.inventaire_id == inventaire_id,
-            LigneInventaire.stock_id == ligne.stock_id).first():
-        raise HTTPException(
-            status_code=400, detail="Ce stock a déjà été compté dans cet inventaire")
-
-    theorique = float(stock.quantite_disponible or 0)
+    
+    ecart = ligne.quantite_comptee - stock.quantite
+    
     l = LigneInventaire(
         inventaire_id=inventaire_id,
         stock_id=ligne.stock_id,
-        quantite_theorique=theorique,
-        quantite_comptee=quantite_comptee,
-        ecart=quantite_comptee - theorique,
-        statut="compte",
-        operateur=ligne.operateur or current_user.id,
-        date_comptage=date.today(),
-        commentaires=ligne.commentaires,
+        quantite_theorique=stock.quantite,
+        quantite_comptee=ligne.quantite_comptee,
+        ecart=ecart,
+        compteur_id=ligne.compteur_id,
+        date_comptage=datetime.utcnow()
     )
     db.add(l)
     db.commit()
@@ -535,65 +497,31 @@ def ajouter_ligne_inventaire(
 @router.put("/inventaires/{inventaire_id}/valider", response_model=InventaireTournantResponse)
 def valider_inventaire(
     inventaire_id: int,
+    validateur_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Valide l'inventaire et ajuste réellement le stock (Batch 18).
-
-    Anciens fantômes : stock.quantite (perte silencieuse — l'ajustement
-    n'était jamais persisté sur la bonne colonne), validateur_id /
-    date_validation (colonnes inexistantes) et statut "valide" hors du
-    workflow réel planifie/en_cours/termine/annule. Ici : l'ajustement porte
-    sur quantite_disponible ET chaque écart corrigé est tracé dans le registre
-    MouvementStock (type inventaire) — aucune correction invisible.
-    Le validateur est l'utilisateur authentifié (plus de query param
-    validateur_id non vérifié).
-    """
+    """Validate inventory and adjust stock"""
     from app.models.magasin_avance import InventaireTournant, LigneInventaire
-    from app.models.magasin import Stock, MouvementStock, MouvementType
-
+    from app.models.magasin import Stock
+    
     inventaire = db.query(InventaireTournant).filter(InventaireTournant.id == inventaire_id).first()
     if not inventaire:
         raise HTTPException(status_code=404, detail="Inventaire non trouvé")
-    if inventaire.statut == "termine":
-        raise HTTPException(status_code=400, detail="Inventaire déjà validé (décision unique)")
-    if inventaire.statut == "annule":
-        raise HTTPException(status_code=400, detail="Inventaire annulé : validation impossible")
+    
     lignes = db.query(LigneInventaire).filter(LigneInventaire.inventaire_id == inventaire_id).all()
-    if not lignes:
-        raise HTTPException(status_code=400, detail="Aucune ligne comptée : rien à valider")
-
-    ajustees = 0
+    
     for ligne in lignes:
-        if ligne.quantite_comptee is None or float(ligne.ecart or 0) == 0:
-            continue
-        stock = db.query(Stock).filter(Stock.id == ligne.stock_id).first()
-        if not stock:
-            continue
-        dispo_avant = float(stock.quantite_disponible or 0)
-        dispo_apres = float(ligne.quantite_comptee)
-        db.add(MouvementStock(
-            company_id=stock.company_id,
-            reference=f"{inventaire.numero_inventaire}/L{ligne.id}",
-            stock_id=stock.id,
-            type_mouvement=MouvementType.INVENTAIRE,
-            quantite=abs(dispo_apres - dispo_avant),
-            quantite_avant=dispo_avant,
-            quantite_apres=dispo_apres,
-            raison=f"Correction inventaire {inventaire.numero_inventaire} "
-                   f"(ecart {dispo_apres - dispo_avant:+.2f})",
-            document_reference=inventaire.numero_inventaire,
-            operateur_id=current_user.id,
-        ))
-        stock.quantite_disponible = dispo_apres
-        ajustees += 1
-
-    inventaire.statut = "termine"
-    inventaire.date_fin = date.today()
-    trace = (f"[VALIDE {date.today().isoformat()} par utilisateur {current_user.id}] "
-             f"{ajustees} ligne(s) ajustée(s)")
-    inventaire.notes = f"{inventaire.notes}\n{trace}" if inventaire.notes else trace
-
+        if ligne.ecart != 0:
+            stock = db.query(Stock).filter(Stock.id == ligne.stock_id).first()
+            if stock:
+                stock.quantite = ligne.quantite_comptee
+                stock.quantite_disponible = ligne.quantite_comptee - (stock.quantite_reservee or 0)
+    
+    inventaire.statut = "valide"
+    inventaire.validateur_id = validateur_id
+    inventaire.date_validation = datetime.utcnow()
+    
     db.commit()
     db.refresh(inventaire)
     return inventaire
@@ -605,81 +533,34 @@ def calculer_precision_inventaire(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Taux de précision d'un inventaire (Batch 18).
-
-    Sans ligne comptée : precision = None + message « non mesurée » — un
-    inventaire jamais compté n'est pas un inventaire à 0 % (l'ancien code
-    rendait un faux 0.0 mensonger).
-    """
-    from app.models.magasin_avance import InventaireTournant, LigneInventaire
-
-    if not db.query(InventaireTournant).filter(InventaireTournant.id == inventaire_id).first():
-        raise HTTPException(status_code=404, detail="Inventaire non trouvé")
+    """Calculate inventory accuracy percentage"""
+    from app.models.magasin_avance import LigneInventaire
+    
     lignes = db.query(LigneInventaire).filter(LigneInventaire.inventaire_id == inventaire_id).all()
+    
     if not lignes:
-        return {"inventaire_id": inventaire_id, "precision": None,
-                "message": "aucune ligne comptée — précision non mesurée"}
-    lignes_correctes = sum(1 for l in lignes if float(l.ecart or 0) == 0)
-    return {
-        "inventaire_id": inventaire_id,
-        "lignes_total": len(lignes),
-        "lignes_correctes": lignes_correctes,
-        "precision": round(lignes_correctes / len(lignes) * 100, 2),
-    }
+        return {"inventaire_id": inventaire_id, "precision": 0.0}
+    
+    lignes_correctes = sum(1 for l in lignes if l.ecart == 0)
+    precision = (lignes_correctes / len(lignes)) * 100
+    
+    return {"inventaire_id": inventaire_id, "precision": round(precision, 2)}
 
 
 # ============ FOURNISSEURS ============
 @router.post("/fournisseurs-stock", response_model=FournisseurStockResponse, status_code=status.HTTP_201_CREATED)
 def creer_fournisseur_stock(
-    evaluation: FournisseurStockCreate,
+    fournisseur: FournisseurStockCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Enregistre une évaluation fournisseur (Batch 18, modèle réel).
-
-    L'ancien code construisait FournisseurStock(delai_livraison_jours=...,
-    qualite=..., fiabilite=...) : aucune de ces colonnes n'existe →
-    TypeError 500 garanti. note_globale : calculée sur les notes 1-10
-    réellement fournies, jamais inventée.
-    """
+    """Create supplier stock record"""
     from app.models.magasin_avance import FournisseurStock
-    from app.models.tiers import Fournisseur
-
-    if not db.query(Fournisseur).filter(Fournisseur.id == evaluation.fournisseur_id).first():
-        raise HTTPException(status_code=404, detail="Fournisseur inexistant")
-    for champ in ("qualite_produit", "prix_competitif", "service_client"):
-        note = getattr(evaluation, champ)
-        if note is not None and not (1 <= float(note) <= 10):
-            raise HTTPException(status_code=400,
-                                detail=f"{champ} doit être une note entre 1 et 10")
-    if evaluation.taux_livraison_ponctuelle is not None and not (
-            0 <= float(evaluation.taux_livraison_ponctuelle) <= 100):
-        raise HTTPException(status_code=400,
-                            detail="taux_livraison_ponctuelle doit être un pourcentage 0-100")
-    if evaluation.delai_moyen_livraison is not None and evaluation.delai_moyen_livraison < 0:
-        raise HTTPException(status_code=400,
-                            detail="delai_moyen_livraison ne peut pas être négatif")
-
-    note_globale = evaluation.note_globale
-    if note_globale is None:
-        notes_fournies = [float(v) for v in (evaluation.qualite_produit,
-                                             evaluation.prix_competitif,
-                                             evaluation.service_client) if v is not None]
-        note_globale = (round(sum(notes_fournies) / len(notes_fournies), 2)
-                        if notes_fournies else None)
-
     fs = FournisseurStock(
-        fournisseur_id=evaluation.fournisseur_id,
-        delai_moyen_livraison=evaluation.delai_moyen_livraison,
-        taux_livraison_ponctuelle=evaluation.taux_livraison_ponctuelle,
-        qualite_produit=evaluation.qualite_produit,
-        prix_competitif=evaluation.prix_competitif,
-        service_client=evaluation.service_client,
-        note_globale=note_globale,
-        date_evaluation=date.today(),
-        evaluateur=current_user.id,
-        commentaires=evaluation.commentaires,
-        statut="actif",
+        fournisseur_id=fournisseur.fournisseur_id,
+        delai_livraison_jours=fournisseur.delai_livraison_jours,
+        qualite=fournisseur.qualite,
+        fiabilite=fournisseur.fiabilite
     )
     db.add(fs)
     db.commit()
@@ -687,8 +568,7 @@ def creer_fournisseur_stock(
     return fs
 
 
-@router.get("/fournisseurs/{fournisseur_id}/performance",
-            response_model=PerformanceFournisseurResponse)
+@router.get("/fournisseurs/{fournisseur_id}/performance")
 def evaluer_performance_fournisseur(
     fournisseur_id: int,
     debut_periode: date,
@@ -696,22 +576,10 @@ def evaluer_performance_fournisseur(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Performance réelle d'après les commandes fournisseur (Batch 18).
-
-    Anciens fantômes : cmd.date_livraison / cmd.date_prevue (réel :
-    date_livraison_reelle / date_livraison_prevue → AttributeError 500) et
-    statut "recu" (réel : "livree" → le compteur ne matchait jamais). Sans
-    commande sur la période : note/taux/délai = None + message, plus le faux
-    0/100 qui transformait l'absence de mesure en mauvaise note.
-    """
-    from app.models.magasin_avance import CommandeFournisseur
-    from app.models.tiers import Fournisseur
-
-    if debut_periode > fin_periode:
-        raise HTTPException(status_code=400, detail="debut_periode postérieure à fin_periode")
-    if not db.query(Fournisseur).filter(Fournisseur.id == fournisseur_id).first():
-        raise HTTPException(status_code=404, detail="Fournisseur inexistant")
-
+    """Evaluate supplier performance"""
+    from app.models.magasin_avance import CommandeFournisseur, MissionSousTraitant
+    from sqlalchemy import func, and_
+    
     commandes = db.query(CommandeFournisseur).filter(
         and_(
             CommandeFournisseur.fournisseur_id == fournisseur_id,
@@ -719,110 +587,78 @@ def evaluer_performance_fournisseur(
             CommandeFournisseur.date_commande <= fin_periode
         )
     ).all()
-
+    
     if not commandes:
-        return {"fournisseur_id": fournisseur_id, "commandes": 0,
-                "note": None, "taux_livraison": None, "delai_moyen_jours": None,
-                "message": "aucune commande sur la période — performance non évaluée"}
-
-    total = len(commandes)
-    livrees = sum(1 for c in commandes if c.statut == "livree")
-    taux = round(livrees / total * 100, 2)
-
-    delais = [(c.date_livraison_reelle - c.date_livraison_prevue).days
-              for c in commandes
-              if c.date_livraison_reelle and c.date_livraison_prevue]
-    if delais:
-        delai_moyen = round(sum(delais) / len(delais), 2)
-        note = round(min(100, taux * 0.7 + max(0, 100 - abs(delai_moyen)) * 0.3), 2)
-    else:
-        # Retard jamais mesurable : note = taux de livraison brut, sans
-        # composante délai inventée.
-        delai_moyen = None
-        note = taux
-
-    return {"fournisseur_id": fournisseur_id, "commandes": total,
-            "commandes_livrees": livrees, "taux_livraison": taux,
-            "delai_moyen_jours": delai_moyen, "note": round(note, 2)}
+        return {"note": 0, "commandes": 0, "taux_livraison": 0}
+    
+    total_commandes = len(commandes)
+    commandes_livrees = sum(1 for c in commandes if c.statut == "recu")
+    taux_livraison = (commandes_livrees / total_commandes) * 100
+    
+    delais = []
+    for cmd in commandes:
+        if cmd.date_livraison and cmd.date_prevue:
+            delai = (cmd.date_livraison - cmd.date_prevue).days
+            delais.append(delai)
+    
+    delai_moyen = sum(delais) / len(delais) if delais else 0
+    note = min(100, taux_livraison * 0.7 + max(0, 100 - abs(delai_moyen)) * 0.3)
+    
+    return {
+        "note": round(note, 2),
+        "commandes": total_commandes,
+        "commandes_livrees": commandes_livrees,
+        "taux_livraison": round(taux_livraison, 2),
+        "delai_moyen_jours": round(delai_moyen, 2)
+    }
 
 
 # ============ RÉAPPROVISIONNEMENT ============
-@router.post("/reapprovisionnement/automatique/{fournisseur_id}",
-             response_model=ReapproAutomatiqueResponse)
+@router.post("/reapprovisionnement/automatique/{fournisseur_id}")
 def generer_commande_automatique(
     fournisseur_id: int,
     seuil_alerte: float = 10.0,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Génère UNE commande groupée pour les stocks sous le seuil (Batch 18).
-
-    Anciens fantômes : CommandeFournisseur(reference=..., date_prevue=...)
-    et LigneCommandeFournisseur(article_id=stock.article_id) — reference,
-    date_prevue et article_id n'existent pas, et Stock n'a pas d'article_id
-    (lien réel : stock_id / code_article) → TypeError avant le premier
-    commit. prix_unitaire est NOT NULL sur le modèle : un stock sans prix
-    sur sa fiche est IGNORE et déclaré dans « ignorees », jamais price a 0.0
-    invente (Zero-Mock).
-    """
+    """Generate purchase orders for stock below threshold"""
     from app.models.magasin_avance import CommandeFournisseur, LigneCommandeFournisseur
     from app.models.magasin import Stock
-    from app.models.tiers import Fournisseur
-
-    if seuil_alerte <= 0:
-        raise HTTPException(status_code=400, detail="seuil_alerte doit être positif")
-    if not db.query(Fournisseur).filter(Fournisseur.id == fournisseur_id).first():
-        raise HTTPException(status_code=404, detail="Fournisseur inexistant")
-
-    stocks_bas = db.query(Stock).filter(Stock.quantite_disponible < seuil_alerte).all()
-    a_commander = [s for s in stocks_bas if s.prix_unitaire is not None]
-    ignorees = [{"stock_id": s.id, "code_article": s.code_article,
-                 "raison": "prix_unitaire absent de la fiche stock — aucun prix inventé"}
-                for s in stocks_bas if s.prix_unitaire is None]
-    if not a_commander:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Aucun stock commandable sous le seuil {seuil_alerte} "
-                   f"({len(stocks_bas)} sous le seuil, {len(ignorees)} ignorés faute de prix)")
-
-    numero = _prochaine_rotation_numero(db, CommandeFournisseur, "numero_commande", "CMD")
-    quantite = seuil_alerte * 2
-    commande = CommandeFournisseur(
-        numero_commande=numero,
-        fournisseur_id=fournisseur_id,
-        date_commande=date.today(),
-        date_livraison_prevue=date.today() + timedelta(days=7),
-        statut="en_cours",
-        devise="XAF",
-        createur=current_user.id,
-        notes=f"Générée automatiquement — seuil {seuil_alerte}",
-    )
-    db.add(commande)
-    db.flush()
-
-    lignes_infos = []
-    montant_total = 0.0
-    for stock in a_commander:
-        prix = float(stock.prix_unitaire)
-        total_ligne = round(quantite * prix, 2)
-        montant_total += total_ligne
-        db.add(LigneCommandeFournisseur(
+    
+    stocks_bas = db.query(Stock).filter(
+        Stock.quantite_disponible < seuil_alerte
+    ).all()
+    
+    commandes_generees = []
+    for stock in stocks_bas:
+        quantite_commandee = seuil_alerte * 2
+        
+        commande = CommandeFournisseur(
+            fournisseur_id=fournisseur_id,
+            reference=f"CMD-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+            date_commande=date.today(),
+            date_prevue=date.today() + timedelta(days=7),
+            statut="en_attente"
+        )
+        db.add(commande)
+        db.flush()
+        
+        ligne = LigneCommandeFournisseur(
             commande_id=commande.id,
-            stock_id=stock.id,
-            quantite_commandee=quantite,
-            prix_unitaire=prix,
-            quantite_recue=0,
-            prix_total=total_ligne,
-            statut="en_attente",
-        ))
-        lignes_infos.append({"stock_id": stock.id, "code_article": stock.code_article,
-                             "designation": stock.designation,
-                             "quantite_commandee": quantite,
-                             "prix_unitaire": prix, "prix_total": total_ligne})
-    commande.montant_total = round(montant_total, 2)
+            article_id=stock.article_id,
+            quantite_commandee=quantite_commandee,
+            prix_unitaire=0.0
+        )
+        db.add(ligne)
+        
+        commandes_generees.append({
+            "article_id": stock.article_id,
+            "quantite": quantite_commandee,
+            "commande_id": commande.id
+        })
+    
     db.commit()
-    return {"commande_id": commande.id, "numero_commande": numero,
-            "lignes": lignes_infos, "ignorees": ignorees}
+    return commandes_generees
 
 
 # ============ RÉCEPTIONS ============
