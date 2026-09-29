@@ -283,6 +283,12 @@ class LigneBonReceptionResponse(BaseModel):
         from_attributes = True
 
 
+class RefusBonReception(BaseModel):
+    # Le refus d'une reception exige un motif ecrit, comme au batch 16 :
+    # une decision opposable sans motif trace n'existe pas.
+    motif: str
+
+
 # BonSortie schemas — SUPPRIMÉS (Batch 16) : squelettes fantômes déconnectés du
 # modèle réel (destinataire_id, bon_id, quantite n'existent pas sur
 # BonSortie/LigneBonSortie ; stock.quantite non plus). Les VRAIS schémas du bon
