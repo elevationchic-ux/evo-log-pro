@@ -607,7 +607,7 @@ export const magasinAPI = {
     apiClient.get(`/api/magasin/declarations/${id}/receptions-summary`),
   getDeclarationReceptionsHistory: (id: number) =>
     apiClient.get(`/api/magasin/declarations/${id}/receptions-history`),
-  // completeReception SUPPRIMÉ (Batch 19) : clone sans appelel de
+  // completeReception SUPPRIMÉ (Batch 19) : clone sans appelant de
   // createReception vers l'ancienne route morte /magasin-avance/receptions.
   getCommandes: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin/commandes', { params }),
