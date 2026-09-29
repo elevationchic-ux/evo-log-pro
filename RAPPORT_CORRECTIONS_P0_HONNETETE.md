@@ -829,7 +829,7 @@ supprimes avec commentaire pointeur, retire des re-exports.
   fusion silencieuse), comptage refuse si inventaire `termine`/`annule`.
 - Precision : `None` + « non mesuree » sans ligne (plus de faux 0 %) ; 404 si
   inventaire inconnu.
-- Evaluation fournisseur : notes 1–10 et taux 0–100 validés ; `note_globale`
+- Evaluation fournisseur : notes 1–10 et taux 0–100 valides ; `note_globale`
   calculee sur les notes fournies sinon `None` ; evaluateur = authentifie.
 - Performance : 404 si fournisseur inconnu ; periode invalide 400 ; statut reel
   `livree` ; delais calcules sur `date_livraison_reelle − date_livraison_prevue` ;
