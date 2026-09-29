@@ -968,7 +968,6 @@ export const removalSlipAPI = {
   delete: (id: number) => apiClient.delete(`/api/v1/magasin/removal-slips/${id}`),
 };
 
-// ─── Service Réceptions Magasin 3 (MAG3) ──────────────────────────────────
 // ─── Inventaires tournants (circuit réel Batch 18, /magasin-avance) ─────
 // POST /inventaires ouvre une campagne (numero genere cote route),
 // POST /inventaires/{id}/lignes enregistre un comptage (theorique lu sur
@@ -995,6 +994,7 @@ export const inventaireAPI = {
     apiClient.get(`/api/v1/magasin-avance/inventaires/${inventaireId}/precision`),
 };
 
+// ─── Service Réceptions Magasin 3 (MAG3) ──────────────────────────────────
 export const receptionMag3API = {
   getAll: (params?: Record<string, unknown>) => apiClient.get('/api/v1/magasin/receptions-mag3', { params }),
   getStats: () => apiClient.get('/api/v1/magasin/receptions-mag3/stats'),
