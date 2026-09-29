@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Users, UserPlus, Download, Upload, Search, Filter, Mail, Phone, Briefcase,
+  Users, UserPlus, Download, Upload, Search, Mail, Phone, Briefcase,
   Calendar, FileSpreadsheet, X, RefreshCw, Loader2, Copy, AlertTriangle,
   Plane, KeyRound, Info,
 } from 'lucide-react'
