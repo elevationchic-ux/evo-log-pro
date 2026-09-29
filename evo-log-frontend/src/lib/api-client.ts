@@ -721,13 +721,21 @@ export const rhAPI = {
 export const portailRHAPI = {
   getMonProfil: () => apiClient.get('/api/v1/rh/portail/me'),
   getMesBulletins: () => apiClient.get('/api/v1/rh/portail/bulletins'),
-  telechargerBulletin: (id: string) => `/api/v1/rh/portail/bulletins/${id}/telecharger`,
   getCalendrierPaie: () => apiClient.get('/api/v1/rh/portail/calendrier-paie'),
   getMesConges: () => apiClient.get('/api/v1/rh/portail/conges'),
   soumettreConge: (data: { type_conge: string; date_debut: string; date_fin: string; motif?: string }) =>
     apiClient.post('/api/v1/rh/portail/conges', data),
   getDocumentsRH: () => apiClient.get('/api/v1/rh/portail/documents'),
-  telechargerAttestationTravail: () => '/api/v1/rh/portail/documents/attestation-travail',
+  // Les pièces du portail sont derrière une authentification Bearer : un lien
+  // <a href="/api/v1/..."> part sans jeton et revient en 401. Le fichier est
+  // donc récupéré par le client HTTP, qui porte l'en-tête d'authentification,
+  // puis présenté via une URL objet locale.
+  telechargerBulletin: (id: number | string) =>
+    apiClient.get(`/api/v1/rh/portail/bulletins/${id}/telecharger`, { responseType: 'blob' }),
+  telechargerDocument: (documentId: number) =>
+    apiClient.get(`/api/v1/rh/portail/documents/${documentId}/fichier`, { responseType: 'blob' }),
+  telechargerAttestationTravail: () =>
+    apiClient.get('/api/v1/rh/portail/documents/attestation-travail', { responseType: 'blob' }),
 };
 
 // ─── Service Chat Collaboratif & Meeting Rooms & WebRTC ────────────
