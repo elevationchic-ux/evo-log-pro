@@ -546,3 +546,260 @@ def department_presence(
         "collaborateurs": collaborateurs,
         "synthese": synthese,
     }
+
+
+# ── Phase 4 (Tranche B, ecriture) : planning + presence ──────────────────────
+_VALID_QUARTS = frozenset({"JOUR", "NUIT", "MATIN", "SOIR", "STANDARD"})
+_VALID_STATUTS = frozenset({"PLANIFIE", "CONFIRME", "EN_POSTE", "TERMINE", "ABSENT", "REMPLACE"})
+
+
+class PlanningCreatePayload(BaseModel):
+    employe_id: int = Field(..., description="Collaborateur du departement")
+    date_jour: str = Field(..., description="Date AAAA-MM-JJ")
+    quart: str = Field(..., description="JOUR | NUIT | MATIN | SOIR | STANDARD")
+    poste_assigne: str = Field(..., max_length=100)
+    statut: Optional[str] = Field("PLANIFIE", description="Defaut PLANIFIE ; CONFIRME est soumis au delai du mercredi")
+    observations: Optional[str] = None
+
+
+class PlanningUpdatePayload(BaseModel):
+    quart: Optional[str] = None
+    poste_assigne: Optional[str] = None
+    statut: Optional[str] = None
+    observations: Optional[str] = None
+
+
+def _check_publication_deadline(date_jour: _date, new_statut: Optional[str]) -> None:
+    """Contrainte "au mercredi de la semaine precedente".
+
+    Un tour de garde dont la date_jour tombe dans une semaine ISO FUTURE ne peut
+    passer en statut CONFIRME (publication) que si l'on est au plus mercredi de
+    la semaine ISO precedente. Au-dela, la fenetre de publication est fermée ;
+    le tour reste en PLANIFIE (brouillon) — modification libre, mais pas validation.
+    """
+    if (new_statut or "").upper() != "CONFIRME":
+        return  # Seule la publication est concernee.
+    today = _date.today()
+    iso_target = date_jour.isocalendar()  # (year, week, weekday)
+    iso_today = today.isocalendar()
+    # Si la date est dans la semaine courante ou passee, pas de contrainte.
+    target_key = (iso_target[0], iso_target[1])
+    today_key = (iso_today[0], iso_today[1])
+    if target_key <= today_key:
+        return
+    # Deadline : mercredi de la semaine PRECEDANT celle du target.
+    prev_week = iso_target[1] - 1
+    prev_year = iso_target[0]
+    if prev_week < 1:
+        prev_year -= 1
+        prev_week = 52  # Approximation sure ; un calendrier reel max 53.
+        # Verifier si l'annee precedente a 53 semaines.
+        try:
+            _date.fromisocalendar(prev_year, 53, 1)
+            prev_week = 53
+        except ValueError:
+            pass
+    try:
+        deadline = _date.fromisocalendar(prev_year, prev_week, 3)  # Mercredi
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Semaine cible invalide")
+    if today > deadline:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Publication fermee : le planning de la semaine "
+                f"{iso_target[0]}-W{iso_target[1]:02d} devait etre confirme "
+                f"au plus tard le {deadline.isoformat()} (mercredi precedent). "
+                "Le tour reste en statut PLANIFIE."
+            ),
+        )
+
+
+def _guard_planning_in_dept(db: Session, planning_id: int, dept: Department) -> PlanningGarde:
+    """Le PlanningGarde existe ET son employe est membre du departement resolu."""
+    pg = db.query(PlanningGarde).filter(PlanningGarde.id == planning_id).first()
+    if not pg:
+        raise HTTPException(status_code=404, detail="Tour de garde introuvable")
+    member_ids = _department_member_ids(db, dept)
+    if pg.employe_id not in member_ids:
+        raise HTTPException(
+            status_code=403,
+            detail="Ce tour de garde ne concerne pas un collaborateur de votre departement",
+        )
+    return pg
+
+
+@router.post(
+    "/planning",
+    summary="Creer un tour de garde pour un collaborateur du departement",
+    status_code=status.HTTP_201_CREATED,
+)
+def create_planning(
+    payload: PlanningCreatePayload,
+    department_id: Optional[int] = Query(None, description="Reserve admin/CADC ; ignore pour un chef"),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_department_head),
+):
+    """Le chef planifie un tour de garde (PlanningGarde) pour un membre de SON departement.
+
+    Contrainte : statut CONFIRME est soumis au delai "au mercredi de la semaine
+    precedente" (_check_publication_deadline). Quart et statut valides contre
+    les enumerations du modele.
+    """
+    dept = _scoped_department(db, current, department_id)
+    member_ids = _department_member_ids(db, dept)
+    if payload.employe_id not in member_ids:
+        raise HTTPException(
+            status_code=403,
+            detail="Collaborateur hors de votre departement",
+        )
+    quart = payload.quart.upper().strip()
+    if quart not in _VALID_QUARTS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Quart invalide (attendu : {', '.join(sorted(_VALID_QUARTS))})",
+        )
+    statut = (payload.statut or "PLANIFIE").upper().strip()
+    if statut not in _VALID_STATUTS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Statut invalide (attendu : {', '.join(sorted(_VALID_STATUTS))})",
+        )
+    date_jour = _parse_date(payload.date_jour)
+    _check_publication_deadline(date_jour, statut)
+
+    pg = PlanningGarde(
+        company_id=dept.company_id,
+        employe_id=payload.employe_id,
+        superviseur_id=current.id,
+        date_jour=date_jour,
+        quart=quart,
+        poste_assigne=payload.poste_assigne.strip(),
+        statut=statut,
+        observations=payload.observations,
+    )
+    db.add(pg)
+    db.commit()
+    db.refresh(pg)
+    return {
+        "id": pg.id,
+        "employe_id": pg.employe_id,
+        "date_jour": pg.date_jour.isoformat(),
+        "quart": pg.quart,
+        "poste_assigne": pg.poste_assigne,
+        "statut": pg.statut,
+        "observations": pg.observations,
+    }
+
+
+@router.put(
+    "/planning/{planning_id}",
+    summary="Modifier un tour de garde du departement",
+)
+def update_planning(
+    planning_id: int,
+    payload: PlanningUpdatePayload,
+    department_id: Optional[int] = Query(None, description="Reserve admin/CADC ; ignore pour un chef"),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_department_head),
+):
+    """Met a jour les champs fournis (quart, poste, statut, observations).
+
+    Le tour doit appartenir a un membre du departement resolu. La contrainte
+    "au mercredi" s'applique si le nouveau statut est CONFIRME.
+    """
+    dept = _scoped_department(db, current, department_id)
+    pg = _guard_planning_in_dept(db, planning_id, dept)
+
+    if payload.quart is not None:
+        q = payload.quart.upper().strip()
+        if q not in _VALID_QUARTS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Quart invalide (attendu : {', '.join(sorted(_VALID_QUARTS))})",
+            )
+        pg.quart = q
+    if payload.poste_assigne is not None:
+        pg.poste_assigne = payload.poste_assigne.strip()
+    if payload.statut is not None:
+        s = payload.statut.upper().strip()
+        if s not in _VALID_STATUTS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Statut invalide (attendu : {', '.join(sorted(_VALID_STATUTS))})",
+            )
+        _check_publication_deadline(pg.date_jour, s)
+        pg.statut = s
+    if payload.observations is not None:
+        pg.observations = payload.observations
+
+    db.commit()
+    db.refresh(pg)
+    return {
+        "id": pg.id,
+        "employe_id": pg.employe_id,
+        "date_jour": pg.date_jour.isoformat(),
+        "quart": pg.quart,
+        "poste_assigne": pg.poste_assigne,
+        "statut": pg.statut,
+        "observations": pg.observations,
+    }
+
+
+@router.delete(
+    "/planning/{planning_id}",
+    summary="Supprimer un tour de garde du departement",
+)
+def delete_planning(
+    planning_id: int,
+    department_id: Optional[int] = Query(None, description="Reserve admin/CADC ; ignore pour un chef"),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_department_head),
+):
+    """Supprime definitivement un tour de garde appartenant a un membre du departement."""
+    dept = _scoped_department(db, current, department_id)
+    pg = _guard_planning_in_dept(db, planning_id, dept)
+    db.delete(pg)
+    db.commit()
+    return {"deleted": pg.id}
+
+
+@router.post(
+    "/presence/{pointage_id}/valider",
+    summary="Valider un emargement (pointage) d'un collaborateur du departement",
+)
+def validate_presence(
+    pointage_id: int,
+    department_id: Optional[int] = Query(None, description="Reserve admin/CADC ; ignore pour un chef"),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_department_head),
+):
+    """Le chef confirme qu'un emargement (PointageVacation) est correct.
+
+    Seuls les pointages des membres de SON departement sont validables. L'appel
+    met est_valide=True et renseigne valide_par_id (chef). Si le pointage est
+    deja valide, la reponse reste 200 (idempotent).
+    """
+    dept = _scoped_department(db, current, department_id)
+    pv = db.query(PointageVacation).filter(PointageVacation.id == pointage_id).first()
+    if not pv:
+        raise HTTPException(status_code=404, detail="Emargement introuvable")
+    member_ids = _department_member_ids(db, dept)
+    if pv.employe_id not in member_ids:
+        raise HTTPException(
+            status_code=403,
+            detail="Cet emargement ne concerne pas un collaborateur de votre departement",
+        )
+    pv.est_valide = True
+    pv.valide_par_id = current.id
+    db.commit()
+    db.refresh(pv)
+    return {
+        "id": pv.id,
+        "employe_id": pv.employe_id,
+        "date_pointage": pv.date_pointage.isoformat() if pv.date_pointage else None,
+        "heure_arrivee": pv.heure_arrivee,
+        "heure_depart": pv.heure_depart,
+        "est_valide": pv.est_valide,
+        "valide_par_id": pv.valide_par_id,
+    }
