@@ -356,13 +356,6 @@ export default function EmployesPage() {
 
   // ---------------------------------------------------------------- filtres
 
-  const libelleStatut = (e: Fiche): string => {
-    if (!e.is_active) return t('Compte désactivé', 'Account disabled')
-    if (!e.statut) return t('Sans contrat', 'No contract')
-    const s = STATUTS[e.statut]
-    return s ? t(s.fr, s.en) : e.statut
-  }
-
   const deptList = useMemo(
     () => Array.from(new Set(employes.map((e) => e.departement).filter(Boolean) as string[])).sort(),
     [employes]
