@@ -3,3 +3,18 @@
 ........................................................................ [ 36%]
 ........................................................................ [ 48%]
 ........................................................................ [ 60%]
+.......................F................................................ [ 72%]
+.........................................................F.............. [ 84%]
+........................................................................ [ 96%]
+.....................                                                    [100%]
+================================== FAILURES ===================================
+E   AssertionError: Table users not found in database
+    assert 'users' in []
+C:\Users\chris\Documents\Projet\Documents\evo-log pro\evo-log-backend\tests\unit\test_real_backend.py:413: AssertionError: Table users not found in database
+E   AssertionError: Table users not found in database
+    assert 'users' in []
+C:\Users\chris\Documents\Projet\Documents\evo-log pro\evo-log-backend\tests\unit\test_simple_real.py:131: AssertionError: Table users not found in database
+=========================== short test summary info ===========================
+FAILED tests/unit/test_real_backend.py::TestDatabaseConnectionReal::test_database_tables_exist
+FAILED tests/unit/test_simple_real.py::TestDatabaseConnection::test_database_tables_exist
+2 failed, 595 passed in 233.80s (0:03:53)
