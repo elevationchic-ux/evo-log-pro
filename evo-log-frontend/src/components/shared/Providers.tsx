@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SettingsProvider } from '@/components/layout/SettingsProvider';
 import { AuthProvider } from '@/components/layout/AuthProvider';
 import ServiceWorkerRegistrar from '@/components/shared/ServiceWorkerRegistrar';
+import ChunkRecovery from '@/components/shared/ChunkRecovery';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
