@@ -149,6 +149,14 @@ def client(db, _session_client):
     from app.main import app
     from app.core.security import get_current_user
 
+    # Defensive: some test modules create their own TestClient whose shutdown
+    # calls engine.dispose() on the APP's engine (StaticPool :memory:). Since
+    # our _session_client lifespan only runs once, we must re-ensure the app
+    # engine's schema is intact. create_all(checkfirst=True) is idempotent and
+    # nearly instant when tables already exist.
+    from app.core.database import engine as app_engine
+    Base.metadata.create_all(bind=app_engine)
+
     # Fake superuser that bypasses all permission checks
     _fake_user = types.SimpleNamespace(
         id=1, email="admin@test.local", is_active=True,

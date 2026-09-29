@@ -15,7 +15,8 @@ from app.models.tiers import Fournisseur
 from app.routers.v1 import magasin_avance as rv
 from app.core.security import get_current_user
 
-engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
+engine = create_engine("sqlite://", connect_args={"check_same_thread": False},
+                       poolclass=__import__("sqlalchemy.pool", fromlist=["StaticPool"]).StaticPool)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine, autoflush=True)
 db = Session()
