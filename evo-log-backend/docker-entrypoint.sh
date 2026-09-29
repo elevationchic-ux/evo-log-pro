@@ -59,5 +59,22 @@ fi
 echo "[entrypoint] alembic upgrade head"
 alembic upgrade head
 
+# ----------------------------------------------------------------------------
+# Auto-reparation NON-BLOQUANTE du chemin de login. Le `SELECT users` de
+# /auth/login projette TOUTES les colonnes du modele User ; si la table est
+# partielement desynchronisee (colonne declaree par l'ORM jamais posee sur la
+# base), le login leve une erreur 500 pour n'importe quel identifiant, meme
+# inexistant, alors que /health (SELECT 1) reste vert. Ce script refait la
+# parite `users` (colonnes NULLABLES uniquement, idempotent, non destructif)
+# et garantit les comptes de secours.
+#
+# STREICTEMENT NON-BLOQUANT (`|| true`) : on ne doit JAMAIS empecher uvicorn de
+# demarrer a cause de cette etape facultative. Un succes acceler la reparation
+# ; un echec est simplement loggue et l'API demarre quand meme (le Shell
+# `python scripts/ensure_login_railway.py` reste le levier manuel de secours).
+# ----------------------------------------------------------------------------
+echo "[entrypoint] auto-reparation login/users (non-bloquante)"
+python scripts/ensure_login_railway.py || echo "[entrypoint] reparation ignoree (non-fatale)"
+
 echo "[entrypoint] demarrage uvicorn sur port ${PORT:-8000}"
 exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" --workers "${WEB_CONCURRENCY:-1}"
