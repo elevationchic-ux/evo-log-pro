@@ -68,14 +68,19 @@ alembic upgrade head
 # parite `users` (colonnes NULLABLES uniquement, idempotent, non destructif)
 # et garantit les comptes de secours.
 #
-# STRICTEMENT NON-BLOQUANT (`|| true`) : on ne doit JAMAIS empecher uvicorn de
-# demarrer a cause de cette etape facultative. En cas de succes la reparation
-# s'applique ; en cas d'echec c'est simplement loggue et l'API demarre quand
-# meme (le Shell `python scripts/ensure_login_railway.py` reste le levier
-# manuel de secours).
+# STRICTEMENT NON-BLOQUANT : on ne doit JAMAIS empecher uvicorn de demarrer a
+# cause de cette etape facultative. On la BORNE EN PLUS dans le temps
+# (`timeout 90`) : sous un redéploiement frequent, une reparation qui traine
+# (verrou BDD, introspection sur grosse base) ne doit pas repousser l'ecoute
+# HTTP et creer une fenetre de 502. `timeout` renvoie 124 a l'echéance -> le `||`
+# absorbe le code retour (set -e ne coupe pas une commande suivie de `||`).
 # ----------------------------------------------------------------------------
-echo "[entrypoint] auto-reparation login/users (non-bloquante)"
-python scripts/ensure_login_railway.py || echo "[entrypoint] reparation ignoree (non-fatale)"
+echo "[entrypoint] auto-reparation login/users (non-bloquante, <=90s)"
+if command -v timeout >/dev/null 2>&1; then
+    timeout 90 python scripts/ensure_login_railway.py || echo "[entrypoint] reparation ignoree (non-fatale ou timeout)"
+else
+    python scripts/ensure_login_railway.py || echo "[entrypoint] reparation ignoree (non-fatale)"
+fi
 
 echo "[entrypoint] demarrage uvicorn sur port ${PORT:-8000}"
 exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" --workers "${WEB_CONCURRENCY:-1}"
