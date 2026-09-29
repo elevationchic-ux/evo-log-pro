@@ -262,6 +262,15 @@ export const departmentAPI = {
     apiClient.get(`${DEPT_BASE}/planning`, { params: { semaine: params?.semaine, ...(params?.departmentId ? { department_id: params.departmentId } : {}) } }),
   getPresence: (params?: { date?: string; departmentId?: number }) =>
     apiClient.get(`${DEPT_BASE}/presence`, { params: { date: params?.date, ...(params?.departmentId ? { department_id: params.departmentId } : {}) } }),
+  // Phase 4 Tranche B (ecriture) : le chef gere les tours de garde et valide les pointages.
+  createPlanning: (data: { employe_id: number; date_jour: string; quart: string; poste_assigne: string; statut?: string; observations?: string }, departmentId?: number) =>
+    apiClient.post(`${DEPT_BASE}/planning`, data, { params: departmentId ? { department_id: departmentId } : undefined }),
+  updatePlanning: (id: number, data: { quart?: string; poste_assigne?: string; statut?: string; observations?: string }, departmentId?: number) =>
+    apiClient.put(`${DEPT_BASE}/planning/${id}`, data, { params: departmentId ? { department_id: departmentId } : undefined }),
+  deletePlanning: (id: number, departmentId?: number) =>
+    apiClient.delete(`${DEPT_BASE}/planning/${id}`, { params: departmentId ? { department_id: departmentId } : undefined }),
+  validatePresence: (pointageId: number, departmentId?: number) =>
+    apiClient.post(`${DEPT_BASE}/presence/${pointageId}/valider`, undefined, { params: departmentId ? { department_id: departmentId } : undefined }),
 };
 
 /** RBAC granulaire : catalogue de permissions, rôles effectifs, accréditations
