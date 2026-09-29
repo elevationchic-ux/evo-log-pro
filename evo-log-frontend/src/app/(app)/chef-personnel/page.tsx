@@ -358,11 +358,11 @@ export default function ChefPersonnelPage() {
     const matchesSearch =
       a.full_name.toLowerCase().includes(searchFilter.toLowerCase()) ||
       a.username.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      a.agency_name.toLowerCase().includes(searchFilter.toLowerCase());
+      (a.agency_name || '').toLowerCase().includes(searchFilter.toLowerCase());
     return matchesRole && matchesSearch;
   });
 
-  const pendingCongesCount = conges.filter(c => c.statut === 'EN_ATTENTE').length;
+  const pendingCongesCount = conges.filter(c => congeNormalise(c.statut) === 'en_attente').length;
 
   return (
     <div className="min-h-screen p-4 sm:p-8 space-y-6 text-white font-sans">
@@ -577,8 +577,20 @@ export default function ChefPersonnelPage() {
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center font-black text-lg text-slate-950 shadow-md">
                       {agent.full_name.substring(0, 2).toUpperCase()}
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                      {agent.statut_presence.replace('_', ' ')}
+                    {/* Pas de pastille verte par défaut : une absence de
+                        planning n'est pas une présence au poste. */}
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase border ${
+                      agent.statut_presence === 'EN_POSTE'
+                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                        : agent.statut_presence === 'EN_CONGE'
+                          ? 'bg-sky-500/15 text-sky-300 border-sky-500/30'
+                          : agent.statut_presence === 'ABSENT'
+                            ? 'bg-red-500/15 text-red-400 border-red-500/30'
+                            : agent.statut_presence === 'EN_REPOS'
+                              ? 'bg-slate-500/15 text-slate-300 border-slate-500/30'
+                              : 'bg-slate-800/60 text-slate-400 border-slate-700'
+                    }`}>
+                      {agent.statut_presence ? agent.statut_presence.replace('_', ' ') : 'Non planifié'}
                     </span>
                   </div>
 
@@ -590,11 +602,11 @@ export default function ChefPersonnelPage() {
                   <div className="space-y-1.5 text-xs text-slate-400 font-mono mb-4">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                      <span className="truncate">{agent.agency_name}</span>
+                      <span className="truncate">{agent.agency_name || 'Agence non renseignée'}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                      <span className="text-slate-300">{agent.quart_actuel || 'Standard'}</span>
+                      <span className="text-slate-300">{agent.quart_actuel || 'Aucun quart planifié'}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Phone className="w-3.5 h-3.5 text-slate-500 shrink-0" />
@@ -605,7 +617,7 @@ export default function ChefPersonnelPage() {
 
                 <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
                   <span>Dernier pointage :</span>
-                  <b className="text-slate-200">{agent.dernier_pointage || 'Émargé'}</b>
+                  <b className="text-slate-200">{agent.dernier_pointage || 'Aucun émargement'}</b>
                 </div>
               </div>
             ))}
