@@ -225,8 +225,7 @@ export default function ChefPersonnelPage() {
       });
       if (!res.ok) {
         // Une décision refusée par le serveur ne doit pas s'afficher comme prise.
-        const corps = await res.json().catch(() => null);
-        throw new Error(typeof corps?.detail === 'string' ? corps.detail : `HTTP ${res.status}`);
+        throw new Error(await lireDetail(res));
       }
       setSelectedCongeForDecision(null);
       setIsDecisionModalOpen(false);
@@ -244,7 +243,7 @@ export default function ChefPersonnelPage() {
   const handleAddPlanning = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!planAgentId) {
-      setErreurDecision('Sélectionnez dabord un agent à planifier.');
+      setErreurDecision('Sélectionnez d’abord un agent à planifier.');
       return;
     }
     setPlanEnCours(true);
@@ -277,7 +276,7 @@ export default function ChefPersonnelPage() {
   const handleAddDotation = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!dotAgentId) {
-      setErreurDecision('Sélectionnez dabord leagent destinataire.');
+      setErreurDecision('Sélectionnez d’abord l’agent destinataire.');
       return;
     }
     if (!dotDesignation.trim()) return;
