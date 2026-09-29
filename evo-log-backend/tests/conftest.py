@@ -61,14 +61,6 @@ _tables_created = False
 _dirty_tables: set[str] = set()
 
 
-def _mark_dirty(mapper, connection, target):
-    """After-flush hook: add table name to dirty set."""
-    _dirty_tables.add(target.__table__.name)
-
-
-event.listen(Session, "after_flush", lambda session, ctx: None)  # placeholder
-
-
 def _register_dirty_listeners():
     """Attach ORM events to track modified tables per test."""
     # We use the mapper-level events for after_insert, after_update, after_delete

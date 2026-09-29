@@ -92,44 +92,57 @@ export const authOptions: NextAuthOptions = {
         ticket: { label: "Session ticket", type: "text" },
       },
       async authorize(credentials) {
-        // Voie « jalon » : /login a deja ete appele par le navigateur. On
-        // revalide le token aupres de GET /auth/session au lieu de renvoyer le
-        // mot de passe : un deuxieme /login gonflerait le compteur de
-        // tentatives (et le rate-limit) pour une seule connexion.
-        if (credentials?.ticket) {
-          const res = await fetch(`${API_BASE}/api/v1/auth/session`, {
-            headers: { Authorization: `Bearer ${credentials.ticket}` },
+        // Toute la logique est enveloppee : une erreur reseau vers le backend
+        // (cold start Railway, DNS, timeout) doit se traduire par un echec de
+        // connexion propre (null -> NextAuth 401 + log serveur), JAMAIS par une
+        // exception non capturee qui noie la vraie cause dans les logs Vercel.
+        try {
+          // Voie « jalon » : /login a deja ete appele par le navigateur. On
+          // revalide le token aupres de GET /auth/session au lieu de renvoyer le
+          // mot de passe : un deuxieme /login gonflerait le compteur de
+          // tentatives (et le rate-limit) pour une seule connexion.
+          if (credentials?.ticket) {
+            const res = await fetch(`${API_BASE}/api/v1/auth/session`, {
+              headers: { Authorization: `Bearer ${credentials.ticket}` },
+            })
+            if (!res.ok) {
+              console.error(`[auth] /session -> ${res.status} sur ${API_BASE}`)
+              return null
+            }
+            const payload: BackendSession = await res.json()
+            if (!payload?.access_token) return null
+            return toSessionUser(payload, payload.access_token, payload.refresh_token)
+          }
+
+          // Call backend auth API
+          const identifier = (credentials as any)?.email || credentials?.username
+          const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: identifier,
+              password: credentials?.password
+            }),
           })
-          if (!res.ok) return null
-          const payload: BackendSession = await res.json()
-          if (!payload?.access_token) return null
-          return toSessionUser(payload, payload.access_token, payload.refresh_token)
-        }
 
-        // Call backend auth API
-        const identifier = (credentials as any)?.email || credentials?.username
-        const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: identifier,
-            password: credentials?.password
-          }),
-        })
+          if (!res.ok) {
+            console.error(`[auth] /login -> ${res.status} sur ${API_BASE}`)
+            return null
+          }
 
-        if (!res.ok) {
+          const user = await res.json()
+
+          if (user && user.access_token) {
+            return toSessionUser(user, user.access_token, user.refresh_token)
+          }
+          // 2FA active : le backend renvoie un jeton intermediaire, pas de
+          // session. Le formulaire doit passer par /mfa puis revenir avec un
+          // ticket ; on ne cree jamais de session sans le second facteur.
+          return null
+        } catch (err) {
+          console.error(`[auth] authorize() exception (API_BASE=${API_BASE}) :`, err)
           return null
         }
-
-        const user = await res.json()
-
-        if (user && user.access_token) {
-          return toSessionUser(user, user.access_token, user.refresh_token)
-        }
-        // 2FA active : le backend renvoie un jeton intermediaire, pas de
-        // session. Le formulaire doit passer par /mfa puis revenir avec un
-        // ticket ; on ne cree jamais de session sans le second facteur.
-        return null
       }
     })
   ],

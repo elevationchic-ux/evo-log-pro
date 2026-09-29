@@ -245,23 +245,10 @@ export default function DepartementPage() {
   }
 
   async function handleValidatePresence(row: PresenceRow) {
-    // Note: we don't have the pointage_id in the presence response yet; the backend
-    // returns employe_id + date. The validatePresence endpoint takes pointage_id.
-    // For now, this button calls the API with a synthetic lookup via employe_id.
-    // We need the pointage_id. The backend GET /presence already returns `pointe`
-    // boolean; to get the pointage_id we'd need to expose it.
-    // Actually, looking at the backend, the presence endpoint doesn't return pointage_id.
-    // Let's pass employe_id as a lookup and adjust: actually we should add pointage_id
-    // to the presence response. For now, use employe_id as a marker (the backend
-    // validatePresence takes pointage_id — this needs a response field).
-    // NOTE: The backend /presence returns `collaborateurs` with no `pointage_id` field.
-    // I'll add it to the response in the backend and wire it here.
+    if (!row.pointage_id) { toast.error('Identifiant de pointage indisponible'); return; }
     setBusyId(row.employe_id);
     try {
-      // @ts-expect-error — pointageId will come from row once backend exposes it
-      const pid: number = (row as any).pointage_id;
-      if (!pid) { toast.error('Identifiant de pointage indisponible'); return; }
-      await departmentAPI.validatePresence(pid);
+      await departmentAPI.validatePresence(row.pointage_id);
       toast.success('Emargement validé');
       await load();
     } catch (err: any) {
@@ -375,6 +362,16 @@ export default function DepartementPage() {
                   <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold border ${PRESENCE_STYLE[c.presence]}`}>
                     {c.presence}
                   </span>
+                  {canManage && c.pointe && c.est_valide === false && c.pointage_id && (
+                    <button
+                      type="button"
+                      onClick={() => handleValidatePresence(c)}
+                      disabled={busyId === c.employe_id}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 disabled:opacity-50 transition"
+                    >
+                      <CheckCircle2 className="w-3 h-3" /> Valider
+                    </button>
+                  )}
                 </div>
               </li>
             ))}
