@@ -969,6 +969,32 @@ export const removalSlipAPI = {
 };
 
 // ─── Service Réceptions Magasin 3 (MAG3) ──────────────────────────────────
+// ─── Inventaires tournants (circuit réel Batch 18, /magasin-avance) ─────
+// POST /inventaires ouvre une campagne (numero genere cote route),
+// POST /inventaires/{id}/lignes enregistre un comptage (theorique lu sur
+// la colonne reelle), PUT /inventaires/{id}/valider ajuste le stock ET
+// journalise chaque ecart dans MouvementStock. Ne pas confondre avec
+// /magasin-avance/receptions (bons de reception fournisseur, Batch 19).
+export const inventaireAPI = {
+  create: (data: {
+    entrepot_id: number;
+    date_debut: string;
+    date_fin?: string;
+    type_inventaire?: string;
+    notes?: string;
+  }) => apiClient.post('/api/v1/magasin-avance/inventaires', data),
+  ajouterLigne: (inventaireId: number, data: {
+    stock_id: number;
+    quantite_comptee: number;
+    operateur?: number;
+    commentaires?: string;
+  }) => apiClient.post(`/api/v1/magasin-avance/inventaires/${inventaireId}/lignes`, data),
+  valider: (inventaireId: number) =>
+    apiClient.put(`/api/v1/magasin-avance/inventaires/${inventaireId}/valider`),
+  precision: (inventaireId: number) =>
+    apiClient.get(`/api/v1/magasin-avance/inventaires/${inventaireId}/precision`),
+};
+
 export const receptionMag3API = {
   getAll: (params?: Record<string, unknown>) => apiClient.get('/api/v1/magasin/receptions-mag3', { params }),
   getStats: () => apiClient.get('/api/v1/magasin/receptions-mag3/stats'),

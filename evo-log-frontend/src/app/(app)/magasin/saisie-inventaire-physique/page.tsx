@@ -14,6 +14,7 @@ interface StockItem {
   unite_mesure?: string;
   quantite_disponible: number;
   emplacement?: string;
+  entrepot_id?: number;
   entrepot_nom?: string;
 }
 
