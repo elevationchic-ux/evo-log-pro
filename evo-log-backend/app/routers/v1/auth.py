@@ -577,7 +577,9 @@ async def verify_2fa(
         )
     secret = getattr(user, "two_factor_secret", None)
     if secret and verify_totp(secret, code or ""):
-        return _build_login_payload(user)
+        payload = _build_login_payload(user)
+        _attacher_pointage_arrivee(db, user, payload)
+        return payload
 
     # Le code peut aussi etre un code de secours a usage unique : c'est la
     # seule porte de sortie quand le telephone a ete perdu ou remplace.
@@ -587,7 +589,9 @@ async def verify_2fa(
     if accepte:
         user.two_factor_recovery_codes = nouveau_blob
         db.commit()
-        return _build_login_payload(user)
+        payload = _build_login_payload(user)
+        _attacher_pointage_arrivee(db, user, payload)
+        return payload
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
