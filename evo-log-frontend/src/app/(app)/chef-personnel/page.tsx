@@ -14,12 +14,14 @@ interface EffectifAgent {
   username: string;
   full_name: string;
   email: string;
-  telephone?: string;
+  telephone?: string | null;
   role: string;
-  agency_name: string;
-  statut_presence: 'EN_POSTE' | 'EN_REPOS' | 'EN_CONGE' | 'ABSENT';
-  quart_actuel?: string;
-  dernier_pointage?: string;
+  // Agence, présence, quart et dernier pointage peuvent être null : le backend
+  // ne remplit plus ces cases avec des valeurs par défaut.
+  agency_name?: string | null;
+  statut_presence?: 'EN_POSTE' | 'EN_REPOS' | 'EN_CONGE' | 'ABSENT' | null;
+  quart_actuel?: string | null;
+  dernier_pointage?: string | null;
 }
 
 interface DemandeCongeN1 {
@@ -31,10 +33,14 @@ interface DemandeCongeN1 {
   date_debut: string;
   date_fin: string;
   jours_ouvrables: number;
-  motif?: string;
-  statut: 'EN_ATTENTE' | 'APPROUVE' | 'REJETE';
-  date_demande?: string;
-  commentaire_superviseur?: string;
+  motif?: string | null;
+  // Valeurs d'enum rendues par l'API : en_attente, approuve, refuse, en_cours,
+  // termine, annule (minuscules). Comparer à 'EN_ATTENTE' ne matchait jamais,
+  // les boutons de décision n'apparaissaient donc pas.
+  statut: string;
+  date_demande?: string | null;
+  commentaire_superviseur?: string | null;
+  motif_refus?: string | null;
 }
 
 interface PlanningItem {
@@ -180,7 +186,10 @@ export default function ChefPersonnelPage() {
   const handleOpenDecision = (conge: DemandeCongeN1, action: 'APPROUVER' | 'REJETER') => {
     setSelectedCongeForDecision(conge);
     setDecisionAction(action);
-    setDecisionComment(action === 'APPROUVER' ? 'Demande validée conforme aux plannings.' : 'Refusé pour nécessités urgentes de service.');
+    // Le commentaire part vide : pré-écrire « Demande validée conforme aux
+    // plannings » ou « Refusé pour nécessités urgentes de service » ferait
+    // porter au décideur une justification qu'il n'a pas rédigée.
+    setDecisionComment('');
     setIsDecisionModalOpen(true);
   };
 
@@ -189,7 +198,7 @@ export default function ChefPersonnelPage() {
     if (!selectedCongeForDecision) return;
 
     try {
-      await fetch(`/api/v1/chef-personnel/conges/${selectedCongeForDecision.id}/decision`, {
+      const res = await fetch(`/api/v1/chef-personnel/conges/${selectedCongeForDecision.id}/decision`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -197,21 +206,21 @@ export default function ChefPersonnelPage() {
           commentaire: decisionComment
         })
       });
-    } catch { }
-
-    setConges(conges.map(c => {
-      if (c.id === selectedCongeForDecision.id) {
-        return {
-          ...c,
-          statut: decisionAction === 'APPROUVER' ? 'APPROUVE' : 'REJETE',
-          commentaire_superviseur: decisionComment
-        };
+      if (!res.ok) {
+        // Une décision refusée par le serveur ne doit pas s'afficher comme prise.
+        const corps = await res.json().catch(() => null);
+        throw new Error(typeof corps?.detail === 'string' ? corps.detail : `HTTP ${res.status}`);
       }
-      return c;
-    }));
-
-    setIsDecisionModalOpen(false);
-    setSelectedCongeForDecision(null);
+      setSelectedCongeForDecision(null);
+      setIsDecisionModalOpen(false);
+      await fetchData();
+    } catch (err) {
+      setErreurDecision(
+        err instanceof Error && err.message
+          ? err.message
+          : "La décision n'a pas pu être enregistrée."
+      );
+    }
   };
 
   // Handle Add Shift
