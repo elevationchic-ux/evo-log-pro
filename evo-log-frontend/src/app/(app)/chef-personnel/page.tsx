@@ -967,10 +967,21 @@ export default function ChefPersonnelPage() {
                   onChange={e => setPlanAgentId(Number(e.target.value))}
                   className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-400"
                 >
+                  <option value={0}>— Sélectionner un agent —</option>
                   {effectifs.map(a => (
                     <option key={a.id} value={a.id}>{a.full_name} ({a.role})</option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Date de garde</label>
+                <input
+                  type="date"
+                  value={planDate}
+                  onChange={e => setPlanDate(e.target.value)}
+                  className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-400"
+                />
               </div>
 
               <div>
@@ -1020,9 +1031,10 @@ export default function ChefPersonnelPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs"
+                  disabled={planEnCours}
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs disabled:opacity-50"
                 >
-                  Planifier
+                  {planEnCours ? 'Enregistrement…' : 'Planifier'}
                 </button>
               </div>
             </form>
