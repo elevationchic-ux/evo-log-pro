@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.database import Base, get_db
-import app.models  # noqa: enregistre tous les modeles
+import app.main  # noqa: enregistre TOUS les modeles (lecon conftest)
 from app.models.magasin import Stock, Entrepot
 from app.models.magasin_avance import (
     BonReception, CommandeFournisseur, LigneCommandeFournisseur)

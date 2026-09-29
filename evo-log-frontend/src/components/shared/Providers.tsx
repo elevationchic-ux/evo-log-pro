@@ -19,6 +19,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
           <SettingsProvider>
             <ServiceWorkerRegistrar />
+            <ChunkRecovery />
             {children}
           </SettingsProvider>
         </AuthProvider>
