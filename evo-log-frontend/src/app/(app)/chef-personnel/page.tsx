@@ -376,6 +376,23 @@ export default function ChefPersonnelPage() {
           </button>
         </div>
       )}
+      {erreurFetch && (
+        <div
+          role="status"
+          className="flex items-start gap-3 border border-amber-500/40 bg-amber-500/10 rounded-2xl px-4 py-3"
+        >
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-200 font-semibold flex-1 leading-relaxed">{erreurFetch}</p>
+          <button
+            type="button"
+            onClick={fetchData}
+            className="p-2 rounded-lg text-amber-300 hover:text-white hover:bg-amber-500/20 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label="Réessayer le chargement"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-slate-800">
