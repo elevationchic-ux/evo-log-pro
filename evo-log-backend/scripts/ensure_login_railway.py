@@ -179,4 +179,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise main()
+    sys.exit(main())
