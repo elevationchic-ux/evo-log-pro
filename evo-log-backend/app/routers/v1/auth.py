@@ -312,6 +312,20 @@ async def logout(token: str = Depends(oauth2_scheme)):
     return {"message": "Successfully logged out"}
 
 
+@router.post("/pointer-depart")
+async def pointer_depart_route(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Phase 4 Tranche C : enregistre l'heure de depart du compte authentifie.
+
+    Symetrique de la pointe d'arrivee automatique. Appel best-effort par le
+    front a la deconnexion (ou bouton "Pointer mon depart"). Renvoie les donnees
+    de la journee (heures_effectives calculees) ou 400 si aucune arrivee n'a
+    ete enregistree aujourd'hui."""
+    return pointer_depart(db, current_user)
+
+
 @router.post("/change-password")
 async def change_password(
     request: Request,
