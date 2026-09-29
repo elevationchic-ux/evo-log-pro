@@ -206,9 +206,12 @@ from app.schemas.rh import (
     DocumentEmployeCreate, DocumentEmployeUpdate, DocumentEmployeResponse,
     OrganigrammeCreate, OrganigrammeUpdate, OrganigrammeResponse,
     CompetenceCreate, CompetenceUpdate, CompetenceResponse,
-    CompetenceEmployeCreate, CompetenceEmployeUpdate, CompetenceEmployeResponse,
-    BulletinPaieResponse
+    CompetenceEmployeCreate, CompetenceEmployeUpdate, CompetenceEmployeResponse
 )
+# BulletinPaieResponse : definition unique en app/schemas/rh_avance.py (le
+# doublon de schemas/rh a ete supprime volontairement, cf. commentaire en fin
+# de fichier) — le re-export passe donc desormais par rh_avance.
+from app.schemas.rh_avance import BulletinPaieResponse
 from app.schemas.magasin_avance import (
     PeremptionCreate, PeremptionResponse,
     ReservationStockCreate, ReservationStockResponse,
