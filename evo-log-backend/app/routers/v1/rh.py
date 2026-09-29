@@ -542,7 +542,14 @@ def soumettre_demande_conge_portail(
 
     conge_type_enum = TypeConge.CONGE_ANNUEL
     t_str = payload.type_conge.lower()
-    if "maladie" in t_str:
+    # Une valeur d'enum recue telle quelle (contrat de l'API) doit etre honoree
+    # immediatement : la recherche par sous-chaine ne sert que de repli pour les
+    # libelles libres. Sans ce garde-fou, « absence_autorisee » tombait silencieusement
+    # dans la branche par defaut et enregistrait un conge annuel.
+    par_valeur = {e.value: e for e in TypeConge}
+    if t_str in par_valeur:
+        conge_type_enum = par_valeur[t_str]
+    elif "maladie" in t_str:
         conge_type_enum = TypeConge.CONGE_MALADIE
     elif "maternite" in t_str:
         conge_type_enum = TypeConge.CONGE_MATERNITE
