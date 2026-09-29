@@ -305,6 +305,13 @@ export default function EmployesPage() {
     }
   }
 
+  const libelleStatut = (e: Fiche): string => {
+    if (!e.is_active) return t('Compte désactivé', 'Account disabled')
+    if (!e.statut) return t('Sans contrat', 'No contract')
+    const s = STATUTS[e.statut]
+    return s ? t(s.fr, s.en) : e.statut
+  }
+
   const exporterCSV = () => {
     if (filtered.length === 0) {
       toast.error(t('Aucune donnée à exporter.', 'Nothing to export.'))

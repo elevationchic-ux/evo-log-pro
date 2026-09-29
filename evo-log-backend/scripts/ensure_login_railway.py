@@ -97,7 +97,13 @@ def main() -> int:
         print("(Le login accepte le username OU l'email.)")
         return 0
     except Exception as exc:  # noqa: BLE001 - script operateur, trace utile
+        # Traceback COMPLET volontaire : ce script executant exactement le meme
+        # `SELECT users` que /auth/login, l'echec ici est le MEILLEUR endroit pour
+        # reveler l'erreur PostgreSQL reelle sous-jacente au 500 de login. Sans
+        # la trace complete, on ne voit que le message et on tourne en rond.
+        import traceback
         print(f"ECHEC : {type(exc).__name__}: {exc}")
+        traceback.print_exc()
         return 1
     finally:
         db.close()
