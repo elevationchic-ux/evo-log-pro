@@ -30,6 +30,7 @@ os.environ.setdefault("REDIS_URL", "disabled")
 
 import types
 
+import re
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event, text
@@ -55,32 +56,23 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 _tables_created = False
 
 # ---------------------------------------------------------------------------
-# Dirty-table tracking: records which tables were INSERTed/UPDATEd so that
-# teardown can DELETE only from those (1-5 tables vs full 318 scan).
+# Dirty-table tracking: records which tables received DML (INSERT/UPDATE/DELETE)
+# so that teardown can DELETE only from those (typically 1-5 of 318).
+# Uses engine-level event to capture ALL SQL including association tables.
 # ---------------------------------------------------------------------------
 _dirty_tables: set[str] = set()
 
+_DML_RE = re.compile(
+    r'(?:INSERT\s+(?:OR\s+\w+\s+)?INTO|UPDATE|DELETE\s+FROM)\s+"?(\w+)"?',
+    re.IGNORECASE,
+)
 
-def _register_dirty_listeners():
-    """Attach ORM events to track modified tables per test."""
-    # We use the mapper-level events for after_insert, after_update, after_delete
-    for mapper in Base.registry.mappers:
-        table_name = mapper.class_.__table__.name
-        event.listen(
-            mapper, "after_insert",
-            lambda m, conn, target, tn=table_name: _dirty_tables.add(tn),
-            propagate=True,
-        )
-        event.listen(
-            mapper, "after_update",
-            lambda m, conn, target, tn=table_name: _dirty_tables.add(tn),
-            propagate=True,
-        )
-        event.listen(
-            mapper, "after_delete",
-            lambda m, conn, target, tn=table_name: _dirty_tables.add(tn),
-            propagate=True,
-        )
+
+@event.listens_for(engine, "before_cursor_execute")
+def _track_dirty_tables(conn, cursor, statement, parameters, context, executemany):
+    m = _DML_RE.match(statement)
+    if m:
+        _dirty_tables.add(m.group(1))
 
 
 def _ensure_tables():
@@ -93,7 +85,6 @@ def _ensure_tables():
     # Base.metadata.create_all() echoue sur des cles etrangeres non resolvees.
     import app.main  # noqa: F401
     Base.metadata.create_all(bind=engine)
-    _register_dirty_listeners()
     _tables_created = True
 
 
