@@ -89,6 +89,16 @@ interface DotationItem {
 // sont alimentés exclusivement par l'API /api/v1/chef-personnel/*. En l'absence de
 // réponse du backend, chaque onglet affiche un état vide explicite.
 
+/** Message d'erreur rendu par l'API, ou un repli lisible sur le code HTTP. */
+async function lireDetail(res: Response): Promise<string> {
+  const corps = await res.json().catch(() => null);
+  if (typeof corps?.detail === 'string') return corps.detail;
+  if (Array.isArray(corps?.detail)) {
+    return corps.detail.map((d: any) => d.msg || JSON.stringify(d)).join(' — ');
+  }
+  return `Le serveur a répondu ${res.status}.`;
+}
+
 
 export default function ChefPersonnelPage() {
   const { user } = useAuth();
