@@ -1059,6 +1059,7 @@ export default function ChefPersonnelPage() {
                   onChange={e => setDotAgentId(Number(e.target.value))}
                   className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-400"
                 >
+                  <option value={0}>— Sélectionner un agent —</option>
                   {effectifs.map(a => (
                     <option key={a.id} value={a.id}>{a.full_name} ({a.role})</option>
                   ))}

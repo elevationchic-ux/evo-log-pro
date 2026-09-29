@@ -851,7 +851,10 @@ verifiee a la main, commande groupee a prix reel, refus total du prix invente).
 
 ### Verification — batch VERT, suite globale ROUGE de cause externe
 
-- 35 tests cibles : ✅ **35 passed** (b18 : 9, b17 : 9, batch 16 : 10, WMS : 8).
+- Tests cibles (re-verifie a la fin du batch, 4 fichiers joues ensemble) :
+  ✅ **41 passed** — b18 : 9 (`test_magasin_avance_inventaires_fournisseurs`),
+  b17 : 9 (`test_magasin_avance_retours_litiges`), batch 16 : 10
+  (`test_removal_slips`), magasin live : 14 (`test_magasin_store`).
 - `compileall app` : ✅ EXIT=0 ; `import app.main` : ✅ OK ; **`DB_CHANGED=False`**.
 - Suite complete : ❌ **48 failed / 487 passed / 240 errors** — mais **aucun
   echec dans les fichiers de ce batch ni des batches 16–17**. Attribution prouvee,
@@ -874,7 +877,7 @@ verifiee a la main, commande groupee a prix reel, refus total du prix invente).
   sandboxee a echoue **apres** ses premieres instructions et a revert mes 3
   fichiers batch 18 dans l'arbre principal (plus supprime mon fichier de tests,
   suppression happee par l'auto-push). Restauration depuis le snapshot complet
-  `1cc4ecb`, re-verifiee par les 35 tests cibles verts ci-dessus.
+  `1cc4ecb`, re-verifiee par les 41 tests cibles verts ci-dessus.
 
 ### Reste (hors perimetre du batch, signale)
 
