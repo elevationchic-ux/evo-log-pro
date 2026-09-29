@@ -1094,10 +1094,14 @@ def valider_reception(
         cmd = db.query(CommandeFournisseur).filter(
             CommandeFournisseur.id == b.commande_fournisseur_id).first()
         if cmd:
-            toutes_reçues = db.query(LigneCommandeFournisseur).filter(
+            # flush explicite : la session applicative est autoflush=False,
+            # sans flush le COUNT ci-dessous lirait les statuts PRÉCÉDENTS
+            # en base et la commande resterait éternellement « en cours ».
+            db.flush()
+            toutes_recues = db.query(LigneCommandeFournisseur).filter(
                 LigneCommandeFournisseur.commande_id == cmd.id,
                 LigneCommandeFournisseur.statut != "recu").count() == 0
-            if toutes_reçues:
+            if toutes_recues:
                 cmd.statut = "livree"
                 cmd.date_livraison_reelle = date.today()
 
