@@ -205,6 +205,71 @@ export default function DepartementPage() {
     }
   }
 
+  // ── Phase 4 Tranche B handlers : planning + presence ecriture ──
+  async function handleCreatePlanning() {
+    if (!planForm.employe_id || !planForm.date_jour || !planForm.poste_assigne) {
+      toast.error('Renseignez collaborateur, date et poste.');
+      return;
+    }
+    setPlanBusy(true);
+    try {
+      await departmentAPI.createPlanning({
+        employe_id: Number(planForm.employe_id),
+        date_jour: planForm.date_jour,
+        quart: planForm.quart,
+        poste_assigne: planForm.poste_assigne,
+      });
+      toast.success('Tour de garde créé');
+      setShowPlanForm(false);
+      setPlanForm({ employe_id: '', date_jour: '', quart: 'STANDARD', poste_assigne: '' });
+      await load();
+    } catch (err: any) {
+      toast.error(errMsg(err, 'Échec de la création'));
+    } finally {
+      setPlanBusy(false);
+    }
+  }
+
+  async function handleDeletePlanning(line: PlanningLine) {
+    setBusyId(line.id);
+    try {
+      await departmentAPI.deletePlanning(line.id);
+      toast.success('Tour supprimé');
+      await load();
+    } catch (err: any) {
+      toast.error(errMsg(err, 'Échec de la suppression'));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleValidatePresence(row: PresenceRow) {
+    // Note: we don't have the pointage_id in the presence response yet; the backend
+    // returns employe_id + date. The validatePresence endpoint takes pointage_id.
+    // For now, this button calls the API with a synthetic lookup via employe_id.
+    // We need the pointage_id. The backend GET /presence already returns `pointe`
+    // boolean; to get the pointage_id we'd need to expose it.
+    // Actually, looking at the backend, the presence endpoint doesn't return pointage_id.
+    // Let's pass employe_id as a lookup and adjust: actually we should add pointage_id
+    // to the presence response. For now, use employe_id as a marker (the backend
+    // validatePresence takes pointage_id — this needs a response field).
+    // NOTE: The backend /presence returns `collaborateurs` with no `pointage_id` field.
+    // I'll add it to the response in the backend and wire it here.
+    setBusyId(row.employe_id);
+    try {
+      // @ts-expect-error — pointageId will come from row once backend exposes it
+      const pid: number = (row as any).pointage_id;
+      if (!pid) { toast.error('Identifiant de pointage indisponible'); return; }
+      await departmentAPI.validatePresence(pid);
+      toast.success('Emargement validé');
+      await load();
+    } catch (err: any) {
+      toast.error(errMsg(err, 'Échec de la validation'));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   if (loading) {
     return <div className="p-6 text-slate-400 text-sm">Chargement du département…</div>;
   }

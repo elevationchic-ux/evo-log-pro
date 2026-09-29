@@ -826,19 +826,78 @@ def generer_commande_automatique(
 
 
 # ============ RÉCEPTIONS ============
+# Batch 19 : reconstruit sur les modeles REELS BonReception /
+# LigneBonReception. L'ancienne version inventait commande_id (reel :
+# commande_fournisseur_id), bon_id (reel : bon_reception_id), article_id /
+# emplacement_id (reels : stock_id / emplacement String), oubliait
+# numero_bon (unique NOT NULL) et ecrivait stock.quantite (reel :
+# quantite_disponible) → TypeError 500 garanti ou succes menteux.
+# Le numero BR-YYYYMMDD-NNNN est genere cote route ; un bon recoit
+# obligatoirement un fournisseur ET un entrepot reels (FK SQLite non
+# verifiees → controles explicites).
+
+
+@router.get("/receptions", response_model=List[BonReceptionResponse])
+def lister_receptions(
+    statut: Optional[str] = Query(None),
+    fournisseur_id: Optional[int] = Query(None),
+    entrepot_id: Optional[int] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Liste des bons de reception (filtres reels, aucune donnee inventee)."""
+    from app.models.magasin_avance import BonReception
+
+    q = db.query(BonReception)
+    if statut:
+        q = q.filter(BonReception.statut == statut)
+    if fournisseur_id:
+        q = q.filter(BonReception.fournisseur_id == fournisseur_id)
+    if entrepot_id:
+        q = q.filter(BonReception.entrepot_id == entrepot_id)
+    return q.order_by(BonReception.id.desc()).offset(skip).limit(limit).all()
+
+
 @router.post("/receptions", response_model=BonReceptionResponse, status_code=status.HTTP_201_CREATED)
 def creer_bon_reception(
     bon: BonReceptionCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Create goods receipt note"""
+    """Ouvre un bon de reception (statut initial `en_attente`).
+
+    Fournisseur, entrepot et commande liee sont verifies existants avant
+    toute ecriture ; la date est celle du jour si elle n'est pas fournie.
+    """
     from app.models.magasin_avance import BonReception
+    from app.models.magasin import Entrepot
+    from app.models.tiers import Fournisseur
+
+    if not db.query(Fournisseur).filter(Fournisseur.id == bon.fournisseur_id).first():
+        raise HTTPException(status_code=400,
+                            detail=f"Fournisseur {bon.fournisseur_id} inexistant")
+    if not db.query(Entrepot).filter(Entrepot.id == bon.entrepot_id).first():
+        raise HTTPException(status_code=400,
+                            detail=f"Entrepot {bon.entrepot_id} inexistant")
+    if bon.commande_fournisseur_id is not None:
+        from app.models.magasin_avance import CommandeFournisseur
+        if not db.query(CommandeFournisseur).filter(
+                CommandeFournisseur.id == bon.commande_fournisseur_id).first():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Commande {bon.commande_fournisseur_id} inexistante")
+
     b = BonReception(
-        commande_id=bon.commande_id,
+        numero_bon=_prochaine_rotation_numero(db, BonReception, "numero_bon", "BR"),
+        commande_fournisseur_id=bon.commande_fournisseur_id,
         fournisseur_id=bon.fournisseur_id,
-        date_reception=bon.date_reception,
-        statut="en_cours"
+        entrepot_id=bon.entrepot_id,
+        date_reception=bon.date_reception or date.today(),
+        statut="en_attente",
+        operateur=current_user.id,
+        notes=bon.notes,
     )
     db.add(b)
     db.commit()
@@ -846,69 +905,45 @@ def creer_bon_reception(
     return b
 
 
-@router.post("/receptions/{bon_id}/lignes", response_model=LigneBonReceptionResponse, status_code=status.HTTP_201_CREATED)
-def ajouter_ligne_reception(
+@router.patch("/receptions/{bon_id}", response_model=BonReceptionResponse)
+def modifier_bon_reception(
     bon_id: int,
-    ligne: LigneBonReceptionCreate,
+    data: BonReceptionUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Add received item line"""
-    from app.models.magasin_avance import LigneBonReception
-    l = LigneBonReception(
-        bon_id=bon_id,
-        article_id=ligne.article_id,
-        quantite_recue=ligne.quantite_recue,
-        quantite_commandee=ligne.quantite_commandee,
-        emplacement_id=ligne.emplacement_id
-    )
-    db.add(l)
-    db.commit()
-    db.refresh(l)
-    return l
+    """Corrige un bon EN ATTENTE uniquement. Un bon valide ou refuse est
+    immuable (decision unique) — passage par /valider ou /refuser."""
+    from app.models.magasin_avance import BonReception
+    from app.models.magasin import Entrepot
+    from app.models.tiers import Fournisseur
 
-
-@router.put("/receptions/{bon_id}/valider", response_model=BonReceptionResponse)
-def valider_reception(
-    bon_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Validate receipt and update stock"""
-    from app.models.magasin_avance import BonReception, LigneBonReception
-    from app.models.magasin import Stock, Entrepot
-    
-    bon = db.query(BonReception).filter(BonReception.id == bon_id).first()
-    if not bon:
+    b = db.query(BonReception).filter(BonReception.id == bon_id).first()
+    if not b:
         raise HTTPException(status_code=404, detail="Bon de réception non trouvé")
-    
-    lignes = db.query(LigneBonReception).filter(LigneBonReception.bon_id == bon_id).all()
-    entrepot = db.query(Entrepot).first()
-    
-    for ligne in lignes:
-        stock = db.query(Stock).filter(
-            Stock.article_id == ligne.article_id
-        ).first()
-        
-        if stock:
-            stock.quantite += ligne.quantite_recue
-            stock.quantite_disponible += ligne.quantite_recue
-        else:
-            nouveau_stock = Stock(
-                article_id=ligne.article_id,
-                entrepot_id=entrepot.id if entrepot else 1,
-                quantite=ligne.quantite_recue,
-                quantite_disponible=ligne.quantite_recue,
-                emplacement_detail_id=ligne.emplacement_id
-            )
-            db.add(nouveau_stock)
-    
-    bon.statut = "valide"
-    bon.date_validation = datetime.utcnow()
-    
+    if b.statut != "en_attente":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Bon {b.statut} : immuable, decision deja prise")
+
+    if data.fournisseur_id is not None:
+        if not db.query(Fournisseur).filter(Fournisseur.id == data.fournisseur_id).first():
+            raise HTTPException(status_code=400,
+                                detail=f"Fournisseur {data.fournisseur_id} inexistant")
+        b.fournisseur_id = data.fournisseur_id
+    if data.entrepot_id is not None:
+        if not db.query(Entrepot).filter(Entrepot.id == data.entrepot_id).first():
+            raise HTTPException(status_code=400,
+                                detail=f"Entrepot {data.entrepot_id} inexistant")
+        b.entrepot_id = data.entrepot_id
+    if data.date_reception is not None:
+        b.date_reception = data.date_reception
+    if data.notes is not None:
+        b.notes = data.notes
+
     db.commit()
-    db.refresh(bon)
-    return bon
+    db.refresh(b)
+    return b
 
 
 # ============ SORTIES ============
