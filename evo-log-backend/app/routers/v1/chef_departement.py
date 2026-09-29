@@ -532,6 +532,7 @@ def department_presence(
             "quart": pg.quart if pg is not None else None,
             "poste_assigne": pg.poste_assigne if pg is not None else None,
             "pointe": pv is not None,
+            "pointage_id": pv.id if pv is not None else None,
             "heure_arrivee": pv.heure_arrivee if pv is not None else None,
             "heure_depart": pv.heure_depart if pv is not None else None,
             "heures_effectives": float(pv.heures_effectives) if (pv is not None and pv.heures_effectives is not None) else None,

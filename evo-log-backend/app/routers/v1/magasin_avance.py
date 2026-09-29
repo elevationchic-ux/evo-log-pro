@@ -946,6 +946,199 @@ def modifier_bon_reception(
     return b
 
 
+@router.post("/receptions/{bon_id}/lignes", response_model=LigneBonReceptionResponse, status_code=status.HTTP_201_CREATED)
+def ajouter_ligne_reception(
+    bon_id: int,
+    ligne: LigneBonReceptionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Ajoute un article recu a un bon en attente (colonnes reelles).
+
+    stock_id (Fantome : article_id) ; emplacement est une chaine (Fantome :
+    emplacement_id). Un bon deja valide ou refuse n'accepte plus de ligne.
+    Le statut de conformite est CALCULE (conforme si quantite commandee
+    fournie et egale, sinon ecart) — jamais laisse a une saisie libre.
+    """
+    from app.models.magasin_avance import BonReception, LigneBonReception
+    from app.models.magasin import Stock
+
+    b = db.query(BonReception).filter(BonReception.id == bon_id).first()
+    if not b:
+        raise HTTPException(status_code=404, detail="Bon de réception non trouvé")
+    if b.statut != "en_attente":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Bon {b.statut} : plus aucune ligne possible")
+    stock = db.query(Stock).filter(Stock.id == ligne.stock_id).first()
+    if not stock:
+        raise HTTPException(status_code=404, detail="Stock non trouvé")
+    quantite_recue = float(ligne.quantite_recue)
+    if quantite_recue <= 0:
+        raise HTTPException(status_code=400,
+                            detail="quantite_recue doit etre positive")
+    if ligne.quantite_commandee is not None and float(ligne.quantite_commandee) < 0:
+        raise HTTPException(status_code=400,
+                            detail="quantite_commandee ne peut pas etre negative")
+    if db.query(LigneBonReception).filter(
+            LigneBonReception.bon_reception_id == bon_id,
+            LigneBonReception.stock_id == ligne.stock_id).first():
+        raise HTTPException(
+            status_code=400,
+            detail="Ce stock figure deja sur ce bon : corrigez la ligne existante")
+
+    statut_ligne = "conforme"
+    if (ligne.quantite_commandee is not None
+            and quantite_recue != float(ligne.quantite_commandee)):
+        statut_ligne = "ecart"
+
+    l = LigneBonReception(
+        bon_reception_id=bon_id,
+        stock_id=ligne.stock_id,
+        quantite_recue=quantite_recue,
+        quantite_commandee=ligne.quantite_commandee,
+        prix_unitaire=ligne.prix_unitaire,
+        emplacement=ligne.emplacement,
+        numero_lot=ligne.numero_lot,
+        date_peremption=ligne.date_peremption,
+        statut=statut_ligne,
+        commentaires=ligne.commentaires,
+    )
+    db.add(l)
+    db.commit()
+    db.refresh(l)
+    return l
+
+
+@router.put("/receptions/{bon_id}/valider", response_model=BonReceptionResponse)
+def valider_reception(
+    bon_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Valide la reception : stock reellement augmente ET journalise.
+
+    Ancienne version : lisait LigneBonReception.bon_id et Stock.article_id
+    (AttributError), ecrivait stock.quantite (colonne fantome → perte
+    silencieuse de tout l'apport), inventait un Stock(...article_id=...)
+    et signait date_validation=utcnow() sur une colonne Date. Ici :
+    augmentation de quantite_disponible sur les lignes reellement comptees,
+    un mouvement MouvementStock (type entree) par ligne — aucun apport
+    invisible — decision unique, validateur = utilisateur authentifie.
+    """
+    from app.models.magasin_avance import (
+        BonReception, LigneBonReception, CommandeFournisseur,
+        LigneCommandeFournisseur)
+    from app.models.magasin import Stock, MouvementStock, MouvementType
+
+    b = db.query(BonReception).filter(BonReception.id == bon_id).first()
+    if not b:
+        raise HTTPException(status_code=404, detail="Bon de réception non trouvé")
+    if b.statut == "valide":
+        raise HTTPException(status_code=400,
+                            detail="Bon deja valide : decision unique")
+    if b.statut == "refuse":
+        raise HTTPException(status_code=400,
+                            detail="Bon refuse : reouverture impossible")
+    lignes = db.query(LigneBonReception).filter(
+        LigneBonReception.bon_reception_id == bon_id).all()
+    if not lignes:
+        raise HTTPException(status_code=400,
+                            detail="Aucune ligne recue : rien a valider")
+
+    for ligne in lignes:
+        stock = db.query(Stock).filter(Stock.id == ligne.stock_id).first()
+        if not stock:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Ligne {ligne.id} : stock {ligne.stock_id} introuvable")
+        avant = float(stock.quantite_disponible or 0)
+        delta = float(ligne.quantite_recue)
+        db.add(MouvementStock(
+            company_id=stock.company_id,
+            reference=f"{b.numero_bon}/L{ligne.id}",
+            stock_id=stock.id,
+            type_mouvement=MouvementType.ENTREE,
+            quantite=delta,
+            quantite_avant=avant,
+            quantite_apres=avant + delta,
+            prix_unitaire=ligne.prix_unitaire,
+            raison=f"Reception {b.numero_bon}",
+            document_reference=b.numero_bon,
+            operateur_id=current_user.id,
+        ))
+        stock.quantite_disponible = avant + delta
+        # Le registre des lignes de commande porte quantite_recue : on le
+        # met a jour quand le bon est rattache a une commande (sinon la
+        # commande resterait eternellement « en cours »).
+        if b.commande_fournisseur_id is not None:
+            lc = db.query(LigneCommandeFournisseur).filter(
+                LigneCommandeFournisseur.commande_id == b.commande_fournisseur_id,
+                LigneCommandeFournisseur.stock_id == ligne.stock_id).first()
+            if lc:
+                lc.quantite_recue = float(lc.quantite_recue or 0) + delta
+                lc.date_reception = date.today()
+                if lc.quantite_recue >= float(lc.quantite_commandee or 0):
+                    lc.statut = "recu"
+
+    b.statut = "valide"
+    b.validateur = current_user.id
+    b.date_validation = date.today()
+    trace = (f"[VALIDE {date.today().isoformat()} par utilisateur "
+             f"{current_user.id}] {len(lignes)} ligne(s) en stock")
+    b.notes = f"{b.notes}\n{trace}" if b.notes else trace
+
+    if b.commande_fournisseur_id is not None:
+        cmd = db.query(CommandeFournisseur).filter(
+            CommandeFournisseur.id == b.commande_fournisseur_id).first()
+        if cmd:
+            toutes_reçues = db.query(LigneCommandeFournisseur).filter(
+                LigneCommandeFournisseur.commande_id == cmd.id,
+                LigneCommandeFournisseur.statut != "recu").count() == 0
+            if toutes_reçues:
+                cmd.statut = "livree"
+                cmd.date_livraison_reelle = date.today()
+
+    db.commit()
+    db.refresh(b)
+    return b
+
+
+@router.put("/receptions/{bon_id}/refuser", response_model=BonReceptionResponse)
+def refuser_reception(
+    bon_id: int,
+    data: RefusBonReception,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Refuse une reception avec motif ecrit OBLIGATOIRE ( Batch 16 :
+    une decision opposable sans motif trace n'existe pas). Aucun stock ne
+    bouge : la marchandise refusee n'est pas entree."""
+    from app.models.magasin_avance import BonReception
+
+    b = db.query(BonReception).filter(BonReception.id == bon_id).first()
+    if not b:
+        raise HTTPException(status_code=404, detail="Bon de réception non trouvé")
+    if b.statut != "en_attente":
+        raise HTTPException(status_code=400,
+                            detail=f"Bon {b.statut} : decision deja prise")
+    motif = (data.motif or "").strip()
+    if not motif:
+        raise HTTPException(status_code=400,
+                            detail="Un refus exige un motif ecrit non vide")
+
+    b.statut = "refuse"
+    b.validateur = current_user.id
+    b.date_validation = date.today()
+    trace = (f"[REFUSE {date.today().isoformat()} par utilisateur "
+             f"{current_user.id}] {motif}")
+    b.notes = f"{b.notes}\n{trace}" if b.notes else trace
+
+    db.commit()
+    db.refresh(b)
+    return b
+
+
 # ============ SORTIES ============
 # SUPPRIMÉ (Batch 16) : l'ancien trio POST /sorties, POST /sorties/{id}/lignes,
 # PUT /sorties/{id}/valider était du code mort — il construisait
