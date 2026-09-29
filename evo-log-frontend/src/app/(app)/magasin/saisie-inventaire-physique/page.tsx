@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ClipboardCheck, ArrowLeft, Save, Search } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { magasinAPI } from '@/lib/api-client';
+import { magasinAPI, inventaireAPI } from '@/lib/api-client';
 
 interface StockItem {
   id: number;
@@ -96,21 +96,52 @@ export default function SaisieInventairePhysiquePage() {
       toast.error('Aucune ligne comptée à soumettre');
       return;
     }
+    // Le circuit réel (Batch 18) : inventaire tournant → comptages →
+    // validation qui ajuste le stock et journalise chaque écart.
+    // L'ancien code postait un payload d'inventaire sur /magasin-avance/
+    // receptions (422 permanent) en croyant « enregistrer les écarts » :
+    // rien n'était jamais enregistré.
+    const entrepotIds = new Set(
+      counted
+        .map(l => items.find(i => i.id === l.stock_id)?.entrepot_id)
+        .filter((e): e is number => typeof e === 'number')
+    );
+    if (entrepotIds.size !== 1) {
+      toast.error(
+        'Impossible de rattacher les comptages à un entrepôt unique : ' +
+        'chaque stock doit porter un entrepôt et ils doivent être identiques.'
+      );
+      return;
+    }
     setSaving(true);
     try {
-      // Submit each counted line via the inventaire API
+      const today = new Date().toISOString().slice(0, 10);
+      const creres = await inventaireAPI.create({
+        entrepot_id: [...entrepotIds][0],
+        date_debut: today,
+        type_inventaire: 'complet',
+        notes: 'Inventaire physique saisi depuis le terminal magasin',
+      });
+      const inventaireId = creres.data.id;
+      let comptees = 0;
       for (const line of counted) {
-        await magasinAPI.createReception({
+        await inventaireAPI.ajouterLigne(inventaireId, {
           stock_id: line.stock_id,
-          quantite_comptee: line.realQty,
-          type_mouvement: 'inventaire_ajustement',
-          notes: `Inventaire physique: ${line.status} (${line.variance})`,
+          quantite_comptee: line.realQty as number,
+          commentaires: `Saisie physique : ${line.status} (écart ${line.variance})`,
         });
+        comptees += 1;
       }
-      toast.success(`${counted.length} ligne(s) soumises — écarts enregistrés`);
+      toast.success(
+        `Inventaire ${creres.data.numero_inventaire} : ${comptees} comptage(s) enregistré(s). ` +
+        'Validez l\'inventaire côté magasin avancé pour ajuster le stock et journaliser les écarts.'
+      );
       setCounts(new Map());
     } catch (err: any) {
-      toast.error('Erreur soumission inventaire');
+      const detail = err?.response?.data?.detail;
+      toast.error(
+        typeof detail === 'string' ? detail : 'Erreur soumission inventaire'
+      );
     } finally {
       setSaving(false);
     }
