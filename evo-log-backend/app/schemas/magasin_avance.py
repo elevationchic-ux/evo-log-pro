@@ -126,11 +126,19 @@ class TransfertStockResponse(TransfertStockBase):
         from_attributes = True
 
 
-# InventaireTournant schemas
+# InventaireTournant schemas — Batch 18 : ALIGNES SUR LE MODELE REEL
+# (app/models/magasin_avance.InventaireTournant). L'ancien schema inventait
+# date_inventaire / validateur_id / date_validation : colonnes qui n'existent
+# PAS (reel : date_debut, date_fin, responsable, notes) → TypeError 500 garanti
+# a la creation. numero_inventaire (unique NOT NULL) est genere cote route.
 class InventaireTournantBase(BaseModel):
     entrepot_id: int
-    date_inventaire: date
-    type_inventaire: str = "tournant"
+    date_debut: date
+    date_fin: Optional[date] = None
+    # colonne nullable sur le modèle → None admis à la lecture, jamais
+    # transformé en chaîne inventée
+    type_inventaire: Optional[str] = "tournant"  # partiel, complet, cyclique
+    notes: Optional[str] = None
 
 
 class InventaireTournantCreate(InventaireTournantBase):
@@ -139,92 +147,69 @@ class InventaireTournantCreate(InventaireTournantBase):
 
 class InventaireTournantResponse(InventaireTournantBase):
     id: int
-    statut: str
-    validateur_id: Optional[int] = None
-    date_validation: Optional[datetime] = None
-    
+    numero_inventaire: str
+    statut: str  # planifie, en_cours, termine, annule
+    responsable: Optional[int] = None
+
     class Config:
         from_attributes = True
 
 
-class LigneInventaireBase(BaseModel):
-    inventaire_id: int
+class LigneInventaireCreate(BaseModel):
+    # compteur_id (fantome) → operateur (colonne reelle)
     stock_id: int
     quantite_comptee: float
-    compteur_id: int
+    operateur: Optional[int] = None
+    commentaires: Optional[str] = None
 
 
-class LigneInventaireCreate(LigneInventaireBase):
-    pass
-
-
-class LigneInventaireResponse(LigneInventaireBase):
+class LigneInventaireResponse(BaseModel):
     id: int
-    quantite_theorique: float
-    ecart: float
-    date_comptage: datetime
-    
+    inventaire_id: int
+    stock_id: int
+    quantite_theorique: Optional[float] = None
+    quantite_comptee: Optional[float] = None
+    ecart: Optional[float] = None
+    statut: str
+    operateur: Optional[int] = None
+    date_comptage: Optional[date] = None  # colonne reelle de type Date
+    commentaires: Optional[str] = None
+
     class Config:
         from_attributes = True
 
 
-# FournisseurStock schemas
-class FournisseurStockBase(BaseModel):
+# FournisseurStock schemas — Batch 18 : alignés sur le modèle réel
+# (delai_livraison_jours/qualite/fiabilite étaient des fantaisies : le modèle
+# porte delai_moyen_livraison, taux_livraison_ponctuelle, qualite_produit,
+# prix_competitif, service_client, note_globale).
+class FournisseurStockCreate(BaseModel):
     fournisseur_id: int
-    delai_livraison_jours: int
-    qualite: str = "standard"
-    fiabilite: float = 100.0
+    delai_moyen_livraison: Optional[int] = None  # jours
+    taux_livraison_ponctuelle: Optional[float] = None  # %
+    qualite_produit: Optional[float] = None  # note 1-10
+    prix_competitif: Optional[float] = None  # note 1-10
+    service_client: Optional[float] = None  # note 1-10
+    note_globale: Optional[float] = None  # calculée si absent
+    commentaires: Optional[str] = None
 
 
-class FournisseurStockCreate(FournisseurStockBase):
-    pass
-
-
-class FournisseurStockResponse(FournisseurStockBase):
+class FournisseurStockResponse(FournisseurStockCreate):
     id: int
-    
+    date_evaluation: Optional[date] = None
+    evaluateur: Optional[int] = None
+    statut: str
+
     class Config:
         from_attributes = True
 
 
-# CommandeFournisseur schemas
-class CommandeFournisseurBase(BaseModel):
-    fournisseur_id: int
-    reference: str
-    date_commande: date
-    date_prevue: date
-    statut: str = "en_attente"
-
-
-class CommandeFournisseurCreate(CommandeFournisseurBase):
-    pass
-
-
-class CommandeFournisseurResponse(CommandeFournisseurBase):
-    id: int
-    date_livraison: Optional[date] = None
-    
-    class Config:
-        from_attributes = True
-
-
-class LigneCommandeFournisseurBase(BaseModel):
-    commande_id: int
-    article_id: int
-    quantite_commandee: float
-    prix_unitaire: float
-
-
-class LigneCommandeFournisseurCreate(LigneCommandeFournisseurBase):
-    pass
-
-
-class LigneCommandeFournisseurResponse(LigneCommandeFournisseurBase):
-    id: int
-    quantite_recue: Optional[float] = None
-    
-    class Config:
-        from_attributes = True
+# CommandeFournisseur / LigneCommandeFournisseur schemas — SUPPRIMÉS
+# (Batch 18) : squelettes fantômes jamais consommés par aucune route
+# (reference, date_prevue, date_livraison, article_id n'existent pas ; le
+# modèle réel porte numero_commande, date_livraison_prevue,
+# date_livraison_reelle, stock_id). Utilisés uniquement par la route
+# /reapprovisionnement/automatique qui les construit sur le modèle réel.
 
 
 # BonReception schemas
@@ -407,13 +392,47 @@ class RotationStockResponse(BaseModel):
 
 
 class PrecisionInventaireResponse(BaseModel):
+    # Batch 18 : precision None + message quand aucune ligne comptee — un
+    # inventaire jamais mesure n'est pas un inventaire a 0 %.
     inventaire_id: int
-    precision: float
+    lignes_total: int = 0
+    lignes_correctes: int = 0
+    precision: Optional[float] = None
+    message: Optional[str] = None
 
 
 class PerformanceFournisseurResponse(BaseModel):
+    # Batch 18 : note/taux/delai None quand la mesure est impossible
+    # (aucune commande, aucune date de livraison mesurable) — plus de faux zero.
     fournisseur_id: int
-    note: float
-    commandes: int
-    taux_livraison: float
-    delai_moyen_jours: float
+    commandes: int = 0
+    commandes_livrees: int = 0
+    taux_livraison: Optional[float] = None
+    delai_moyen_jours: Optional[float] = None
+    note: Optional[float] = None
+    message: Optional[str] = None
+
+
+class ReapproLigneInfo(BaseModel):
+    stock_id: int
+    code_article: Optional[str] = None
+    designation: Optional[str] = None
+    quantite_commandee: float
+    prix_unitaire: float
+    prix_total: float
+
+
+class ReapproIgnoreInfo(BaseModel):
+    stock_id: int
+    code_article: Optional[str] = None
+    raison: str
+
+
+class ReapproAutomatiqueResponse(BaseModel):
+    # Batch 18 : une seule commande groupee (modele reel : lignes -> stock_id,
+    # prix NOT NULL — les stocks sans prix sont IGNOREES et declarees, jamais
+    # pricees a 0.0 invente).
+    commande_id: int
+    numero_commande: str
+    lignes: List[ReapproLigneInfo]
+    ignorees: List[ReapproIgnoreInfo]
