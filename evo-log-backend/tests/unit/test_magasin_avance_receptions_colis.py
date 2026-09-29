@@ -352,8 +352,6 @@ def test_colis_etiquetage_decision_unique(client, db):
     assert r.status_code == 201
     cid = r.json()["id"]
 
-    r = client.get(BASE + "/colis/999999/etiqueter")  # method check via PUT below
-    r = client.get(BASE + "/colis/999999/etiqueter")  # method check via PUT below
     inconnu = client.put(f"{BASE}/colis/999999/etiqueter")
     assert inconnu.status_code == 404
 
