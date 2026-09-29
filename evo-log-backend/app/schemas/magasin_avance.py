@@ -382,31 +382,49 @@ class LitigeTransporteurResponse(BaseModel):
         from_attributes = True
 
 
-# Colis schemas
-class ColisBase(BaseModel):
-    reference_colis: str
-    poids: float
-    dimensions: str
-    contenu: str
-
-
-class ColisCreate(ColisBase):
-    pass
+# Colis schemas — Batch 19 : alignés sur le modèle réel (Colis porte
+# numero_colis / emplacement / date_etiquetage(Date) / operateur ;
+# reference_colis, code_barres, palette_id, date_creation, date_palettisation
+# N'EXISTENT PAS — l'ancien ColisService y écrivait en silence ou levait
+# TypeError). La palettisation n'étant pas modélisée (aucune colonne), elle
+# est tracée dans `emplacement` (l'unique colonne de localisation réelle).
+class ColisCreate(BaseModel):
+    type_colis: Optional[str] = None  # carton, palette, caisse, sac
+    poids: Optional[float] = None
+    dimensions: Optional[str] = None  # format LxHxW
+    volume: Optional[float] = None
+    contenu: Optional[str] = None
+    fragile: Optional[bool] = None
+    empilable: Optional[bool] = None
+    bon_sortie_id: Optional[int] = None
 
 
 class ColisUpdate(BaseModel):
-    code_barres: Optional[str] = None
-    palette_id: Optional[str] = None
+    type_colis: Optional[str] = None
+    poids: Optional[float] = None
+    dimensions: Optional[str] = None
+    volume: Optional[float] = None
+    contenu: Optional[str] = None
+    fragile: Optional[bool] = None
+    empilable: Optional[bool] = None
+    emplacement: Optional[str] = None
 
 
-class ColisResponse(ColisBase):
+class ColisResponse(BaseModel):
     id: int
-    code_barres: Optional[str] = None
-    palette_id: Optional[str] = None
-    date_creation: datetime
-    date_etiquetage: Optional[datetime] = None
-    date_palettisation: Optional[datetime] = None
-    
+    numero_colis: str
+    bon_sortie_id: Optional[int] = None
+    type_colis: Optional[str] = None
+    poids: Optional[float] = None
+    dimensions: Optional[str] = None
+    volume: Optional[float] = None
+    contenu: Optional[str] = None
+    fragile: Optional[bool] = None
+    empilable: Optional[bool] = None
+    emplacement: Optional[str] = None
+    date_etiquetage: Optional[date] = None  # colonne reelle de type Date
+    operateur: Optional[int] = None
+
     class Config:
         from_attributes = True
 
