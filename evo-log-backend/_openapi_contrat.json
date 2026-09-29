@@ -23,9 +23,12 @@
     "date_enregistrement",
     "date_fin",
     "employe_id",
+    "heure_debut",
+    "heure_fin",
     "id",
     "justifie",
     "motif",
+    "nombre_heures",
     "nombre_jours",
     "type_absence"
    ],
@@ -1208,16 +1211,15 @@
    ],
    "enums": {}
   },
-  "Body_ocr_extract_api_v1_parc_ocr_extract_post": {
+  "Body_import_employes_excel_api_v1_rh_employes_import_excel_post": {
    "champs": [
     "file"
    ],
    "enums": {}
   },
-  "Body_preparer_bulletin_api_v1_rh_paie_bulletin_post": {
+  "Body_ocr_extract_api_v1_parc_ocr_extract_post": {
    "champs": [
-    "deductions",
-    "primes"
+    "file"
    ],
    "enums": {}
   },
@@ -1358,41 +1360,36 @@
   },
   "BonReceptionCreate": {
    "champs": [
-    "commande_id",
+    "commande_fournisseur_id",
     "date_reception",
+    "entrepot_id",
     "fournisseur_id",
-    "statut"
+    "notes"
    ],
    "enums": {}
   },
   "BonReceptionResponse": {
    "champs": [
-    "commande_id",
+    "commande_fournisseur_id",
     "date_reception",
     "date_validation",
+    "entrepot_id",
     "fournisseur_id",
     "id",
-    "statut"
+    "notes",
+    "numero_bon",
+    "operateur",
+    "statut",
+    "validateur"
    ],
    "enums": {}
   },
-  "BonSortieCreate": {
+  "BonReceptionUpdate": {
    "champs": [
-    "date_sortie",
-    "destinataire_id",
-    "statut",
-    "type_sortie"
-   ],
-   "enums": {}
-  },
-  "BonSortieResponse": {
-   "champs": [
-    "date_sortie",
-    "date_validation",
-    "destinataire_id",
-    "id",
-    "statut",
-    "type_sortie"
+    "date_reception",
+    "entrepot_id",
+    "fournisseur_id",
+    "notes"
    ],
    "enums": {}
   },
@@ -1427,6 +1424,25 @@
     "periode",
     "primes",
     "salaire_base"
+   ],
+   "enums": {}
+  },
+  "BulletinPaieResponse": {
+   "champs": [
+    "cnps_accidents",
+    "cnps_retraites",
+    "devise",
+    "employe_id",
+    "employe_nom",
+    "heures_supplementaires",
+    "irmg",
+    "montant_heures_sup",
+    "net_a_payer",
+    "periode",
+    "primes",
+    "salaire_base",
+    "salaire_brut",
+    "total_cnps"
    ],
    "enums": {}
   },
@@ -2067,25 +2083,45 @@
   },
   "ColisCreate": {
    "champs": [
+    "bon_sortie_id",
     "contenu",
     "dimensions",
+    "empilable",
+    "fragile",
     "poids",
-    "reference_colis"
+    "type_colis",
+    "volume"
    ],
    "enums": {}
   },
   "ColisResponse": {
    "champs": [
-    "code_barres",
+    "bon_sortie_id",
     "contenu",
-    "date_creation",
     "date_etiquetage",
-    "date_palettisation",
     "dimensions",
+    "empilable",
+    "emplacement",
+    "fragile",
     "id",
-    "palette_id",
+    "numero_colis",
+    "operateur",
     "poids",
-    "reference_colis"
+    "type_colis",
+    "volume"
+   ],
+   "enums": {}
+  },
+  "ColisUpdate": {
+   "champs": [
+    "contenu",
+    "dimensions",
+    "empilable",
+    "emplacement",
+    "fragile",
+    "poids",
+    "type_colis",
+    "volume"
    ],
    "enums": {}
   },
@@ -2586,6 +2622,7 @@
     "id",
     "jours_ouvrables",
     "motif",
+    "motif_refus",
     "statut",
     "type_conge"
    ],
@@ -2595,6 +2632,7 @@
    "champs": [
     "approbateur_id",
     "commentaire_approbation",
+    "created_at",
     "date_approbation",
     "date_debut",
     "date_demande",
@@ -2794,7 +2832,10 @@
     "coefficient",
     "date_debut",
     "date_fin",
+    "departement",
     "employe_id",
+    "horaire_travail",
+    "lieu_travail",
     "periode_essai_jours",
     "poste",
     "salaire_base",
@@ -2809,8 +2850,11 @@
     "date_debut",
     "date_dernier_renouvellement",
     "date_fin",
+    "departement",
     "employe_id",
+    "horaire_travail",
     "id",
+    "lieu_travail",
     "nombre_renouvellements",
     "periode_essai_jours",
     "poste",
@@ -3134,6 +3178,13 @@
    ],
    "enums": {}
   },
+  "DecisionCongePortail": {
+   "champs": [
+    "approuve",
+    "commentaire"
+   ],
+   "enums": {}
+  },
   "DeclarationDouaniereAvanceCreate": {
    "champs": [
     "bureau_douane_id",
@@ -3301,6 +3352,20 @@
    ],
    "enums": {}
   },
+  "DemandeApprobation": {
+   "champs": [
+    "date_debut",
+    "date_fin",
+    "motif"
+   ],
+   "enums": {}
+  },
+  "DemandeRefus": {
+   "champs": [
+    "motif"
+   ],
+   "enums": {}
+  },
   "DemarrageRequest": {
    "champs": [
     "date_debut_reelle",
@@ -3318,6 +3383,12 @@
     "modules_allowed",
     "nom",
     "parent_id"
+   ],
+   "enums": {}
+  },
+  "DepartmentModulesPayload": {
+   "champs": [
+    "modules"
    ],
    "enums": {}
   },
@@ -3488,6 +3559,7 @@
     "date_expiration",
     "employe_id",
     "id",
+    "nom_fichier",
     "type_document"
    ],
    "enums": {}
@@ -4050,6 +4122,29 @@
     "statut",
     "type_emplacement",
     "zone_id"
+   ],
+   "enums": {}
+  },
+  "EmployeCreateIn": {
+   "champs": [
+    "classification",
+    "coefficient",
+    "date_embauche",
+    "date_fin_contrat",
+    "departement",
+    "email",
+    "full_name",
+    "horaire_travail",
+    "lieu_travail",
+    "manager_email",
+    "matricule",
+    "nom",
+    "phone",
+    "poste",
+    "prenom",
+    "role",
+    "salaire_base",
+    "type_contrat"
    ],
    "enums": {}
   },
@@ -4697,6 +4792,20 @@
    ],
    "enums": {}
   },
+  "FichePaieIn": {
+   "champs": [
+    "annee",
+    "date_paiement",
+    "deductions",
+    "employe_id",
+    "heures_supplementaires",
+    "mois",
+    "primes",
+    "salaire_base",
+    "statut"
+   ],
+   "enums": {}
+  },
   "FixedAssetSchema": {
    "champs": [
     "acquisition_date",
@@ -4932,20 +5041,31 @@
   },
   "FournisseurStockCreate": {
    "champs": [
-    "delai_livraison_jours",
-    "fiabilite",
+    "commentaires",
+    "delai_moyen_livraison",
     "fournisseur_id",
-    "qualite"
+    "note_globale",
+    "prix_competitif",
+    "qualite_produit",
+    "service_client",
+    "taux_livraison_ponctuelle"
    ],
    "enums": {}
   },
   "FournisseurStockResponse": {
    "champs": [
-    "delai_livraison_jours",
-    "fiabilite",
+    "commentaires",
+    "date_evaluation",
+    "delai_moyen_livraison",
+    "evaluateur",
     "fournisseur_id",
     "id",
-    "qualite"
+    "note_globale",
+    "prix_competitif",
+    "qualite_produit",
+    "service_client",
+    "statut",
+    "taux_livraison_ponctuelle"
    ],
    "enums": {}
   },
@@ -5913,21 +6033,25 @@
   },
   "InventaireTournantCreate": {
    "champs": [
-    "date_inventaire",
+    "date_debut",
+    "date_fin",
     "entrepot_id",
+    "notes",
     "type_inventaire"
    ],
    "enums": {}
   },
   "InventaireTournantResponse": {
    "champs": [
-    "date_inventaire",
-    "date_validation",
+    "date_debut",
+    "date_fin",
     "entrepot_id",
     "id",
+    "notes",
+    "numero_inventaire",
+    "responsable",
     "statut",
-    "type_inventaire",
-    "validateur_id"
+    "type_inventaire"
    ],
    "enums": {}
   },
@@ -6111,38 +6235,29 @@
   },
   "LigneBonReceptionCreate": {
    "champs": [
-    "article_id",
-    "bon_id",
-    "emplacement_id",
+    "commentaires",
+    "date_peremption",
+    "emplacement",
+    "numero_lot",
+    "prix_unitaire",
     "quantite_commandee",
-    "quantite_recue"
+    "quantite_recue",
+    "stock_id"
    ],
    "enums": {}
   },
   "LigneBonReceptionResponse": {
    "champs": [
-    "article_id",
-    "bon_id",
-    "emplacement_id",
+    "bon_reception_id",
+    "commentaires",
+    "date_peremption",
+    "emplacement",
     "id",
+    "numero_lot",
+    "prix_unitaire",
     "quantite_commandee",
-    "quantite_recue"
-   ],
-   "enums": {}
-  },
-  "LigneBonSortieCreate": {
-   "champs": [
-    "bon_id",
-    "quantite",
-    "stock_id"
-   ],
-   "enums": {}
-  },
-  "LigneBonSortieResponse": {
-   "champs": [
-    "bon_id",
-    "id",
-    "quantite",
+    "quantite_recue",
+    "statut",
     "stock_id"
    ],
    "enums": {}
@@ -6377,8 +6492,8 @@
   },
   "LigneInventaireCreate": {
    "champs": [
-    "compteur_id",
-    "inventaire_id",
+    "commentaires",
+    "operateur",
     "quantite_comptee",
     "stock_id"
    ],
@@ -6422,13 +6537,15 @@
   },
   "LigneInventaireResponse": {
    "champs": [
-    "compteur_id",
+    "commentaires",
     "date_comptage",
     "ecart",
     "id",
     "inventaire_id",
+    "operateur",
     "quantite_comptee",
     "quantite_theorique",
+    "statut",
     "stock_id"
    ],
    "enums": {}
@@ -6556,23 +6673,48 @@
   },
   "LitigeTransporteurCreate": {
    "champs": [
+    "assureur",
     "description",
+    "mission_id",
     "montant_reclame",
+    "numero_police",
     "transporteur_id",
     "type_litige"
    ],
    "enums": {}
   },
+  "LitigeTransporteurResolution": {
+   "champs": [
+    "montant_indemnise",
+    "resolution",
+    "statut"
+   ],
+   "enums": {}
+  },
   "LitigeTransporteurResponse": {
    "champs": [
-    "date_litige",
+    "assureur",
+    "date_incident",
     "date_resolution",
     "description",
     "id",
+    "mission_id",
     "montant_reclame",
+    "numero_litige",
+    "numero_police",
     "resolution",
     "statut",
     "transporteur_id",
+    "type_litige"
+   ],
+   "enums": {}
+  },
+  "LitigeTransporteurUpdate": {
+   "champs": [
+    "assureur",
+    "description",
+    "montant_reclame",
+    "numero_police",
     "type_litige"
    ],
    "enums": {}
@@ -8018,6 +8160,18 @@
    ],
    "enums": {}
   },
+  "PerformanceFournisseurResponse": {
+   "champs": [
+    "commandes",
+    "commandes_livrees",
+    "delai_moyen_jours",
+    "fournisseur_id",
+    "message",
+    "note",
+    "taux_livraison"
+   ],
+   "enums": {}
+  },
   "PerformanceSousTraitantResponse": {
    "champs": [
     "missions_totales",
@@ -8306,6 +8460,17 @@
    ],
    "enums": {}
   },
+  "PlanningCreatePayload": {
+   "champs": [
+    "date_jour",
+    "employe_id",
+    "observations",
+    "poste_assigne",
+    "quart",
+    "statut"
+   ],
+   "enums": {}
+  },
   "PlanningGardeCreate": {
    "champs": [
     "date_jour",
@@ -8373,6 +8538,15 @@
     "instructions",
     "observations",
     "poids_decharge",
+    "statut"
+   ],
+   "enums": {}
+  },
+  "PlanningUpdatePayload": {
+   "champs": [
+    "observations",
+    "poste_assigne",
+    "quart",
     "statut"
    ],
    "enums": {}
@@ -8575,6 +8749,9 @@
   "PrecisionInventaireResponse": {
    "champs": [
     "inventaire_id",
+    "lignes_correctes",
+    "lignes_total",
+    "message",
     "precision"
    ],
    "enums": {}
@@ -9031,6 +9208,34 @@
    ],
    "enums": {}
   },
+  "ReapproAutomatiqueResponse": {
+   "champs": [
+    "commande_id",
+    "ignorees",
+    "lignes",
+    "numero_commande"
+   ],
+   "enums": {}
+  },
+  "ReapproIgnoreInfo": {
+   "champs": [
+    "code_article",
+    "raison",
+    "stock_id"
+   ],
+   "enums": {}
+  },
+  "ReapproLigneInfo": {
+   "champs": [
+    "code_article",
+    "designation",
+    "prix_total",
+    "prix_unitaire",
+    "quantite_commandee",
+    "stock_id"
+   ],
+   "enums": {}
+  },
   "ReceptionCreate": {
    "champs": [
     "bc_id",
@@ -9147,6 +9352,12 @@
    ],
    "enums": {}
   },
+  "RefusBonReception": {
+   "champs": [
+    "motif"
+   ],
+   "enums": {}
+  },
   "ReglementCreate": {
    "champs": [
     "banque",
@@ -9227,6 +9438,12 @@
     "lignes",
     "notes",
     "type_sortie"
+   ],
+   "enums": {}
+  },
+  "RemovalSlipRefus": {
+   "champs": [
+    "motif"
    ],
    "enums": {}
   },
@@ -9486,26 +9703,48 @@
   },
   "RetourClientCreate": {
    "champs": [
-    "article_id",
+    "bon_sortie_id",
     "client_id",
-    "etat",
     "motif",
-    "quantite"
+    "notes",
+    "quantite",
+    "type_retour"
    ],
    "enums": {}
   },
   "RetourClientResponse": {
    "champs": [
-    "action_effectuee",
-    "article_id",
+    "action",
+    "bon_sortie_id",
     "client_id",
+    "cout_traitement",
     "date_retour",
-    "date_traitement",
-    "etat",
     "id",
     "motif",
+    "notes",
+    "numero_retour",
+    "operateur",
     "quantite",
-    "statut"
+    "statut",
+    "type_retour"
+   ],
+   "enums": {}
+  },
+  "RetourClientTraitement": {
+   "champs": [
+    "action",
+    "cout_traitement",
+    "decision",
+    "notes"
+   ],
+   "enums": {}
+  },
+  "RetourClientUpdate": {
+   "champs": [
+    "motif",
+    "notes",
+    "quantite",
+    "type_retour"
    ],
    "enums": {}
   },
@@ -9552,7 +9791,10 @@
   "RotationStockResponse": {
    "champs": [
     "article_id",
-    "rotation"
+    "jours",
+    "rotation",
+    "sorties",
+    "stock_actuel"
    ],
    "enums": {}
   },
@@ -10570,7 +10812,8 @@
     "heures_sup",
     "heures_travaillees",
     "id",
-    "statut"
+    "statut",
+    "tache"
    ],
    "enums": {}
   },
@@ -11361,44 +11604,6 @@
    ],
    "enums": {}
   },
-  "app__schemas__rh__BulletinPaieResponse": {
-   "champs": [
-    "cotisations",
-    "deductions",
-    "employe_id",
-    "heures_sup",
-    "impot_revenu",
-    "indemnite_heures_sup",
-    "note",
-    "periode",
-    "primes",
-    "salaire_base",
-    "salaire_brut",
-    "salaire_net",
-    "total_deductions",
-    "total_primes"
-   ],
-   "enums": {}
-  },
-  "app__schemas__rh_avance__BulletinPaieResponse": {
-   "champs": [
-    "cnps_accidents",
-    "cnps_retraites",
-    "devise",
-    "employe_id",
-    "employe_nom",
-    "heures_supplementaires",
-    "irmg",
-    "montant_heures_sup",
-    "net_a_payer",
-    "periode",
-    "primes",
-    "salaire_base",
-    "salaire_brut",
-    "total_cnps"
-   ],
-   "enums": {}
-  },
   "app__schemas__tenant__CompanyCreate": {
    "champs": [
     "adresse",
@@ -12094,6 +12299,9 @@
    ]
   },
   "/api/v1/finance/plan-comptable": {
+   "get": [
+    "PlanComptableOHADAResponse"
+   ],
    "post": [
     "PlanComptableOHADAResponse"
    ]
@@ -12813,6 +13021,12 @@
   "/api/v1/magasin/removal-slips/{id}/validate": {
    "post": []
   },
+  "/api/v1/magasin/removal-slips/{id}/refuse": {
+   "post": []
+  },
+  "/api/v1/magasin/removal-slips/{id}/pdf": {
+   "get": []
+  },
   "/api/v1/magasin/receptions-mag3/": {
    "get": [],
    "post": []
@@ -13178,13 +13392,17 @@
   "/api/v1/rh/portail/documents": {
    "get": []
   },
+  "/api/v1/rh/portail/documents/{document_id}/fichier": {
+   "get": []
+  },
   "/api/v1/rh/portail/documents/attestation-travail": {
    "get": []
   },
   "/api/v1/rh/conges": {
    "post": [
     "CongeResponse"
-   ]
+   ],
+   "get": []
   },
   "/api/v1/rh/conges/solde/{employe_id}/{annee}": {
    "get": [
@@ -13198,6 +13416,11 @@
   },
   "/api/v1/rh/conges/{conge_id}/rejeter": {
    "put": [
+    "CongeResponse"
+   ]
+  },
+  "/api/v1/rh/conges/{conge_id}/decision": {
+   "post": [
     "CongeResponse"
    ]
   },
@@ -13262,9 +13485,8 @@
    ]
   },
   "/api/v1/rh/paie/bulletin": {
-   "post": [
-    "app__schemas__rh__BulletinPaieResponse"
-   ]
+   "post": [],
+   "get": []
   },
   "/api/v1/rh/documents": {
    "post": [
@@ -13299,7 +13521,8 @@
    "get": []
   },
   "/api/v1/rh/employes": {
-   "get": []
+   "get": [],
+   "post": []
   },
   "/api/v1/rh/employes/{employe_id}": {
    "get": []
@@ -13666,13 +13889,27 @@
    ]
   },
   "/api/v1/magasin-avance/fournisseurs/{fournisseur_id}/performance": {
-   "get": []
+   "get": [
+    "PerformanceFournisseurResponse"
+   ]
   },
   "/api/v1/magasin-avance/reapprovisionnement/automatique/{fournisseur_id}": {
-   "post": []
+   "post": [
+    "ReapproAutomatiqueResponse",
+    "ReapproIgnoreInfo",
+    "ReapproLigneInfo"
+   ]
   },
   "/api/v1/magasin-avance/receptions": {
+   "get": [
+    "BonReceptionResponse"
+   ],
    "post": [
+    "BonReceptionResponse"
+   ]
+  },
+  "/api/v1/magasin-avance/receptions/{bon_id}": {
+   "patch": [
     "BonReceptionResponse"
    ]
   },
@@ -13686,23 +13923,21 @@
     "BonReceptionResponse"
    ]
   },
-  "/api/v1/magasin-avance/sorties": {
-   "post": [
-    "BonSortieResponse"
-   ]
-  },
-  "/api/v1/magasin-avance/sorties/{bon_id}/lignes": {
-   "post": [
-    "LigneBonSortieResponse"
-   ]
-  },
-  "/api/v1/magasin-avance/sorties/{bon_id}/valider": {
+  "/api/v1/magasin-avance/receptions/{bon_id}/refuser": {
    "put": [
-    "BonSortieResponse"
+    "BonReceptionResponse"
    ]
   },
   "/api/v1/magasin-avance/retours": {
+   "get": [
+    "RetourClientResponse"
+   ],
    "post": [
+    "RetourClientResponse"
+   ]
+  },
+  "/api/v1/magasin-avance/retours/{retour_id}": {
+   "patch": [
     "RetourClientResponse"
    ]
   },
@@ -13712,7 +13947,15 @@
    ]
   },
   "/api/v1/magasin-avance/litiges": {
+   "get": [
+    "LitigeTransporteurResponse"
+   ],
    "post": [
+    "LitigeTransporteurResponse"
+   ]
+  },
+  "/api/v1/magasin-avance/litiges/{litige_id}": {
+   "patch": [
     "LitigeTransporteurResponse"
    ]
   },
@@ -13722,7 +13965,15 @@
    ]
   },
   "/api/v1/magasin-avance/colis": {
+   "get": [
+    "ColisResponse"
+   ],
    "post": [
+    "ColisResponse"
+   ]
+  },
+  "/api/v1/magasin-avance/colis/{colis_id}": {
+   "patch": [
     "ColisResponse"
    ]
   },
@@ -14063,11 +14314,17 @@
    ]
   },
   "/api/v1/transit-avance/dossiers": {
+   "get": [
+    "DossierTransitAvanceResponse"
+   ],
    "post": [
     "DossierTransitAvanceResponse"
    ]
   },
   "/api/v1/transit-avance/dossiers/{dossier_id}": {
+   "get": [
+    "DossierTransitAvanceResponse"
+   ],
    "put": [
     "DossierTransitAvanceResponse"
    ]
@@ -14668,7 +14925,14 @@
    ]
   },
   "/api/v1/maintenance-gmao/ordres": {
+   "get": [],
    "post": [
+    "OrdreMaintenanceResponse"
+   ]
+  },
+  "/api/v1/maintenance-gmao/ordres/{ordre_id}": {
+   "get": [],
+   "put": [
     "OrdreMaintenanceResponse"
    ]
   },
@@ -14677,12 +14941,8 @@
     "OrdreMaintenanceResponse"
    ]
   },
-  "/api/v1/maintenance-gmao/ordres/{ordre_id}": {
-   "put": [
-    "OrdreMaintenanceResponse"
-   ]
-  },
   "/api/v1/maintenance-gmao/equipements": {
+   "get": [],
    "post": [
     "EquipementGMAOResponse"
    ]
@@ -14756,6 +15016,30 @@
     "SynchronisationResponse"
    ]
   },
+  "/api/v1/integration/sydonia": {
+   "get": [
+    "SYDONIAPlusResponse"
+   ],
+   "post": [
+    "SYDONIAPlusResponse"
+   ]
+  },
+  "/api/v1/integration/guichet-unique": {
+   "get": [
+    "GuichetUniqueResponse"
+   ],
+   "post": [
+    "GuichetUniqueResponse"
+   ]
+  },
+  "/api/v1/integration/pcs": {
+   "get": [
+    "PCSResponse"
+   ],
+   "post": [
+    "PCSResponse"
+   ]
+  },
   "/api/v1/integration/integrations/{integration_id}/activer": {
    "put": [
     "IntegrationResponse"
@@ -14776,29 +15060,14 @@
     "RequeteIntegrationResponse"
    ]
   },
-  "/api/v1/integration/sydonia": {
-   "post": [
-    "SYDONIAPlusResponse"
-   ]
-  },
   "/api/v1/integration/sydonia/{dossier_id}": {
    "put": [
     "SYDONIAPlusResponse"
    ]
   },
-  "/api/v1/integration/guichet-unique": {
-   "post": [
-    "GuichetUniqueResponse"
-   ]
-  },
   "/api/v1/integration/guichet-unique/{transaction_id}": {
    "put": [
     "GuichetUniqueResponse"
-   ]
-  },
-  "/api/v1/integration/pcs": {
-   "post": [
-    "PCSResponse"
    ]
   },
   "/api/v1/integration/pcs/{operation_id}": {
@@ -15414,7 +15683,7 @@
   },
   "/api/v1/rh-avance/bulletin-paie": {
    "post": [
-    "app__schemas__rh_avance__BulletinPaieResponse"
+    "BulletinPaieResponse"
    ]
   },
   "/api/v1/rh-avance/charges-sociales/{employe_id}": {
@@ -15589,6 +15858,12 @@
   "/api/v1/saas/console/accreditations/demandes": {
    "get": []
   },
+  "/api/v1/saas/console/accreditations/demandes/{request_id}/approuver": {
+   "post": []
+  },
+  "/api/v1/saas/console/accreditations/demandes/{request_id}/refuser": {
+   "post": []
+  },
   "/api/v1/saas/console/companies/{company_id}/accreditations": {
    "get": [],
    "post": []
@@ -15637,6 +15912,38 @@
   },
   "/api/v1/company-admin/modules/demandes/{request_id}": {
    "delete": []
+  },
+  "/api/v1/departement/overview": {
+   "get": []
+  },
+  "/api/v1/departement/membres": {
+   "get": []
+  },
+  "/api/v1/departement/candidats": {
+   "get": []
+  },
+  "/api/v1/departement/membres/{member_id}/affecter": {
+   "post": []
+  },
+  "/api/v1/departement/membres/{member_id}/retirer": {
+   "post": []
+  },
+  "/api/v1/departement/modules": {
+   "put": []
+  },
+  "/api/v1/departement/planning": {
+   "get": [],
+   "post": []
+  },
+  "/api/v1/departement/presence": {
+   "get": []
+  },
+  "/api/v1/departement/planning/{planning_id}": {
+   "put": [],
+   "delete": []
+  },
+  "/api/v1/departement/presence/{pointage_id}/valider": {
+   "post": []
   },
   "/api/v1/shift-planning/": {
    "get": []
@@ -16303,6 +16610,9 @@
    "get": []
   },
   "/api/finance/plan-comptable": {
+   "get": [
+    "PlanComptableOHADAResponse"
+   ],
    "post": [
     "PlanComptableOHADAResponse"
    ]
