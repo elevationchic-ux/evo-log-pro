@@ -670,7 +670,7 @@ export default function ChefPersonnelPage() {
                   </div>
                 </div>
 
-                {cg.statut === 'EN_ATTENTE' ? (
+                {congeNormalise(cg.statut) === 'en_attente' ? (
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => handleOpenDecision(cg, 'APPROUVER')}
@@ -689,7 +689,12 @@ export default function ChefPersonnelPage() {
                   </div>
                 ) : (
                   <div className="shrink-0 text-xs font-mono text-slate-500">
-                    {cg.statut === 'APPROUVE' ? '✓ Arbitré & Notifié' : '✗ Refusé'}
+                    {congeNormalise(cg.statut) === 'approuve'
+                      ? '✓ Arbitré & Notifié'
+                      : cg.motif_refus
+                        ? `✗ Refusé — ${cg.motif_refus}`
+                        : '✗ Refusé sans motif'
+                    }
                   </div>
                 )}
               </div>
