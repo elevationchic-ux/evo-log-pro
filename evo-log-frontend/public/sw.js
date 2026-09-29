@@ -92,7 +92,10 @@ self.addEventListener('fetch', (event) => {
         .then((res) => {
           if (res.ok) {
             const clone = res.clone();
-            caches.open(PAGE_CACHE).then((cache) => cache.put(request, clone));
+            caches
+              .open(PAGE_CACHE)
+              .then((cache) => cache.put(request, clone))
+              .catch(() => {});
           }
           return res;
         })

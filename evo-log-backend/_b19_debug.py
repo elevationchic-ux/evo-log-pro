@@ -1,5 +1,5 @@
 import os
-os.environ["DATABASE_URL"] = ":memory:"
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 from datetime import date
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
