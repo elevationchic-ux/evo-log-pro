@@ -66,10 +66,15 @@ ACCOUNTS = [
 def heal_schema(write: bool) -> None:
     insp = sa_inspect(engine)
 
-    # 1a) Tables totalement absentes -> les creer (checkfirst = IF NOT EXISTS).
-    #     create_all n'ALTERE pas les tables existantes, donc c'est sur.
+    # 1a) Filet de securite : creer les tables TOTALEMENT absentes. Non-fatal :
+    #     le metadata est partiel (certains modeles hors __init__), donc un
+    #     echec ici n'empeche pas la vraie reparation (colonnes `users`). En
+    #     production la base est deja migratee -> cette etape est un no-op.
     if write:
-        Base.metadata.create_all(bind=engine, checkfirst=True)
+        try:
+            Base.metadata.create_all(bind=engine, checkfirst=True)
+        except Exception as exc:  # noqa: BLE001 - opportunite, pas un blocage
+            print(f"  [i] create_all ignore (non-fatal) : {type(exc).__name__}: {exc}")
 
     # 1b) Colonnes du modele absentes de la table `users` existante.
     if not insp.has_table("users"):

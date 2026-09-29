@@ -1115,9 +1115,10 @@ export default function ChefPersonnelPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs"
+                  disabled={dotEnCours}
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs disabled:opacity-50"
                 >
-                  Attribuer
+                  {dotEnCours ? 'Enregistrement…' : 'Attribuer'}
                 </button>
               </div>
             </form>
