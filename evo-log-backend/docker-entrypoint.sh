@@ -68,10 +68,11 @@ alembic upgrade head
 # parite `users` (colonnes NULLABLES uniquement, idempotent, non destructif)
 # et garantit les comptes de secours.
 #
-# STREICTEMENT NON-BLOQUANT (`|| true`) : on ne doit JAMAIS empecher uvicorn de
-# demarrer a cause de cette etape facultative. Un succes acceler la reparation
-# ; un echec est simplement loggue et l'API demarre quand meme (le Shell
-# `python scripts/ensure_login_railway.py` reste le levier manuel de secours).
+# STRICTEMENT NON-BLOQUANT (`|| true`) : on ne doit JAMAIS empecher uvicorn de
+# demarrer a cause de cette etape facultative. En cas de succes la reparation
+# s'applique ; en cas d'echec c'est simplement loggue et l'API demarre quand
+# meme (le Shell `python scripts/ensure_login_railway.py` reste le levier
+# manuel de secours).
 # ----------------------------------------------------------------------------
 echo "[entrypoint] auto-reparation login/users (non-bloquante)"
 python scripts/ensure_login_railway.py || echo "[entrypoint] reparation ignoree (non-fatale)"
