@@ -140,10 +140,19 @@ async def login(request: Request, db: Session = Depends(get_db)):
 
     payload = _build_login_payload(user)
     # Phase 4 Tranche C : pointe d'arrivee automatique a la connexion.
+    _attacher_pointage_arrivee(db, user, payload)
+    return payload
+
+
+def _attacher_pointage_arrivee(db: Session, user: User, payload: dict) -> None:
+    """Best-effort : greffe ``pointage_info`` sur un payload de session.
+
+    Shared par /auth/login et les deux branches de /auth/2fa/verify pour que
+    la pointe d'arrivee automatique se declenche sur TOUTE ouverture effective
+    de session, jamais sur /session (re-hydratation d'un token deja valide)."""
     pi = auto_pointage_arrivee(db, user)
     if pi:
         payload["pointage_info"] = pi
-    return payload
 
 
 def _build_login_payload(user: User) -> dict:

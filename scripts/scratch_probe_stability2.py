@@ -1,11 +1,4 @@
-"""Caracterise l'instabilite prod : alterne health et login, 10 cycles.
-
-Objectif : distinguer
-  - crash-loop global (health ALSO 502 par intervalles), de
-  - plantage/timeout specifique au chemin /auth/login (health toujours 200,
-    login toujours 502 ou tres lent).
-Horodate chaque sonde pour voir la period icite (redemarrages ~ toutes les X s).
-"""
+"""Sonde courte : 4 cycles health+login, timeout 15s, sortie flush immediate."""
 import json
 import time
 import urllib.request
@@ -22,22 +15,17 @@ def call(path, method="GET", body=None):
     req = urllib.request.Request(BASE + path, data=data, headers=headers, method=method)
     t = time.time()
     try:
-        with urllib.request.urlopen(req, timeout=45) as r:
-            acao = r.headers.get("access-control-allow-origin", "-")
-            return r.status, time.time() - t, acao
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return r.status, time.time() - t, r.headers.get("access-control-allow-origin", "-")
     except urllib.error.HTTPError as e:
-        acao = e.headers.get("access-control-allow-origin", "-")
-        return e.code, time.time() - t, acao
+        return e.code, time.time() - t, e.headers.get("access-control-allow-origin", "-")
     except Exception as e:
         return f"ERR:{type(e).__name__}", time.time() - t, "-"
 
 
-ts0 = time.strftime("%H:%M:%S")
-print(f"debut {ts0}")
-for i in range(10):
+for i in range(4):
     hs, ht, hca = call("/api/health")
+    print(f"[{time.strftime('%H:%M:%S')}] health {hs} {ht:4.1f}s acao={hca}", flush=True)
     ls, lt, lca = call("/api/v1/auth/login", method="POST",
                        body={"username": "ghost.probe", "password": "x"})
-    stamp = time.strftime("%H:%M:%S")
-    print(f"[{stamp}] health {hs} {ht:4.1f}s acao={hca:12s} | login {ls} {lt:4.1f}s acao={lca}")
-    time.sleep(3)
+    print(f"[{time.strftime('%H:%M:%S')}] login  {ls} {lt:4.1f}s acao={lca}", flush=True)
