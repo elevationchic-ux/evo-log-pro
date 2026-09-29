@@ -10,7 +10,7 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app tests` | ✅ EXIT=0 |
-| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 17) | ✅ **527 passed, 2 xfailed, 0 failed** (370 s). Historique : les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`** — corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17, §18 et §19). |
+| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 17) | ✅ **527 passed, 2 xfailed, 0 failed** (370 s) au run du batch 17. ATTENTION batch 18 : la suite complete est **rouge de cause externe** (48 failed / 240 errors sur les clusters transport/rh/saas/rbac) — commits WIP d'une session concurrente posterieurs a 01:12, attribution prouvee par worktree temoin (baseline 42b7c6b = 539 passed, 0 failed). Le batch 18 lui-meme est vert sur 35 tests cibles ; re-run global du a faire quand le WIP concurrent sera stabilise (§20). Historique : les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`** — corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17, §18 et §20). |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1082 routes OpenAPI) |
 | `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
 
