@@ -81,6 +81,48 @@ def mettre_a_jour_bureau_douane(
 
 
 # ============ DOSSIERS TRANSIT ============
+@router.get("/dossiers", response_model=List[DossierTransitAvanceResponse])
+def lister_dossiers_transit(
+    skip: int = 0,
+    limit: int = 100,
+    statut: str = None,
+    search: str = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Dossiers de transit reellement enregistres (filtr tenant automatique).
+
+    `search` porte sur le numero de dossier, la marchandise ou le numero de
+    connaissement : aucun enregistrement n'est ajoute lorsque la base est vide.
+    """
+    from sqlalchemy import or_
+
+    q = db.query(DossierTransitAvance).order_by(DossierTransitAvance.id.desc())
+    if statut:
+        q = q.filter(DossierTransitAvance.statut == statut)
+    if search:
+        like = f"%{search}%"
+        q = q.filter(or_(
+            DossierTransitAvance.numero_dossier.ilike(like),
+            DossierTransitAvance.marchandise.ilike(like),
+            DossierTransitAvance.numero_connaisse.ilike(like),
+        ))
+    return q.offset(skip).limit(min(limit, 500)).all()
+
+
+@router.get("/dossiers/{dossier_id}", response_model=DossierTransitAvanceResponse)
+def obtenir_dossier_transit(
+    dossier_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Fiche complete d'un dossier de transit existant."""
+    d = db.query(DossierTransitAvance).filter(DossierTransitAvance.id == dossier_id).first()
+    if not d:
+        raise HTTPException(status_code=404, detail="Dossier non trouvé")
+    return d
+
+
 @router.post("/dossiers", response_model=DossierTransitAvanceResponse, status_code=status.HTTP_201_CREATED)
 def creer_dossier_transit(
     dossier: DossierTransitAvanceCreate,
