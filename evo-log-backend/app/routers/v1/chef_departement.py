@@ -1,4 +1,4 @@
-"""Espace departement (Phase 3 — niveau 2, Chef de departement).
+"""Espace departement (Phase 3/4 — niveau 2, Chef de departement).
 
 Perimetre strict : un chef de departement (role_level 2) ne voit et ne pilote
 QUE les collaborateurs de SON departement. L'Admin Entreprise (1) et le CADC (0)
@@ -17,13 +17,15 @@ Tranche A (lecture) : roster humain + fiche du departement. Tranche B (ecriture)
   il ne touche jamais un niveau 1/2, ni un compte d'une autre entreprise, ni un
   Super Admin ;
 - l'ALLOCATION des modules d'un departement releve de l'Admin Entreprise (1) /
-  CADC (0) UNIQUEMENT (un chef ne se auto-grantit pas de module) et reste STRICTEMENT
+  CADC (0) UNIQUEMENT (un chef ne se auto-grantit pas ; cf. PUT /modules 403) et reste STRICTEMENT
   bornee par ``Company.modules_actives`` (un departement ne peut pas depasser son
-  entreprise). Phase 4 (Tranche A, lecture) ajoute le PLANNING et la PRESENCE du
-  departement, scopes par le MEME ``_scoped_department`` : un chef ne voit que les
-  tours de garde et les pointages de SES collaborateurs (modeles chef_personnel
-  PlanningGarde / PointageVacation). L'ecriture du planning departemental reste une
-  tranche suivante.
+  entreprise).
+Phase 4 (Tranche A, lecture) : PLANNING + PRESENCE du departement scopes par le
+MEME ``_scoped_department`` (modeles chef_personnel PlanningGarde / PointageVacation).
+Phase 4 (Tranche B, ecriture) : un chef peut CREER / MODIFIER / SUPPRIMER les tours
+de garde (PlanningGarde) de SES collaborateurs, sous la contrainte de publication
+"au mercredi de la semaine precedente" ; il peut aussi VALIDER un emargement
+(PointageVacation) d'un membre. L'ecriture ne sort jamais du perimetre departement.
 """
 import json
 from datetime import date as _date
