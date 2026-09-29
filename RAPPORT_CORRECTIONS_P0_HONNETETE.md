@@ -885,7 +885,7 @@ verifiee a la main, commande groupee a prix reel, refus total du prix invente).
   `/api/magasin-avance/receptions`, donc 422 permanent) et le trio `/colis`
   (`ColisService` fantome : `reference_colis`, `date_creation`, `code_barres`,
   `palette_id` — le modele reel porte `numero_colis`, `emplacement`,
-  `date_etiquetage` ; les schemas `Colis*` sont fantomes eux aussi). Also :
+  `date_etiquetage` ; les schemas `Colis*` sont fantomes eux aussi). Egalement :
   `magasin_avance_service.traiter_retour` ecrit toujours `action_effectuee`/
   `date_traitement` (colonnes inexistantes) — code mort, a purger.
 - **Re-run de la suite complete** des que les commits concurrents (rh/transport/

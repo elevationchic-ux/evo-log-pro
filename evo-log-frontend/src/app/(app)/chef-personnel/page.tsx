@@ -99,6 +99,30 @@ async function lireDetail(res: Response): Promise<string> {
   return `Le serveur a répondu ${res.status}.`;
 }
 
+// L'API rend les VALEURS d'enum, en minuscules (`en_attente`, `approuve`,
+// `refuse`, `conge_annuel`). L'écran comparait des MAJUSCULES : aucun
+// commentaire, aucun badge et surtout aucun bouton de décision ne se montrait.
+const congeNormalise = (v?: string | null) => String(v || '').toLowerCase();
+
+const LIBELLES_CONGE: Record<string, string> = {
+  en_attente: 'En attente',
+  approuve: 'Approuvé',
+  refuse: 'Refusé',
+  en_cours: 'En cours',
+  termine: 'Terminé',
+  annule: 'Annulé',
+};
+
+const LIBELLES_TYPE_CONGE: Record<string, string> = {
+  conge_annuel: 'Congé annuel',
+  conge_maladie: 'Congé maladie',
+  conge_maternite: 'Congé maternité',
+  conge_paternite: 'Congé paternité',
+  conge_exceptionnel: 'Congé exceptionnel',
+  conge_sans_solde: 'Congé sans solde',
+  absence_autorisee: 'Absence autorisée',
+};
+
 
 export default function ChefPersonnelPage() {
   const { user } = useAuth();
@@ -622,17 +646,19 @@ export default function ChefPersonnelPage() {
                     <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-slate-800 text-slate-300 font-mono">
                       {cg.employe_role}
                     </span>
-                    <span className={`px-2 py-0.5 text-[11px] font-black rounded-full ${cg.statut === 'APPROUVE'
+                    <span className={`px-2 py-0.5 text-[11px] font-black rounded-full ${congeNormalise(cg.statut) === 'approuve'
                       ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                      : cg.statut === 'REJETE'
+                      : congeNormalise(cg.statut) === 'refuse'
                         ? 'bg-red-500/15 text-red-400 border border-red-500/30'
                         : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                       }`}>
-                      {cg.statut}
+                      {LIBELLES_CONGE[congeNormalise(cg.statut)] || cg.statut}
                     </span>
                   </div>
 
-                  <div className="text-xs text-emerald-400 font-bold">{cg.type_conge}</div>
+                  <div className="text-xs text-emerald-400 font-bold">
+                    {LIBELLES_TYPE_CONGE[congeNormalise(cg.type_conge)] || cg.type_conge}
+                  </div>
                   <p className="text-xs text-slate-300 max-w-2xl">{cg.motif}</p>
 
                   <div className="flex items-center gap-4 text-[11px] text-slate-400 font-mono pt-1">
