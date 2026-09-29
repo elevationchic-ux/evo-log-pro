@@ -7,7 +7,10 @@
  * src/utils/offlineSync.ts, avec le token de session).
  */
 
-const VERSION = 'evo-log-v1';
+// Bump de VERSION a chaque changement de stratégie : l'etape 'activate' Purge
+// les caches ne portant pas la VERSION courante, ce qui evite de resservir des
+// chunks d'une build superdee (ChunkLoadError apres un redéploiement Vercel).
+const VERSION = 'evo-log-v2';
 const STATIC_CACHE = `${VERSION}-static`;
 const PAGE_CACHE = `${VERSION}-pages`;
 
@@ -18,6 +21,7 @@ self.addEventListener('install', (event) => {
     caches
       .open(STATIC_CACHE)
       .then((cache) => cache.addAll(PRECACHE_URLS))
+      .catch(() => {})
       .then(() => self.skipWaiting())
   );
 });
