@@ -171,6 +171,7 @@ export default function ChefPersonnelPage() {
   const [dotSerie, setDotSerie] = useState('');
   const [dotEnCours, setDotEnCours] = useState(false);
   const [erreurDecision, setErreurDecision] = useState('');
+  const [erreurFetch, setErreurFetch] = useState('');
 
   // RBAC Permission Check
   const userRoles = (user?.roles || []).map(r => r.toUpperCase());
@@ -182,41 +183,31 @@ export default function ChefPersonnelPage() {
   // Fetch backend data
   const fetchData = async () => {
     setIsLoading(true);
-    try {
-      const resEff = await fetch('/api/v1/chef-personnel/effectifs');
-      if (resEff.ok) {
-        const data = await resEff.json();
-        if (Array.isArray(data) && data.length > 0) setEffectifs(data);
+    setErreurFetch('');
+    // Chaque jeu de données est affecté tel que renvoyé : une liste vide doit
+    // afficher l'état vide, pas conserver la réponse précédente.
+    const charger = async (url: string, appliquer: (data: any[]) => void) => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        appliquer(Array.isArray(data) ? data : (data?.items ?? []));
+      } catch {
+        return false;
       }
-
-      const resCg = await fetch('/api/v1/chef-personnel/conges');
-      if (resCg.ok) {
-        const data = await resCg.json();
-        if (Array.isArray(data) && data.length > 0) setConges(data);
-      }
-
-      const resPl = await fetch('/api/v1/chef-personnel/plannings');
-      if (resPl.ok) {
-        const data = await resPl.json();
-        if (Array.isArray(data) && data.length > 0) setPlannings(data);
-      }
-
-      const resPt = await fetch('/api/v1/chef-personnel/pointages');
-      if (resPt.ok) {
-        const data = await resPt.json();
-        if (Array.isArray(data) && data.length > 0) setPointages(data);
-      }
-
-      const resDt = await fetch('/api/v1/chef-personnel/dotations');
-      if (resDt.ok) {
-        const data = await resDt.json();
-        if (Array.isArray(data) && data.length > 0) setDotations(data);
-      }
-    } catch {
-      // Keep initial seed
-    } finally {
-      setIsLoading(false);
+      return true;
+    };
+    const resultats = await Promise.all([
+      charger('/api/v1/chef-personnel/effectifs', setEffectifs),
+      charger('/api/v1/chef-personnel/conges', setConges),
+      charger('/api/v1/chef-personnel/plannings', setPlannings),
+      charger('/api/v1/chef-personnel/pointages', setPointages),
+      charger('/api/v1/chef-personnel/dotations', setDotations),
+    ]);
+    if (resultats.some(ok => !ok)) {
+      setErreurFetch("Le service /api/v1/chef-personnel n'a pas répondu : les écrans peuvent être incomplets.");
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -366,6 +357,25 @@ export default function ChefPersonnelPage() {
 
   return (
     <div className="min-h-screen p-4 sm:p-8 space-y-6 text-white font-sans">
+      {/* Une écriture rejetée par le serveur doit rester visible : sans cette
+          bannière, la décision / planification échouait en silence. */}
+      {erreurDecision && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 border border-red-500/40 bg-red-500/10 rounded-2xl px-4 py-3"
+        >
+          <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+          <p className="text-xs text-red-200 font-semibold flex-1 leading-relaxed">{erreurDecision}</p>
+          <button
+            type="button"
+            onClick={() => setErreurDecision('')}
+            className="p-2 rounded-lg text-red-300 hover:text-white hover:bg-red-500/20 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label="Masquer le message d'erreur"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-slate-800">
