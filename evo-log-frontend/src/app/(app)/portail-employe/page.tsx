@@ -360,11 +360,16 @@ export default function PortailEmployePage() {
       lien.remove();
       URL.revokeObjectURL(url);
     } catch (err: any) {
-      const detail = err?.response?.data instanceof Blob
-        ? await err.response.data.text().then(txt => {
-            try { return JSON.parse(txt)?.detail; } catch { return null; }
-          })
-        : err?.response?.data?.detail;
+      // Le backend répond en JSON même sur une route binaire : le blob d'erreur
+      // est relu pour afficher le message précis plutôt qu'un échec générique.
+      let detail: unknown = err?.response?.data?.detail;
+      if (err?.response?.data instanceof Blob) {
+        try {
+          detail = JSON.parse(await err.response.data.text())?.detail;
+        } catch {
+          detail = null;
+        }
+      }
       toast.error(typeof detail === 'string' && detail
         ? detail
         : t('Téléchargement impossible : le document n’est pas disponible.', 'Download failed: the document is not available.'));

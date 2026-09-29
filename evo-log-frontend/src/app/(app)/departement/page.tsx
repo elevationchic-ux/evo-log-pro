@@ -20,7 +20,7 @@
 // renvoyée par le backend plutôt que des données inventées.
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Users, Building2, Mail, Phone, BadgeCheck, UserCog, CircleSlash, UserPlus, UserMinus, Search, CalendarDays, Clock } from 'lucide-react';
+import { Users, Building2, Mail, Phone, BadgeCheck, UserCog, CircleSlash, UserPlus, UserMinus, Search, CalendarDays, Clock, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { departmentAPI } from '@/lib/api-client';
 
