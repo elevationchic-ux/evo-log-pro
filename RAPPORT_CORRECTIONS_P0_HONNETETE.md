@@ -792,6 +792,112 @@ c'est un chiffre invente. `None` + « non mesure » est la seule reponse honnete
 
 ---
 
+## 20. Batch 18 — Inventaires tournants, evaluations/performance fournisseur, reappro : 7 endpoints morts reconstruits (+ suite rouge de cause externe)
+
+Annonce au §19 (« Reste ») : le reappro et la performance fournisseur etaient
+morts. L'audit exhaustif de la section restante du router a montre que **tout le
+bloc l.445–661 etait du meme tonneau** — 7 endpoints, 500 garantis ou pertes
+silencieuses. Ce batch les reconstruit sur les modeles reels.
+
+### Constat (audit)
+
+| Endpoint | Cause de mort | Effet reel |
+|---|---|---|
+| `POST /inventaires` | `InventaireTournant(date_inventaire=…)` + `numero_inventaire` (unique NOT NULL) jamais fourni | TypeError → 500 garanti |
+| `POST /inventaires/{id}/lignes` | lecture `stock.quantite` (reel : `quantite_disponible`) ; `compteur_id` (reel : `operateur`) | AttributeError → 500 |
+| `PUT /inventaires/{id}/valider` | ecriture `stock.quantite`, `validateur_id`, `date_validation` (inexistants) + statut `"valide"` hors workflow reel | **reponse 200 menteuse** : l'ajustement theorique etait perdu en silence, le statut pollue la donnee, et aucune ligne du registre MouvementStock |
+| `GET /inventaires/{id}/precision` | faux `0.0` sans ligne comptee ; `l.ecart == 0` sur Numeric | mesure inventee |
+| `POST /fournisseurs-stock` | `FournisseurStock(delai_livraison_jours, qualite, fiabilite)` : 3 kwargs fantomes | TypeError → 500 |
+| `GET /fournisseurs/{id}/performance` | `cmd.date_livraison`/`cmd.date_prevue` (reels : `_reelle`/`_prevue`) ; `statut=="recu"` (reel : `"livree"`) ; `note: 0` sans commande | AttributeError → 500 ; et faux 0/100 |
+| `POST /reapprovisionnement/automatique/{id}` | `CommandeFournisseur(reference, date_prevue)` + `LigneCommandeFournisseur(article_id=stock.article_id)` — article_id n'existe NI sur la ligne NI sur Stock ; `prix_unitaire=0.0` invente ; 1 commande par stock | TypeError → 500 ; pollution tarifaire si ca avait tourne |
+
+Schemas associes reconstruits alignes modele (`InventaireTournant*`,
+`LigneInventaire*`, `FournisseurStock*`) ; les schemas `CommandeFournisseur*/
+LigneCommandeFournisseur*` (fantomes et **non consommes par les routes**) ont ete
+supprimes avec commentaire pointeur, retire des re-exports.
+
+### Corrections
+
+- `PUT /inventaires/{id}/valider` : le validateur est l'utilisateur authentifie
+  (plus de query param `validateur_id` non verifie) ; refus sur inventaire vide
+  (« rien a valider ») et sur decision deja prise ; statut **`termine`** (workflow
+  reel) ; l'ajustement porte sur `quantite_disponible` **et chaque ecart corrige
+  est journalise dans MouvementStock (type `inventaire`)** avec
+  `reference = {numero_inventaire}/L{id_ligne}` — aucune correction invisible ;
+  trace date+utilisateur dans `notes`.
+- Comptage : theorique = colonne reelle, unicite stock/inventaire (pas de
+  fusion silencieuse), comptage refuse si inventaire `termine`/`annule`.
+- Precision : `None` + « non mesuree » sans ligne (plus de faux 0 %) ; 404 si
+  inventaire inconnu.
+- Evaluation fournisseur : notes 1–10 et taux 0–100 validés ; `note_globale`
+  calculee sur les notes fournies sinon `None` ; evaluateur = authentifie.
+- Performance : 404 si fournisseur inconnu ; periode invalide 400 ; statut reel
+  `livree` ; delais calcules sur `date_livraison_reelle − date_livraison_prevue` ;
+  **sans commande → note `None` + message, plus de 0/100** ; sans delai mesurable,
+  note = taux brut sans composante delai inventee.
+- Reappro : **une seule commande groupee** (le modele relie les lignes a des
+  `stock_id`, et l'ancien code creait N commandes pour un fournisseur) ;
+  numerotation anti-collision `CMD-YYYYMMDD-NNNN` ; `montant_total` sommant les
+  lignes reelles ; stock sans prix sur sa fiche = **ignore et declare** dans
+  `ignorees` (jamais price a 0.0) ; 400 si rien de commandable.
+
+### Tests
+
+`tests/unit/test_magasin_avance_inventaires_fournisseurs.py` : 9 tests reels
+(404/400 de validation, theorique/ecart sur colonnes reelles, journalisation
+MouvementStock verifiee avec quantite_avant/apres, decision unique, precision
+None-vs-75 %, note_globale calculee, performance sans faux zero avec note 64.4
+verifiee a la main, commande groupee a prix reel, refus total du prix invente).
+
+### Verification — batch VERT, suite globale ROUGE de cause externe
+
+- 35 tests cibles : ✅ **35 passed** (b18 : 9, b17 : 9, batch 16 : 10, WMS : 8).
+- `compileall app` : ✅ EXIT=0 ; `import app.main` : ✅ OK ; **`DB_CHANGED=False`**.
+- Suite complete : ❌ **48 failed / 487 passed / 240 errors** — mais **aucun
+  echec dans les fichiers de ce batch ni des batches 16–17**. Attribution prouvee,
+  pas d'alibi :
+  1. worktree temoin au commit `42b7c6b` (01:12, etat batch 17 **sans** batch 18)
+     rejouee a l'instant : ✅ **539 passed, 0 failed** ;
+  2. les clusters en echec (transport_exploitation/international, saas_console,
+     tenant_console_rbac, rbac_permissions_engine, numerotation, reporting…)
+     tombent sur `UNIQUE tiers.code/companies.code` (fuites de seeds) et sur
+     `ImportError: BulletinPaieResponse from app.schemas.rh` — fichiers `rh*`,
+     `transport*` et `_rbac_patch*` edites **pendant ce batch par une session
+     concurrente** (commits auto-push 01:12→01:58, `rh_service.py` modifie non
+     commité, erreur de syntaxe `transport_exploitation.py` observee en direct,
+     puis corrigee par son auteur) ;
+  3. mes fichiers n'ont jamais ete dans la liste des echecs.
+  Decision Zero-Mock : **le rouge est constate, non camoufle** ; le re-run de la
+  suite complete reste a faire quand le WIP concurrent sera stabilise (inscrit au
+  « Reste »). Aucun fichier de la session concurrente n'a ete touche.
+- Incident pendant la verification, corrige et declare : une chaine de commandes
+  sandboxee a echoue **apres** ses premieres instructions et a revert mes 3
+  fichiers batch 18 dans l'arbre principal (plus supprime mon fichier de tests,
+  suppression happee par l'auto-push). Restauration depuis le snapshot complet
+  `1cc4ecb`, re-verifiee par les 35 tests cibles verts ci-dessus.
+
+### Reste (hors perimetre du batch, signale)
+
+- **Batch 19 — meme module, dernier bloc** : le trio `/receptions` (3 endpoints
+  morts : `BonReception(commande_id=…)`, `LigneBonReception(bon_id, article_id,
+  emplacement_id=…)`, `Stock.article_id` — pendant que le frontend
+  `saisie-inventaire-physique` poste un payload d'inventaire sur
+  `/api/magasin-avance/receptions`, donc 422 permanent) et le trio `/colis`
+  (`ColisService` fantome : `reference_colis`, `date_creation`, `code_barres`,
+  `palette_id` — le modele reel porte `numero_colis`, `emplacement`,
+  `date_etiquetage` ; les schemas `Colis*` sont fantomes eux aussi). Also :
+  `magasin_avance_service.traiter_retour` ecrit toujours `action_effectuee`/
+  `date_traitement` (colonnes inexistantes) — code mort, a purger.
+- **Re-run de la suite complete** des que les commits concurrents (rh/transport/
+  rbac) se stabilisent ; retablir la ligne pytest de l'en-tete.
+
+➡️ Zero-Mock applique a l'inventaire : un 200 « inventaire valide » qui ne
+corrige rien de visible et ecrit un statut hors workflow est une double
+ecriture mensongere ; la version reconstruite ne peut repondre 200 qu'avec des
+lignes comptees, un stock reellement ajuste et une ligne de registre par ecart.
+
+---
+
 * Aucun acte à valeur légale (validation CNCC, dépôt GUCE/SYDONIA, quittance, bulletin CNPS,
   paiement mobile money) n'est jamais affiché comme "fait" s'il ne l'est pas : soit c'est réel,
   soit l'API répond **501 avec la raison exacte**.

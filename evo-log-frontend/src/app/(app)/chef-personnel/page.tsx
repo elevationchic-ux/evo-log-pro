@@ -120,16 +120,23 @@ export default function ChefPersonnelPage() {
   const [decisionComment, setDecisionComment] = useState('');
 
   const [isPlanningModalOpen, setIsPlanningModalOpen] = useState(false);
-  const [planAgentId, setPlanAgentId] = useState<number>(17);
+  // Aucun agent ni poste pré-choisi : un id en dur et un « Poste Contrôle
+  // Quai 14 » de secours planifieraient une affectation que personne n'a
+  // demandée.
+  const [planAgentId, setPlanAgentId] = useState(0);
+  const [planDate, setPlanDate] = useState(new Date().toISOString().split('T')[0]);
   const [planQuart, setPlanQuart] = useState('NUIT (19h-07h)');
-  const [planPoste, setPlanPoste] = useState('Poste Contrôle Quai 14');
+  const [planPoste, setPlanPoste] = useState('');
   const [planObs, setPlanObs] = useState('');
+  const [planEnCours, setPlanEnCours] = useState(false);
 
   const [isDotationModalOpen, setIsDotationModalOpen] = useState(false);
-  const [dotAgentId, setDotAgentId] = useState<number>(17);
+  const [dotAgentId, setDotAgentId] = useState(0);
   const [dotDesignation, setDotDesignation] = useState('');
   const [dotCategorie, setDotCategorie] = useState('EPI');
   const [dotSerie, setDotSerie] = useState('');
+  const [dotEnCours, setDotEnCours] = useState(false);
+  const [erreurDecision, setErreurDecision] = useState('');
 
   // RBAC Permission Check
   const userRoles = (user?.roles || []).map(r => r.toUpperCase());
@@ -224,51 +231,70 @@ export default function ChefPersonnelPage() {
   };
 
   // Handle Add Shift
-  const handleAddPlanning = (e: React.FormEvent) => {
+  const handleAddPlanning = async (e: React.FormEvent) => {
     e.preventDefault();
-    const agent = effectifs.find(a => a.id === planAgentId);
-    if (!agent) return;
-
-    const newPlan: PlanningItem = {
-      id: plannings.length + 1,
-      employe_id: agent.id,
-      employe_nom: agent.full_name,
-      employe_role: agent.role,
-      date_jour: new Date().toISOString().split('T')[0],
-      quart: planQuart,
-      poste_assigne: planPoste,
-      statut: 'CONFIRME',
-      observations: planObs
-    };
-
-    setPlannings([newPlan, ...plannings]);
-    setIsPlanningModalOpen(false);
-    setPlanObs('');
+    if (!planAgentId) {
+      setErreurDecision('Sélectionnez dabord un agent à planifier.');
+      return;
+    }
+    setPlanEnCours(true);
+    try {
+      const res = await fetch('/api/v1/chef-personnel/plannings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employe_id: planAgentId,
+          date_jour: planDate,
+          quart: planQuart,
+          poste_assigne: planPoste,
+          observations: planObs || null,
+        }),
+      });
+      if (!res.ok) throw new Error(await lireDetail(res));
+      setErreurDecision('');
+      setIsPlanningModalOpen(false);
+      setPlanObs('');
+      setPlanPoste('');
+      await fetchData();
+    } catch (err) {
+      setErreurDecision(err instanceof Error ? err.message : 'Planification impossible.');
+    } finally {
+      setPlanEnCours(false);
+    }
   };
 
   // Handle Add Dotation
-  const handleAddDotation = (e: React.FormEvent) => {
+  const handleAddDotation = async (e: React.FormEvent) => {
     e.preventDefault();
-    const agent = effectifs.find(a => a.id === dotAgentId);
-    if (!agent || !dotDesignation) return;
-
-    const newDot: DotationItem = {
-      id: dotations.length + 1,
-      employe_id: agent.id,
-      employe_nom: agent.full_name,
-      employe_role: agent.role,
-      designation: dotDesignation,
-      categorie: dotCategorie,
-      date_remise: new Date().toISOString().split('T')[0],
-      numero_serie: dotSerie || undefined,
-      etat: 'NEUF',
-      est_restitue: false
-    };
-
-    setDotations([newDot, ...dotations]);
-    setIsDotationModalOpen(false);
-    setDotDesignation('');
-    setDotSerie('');
+    if (!dotAgentId) {
+      setErreurDecision('Sélectionnez dabord leagent destinataire.');
+      return;
+    }
+    if (!dotDesignation.trim()) return;
+    setDotEnCours(true);
+    try {
+      const res = await fetch('/api/v1/chef-personnel/dotations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employe_id: dotAgentId,
+          designation: dotDesignation.trim(),
+          categorie: dotCategorie,
+          date_remise: new Date().toISOString().split('T')[0],
+          numero_serie: dotSerie.trim() || null,
+        }),
+      });
+      if (!res.ok) throw new Error(await lireDetail(res));
+      setErreurDecision('');
+      setIsDotationModalOpen(false);
+      setDotDesignation('');
+      setDotSerie('');
+      await fetchData();
+    } catch (err) {
+      setErreurDecision(err instanceof Error ? err.message : 'Attribution impossible.');
+    } finally {
+      setDotEnCours(false);
+    }
   };
 
   // Security barrier
