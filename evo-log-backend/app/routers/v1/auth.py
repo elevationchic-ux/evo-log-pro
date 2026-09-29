@@ -138,7 +138,12 @@ async def login(request: Request, db: Session = Depends(get_db)):
             "token_type": "bearer",
         }
 
-    return _build_login_payload(user)
+    payload = _build_login_payload(user)
+    # Phase 4 Tranche C : pointe d'arrivee automatique a la connexion.
+    pi = auto_pointage_arrivee(db, user)
+    if pi:
+        payload["pointage_info"] = pi
+    return payload
 
 
 def _build_login_payload(user: User) -> dict:
