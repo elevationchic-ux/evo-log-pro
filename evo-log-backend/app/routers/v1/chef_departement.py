@@ -28,7 +28,7 @@ de garde (PlanningGarde) de SES collaborateurs, sous la contrainte de publicatio
 (PointageVacation) d'un membre. L'ecriture ne sort jamais du perimetre departement.
 """
 import json
-from datetime import date as _date, timedelta
+from datetime import date as _date
 from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
