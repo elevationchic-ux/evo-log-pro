@@ -578,9 +578,18 @@ export const magasinAPI = {
     apiClient.put(`/api/magasin/clients/${id}`, data),
   deleteClient: (id: number) =>
     apiClient.delete(`/api/magasin/clients/${id}`),
+  // Bons de réception fournisseur (Batch 19 : la route /magasin-avance/
+  // receptions existe enfin sur le modèle réel — payload : fournisseur_id,
+  // entrepot_id, commande_fournisseur_id?, date_reception?, notes?).
   getReceptions: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin-avance/receptions', { params }),
-  createReception: async (data: any) => {
+  createReception: async (data: {
+    fournisseur_id: number;
+    entrepot_id: number;
+    commande_fournisseur_id?: number;
+    date_reception?: string;
+    notes?: string;
+  }) => {
     const response = await apiClient.post('/api/magasin-avance/receptions', data)
     return response.data
   },
@@ -598,8 +607,8 @@ export const magasinAPI = {
     apiClient.get(`/api/magasin/declarations/${id}/receptions-summary`),
   getDeclarationReceptionsHistory: (id: number) =>
     apiClient.get(`/api/magasin/declarations/${id}/receptions-history`),
-  completeReception: (data: unknown) =>
-    apiClient.post('/api/magasin-avance/receptions', data),
+  // completeReception SUPPRIMÉ (Batch 19) : clone sans appelel de
+  // createReception vers l'ancienne route morte /magasin-avance/receptions.
   getCommandes: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin/commandes', { params }),
   getHistory: (params?: Record<string, unknown>) =>
