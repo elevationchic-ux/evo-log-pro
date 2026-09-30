@@ -38,7 +38,10 @@ from app.schemas.customer_support import (
     ContractCreate,
     ContractResponse,
     TicketCreate,
+    TicketUpdate,
     TicketResponse,
+    TICKET_STATUTS,
+    TICKET_PRIORITES,
     IncidentCreate,
     IncidentUpdate,
     IncidentResponse,
@@ -287,8 +290,37 @@ async def list_tickets(
 
 @support_router.post("/tickets", response_model=TicketResponse, status_code=201)
 async def create_ticket(payload: TicketCreate, db: Session = Depends(get_db)):
-    row = SupportTicket(reference=_ref("TKT"), **payload.model_dump())
+    data = payload.model_dump()
+    _valider_ticket_champs(data)
+    row = SupportTicket(reference=_ref("TKT"), **data)
     db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+@support_router.get("/tickets/{ticket_id}", response_model=TicketResponse)
+async def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
+    return _get_or_404(SupportTicket, db, ticket_id, "Ticket")
+
+
+@support_router.put("/tickets/{ticket_id}", response_model=TicketResponse)
+async def update_ticket(
+    ticket_id: int, payload: TicketUpdate, db: Session = Depends(get_db)
+):
+    row = _get_or_404(SupportTicket, db, ticket_id, "Ticket")
+    data = payload.model_dump(exclude_unset=True)
+    _valider_ticket_champs(data)
+    for k, v in data.items():
+        setattr(row, k, v)
+    statut = data.get("statut")
+    if statut in ("resolu", "ferme") and not row.resolved_at:
+        row.resolved_at = datetime.now()
+    elif statut == "ouvert":
+        # Une reouverture efface l'horodatage de resolution : la date doit
+        # rester la trace d'une cloture reelle, pas un reliquat d'un cycle
+        # precedent.
+        row.resolved_at = None
     db.commit()
     db.refresh(row)
     return row

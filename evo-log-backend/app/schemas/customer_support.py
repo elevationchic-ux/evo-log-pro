@@ -167,6 +167,16 @@ class TicketResponse(TicketCreate):
         from_attributes = True
 
 
+class TicketUpdate(BaseModel):
+    """Transition d'un ticket : uniquement des colonnes existantes."""
+    statut: Optional[str] = None
+    priorite: Optional[str] = None
+    assigne_a: Optional[str] = None
+    categorie: Optional[str] = None
+    module_concerne: Optional[str] = None
+    description: Optional[str] = None
+
+
 class IncidentCreate(BaseModel):
     titre: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = None
