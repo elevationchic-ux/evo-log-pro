@@ -167,6 +167,8 @@ export const adminAPI = {
   getUsers: (params?: Record<string, unknown>) => apiClient.get('/api/v1/admin/users', { params }),
   createUser: (data: any) => apiClient.post('/api/v1/admin/users', data),
   updateUser: (id: number, data: any) => apiClient.put(`/api/v1/admin/users/${id}`, data),
+  // Modèle "Utilisateur ≠ Rôle" : affecter plusieurs casquettes (rôles) à un user.
+  assignUserRoles: (id: number, roles: string[]) => apiClient.put(`/api/v1/admin/users/${id}/roles`, { roles }),
   toggleUserStatus: (id: number, data?: any) => apiClient.patch(`/api/v1/admin/users/${id}/status`, data),
   resetPassword: (id: number, new_password?: string) => apiClient.post(`/api/v1/admin/users/${id}/reset-password`, { new_password }),
   getRoles: () => apiClient.get('/api/v1/admin/roles'),

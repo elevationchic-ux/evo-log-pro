@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { adminAPI, rbacAPI } from "../../../../../lib/api-client";
 import {
   Users, Plus, Search, Edit, Trash2, Shield, CheckCircle,
   XCircle, Eye, Filter, RefreshCw, Mail, Phone,
-  UserCheck, UserX, ChevronDown, BadgeCheck
+  UserCheck, UserX, ChevronDown, BadgeCheck, X, Briefcase
 } from "lucide-react";
 
 interface UserEntry {
@@ -17,6 +18,9 @@ interface UserEntry {
   email: string;
   telephone: string;
   role: string;
+  roles: string[];
+  matricule: string;
+  job_title: string;
   departement: string;
   statut: "ACTIF" | "INACTIF" | "SUSPENDU";
   derniere_connexion: string;
@@ -73,13 +77,19 @@ export default function UserManagementPage() {
   }, [accreditations]);
   const users: UserEntry[] = apiUsers.map((user: any) => {
     const [prenom = "", ...nomParts] = String(user.full_name || user.username || "").split(" ");
+    const roleList: string[] = Array.isArray(user.roles) && user.roles.length
+      ? user.roles
+      : [user.role || "OPERATEUR"];
     return {
       id: user.id,
       nom: nomParts.join(" "),
       prenom,
       email: user.email,
       telephone: user.phone || "",
-      role: user.role || "OPERATEUR",
+      role: user.role || roleList[0] || "OPERATEUR",
+      roles: roleList,
+      matricule: user.matricule || "",
+      job_title: user.job_title || "",
       departement: user.department?.name || "",
       statut: user.is_active ? "ACTIF" : "SUSPENDU",
       derniere_connexion: user.last_login || user.created_at || new Date(0).toISOString(),
