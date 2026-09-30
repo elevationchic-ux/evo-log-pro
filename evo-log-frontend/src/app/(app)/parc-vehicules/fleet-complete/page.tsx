@@ -325,7 +325,7 @@ export default function ParcFleetCompletePage() {
 
       {/* Add Vehicle Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-surface border border-outline rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-outline pb-3">
               <h3 className="font-bold text-on-surface text-base">{t('Enregistrer un Nouveau Véhicule / Engin', 'Register a New Vehicle / Equipment')}</h3>
@@ -460,7 +460,7 @@ export default function ParcFleetCompletePage() {
 
       {/* Selected Vehicle 360 Sheet Modal */}
       {selectedVehicle && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-surface border border-outline rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-outline pb-3">
               <div>

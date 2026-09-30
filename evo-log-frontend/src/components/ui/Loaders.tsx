@@ -6,7 +6,7 @@ import React from 'react';
  */
 export const FullScreenLoader = () => {
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-between bg-slate-950 text-white z-50 p-6 sm:p-12 font-sans select-none overflow-hidden animate-in fade-in duration-300">
+    <div className="fixed inset-0 flex flex-col items-center justify-between bg-slate-950 text-white z-[100] p-6 sm:p-12 font-sans select-none overflow-hidden animate-in fade-in duration-300">
       {/* Dynamic Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-amber-500/15 via-yellow-500/10 to-amber-600/5 rounded-full blur-[140px] pointer-events-none animate-pulse" />
 

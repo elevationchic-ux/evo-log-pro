@@ -261,7 +261,7 @@ export default function SupportPage() {
 
       {/* Modal Creation */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-surface border border-outline rounded-2xl w-full max-w-lg p-6 space-y-4 text-on-surface shadow-2xl">
             <div className="flex justify-between items-center pb-2 border-b border-outline">
               <h2 className="text-lg font-bold flex items-center gap-2">

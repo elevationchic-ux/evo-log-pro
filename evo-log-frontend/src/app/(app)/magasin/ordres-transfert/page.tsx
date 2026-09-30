@@ -288,7 +288,7 @@ function OTModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () =>
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 overflow-y-auto"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">

@@ -933,7 +933,7 @@ export default function ChefPersonnelPage() {
 
       {/* MODAL: DÉCISION CONGÉ */}
       {isDecisionModalOpen && selectedCongeForDecision && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-emerald-500/40 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
             <h3 className="text-base font-black text-white flex items-center gap-2">
               <Calendar className="w-4 h-4 text-emerald-400" />
@@ -979,7 +979,7 @@ export default function ChefPersonnelPage() {
 
       {/* MODAL: PLANNING QUART */}
       {isPlanningModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-emerald-500/40 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
             <h3 className="text-base font-black text-white flex items-center gap-2">
               <Clock className="w-4 h-4 text-emerald-400" />
@@ -1071,7 +1071,7 @@ export default function ChefPersonnelPage() {
 
       {/* MODAL: DOTATION EPI */}
       {isDotationModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-emerald-500/40 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
             <h3 className="text-base font-black text-white flex items-center gap-2">
               <Shield className="w-4 h-4 text-emerald-400" />

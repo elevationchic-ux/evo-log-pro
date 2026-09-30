@@ -250,7 +250,7 @@ export default function AdminSaasUsersPage() {
 
       {/* Create User Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <h3 className="text-lg font-bold text-slate-100">Créer un Compte Collaborateur</h3>
             <form onSubmit={handleCreate} className="space-y-3 text-xs">

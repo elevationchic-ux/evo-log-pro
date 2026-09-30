@@ -365,7 +365,7 @@ export default function FinanceOhadaSuppliers() {
 
       {/* Modal règlement */}
       {payModal.open && payModal.fournisseur && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="bg-slate-900 border border-emerald-500/40 rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div>

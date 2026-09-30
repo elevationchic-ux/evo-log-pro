@@ -226,7 +226,7 @@ export default function InvoicingPage() {
 
       {/* Printable Invoice Modal with Company Document Header */}
       {selectedInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <div className="bg-surface rounded-2xl border border-outline max-w-3xl w-full p-6 sm:p-8 space-y-6 my-8 shadow-2xl relative">
             <div className="flex items-center justify-between no-print border-b border-outline pb-4">
               <span className="text-xs font-bold uppercase tracking-wider text-primary">Aperçu Facture OHADA</span>

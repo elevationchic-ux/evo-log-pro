@@ -852,7 +852,7 @@ export default function EnterpriseChatPage() {
       {/* MODAL : VISIOCONFÉRENCE / APPEL VIDÉO WEBRTC                              */}
       {/* ========================================================================= */}
       {isInCall && (
-        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-emerald-500/50 rounded-3xl overflow-hidden shadow-2xl max-w-4xl w-full flex flex-col h-[600px] animate-in zoom-in-95">
             {/* Call Header */}
             <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
@@ -976,7 +976,7 @@ export default function EnterpriseChatPage() {
       {/* MODAL : CRÉER UN NOUVEAU SALON DE MEETING ENTRE COLLÈGUES                */}
       {/* ========================================================================= */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-emerald-500/40 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-5 animate-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">

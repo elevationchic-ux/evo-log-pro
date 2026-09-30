@@ -687,7 +687,7 @@ export default function EmployesPage() {
 
       {/* -------------------------------------------------- modal création */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 backdrop-blur-sm sm:items-center sm:p-4">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/80 backdrop-blur-sm sm:items-center sm:p-4">
           <div
             role="dialog"
             aria-modal="true"
@@ -877,7 +877,7 @@ export default function EmployesPage() {
 
       {/* -------------------------------------------------- modal import */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 backdrop-blur-sm sm:items-center sm:p-4">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/80 backdrop-blur-sm sm:items-center sm:p-4">
           <div
             role="dialog"
             aria-modal="true"

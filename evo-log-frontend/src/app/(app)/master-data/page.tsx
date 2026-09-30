@@ -335,7 +335,7 @@ export default function MasterDataPage() {
 
       {/* Modal Creation Article */}
       {isArticleModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-surface border border-outline rounded-2xl w-full max-w-lg p-6 space-y-4 text-on-surface shadow-2xl">
             <h2 className="text-lg font-bold">Ajouter un Article au Référentiel</h2>
             <form onSubmit={handleCreateArticle} className="space-y-4">

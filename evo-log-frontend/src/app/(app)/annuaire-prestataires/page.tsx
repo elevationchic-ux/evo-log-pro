@@ -1103,7 +1103,7 @@ export default function AnnuairePrestatairesPage() {
 
       {/* MODAL: DEMANDE DE COTATION (RFQ) */}
       {isRfqModalOpen && selectedPrestataireForRfq && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2">
@@ -1219,7 +1219,7 @@ export default function AnnuairePrestatairesPage() {
 
       {/* MODAL: NOUVEAU PRESTATAIRE (RÉSERVÉ SUPERADMIN) */}
       {isNewPrestataireModalOpen && isSuperAdmin && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl space-y-4 my-8">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2">

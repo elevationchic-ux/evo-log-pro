@@ -55,13 +55,19 @@ def test_tous_les_codes_du_routeur_existent_au_catalogue():
     assert not fantomes, f"codes require_perm inconnus du catalogue: {fantomes}"
 
 
-# ── 2. MAGASINIER : execute tout, n'approuve rien ───────────────────────────
+# ── 2. MAGASINIER : execute son circuit, n'approuve rien, n'achete rien ─────
+# Le reapprovisionnement automatique cree une REELLE commande d'achat :
+# c'est un acte commercial, pas un geste de depot. Il est donc porte par
+# CHEF_MAGASIN et refuse a MAGASINIER (assertion rouge explicite).
+HORS_POUR_MAGASINIER = {"achats.commande.create"}
+
+
 def test_magasinier_couvre_execution_et_jamais_approval():
     codes_magasinier = _codes_role("MAGASINIER")
     approuve_vus, execution_vus = [], []
     for code in _codes_utilises():
         action = code.rsplit(".", 1)[1]
-        if action in ("approve", "export"):
+        if action in ("approve", "export") or code in HORS_POUR_MAGASINIER:
             approuve_vus.append(code)
             assert not has_perm(codes_magasinier, code), (
                 f"MAGASINIER ne doit PAS pouvoir {code} (validation reservee au chef)"
@@ -71,7 +77,7 @@ def test_magasinier_couvre_execution_et_jamais_approval():
             assert has_perm(codes_magasinier, code), (
                 f"MAGASINIER doit pouvoir {code} : blocage abusif du metier"
             )
-    # Assertion negative : s'il n'y avait plus aucun approve dans le module,
+    # Assertion negative : s'il n'y avait plus aucun refus dans le module,
     # on veut le savoir plutot que de laisser passer un faux vert.
     assert approuve_vus and execution_vus
 
@@ -167,7 +173,7 @@ def test_migration_033_seed_complete_et_idempotente(tmp_path, monkeypatch):
         url, f"SELECT COUNT(*) FROM role_permissions WHERE role_id = {chef_id}")
     liens_mag = _scalar(
         url, f"SELECT COUNT(*) FROM role_permissions WHERE role_id = {magasinier_id}")
-    # CHEF_MAGASIN a 6 codes (dont wildcard) ; MAGASINIER a 14 codes.
+    # Compte derive du catalogue (source de verite), pas un nombre fige.
     assert liens_chef == len(_codes_role("CHEF_MAGASIN"))
     assert liens_mag == len(_codes_role("MAGASINIER"))
 

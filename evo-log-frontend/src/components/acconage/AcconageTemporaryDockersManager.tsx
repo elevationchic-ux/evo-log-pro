@@ -348,7 +348,7 @@ export default function AcconageTemporaryDockersManager({ escaleId, escaleNumero
 
       {/* Modal: Affecter Docker */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-surface rounded-2xl border border-outline max-w-lg w-full p-6 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-on-surface">

@@ -6,7 +6,7 @@ import { ShieldAlert, ArrowLeft, Lock } from 'lucide-react';
 
 export default function RegisterPage() {
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950 text-white flex items-center justify-center p-4 font-sans select-none overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-slate-950 text-white flex items-center justify-center p-4 font-sans select-none overflow-hidden">
       <div className="relative z-10 bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl space-y-6 animate-in zoom-in-95 duration-300">
         <div className="w-16 h-16 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-amber-500/10">
           <Lock className="w-8 h-8" />

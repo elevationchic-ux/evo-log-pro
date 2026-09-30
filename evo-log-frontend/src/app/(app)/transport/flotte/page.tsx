@@ -212,7 +212,7 @@ export default function TransportFlottePage() {
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setModalOpen(false)}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setModalOpen(false)}>
           <div className="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="mb-4 text-lg font-bold text-slate-100">{t('Ajouter un véhicule', 'Add a vehicle')}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

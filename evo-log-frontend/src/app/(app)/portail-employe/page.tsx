@@ -955,7 +955,7 @@ export default function PortailEmployePage() {
       {/* ─── MODALE : NOUVELLE DEMANDE ─── */}
       {modalOuvert && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
           role="dialog"
           aria-modal="true"
           aria-label={t('Nouvelle demande de congé', 'New leave request')}

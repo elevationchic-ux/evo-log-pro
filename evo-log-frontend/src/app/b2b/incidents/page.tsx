@@ -88,7 +88,7 @@ export default function B2BIncidentsPage() {
 
       {/* Incident Declaration Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
             <h2 className="text-xl font-black text-white mb-1">Déclaration d'Incident Logistique</h2>
             <p className="text-xs text-slate-400 mb-5">Renseignez les informations ci-dessous. Notre équipe sera notifiée immédiatement.</p>

@@ -248,7 +248,7 @@ export default function LoginPage() {
       {/* 2. CADC HIGH-TECH SPLASH SCREEN */}
       {showSplash && (
         <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-between p-6 sm:p-12 overflow-hidden"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-between p-6 sm:p-12 overflow-hidden"
           style={{
             background: 'radial-gradient(circle at center, #07152b 0%, #030d1d 55%, #01060e 100%)',
             animation: splashProgress >= 100 ? 'splashFadeOut 0.5s ease-out forwards' : 'splashFadeIn 0.4s ease-out',
@@ -546,7 +546,7 @@ export default function LoginPage() {
 
       {/* Password Change Modal for admin123 default password */}
       {mustChangePassword && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95 duration-300">
             <div className="w-14 h-14 bg-amber-500/15 text-amber-400 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto">
               <KeyRound className="w-7 h-7" />

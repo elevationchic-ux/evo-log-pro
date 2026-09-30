@@ -314,7 +314,7 @@ export default function PortOperationsWeighbridgePage() {
 
       {/* Modal Pesée */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
             <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
               <Scale className="w-5 h-5 text-emerald-400" />

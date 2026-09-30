@@ -151,7 +151,7 @@ export default function MonEspaceRHPage() {
 
         {/* Modal Demande Congé */}
         {showCongeModal && (
-          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
             <div className="bg-slate-900 rounded-3xl p-8 max-w-md w-full animate-in zoom-in-95">
               <h2 className="text-2xl font-black text-slate-200 mb-6 flex items-center gap-2">
                 <CalendarDays className="text-teal-600" /> Nouvelle demande

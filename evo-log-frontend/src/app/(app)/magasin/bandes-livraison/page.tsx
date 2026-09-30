@@ -277,7 +277,7 @@ function BandeLivraisonModal({ onClose, onSuccess }: { onClose: () => void, onSu
   )
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
       <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
         <div className="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
           <h2 className="text-xl font-bold text-slate-200 flex items-center gap-2">

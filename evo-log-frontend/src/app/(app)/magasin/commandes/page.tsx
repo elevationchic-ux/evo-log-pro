@@ -218,7 +218,7 @@ export default function CommandesPage() {
 
         {/* Create Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
             <div className="w-full max-w-4xl rounded-lg bg-slate-900 p-6">
               <h2 className="mb-4 text-xl font-bold">Nouvelle Commande</h2>
               <CommandeForm
@@ -243,7 +243,7 @@ export default function CommandesPage() {
 
         {/* Edit Modal */}
         {showEditModal && selectedCommande && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
             <div className="w-full max-w-4xl rounded-lg bg-slate-900 p-6">
               <h2 className="mb-4 text-xl font-bold">Modifier Commande</h2>
               <CommandeForm

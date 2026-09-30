@@ -114,7 +114,11 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ]),
     ("CHEF_MAGASIN", 2, "Chef de magasin : pilotage et validation complete du depot", [
         "magasin.*.*",
-        "achats.reception.read", "achats.reception.approve",
+        # Le chef execute aussi les receptions et doit pouvoir les valider ;
+        # seul le declenchement de commande d'achat (reappro auto) reste
+        # un acte d'achat qu'il porte, jamais le magasinier.
+        "achats.reception.read", "achats.reception.create", "achats.reception.modify",
+        "achats.reception.approve",
         "achats.commande.read", "achats.commande.create",
         "fournisseurs.referentiel.read",
     ]),
