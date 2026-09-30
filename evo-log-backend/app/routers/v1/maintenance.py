@@ -5,6 +5,7 @@ CRD réel sur le modele Maintenance (table `maintenances`) : aucun ordre de
 travail codé en dur. Les KPIs sont calcules depuis la base, pas inventes.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from datetime import datetime, timezone
@@ -32,13 +33,19 @@ def _serialize(m: Maintenance) -> dict:
         "ordre_id": f"OT-{m.id:05d}",
         "vehicule_id": m.vehicule_id,
         "vehicule": veh.immatriculation if veh else None,
+        # Alias servis a l'ecran atelier, qui designe le vehicule par sa plaque.
+        "immatriculation_camion": veh.immatriculation if veh else None,
+        "vehicule_immatriculation": veh.immatriculation if veh else None,
         "vehicule_detail": (
             f"{veh.immatriculation} ({veh.marque} {veh.modele})".strip() if veh else None
         ),
         "vehicule_type": veh.type_vehicule if veh else None,
         "vehicule_km": veh.kilometrage if veh else None,
         "type_intervention": (m.type_maintenance or "").upper() or None,
+        "type_maintenance": (m.type_maintenance or "").upper() or None,
         "statut": (m.statut or "planifie").upper(),
+        "priorite": (m.priorite or "").upper() or None,
+        "pieces": m.pieces,
         "technicien": m.realisateur,
         "date_creation": _iso(m.created_at),
         "date_debut": _iso(m.date_debut),
@@ -191,3 +198,180 @@ async def obtenir_kpis_maintenance(
         "taux_preventif_pct": round(100 * len(prevenue) / len(terminees), 1) if terminees else None,
         "source": "maintenances (base de donnees)",
     }
+
+
+# ============ ECRAN ATELIER : CREATION + FICHE DETAILLEE ============
+#
+# Routes parametriques declarees EN DERNIER : `/maintenance/{maintenance_id}`
+# absorbe tout segment (y compris « stats », « ordres », « analytics »). Placee
+# apres les routes litterales, l'ordre de resolution FastAPI conserve ces
+# dernieres. Inverser les deux rendrait /maintenance/stats invisible.
+#
+# `POST /api/v1/maintenance` etait appele par /maintenance/edit et
+# /maintenance (page) sans route declaree : c'est l'enveloppe rattrape-tout
+# `pending_modules` qui repondait 202 {accepted:false}, et l'ecran affichait
+# « Nouvel ordre de travail cree » sur une donnee jamais ecrite en base.
+
+CHAMPS_COLONNE = (
+    "type_maintenance", "date_debut", "date_fin", "kilometrage", "description",
+    "cout", "realisateur", "statut", "notes", "priorite", "pieces",
+)
+CHAMPS_VEhicule = ("vehicule_id", "immatriculation_camion",
+                   "vehicule_immatriculation", "immatriculation")
+
+TYPES_MAINTENANCE = ("preventive", "curative", "corrective", "visite_technique",
+                     "pneumatique", "premiere_mise")
+STATUTS_ATELIER = ("planifie", "en_attente", "en_cours", "attente_pieces",
+                   "termine", "annule")
+
+
+def _resoudre_vehicule(db: Session, payload: dict) -> Optional[Vehicule]:
+    """vehicule_id ou plaque -> vehicule reellement au parc. Rien n'est cree.
+
+    Une immatriculation inconnue est refusee : rattacher un ordre de travail a
+    un vehicule inexistant (ou a un id devine) fausserait le carnet d'entretien
+    et les KPIs MTBF/MTTR de toute la flotte.
+    """
+    vid = payload.get("vehicule_id")
+    if vid not in (None, "", 0):
+        try:
+            cle = int(vid)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="vehicule_id doit etre un entier.")
+        vehicule = db.get(Vehicule, cle)
+        if not vehicule:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Aucun vehicule en base avec l'id {cle} : selectionnez un vehicule du parc.",
+            )
+        return vehicule
+
+    plaque = str(
+        payload.get("immatriculation_camion")
+        or payload.get("vehicule_immatriculation")
+        or payload.get("immatriculation")
+        or ""
+    ).strip()
+    if not plaque:
+        raise HTTPException(
+            status_code=400,
+            detail="Vehicule requis : vehicule_id ou immatriculation_camion.",
+        )
+    vehicule = (
+        db.query(Vehicule)
+        .filter(func.upper(Vehicule.immatriculation) == plaque.upper())
+        .first()
+    )
+    if not vehicule:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Aucun vehicule porte l'immatriculation « {plaque} » dans ce compte : "
+                "impossible d'ouvrir un ordre de travail sur un vehicule inexistant."
+            ),
+        )
+    return vehicule
+
+
+def _valider_champs(payload: dict):
+    """Refuse toute cle inconnue au lieu de la jeter silencieusement."""
+    autorisees = set(CHAMPS_COLONNE) | set(CHAMPS_VEhicule)
+    inconnues = sorted(k for k in payload if k not in autorisees)
+    if inconnues:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Champs non enregistables : {inconnues}. Colonnes disponibles : "
+                f"{sorted(CHAMPS_COLONNE)}."
+            ),
+        )
+    if "statut" in payload and payload["statut"]:
+        s = str(payload["statut"]).strip().lower()
+        if s not in STATUTS_ATELIER:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Statut d'atelier inconnu : {payload['statut']}. Attendu : {list(STATUTS_ATELIER)}.",
+            )
+    if "type_maintenance" in payload and payload["type_maintenance"]:
+        t = str(payload["type_maintenance"]).strip().lower()
+        if t not in TYPES_MAINTENANCE:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Type de maintenance inconnu : {payload['type_maintenance']}. Attendu : {list(TYPES_MAINTENANCE)}.",
+            )
+
+
+def _appliquer_champs(row: Maintenance, payload: dict) -> None:
+    """Ecrit les champs reconnus, normalises comme le reste du module (minuscules)."""
+    for cle in CHAMPS_COLONNE:
+        if cle not in payload:
+            continue
+        valeur = payload[cle]
+        if cle in ("statut", "type_maintenance", "priorite"):
+            setattr(row, cle, str(valeur).strip().lower() if valeur else None)
+        elif cle.startswith("date_"):
+            if isinstance(valeur, str) and valeur:
+                valeur = datetime.fromisoformat(valeur.replace("Z", "+00:00"))
+            setattr(row, cle, valeur or None)
+        elif cle == "kilometrage":
+            setattr(row, cle, int(valeur) if valeur not in (None, "") else None)
+        elif cle == "cout":
+            setattr(row, cle, float(valeur) if valeur not in (None, "") else None)
+        else:
+            setattr(row, cle, valeur if valeur not in (None, "") else None)
+
+
+@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
+async def creer_maintenance(payload: dict, db: Session = Depends(get_db)):
+    """Cree un ordre de travail reellement persiste (ecran atelier /maintenance)."""
+    _valider_champs(payload)
+    vehicule = _resoudre_vehicule(db, payload)
+    if not (payload.get("description") or "").strip():
+        raise HTTPException(
+            status_code=400,
+            detail="La description de l'intervention est exigee : un ordre de travail "
+                   "sans travaux decrits ne peut pas etre transmis a l'atelier.",
+        )
+    row = Maintenance(vehicule_id=vehicule.id)
+    _appliquer_champs(row, payload)
+    if not row.date_debut:
+        row.date_debut = datetime.now(timezone.utc)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _serialize(row)
+
+
+@router.get("/{maintenance_id}")
+async def obtenir_maintenance(maintenance_id: int, db: Session = Depends(get_db)):
+    """Fiche detaillee d'un ordre de maintenance (ecran /maintenance/view)."""
+    row = db.get(Maintenance, maintenance_id)
+    if not row:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Ordre de maintenance {maintenance_id} introuvable.",
+        )
+    return _serialize(row)
+
+
+@router.put("/{maintenance_id}")
+async def modifier_maintenance(
+    maintenance_id: int,
+    payload: dict,
+    db: Session = Depends(get_db),
+):
+    """Met a jour un ordre existant, y compris son rattachement vehicule."""
+    row = db.get(Maintenance, maintenance_id)
+    if not row:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Ordre de maintenance {maintenance_id} introuvable.",
+        )
+    _valider_champs(payload)
+    if any(k in payload for k in CHAMPS_VEhicule):
+        row.vehicule_id = _resoudre_vehicule(db, payload).id
+    _appliquer_champs(row, payload)
+    db.commit()
+    db.refresh(row)
+    return _serialize(row)

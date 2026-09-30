@@ -26,6 +26,8 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Message transitaire pendant une attente « patiente » (redéploiement Railway).
+  const [statusNote, setStatusNote] = useState<string | null>(null);
 
   // Password change modal
   const [mustChangePassword, setMustChangePassword] = useState(false);
