@@ -211,6 +211,11 @@ def update_user(
         user.email = payload["email"]
     if "phone" in payload:
         user.phone = payload["phone"]
+    # Identite employe (Utilisateur != Role) : matricule / poste.
+    if "matricule" in payload:
+        user.matricule = payload["matricule"]
+    if "job_title" in payload:
+        user.job_title = payload["job_title"]
     if "is_active" in payload:
         user.is_active = bool(payload["is_active"])
     if "company_id" in payload:
@@ -230,6 +235,88 @@ def update_user(
     db.commit()
     db.refresh(user)
     return {"message": "Utilisateur mis à jour avec succès", "id": user.id}
+
+
+@router.put("/users/{user_id}/roles")
+def assign_user_roles(
+    user_id: int,
+    payload: Dict[str, Any],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_company_admin),
+):
+    """Affecter PLUSIEURS casquettes (roles) a un utilisateur.
+
+    Modele "Utilisateur != Role" (beaucoup-a-beaucoup, cf. Phase 4) : un employe
+    peut porter plusieurs roles, et l'acces resulte du role le plus privilegie
+    (level minimal). On remplace l'ensemble des casquettes par la liste fournie.
+
+    Anti-escalade :
+      * SUPER_ADMIN (level 0) reserve au Super-Admin ;
+      * un non-Super-Admin ne peut accorder un role plus privilegie que le sien.
+    Les roles standard absents de la base sont materialises (get-or-create) pour
+    que l'affectation reussisse sans dependre d'un seed prealable.
+    """
+    user = _get_scoped_user(db, current_user, user_id)
+
+    requested = payload.get("roles")
+    if requested is None:
+        raise HTTPException(status_code=400, detail="La liste 'roles' est requise")
+    if not isinstance(requested, list):
+        raise HTTPException(status_code=400, detail="'roles' doit etre une liste de noms")
+
+    names: List[str] = []
+    for raw in requested:
+        name = str(raw or "").strip().upper().replace(" ", "_")
+        if name and name not in names:
+            names.append(name)
+
+    if "SUPER_ADMIN" in names and not _is_superadmin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Affectation du role SUPER_ADMIN reservee au Super Admin",
+        )
+
+    std_by_name = {s["name"]: s for s in STANDARD_ROLES}
+    role_objs: List[Role] = []
+    for name in names:
+        role = db.query(Role).filter(Role.name == name).first()
+        if not role:
+            std = std_by_name.get(name)
+            role = Role(
+                name=name,
+                description=std["desc"] if std else f"Role {name}",
+                level=std["level"] if std else 3,
+                company_id=None,
+                is_active=True,
+                is_system=bool(std),
+            )
+            db.add(role)
+            db.flush()
+        role_objs.append(role)
+
+    # Plafond de privilege : on ne peut grimper au-dessus de son propre niveau.
+    if role_objs and not _is_superadmin(current_user):
+        best_level = min((r.level if r.level is not None else 3) for r in role_objs)
+        if best_level < current_user.role_level:
+            raise HTTPException(
+                status_code=403,
+                detail="Impossible d'accorder un role plus privilegue que le votre",
+            )
+
+    user.roles = role_objs
+    user.role_level = (
+        min((r.level if r.level is not None else 3) for r in role_objs)
+        if role_objs else 3
+    )
+
+    db.commit()
+    db.refresh(user)
+    return {
+        "id": user.id,
+        "roles": [r.name for r in role_objs],
+        "role_level": user.role_level,
+        "message": f"{len(role_objs)} casquette(s) affectee(s) a {user.username}",
+    }
 
 
 @router.patch("/users/{user_id}/status")
