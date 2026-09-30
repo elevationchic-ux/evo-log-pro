@@ -1,10 +1,40 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Car, Wrench, FileText, TrendingUp, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { apiClient } from '@/lib/api-client';
+
+interface FleetKpis {
+  total: number;
+  actifs: number;
+  enMaintenance: number;
+  bloques: number;
+}
 
 export default function ParcVehiculesDashboard() {
+  const [kpis, setKpis] = useState<FleetKpis>({ total: 0, actifs: 0, enMaintenance: 0, bloques: 0 });
+  const [loading, setLoading] = useState(true);
+
+  const fetchKpis = useCallback(async () => {
+    try {
+      const res: any = await apiClient.get('/api/v1/transport/camions', { params: { limit: 500 } });
+      const camions: any[] = Array.isArray(res.data ?? res) ? (res.data ?? res) : [];
+      const total = camions.length;
+      const actifs = camions.filter(c => c.status === 'active' && !c.est_bloque).length;
+      const enMaintenance = camions.filter(c => c.status === 'in_maintenance').length;
+      const bloques = camions.filter(c => c.est_bloque).length;
+      setKpis({ total, actifs, enMaintenance, bloques });
+    } catch (err: any) {
+      toast.error('Erreur lors du chargement du parc');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchKpis(); }, [fetchKpis]);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Header */}
@@ -28,18 +58,21 @@ export default function ParcVehiculesDashboard() {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Parc Total', value: '127', sub: 'Véhicules & Engins', color: 'text-blue-400' },
-          { label: 'En Service', value: '89', sub: 'Actifs Mission', color: 'text-emerald-400' },
-          { label: 'En Maintenance', value: '23', sub: 'Atelier GMAO', color: 'text-amber-400' },
-          { label: 'TCO Moyen/Mois', value: '9.28M', sub: 'XAF par véhicule', color: 'text-pink-400' },
-        ].map((kpi, i) => (
-          <div key={i} className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{kpi.label}</div>
-            <div className={`text-2xl font-black ${kpi.color} font-mono`}>{kpi.value}</div>
-            <div className="text-[11px] text-slate-400 mt-1">{kpi.sub}</div>
-          </div>
-        ))}
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl animate-pulse">
+              <div className="h-3 w-20 bg-slate-800 rounded mb-3" />
+              <div className="h-8 w-12 bg-slate-800 rounded" />
+            </div>
+          ))
+        ) : (
+          <>
+            <KpiCard label="Parc Total" value={kpis.total} sub="Camions & tracteurs" color="text-blue-400" icon={<Car className="w-4 h-4" />} />
+            <KpiCard label="En Service" value={kpis.actifs} sub="Disponibles mission" color="text-emerald-400" icon={<CheckCircle2 className="w-4 h-4" />} />
+            <KpiCard label="En Maintenance" value={kpis.enMaintenance} sub="Atelier GMAO" color="text-amber-400" icon={<Wrench className="w-4 h-4" />} />
+            <KpiCard label="Bloqués" value={kpis.bloques} sub="Administratif / panne" color="text-red-400" icon={<AlertTriangle className="w-4 h-4" />} />
+          </>
+        )}
       </div>
 
       {/* Raccourcis */}
@@ -47,7 +80,7 @@ export default function ParcVehiculesDashboard() {
         {[
           { href: '/parc-vehicules/fleet-complete', icon: Car, tcode: 'KVEH_FLT', title: 'Parc Complet', desc: 'Fiches véhicules, tracteurs, remorques et engins de manutention portuaire.', color: 'blue' },
           { href: '/parc-vehicules/preventive-maintenance', icon: Wrench, tcode: 'KVEH_MNT', title: 'Maintenance GMAO', desc: 'Ordres de travail préventifs et correctifs, suivi des alertes vidange et freins.', color: 'amber' },
-          { href: '/parc-vehicules/documents', icon: FileText, tcode: 'KVEH_DOC', title: 'Documents & Assurances', desc: 'Cartes grises, visites techniques, vignettes CEMAC, assurances AXA/Chanas.', color: 'emerald' },
+          { href: '/parc-vehicules/documents', icon: FileText, tcode: 'KVEH_DOC', title: 'Documents & Assurances', desc: 'Cartes grises, visites techniques, vignettes CEMAC, assurances.', color: 'emerald' },
           { href: '/parc-vehicules/costs-consumption', icon: TrendingUp, tcode: 'KVEH_CST', title: 'TCO & Consommation', desc: 'Coût Total de Détention par véhicule, MTBF, MTTR et conso L/100km.', color: 'pink' },
         ].map((item, i) => {
           const IconCmp = item.icon;
@@ -69,6 +102,18 @@ export default function ParcVehiculesDashboard() {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function KpiCard({ label, value, sub, color, icon }: { label: string; value: number; sub: string; color: string; icon: React.ReactNode }) {
+  return (
+    <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
+      <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+        {icon} {label}
+      </div>
+      <div className={`text-2xl font-black ${color} font-mono`}>{value}</div>
+      <div className="text-[11px] text-slate-400 mt-1">{sub}</div>
     </div>
   );
 }
