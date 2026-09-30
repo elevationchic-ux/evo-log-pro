@@ -66,7 +66,24 @@ export default function AcconagePage() {
     enabled: mounted && isModalOpen,
   });
 
+  // L'API des escales ne porte que navire_id : la désignation du navire vient
+  // de la table navires, mise en correspondance ici (aucun nom inventé).
+  const { data: naviresData } = useQuery({
+    queryKey: ['acconage-navires'],
+    queryFn: async () => {
+      const res = await acconageAPI.getNavires();
+      return res.data?.items || res.data || (Array.isArray(res) ? res : []);
+    },
+    enabled: mounted && isModalOpen,
+  });
+
   const escales = Array.isArray(escalesData) ? escalesData : [];
+  const nomsNavires: Record<number, string> = Array.isArray(naviresData)
+    ? naviresData.reduce((acc: Record<number, string>, n: any) => {
+        if (n?.id != null && n?.nom) acc[n.id] = n.nom;
+        return acc;
+      }, {})
+    : {};
 
   const createMutation = useMutation({
     mutationFn: async (payload: any) => {
@@ -254,7 +271,7 @@ export default function AcconagePage() {
                     {escales.map((es: any) => (
                       <option key={es.id} value={es.id}>
                         {es.numero_escale}
-                        {es.nom_navire ? ` • ${es.nom_navire}` : es.navire?.nom ? ` • ${es.navire.nom}` : ''}
+                        {nomsNavires[es.navire_id] ? ` • ${nomsNavires[es.navire_id]}` : ''}
                       </option>
                     ))}
                   </select>
