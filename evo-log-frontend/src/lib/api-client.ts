@@ -368,6 +368,10 @@ export const authAPI = {
     apiClient.post('/api/v1/auth/2fa/recovery-codes', { password }),
   revokeSessions: () =>
     apiClient.post('/api/v1/auth/revoke-sessions'),
+  // Phase 4 Tranche C : pointe de depart (symetrique de l'arrivee auto au login).
+  // Best-effort a la deconnexion ; ne bloque jamais la deconnexion si l'appel echoue.
+  pointerDepart: () =>
+    apiClient.post('/api/v1/auth/pointer-depart'),
 };
 
 // ─── Service Sécurité & Escalade ──────────────────────────────────────────
