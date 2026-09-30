@@ -1889,7 +1889,7 @@ applyAdvanced(ADVANCED_SUBMODULES);
 // mort. Idempotent et réversible comme l'onde 1.
 // ----------------------------------------------------------------------------
 const ADVANCED_SUBMODULES_WAVE2: AdvancedSubModuleEntry[] = [
-  // 💰 Finance OHADA —深度 : facturation/encaissements non couverts par /finance-ohada/*
+  // 💰 Finance OHADA — detail : facturation/encaissements non couverts par /finance-ohada/*
   { family: 'finance-ohada', label: 'Facturation & Billing', path: '/finance/billing', icon: Receipt, badge: 'Avancé', description: 'Cycle de facturation détaillé et generation des documents', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
   { family: 'finance-ohada', label: 'Encaissements Clients', path: '/finance/encaissements', icon: ArrowUpDown, badge: 'Avancé', description: 'Suivi des reglements et encaissements clients', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
   { family: 'finance-ohada', label: 'Réquisitions d’Achat', path: '/finance/requisitions', icon: ShoppingCart, badge: 'Avancé', description: 'Demandes internes d’achat et circuit de validation', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
