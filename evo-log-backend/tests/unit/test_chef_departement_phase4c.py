@@ -241,7 +241,8 @@ def test_login_attaches_pointage_info(http_client):
     # La pointe existe reellement en base.
     db = SessionLocal()
     try:
-        assert db.query(PointageVacation).join(User).filter(
+        assert db.query(PointageVacation).join(
+            User, PointageVacation.employe_id == User.id).filter(
             User.username == "hl1-emp",
             PointageVacation.date_pointage == _date.today()).count() == 1
     finally:

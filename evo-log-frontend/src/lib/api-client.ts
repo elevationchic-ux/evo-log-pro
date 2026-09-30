@@ -129,6 +129,17 @@ apiClient.interceptors.response.use(
     const url: string = error.config?.url || '';
     const isAuthEndpoint = url.includes('/auth/me') || url.includes('/auth/refresh') || url.includes('/auth/login');
 
+    // Cold-start / redéploiement Railway : retenter une (et une seule) fenêtre
+    // transitoire avant de remonter l'erreur. Max 2 essais, backoff croissant.
+    if (error.config && isTransientUnavailable(error)) {
+      const attempt: number = error.config._coldStartRetry || 0;
+      if (attempt < 2) {
+        error.config._coldStartRetry = attempt + 1;
+        await sleep(500 * (attempt + 1));
+        return apiClient(error.config);
+      }
+    }
+
     if (status === 401 && !isAuthEndpoint && error.config && !error.config._retriedAfterRefresh) {
       _refreshInFlight = _refreshInFlight ?? tryRefreshToken().finally(() => { _refreshInFlight = null; });
       const refreshed = await _refreshInFlight;
