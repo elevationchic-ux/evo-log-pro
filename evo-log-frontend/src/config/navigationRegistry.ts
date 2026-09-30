@@ -1763,3 +1763,114 @@ export function getCemacSpecificModules(): ModuleNavConfig[] {
     module.subModules.some(sub => sub.isCemacSpecific)
   );
 }
+
+// ============================================================================
+// ENRICHISSEMENT « MODULES AVANCÉS » (Option A : rattachement en sous-modules)
+// ----------------------------------------------------------------------------
+// Ces écrans existent déjà comme vraies pages sous app/(app) (composants
+// substantiels de 8 à 26 Ko) mais n'étaient référencés NULLE PART dans la
+// navigation → donc invisibles dans la sidebar, la palette de commandes et la
+// bulle orbitale. On les rattache à leur famille canonique selon la table
+// LEGACY_ALIAS de modulePalette.ts (ex acconage→port-operations,
+// master-data→admin-tenant, maintenance→parc-vehicules, fuel-guard→transport…).
+//
+// Correctif purement ADDITIF et IDEMPOTENT :
+//   - chaque `path` est une page RéELLE existante (aucun lien mort introduit) ;
+//   - si la famille cible brille par son absence, l'entrée est silencieusement
+//     ignorée (pas d'exception) ;
+//   - si le chemin est déjà référencé ailleurs dans la famille, on ne le duplique pas.
+// La restriction d'accès réelle reste appliquée côté API ; le champ
+// `requiredRoles` aligne la visibilité sur celle des sous-modules frères.
+// ============================================================================
+type AdvancedSubModuleEntry = {
+  family: string;
+  label: string;
+  path: string;
+  icon: any;
+  badge?: string;
+  description?: string;
+  requiredRoles?: string[];
+};
+
+const ADVANCED_SUBMODULES: AdvancedSubModuleEntry[] = [
+  // 🚢 Opérations Portuaires & Acconage
+  { family: 'port-operations', label: 'Acconage & Manutention', path: '/acconage', icon: Ship, badge: 'Avancé', description: 'Opérations d acconage, escales et navires (CRUD complet)', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'ACCONAGE'] },
+  { family: 'port-operations', label: 'Acconage Avancé', path: '/acconage-avance', icon: Anchor, badge: 'Avancé', description: 'Functions portuaires avancées (cadres, postes, rendements)', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'ACCONAGE'] },
+  { family: 'port-operations', label: 'Cycle de Vie Conteneurs', path: '/container-lifecycle', icon: Boxes, badge: 'Avancé', description: 'Suivi bout-en-bout du conteneur du port a la restitution', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'MAGASIN'] },
+  { family: 'port-operations', label: 'Connaissement (B/L)', path: '/bill-of-loading', icon: FileText, badge: 'Doc', description: 'Emission et gestion des bills of lading', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'TRANSIT'] },
+  { family: 'port-operations', label: 'Incidents Portuaires', path: '/port-incidents', icon: AlertTriangle, badge: 'QSE', description: 'Declaraance et suivi des incidents de quai', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'QHSE'] },
+  { family: 'port-operations', label: 'Performance Portuaire', path: '/port-performance', icon: BarChart3, badge: 'KPI', description: 'Indicateurs de cadence et de productivite portuaire', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MANAGER'] },
+  { family: 'port-operations', label: 'Grille Tarifaire Port', path: '/port-pricing', icon: Tag, badge: 'Tarifs', description: 'Barème des prestations portuaires et cotations', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS'] },
+
+  // 🛃 Transit & Douane CEMAC
+  { family: 'transit-douane', label: 'Transit Avancé', path: '/transit-avance', icon: Landmark, badge: 'Avancé', description: 'Moteur de transit avance : nomenclature CEMAC, taxes, T-Code', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSIT', 'DOUANE'] },
+  { family: 'transit-douane', label: 'Dédouanement Réel', path: '/real-customs', icon: FileCheck, badge: 'SIGAS', description: 'Declarations douanieres reelles et rapprochement systeme', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSIT', 'DOUANE'] },
+  { family: 'transit-douane', label: 'Intégration CEMAC/Cameroun', path: '/integration-cameroun', icon: Wifi, badge: 'EDI', description: 'Echange de donnees avec les systemes douaniers camerounais', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSIT', 'INTEGRATION'] },
+  { family: 'transit-douane', label: 'Magasin sous Douane', path: '/magasin-douane', icon: Warehouse, badge: 'Avancé', description: 'Gestion des marchandises en magasin sous douane', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSIT', 'MAGASIN'] },
+
+  // 🚚 Transport & Flotte
+  { family: 'transport-flotte', label: 'Transport Avancé', path: '/transport-avance', icon: Truck, badge: 'Avancé', description: 'Transport avance : tournées, missions, tarification', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSPORT'] },
+  { family: 'transport-flotte', label: 'Tracking Temps Réel', path: '/tracking', icon: Radio, badge: 'Live', description: 'Suivi temps réel des véhicules et cargaisons', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSPORT'] },
+  { family: 'transport-flotte', label: 'ePOD & Preuves Livraison', path: '/tracking/epod', icon: Navigation, badge: 'ePOD', description: 'Preuves de livraison électroniques et signature', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSPORT', 'CHAUFFEUR'] },
+  { family: 'transport-flotte', label: 'Géolocalisation GPS', path: '/gps-tracking', icon: MapPin, badge: 'GPS', description: 'Telemetrie GPS et historical des parcours', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSPORT'] },
+  { family: 'transport-flotte', label: 'FuelGuard Carburant', path: '/fuel-guard', icon: Fuel, badge: 'Anti-fraude', description: 'Contrôle carburant et détection de fraude', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSPORT'] },
+  { family: 'transport-flotte', label: 'Espace Chauffeur Mobile', path: '/mobile-chauffeur/mission-active', icon: UserCheck, badge: 'Mobile', description: 'Mission active du chauffeur (version mobile)', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSPORT', 'CHAUFFEUR'] },
+  { family: 'transport-flotte', label: 'Transport International', path: '/transport-international', icon: Globe, badge: 'Export', description: 'Transit international, corridors et transit pays', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSPORT'] },
+  { family: 'transport-flotte', label: 'Planification Conducteurs', path: '/shift-planning', icon: Calendar, badge: 'Planning', description: 'Planning des services et roulement des conducteurs', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSPORT', 'MANAGER'] },
+
+  // 📦 Magasin & Stock (WMS)
+  { family: 'magasin-stock', label: 'Magasin Avancé (WMS)', path: '/magasin-avance', icon: Boxes, badge: 'Avancé', description: 'WMS avance : emplacements, onduleurs, inventaires tournants', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MAGASIN'] },
+  { family: 'magasin-stock', label: 'Réception Magasin 3', path: '/reception-mag3', icon: Package, badge: 'Avancé', description: 'Processus de reception qualite en magasin', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MAGASIN'] },
+  { family: 'magasin-stock', label: 'Bon de Sortie', path: '/removal-slip', icon: FileText, badge: 'Sortie', description: 'Emission et contrôle des bons de sortie de stock', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MAGASIN'] },
+  { family: 'magasin-stock', label: 'Marchandises', path: '/goods', icon: Package, badge: 'Articles', description: 'Catalogue avancé des marchandises et articles', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MAGASIN'] },
+
+  // 💰 Finance OHADA
+  { family: 'finance-ohada', label: 'Cotations & Devis', path: '/cotations', icon: Calculator, badge: 'Avancé', description: 'Cotations, calculs de prix et generation de devis', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Achats / Procurement', path: '/procurement', icon: ShoppingCart, badge: 'Avancé', description: 'Processus achats, appels d offres et fournisseurs', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Passation Commandes', path: '/purchase', icon: ShoppingCart, badge: 'BC', description: 'Commandes d achat et suivis fournisseurs', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Facturation Automatique', path: '/auto-invoicing', icon: Receipt, badge: 'Auto', description: 'Facturation recurrente et emission automatique', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Paiement Local Mobile', path: '/paiement-local', icon: CreditCard, badge: 'Mobile Money', description: 'Encaissements mobile money et paiement locaux', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Transactions', path: '/transactions', icon: ArrowUpDown, badge: 'Journal', description: 'Journal detaille des transactions financieres', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Fiscalité Cameroun', path: '/fiscalite-cameroun', icon: Calculator, badge: 'CEMAC', description: 'Obligations fiscales camerounaises (impots, taxes, declarations)', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+
+  // 🔧 Parc & Maintenance (GMAO)
+  { family: 'parc-vehicules', label: 'Maintenance Véhicules', path: '/maintenance', icon: Wrench, badge: 'Avancé', description: 'Ordres de maintenance, interventions et historique', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MAINTENANCE'] },
+  { family: 'parc-vehicules', label: 'Tableau de bord GMAO', path: '/maintenance-gmao/dashboard', icon: Activity, badge: 'GMAO', description: 'Supervision GMAO : pannes, couts, disponibilite', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MAINTENANCE'] },
+
+  // 🛡️ QHSE & Conformité
+  { family: 'qhse-securite', label: 'Conformité & Audits', path: '/compliance', icon: Shield, badge: 'Avancé', description: 'Registre de conformite, audits et ecarts', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'QHSE'] },
+  { family: 'qhse-securite', label: 'Alertes', path: '/alerts', icon: Zap, badge: 'Live', description: 'Centre des alertes operationnelles et securite', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'QHSE'] },
+  { family: 'qhse-securite', label: 'Notifications', path: '/notifications', icon: Bell, badge: 'Fil', description: 'Fil de notifications internes de la plateforme', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+
+  // 🧑‍💼 Portail Client B2B
+  { family: 'client-b2b', label: 'Portail Client Self-service', path: '/client-portal', icon: Users, badge: 'Avancé', description: 'Portail client complet : commandes, factures, litiges, suivi', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CLIENT'] },
+  { family: 'client-b2b', label: 'Suivi Dossiers (B2B)', path: '/portail-b2b/suivi-dossiers', icon: FileCheck, badge: 'B2B', description: 'Suivi des dossiers du portail B2B', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CLIENT'] },
+
+  // 📊 Rapports & BI
+  { family: 'reports-bi', label: 'Rapports Métier', path: '/reports', icon: BarChart3, badge: 'Avancé', description: 'Bibliotheque de rapports metier et modeles enregistres', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MANAGER'] },
+  { family: 'reports-bi', label: 'Reporting Opérationnel', path: '/reporting', icon: LineChart, badge: 'KPI', description: 'Rapports operationnels de suivi d activite', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MANAGER'] },
+
+  // ⚙️ Administration & Données de référence
+  { family: 'admin-tenant', label: 'Données de Référence (Master Data)', path: '/master-data', icon: Layers, badge: 'Avancé', description: 'Articles, categories, tiers et referentiels maitre', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+  { family: 'admin-tenant', label: 'Fiche Entreprise (OHADA)', path: '/company', icon: Building, badge: 'Legal', description: 'Identite legale OHADA : NIF, RCCM, agrements, RIB', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+  { family: 'admin-tenant', label: 'GED & Documents', path: '/documents', icon: FileText, badge: 'GED', description: 'Gestion electronique des documents et archive', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+  { family: 'admin-tenant', label: 'Intégrations API', path: '/integration', icon: Wifi, badge: 'API', description: 'Connecteurs et integractions tiers (API partenaires)', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+  { family: 'admin-tenant', label: 'Support & Tickets', path: '/support', icon: MessageSquare, badge: 'Helpdesk', description: 'Guichet d assistance et tickets internes', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+];
+
+// Applique l'enrichissement de façon idempotente (aucune duplication, aucune
+// exception si une famille manque). Exécuté une seule fois au chargement du module.
+for (const entry of ADVANCED_SUBMODULES) {
+  const family = NAVIGATION_REGISTRY[entry.family];
+  if (!family) continue;
+  if (family.subModules.some((s) => s.path === entry.path)) continue;
+  family.subModules.push({
+    label: entry.label,
+    path: entry.path,
+    icon: entry.icon,
+    badge: entry.badge,
+    description: entry.description,
+    businessProcess: 'Modules avancés',
+    requiredRoles: entry.requiredRoles,
+  });
+}

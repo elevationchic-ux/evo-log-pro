@@ -7,51 +7,54 @@
 
 @layer base {
   :root {
-    /* ── Premium Onyx/Indigo Theme (Light) ── */
-    --background: 220 33% 98%;
-    --on-background: 222 47% 11%;
+    /* Theme SOMBRE UNIQUE. L'ERP n'a qu'un seul theme :
+       aucun repli clair n'est possible, meme si la classe .dark venait a
+       manquer (portails Radix, impression, premier paint SSR). */
+    --background: 220 20% 10%;
+    --on-background: 215 30% 92%;
 
-    --surface: 0 0% 100%;
-    --on-surface: 222 47% 11%;
-    --surface-variant: 214 32% 91%;
-    --on-surface-variant: 215 16% 47%;
+    --surface: 220 18% 14%;
+    --on-surface: 215 30% 92%;
+    --surface-variant: 220 16% 22%;
+    --on-surface-variant: 215 20% 72%;
 
-    --primary: 221 83% 53%;
-    --on-primary: 210 40% 98%;
-    --primary-container: 221 83% 90%;
-    --on-primary-container: 221 83% 30%;
+    --primary: 217 91% 62%;
+    --on-primary: 0 0% 100%;
+    --primary-container: 217 60% 28%;
+    --on-primary-container: 217 91% 88%;
 
-    --secondary: 160 84% 39%;
+    --secondary: 160 70% 48%;
     --on-secondary: 0 0% 100%;
-    --secondary-container: 160 84% 90%;
-    --on-secondary-container: 160 84% 30%;
+    --secondary-container: 160 50% 22%;
+    --on-secondary-container: 160 70% 88%;
 
-    --tertiary: 43 100% 50%;
-    --on-tertiary: 0 0% 100%;
-    --tertiary-container: 43 100% 90%;
-    --on-tertiary-container: 43 100% 30%;
+    --tertiary: 43 95% 58%;
+    --on-tertiary: 30 50% 10%;
+    --tertiary-container: 43 60% 22%;
+    --on-tertiary-container: 43 95% 88%;
 
-    --error: 348 83% 47%;
+    --error: 4 80% 62%;
     --on-error: 0 0% 100%;
-    --error-container: 348 83% 90%;
-    --on-error-container: 348 83% 30%;
+    --error-container: 4 60% 26%;
+    --on-error-container: 4 80% 90%;
 
-    --outline: 214 32% 85%;
-    --outline-variant: 214 32% 91%;
+    --outline: 220 16% 32%;
+    --outline-variant: 220 16% 22%;
 
     /* Surface containers */
-    --surface-container-lowest: 0 0% 100%;
-    --surface-container-low: 220 33% 98%;
-    --surface-container: 214 32% 95%;
-    --surface-container-high: 214 32% 91%;
-    --surface-container-highest: 214 32% 85%;
+    --surface-container-lowest: 220 20% 8%;
+    --surface-container-low: 220 18% 12%;
+    --surface-container: 220 16% 18%;
+    --surface-container-high: 220 16% 24%;
+    --surface-container-highest: 220 14% 30%;
 
     --radius: 0.75rem;
 
     /* ── EVO-LOG brand primary ── */
-    --EVO-LOG-primary: 221 83% 53%;
+    --EVO-LOG-primary: 217 91% 62%;
 
-    /* ── Module badge colors (light) - ERP Portuaire COMPLET ── */
+    /* Module badge colors - ERP Portuaire COMPLET (identiques en racine et .dark :
+       une seule couleur par module, sans variante jour) */
     /* Phase 1: Arrivée Navire */
     --module-port-operations-bg: 199 89% 18%;
     --module-port-operations-text: 199 89% 74%;
