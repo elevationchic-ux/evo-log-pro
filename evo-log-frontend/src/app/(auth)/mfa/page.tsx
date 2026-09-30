@@ -75,6 +75,7 @@ export default function MfaPage() {
   const [revealNew, setRevealNew] = useState(false);
   const [rotateError, setRotateError] = useState<string | null>(null);
   const [rolesAfterVerify, setRolesAfterVerify] = useState<string[]>([]);
+  const [levelAfterVerify, setLevelAfterVerify] = useState<number>(3);
 
   useEffect(() => {
     const found = readTwoFactorChallenge();
@@ -123,6 +124,7 @@ export default function MfaPage() {
       }
       clearTwoFactorChallenge();
       setRolesAfterVerify(outcome.roles);
+      setLevelAfterVerify(outcome.roleLevel);
 
       if (outcome.mustChangePassword) {
         // Le gate passe avant l'atterrissage : rester sur un compte dont le
@@ -134,7 +136,7 @@ export default function MfaPage() {
 
       setPhase('done');
       toast.success(t('Double authentification validée.', 'Two-factor authentication verified.'));
-      router.push(landingRouteFor(outcome.roles));
+      router.push(landingRouteFor(outcome.roles, outcome.roleLevel));
       router.refresh();
     } catch (err: any) {
       const status = err?.response?.status;

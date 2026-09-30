@@ -117,7 +117,7 @@ export default function MaintenancePage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher par camion..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500"
+              className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-500"
             />
           </div>
         </div>
@@ -194,7 +194,7 @@ export default function MaintenancePage() {
                   value={truckId}
                   onChange={(e) => setTruckId(e.target.value)}
                   placeholder="ex: LT-901-BA"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-orange-500 font-mono"
                 />
               </div>
 
@@ -205,7 +205,7 @@ export default function MaintenancePage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="ex: Remplacement plaquettes de frein avant..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 h-20"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-orange-500 h-20"
                 />
               </div>
 
@@ -215,7 +215,7 @@ export default function MaintenancePage() {
                   <select
                     value={typeMaintenance}
                     onChange={(e) => setTypeMaintenance(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-orange-500"
                   >
                     <option value="PREVENTIVE">Préventive (vidange, filtres)</option>
                     <option value="CURATIVE">Curative (panne, réparation)</option>
@@ -229,7 +229,7 @@ export default function MaintenancePage() {
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-orange-500"
                   >
                     <option value="NORMALE">Normale</option>
                     <option value="URGENTE">Urgente (immobilisation)</option>

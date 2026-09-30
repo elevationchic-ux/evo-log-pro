@@ -6,7 +6,7 @@ from typing import List, Optional
 from datetime import date, datetime, timedelta
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.permissions import require_perm
 from app.models.user import User
 from app.schemas.magasin_avance import (
     PeremptionCreate, PeremptionResponse,
@@ -40,7 +40,7 @@ router = APIRouter(tags=["Magasin Avancé"])
 def enregistrer_peremption(
     peremption: PeremptionCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.create"))
 ):
     """Register expiration date for lot/serial tracking"""
     from app.models.magasin_avance import Peremption
@@ -61,7 +61,7 @@ def obtenir_stock_fefo(
     article_id: int,
     quantite: float,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.stock.read"))
 ):
     """Get stock using FEFO (First Expired, First Out)"""
     from app.models.magasin_avance import Peremption
@@ -83,7 +83,7 @@ def obtenir_stock_fefo(
 def obtenir_peremptions_critiques(
     jours_critique: int = 30,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.stock.read"))
 ):
     """Get stock expiring within critical period"""
     from app.models.magasin_avance import Peremption
@@ -106,7 +106,7 @@ def obtenir_peremptions_critiques(
 @router.get("/peremptions/expirees")
 def obtenir_peremptions_expirees(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.stock.read"))
 ):
     """Get expired stock for quarantine"""
     from app.models.magasin_avance import Peremption
@@ -126,7 +126,7 @@ def obtenir_peremptions_expirees(
 def reserver_stock(
     reservation: ReservationStockCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.picking.create"))
 ):
     """Reserve stock for specific purpose"""
     from app.models.magasin_avance import ReservationStock
@@ -161,7 +161,7 @@ def reserver_stock(
 def liberer_reservation(
     reservation_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.picking.modify"))
 ):
     """Release stock reservation"""
     from app.models.magasin_avance import ReservationStock
@@ -188,7 +188,7 @@ def liberer_reservation(
 def consommer_reservation(
     reservation_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.create"))
 ):
     """Consume reserved stock"""
     from app.models.magasin_avance import ReservationStock
@@ -214,7 +214,7 @@ def consommer_reservation(
 @router.post("/reservations/nettoyer")
 def nettoyer_reservations_expirees(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.stock.modify"))
 ):
     """Auto-release expired reservations"""
     from app.models.magasin_avance import ReservationStock
@@ -249,7 +249,7 @@ def nettoyer_reservations_expirees(
 def creer_kit(
     kit: KitArticleCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.picking.create"))
 ):
     """Create kit definition"""
     from app.models.magasin_avance import KitArticle
@@ -269,7 +269,7 @@ def ajouter_composant(
     kit_id: int,
     composant: ComposantKitCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.picking.modify"))
 ):
     """Add component to kit"""
     from app.models.magasin_avance import ComposantKit
@@ -289,7 +289,7 @@ def assembler_kit(
     kit_id: int,
     quantite_kits: float,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.create"))
 ):
     """Assemble kits from components"""
     from app.models.magasin_avance import KitArticle, ComposantKit
@@ -335,7 +335,7 @@ def assembler_kit(
 def definir_emplacement(
     emplacement: EmplacementDetailCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.stock.modify"))
 ):
     """Define detailed storage location"""
     from app.models.magasin_avance import EmplacementDetail
@@ -357,7 +357,7 @@ def definir_emplacement(
 def obtenir_stock_par_emplacement(
     emplacement_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.stock.read"))
 ):
     """Get all stock at specific location"""
     from app.models.magasin import Stock
@@ -369,7 +369,7 @@ def obtenir_stock_par_emplacement(
 def creer_transfert(
     transfert: TransfertStockCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.create"))
 ):
     """Create stock transfer between warehouses"""
     from app.models.magasin_avance import TransfertStock
@@ -392,7 +392,7 @@ def creer_transfert(
 def executer_transfert(
     transfert_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.create"))
 ):
     """Execute transfer (move stock)"""
     from app.models.magasin_avance import TransfertStock
@@ -447,7 +447,7 @@ def executer_transfert(
 def creer_inventaire(
     inventaire: InventaireTournantCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.inventaire.create"))
 ):
     """Ouvre un inventaire tournant (Batch 18, modèle réel InventaireTournant).
 
@@ -485,7 +485,7 @@ def ajouter_ligne_inventaire(
     inventaire_id: int,
     ligne: LigneInventaireCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.inventaire.modify"))
 ):
     """Enregistre un comptage physique (Batch 18).
 
@@ -538,7 +538,7 @@ def ajouter_ligne_inventaire(
 def valider_inventaire(
     inventaire_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.inventaire.approve"))
 ):
     """Valide l'inventaire et ajuste réellement le stock (Batch 18).
 
@@ -605,7 +605,7 @@ def valider_inventaire(
 def calculer_precision_inventaire(
     inventaire_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.inventaire.read"))
 ):
     """Taux de précision d'un inventaire (Batch 18).
 
@@ -635,7 +635,7 @@ def calculer_precision_inventaire(
 def creer_fournisseur_stock(
     evaluation: FournisseurStockCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.stock.modify"))
 ):
     """Enregistre une évaluation fournisseur (Batch 18, modèle réel).
 
@@ -696,7 +696,7 @@ def evaluer_performance_fournisseur(
     debut_periode: date,
     fin_periode: date,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.stock.read"))
 ):
     """Performance réelle d'après les commandes fournisseur (Batch 18).
 
@@ -755,7 +755,7 @@ def generer_commande_automatique(
     fournisseur_id: int,
     seuil_alerte: float = 10.0,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.commande.create"))
 ):
     """Génère UNE commande groupée pour les stocks sous le seuil (Batch 18).
 
@@ -847,7 +847,7 @@ def lister_receptions(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.reception.read"))
 ):
     """Liste des bons de reception (filtres reels, aucune donnee inventee)."""
     from app.models.magasin_avance import BonReception
@@ -866,7 +866,7 @@ def lister_receptions(
 def creer_bon_reception(
     bon: BonReceptionCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.reception.create"))
 ):
     """Ouvre un bon de reception (statut initial `en_attente`).
 
@@ -912,7 +912,7 @@ def modifier_bon_reception(
     bon_id: int,
     data: BonReceptionUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.reception.modify"))
 ):
     """Corrige un bon EN ATTENTE uniquement. Un bon valide ou refuse est
     immuable (decision unique)  passage par /valider ou /refuser."""
@@ -953,7 +953,7 @@ def ajouter_ligne_reception(
     bon_id: int,
     ligne: LigneBonReceptionCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.reception.modify"))
 ):
     """Ajoute un article recu a un bon en attente (colonnes reelles).
 
@@ -1016,7 +1016,7 @@ def ajouter_ligne_reception(
 def valider_reception(
     bon_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.reception.approve"))
 ):
     """Valide la reception : stock reellement augmente ET journalise.
 
@@ -1115,7 +1115,7 @@ def refuser_reception(
     bon_id: int,
     data: RefusBonReception,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.reception.approve"))
 ):
     """Refuse une reception avec motif ecrit OBLIGATOIRE ( Batch 16 :
     une decision opposable sans motif trace n'existe pas). Aucun stock ne
@@ -1187,7 +1187,7 @@ def lister_retours(
     skip: int = Query(0),
     limit: int = Query(50),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.stock.read"))
 ):
     """Liste des retours clients (filtres statut/client, pagination)."""
     from app.models.magasin_avance import RetourClient
@@ -1203,7 +1203,7 @@ def lister_retours(
 def enregistrer_retour(
     retour: RetourClientCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.create"))
 ):
     """Enregistre un retour client (statut initial `en_attente`).
 
@@ -1264,7 +1264,7 @@ def modifier_retour(
     retour_id: int,
     retour: RetourClientUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.stock.modify"))
 ):
     """Corrige un retour NON ENCORE TRAITE. Un retour accepte/refuse est
     une decision signee : document immuable (circulaire du batch 16)."""
@@ -1291,7 +1291,7 @@ def traiter_retour(
     retour_id: int,
     payload: RetourClientTraitement,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.approve"))
 ):
     """Prend la decision finale sur un retour : `accepte` (avec action parmi
     remplacement/remboursement/destruction) ou `refuse`.
@@ -1401,7 +1401,7 @@ def lister_litiges(
     skip: int = Query(0),
     limit: int = Query(50),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.read"))
 ):
     """Liste des litiges transporteur (filtres statut/transporteur)."""
     from app.models.magasin_avance import LitigeTransporteur
@@ -1417,7 +1417,7 @@ def lister_litiges(
 def creer_litige(
     litige: LitigeTransporteurCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.create"))
 ):
     """Ouvre un litige transporteur (statut initial `en_cours`).
 
@@ -1465,7 +1465,7 @@ def modifier_litige(
     litige_id: int,
     litige: LitigeTransporteurUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.modify"))
 ):
     """Corrige un litige EN COURS seulement (cloture = decision immuable)."""
     from app.models.magasin_avance import LitigeTransporteur
@@ -1491,7 +1491,7 @@ def resoudre_litige(
     litige_id: int,
     payload: LitigeTransporteurResolution,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.approve"))
 ):
     """Clot un litige : `resolu`, `refuse` ou transmis en `justice`.
 
@@ -1555,7 +1555,7 @@ def lister_colis(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.picking.read"))
 ):
     """Liste des colis (filtres sur colonnes reelles)."""
     from app.models.magasin_avance import Colis
@@ -1572,7 +1572,7 @@ def lister_colis(
 def creer_colis(
     colis: ColisCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.picking.create"))
 ):
     """Enregistre un colis (numero CO-YYYYMMDD-NNNN genere ici).
 
@@ -1618,7 +1618,7 @@ def modifier_colis(
     colis_id: int,
     data: ColisUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.picking.modify"))
 ):
     """Met a jour les caracteres physiques d'un colis (numero immuable)."""
     from app.models.magasin_avance import Colis
@@ -1656,7 +1656,7 @@ def modifier_colis(
 def etiqueter_colis(
     colis_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.picking.modify"))
 ):
     """Étiquette un colis : date_etiquetage (colonne Date reelle) = aujourdhui.
 
@@ -1687,7 +1687,7 @@ def palettiser_colis(
     palette: str = Query(..., min_length=1,
                          description="Reference palette (ex: PAL-2026-014)"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.picking.modify"))
 ):
     """Affecte le colis a une palette, tracee dans `emplacement`.
 
@@ -1717,7 +1717,7 @@ def calculer_rotation_stock(
     article_id: int,
     jours: int = 90,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.mouvement.export"))
 ):
     """Taux de rotation annualise d'une fiche article.
 
@@ -1767,7 +1767,7 @@ def calculer_rotation_stock(
 def calculer_precision_stock(
     entrepot_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("magasin.inventaire.read"))
 ):
     """Exactitude du dernier inventaire TOURNE (statut `termine`) d'un entrepot.
 
