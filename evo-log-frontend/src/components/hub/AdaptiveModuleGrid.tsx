@@ -187,9 +187,11 @@ export default function AdaptiveModuleGrid({
 }: AdaptiveModuleGridProps) {
   const allowedItems = items.filter((m) => m.allowed !== false);
 
-  // Sous le seuil de modules ACCESSIBLES -> anneau orbital. On passe aussi
-  // allItems au mode orbital pour que le repli mobile conserve les verrouillés.
-  if (allowedItems.length < threshold) {
+  // Sous le seuil de modules ACCESSIBLES (et au moins 1) -> anneau orbital.
+  // allowedItems.length === 0 : aucun module atteignable, on garde la grille
+  // (qui affiche les verrouillés en "Accès restreint") et on évite une orbite
+  // vide / une division par zéro sur l'angle (360 / N).
+  if (allowedItems.length > 0 && allowedItems.length < threshold) {
     return (
       <OrbitRender
         allowedItems={allowedItems}
