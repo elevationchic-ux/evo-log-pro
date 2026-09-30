@@ -16,6 +16,7 @@ import { apiClient } from '@/lib/api-client'
 import { HelpAndShortcutsModal } from '@/components/shared/HelpAndShortcutsModal'
 import { AppBreadcrumb } from '@/components/shared/AppBreadcrumb'
 import { RecentWorkingTabs } from '@/components/shared/RecentWorkingTabs'
+import { useDomainTransition } from '@/components/shared/DomainTransitionContext'
 import dynamic from 'next/dynamic'
 
 const OfflineSyncIndicator = dynamic(
@@ -43,6 +44,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
   const router = useRouter()
   const pathname = usePathname()
   const t = useI18n()
+  const { triggerDomainTransition } = useDomainTransition()
 
   const [searchValue, setSearchValue] = useState('')
   const [showSuggestion, setShowSuggestion] = useState(false)
@@ -320,7 +322,16 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                               <button
                                 role="option"
                                 aria-selected={active}
-                                onClick={() => { setIsModuleMenuOpen(false); router.push(m.path) }}
+                                onClick={() => {
+                                  setIsModuleMenuOpen(false);
+                                  const currentRoot = pathname ? pathname.replace(/^\/+/, '').split('/')[0] : '';
+                                  const targetRoot = m.path ? m.path.replace(/^\/+/, '').split('/')[0] : '';
+                                  if (currentRoot && targetRoot && currentRoot !== targetRoot) {
+                                    triggerDomainTransition(m.path, 1700);
+                                  } else {
+                                    router.push(m.path);
+                                  }
+                                }}
                                 className="flex min-w-0 flex-1 items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors hover:bg-surface-container-low"
                               >
                                 <span className="shrink-0" style={{ color: active ? m.color : undefined }}>

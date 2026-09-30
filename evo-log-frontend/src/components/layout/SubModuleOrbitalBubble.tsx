@@ -8,6 +8,7 @@ import { localizeTitle, localizeSubLabel } from "@/config/navI18n";
 import { useSettings } from "@/components/layout/SettingsProvider";
 import { useI18n } from "@/hooks/useI18n";
 import { useSession } from "next-auth/react";
+import { useDomainTransition } from "@/components/shared/DomainTransitionContext";
 
 export default function SubModuleOrbitalBubble() {
   const pathname = usePathname();
@@ -73,9 +74,17 @@ export default function SubModuleOrbitalBubble() {
     });
   };
 
+  const { triggerDomainTransition } = useDomainTransition();
+
   const navigate = (path: string) => {
     setIsOpen(false);
-    router.push(path);
+    const currentRoot = pathname ? pathname.replace(/^\/+/, '').split('/')[0] : '';
+    const targetRoot = path ? path.replace(/^\/+/, '').split('/')[0] : '';
+    if (currentRoot && targetRoot && currentRoot !== targetRoot) {
+      triggerDomainTransition(path, 1700);
+    } else {
+      router.push(path);
+    }
   };
 
   // Fermeture clavier : Échap replie le panneau (tous modules), aligné sur le reste du chrome.

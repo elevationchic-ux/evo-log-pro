@@ -11,6 +11,8 @@ import SubModuleOrbitalBubble from '@/components/layout/SubModuleOrbitalBubble';
 import CommandPalette from '@/components/layout/CommandPalette';
 import { useModuleTheme } from '@/hooks/useModuleTheme';
 import KeyboardShortcutHandler from '@/components/shared/KeyboardShortcutHandler';
+import DomainLoadingExperience from '@/components/shared/DomainLoadingExperience';
+import { DomainTransitionProvider } from '@/components/shared/DomainTransitionContext';
 
 /* ════════════════════════════════════════════════════════════════════
    Échelle z-index de l'ERP (à respecter partout) :
@@ -81,12 +83,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
   if (status === 'loading') {
     return (
-      <div className="fixed inset-0 bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-xl animate-pulse">E</div>
-          <div className="text-slate-400 text-sm font-mono animate-pulse">Chargement EVO-LOG...</div>
-        </div>
-      </div>
+      <DomainLoadingExperience
+        targetDomain={pathname}
+        durationMs={1200}
+        fullScreen={true}
+      />
     );
   }
 
@@ -164,5 +165,9 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  return <AppLayoutContent>{children}</AppLayoutContent>;
+  return (
+    <DomainTransitionProvider>
+      <AppLayoutContent>{children}</AppLayoutContent>
+    </DomainTransitionProvider>
+  );
 }
