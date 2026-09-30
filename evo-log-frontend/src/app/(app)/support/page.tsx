@@ -37,13 +37,12 @@ export default function SupportPage() {
   const loadTickets = async () => {
     setLoading(true);
     try {
-      const res = await supportAPI.getTickets().catch(() => {
-        return incidentsAPI.getIncidents();
-      });
+      const res = await supportAPI.getTickets();
       const raw = res.data?.items || res.data || [];
       setTickets(Array.isArray(raw) ? raw : []);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setError(err?.response?.data?.detail || 'Erreur lors du chargement des tickets.');
       setTickets([]);
     } finally {
       setLoading(false);
