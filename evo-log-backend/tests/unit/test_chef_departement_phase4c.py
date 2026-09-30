@@ -112,7 +112,8 @@ def test_auto_arrivee_skips_non_level3_or_without_department(db):
     float_user = _mk_user(db, 3, company_id=co.id, department_id=None, username="pa2-float")
     assert auto_pointage_arrivee(db, chef) is None         # niveau 2 -> non concerne
     assert auto_pointage_arrivee(db, float_user) is None    # pas de departement
-    assert db.query(PointageVacation).count() == 0
+    assert db.query(PointageVacation).filter(
+        PointageVacation.employe_id.in_([chef.id, float_user.id])).count() == 0
 
 
 def test_auto_arrivee_is_idempotent_same_day(db):

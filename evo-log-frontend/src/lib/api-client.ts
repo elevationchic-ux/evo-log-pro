@@ -69,6 +69,34 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// ── Résilience au cold-start Railway ──────────────────────────────────────
+// L'auto-deploy (un commit = un redéploiement) laisse de brèves fenêtres où le
+// proxy répond 502/503/504 (« Application failed to respond ») ou coupe la
+// connexion (aucune réponse réseau). Ces états sont TRANSITOIRES : le plus
+// souvent la requête n'a JAMAIS atteint l'app (rejetée par le proxy), donc la
+// retenter est sûr. On ne retente QUE ces erreurs, jamais une 4xx applicative
+// (401/403/422 : l'app a bel et bien répondu, un retry ne changerait rien).
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientUnavailable(error: any): boolean {
+  const status = error.response?.status as number | undefined;
+  const isProxy5xx = status === 502 || status === 503 || status === 504;
+  const noResponse = !error.response; // réseau coupé / DNS / timeout / connexion refusée
+  if (!isProxy5xx && !noResponse) return false;
+  const config = error.config || {};
+  const method: string = (config.method || 'get').toLowerCase();
+  const url: string = config.url || '';
+  // GET/HEAD/OPTIONS sont idempotents -> retry toujours sur. Pour les POST on
+  // limite aux routes d'authentification (login/2fa/refresh) : un 502 de proxy
+  // n'a pas atteint l'app, donc pas de compteur de tentatives incrémenté. On
+  // évite ainsi tout double effet sur une écriture métier à moitié traitée.
+  if (method === 'get' || method === 'head' || method === 'options') return true;
+  if (url.includes('/auth/')) return true;
+  return false;
+}
+
 // Intercepteur RESPONSE
 // IMPORTANT: ne déclencher le logout automatique QUE pour les endpoints d'auth;
 // les appels de données peuvent légitimement retourner 401 quand le backend distant
