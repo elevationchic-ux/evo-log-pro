@@ -6,15 +6,15 @@ Toutes les reponses proviennent des tables metier reelles du tenant :
 ``preferences_notification``.
 
 Aucun jeu de donnees de demonstration : le service
-``app.services.b2b_portal_service`` contenait des listes codice en dur
+``app.services.b2b_portal_service`` contenait des listes codées en dur
 (DOS-2026-00841, MSKU9823412, factures et parcours inventes). Il n'est plus
 appele ici. Quand une information n'existe pas en base, elle est absente de la
-reponse (ou la reponse est 400/404)  jamais补 remplacée par une valeur devinee.
+reponse (ou la reponse est 400/404) : jamais remplacee par une valeur devinee.
 """
 from fastapi import APIRouter, Depends, Query, Body, HTTPException
 from sqlalchemy import func, or_
-from sqlalchemy.orm import Session, joinedload
-from datetime import datetime, date as date_type
+from sqlalchemy.orm import Session
+from datetime import datetime, date as date_type, time as time_type
 import re
 import uuid
 
@@ -22,6 +22,7 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
 from app.models.tiers import Client
+from app.models.acconage import Conteneur
 from app.models.finance import Facture, Paiement, FactureStatus, PaiementStatus
 from app.models.transport import Mission, MissionStatus
 from app.models.transit_avance import DossierTransitAvance
@@ -52,8 +53,8 @@ def _id_enterprise(current_user: User):
 def _client_ou_erreur(db: Session, client_id) -> Client:
     """Le client du portail doit exister reellement dans le tenant.
 
-    Plus d'identifiant codice en dur cote frontend : sans ``client_id`` valide,
-    on renvoie 400 avec la liste des clients accessiblesplutot que d'inventer
+    Plus d'identifiant code en dur cote frontend : sans ``client_id`` valide,
+    on renvoie 404 avec la liste des clients accessibles plutot que d'inventer
     un compte ou de retourner un tableau vide presente comme un succes.
     """
     try:

@@ -28,6 +28,32 @@ function resolveApiBase(): string {
 
 const API_BASE = resolveApiBase()
 
+// Retry borne face aux micro-fenêtres d'indisponibilité Railway (cold-start /
+// redéploiement déclenché par l'auto-push). Un 502/503/504 vient du PROXY et
+// n'a PAS atteint l'app : le retenter est sûr (pas de compteur de tentatives
+// ni de rate-limit incrémentés). Une 4xx (401/403/422) vient de l'app -> on ne
+// la retente JAMAIS. Max 3 essais (2 retries), backoff croissant 0.5s/1s.
+async function fetchWithColdStartRetry(
+  url: string,
+  init: RequestInit,
+  attempts = 3,
+): Promise<Response> {
+  let lastErr: unknown
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const res = await fetch(url, init)
+      const transient = res.status === 502 || res.status === 503 || res.status === 504
+      if (!transient || i === attempts - 1) return res
+    } catch (err) {
+      // Erreur réseau (DNS, connexion refusée pendant un boot) : transitoire.
+      if (i === attempts - 1) throw err
+      lastErr = err
+    }
+    await new Promise((r) => setTimeout(r, 500 * (i + 1)))
+  }
+  throw lastErr
+}
+
 interface BackendSession {
   access_token?: string
   refresh_token?: string
@@ -102,7 +128,7 @@ export const authOptions: NextAuthOptions = {
           // mot de passe : un deuxieme /login gonflerait le compteur de
           // tentatives (et le rate-limit) pour une seule connexion.
           if (credentials?.ticket) {
-            const res = await fetch(`${API_BASE}/api/v1/auth/session`, {
+            const res = await fetchWithColdStartRetry(`${API_BASE}/api/v1/auth/session`, {
               headers: { Authorization: `Bearer ${credentials.ticket}` },
             })
             if (!res.ok) {
