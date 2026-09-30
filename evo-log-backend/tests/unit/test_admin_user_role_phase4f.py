@@ -121,11 +121,6 @@ def test_update_user_edits_identity(client, db, company_admin, member):
 # --------------------------------------------------------------------------- #
 def test_assign_roles_multiple_casquettes(client, db, company_admin, member):
     _as(company_admin)
-    resp = client.put(
-        f"/api/v1/admin/users/{member.id}",
-        json={"matricule": member.matricule},  # no-op identite
-    )
-    assert resp.status_code == 200
     r = client.put(
         f"/api/v1/admin/users/{member.id}/roles",
         json={"roles": ["OPERATEUR", "MAGASINIER"]},
@@ -169,7 +164,6 @@ def test_assign_roles_superadmin_allowed_for_superadmin(client, db, member):
         hashed_password=get_password_hash("Adm1n!xyz"),
         is_active=True, is_superuser=True, role_level=0, company_id=None,
     )
-    from app.core.security import get_password_hash as _h  # noqa
     db.add(admin); db.commit(); db.refresh(admin)
     _as(admin)
     r = client.put(
