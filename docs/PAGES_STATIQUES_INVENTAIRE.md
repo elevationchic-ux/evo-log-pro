@@ -2,8 +2,8 @@
 
 - Genere le : 2026-10-01
 - Total pages scannees : 348
-- Pages branchees sur le backend : 301
-- Pages encore statiques : 47
+- Pages branchees sur le backend : 305
+- Pages encore statiques : 43
 
 ## Pages statiques
 
@@ -18,13 +18,9 @@
 | `/admin-tenant/global-settings` | non (vitrine/maintenance) | - |
 | `/bi/margins` | non (vitrine/maintenance) | - |
 | `/compliance/audits` | non (vitrine/maintenance) | - |
-| `/comptabilite-ohada/dashboard` | non (vitrine/maintenance) | - |
 | `/cotations/calculateur` | non (vitrine/maintenance) | - |
 | `/dashboard` | non (vitrine/maintenance) | - |
 | `/dashboard/process-flow` | non (vitrine/maintenance) | - |
-| `/finance/transactions` | non (vitrine/maintenance) | - |
-| `/finance-ohada/dashboard` | non (vitrine/maintenance) | - |
-| `/finance-ohada/invoicing` | non (vitrine/maintenance) | - |
 | `/fiscalite-cameroun` | non (vitrine/maintenance) | - |
 | `/integration-cameroun` | non (vitrine/maintenance) | - |
 | `/magasin/ia-chat` | non (vitrine/maintenance) | - |

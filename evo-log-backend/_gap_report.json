@@ -104,26 +104,10 @@
   "route": "/api/v1/k-modules/procurement/orders"
  },
  {
-  "appel": "/api/v1/k-modules/compliance/audits",
-  "brut": "/api/v1/k-modules/compliance/audits",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 918,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/compliance/audits"
- },
- {
-  "appel": "/api/v1/k-modules/compliance/audits",
-  "brut": "/api/v1/k-modules/compliance/audits",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 919,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/compliance/audits"
- },
- {
   "appel": "/api/v1/k-modules/bi-analytics/executive-summary",
   "brut": "/api/v1/k-modules/bi-analytics/executive-summary",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 924,
+  "ligne": 931,
   "genre": "repond_501",
   "route": "/api/v1/k-modules/bi-analytics/executive-summary"
  }
