@@ -102,9 +102,21 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "transit.declaration.read", "transit.declaration.create", "transit.declaration.modify",
         "acconage.manifeste.read",
     ],),
-    ("MAGASINIER", 3, "Magasinier : mouvements de stock et inventaires", [
-        "magasin.stock.read", "magasin.stock.modify", "magasin.mouvement.create",
-        "magasin.picking.read", "magasin.picking.create", "magasin.inventaire.read",
+    # Batch 21 : le magasinier execute tout le circuit magasin sans jamais
+    # approuver (valider reception, traiter retour, approuver inventaire,
+    # resoudre litige, exporter les KPI restent la competence du chef).
+    ("MAGASINIER", 3, "Magasinier : execution complete des circuits magasin, sans validation", [
+        "magasin.stock.read", "magasin.stock.modify",
+        "magasin.mouvement.read", "magasin.mouvement.create", "magasin.mouvement.modify",
+        "magasin.picking.read", "magasin.picking.create", "magasin.picking.modify",
+        "magasin.inventaire.read", "magasin.inventaire.create", "magasin.inventaire.modify",
+        "achats.reception.read", "achats.reception.create", "achats.reception.modify",
+    ]),
+    ("CHEF_MAGASIN", 2, "Chef de magasin : pilotage et validation complete du depot", [
+        "magasin.*.*",
+        "achats.reception.read", "achats.reception.approve",
+        "achats.commande.read", "achats.commande.create",
+        "fournisseurs.referentiel.read",
     ]),
     ("CHEF_PARC", 2, "Chef de parc : gestion complete de la flotte", [
         "parc.*.*", "transport.*.read", "gps.tracking.read", "gps.alertes.modify",

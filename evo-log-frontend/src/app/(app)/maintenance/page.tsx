@@ -96,7 +96,7 @@ export default function MaintenancePage() {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-500 text-white font-semibold px-5 py-3 rounded-xl text-sm shadow-lg shadow-amber-600/30 transition-all hover:scale-[1.02]"
+          className="inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-500 text-white font-semibold px-5 py-3 rounded-xl text-sm shadow-lg shadow-orange-600/30 transition-all hover:scale-[1.02]"
         >
           <Plus className="w-4 h-4" />
           Créer un Ordre de Travail
@@ -161,7 +161,7 @@ export default function MaintenancePage() {
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <Link
                         href={`/maintenance/view?id=${item.id}`}
-                        className="text-xs font-semibold text-amber-400 hover:text-amber-300"
+                        className="text-xs font-semibold text-orange-400 hover:text-orange-300"
                       >
                         Ouvrir
                       </Link>
@@ -249,7 +249,7 @@ export default function MaintenancePage() {
                 <button
                   type="submit"
                   disabled={createMutation.isPending}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-amber-600/30"
+                  className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-600/30"
                 >
                   {createMutation.isPending ? 'Création...' : 'Créer l\'Ordre'}
                 </button>
