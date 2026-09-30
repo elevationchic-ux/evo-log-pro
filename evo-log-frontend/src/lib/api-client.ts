@@ -929,7 +929,11 @@ export const supportAPI = {
   getIncidents: (params?: Record<string, unknown>) => apiClient.get('/api/v1/support/incidents', { params }),
   createIncident: (data: unknown) => apiClient.post('/api/v1/support/incidents', data),
   getTickets: (params?: Record<string, unknown>) => apiClient.get('/api/v1/support/tickets', { params }),
+  getTicket: (id: number) => apiClient.get(`/api/v1/support/tickets/${id}`),
   createTicket: (data: unknown) => apiClient.post('/api/v1/support/tickets', data),
+  // Transition reelle : statut (ouvert/en_cours/resolu/ferme), priorite
+  // (basse/normale/haute/urgente) et assignation, colonnes existantes.
+  updateTicket: (id: number, data: unknown) => apiClient.put(`/api/v1/support/tickets/${id}`, data),
   updateIncident: (id: number | string, data: unknown) => apiClient.put(`/api/v1/support/incidents/${id}`, data),
 };
 

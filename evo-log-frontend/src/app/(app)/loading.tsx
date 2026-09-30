@@ -1,20 +1,24 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
+import DomainLoadingExperience from '@/components/shared/DomainLoadingExperience';
+
 /**
- * Squelette de chargement global du workspace : affiche des cartes videes
- * pendant la resolution du layout et des pages du groupe (app).
+ * Page de chargement dynamique globale de l'ERP EVO-LOG :
+ * Détecte le module en cours de résolution et déploie l'ambiance, la couleur
+ * et l'animation signature spécifique du domaine (Comptabilité, Port, Transport, Collaboratif...)
  */
 export default function AppLoading() {
+  const pathname = usePathname();
+  const segment = pathname ? pathname.replace(/^\/+/, '').split('/')[0] : 'dashboard';
+
   return (
-    <div className="p-4 sm:p-6 space-y-6 animate-pulse" aria-busy="true" aria-label="Chargement de la page">
-      <div className="space-y-2">
-        <div className="h-3 w-40 rounded bg-slate-800" />
-        <div className="h-6 w-72 rounded bg-slate-800" />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-24 rounded-2xl bg-slate-900 border border-slate-800" />
-        ))}
-      </div>
-      <div className="h-64 rounded-2xl bg-slate-900 border border-slate-800" />
+    <div className="relative min-h-[calc(100vh-var(--app-header-h,64px))] flex items-center justify-center p-2 sm:p-4">
+      <DomainLoadingExperience
+        targetDomain={segment}
+        fullScreen={false}
+        durationMs={2000}
+      />
     </div>
   );
 }

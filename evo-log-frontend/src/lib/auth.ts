@@ -109,14 +109,21 @@ function toSessionUser(p: BackendSession, accessToken: string, refreshToken?: st
  *  Le roleLevel est optionnel pour preserver les appels historiques : sans lui,
  *  on retombe sur l'ancien comportement (dashboard global). */
 export function landingRouteFor(roles: string[], roleLevel?: number): string {
-  if (roles.includes('CHAUFFEUR')) return '/chauffeur'
-  if (roles.includes('ADMIN') || roles.includes('MANAGER')) return '/dashboard/global'
-  if (roles.includes('MAGASINIER') || roles.includes('MAGASIN')) return '/magasin/dashboard'
-  if (roles.includes('TRANSPORT') || roles.includes('DISPATCHER')) return '/transport/control'
-  if (roles.includes('FINANCE')) return '/finance/overview'
+  const normRoles = roles.map(r => r.toUpperCase());
+  if (normRoles.includes('COMPTABLE') || normRoles.includes('COMPTABILITE')) return '/comptabilite-ohada/dashboard';
+  if (normRoles.includes('CHAUFFEUR')) return '/chauffeur';
+  if (normRoles.includes('MAGASINIER') || normRoles.includes('MAGASIN')) return '/magasin/dashboard';
+  if (normRoles.includes('TRANSPORT') || normRoles.includes('DISPATCHER')) return '/transport/control';
+  if (normRoles.includes('FINANCE')) return '/finance/overview';
+  if (normRoles.includes('DECLARANT') || normRoles.includes('TRANSIT') || normRoles.includes('DOUANE')) return '/transit-douane';
+  if (normRoles.includes('PORT_OPERATIONS') || normRoles.includes('ACCONAGE')) return '/port-operations';
+  if (normRoles.includes('QHSE')) return '/qhse-securite';
+  if (normRoles.includes('RH')) return '/rh-personnel';
+  if (normRoles.includes('TECHNICIEN') || normRoles.includes('GMAO')) return '/parc-vehicules';
+  if (normRoles.includes('ADMIN') || normRoles.includes('MANAGER')) return '/dashboard/global';
   // Hub par défaut : collaborateur (niveau 3) sans rôle métier dédié.
-  if (roleLevel === 3) return '/portail-collaborateur'
-  return '/dashboard/global'
+  if (roleLevel === 3) return '/portail-collaborateur';
+  return '/dashboard/global';
 }
 
 export const authOptions: NextAuthOptions = {

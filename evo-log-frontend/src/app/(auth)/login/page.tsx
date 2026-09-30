@@ -10,6 +10,7 @@ import { landingRouteFor } from '@/lib/auth';
 import { saveTwoFactorChallenge } from '@/lib/2fa-challenge';
 import { toast } from 'sonner';
 import { Sparkles, Ship, Lock, User as UserIcon, ArrowRight, ShieldCheck, KeyRound, AlertTriangle, CheckCircle2, Radio, Compass, Anchor, Eye, EyeOff } from 'lucide-react';
+import DomainLoadingExperience from '@/components/shared/DomainLoadingExperience';
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -50,6 +51,10 @@ export default function LoginPage() {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [pendingRoles, setPendingRoles] = useState<string[]>([]);
   const [pendingLevel, setPendingLevel] = useState<number>(3);
+
+  // Transition & Page de chargement signature vers le domaine de destination
+  const [isDomainLanding, setIsDomainLanding] = useState(false);
+  const [targetLandingRoute, setTargetLandingRoute] = useState<string>('');
 
   // Splash animation timer
   useEffect(() => {
@@ -153,10 +158,10 @@ export default function LoginPage() {
         }
       }
 
-      setTimeout(() => {
-        router.push(landingRouteFor(roles, outcome.roleLevel));
-        router.refresh();
-      }, 500);
+      // Déclenchement de la page de chargement signature selon le domaine du rôle (Comptabilité, Port, Transport, Collaboratif...)
+      const targetRoute = landingRouteFor(roles, outcome.roleLevel);
+      setTargetLandingRoute(targetRoute);
+      setIsDomainLanding(true);
     } catch (err: any) {
       const status = err?.response?.status;
       const detail = err?.response?.data?.detail;
@@ -209,15 +214,29 @@ export default function LoginPage() {
     }
 
     setPasswordSuccess(true);
+    const targetRoute = landingRouteFor(pendingRoles, pendingLevel);
     setTimeout(() => {
       setMustChangePassword(false);
-      router.push(landingRouteFor(pendingRoles, pendingLevel));
-      router.refresh();
-    }, 1200);
+      setTargetLandingRoute(targetRoute);
+      setIsDomainLanding(true);
+    }, 600);
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center text-white font-sans select-none overflow-hidden bg-[#020c1b]">
+
+      {/* 0. ÉCRAN DE CHARGEMENT SIGNATURE DU DOMAINE DE DESTINATION DU RÔLE */}
+      {isDomainLanding && (
+        <DomainLoadingExperience
+          targetDomain={targetLandingRoute}
+          durationMs={2200}
+          onComplete={() => {
+            router.push(targetLandingRoute);
+            router.refresh();
+          }}
+          fullScreen={true}
+        />
+      )}
 
       {/* 1. REAL BACKGROUND IMAGE: Cargo Ship Port of Douala */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">

@@ -68,6 +68,32 @@ def _get_or_404(model, db: Session, ident: int, label: str):
     return row
 
 
+def _valider_ticket_champs(data: dict) -> None:
+    """Normalise et refuse statut / priorite hors domaine.
+
+    Les colonnes support_tickets sont des String non contraintes : sans ce
+    garde-fou, « CRITIQUE » ou « EN_COURS » (majuscules heritees d'anciens
+    ecrans) s'installeraient en base et disparaitraient des filtres, ce qui
+    ferait croire a l'operateur que le ticket n'existe plus.
+    """
+    for champ, domain, label in (
+        ("statut", TICKET_STATUTS, "Statut"),
+        ("priorite", TICKET_PRIORITES, "Priorite"),
+    ):
+        if data.get(champ) is None:
+            continue
+        brute = str(data[champ]).strip().lower()
+        if brute not in domain:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"{label} « {data[champ]} » inconnue. "
+                    f"Valeurs admissibles : {', '.join(domain)}."
+                ),
+            )
+        data[champ] = brute
+
+
 # ─── FLEET ────────────────────────────────────────────────────────────────────
 fleet_router = APIRouter()
 
