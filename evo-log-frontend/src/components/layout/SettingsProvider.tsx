@@ -50,6 +50,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.classList.add('dark');
   }, []);
 
+  useEffect(() => {
+    // La langue choisie doit être visible du DOM, pas seulement du state React :
+    // lecteurs d'écran, hyphénation, traductions navigateur et `:lang()` en CSS
+    // restent calés sur le <html lang="fr"> statique du layout sans cette ligne.
+    window.document.documentElement.lang = language;
+  }, [language]);
+
   const toggleSound = useCallback(() => {
     const newValue = !soundEnabled;
     setSoundEnabled(newValue);

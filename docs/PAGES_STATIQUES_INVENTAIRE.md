@@ -2,8 +2,8 @@
 
 - Genere le : 2026-10-01
 - Total pages scannees : 348
-- Pages branchees sur le backend : 298
-- Pages encore statiques : 50
+- Pages branchees sur le backend : 301
+- Pages encore statiques : 47
 
 ## Pages statiques
 
@@ -51,9 +51,6 @@
 | `/settings` | non (vitrine/maintenance) | - |
 | `/settings/system/audit-health` | non (vitrine/maintenance) | - |
 | `/transit-douane/bae` | non (vitrine/maintenance) | - |
-| `/transit-douane/dashboard` | non (vitrine/maintenance) | - |
-| `/transit-douane/declarations` | non (vitrine/maintenance) | - |
-| `/transit-douane/dossiers-cemac` | non (vitrine/maintenance) | - |
 | `/transport-avance` | non (vitrine/maintenance) | - |
 | `/register` | non (vitrine/maintenance) | - |
 | `/reset-password` | non (vitrine/maintenance) | - |

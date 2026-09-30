@@ -1,25 +1,42 @@
 // src/config/domainLoadingConfig.ts
-// Configuration haute fidélité pour les pages de chargement et transitions de grands modules/hubs
-// Source de vérité des identités de domaine, palettes, animations signatures et télémétrie métier.
+// SOURCE DE VÉRITÉ OFFICIELLE DES 28 DÉPARTEMENTS ET GRANDS MODULES EVO-LOG ERP
+// Chaque département possède son identité visuelle, sa palette chromatique,
+// sa localisation institutionnelle, ses messages de diagnostic et son animation parlante.
 
 export type DomainAnimationType =
-  | 'syscohada-ledger'      // Comptabilité OHADA : Balance bilatérale Débit/Crédit, flux d'écritures
-  | 'treasury-flux'         // Finance & Trésorerie : Pulsations bancaires, flux de liquidités
-  | 'synergy-constellation' // Collaboratif & Chat : Réseau multipoints, fréquences hertziennes d'équipe
-  | 'radar-maritime'        // Port & Acconage : Radar tournant à 360°, détection de navires Douala/Kribi
-  | 'customs-laser'         // Transit & Douane : Scan laser de manifestes, sceaux GUCE / SYDONIA
-  | 'telematics-satellite'  // Transport & Flotte : Visée satellitaire GPS, axes routiers corridors CEMAC
-  | 'wms-lidar'             // Magasin & Stock WMS : Scan 3D de rayonnages, lecture code-barres / RFID
-  | 'gmao-gears'            // Parc & Maintenance : Engrenages industriels, diagnostic tachymétrique
-  | 'isps-shield'           // QHSE & Sécurité : Bouclier hexagonal de protection, scanner thermique
-  | 'biometric-ring'        // RH & Personnel : Anneau biométrique, constellation de capital humain
-  | 'b2b-gateway'           // Client & B2B : Passerelle chiffrée partenaires, flux EDI commandes
-  | 'bi-prism'              // Reports & BI : Prisme holographique décisionnel, histogrammes 3D
-  | 'rbac-matrix'           // Admin & Gouvernance : Cylindre cryptographique de permissions, noyau RBAC
-  | 'strategic-compass';    // Dashboard Global : Gyroscope 3 axes et boussole stratégique
+  | 'syscohada-ledger'       // 1. Comptabilité OHADA : Balance bilatérale Débit/Crédit, comptes en orbite
+  | 'treasury-flux'          // 2. Finance & Trésorerie : Flux de liquidités, coffre-fort et devises
+  | 'radar-maritime'         // 3. Port Operations : Radar rotatif à 360°, détection de navires Douala/Kribi
+  | 'crane-sts'              // 4. Acconage & Manutention : Portique STS, levage de conteneurs de quai
+  | 'customs-laser'          // 5. Transit & Guichet GUCE : Scan laser de manifestes, certification Sydonia++
+  | 'dum-customs-stamp'      // 6. Déclarations Douanières : Sceau douanier officiel, liquidation et DUM
+  | 'telematics-satellite'   // 7. Transport & Flotte : Réticule GPS satellitaire, corridors CEMAC
+  | 'truck-dashboard'        // 8. Portail Chauffeur : Tableau de bord de camion routier, tachygraphe
+  | 'wms-lidar'              // 9. Magasin & Stock WMS : Racks 3D isométriques, scan laser vertical
+  | 'rf-scan-gun'            // 10. Portail Magasinier : Douchette RF code-barres et contrôle scellés
+  | 'container-3d-lifecycle' // 11. Cycle de Vie Conteneurs : Conteneur ISO 3D avec tracker IoT
+  | 'gmao-gears'             // 12. Parc Véhicules : Double engrenages industriels, diagnostic moteur
+  | 'workshop-wrench'        // 13. Maintenance Atelier : Clé dynamométrique, analyse vibratoire banc d'essai
+  | 'fuel-gauge'             // 14. Fuel Guard & Énergie : Cuve de carburant volumétrique, débitmètre anti-vol
+  | 'isps-shield'            // 15. QHSE & Sécurité : Bouclier hexagonal de protection, normes ISPS
+  | 'incident-beacon'        // 16. Portail QHSE & Incidents : Gyrophare d'alerte active, radar de zone
+  | 'biometric-ring'         // 17. RH & Capital Humain : Anneau d'empreinte biométrique, organigramme
+  | 'employee-badge'         // 18. Portail Employé : Badge d'accréditation RFID individuel
+  | 'shift-clock'            // 19. Chef Personnel & Quarts : Horloge de relève 3x8 et plannings dockers
+  | 'expense-voucher'        // 20. Portail Frais : Justificatif dématérialisé scellé et virement indemnités
+  | 'synergy-constellation'  // 21. Hub Collaboratif & Chat : Constellation multipoints, flux hertzien d'équipe
+  | 'collaborator-hub'       // 22. Portail Collaborateur : Carrefour central d'aiguillage des missions
+  | 'b2b-gateway'            // 23. Espace Client B2B : Passerelle cryptographique EDI partenaires
+  | 'pricing-scale'          // 24. Cotations & Commercial : Balance de cotation fret, simulateur marge
+  | 'procurement-cart'       // 25. Achats & Fournisseurs : Chariot d'approvisionnement, bons certifiés
+  | 'tax-dgi'                // 26. Fiscalité Cameroun : Sceau officiel DGI, TVA 19.25% et télédéclaration
+  | 'bi-prism'               // 27. Décisionnel & BI : Prisme holographique 3D, matrice décisionnelle
+  | 'rbac-matrix'            // 28. Admin & Gouvernance : Cylindre de clés cryptographiques RBAC
+  | 'strategic-compass';     // Cockpit Global : Boussole gyroscopique 3 axes Navire → Client
 
 export interface DomainLoadingConfig {
   key: string;
+  departmentNumber: number;
   domainName: string;
   subTitle: string;
   badgeCode: string;
@@ -33,17 +50,18 @@ export interface DomainLoadingConfig {
 }
 
 export const DOMAIN_LOADING_CONFIGS: Record<string, DomainLoadingConfig> = {
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
   // 1. COMPTABILITÉ OHADA
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
   'comptabilite-ohada': {
     key: 'comptabilite-ohada',
-    domainName: 'COMPTABILITÉ OHADA',
-    subTitle: 'GRAND LIVRE GÉNÉRAL & PLAN COMPTABLE SYSCOHADA',
+    departmentNumber: 1,
+    domainName: 'DÉPARTEMENT COMPTABILITÉ OHADA',
+    subTitle: 'GRAND LIVRE GÉNÉRAL, BALANCE BILATÉRALE & ÉTATS SYSCOHADA',
     badgeCode: 'SYSCOHADA-2017 • CEMAC OHADA',
-    locationTag: 'ESPACE FINANCIER & COMPTABLE RÉGIONAL',
-    primaryColor: '#8B5CF6', // Violet Royal
-    accentColor: '#F59E0B',  // Or SYSCOHADA
+    locationTag: 'DIRECTION FINANCIÈRE & COMPTABLE (BUREAU 401)',
+    primaryColor: '#8B5CF6',
+    accentColor: '#F59E0B',
     gradientBg: 'from-violet-950 via-[#130728] to-[#04010b]',
     glowClass: 'shadow-violet-500/50 border-violet-500/60 text-violet-400',
     animationType: 'syscohada-ledger',
@@ -51,57 +69,41 @@ export const DOMAIN_LOADING_CONFIGS: Record<string, DomainLoadingConfig> = {
       '▶ Vérification de l\'équilibre bilatéral Débit / Crédit SYSCOHADA...',
       '▶ Synchronisation des journaux auxiliaires (Achats, Ventes, Banque, OD)...',
       '▶ Contrôle des comptes de tiers et calcul de la balance avant inventaire...',
-      '✓ Grand Livre SYSCOHADA ouvert. Bienvenue dans l\'Espace Comptable.',
-    ],
-  },
-  'fiscalite-cameroun': {
-    key: 'fiscalite-cameroun',
-    domainName: 'FISCALITÉ CAMEROUN & DGI',
-    subTitle: 'DÉCLARATIONS FISCALES, TVA & PRÉLÈVEMENTS SPÉCIFIQUES',
-    badgeCode: 'DGI CAMEROUN • CGI OHADA',
-    locationTag: 'ADMINISTRATION FISCALE CEMAC',
-    primaryColor: '#8B5CF6',
-    accentColor: '#10B981',
-    gradientBg: 'from-violet-950 via-[#130728] to-[#04010b]',
-    glowClass: 'shadow-violet-500/50 border-violet-500/60 text-violet-400',
-    animationType: 'syscohada-ledger',
-    steps: [
-      '▶ Interconnexion télédéclarations DGI Cameroun...',
-      '▶ Calcul des acomptes IS, TVA collectée & retenues à la source...',
-      '▶ Rapprochement avec le Grand Livre SYSCOHADA...',
-      '✓ Espace Fiscal prêt. Conformité légale certifiée.',
+      '✓ Grand Livre SYSCOHADA ouvert. Prêt pour les écritures comptables.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 2. FINANCE OHADA & TRÉSORERIE
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 2. FINANCE & TRÉSORERIE OHADA
+  // ═══════════════════════════════════════════════════════════════════════════
   'finance-ohada': {
     key: 'finance-ohada',
-    domainName: 'FINANCE OHADA & TRÉSORERIE',
-    subTitle: 'GESTION DE TRÉSORERIE, FACTURATION & RÈGLEMENTS BANCAIRES',
+    departmentNumber: 2,
+    domainName: 'DÉPARTEMENT FINANCE & TRÉSORERIE',
+    subTitle: 'GESTION DES LIQUIDITÉS, FACTURATION & RÈGLEMENTS BANCAIRES',
     badgeCode: 'SWIFT / BEAC PROTOCOL • OHADA SECURE',
-    locationTag: 'SALLE DES MARCHÉS & TRÉSORERIE DOUALA',
-    primaryColor: '#10B981', // Vert Émeraude
-    accentColor: '#F59E0B',
+    locationTag: 'SALLE DES MARCHÉS & TRÉSORERIE CENTRALE',
+    primaryColor: '#10B981',
+    accentColor: '#34D399',
     gradientBg: 'from-emerald-950 via-[#031d14] to-[#010905]',
     glowClass: 'shadow-emerald-500/50 border-emerald-500/60 text-emerald-400',
     animationType: 'treasury-flux',
     steps: [
-      '▶ Connexion aux passerelles bancaires & soldes en devises (XAF / EUR)...',
-      '▶ Contrôle des factures émises, échéanciers & rapprochements...',
-      '▶ Calcul en direct de la position nette de trésorerie...',
-      '✓ Espace Trésorerie synchronisé. Flux de capitaux validés.',
+      '▶ Interconnexion avec les passerelles bancaires (XAF, EUR, USD)...',
+      '▶ Synchronisation des échéanciers clients et avis d\'encaissement...',
+      '▶ Calcul en direct de la position nette de trésorerie consolidée...',
+      '✓ Trésorerie synchronisée. Flux de capitaux validés.',
     ],
   },
   finance: {
     key: 'finance',
-    domainName: 'FINANCE & FACTURATION CLIENTS',
-    subTitle: 'ÉMISSION DES FACTURES PORTUAIRES & SUIVI DES PAIEMENTS',
-    badgeCode: 'FINANCE-CORE • FACTURATION PRO',
-    locationTag: 'DIRECTION FINANCIÈRE & RECOUVREMENT',
+    departmentNumber: 2,
+    domainName: 'DÉPARTEMENT FINANCE & FACTURATION',
+    subTitle: 'ÉMISSION DES FACTURES PORTUAIRES & SUIVI RECOUVREMENT',
+    badgeCode: 'FINANCE-CORE • FACTURATION CLIENTS',
+    locationTag: 'DIRECTION FINANCIÈRE DOUALA',
     primaryColor: '#10B981',
-    accentColor: '#34D399',
+    accentColor: '#F59E0B',
     gradientBg: 'from-emerald-950 via-[#031d14] to-[#010905]',
     glowClass: 'shadow-emerald-500/50 border-emerald-500/60 text-emerald-400',
     animationType: 'treasury-flux',
@@ -109,136 +111,86 @@ export const DOMAIN_LOADING_CONFIGS: Record<string, DomainLoadingConfig> = {
       '▶ Récupération des décomptes d\'acconage et transit...',
       '▶ Génération des factures pro-forma et bordereaux fiscaux...',
       '▶ Vérification des garanties de paiement et cautionnements...',
-      '✓ Module Facturation prêt.',
+      '✓ Facturation prête. Échéanciers actualisés.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 3. MODULES COLLABORATIFS & CHAT D'ÉQUIPE (Demandé expressément)
-  // ─────────────────────────────────────────────────────────────────────────────
-  chat: {
-    key: 'chat',
-    domainName: 'HUB COLLABORATIF & MESSAGERIE',
-    subTitle: 'SALONS DE QUAI, CANAUX FLOTTE & DISCUSSIONS SÉCURISÉES',
-    badgeCode: 'TEMPS RÉEL WEBSOCKET • ÉQUIPES TERRAIN',
-    locationTag: 'RÉSEAU RADIO & HERTZIEN INTERNE CADC',
-    primaryColor: '#22C55E', // Vert Synergie
-    accentColor: '#EAB308', // Jaune Collaboration
-    gradientBg: 'from-green-950 via-[#051c0e] to-[#010803]',
-    glowClass: 'shadow-green-500/50 border-green-500/60 text-green-400',
-    animationType: 'synergy-constellation',
-    steps: [
-      '▶ Établissement du canal WebSocket temps réel sécurisé...',
-      '▶ Synchronisation des salons d\'équipe (Quai, Dispatch, Comptabilité)...',
-      '▶ Détection de la présence des agents et chauffeurs en ligne...',
-      '✓ Canaux collaboratifs opérationnels. Vos équipes sont connectées.',
-    ],
-  },
-  'portail-collaborateur': {
-    key: 'portail-collaborateur',
-    domainName: 'HUB COLLABORATIF ADAPTATIF',
-    subTitle: 'ESPACE CENTRAL DE TRAVAIL, AGENDAS & ACTIONS PARTAGÉES',
-    badgeCode: 'HUB CENTRAL • RÔLE COLLABORATEUR',
-    locationTag: 'PLATEFORME DE PRODUCTIVITÉ MULTI-SERVICES',
-    primaryColor: '#EAB308', // Jaune Or
-    accentColor: '#22C55E',
-    gradientBg: 'from-yellow-950 via-[#1e1503] to-[#0a0701]',
-    glowClass: 'shadow-yellow-500/50 border-yellow-500/60 text-yellow-400',
-    animationType: 'synergy-constellation',
-    steps: [
-      '▶ Chargement de votre environnement personnalisé d\'équipe...',
-      '▶ Synchronisation des dossiers partagés et tâches en attente...',
-      '▶ Connexion aux passerelles de coordination inter-services...',
-      '✓ Espace Collaboratif activé. Bienvenue au Hub.',
-    ],
-  },
-  'portail-employe': {
-    key: 'portail-employe',
-    domainName: 'MON ESPACE COLLABORATEUR',
-    subTitle: 'GESTION PERSONNELLE, DEMANDES DE CONGÉS & NOTES DE FRAIS',
-    badgeCode: 'ESPACE PERSONNEL • RH & CONFORMITÉ',
-    locationTag: 'PORTAIL AGENT INDIVIDUEL',
-    primaryColor: '#84CC16', // Lime
-    accentColor: '#10B981',
-    gradientBg: 'from-lime-950 via-[#101c03] to-[#040801]',
-    glowClass: 'shadow-lime-500/50 border-lime-500/60 text-lime-400',
-    animationType: 'synergy-constellation',
-    steps: [
-      '▶ Authentification biométrique de l\'agent en cours...',
-      '▶ Chargement de votre solde de congés et relevé de pointage...',
-      '▶ Préparation de vos formulaires de mission...',
-      '✓ Votre espace personnel est prêt.',
-    ],
-  },
-  documents: {
-    key: 'documents',
-    domainName: 'GED & ARCHIVES COLLABORATIVES',
-    subTitle: 'GESTION ÉLECTRONIQUE DES DOCUMENTS & PIÈCES DOUANIÈRES',
-    badgeCode: 'GED SÉCURISÉE • ARCHIVES NUMÉRIQUES',
-    locationTag: 'SERVEUR CENTRAL D\'ARCHIVES NUMÉRISÉES',
-    primaryColor: '#22C55E',
-    accentColor: '#0EA5E9',
-    gradientBg: 'from-green-950 via-[#051c0e] to-[#010803]',
-    glowClass: 'shadow-green-500/50 border-green-500/60 text-green-400',
-    animationType: 'synergy-constellation',
-    steps: [
-      '▶ Indexation des connaissements, manifestes et factures scannées...',
-      '▶ Vérification de l\'intégrité des signatures électroniques...',
-      '▶ Contrôle des autorisations d\'accès documentaires...',
-      '✓ Coffre-fort documentaire ouvert.',
-    ],
-  },
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 4. PORT OPERATIONS & ACCONAGE
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 3. PORT OPERATIONS & ARRIVÉE NAVIRES
+  // ═══════════════════════════════════════════════════════════════════════════
   'port-operations': {
     key: 'port-operations',
-    domainName: 'PORT OPERATIONS & ACCONAGE',
-    subTitle: 'ARRIVÉE NAVIRES, RADAR DES QUAIS & GESTION DES ESCALES',
-    badgeCode: 'DOUALA PORT AUTHORITY • GUCE READY',
-    locationTag: 'TERMINAL À CONTENEURS • BASSIN SUD (04°03\'04"N 009°42\'54"E)',
-    primaryColor: '#0EA5E9', // Sky Blue
-    accentColor: '#38BDF8',
-    gradientBg: 'from-sky-950 via-[#041a2e] to-[#01080f]',
-    glowClass: 'shadow-sky-500/50 border-sky-500/60 text-sky-400',
-    animationType: 'radar-maritime',
-    steps: [
-      '▶ Activation du faisceau radar maritime Port de Douala & Kribi...',
-      '▶ Synchronisation des plans d\'armement et d\'arrimage navires...',
-      '▶ Allocation dynamique des cavaliers et grues portiques de quai...',
-      '✓ Opérations maritimes connectées. Système paré à l\'accostage.',
-    ],
-  },
-  acconage: {
-    key: 'acconage',
-    domainName: 'ACCONAGE & MANUTENTION PORTUAIRE',
-    subTitle: 'DÉBARQUEMENT, EMBARQUEMENT & POINTEURS DE QUAI',
-    badgeCode: 'TERMINAL QUAI 1-4 • OPÉRATIONS MARITIMES',
-    locationTag: 'PORT AUTONOME DE DOUALA (PAD)',
+    departmentNumber: 3,
+    domainName: 'DÉPARTEMENT OPÉRATIONS PORTUAIRES',
+    subTitle: 'ARRIVÉE NAVIRES, RADAR DES BASSINS & GESTION DES ESCALES',
+    badgeCode: 'DOUALA PORT AUTHORITY • CAPITAINERIE',
+    locationTag: 'TOUR RADAR CAPITAINERIE (04°03\'04"N 009°42\'54"E)',
     primaryColor: '#0EA5E9',
     accentColor: '#38BDF8',
     gradientBg: 'from-sky-950 via-[#041a2e] to-[#01080f]',
     glowClass: 'shadow-sky-500/50 border-sky-500/60 text-sky-400',
     animationType: 'radar-maritime',
     steps: [
-      '▶ Réception des avis d\'arrivée navire et pré-manifestes...',
-      '▶ Affectation des équipes d\'acconiers et pointeurs...',
-      '▶ Vérification des cadences de manutention au poste à quai...',
-      '✓ Régie d\'acconage opérationnelle.',
+      '▶ Activation du faisceau radar maritime Port de Douala & Kribi...',
+      '▶ Synchronisation des plans d\'armement et avis d\'arrivée navire...',
+      '▶ Allocation dynamique des postes à quai et remorqueurs...',
+      '✓ Radar opérationnel. Navires en approche identifiés.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 5. TRANSIT & DOUANE
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 4. ACCONAGE & MANUTENTION DE QUAI
+  // ═══════════════════════════════════════════════════════════════════════════
+  acconage: {
+    key: 'acconage',
+    departmentNumber: 4,
+    domainName: 'DÉPARTEMENT ACCONAGE & MANUTENTION',
+    subTitle: 'PORTIQUES STS, DÉBARQUEMENT CONTENEURS & ÉQUIPES DE QUAI',
+    badgeCode: 'TERMINAL QUAI STS 1-4 • ACCONAGE LOURD',
+    locationTag: 'TERMINAL À CONTENEURS • POSTE SUD',
+    primaryColor: '#2563EB',
+    accentColor: '#F59E0B',
+    gradientBg: 'from-blue-950 via-[#0b1c3d] to-[#02050f]',
+    glowClass: 'shadow-blue-500/50 border-blue-500/60 text-blue-400',
+    animationType: 'crane-sts',
+    steps: [
+      '▶ Calibrage des grues portiques STS et cavaliers cavaliers...',
+      '▶ Synchronisation des cadences de manutention au poste à quai...',
+      '▶ Affectation des équipes d\'acconiers et pointeurs certifiés...',
+      '✓ Régie d\'acconage opérationnelle. Déchargement autorisé.',
+    ],
+  },
+  'acconage-avance': {
+    key: 'acconage-avance',
+    departmentNumber: 4,
+    domainName: 'ACCONAGE AVANCÉ & OPTIMISATION NAVIRES',
+    subTitle: 'PLANS D\'ARRIMAGE BAY-PLAN & CADENCES TERMINAL',
+    badgeCode: 'BAPLIE PROTOCOL • STS OPTIMIZER',
+    locationTag: 'CENTRE D\'INGÉNIERIE D\'ARRIMAGE',
+    primaryColor: '#1D4ED8',
+    accentColor: '#60A5FA',
+    gradientBg: 'from-blue-950 via-[#0b1c3d] to-[#02050f]',
+    glowClass: 'shadow-blue-500/50 border-blue-500/60 text-blue-400',
+    animationType: 'crane-sts',
+    steps: [
+      '▶ Chargement du fichier Baplie / EDIFACT du porte-conteneurs...',
+      '▶ Calcul des centres de gravité et stabilité navire...',
+      '▶ Optimisation des séquences de levage des grues...',
+      '✓ Plans d\'arrimage validés.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 5. TRANSIT & GUICHET UNIQUE GUCE
+  // ═══════════════════════════════════════════════════════════════════════════
   'transit-douane': {
     key: 'transit-douane',
-    domainName: 'TRANSIT & DÉDOUANEMENT GUCE',
-    subTitle: 'GUICHET UNIQUE, SYDONIA++ & CONNAISSEMENTS MARITIMES',
+    departmentNumber: 5,
+    domainName: 'DÉPARTEMENT TRANSIT & GUICHET UNIQUE',
+    subTitle: 'GUCE CAMEROUN, SYDONIA++ & CONNAISSEMENTS MARITIMES (BL)',
     badgeCode: 'GUCE CAMEROUN • DOUANES CEMAC',
-    locationTag: 'GUICHET UNIQUE DU COMMERCE EXTÉRIEUR',
-    primaryColor: '#3B82F6', // Blue Cobalt
+    locationTag: 'GUICHET UNIQUE DU COMMERCE EXTÉRIEUR (GUCE)',
+    primaryColor: '#3B82F6',
     accentColor: '#93C5FD',
     gradientBg: 'from-blue-950 via-[#061430] to-[#020510]',
     glowClass: 'shadow-blue-500/50 border-blue-500/60 text-blue-400',
@@ -252,356 +204,632 @@ export const DOMAIN_LOADING_CONFIGS: Record<string, DomainLoadingConfig> = {
   },
   transit: {
     key: 'transit',
-    domainName: 'TRANSIT & FORMALITÉS MARITIMES',
-    subTitle: 'CONNAISSEMENTS BL, BONS DE LIVRAISON & BESC',
-    badgeCode: 'TRANSIT-MARITIME • DÉCLARATIONS CEMAC',
-    locationTag: 'CENTRE DE TRANSIT INTERNATIONAL',
+    departmentNumber: 5,
+    domainName: 'TRANSIT & EXPÉDITIONS MARITIMES',
+    subTitle: 'CONNAISSEMENTS B/L, TITRES DE TRANSPORT & BESC',
+    badgeCode: 'TRANSIT-MARITIME • FORMALITÉS CEMAC',
+    locationTag: 'BUREAU DE TRANSIT INTERNATIONAL',
     primaryColor: '#3B82F6',
     accentColor: '#60A5FA',
     gradientBg: 'from-blue-950 via-[#061430] to-[#020510]',
     glowClass: 'shadow-blue-500/50 border-blue-500/60 text-blue-400',
     animationType: 'customs-laser',
     steps: [
-      '▶ Vérification des numéros BESC & titres de transport...',
-      '▶ Rapprochement avec les manifestes maritimes certifiés...',
-      '▶ Émission des bons à délivrer (BAD) et autorisations de sortie...',
-      '✓ Régie transit opérationnelle.',
+      '▶ Contrôle des manifestes maritimes et titres BESC...',
+      '▶ Rapprochement des bons de délivrance (BAD)...',
+      '▶ Émission des autorisations de sortie sous douane...',
+      '✓ Formalités de transit validées.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 6. DÉCLARATIONS DOUANIÈRES & DUM
+  // ═══════════════════════════════════════════════════════════════════════════
+  'real-customs': {
+    key: 'real-customs',
+    departmentNumber: 6,
+    domainName: 'DÉPARTEMENT DÉDOUANEMENT RÉEL (DUM)',
+    subTitle: 'DÉCLARATION UNIQUE DE MARCHANDISES & LIQUIDATION FISCALE',
+    badgeCode: 'DUM OFFICIELLE • BORDEREAU DE TAXATION',
+    locationTag: 'INSPECTION DOUANIÈRE PORT DE DOUALA',
+    primaryColor: '#0284C7',
+    accentColor: '#F59E0B',
+    gradientBg: 'from-sky-950 via-[#051a2d] to-[#01080e]',
+    glowClass: 'shadow-sky-500/50 border-sky-500/60 text-sky-400',
+    animationType: 'dum-customs-stamp',
+    steps: [
+      '▶ Récupération de la Déclaration Unique de Marchandises (DUM)...',
+      '▶ Contrôle des positions tarifaires du Système Harmonisé (SH)...',
+      '▶ Application du tampon officiel de liquidation douanière...',
+      '✓ Dédouanement certifié. Droits acquittés.',
     ],
   },
   'portail-declarant': {
     key: 'portail-declarant',
-    domainName: 'PORTAIL DÉCLARANT EN DOUANE',
-    subTitle: 'SAISIE DES DÉCLARATIONS, DOCUMENTS GUCE & SUIVI LIQUIDATION',
+    departmentNumber: 6,
+    domainName: 'PORTAIL DÉCLARANT AGRÉÉ EN DOUANE',
+    subTitle: 'ESPACE DE DÉCLARATION, SUIVI DES DOSSIERS ET BAE',
     badgeCode: 'AGRÉMENT DÉCLARANT CEMAC • SYDONIA++',
-    locationTag: 'BUREAU CENTRAL DES DÉCLARANTS AGRÉÉS',
-    primaryColor: '#3B82F6',
-    accentColor: '#F59E0B',
-    gradientBg: 'from-blue-950 via-[#061430] to-[#020510]',
-    glowClass: 'shadow-blue-500/50 border-blue-500/60 text-blue-400',
-    animationType: 'customs-laser',
+    locationTag: 'ESPACE RÉSERVÉ DES TRANSITAIRES DÉCLARANTS',
+    primaryColor: '#0284C7',
+    accentColor: '#38BDF8',
+    gradientBg: 'from-sky-950 via-[#051a2d] to-[#01080e]',
+    glowClass: 'shadow-sky-500/50 border-sky-500/60 text-sky-400',
+    animationType: 'dum-customs-stamp',
     steps: [
-      '▶ Vérification de l\'agrément déclarant et des certificats cryptographiques...',
-      '▶ Importation des positions tarifaires du Système Harmonisé (SH)...',
-      '▶ Synchronisation de vos dossiers en cours de liquidation...',
-      '✓ Espace Déclarant déverrouillé.',
+      '▶ Vérification de l\'agrément déclarant et certificats cryptographiques...',
+      '▶ Téléchargement des déclarations en attente de BAE...',
+      '▶ Contrôle des quittances de paiement des droits...',
+      '✓ Portail Déclarant déverrouillé.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 6. TRANSPORT & FLOTTE
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 7. TRANSPORT & CONVOIS FLOTTE
+  // ═══════════════════════════════════════════════════════════════════════════
   'transport-flotte': {
     key: 'transport-flotte',
-    domainName: 'TRANSPORT & CONVOIS FLOTTE',
-    subTitle: 'TÉLÉMATIQUE SATELLITAIRE GPS & DISPATCHING ROUTIER CEMAC',
+    departmentNumber: 7,
+    domainName: 'DÉPARTEMENT TRANSPORT & FLOTTE',
+    subTitle: 'TÉLÉMATIQUE SATELLITAIRE GPS & CONVOIS SÉCURISÉS CEMAC',
     badgeCode: 'CORRIDORS CEMAC • DOUALA-N\'DJAMENA-BANGUI',
-    locationTag: 'CENTRE DE CONTRÔLE FLOTTE & DISPATCH ROUTIER',
-    primaryColor: '#06B6D4', // Cyan Électrique
+    locationTag: 'TOUR DE DISPATCHING ROUTIER CENTRAL',
+    primaryColor: '#06B6D4',
     accentColor: '#22D3EE',
     gradientBg: 'from-cyan-950 via-[#041d24] to-[#01090c]',
     glowClass: 'shadow-cyan-500/50 border-cyan-500/60 text-cyan-400',
     animationType: 'telematics-satellite',
     steps: [
-      '▶ Accrochage aux constellations GPS et balises télématiques OBD...',
-      '▶ Cartographie des convois sur les corridors Douala - N\'Djamena - Bangui...',
-      '▶ Contrôle des feuilles de route, lettres de voiture et jauges de carburant...',
-      '✓ Tour de contrôle transport active. Flotte en liaison continue.',
+      '▶ Accrochage aux balises GPS et boîtiers télématiques OBD...',
+      '▶ Tracé des convois fret sur les corridors Douala-Yaoundé-N\'Djamena...',
+      '▶ Surveillance en temps réel des jauges, vitesses et arrêts...',
+      '✓ Tour de contrôle transport active. Flotte connectée.',
     ],
   },
   transport: {
     key: 'transport',
-    domainName: 'DISPATCHING ROUTIER & EXPÉDITIONS',
+    departmentNumber: 7,
+    domainName: 'DISPATCHING ROUTIER & LOGISTIQUE TERRESTRE',
     subTitle: 'AFFECTATION DES TRACTEURS, REMORQUES & LETTRES DE VOITURE',
-    badgeCode: 'DISPATCH OPÉRATIONNEL • GESTION MISSIONS',
-    locationTag: 'RÉGIE ROUTIÈRE DU PORT',
+    badgeCode: 'DISPATCH FRET • GESTION MISSIONS',
+    locationTag: 'RÉGIE ROUTIÈRE DE LA ZONE PORTUAIRE',
     primaryColor: '#06B6D4',
     accentColor: '#67E8F9',
     gradientBg: 'from-cyan-950 via-[#041d24] to-[#01090c]',
     glowClass: 'shadow-cyan-500/50 border-cyan-500/60 text-cyan-400',
     animationType: 'telematics-satellite',
     steps: [
-      '▶ Calcul des ordres de transport et plannings de chargement...',
-      '▶ Affectation des remorques porte-conteneurs...',
-      '▶ Validation des ordres de mission des chauffeurs...',
-      '✓ Module Dispatching prêt.',
+      '▶ Calcul des plannings de chargement et ordres de mission...',
+      '▶ Affectation des remorques porte-conteneurs 20\'/40\'...',
+      '▶ Validation des fiches de tournée chauffeurs...',
+      '✓ Dispatching route opérationnel.',
     ],
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 8. PORTAIL CHAUFFEUR & MISSION ROUTE
+  // ═══════════════════════════════════════════════════════════════════════════
   chauffeur: {
     key: 'chauffeur',
-    domainName: 'PORTAIL CHAUFFEUR & MISSION ROUTE',
-    subTitle: 'FEUILLE DE ROUTE NUMÉRIQUE, LETTRES DE VOITURE & CONTRÔLES',
-    badgeCode: 'APPLICATION CHAUFFEUR • CONVOIS SÉCURISÉS',
-    locationTag: 'TERMINAL MOBILE EMBARQUÉ',
-    primaryColor: '#F43F5E', // Rose Flotte
-    accentColor: '#06B6D4',
-    gradientBg: 'from-rose-950 via-[#220710] to-[#0b0104]',
-    glowClass: 'shadow-rose-500/50 border-rose-500/60 text-rose-400',
-    animationType: 'telematics-satellite',
-    steps: [
-      '▶ Connexion au terminal télématique du camion...',
-      '▶ Téléchargement de la lettre de voiture et des consignes de sécurité...',
-      '▶ Vérification du contrôle technique et du niveau de carburant...',
-      '✓ Mission validée. Bonne route.',
-    ],
-  },
-  'portail-chauffeur': {
-    key: 'portail-chauffeur',
-    domainName: 'PORTAIL CHAUFFEUR & MISSION ROUTE',
-    subTitle: 'FEUILLE DE ROUTE NUMÉRIQUE, LETTRES DE VOITURE & CONTRÔLES',
-    badgeCode: 'APPLICATION CHAUFFEUR • CONVOIS SÉCURISÉS',
-    locationTag: 'TERMINAL MOBILE EMBARQUÉ',
+    departmentNumber: 8,
+    domainName: 'PORTAIL CHAUFFEUR & FEUILLE DE ROUTE',
+    subTitle: 'TABLEAU DE BORD CONDUCTEUR, LETTRE DE VOITURE & CONVOI',
+    badgeCode: 'APPLICATION CHAUFFEUR • CORRIDORS FREIGHT',
+    locationTag: 'POSTE DE CONDUITE EMBARQUÉ DU VÉHICULE',
     primaryColor: '#F43F5E',
     accentColor: '#06B6D4',
     gradientBg: 'from-rose-950 via-[#220710] to-[#0b0104]',
     glowClass: 'shadow-rose-500/50 border-rose-500/60 text-rose-400',
-    animationType: 'telematics-satellite',
+    animationType: 'truck-dashboard',
     steps: [
-      '▶ Synchronisation de la feuille de route du convoi...',
-      '▶ Contrôle des points d\'étape et des pesées aux ponts-bascules...',
-      '▶ Déclaration de démarrage de convoi...',
-      '✓ Espace Chauffeur prêt.',
+      '▶ Connexion au terminal de bord du tracteur routier...',
+      '▶ Téléchargement de la lettre de voiture numérique...',
+      '▶ Vérification du tachygraphe, pression pneus et carburant...',
+      '✓ Ordre de mission prêt. Bonne route en sécurité.',
+    ],
+  },
+  'portail-chauffeur': {
+    key: 'portail-chauffeur',
+    departmentNumber: 8,
+    domainName: 'ESPACE CONDUCTEUR ROUTIER',
+    subTitle: 'SUIVI DES PESÉES AU PONT-BASCULE & FRAIS DE ROUTE',
+    badgeCode: 'TERMINAL MOBILE CONDUCTEUR',
+    locationTag: 'POSTE CONDUCTEUR EN TRANSIT',
+    primaryColor: '#F43F5E',
+    accentColor: '#38BDF8',
+    gradientBg: 'from-rose-950 via-[#220710] to-[#0b0104]',
+    glowClass: 'shadow-rose-500/50 border-rose-500/60 text-rose-400',
+    animationType: 'truck-dashboard',
+    steps: [
+      '▶ Synchronisation de l\'itinéraire officiel du corridor...',
+      '▶ Contrôle des certificats de pesée au pont-bascule...',
+      '▶ Préparation des déclarations d\'étape...',
+      '✓ Espace Conducteur paré.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 7. MAGASIN & STOCK WMS
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 9. MAGASIN & STOCK WMS
+  // ═══════════════════════════════════════════════════════════════════════════
   'magasin-stock': {
     key: 'magasin-stock',
-    domainName: 'MAGASIN & STOCK WMS',
-    subTitle: 'GESTION DES RAYONNAGES, SCAN CODES-BARRES & PRÉPARATION DE COLIS',
+    departmentNumber: 9,
+    domainName: 'DÉPARTEMENT MAGASIN & STOCK WMS',
+    subTitle: 'RACKS ISOMÉTRIQUES, SCAN CODES-BARRES & GESTION DES ALVÉOLES',
     badgeCode: 'WMS PROTOCOL • CODE-BARRES GS1 & RFID',
-    locationTag: 'ENTREPÔT LOGISTIQUE ZONE PORTUAIRE',
-    primaryColor: '#F59E0B', // Ambre Industriel
-    accentColor: '#FBBF24',
-    gradientBg: 'from-amber-950 via-[#221303] to-[#0c0601]',
-    glowClass: 'shadow-amber-500/50 border-amber-500/60 text-amber-400',
-    animationType: 'wms-lidar',
-    steps: [
-      '▶ Calibrage du scanner Lidar des travées & alvéoles de stockage...',
-      '▶ Cartographie 3D des magasins sous douane et parcs à conteneurs...',
-      '▶ Synchronisation des inventaires permanents et avis de réception...',
-      '✓ Système WMS initialisé. Alvéoles prêtes pour la préparation.',
-    ],
-  },
-  magasin: {
-    key: 'magasin',
-    domainName: 'MAGASINAGE & ENTREPOSAGE',
-    subTitle: 'GESTION DES MARCHANDISES ENTRANTES ET SORTANTES',
-    badgeCode: 'WMS MAGASINIER • GESTION PARC & CALE',
-    locationTag: 'ENTREPÔT LOGISTIQUE CENTRAL',
+    locationTag: 'ENTREPÔT LOGISTIQUE CENTRAL (ZONE CALE & PARC)',
     primaryColor: '#F59E0B',
     accentColor: '#FBBF24',
     gradientBg: 'from-amber-950 via-[#221303] to-[#0c0601]',
     glowClass: 'shadow-amber-500/50 border-amber-500/60 text-amber-400',
     animationType: 'wms-lidar',
     steps: [
-      '▶ Chargement du registre d\'empotage et dépotage...',
-      '▶ Vérification des plombs et de l\'intégrité des scellés conteneurs...',
-      '▶ Contrôle des stocks disponibles et emplacements...',
-      '✓ Régie Magasin connectée.',
+      '▶ Cartographie 3D des allées, travées et racks d\'entrepôt...',
+      '▶ Scan laser vertical des alvéoles de stockage...',
+      '▶ Rapprochement des inventaires physiques et informatiques...',
+      '✓ Système WMS prêt. Emplacements de stockage assignés.',
     ],
   },
-  'portail-magasinier': {
-    key: 'portail-magasinier',
-    domainName: 'PORTAIL MAGASINIER & TERMINAL QUAI',
-    subTitle: 'SCANNER PORTABLE, RÉCEPTIONS & PRÉPARATIONS PALETTES',
-    badgeCode: 'TERMINAL EMBARQUÉ MAGASINIER • SCANNER SCAN-GUN',
-    locationTag: 'PLATEFORME LOGISTIQUE DE CROSS-DOCKING',
-    primaryColor: '#71717A', // Zinc
-    accentColor: '#F59E0B',
-    gradientBg: 'from-zinc-950 via-[#131316] to-[#060608]',
-    glowClass: 'shadow-zinc-500/50 border-zinc-500/60 text-zinc-400',
+  magasin: {
+    key: 'magasin',
+    departmentNumber: 9,
+    domainName: 'MAGASINAGE & ENTREPOSAGE FRET',
+    subTitle: 'RÉCEPTION MARCHANDISES, EMPOTAGE & DÉPOTAGE',
+    badgeCode: 'WMS OPÉRATIONS • GESTION STOCKS',
+    locationTag: 'PLATEFORME LOGISTIQUE PORTUAIRE',
+    primaryColor: '#F59E0B',
+    accentColor: '#FBBF24',
+    gradientBg: 'from-amber-950 via-[#221303] to-[#0c0601]',
+    glowClass: 'shadow-amber-500/50 border-amber-500/60 text-amber-400',
     animationType: 'wms-lidar',
     steps: [
-      '▶ Synchronisation du terminal durci / scan-gun de quai...',
-      '▶ Récupération de la liste des colis à réceptionner...',
-      '▶ Validation de l\'état des marchandises et réserves éventuelles...',
-      '✓ Terminal Magasinier prêt.',
+      '▶ Contrôle des manifestes d\'empotage et dépotage...',
+      '▶ Vérification de l\'intégrité des emballages et réserves...',
+      '▶ Édition des bons d\'entrée en magasin...',
+      '✓ Espace Magasin connecté.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 8. PARC & VÉHICULES / GMAO
-  // ─────────────────────────────────────────────────────────────────────────────
-  'parc-vehicules': {
-    key: 'parc-vehicules',
-    domainName: 'PARC ENGINS & GMAO TECHNIQUE',
-    subTitle: 'MAINTENANCE PRÉVENTIVE, DIAGNOSTIC MOTEUR & ÉQUIPEMENTS LOURDS',
-    badgeCode: 'GMAO INDUSTRIELLE • NORME ISO 55000',
-    locationTag: 'ATELIER MÉCANIQUE CENTRAL & ATELIER QUAIS',
-    primaryColor: '#F97316', // Orange Mécanique
-    accentColor: '#FB923C',
-    gradientBg: 'from-orange-950 via-[#230d03] to-[#0c0401]',
-    glowClass: 'shadow-orange-500/50 border-orange-500/60 text-orange-400',
-    animationType: 'gmao-gears',
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 10. PORTAIL MAGASINIER & TERMINAL RF
+  // ═══════════════════════════════════════════════════════════════════════════
+  'portail-magasinier': {
+    key: 'portail-magasinier',
+    departmentNumber: 10,
+    domainName: 'PORTAIL MAGASINIER & DOUCHETTE RF',
+    subTitle: 'SCANNER DURCI DE QUAI, CODE 128/DATAMATRIX & INVENTAIRES',
+    badgeCode: 'TERMINAL PORTATIF SCAN-GUN • RADIO-FRÉQUENCE',
+    locationTag: 'TERMINAL PORTABLE SUR QUAI D\'ENTREPOSAGE',
+    primaryColor: '#71717A',
+    accentColor: '#F59E0B',
+    gradientBg: 'from-zinc-950 via-[#131316] to-[#060608]',
+    glowClass: 'shadow-zinc-500/50 border-zinc-500/60 text-zinc-400',
+    animationType: 'rf-scan-gun',
     steps: [
-      '▶ Enclenchement des capteurs télémétriques des tracteurs et grues...',
-      '▶ Analyse vibratoire, pression hydraulique & compteurs d\'heures...',
-      '▶ Synchronisation des Ordres de Réparation (OR) et pièces de rechange...',
-      '✓ Système GMAO armé. Parc mécanique sous supervision préventive.',
+      '▶ Synchronisation de la douchette RF avec la base WMS...',
+      '▶ Chargement de la liste des colis à scanner en priorité...',
+      '▶ Contrôle des numéros de plombs et codes scellés...',
+      '✓ Douchette RF calibrée. Prêt pour le scan de quai.',
     ],
   },
-  parc: {
-    key: 'parc',
-    domainName: 'GESTION DU PARC MATÉRIEL',
-    subTitle: 'SUIVI DES VISITES TECHNIQUES, ASSURANCES & CONSOMMATION CARBURANT',
-    badgeCode: 'PARC ROULANT • FLEET MANAGEMENT',
-    locationTag: 'DIRECTION DU PARC & LOGISTIQUE MATÉRIEL',
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 11. CYCLE DE VIE DES CONTENEURS (CONTAINER LIFECYCLE)
+  // ═══════════════════════════════════════════════════════════════════════════
+  'container-lifecycle': {
+    key: 'container-lifecycle',
+    departmentNumber: 11,
+    domainName: 'DÉPARTEMENT CYCLE DE VIE CONTENEURS',
+    subTitle: 'SUIVI BOUT-EN-BOUT DU CONTENEUR : PLEIN, DÉTENTION & RESTITUTION',
+    badgeCode: 'ISO 6346 CONTAINER • BIC / CSC CERTIFIED',
+    locationTag: 'PARC À CONTENEURS & ZONES DE RESTITUTION',
+    primaryColor: '#8B5CF6',
+    accentColor: '#06B6D4',
+    gradientBg: 'from-purple-950 via-[#130728] to-[#04010b]',
+    glowClass: 'shadow-purple-500/50 border-purple-500/60 text-purple-400',
+    animationType: 'container-3d-lifecycle',
+    steps: [
+      '▶ Détection du numéro de série ISO du conteneur (ex: MSKU, CMAU)...',
+      '▶ Suivi du statut : Navire → Quai → Magasin → Route → Dépotage...',
+      '▶ Calcul des détentions (demurrage) et alertes surestaries...',
+      '✓ Cycle conteneur synchronisé. Traçabilité totale assurée.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 12. PARC VÉHICULES & ENGINS LOURDS
+  // ═══════════════════════════════════════════════════════════════════════════
+  'parc-vehicules': {
+    key: 'parc-vehicules',
+    departmentNumber: 12,
+    domainName: 'DÉPARTEMENT PARC & ENGINS LOURDS',
+    subTitle: 'TRACTEURS, GRUES, REMORQUES & DIAGNOSTIC TÉLÉMÉTRIQUE',
+    badgeCode: 'GMAO INDUSTRIELLE • ISO 55000',
+    locationTag: 'CENTRE TECHNIQUE DU PARC ROULANT',
     primaryColor: '#F97316',
     accentColor: '#FB923C',
     gradientBg: 'from-orange-950 via-[#230d03] to-[#0c0401]',
     glowClass: 'shadow-orange-500/50 border-orange-500/60 text-orange-400',
     animationType: 'gmao-gears',
     steps: [
-      '▶ Examen des dates d\'échéance des vignettes et assurances...',
-      '▶ Rapprochement des cartes carburant et cubitainers...',
-      '▶ Évaluation de la disponibilité opérationnelle de la flotte...',
-      '✓ Registre du parc à jour.',
+      '▶ Enclenchement de la télémétrie des tracteurs, élévateurs et grues...',
+      '▶ Analyse des compteurs d\'heures et pressions hydrauliques...',
+      '▶ Contrôle des visites techniques et assurances obligatoires...',
+      '✓ Parc matériel opérationnel. Engins parés au service.',
+    ],
+  },
+  parc: {
+    key: 'parc',
+    departmentNumber: 12,
+    domainName: 'GESTION DU PARC MATÉRIEL',
+    subTitle: 'DISPONIBILITÉ TECHNIQUE & AFFECTATION DES VÉHICULES',
+    badgeCode: 'FLOTTE MATÉRIEL • SUIVI ENGINTÈQUE',
+    locationTag: 'DIRECTION TECHNIQUE DU PARC',
+    primaryColor: '#F97316',
+    accentColor: '#FB923C',
+    gradientBg: 'from-orange-950 via-[#230d03] to-[#0c0401]',
+    glowClass: 'shadow-orange-500/50 border-orange-500/60 text-orange-400',
+    animationType: 'gmao-gears',
+    steps: [
+      '▶ Examen de l\'état de marche de chaque équipement...',
+      '▶ Évaluation du taux de disponibilité opérationnelle...',
+      '▶ Planification des rotations d\'engins sur le quai...',
+      '✓ Parc matériel prêt.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 13. MAINTENANCE GMAO & ATELIER
+  // ═══════════════════════════════════════════════════════════════════════════
+  maintenance: {
+    key: 'maintenance',
+    departmentNumber: 13,
+    domainName: 'DÉPARTEMENT MAINTENANCE & ATELIER GMAO',
+    subTitle: 'RÉVISIONS PRÉVENTIVES, INTERVENTIONS CURATIVES & PIÈCES DÉTACHÉES',
+    badgeCode: 'ATELIER MÉCANIQUE • GMAO EXPERT',
+    locationTag: 'ATELIER CENTRAL DE RÉPARATION LOURDE',
+    primaryColor: '#EA580C',
+    accentColor: '#F97316',
+    gradientBg: 'from-orange-950 via-[#230d03] to-[#0c0401]',
+    glowClass: 'shadow-orange-500/50 border-orange-500/60 text-orange-400',
+    animationType: 'workshop-wrench',
+    steps: [
+      '▶ Synchronisation des Ordres de Travail (OT) prioritaires...',
+      '▶ Vérification du stock de pièces de rechange au magasin technique...',
+      '▶ Relevé des diagnostics et analyse vibratoire des moteurs...',
+      '✓ Atelier GMAO opérationnel. Bancs d\'essai validés.',
     ],
   },
   'portail-technicien': {
     key: 'portail-technicien',
-    domainName: 'PORTAIL TECHNICIEN GMAO',
-    subTitle: 'DIAGNOSTICS ATELIER, PIÈCES DÉTACHÉES & ORDRES DE TRAVAIL',
-    badgeCode: 'ATELIER GMAO • TECHNICIEN AGRÉÉ',
-    locationTag: 'POSTE D\'INTERVENTION ATELIER',
-    primaryColor: '#78716C', // Stone
+    departmentNumber: 13,
+    domainName: 'PORTAIL TECHNICIEN GMAO ATELIER',
+    subTitle: 'FEUILLE D\'INTERVENTION, SAISIE DU TEMPS & PIÈCES CONSOMMÉES',
+    badgeCode: 'TECHNICIEN AGRÉÉ • GMAO ATELIER',
+    locationTag: 'POSTE D\'INTERVENTION MÉCANIQUE',
+    primaryColor: '#78716C',
     accentColor: '#F97316',
     gradientBg: 'from-stone-950 via-[#181615] to-[#080706]',
     glowClass: 'shadow-stone-500/50 border-stone-500/60 text-stone-400',
-    animationType: 'gmao-gears',
+    animationType: 'workshop-wrench',
     steps: [
-      '▶ Récupération des fiches d\'intervention mécanique prioritaires...',
-      '▶ Disponibilité des pièces au magasin technique...',
-      '▶ Enregistrement des temps d\'intervention et tests de charge...',
+      '▶ Récupération de la fiche d\'intervention mécanique...',
+      '▶ Contrôle de la disponibilité des filtres, courroies et pièces...',
+      '▶ Enregistrement des heures atelier et validation des tests...',
       '✓ Espace Technicien prêt.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 9. QHSE & SÉCURITÉ PORTUAIRE
-  // ─────────────────────────────────────────────────────────────────────────────
-  'qhse-securite': {
-    key: 'qhse-securite',
-    domainName: 'QHSE & SÉCURITÉ PORTUAIRE',
-    subTitle: 'CODE ISPS, SURVEILLANCE DES RISQUES & CONFORMITÉ ENVIRONNEMENTALE',
-    badgeCode: 'ISPS CODE • ISO 45001 / 14001',
-    locationTag: 'CENTRE DE GESTION DES RISQUES & SÛRETÉ',
-    primaryColor: '#EF4444', // Rouge Écarlate
-    accentColor: '#F87171',
-    gradientBg: 'from-red-950 via-[#210606] to-[#0c0101]',
-    glowClass: 'shadow-red-500/50 border-red-500/60 text-red-400',
-    animationType: 'isps-shield',
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 14. FUEL GUARD & GESTION CARBURANT
+  // ═══════════════════════════════════════════════════════════════════════════
+  'fuel-guard': {
+    key: 'fuel-guard',
+    departmentNumber: 14,
+    domainName: 'DÉPARTEMENT FUEL GUARD & CARBURANT',
+    subTitle: 'JAUGEAGE ÉLECTRONIQUE, DÉBITMÈTRES & CONTRÔLE ANTI-SIPHONNAGE',
+    badgeCode: 'FUEL GUARD • ANTI-SIPHON TELEMETRY',
+    locationTag: 'STATION PRIVATIVE & CUVES DE CARBURANT PORT',
+    primaryColor: '#F59E0B',
+    accentColor: '#EF4444',
+    gradientBg: 'from-amber-950 via-[#1e0f03] to-[#0a0501]',
+    glowClass: 'shadow-amber-500/50 border-amber-500/60 text-amber-400',
+    animationType: 'fuel-gauge',
     steps: [
-      '▶ Activation du bouclier de conformité ISPS & contrôles d\'accès de zone...',
-      '▶ Analyse thermique et détection des marchandises dangereuses (IMDG)...',
-      '▶ Vérification des protocoles EPI et registres de presqu\'accidents...',
-      '✓ Système de sûreté déployé. Intégrité opérationnelle à 100%.',
+      '▶ Sondage ultrasonique des cuves de gazole et réservoirs camions...',
+      '▶ Rapprochement des consommations au km vs dotations prévues...',
+      '▶ Analyse des alertes de baisse anormale et suspicion siphonnage...',
+      '✓ Télémétrie carburant armée. Gestion énergétique active.',
     ],
   },
-  qhse: {
-    key: 'qhse',
-    domainName: 'QUALITÉ, HYGIÈNE, SÉCURITÉ & ENVIRONNEMENT',
-    subTitle: 'AUDITS DE CONFORMITÉ, PLANS DE PRÉVENTION & GESTION INCIDENTS',
-    badgeCode: 'QHSE AUDIT • CONFORMITÉ RÈGLEMENTAIRE',
-    locationTag: 'DÉPARTEMENT QHSE & PRÉVENTION DES RISQUES',
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 15. QHSE & SÉCURITÉ PORTUAIRE
+  // ═══════════════════════════════════════════════════════════════════════════
+  'qhse-securite': {
+    key: 'qhse-securite',
+    departmentNumber: 15,
+    domainName: 'DÉPARTEMENT QHSE & SÉCURITÉ ISPS',
+    subTitle: 'CONFORMITÉ CODE ISPS, MARCHANDISES DANGEREUSES IMDG & ZONES',
+    badgeCode: 'ISPS CODE • ISO 45001 & ISO 14001',
+    locationTag: 'POSTE CENTRAL DE CONTRÔLE & SÛRETÉ (PC SÉCURITÉ)',
     primaryColor: '#EF4444',
     accentColor: '#F87171',
     gradientBg: 'from-red-950 via-[#210606] to-[#0c0101]',
     glowClass: 'shadow-red-500/50 border-red-500/60 text-red-400',
     animationType: 'isps-shield',
     steps: [
-      '▶ Examen des rapports d\'incidents en cours...',
-      '▶ Suivi des formations sécurité et habilitations caristes...',
-      '▶ Contrôle des fiches de données de sécurité (FDS)...',
-      '✓ Régie QHSE en veille active.',
+      '▶ Déploiement du bouclier de sûreté portuaire Code ISPS...',
+      '▶ Détection thermique et contrôle des marchandises dangereuses IMDG...',
+      '▶ Contrôle des protocoles de port des EPI et autorisations d\'accès...',
+      '✓ Bouclier QHSE actif. Intégrité des zones portuaires certifiée.',
     ],
   },
+  qhse: {
+    key: 'qhse',
+    departmentNumber: 15,
+    domainName: 'QUALITÉ, HYGIÈNE, SÉCURITÉ & ENVIRONNEMENT',
+    subTitle: 'AUDITS DE CONFORMITÉ & PLANS DE PRÉVENTION',
+    badgeCode: 'QHSE AUDIT • VEILLE RÈGLEMENTAIRE',
+    locationTag: 'BUREAU DE PRÉVENTION DES RISQUES',
+    primaryColor: '#EF4444',
+    accentColor: '#F87171',
+    gradientBg: 'from-red-950 via-[#210606] to-[#0c0101]',
+    glowClass: 'shadow-red-500/50 border-red-500/60 text-red-400',
+    animationType: 'isps-shield',
+    steps: [
+      '▶ Revue des fiches d\'accidents et presqu\'accidents...',
+      '▶ Contrôle des registres de vérification périodique des extincteurs...',
+      '▶ Évaluation de la conformité environnementale sur les quais...',
+      '✓ Registre QHSE à jour.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 16. PORTAIL QHSE TERRAIN & INCIDENTS
+  // ═══════════════════════════════════════════════════════════════════════════
   'portail-qhse': {
     key: 'portail-qhse',
-    domainName: 'PORTAIL QHSE TERRAIN',
-    subTitle: 'SIGNALEMENT LIVE DES RISQUES, AUDITS SUR LE QUAI & ACTIONS IMMÉDIATES',
+    departmentNumber: 16,
+    domainName: 'PORTAIL QHSE TERRAIN & ALERTE LIVE',
+    subTitle: 'SIGNALEMENT IMMÉDIAT DES DANGERS SUR LE QUAI ET MAIN COURANTE',
     badgeCode: 'SIGNALEMENT RAPIDE • SÉCURITÉ ACTIVE',
-    locationTag: 'PATROUILLE DE SÛRETÉ PORTUAIRE',
+    locationTag: 'PATROUILLE DE SÛRETÉ SUR LE QUAI',
     primaryColor: '#E11D48',
     accentColor: '#EF4444',
     gradientBg: 'from-rose-950 via-[#23050c] to-[#0c0103]',
     glowClass: 'shadow-rose-600/50 border-rose-600/60 text-rose-400',
-    animationType: 'isps-shield',
+    animationType: 'incident-beacon',
     steps: [
-      '▶ Connexion au canal d\'alerte prioritaire sécurité...',
-      '▶ Géolocalisation des patrouilles et rondes de surveillance...',
-      '▶ Préparation des formulaires d\'audit inopiné...',
-      '✓ Espace QHSE Terrain opérationnel.',
+      '▶ Connexion au canal prioritaire des urgences de quai...',
+      '▶ Géolocalisation des équipes de sûreté et patrouilles...',
+      '▶ Ouverture de la main courante électronique de sécurité...',
+      '✓ Espace QHSE Terrain paré.',
+    ],
+  },
+  'port-incidents': {
+    key: 'port-incidents',
+    departmentNumber: 16,
+    domainName: 'GESTION DES INCIDENTS PORTUAIRES',
+    subTitle: 'DÉCLARATION, ANALYSE DES CAUSES RACINES & ACTIONS CORRECTIVES',
+    badgeCode: 'INCIDENTS TRACKER • AUDIT QUAI',
+    locationTag: 'CELLULE D\'ANALYSE DES INCIDENTS',
+    primaryColor: '#E11D48',
+    accentColor: '#F59E0B',
+    gradientBg: 'from-rose-950 via-[#23050c] to-[#0c0103]',
+    glowClass: 'shadow-rose-600/50 border-rose-600/60 text-rose-400',
+    animationType: 'incident-beacon',
+    steps: [
+      '▶ Réception des signalements d\'avaries matérielles...',
+      '▶ Déclenchement de l\'arbre des causes et expertise assurances...',
+      '▶ Enregistrement des mesures conservatoires...',
+      '✓ Registre des incidents connecté.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 10. RH & CAPITAL HUMAIN
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 17. RH & CAPITAL HUMAIN
+  // ═══════════════════════════════════════════════════════════════════════════
   'rh-personnel': {
     key: 'rh-personnel',
-    domainName: 'RH & CAPITAL HUMAIN',
-    subTitle: 'GESTION DU PERSONNEL, POINTAGES BIOMÉTRIQUES & FICHES DE PAIE',
-    badgeCode: 'OHADA SOCIAL • CONVENTION PORTUAIRE',
-    locationTag: 'DIRECTION DES RESSOURCES HUMAINES & SOCIALES',
-    primaryColor: '#EC4899', // Rose Vibrant
-    accentColor: '#F472B6',
-    gradientBg: 'from-pink-950 via-[#220716] to-[#0c0107]',
-    glowClass: 'shadow-pink-500/50 border-pink-500/60 text-pink-400',
-    animationType: 'biometric-ring',
-    steps: [
-      '▶ Synchronisation des pointages biométriques d\'arrivée aux portes...',
-      '▶ Contrôle des plannings de relève des dockers et agents de quart...',
-      '▶ Calcul des variables de paie, heures sup & primes de rendement...',
-      '✓ Registre du personnel ouvert. Gestion du capital humain active.',
-    ],
-  },
-  rh: {
-    key: 'rh',
-    domainName: 'RESSOURCES HUMAINES & ADMINISTRATION DU PERSONNEL',
-    subTitle: 'CONTRATS DE TRAVAIL, CNPS & HABILITATIONS OPÉRATIONNELLES',
-    badgeCode: 'RH DIRECTOIRE • CONFORMITÉ LÉGALE',
-    locationTag: 'BUREAU DU PERSONNEL',
+    departmentNumber: 17,
+    domainName: 'DÉPARTEMENT RESSOURCES HUMAINES',
+    subTitle: 'GESTION DU PERSONNEL, POINTAGES BIOMÉTRIQUES & BULLETIN PAIE',
+    badgeCode: 'OHADA SOCIAL • CONVENTION COLLECTIVE',
+    locationTag: 'DIRECTION DES RESSOURCES HUMAINES (RH)',
     primaryColor: '#EC4899',
     accentColor: '#F472B6',
     gradientBg: 'from-pink-950 via-[#220716] to-[#0c0107]',
     glowClass: 'shadow-pink-500/50 border-pink-500/60 text-pink-400',
     animationType: 'biometric-ring',
     steps: [
-      '▶ Contrôle des cotisations CNPS et déclarations sociales...',
-      '▶ Mise à jour des dossiers agents et fiches de poste...',
-      '▶ Validation des demandes de congés et autorisations d\'absence...',
-      '✓ Espace RH synchronisé.',
+      '▶ Synchronisation des terminaux biométriques de pointage aux portes...',
+      '▶ Contrôle des plannings de présence, retards et heures supplémentaires...',
+      '▶ Calcul des variables de rémunération et cotisations sociales CNPS...',
+      '✓ Espace RH ouvert. Données du personnel synchronisées.',
+    ],
+  },
+  rh: {
+    key: 'rh',
+    departmentNumber: 17,
+    domainName: 'ADMINISTRATION DU PERSONNEL & CONTRATS',
+    subTitle: 'DOSSIERS INDIVIDUELS, MÉDECINE DU TRAVAIL & CONTRATS',
+    badgeCode: 'RH PERSONNEL • GESTION TALENTS',
+    locationTag: 'SERVICE DE L\'ADMINISTRATION RH',
+    primaryColor: '#EC4899',
+    accentColor: '#F472B6',
+    gradientBg: 'from-pink-950 via-[#220716] to-[#0c0107]',
+    glowClass: 'shadow-pink-500/50 border-pink-500/60 text-pink-400',
+    animationType: 'biometric-ring',
+    steps: [
+      '▶ Vérification des dates de renouvellement des contrats...',
+      '▶ Contrôle des visites médicales d\'aptitude des dockers...',
+      '▶ Préparation des états de déclaration annuelle...',
+      '✓ Dossiers agents à jour.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 11. CLIENT & B2B
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 18. PORTAIL EMPLOYÉ & MON ESPACE
+  // ═══════════════════════════════════════════════════════════════════════════
+  'portail-employe': {
+    key: 'portail-employe',
+    departmentNumber: 18,
+    domainName: 'MON ESPACE EMPLOYÉ & AGENT',
+    subTitle: 'CONSULTATION BULLETINS, DEMANDES DE CONGÉS & ATTESTATIONS',
+    badgeCode: 'BADGE RFID AGENT • ESPACE PRIVÉ',
+    locationTag: 'PORTAIL INDIVIDUEL DE L\'AGENT',
+    primaryColor: '#84CC16',
+    accentColor: '#10B981',
+    gradientBg: 'from-lime-950 via-[#101c03] to-[#040801]',
+    glowClass: 'shadow-lime-500/50 border-lime-500/60 text-lime-400',
+    animationType: 'employee-badge',
+    steps: [
+      '▶ Reconnaissance du badge RFID de l\'employé...',
+      '▶ Chargement du solde de congés payés et compteurs d\'heures...',
+      '▶ Mise à disposition des derniers bulletins de paie numérisés...',
+      '✓ Votre espace personnel est prêt. Bienvenue.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 19. CHEF DE PERSONNEL & RELÈVES DES QUARTS
+  // ═══════════════════════════════════════════════════════════════════════════
+  'chef-personnel': {
+    key: 'chef-personnel',
+    departmentNumber: 19,
+    domainName: 'DÉPARTEMENT CHEF DU PERSONNEL',
+    subTitle: 'PLANIFICATION DES RELÈVES 3X8 & AFFECTATION DES DOCKERS',
+    badgeCode: 'SHIFTS 3X8 • COMMANDEMENT QUAIS',
+    locationTag: 'BUREAU DE COMMANDEMENT DES ÉQUIPES DE QUAI',
+    primaryColor: '#F43F5E',
+    accentColor: '#8B5CF6',
+    gradientBg: 'from-rose-950 via-[#1a0520] to-[#08020d]',
+    glowClass: 'shadow-rose-500/50 border-rose-500/60 text-rose-400',
+    animationType: 'shift-clock',
+    steps: [
+      '▶ Vérification des présences à la relève de quart (Matin, Soir, Nuit)...',
+      '▶ Affectation des dockers aux navires en cours de déchargement...',
+      '▶ Contrôle des heures de vacation et primes d\'intempéries...',
+      '✓ Planification des relèves validée. Équipes sur le quai.',
+    ],
+  },
+  'shift-planning': {
+    key: 'shift-planning',
+    departmentNumber: 19,
+    domainName: 'PLANIFICATION DES HORAIRES ET QUARTS',
+    subTitle: 'TABLEAU DE SERVICE MENSUEL & ROTATION DES ÉQUIPES',
+    badgeCode: 'ROSTER ENGINE • PLANNING 24/7',
+    locationTag: 'SERVICE DE PLANIFICATION DES HORAIRES',
+    primaryColor: '#F43F5E',
+    accentColor: '#F59E0B',
+    gradientBg: 'from-rose-950 via-[#1a0520] to-[#08020d]',
+    glowClass: 'shadow-rose-500/50 border-rose-500/60 text-rose-400',
+    animationType: 'shift-clock',
+    steps: [
+      '▶ Calcul des grilles de roulement 24h/24 et 7j/7...',
+      '▶ Respect des temps de repos légaux et conventions collectives...',
+      '▶ Édition des plannings prévisionnels par équipe...',
+      '✓ Grille des quarts prête.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 20. PORTAIL FRAIS & INDEMNITÉS
+  // ═══════════════════════════════════════════════════════════════════════════
+  'portail-frais': {
+    key: 'portail-frais',
+    departmentNumber: 20,
+    domainName: 'PORTAIL FRAIS DE MISSION & AVANCES',
+    subTitle: 'TÉLÉCHARGEMENT REÇUS, INDEMNITÉS ROUTE & BORDEREAUX SCELLÉS',
+    badgeCode: 'JUSTIFICATIFS SÉCURISÉS • REMBOURSEMENT RAPIDE',
+    locationTag: 'BUREAU DE LIQUIDATION DES FRAIS DE MISSION',
+    primaryColor: '#0D9488',
+    accentColor: '#10B981',
+    gradientBg: 'from-teal-950 via-[#031c19] to-[#010908]',
+    glowClass: 'shadow-teal-500/50 border-teal-500/60 text-teal-400',
+    animationType: 'expense-voucher',
+    steps: [
+      '▶ Numérisation et extraction OCR des reçus de péage et hôtel...',
+      '▶ Calcul des forfaits d\'indemnités kilométriques et repas...',
+      '▶ Transmission du bordereau scellé au service comptabilité...',
+      '✓ Note de frais prête pour le virement.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 21. HUB COLLABORATIF & MESSAGERIE D'ÉQUIPE
+  // ═══════════════════════════════════════════════════════════════════════════
+  chat: {
+    key: 'chat',
+    departmentNumber: 21,
+    domainName: 'HUB COLLABORATIF & COMMUNICATIONS',
+    subTitle: 'SALONS DE QUAI, CANAUX FLOTTE & DISCUSSIONS MULTI-ÉQUIPES',
+    badgeCode: 'WEBSOCKET TEMPS RÉEL • RADIO INTERNE',
+    locationTag: 'CENTRE DE COMMUNICATION NUMÉRIQUE CADC',
+    primaryColor: '#22C55E',
+    accentColor: '#EAB308',
+    gradientBg: 'from-green-950 via-[#051c0e] to-[#010803]',
+    glowClass: 'shadow-green-500/50 border-green-500/60 text-green-400',
+    animationType: 'synergy-constellation',
+    steps: [
+      '▶ Établissement du canal WebSocket temps réel chiffré...',
+      '▶ Synchronisation des salons d\'équipe (Quai, Flotte, Compta, Direction)...',
+      '▶ Détection de la présence des agents et conducteurs en ligne...',
+      '✓ Canaux collaboratifs opérationnels. Équipes en direct.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 22. PORTAIL COLLABORATEUR CENTRAL
+  // ═══════════════════════════════════════════════════════════════════════════
+  'portail-collaborateur': {
+    key: 'portail-collaborateur',
+    departmentNumber: 22,
+    domainName: 'HUB CENTRAL COLLABORATEUR',
+    subTitle: 'CARREFOUR DES MISSIONS, DOSSIERS PARTAGÉS & AGENDAS ÉQUIPE',
+    badgeCode: 'HUB CENTRAL • RÔLE COLLABORATEUR',
+    locationTag: 'ESPACE DE TRAVAIL UNIFIÉ MULTI-DÉPARTEMENTS',
+    primaryColor: '#EAB308',
+    accentColor: '#22C55E',
+    gradientBg: 'from-yellow-950 via-[#1e1503] to-[#0a0701]',
+    glowClass: 'shadow-yellow-500/50 border-yellow-500/60 text-yellow-400',
+    animationType: 'collaborator-hub',
+    steps: [
+      '▶ Initialisation de votre bureau virtuel personnalisé...',
+      '▶ Rapprochement des dossiers partagés entre services...',
+      '▶ Vérification des notifications prioritaires et jalons du jour...',
+      '✓ Hub Collaborateur activé. Bienvenue.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 23. ESPACE CLIENT & PARTENAIRES B2B
+  // ═══════════════════════════════════════════════════════════════════════════
   'client-b2b': {
     key: 'client-b2b',
-    domainName: 'ESPACE CLIENT & PARTENAIRES B2B',
-    subTitle: 'PORTAIL EXTÉRIEUR, TRACKING CONTENEURS & COTATIONS INSTANTANÉES',
+    departmentNumber: 23,
+    domainName: 'DÉPARTEMENT RELATIONS CLIENTS & B2B',
+    subTitle: 'PORTAIL CLIENT PRIVILÈGE, SUIVI EXPÉDITIONS & COMMANDES',
     badgeCode: 'B2B SECURE GATEWAY • SSL 256-BIT',
     locationTag: 'PASSERELLE PARTENAIRES & IMPORT/EXPORT',
-    primaryColor: '#14B8A6', // Teal
+    primaryColor: '#14B8A6',
     accentColor: '#2DD4BF',
     gradientBg: 'from-teal-950 via-[#031d1b] to-[#010908]',
     glowClass: 'shadow-teal-500/50 border-teal-500/60 text-teal-400',
     animationType: 'b2b-gateway',
     steps: [
       '▶ Authentification du compte partenaire et vérification des mandats...',
-      '▶ Chargement du suivi satellite en temps réel des expéditions maritimes...',
+      '▶ Chargement du suivi satellite en temps réel des cargaisons...',
       '▶ Synchronisation des cotations en cours et factures électroniques...',
       '✓ Passerelle B2B déverrouillée. Vos flux logistiques sont à portée.',
     ],
   },
   'client-portal': {
     key: 'client-portal',
+    departmentNumber: 23,
     domainName: 'PORTAIL CLIENT IMPORT-EXPORT',
-    subTitle: 'VISIBILITÉ BOUT-EN-BOUT DU CHARGEMENT NAVIRE JUSQU\'À DESTINATION',
+    subTitle: 'VISIBILITÉ BOUT-EN-BOUT DU CHARGEMENT JUSQU\'AU DÉPOTAGE',
     badgeCode: 'PORTAIL CLIENTS PRIVILÈGE',
     locationTag: 'ESPACE SELF-SERVICE LOGISTIQUE',
     primaryColor: '#14B8A6',
@@ -617,120 +845,252 @@ export const DOMAIN_LOADING_CONFIGS: Record<string, DomainLoadingConfig> = {
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 12. REPORTS & DÉCISIONNEL BI
-  // ─────────────────────────────────────────────────────────────────────────────
-  'reports-bi': {
-    key: 'reports-bi',
-    domainName: 'DÉCISIONNEL & REPORTING BI',
-    subTitle: 'ANALYTICS AVANCÉS, KPI PORTUAIRES & PRÉVISIONS LOGISTIQUES',
-    badgeCode: 'BUSINESS INTELLIGENCE • DATA WAREHOUSE',
-    locationTag: 'SALLE STRATÉGIQUE & ANALYSE DÉCISIONNELLE',
-    primaryColor: '#A855F7', // Purple
-    accentColor: '#C084FC',
-    gradientBg: 'from-purple-950 via-[#1e072a] to-[#0a0110]',
-    glowClass: 'shadow-purple-500/50 border-purple-500/60 text-purple-400',
-    animationType: 'bi-prism',
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 24. COTATIONS & DIRECTION COMMERCIALE
+  // ═══════════════════════════════════════════════════════════════════════════
+  cotations: {
+    key: 'cotations',
+    departmentNumber: 24,
+    domainName: 'DÉPARTEMENT COMMERCIAL & COTATIONS',
+    subTitle: 'TARIFICATION FRET, BAREMES D\'ACCONAGE & SIMULATEUR DE MARGE',
+    badgeCode: 'GRILLE TARIFAIRE • CRM COMMERCIAL',
+    locationTag: 'DIRECTION COMMERCIALE & DÉVELOPPEMENT',
+    primaryColor: '#EAB308',
+    accentColor: '#F59E0B',
+    gradientBg: 'from-yellow-950 via-[#1e1302] to-[#090601]',
+    glowClass: 'shadow-yellow-500/50 border-yellow-500/60 text-yellow-400',
+    animationType: 'pricing-scale',
     steps: [
-      '▶ Agrégation des cubes OLAP financiers, douaniers et maritimes...',
-      '▶ Calcul des métriques de temps de rotation (dwell time) et rentabilité...',
-      '▶ Génération des graphiques prédictifs et synthèses exécutives...',
-      '✓ Matrice BI opérationnelle. Données d\'aide à la décision prêtes.',
+      '▶ Chargement des grilles de prix au conteneur et à la tonne...',
+      '▶ Simulation des frais de transit, douane et magasinage...',
+      '▶ Génération de l\'offre commerciale personnalisée en FCFA...',
+      '✓ Devis commercial prêt à émettre.',
     ],
   },
-  bi: {
-    key: 'bi',
-    domainName: 'TABLEAUX DE BORD STRATÉGIQUES',
-    subTitle: 'TABLEAU DE BORD EXÉCUTIF ET PERFORMANCES MULTI-AGENCES',
-    badgeCode: 'KPI SUITE • DIRECTOIRE CADC',
-    locationTag: 'CENTRE DÉCISIONNEL CONSOLIDÉ',
+  'portail-commercial': {
+    key: 'portail-commercial',
+    departmentNumber: 24,
+    domainName: 'ESPACE COMMERCIAL & NÉGOCIATION',
+    subTitle: 'PIPELINE AFFAIRES, COMPTES CLÉS & COMMISSIONS',
+    badgeCode: 'COMMERCIAL TERRAIN • PORT CADC',
+    locationTag: 'BUREAU DES VENTES MARITIMES',
+    primaryColor: '#EAB308',
+    accentColor: '#10B981',
+    gradientBg: 'from-yellow-950 via-[#1e1302] to-[#090601]',
+    glowClass: 'shadow-yellow-500/50 border-yellow-500/60 text-yellow-400',
+    animationType: 'pricing-scale',
+    steps: [
+      '▶ Actualisation des opportunités de trafic maritime...',
+      '▶ Vérification des encours clients et limites de crédit...',
+      '▶ Suivi des relances et des propositions contractuelles...',
+      '✓ Espace Commercial paré.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 25. ACHATS & FOURNISSEURS (PROCUREMENT)
+  // ═══════════════════════════════════════════════════════════════════════════
+  procurement: {
+    key: 'procurement',
+    departmentNumber: 25,
+    domainName: 'DÉPARTEMENT ACHATS & APPROVISIONNEMENTS',
+    subTitle: 'BONS DE COMMANDE, ÉVALUATION DES FOURNISSEURS & RÉCEPTIONS',
+    badgeCode: 'PROCUREMENT ENGINE • HOMOLOGATION PRESTATAIRES',
+    locationTag: 'DIRECTION DES ACHATS & MOYENS GÉNÉRAUX',
+    primaryColor: '#10B981',
+    accentColor: '#34D399',
+    gradientBg: 'from-emerald-950 via-[#031d14] to-[#010905]',
+    glowClass: 'shadow-emerald-500/50 border-emerald-500/60 text-emerald-400',
+    animationType: 'procurement-cart',
+    steps: [
+      '▶ Contrôle des demandes d\'achat (DA) validées par la direction...',
+      '▶ Comparaison des offres fournisseurs et délais de livraison...',
+      '▶ Émission des bons de commande officiels avec visa budgétaire...',
+      '✓ Centrale d\'achats connectée. Commandes prêtes à valider.',
+    ],
+  },
+  purchase: {
+    key: 'purchase',
+    departmentNumber: 25,
+    domainName: 'APPROVISIONNEMENTS & MOYENS GÉNÉRAUX',
+    subTitle: 'GESTION DES PRESTATAIRES ET STOCKS DE FONCTIONNEMENT',
+    badgeCode: 'ACHATS MATÉRIEL • FOURNISSEURS',
+    locationTag: 'SERVICE DES ACHATS',
+    primaryColor: '#10B981',
+    accentColor: '#34D399',
+    gradientBg: 'from-emerald-950 via-[#031d14] to-[#010905]',
+    glowClass: 'shadow-emerald-500/50 border-emerald-500/60 text-emerald-400',
+    animationType: 'procurement-cart',
+    steps: [
+      '▶ Examen des devis fournisseurs en attente...',
+      '▶ Suivi des livraisons et réceptions magasins...',
+      '▶ Rapprochement factures / bons de livraison...',
+      '✓ Module Approvisionnements prêt.',
+    ],
+  },
+  fournisseurs: {
+    key: 'fournisseurs',
+    departmentNumber: 25,
+    domainName: 'ANNUAIRE FOURNISSEURS & PRESTATAIRES',
+    subTitle: 'CONTRATS CADRES, AUDITS QUALITÉ & CONDITIONS DE PAIEMENT',
+    badgeCode: 'BASE FOURNISSEURS AGRÉÉS',
+    locationTag: 'BUREAU DE CONTRÔLE DES TIERS',
+    primaryColor: '#10B981',
+    accentColor: '#F59E0B',
+    gradientBg: 'from-emerald-950 via-[#031d14] to-[#010905]',
+    glowClass: 'shadow-emerald-500/50 border-emerald-500/60 text-emerald-400',
+    animationType: 'procurement-cart',
+    steps: [
+      '▶ Vérification des attestations fiscales et bancaires des prestataires...',
+      '▶ Notation de la conformité et des délais constatés...',
+      '▶ Suivi des contrats cadres actifs...',
+      '✓ Annuaire Fournisseurs disponible.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 26. FISCALITÉ CAMEROUN & DGI
+  // ═══════════════════════════════════════════════════════════════════════════
+  'fiscalite-cameroun': {
+    key: 'fiscalite-cameroun',
+    departmentNumber: 26,
+    domainName: 'DÉPARTEMENT FISCALITÉ CAMEROUN & DGI',
+    subTitle: 'DÉCLARATIONS FISCALES CGI, TVA 19.25% & RETENUES À LA SOURCE',
+    badgeCode: 'DGI CAMEROUN • CGI CEMAC',
+    locationTag: 'DIRECTION DES AFFAIRES FISCALES & JURIDIQUES',
+    primaryColor: '#8B5CF6',
+    accentColor: '#10B981',
+    gradientBg: 'from-violet-950 via-[#130728] to-[#04010b]',
+    glowClass: 'shadow-violet-500/50 border-violet-500/60 text-violet-400',
+    animationType: 'tax-dgi',
+    steps: [
+      '▶ Interconnexion avec le portail officiel de la DGI Cameroun...',
+      '▶ Calcul automatique de la TVA (19,25%), acomptes IS et TSR...',
+      '▶ Rapprochement avec les écritures du Grand Livre SYSCOHADA...',
+      '✓ Télédéclarations fiscales prêtes. Conformité DGI certifiée.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 27. DÉCISIONNEL & REPORTING BI
+  // ═══════════════════════════════════════════════════════════════════════════
+  'reports-bi': {
+    key: 'reports-bi',
+    departmentNumber: 27,
+    domainName: 'DÉPARTEMENT DÉCISIONNEL & REPORTING BI',
+    subTitle: 'PRISME HOLOGRAPHIQUE 3D, CUBES OLAP & PRÉVISIONS LOGISTIQUES',
+    badgeCode: 'BUSINESS INTELLIGENCE • DATA WAREHOUSE',
+    locationTag: 'CENTRE DÉCISIONNEL STRATÉGIQUE (DATA LAB)',
     primaryColor: '#A855F7',
     accentColor: '#C084FC',
     gradientBg: 'from-purple-950 via-[#1e072a] to-[#0a0110]',
     glowClass: 'shadow-purple-500/50 border-purple-500/60 text-purple-400',
     animationType: 'bi-prism',
     steps: [
-      '▶ Compilation des chiffres d\'affaires par module...',
-      '▶ Évaluation des cadences de manutention et du taux de fret...',
-      '▶ Consolidation des rapports périodiques OHADA...',
-      '✓ Tableaux de bord stratégiques actualisés.',
+      '▶ Compilation des flux multidimensionnels Navires, Flotte et Douane...',
+      '▶ Calcul des métriques de temps de séjour (dwell time) et ratios OHADA...',
+      '▶ Déploiement des graphiques décisionnels et courbes prédictives...',
+      '✓ Matrice BI opérationnelle. Données exécutives prêtes.',
+    ],
+  },
+  bi: {
+    key: 'bi',
+    departmentNumber: 27,
+    domainName: 'TABLEAU DE BORD STRATÉGIQUE EXÉCUTIF',
+    subTitle: 'INDICATEURS CLÉS DE PERFORMANCE & VUE CONSOLIDÉE DIRECTION',
+    badgeCode: 'KPI SUITE • DIRECTOIRE CADC',
+    locationTag: 'SALLE DU DIRECTOIRE GÉNÉRAL',
+    primaryColor: '#A855F7',
+    accentColor: '#F59E0B',
+    gradientBg: 'from-purple-950 via-[#1e072a] to-[#0a0110]',
+    glowClass: 'shadow-purple-500/50 border-purple-500/60 text-purple-400',
+    animationType: 'bi-prism',
+    steps: [
+      '▶ Rapprochement des volumes conteneurs EVP traités...',
+      '▶ Mesure de la rentabilité opérationnelle par axe de fret...',
+      '▶ Synthèse du chiffre d\'affaires consolidé...',
+      '✓ Tableau de bord stratégique prêt.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 13. ADMIN SAAS & GOUVERNANCE MULTI-TENANT
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 28. GOUVERNANCE & ADMINISTRATION SAAS CADC
+  // ═══════════════════════════════════════════════════════════════════════════
   'admin-tenant': {
     key: 'admin-tenant',
-    domainName: 'GOUVERNANCE & TENANT ENTREPRISE',
-    subTitle: 'GESTION DES ACCRÉDITATIONS, AGENCES, RÔLES RBAC & AUDIT PISTE',
+    departmentNumber: 28,
+    domainName: 'DÉPARTEMENT GOUVERNANCE & TENANT',
+    subTitle: 'MATRICE RBAC, ACCRÉDITATIONS, AGENCES & PISTE D\'AUDIT',
     badgeCode: 'RBAC MULTI-TENANT • CONFORMITÉ SYSTÈME',
-    locationTag: 'CENTRE DE CONTRÔLE GOUVERNANCE & ACCRÉDITATIONS',
-    primaryColor: '#64748B', // Slate
-    accentColor: '#D946EF', // Fuchsia
+    locationTag: 'CENTRE DE CONTRÔLE GOUVERNANCE & SÉCURITÉ SYSTÈME',
+    primaryColor: '#64748B',
+    accentColor: '#D946EF',
     gradientBg: 'from-slate-950 via-[#111622] to-[#05070a]',
     glowClass: 'shadow-slate-500/50 border-slate-500/60 text-slate-400',
     animationType: 'rbac-matrix',
     steps: [
       '▶ Chargement de la matrice granulaire des rôles et habilitations...',
-      '▶ Contrôle de l\'étanchéité multi-tenant et politique de sécurité...',
-      '▶ Inspection des journaux d\'audit et des signatures d\'accès...',
-      '✓ Console de gouvernance déverrouillée. Administration prête.',
+      '▶ Contrôle de l\'étanchéité multi-tenant et des politiques d\'isolation...',
+      '▶ Inspection des journaux d\'audit et certificats de signature...',
+      '✓ Console de gouvernance déverrouillée. Administration opérationnelle.',
     ],
   },
   'admin-saas': {
     key: 'admin-saas',
-    domainName: 'ADMINISTRATION CADC SAAS',
-    subTitle: 'SUPERVISION MULTI-TENANT, GESTION DES ENTREPRISES & LICENCES',
+    departmentNumber: 28,
+    domainName: 'CONSOLE ADMINISTRATION CADC HQ',
+    subTitle: 'SUPERVISION MULTI-LOCATAIRES, LICENCES & CLUSTERS CLOUD',
     badgeCode: 'CORE SYSTEM • NIVEAU SUPERADMIN CADC',
-    locationTag: 'CODE AXIS DIGITAL CAMEROUN (HQ)',
-    primaryColor: '#D946EF', // Fuchsia
+    locationTag: 'CODE AXIS DIGITAL CAMEROUN (SIÈGE)',
+    primaryColor: '#D946EF',
     accentColor: '#F59E0B',
     gradientBg: 'from-fuchsia-950 via-[#260424] to-[#0d010c]',
     glowClass: 'shadow-fuchsia-500/50 border-fuchsia-500/60 text-fuchsia-400',
     animationType: 'rbac-matrix',
     steps: [
-      '▶ Vérification du cluster PostgreSQL et des métriques d\'isolation...',
-      '▶ Contrôle de l\'état de santé des API FastAPI et du broker de messages...',
-      '▶ Supervision de l\'ensemble des tenants déployés...',
+      '▶ Vérification de l\'intégrité des bases PostgreSQL et brokers...',
+      '▶ Contrôle de charge des API FastAPI et nœuds de calcul...',
+      '▶ Supervision de l\'ensemble des entreprises hébergées...',
       '✓ Console SaaS CADC active.',
     ],
   },
   admin: {
     key: 'admin',
-    domainName: 'PARAMÈTRES & GOUVERNANCE',
-    subTitle: 'CONFIGURATIONS SYSTÈME, UTILISATEURS & ACCÈS',
-    badgeCode: 'GOUVERNANCE SYSTÈME',
-    locationTag: 'CENTRE D\'ADMINISTRATION',
+    departmentNumber: 28,
+    domainName: 'ADMINISTRATION & SÉCURITÉ SYSTÈME',
+    subTitle: 'PARAMÈTRES GÉNÉRAUX, SESSIONS & CONTRÔLE D\'ACCÈS',
+    badgeCode: 'ADMIN SYSTÈME • HABILITATIONS',
+    locationTag: 'CENTRE D\'ADMINISTRATION GÉNÉRALE',
     primaryColor: '#64748B',
     accentColor: '#94A3B8',
     gradientBg: 'from-slate-950 via-[#111622] to-[#05070a]',
     glowClass: 'shadow-slate-500/50 border-slate-500/60 text-slate-400',
     animationType: 'rbac-matrix',
     steps: [
-      '▶ Vérification des droits administrateur...',
-      '▶ Chargement des référentiels système...',
-      '▶ Contrôle des certificats de connexion...',
-      '✓ Espace Administration prêt.',
+      '▶ Vérification des accréditations administrateur...',
+      '▶ Chargement des référentiels système d\'entreprise...',
+      '▶ Contrôle des jetons de session actifs...',
+      '✓ Administration système prête.',
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 14. DASHBOARD GLOBAL (COCKPIT CENTRAL)
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TRANSVERSAL : DASHBOARD GLOBAL & COCKPIT NAVIRE → CLIENT
+  // ═══════════════════════════════════════════════════════════════════════════
   dashboard: {
     key: 'dashboard',
+    departmentNumber: 0,
     domainName: 'COCKPIT GLOBAL EVO-LOG',
     subTitle: 'SYNTHÈSE INTÉGRÉE NAVIRE → CLIENT & SUPERVISION OPÉRATIONNELLE',
-    badgeCode: 'CADC ERP • SUITE LOGISTIQUE INTÉGRÉE',
+    badgeCode: 'CADC ERP • 28 DÉPARTEMENTS INTÉGRÉS',
     locationTag: 'DIRECTION GÉNÉRALE & SALLE DES OPÉRATIONS',
-    primaryColor: '#6366F1', // Indigo Stratégique
-    accentColor: '#F59E0B', // Or
+    primaryColor: '#6366F1',
+    accentColor: '#F59E0B',
     gradientBg: 'from-indigo-950 via-[#0a0e28] to-[#02040c]',
     glowClass: 'shadow-indigo-500/50 border-indigo-500/60 text-indigo-400',
     animationType: 'strategic-compass',
     steps: [
-      '▶ Agrégation des flux opérationnels Navire → Douane → Route → Entrepôt...',
+      '▶ Agrégation des flux opérationnels des 28 départements métiers...',
       '▶ Synchronisation des alertes en direct et indicateurs clés de performance...',
       '▶ Déploiement de la vue transversale consolidée de l\'entreprise...',
       '✓ Cockpit Global déployé. Bienvenue sur EVO-LOG SaaS.',
@@ -739,54 +1099,127 @@ export const DOMAIN_LOADING_CONFIGS: Record<string, DomainLoadingConfig> = {
 };
 
 /**
- * Résout la configuration visuelle pour n'importe quelle route ou clé de module.
+ * Résolution intelligente de n'importe quelle route ou clé de module vers son département
  */
 export function resolveDomainLoadingConfig(routeOrKey: string): DomainLoadingConfig {
   const clean = routeOrKey.replace(/^\/+/, '').split('/')[0] || 'dashboard';
 
-  // Correspondance directe
+  // 1. Correspondance directe
   if (DOMAIN_LOADING_CONFIGS[clean]) {
     return DOMAIN_LOADING_CONFIGS[clean];
   }
 
-  // Correspondances partielles ou alias
-  if (clean.includes('comptabilite') || clean.includes('cloture') || clean.includes('journal')) {
+  // 2. Mappages fins vers les 28 départements
+  // Dpt 1 : Comptabilité OHADA
+  if (clean.includes('compta') || clean.includes('syscohada') || clean.includes('journal') || clean.includes('grand-livre') || clean.includes('cloture')) {
     return DOMAIN_LOADING_CONFIGS['comptabilite-ohada'];
   }
-  if (clean.includes('finance') || clean.includes('invoicing') || clean.includes('tresorerie') || clean.includes('frais')) {
+  // Dpt 2 : Finance OHADA
+  if (clean.includes('finance') || clean.includes('tresorerie') || clean.includes('banque') || clean.includes('encaissement') || clean.includes('facture')) {
     return DOMAIN_LOADING_CONFIGS['finance-ohada'];
   }
-  if (clean.includes('chat') || clean.includes('collaborat') || clean.includes('notif')) {
-    return DOMAIN_LOADING_CONFIGS['chat'];
-  }
-  if (clean.includes('port') || clean.includes('acconage') || clean.includes('navire')) {
+  // Dpt 3 : Port Operations
+  if (clean.includes('port-operations') || clean.includes('navire') || clean.includes('escale') || clean.includes('control-tower')) {
     return DOMAIN_LOADING_CONFIGS['port-operations'];
   }
-  if (clean.includes('transit') || clean.includes('douane') || clean.includes('declarant') || clean.includes('sydonia')) {
+  // Dpt 4 : Acconage
+  if (clean.includes('acconage') || clean.includes('quai') || clean.includes('manutention') || clean.includes('weighbridge')) {
+    return DOMAIN_LOADING_CONFIGS['acconage'];
+  }
+  // Dpt 5 : Transit & GUCE
+  if (clean.includes('transit') || clean.includes('guce') || clean.includes('bill-of-loading') || clean.includes('connaissement')) {
     return DOMAIN_LOADING_CONFIGS['transit-douane'];
   }
-  if (clean.includes('transport') || clean.includes('flotte') || clean.includes('chauffeur') || clean.includes('tracking')) {
+  // Dpt 6 : Douane réelle & Déclarant
+  if (clean.includes('customs') || clean.includes('declarant') || clean.includes('douane') || clean.includes('dum') || clean.includes('bae')) {
+    return DOMAIN_LOADING_CONFIGS['real-customs'];
+  }
+  // Dpt 7 : Transport & Flotte
+  if (clean.includes('transport') || clean.includes('flotte') || clean.includes('tracking') || clean.includes('gps') || clean.includes('convoi')) {
     return DOMAIN_LOADING_CONFIGS['transport-flotte'];
   }
-  if (clean.includes('magasin') || clean.includes('stock') || clean.includes('wms') || clean.includes('entrepot')) {
+  // Dpt 8 : Chauffeur
+  if (clean.includes('chauffeur') || clean.includes('conducteur') || clean.includes('mobile-chauffeur')) {
+    return DOMAIN_LOADING_CONFIGS['chauffeur'];
+  }
+  // Dpt 9 : Magasin & Stock
+  if (clean.includes('magasin-stock') || clean.includes('magasin') || clean.includes('stock') || clean.includes('wms') || clean.includes('entrepot') || clean.includes('reception')) {
     return DOMAIN_LOADING_CONFIGS['magasin-stock'];
   }
-  if (clean.includes('parc') || clean.includes('gmao') || clean.includes('maintenance') || clean.includes('vehicule')) {
+  // Dpt 10 : Portail Magasinier
+  if (clean.includes('magasinier') || clean.includes('scan-gun') || clean.includes('douchette')) {
+    return DOMAIN_LOADING_CONFIGS['portail-magasinier'];
+  }
+  // Dpt 11 : Cycle conteneurs
+  if (clean.includes('container') || clean.includes('conteneur') || clean.includes('demurrage')) {
+    return DOMAIN_LOADING_CONFIGS['container-lifecycle'];
+  }
+  // Dpt 12 : Parc Véhicules
+  if (clean.includes('parc') || clean.includes('vehicule') || clean.includes('engin')) {
     return DOMAIN_LOADING_CONFIGS['parc-vehicules'];
   }
-  if (clean.includes('qhse') || clean.includes('securite') || clean.includes('compliance') || clean.includes('isps')) {
+  // Dpt 13 : Maintenance GMAO
+  if (clean.includes('maintenance') || clean.includes('gmao') || clean.includes('technicien') || clean.includes('atelier')) {
+    return DOMAIN_LOADING_CONFIGS['maintenance'];
+  }
+  // Dpt 14 : Carburant
+  if (clean.includes('fuel') || clean.includes('carburant') || clean.includes('gazole')) {
+    return DOMAIN_LOADING_CONFIGS['fuel-guard'];
+  }
+  // Dpt 15 : QHSE Sécurité
+  if (clean.includes('qhse-securite') || clean.includes('qhse') || clean.includes('securite') || clean.includes('compliance') || clean.includes('isps')) {
     return DOMAIN_LOADING_CONFIGS['qhse-securite'];
   }
-  if (clean.includes('rh') || clean.includes('personnel') || clean.includes('employe') || clean.includes('shift')) {
+  // Dpt 16 : Incidents portuaires
+  if (clean.includes('incident') || clean.includes('alert') || clean.includes('danger')) {
+    return DOMAIN_LOADING_CONFIGS['portail-qhse'];
+  }
+  // Dpt 17 : RH & Personnel
+  if (clean.includes('rh') || clean.includes('personnel') || clean.includes('paie') || clean.includes('social')) {
     return DOMAIN_LOADING_CONFIGS['rh-personnel'];
   }
+  // Dpt 18 : Portail Employé
+  if (clean.includes('employe') || clean.includes('agent') || clean.includes('mon-espace')) {
+    return DOMAIN_LOADING_CONFIGS['portail-employe'];
+  }
+  // Dpt 19 : Chef Personnel & Quarts
+  if (clean.includes('chef-personnel') || clean.includes('shift') || clean.includes('releve') || clean.includes('quart')) {
+    return DOMAIN_LOADING_CONFIGS['chef-personnel'];
+  }
+  // Dpt 20 : Frais & Indemnités
+  if (clean.includes('frais') || clean.includes('indemnite') || clean.includes('per-diem')) {
+    return DOMAIN_LOADING_CONFIGS['portail-frais'];
+  }
+  // Dpt 21 : Hub Collaboratif & Chat
+  if (clean.includes('chat') || clean.includes('message') || clean.includes('discussion') || clean.includes('canal')) {
+    return DOMAIN_LOADING_CONFIGS['chat'];
+  }
+  // Dpt 22 : Portail Collaborateur
+  if (clean.includes('collaborat') || clean.includes('hub')) {
+    return DOMAIN_LOADING_CONFIGS['portail-collaborateur'];
+  }
+  // Dpt 23 : Client B2B
   if (clean.includes('client') || clean.includes('b2b') || clean.includes('portal')) {
     return DOMAIN_LOADING_CONFIGS['client-b2b'];
   }
-  if (clean.includes('report') || clean.includes('bi')) {
+  // Dpt 24 : Commercial & Cotations
+  if (clean.includes('cotation') || clean.includes('commercial') || clean.includes('tarif') || clean.includes('pricing') || clean.includes('devis')) {
+    return DOMAIN_LOADING_CONFIGS['cotations'];
+  }
+  // Dpt 25 : Achats & Fournisseurs
+  if (clean.includes('purchase') || clean.includes('procurement') || clean.includes('fournisseur') || clean.includes('achat') || clean.includes('supplier')) {
+    return DOMAIN_LOADING_CONFIGS['procurement'];
+  }
+  // Dpt 26 : Fiscalité DGI
+  if (clean.includes('fiscal') || clean.includes('dgi') || clean.includes('impot') || clean.includes('tax')) {
+    return DOMAIN_LOADING_CONFIGS['fiscalite-cameroun'];
+  }
+  // Dpt 27 : BI & Décisionnel
+  if (clean.includes('bi') || clean.includes('report') || clean.includes('analytics') || clean.includes('stat')) {
     return DOMAIN_LOADING_CONFIGS['reports-bi'];
   }
-  if (clean.includes('admin') || clean.includes('tenant') || clean.includes('setting')) {
+  // Dpt 28 : Gouvernance & Admin
+  if (clean.includes('admin') || clean.includes('tenant') || clean.includes('saas') || clean.includes('setting') || clean.includes('role')) {
     return DOMAIN_LOADING_CONFIGS['admin-tenant'];
   }
 

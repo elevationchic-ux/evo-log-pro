@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { NAVIGATION_REGISTRY, ModuleNavConfig } from "@/config/navigationRegistry";
 import { localizeTitle, localizeSubLabel } from "@/config/navI18n";
 import { useSettings } from "@/components/layout/SettingsProvider";
+import { useDomainTransition } from "@/components/shared/DomainTransitionContext";
 import {
   LayoutDashboard,
   Truck,
@@ -72,6 +73,7 @@ export default function ModuleSidebar({
   const pathname = usePathname();
   const { data: session } = useSession();
   const { language } = useSettings();
+  const { triggerDomainTransition } = useDomainTransition();
 
   // Access Warning Modal State
   const [deniedModalItem, setDeniedModalItem] = useState<{ label: string; key: string } | null>(null);
@@ -199,7 +201,15 @@ export default function ModuleSidebar({
                 <Link
                   href={item.path}
                   title={title}
-                  onClick={() => isMobile && onClose && onClose()}
+                  onClick={(e) => {
+                    if (isMobile && onClose) onClose();
+                    const currentRoot = pathname ? pathname.replace(/^\/+/, '').split('/')[0] : '';
+                    const targetRoot = item.path ? item.path.replace(/^\/+/, '').split('/')[0] : '';
+                    if (currentRoot && targetRoot && currentRoot !== targetRoot) {
+                      e.preventDefault();
+                      triggerDomainTransition(item.path, 1700);
+                    }
+                  }}
                   className={`flex-1 min-w-0 flex items-center gap-3 py-2.5 rounded-xl text-sm font-semibold transition-all group border ${
                     isCollapsed ? "px-2 justify-center" : "px-3"
                   } ${

@@ -10,9 +10,9 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app tests` | ✅ EXIT=0 |
-| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 20) | ✅ **645 passed, 2 xfailed, 0 failed** (344 s) au run definitif du batch 20, `PYTEST_EXIT=0`, **`DB_CHANGED=False`**. Le batch 20 ajoute 6 tests ; les autres evoluations de total (625 → 645) incluent des tests d'une session concurrente (tranche devis 030), sans echec imputable aux lots 16 a 20. Historique : le run du batch 18 etait **rouge de cause externe** (commits WIP concurrents, attribution prouvee par worktree temoin), re-vert des le batch 19 (§20/§21). Les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`**  corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17 a §22). |
-| `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1138 routes OpenAPI au batch 20) |
-| `npx tsc --noEmit` (frontend) | ✅ EXIT=0 |
+| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 21) | ✅ **659 passed, 2 xfailed, 0 failed** (538 s) au run definitif du batch 21, `PYTEST_EXIT=0`. Le batch 21 ajoute 7 tests ; les autres evoluations de total (625 → 645 → 659) incluent des tests d'une session concurrente (tranches devis 030, maintenance 031/032), sans echec imputable aux lots 16 a 21. Historique : le run du batch 18 etait **rouge de cause externe** (commits WIP concurrents, attribution prouvee par worktree temoin), re-vert des le batch 19 (§20/§21). Les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`**  corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17 a §22 ; au run du batch 21 le hash etait **illisible** — base verrouillee par un process de dev concurrent — declare comme tel plutot que pretendu). |
+| `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1140 routes OpenAPI au batch 21) |
+| `npx tsc --noEmit` (frontend) | ❌ au 01/10 (batch 21) : erreur dans `transit-douane/dashboard/page.tsx` (import `ReceiptText` inexistant dans lucide-react), **commise par une session concurrente**, aucun lien avec le lot 16-21 — voir §23. Etait ✅ EXIT=0 aux batches precedents. |
 
 ---
 
@@ -1023,6 +1023,95 @@ que par une migration reelle, puis journaliser un `MouvementStock` seulement
 quand l'operateur a designe la ligne de retour ET que la marchandise n'est pas
 detruite, est la suite logique — une absence de reintegration se declare dans
 les notes, elle ne se simule pas.
+
+---
+
+## 23. Batch 21 — RBAC granulaire sur `/magasin-avance` : 43 endpoints qui n'attendaient qu'un droit
+
+### Contexte et choix de la cible
+
+Le backlog (`TODO.md`, phase 6) porte une ligne ⏳ : « Étendre `require_perm`
+au-dela des domaines coeur (~323 routes restantes) ». Audit de l'etat reel :
+une session concurrente a deja converti transport/comptabilite/magasin
+(8 fichiers, ~180 appels `require_perm`). Les 43 endpoints de
+`magasin_avance.py` — reconstruits aux batches 16-20 — etaient les plus gros
+restants proteges par la **seule authentification** : n'importe quel
+utilisateur connecte pouvait valider une reception, traiter un retour ou
+exporter les KPI. C'est cette cible qui a ete traitee, sans chevauchement
+avec la session concurrente (aucun de ses fichiers n'est touche).
+
+### Conversion (mapping explicite, pas de default)
+
+Un script one-shot (`scripts/scratch_apply_magasin_perms.py`) remplace
+chaque `Depends(get_current_user)` par `Depends(require_perm("…"))` avec une
+table (methode + chemin) → code : **toute route sans mapping ou tout mapping
+sans route fait echouer le script** — pas de protection « par defaut »
+inventee. Resultat : 43/43 converties, 19 codes distincts, zero code fantome
+(reverifie contre `iter_permission_rows()` du catalogue).
+
+| Secteur | Codes appliques |
+|---|---|
+| Peremptions / FEFO | lecture `magasin.stock.read` ; poser une peremption `magasin.mouvement.create` |
+| Reservations / kits / colis | execution `magasin.picking.*` ; consommer/assembler (mouvement reel) `magasin.mouvement.create` |
+| Transferts | `magasin.mouvement.create` (un transfert EST un couple de mouvements) |
+| Inventaires | `magasin.inventaire.read/create/modify` ; **valider** `…approve` |
+| Receptions | `achats.reception.read/create/modify` ; **valider/refuser** `…approve` |
+| Retours / litiges | declaration `magasin.mouvement.create` ; **traiter/resoudre** `…approve` |
+| Reappro automatique | `achats.commande.create` — un vrai acte d'achat, pas un geste de depot |
+| KPI rotation | `magasin.mouvement.export` ; precision = lecture d'inventaire |
+
+### Roles : le catalogue complet, avec deux bugs reels trouves par les tests
+
+La conversion aurait pu verrouiller le metier ; le moteur `can()` est additif
+(level 0/1 bypass, repli `modules_allowed` pour un tenant jamais seede), mais
+les roles granulaires devaient etre alignes. `MAGASINIER` etendu a toute
+l'execution (14 codes, **aucune approval**) ; nouveau `CHEF_MAGASIN` level 2
+(`magasin.*.*` + approvals + `achats.commande.create`). Deux premieres
+versions des tests ont signale deux vraies incoherences de conception,
+corrigees dans le catalogue : le chef ne pouvait pas **creer** une reception
+(pourtant il les valide), et regle « tout sauf approve pour le magasinier »
+lui aurait donne la commande d'achat automatique — refusee desormais, avec
+assertion rouge explicite.
+
+### Migration 033 + tests
+
+- `migrations/versions/033_rbac_magasin_grants.py` : seed **purement additif**
+  (codes manquants, role CHEF_MAGASIN, liens supplementaires MAGASINIER) ;
+  ne supprime rien, downgrade = pass (convention 027). Garde explicite :
+  tables RBAC absentes → **RuntimeError nommant la precondition** au lieu de
+  passer en silence. Tete de chaine verifiee : `033_rbac_magasin_grants`.
+- `tests/unit/test_rbac_magasin_perms.py` : ✅ **7 passed** — parite
+  catalogue, coverage MAGASINIER/CHEF_MAGASIN dans les deux sens (vert
+  autorise, rouge interdit), **403 HTTP reel** avec utilisateur limite
+  (lecture 200 / declaration 403 / approval 403 **avant toute ecriture**,
+  verrouillee par comptage), seed 033 rejoue sans duplication, et refus
+  explicite sur base sans tables RBAC.
+
+### Verification
+
+- Non-régression ciblée : moteur RBAC + batches 17/18/19/20 + chaîne migrations ✅ **45 passed** — dont `test_magasin_avance_inventaires_fournisseurs.py` (batch 19) dont les utilisateurs SuperAdmin passent par le bypass level 0/1 du moteur, aucun test d'identité à réécrire.
+- Suite complete (commande CI) : ✅ **659 passed, 2 xfailed, 0 failed** (538 s), `PYTEST_EXIT=0`. Le delta vs 645 inclut les 7 tests du batch 21 et des tests d'une session concurrente. Control `DB_CHANGED` **impossible ce run** : `kamlog_erp.db` verrouille par un process de dev concurrent (Get-FileHash echoue) ; l'absence de pollution repose sur le contrat conftest (`DATABASE_URL=:memory:` force, exit 0 = aucun fallback vers l'engine reel), et le hash n'a pas ete declare a tort.
+- `compileall` ✅ EXIT=0 ; `import app.main` ✅ OK (**1140** chemins OpenAPI, derive concurrente inclue).
+- Frontend : **aucun changement batch 21** ; `audit_frontend.py --strict-honesty` ✅ EXIT=0. `tsc --noEmit` ❌ **rouge de cause externe** : import `ReceiptText` inexistant dans `lucide-react`, committe par la session concurrente sur `transit-douane/dashboard/page.tsx` (ni mon fichier, ni mon lot) — signale, volontairement **ne corrige pas** pour ne pas ecraser une session active.
+
+### Reste (hors perimetre du batch, signale)
+
+- ~40 autres routeurs restent proteges par la seule authentification (rh 43,
+  qhse 43, transit_avance 40, acconage_avance 38, finance 37…) — la ligne ⏳
+  du TODO phase 6 n'est pas close ; chaque future tranche devra le meme
+  mapping explicite + alignement roles.
+- `visible_user_ids` n'est toujours pas branche sur les listes portant
+  `created_by`/`department_id` (2e moitie de la ligne ⏳).
+- La description de role `MAGASINIER` changee dans le catalogue ne remet pas
+  a jour la colonne `description` des lignes existantes (033 est additive
+  sur les liens, pas sur les metastadonnees) — cosmetique, declare.
+- L'erreur `tsc` concurrente devra etre reparee par son auteur ou dans un
+  lot dedie transit-douane.
+
+➡️ Zero-Mock applique a l'autorisation : un endpoint qui « reussit » devant
+n'importe qui est une faille habillee en fonctionnalite ; ici chaque droit
+ requis existe au catalogue, chaque role qui doit agir peut agir — et la
+ preuve du 403 est un appel HTTP reel, pas une assertion sur un mock.
 
 ---
 
