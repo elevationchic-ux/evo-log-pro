@@ -8,22 +8,28 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono' })
 
 export const metadata: Metadata = {
-  title: 'EVO-LOG  Plateforme ERP Logistique SaaS • CADC',
-  description: 'Plateforme ERP Logistique SaaS Multi-Entreprises de Classe Mondiale par Code Axis Digital Cameroun',
+  title: 'EVO-LOG — Plateforme ERP Logistique SaaS • CADC',
+  description: 'Plateforme ERP Logistique SaaS Multi-Entreprises de Classe Mondiale par Code Axis Digital Cameroun (CADC) — Logistique, Transit & Acconage Portuaire.',
   icons: {
     icon: [
-      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+      // SVG (vectoriel — parfait à toutes les tailles, modern browsers)
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      // PNG fallbacks
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/icon-192x192.png',  sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png',  sizes: '512x512', type: 'image/png' },
     ],
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
+    shortcut: '/favicon.svg',
   },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'EVO-LOG SaaS',
+    title: 'EVO-LOG',
   },
 }
 

@@ -1,29 +1,51 @@
 {
-  "name": "EVO-LOG SaaS",
+  "name": "EVO-LOG — ERP Logistique & Portuaire",
   "short_name": "EVO-LOG",
-  "description": "ERP Logistique - Gestion Transport, Transit & Magasin",
+  "description": "Plateforme ERP Logistique SaaS Multi-Entreprises — Logistique, Transit & Acconage Portuaire. Par CADC Cameroun.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1e40af",
+  "background_color": "#020c1b",
+  "theme_color": "#f59e0b",
   "orientation": "portrait-primary",
+  "lang": "fr",
+  "categories": ["business", "productivity", "utilities"],
   "icons": [
+    {
+      "src": "/icons/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
     }
-  ]
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false
 }
