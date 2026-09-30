@@ -1916,8 +1916,8 @@ applyAdvanced(ADVANCED_SUBMODULES_WAVE2);
 // ----------------------------------------------------------------------------
 // ONDE 3 — derniers écrans métier RéELS non doublonnés restés hors menu.
 // (Les routes /logout, /settings, /chauffeur, /audit, /role, /tenant, /tiers,
-// /suppliers restent volontairement hors liste : actions systéme ou doublons
-// des modules canoniques djá câblés.)
+// /suppliers restent volontairement hors liste : actions systeme ou doublons
+// des modules canoniques deja cablés.)
 // ----------------------------------------------------------------------------
 const ADVANCED_SUBMODULES_WAVE3: AdvancedSubModuleEntry[] = [
   { family: 'finance-ohada', label: 'Acquisitions & Immobilisations', path: '/acquisition', icon: TrendingUp, badge: 'Immo', description: 'Suivi des acquisitions et entrees d’immobilisations', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
