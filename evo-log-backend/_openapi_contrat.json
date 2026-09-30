@@ -13068,6 +13068,9 @@
   "/api/v1/admin/users/{user_id}": {
    "put": []
   },
+  "/api/v1/admin/users/{user_id}/roles": {
+   "put": []
+  },
   "/api/v1/admin/users/{user_id}/status": {
    "patch": []
   },

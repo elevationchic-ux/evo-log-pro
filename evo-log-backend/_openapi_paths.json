@@ -210,6 +210,7 @@
  "/api/v1/admin/users",
  "/api/v1/admin/users/{user_id}",
  "/api/v1/admin/users/{user_id}/reset-password",
+ "/api/v1/admin/users/{user_id}/roles",
  "/api/v1/admin/users/{user_id}/status",
  "/api/v1/ai/assistant/chat",
  "/api/v1/ai/assistant/feedback",
