@@ -36,8 +36,8 @@ export default function MaintenancePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Form states
-  const [truckId, setTruckId] = useState('');
+  // Form states : le vehicule est choisi dans le parc, plus saisi en libre.
+  const [vehiculeId, setVehiculeId] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('NORMALE');
   const [typeMaintenance, setTypeMaintenance] = useState('PREVENTIVE');
@@ -76,7 +76,7 @@ export default function MaintenancePage() {
       toast.success("Ordre de travail atelier enregistré !");
       queryClient.invalidateQueries({ queryKey: ['maintenance'] });
       setIsModalOpen(false);
-      setTruckId('');
+      setVehiculeId('');
       setDescription('');
     },
     onError: (err: any) => {
@@ -86,10 +86,14 @@ export default function MaintenancePage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aucun remplacement par une valeur par defaut : l'API refuse une
-    // immatriculation inconnue au parc, et l'erreur est affichee telle quelle.
+    if (!vehiculeId) {
+      toast.error("Aucun vehicule selectionne : un ordre de travail s'ouvre sur un camion du parc.");
+      return;
+    }
+    const vehicule = vehicules.find((v: any) => String(v.id) === vehiculeId);
     createMutation.mutate({
-      immatriculation_camion: truckId.trim(),
+      vehicule_id: Number(vehiculeId),
+      immatriculation_camion: vehicule?.immatriculation,
       description: description.trim(),
       priorite: priority,
       type_maintenance: typeMaintenance,
