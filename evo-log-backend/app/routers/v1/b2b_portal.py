@@ -303,10 +303,26 @@ def calculate_quote(
 
     total_ht = round(sum(l["montant_ht"] for l in lignes), 2)
     total_tva = round(sum(l["montant_tva"] for l in lignes), 2)
+    # ``client_nom`` est non nullable en base : on le prend depuis le client
+    # reellement resolu, sinon depuis le nom saisi. Jamais depuis une valeur
+    # par defaut qui ferait paraitre un devis anonyme comme un devis client.
+    client_id = payload.get("client_id")
+    if client_id in (None, ""):
+        nom_client = (payload.get("client_nom") or "").strip()
+        if not nom_client:
+            raise HTTPException(
+                status_code=400,
+                detail="client_id ou client_nom requis : un devis sans destinataire "
+                       "ne peut pas etre attribue a un compte.",
+            )
+        client_resolu = None
+    else:
+        client_resolu = _client_ou_erreur(db, client_id)
+        nom_client = client_resolu.name
     cotation = CotationDevis(
         company_id=_id_enterprise(current_user),
         reference=_reference_unique(db, CotationDevis, CotationDevis.reference, "DEV"),
-        client_nom=(payload.get("client_nom") or "").strip(),
+        client_nom=nom_client,
         origine=payload.get("port_of_loading") or payload.get("origine") or "",
         destination=payload.get("final_destination") or payload.get("destination") or "",
         nature_fret=service,
@@ -320,7 +336,7 @@ def calculate_quote(
             "cargo_nature": payload.get("cargo_nature"),
             "services_additionnels": extras,
         },
-        client_id=payload.get("client_id"),
+        client_id=client_resolu.id if client_resolu else None,
         statut="SOUMIS",
     )
     db.add(cotation)

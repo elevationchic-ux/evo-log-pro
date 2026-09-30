@@ -365,6 +365,10 @@ class RetourClient(Base):
     numero_retour = Column(String(50), unique=True, nullable=False)
     client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
     bon_sortie_id = Column(Integer, ForeignKey('bons_sortie.id'))
+    # Batch 20 (migration 029) : la ligne de stock ou retourne physiquement la
+    # marchandise. NULLable = « ligne non precisee », et dans ce cas /traiter
+    # ne reintegre RIEN (Zero-Mock : aucun mouvement invente).
+    stock_id = Column(Integer, ForeignKey('stocks.id'), index=True)
     date_retour = Column(Date, server_default=func.current_date())
     type_retour = Column(String(50))  # defectif, mauvais_quantite, refus, erreur_livraison
     motif = Column(Text)

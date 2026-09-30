@@ -304,6 +304,9 @@ class RefusBonReception(BaseModel):
 class RetourClientCreate(BaseModel):
     client_id: int
     bon_sortie_id: Optional[int] = None
+    # Batch 20 : ligne de stock ou la marchandise retourne physiquement.
+    # Absente = /traiter ne reintegre rien (aucun mouvement invente).
+    stock_id: Optional[int] = None
     type_retour: Optional[str] = None  # defectif, mauvais_quantite, refus, erreur_livraison
     motif: str
     quantite: Optional[float] = None
@@ -329,6 +332,7 @@ class RetourClientResponse(BaseModel):
     numero_retour: str
     client_id: int
     bon_sortie_id: Optional[int] = None
+    stock_id: Optional[int] = None
     date_retour: Optional[date] = None
     type_retour: Optional[str] = None
     motif: Optional[str] = None
