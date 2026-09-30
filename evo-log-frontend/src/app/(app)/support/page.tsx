@@ -15,7 +15,7 @@ import {
   PhoneCall,
   Mail
 } from 'lucide-react';
-import { supportAPI, incidentsAPI } from '@/lib/api-client';
+import { supportAPI } from '@/lib/api-client';
 import { toast } from 'sonner';
 
 export default function SupportPage() {
