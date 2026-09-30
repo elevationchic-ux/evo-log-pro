@@ -41,7 +41,7 @@ export default function MaintenanceViewPage() {
   if (!id) {
     return (
       <div className="p-6 max-w-2xl mx-auto text-center space-y-4">
-        <Wrench className="w-16 h-16 text-amber-500/40 mx-auto" />
+        <Wrench className="w-16 h-16 text-orange-500/40 mx-auto" />
         <h1 className="text-xl font-bold text-on-surface">Consultation d'un Ordre de Travail Atelier</h1>
         <p className="text-sm text-on-surface-variant">
           Veuillez sélectionner un ordre d'intervention depuis la liste de maintenance, ou saisir son numéro.
@@ -118,7 +118,7 @@ export default function MaintenanceViewPage() {
           </button>
           <div>
             <h1 className="text-xl font-bold text-on-surface flex items-center gap-2">
-              <Wrench className="w-5 h-5 text-amber-600" />
+              <Wrench className="w-5 h-5 text-orange-600" />
               Ordre de Travail #{order.id || id}
             </h1>
             <p className="text-xs text-on-surface-variant">
@@ -168,7 +168,7 @@ export default function MaintenanceViewPage() {
         {/* Diagnostic et Pièces */}
         <div className="bg-surface border border-outline rounded-2xl p-5 space-y-4">
           <h2 className="font-bold text-sm text-on-surface border-b border-outline pb-2 flex items-center gap-2">
-            <Layers className="w-4 h-4 text-amber-600" /> Diagnostic & Pièces Remplacées
+            <Layers className="w-4 h-4 text-orange-600" /> Diagnostic & Pièces Remplacées
           </h2>
           <div className="text-xs text-on-surface space-y-3">
             <div>

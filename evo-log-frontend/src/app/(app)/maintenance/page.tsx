@@ -9,13 +9,25 @@ import { toast } from 'sonner';
 
 // Couleur du badge d'atelier selon le statut reellement persiste. Une valeur
 // absente de la base reste grisee : elle n'est pas requalifiee « apprete ».
+// L'orange est reserve a l'identite du module : « attente pieces » est note
+// violet pour ne pas confondre etat metier et couleur de rubrique.
 function statutBadge(statut?: string): string {
   const s = String(statut || '').toUpperCase();
   if (s === 'TERMINE') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
   if (s === 'EN_COURS') return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-  if (s === 'ATTENTE_PIECES') return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+  if (s === 'ATTENTE_PIECES') return 'bg-violet-500/10 text-violet-400 border-violet-500/20';
   if (s === 'ANNULE') return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
   return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+}
+
+// Priorite telle que stockee (basse / normale / urgente / critique). Rien n'est
+// colore par defaut : une priorite non renseignee reste grise.
+function prioriteBadge(priorite?: string): string {
+  const p = String(priorite || '').toUpperCase();
+  if (p === 'CRITIQUE') return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+  if (p === 'URGENTE') return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+  if (p === 'NORMALE' || p === 'BASSE') return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+  return 'bg-slate-500/10 text-slate-500 border-slate-600/40';
 }
 
 export default function MaintenancePage() {

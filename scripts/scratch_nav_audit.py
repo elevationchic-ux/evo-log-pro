@@ -1,24 +1,29 @@
-"""Audit de la hierarchie de navigation.
+"""Audit de hierarchie, AVEC resolution des redirections.
 
-Croise le NAVIGATION_REGISTRY (chemins affiches dans la sidebar) avec les
-vraies pages Next.js sous app/(app). But : trouver (1) les modules/pages qui
-EXISTENT mais n'apparaissent dans AUCUNE entree de menu (invisibles = la
-plainte 'je ne vois pas les modules avances'), et (2) les entrees de menu qui
-pointent vers une page inexistante (liens morts).
-
-Sortie : liste triee, sans inventer. Les pages de detail (create/edit/view/[id])
- sont légitimement hors menu ; on ne signale que les RACINES de module absentes.
+Le menu (NAVIGATION_REGISTRY) pointe parfois vers des pages qui ne sont qu'un
+redirect() vers le vrai arbre (ex /magasin-stock/dashboard -> /magasin/dashboard).
+Un module n'est DONC caché que si aucune chaine partant d'une entree de menu ne
+l'atteint. On calcule l'ensemble atteignable par fermeture transitive des
+redirect(), puis on signale les racines de pages qui en sont absentes.
 """
 import os
 import re
 import glob
+from collections import deque
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FE = os.path.join(ROOT, "evo-log-frontend", "src")
 REG = os.path.join(FE, "config", "navigationRegistry.ts")
 APP = os.path.join(FE, "app", "(app)")
 
-# --- 1) chemins references dans le registre -------------------------------
+
+def page_to_url(fp):
+    rel = os.path.relpath(fp, APP).replace("\\", "/")
+    rel = os.path.dirname(rel) if rel.lower().endswith("page.tsx") else rel
+    parts = [seg for seg in rel.split("/") if seg and not seg.startswith("(")]
+    return ("/" + "/".join(parts)).rstrip("/") or "/"
+
+
 reg_txt = open(REG, encoding="utf-8").read()
 nav_paths = set()
 for m in re.finditer(r"""path:\s*['"`]([^'"`]+)['"`]""", reg_txt):
@@ -26,62 +31,86 @@ for m in re.finditer(r"""path:\s*['"`]([^'"`]+)['"`]""", reg_txt):
     if p.startswith("/"):
         nav_paths.add(p.split("?")[0].rstrip("/") or "/")
 
-# --- 2) vraies pages -> URLs ----------------------------------------------
-def page_to_url(fp):
-    rel = os.path.relpath(fp, APP).replace("\\", "/")
-    rel = os.path.dirname(rel) if rel.lower().endswith("page.tsx") else rel
-    parts = [seg for seg in rel.split("/") if seg and not seg.startswith("(")]
-    url = "/" + "/".join(parts)
-    return url.rstrip("/")
+pages = sorted({page_to_url(fp) for fp in glob.glob(os.path.join(APP, "**", "page.tsx"), recursive=True)})
 
-pages = []
+# url -> cible de redirect (s'il n'y a qu'un redirect et rien d'essentiel autour)
+RED_RE = re.compile(r"""redirect\(\s*[`'"]([^`'"]+)[`'"]\s*\)""")
+url2red = {}
 for fp in glob.glob(os.path.join(APP, "**", "page.tsx"), recursive=True):
-    pages.append(page_to_url(fp))
-pages = sorted(set(pages))
+    u = page_to_url(fp)
+    txt = open(fp, encoding="utf-8", errors="ignore").read()
+    ms = RED_RE.findall(txt)
+    if ms:
+        url2red[u] = [t.split("?")[0].rstrip("/") or "/" for t in ms]
 
-# racines de module = 1er segment ; le menu doit en couvrir au moins un chemin
+pages_set = set(pages)
+
+
+def resolve(u, seen=None):
+    """Retourne l'ensemble des URLs atteignables depuis u en suivant les redirects."""
+    seen = seen or set()
+    out = set()
+    dq = deque([u])
+    while dq:
+        cur = dq.popleft()
+        if cur in seen:
+            continue
+        seen.add(cur)
+        out.add(cur)
+        for nxt in url2red.get(cur, []):
+            # cible dynamique ?params -> normalise vers la page /params absente
+            base = nxt
+            dq.append(base)
+    return out
+
+
+reachable = set()
+for np in nav_paths:
+    reachable |= resolve(np)
+
+# une racine de page est couverte si AU MOINS une de ses pages est reachable
 def root_of(u):
     seg = u.strip("/").split("/")
     return "/" + seg[0] if seg and seg[0] else "/"
 
-module_roots = {}  # root -> list of page urls
+
+roots = {}
 for u in pages:
-    module_roots.setdefault(root_of(u), []).append(u)
+    roots.setdefault(root_of(u), []).append(u)
 
-# un chemin de menu couvre une racine si prefixe /<root>
-nav_roots = {r for r in module_roots if any(np == r or np.startswith(r + "/") for np in nav_paths)}
+covered_roots = {r for r, us in roots.items() if any(u in reachable for u in us)}
 
-print("=" * 72)
-print(f"entrees de menu (chemins): {len(nav_paths)}   pages reelles: {len(pages)}   racines module: {len(module_roots)}")
-print("=" * 72)
+print("=" * 74)
+print(f"nav={len(nav_paths)}  pages={len(pages)}  racines={len(roots)}  reachable_urls={len(reachable)}")
+print("=" * 74)
 
-print("\n### RACINES DE MODULE ABSENTES DU MENU (invisibles utilisateur) ###")
-missing = sorted(module_roots.keys() - nav_roots)
-for r in missing:
-    print(f"  {r}  ({len(module_roots[r])} pages)")
-if not missing:
-    print("  (aucune - toute racine est couverte)")
+hidden = sorted(set(roots) - covered_roots)
+print("\n### RACINES TOTALEMENT INATTEIGNABLES DEPUIS LE MENU (vrais modules caches) ###")
+for r in hidden:
+    sample = ", ".join(sorted(roots[r])[:4])
+    print(f"  {r:26} ({len(roots[r]):2} pages)  ex: {sample}")
+if not hidden:
+    print("  (aucun)")
 
-print("\n### ENTTRES DE MENU SANS PAGE CORRESPONDANTE (lien mort potentiel) ###")
-def has_page(np):
-    # page exacte, ou dynamique [id]/[x] sur n'importe quel segment
-    for u in pages:
-        segs_menu = np.strip("/").split("/")
-        segs_page = u.strip("/").split("/")
-        if len(segs_menu) != len(segs_page):
-            continue
-        ok = all(sm == sp or sp.startswith("[") for sm, sp in zip(segs_menu, segs_page))
-        if ok:
+print("\n### ENTTRES DE MENU MORTS (aucune page, meme apres redirection) ###")
+# un chemin de menu est 'vivant' s'il existe comme page OU redirige vers une page
+def menu_alive(np):
+    for u in pages_set:
+        sm, sp = np.strip("/").split("/"), u.strip("/").split("/")
+        if len(sm) == len(sp) and all(a == b or b.startswith("[") for a, b in zip(sm, sp)):
             return True
+    # chaine de redirect depuis une page concordante
+    for u in pages_set:
+        sm, sp = np.strip("/").split("/"), u.strip("/").split("/")
+        if len(sm) == len(sp) and all(a == b or b.startswith("[") for a, b in zip(sm, sp)):
+            for t in url2red.get(u, []):
+                if t in pages_set:
+                    return True
     return False
 
-dead = sorted(np for np in nav_paths if not has_page(np))
+
+dead = sorted(np for np in nav_paths if not menu_alive(np))
 for d in dead:
     print(f"  {d}")
 if not dead:
-    print("  (aucun - tout chemin de menu mene a une page)")
-
-print("\n### TOUTES LES RACINES DE MODULE (couvertes ou non) ###")
-for r in sorted(module_roots):
-    flag = "OK-menu" if r in nav_roots else "--ABSENT--"
-    print(f"  [{flag:11}] {r}  ({len(module_roots[r])} pages)")
+    print("  (aucun)")

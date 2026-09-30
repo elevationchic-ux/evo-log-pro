@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 function statutBadge(statut?: string): string {
   const s = String(statut || '').toUpperCase();
   if (s === 'TERMINE') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-  if (s === 'EN_COURS') return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20';
+  if (s === 'EN_COURS') return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
   if (s === 'ANNULE') return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
   return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
 }
@@ -137,7 +137,7 @@ export default function AcconagePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-semibold mb-2 border border-cyan-500/20">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-xs font-semibold mb-2 border border-sky-500/20">
             <Anchor className="w-3.5 h-3.5" />
             K-Acconage • Gestion de Quai & Manutention Portuaire
           </div>
@@ -147,7 +147,7 @@ export default function AcconagePage() {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold px-5 py-3 rounded-xl text-sm shadow-lg shadow-cyan-600/30 transition-all hover:scale-[1.02]"
+          className="inline-flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-semibold px-5 py-3 rounded-xl text-sm shadow-lg shadow-sky-600/30 transition-all hover:scale-[1.02]"
         >
           <Plus className="w-4 h-4" />
           Enregistrer une Opération
@@ -168,7 +168,7 @@ export default function AcconagePage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher par navire ou escale..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+              className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500"
             />
           </div>
         </div>
@@ -194,7 +194,7 @@ export default function AcconagePage() {
                   <tr key={item.id || idx} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-100">
                       <div className="flex items-center gap-2">
-                        <Ship className="w-4 h-4 text-cyan-400 shrink-0" />
+                        <Ship className="w-4 h-4 text-sky-400 shrink-0" />
                         <span>{item.nom_navire || 'Navire non rattaché'}</span>
                       </div>
                       <div className="ml-6 text-xs font-mono text-slate-500">
@@ -211,7 +211,7 @@ export default function AcconagePage() {
                         <span>{item.marchandise || 'Non renseignée'}</span>
                       </div>
                       {item.quantite != null && (
-                        <div className="ml-6 text-xs font-mono text-cyan-400">
+                        <div className="ml-6 text-xs font-mono text-sky-400">
                           {item.quantite} {item.unite || ''}
                         </div>
                       )}
@@ -224,7 +224,7 @@ export default function AcconagePage() {
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <Link
                         href={`/acconage/view?id=${item.id}`}
-                        className="text-xs font-semibold text-cyan-400 hover:text-cyan-300"
+                        className="text-xs font-semibold text-sky-400 hover:text-sky-300"
                       >
                         Ouvrir
                       </Link>
@@ -265,7 +265,7 @@ export default function AcconagePage() {
                     required
                     value={escaleId}
                     onChange={(e) => setEscaleId(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500"
                   >
                     <option value="">— Sélectionner une escale —</option>
                     {escales.map((es: any) => (
@@ -283,7 +283,7 @@ export default function AcconagePage() {
                 <select
                   value={operationType}
                   onChange={(e) => setOperationType(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500"
                 >
                   {TYPES_OPERATION.map((t) => (
                     <option key={t.value} value={t.value}>{t.label}</option>
@@ -298,7 +298,7 @@ export default function AcconagePage() {
                   value={marchandise}
                   onChange={(e) => setMarchandise(e.target.value)}
                   placeholder="ex: Sacs de ciment, bananes, pièces détachées"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500"
                 />
               </div>
 
@@ -312,7 +312,7 @@ export default function AcconagePage() {
                     value={quantite}
                     onChange={(e) => setQuantite(e.target.value)}
                     placeholder="ex: 420"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500"
                   />
                 </div>
                 <div>
@@ -320,7 +320,7 @@ export default function AcconagePage() {
                   <select
                     value={unite}
                     onChange={(e) => setUnite(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500"
                   >
                     {UNITES.map((u) => (
                       <option key={u} value={u}>{u}</option>
@@ -336,7 +336,7 @@ export default function AcconagePage() {
                   value={equipement}
                   onChange={(e) => setEquipement(e.target.value)}
                   placeholder="ex: Portique STS 02, Grue Gottwald #1"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500"
                 />
               </div>
 
@@ -346,7 +346,7 @@ export default function AcconagePage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="ex: Rotation sous séquestre, équipe de 12 dockers"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 h-20"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500 h-20"
                 />
               </div>
 
@@ -361,7 +361,7 @@ export default function AcconagePage() {
                 <button
                   type="submit"
                   disabled={createMutation.isPending || !escaleId}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-600/30 disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-600/30 disabled:opacity-50"
                 >
                   {createMutation.isPending ? 'Enregistrement...' : "Valider L'Opération"}
                 </button>

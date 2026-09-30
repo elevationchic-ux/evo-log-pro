@@ -104,7 +104,7 @@ export default function AcconageEditPage() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-on-surface flex items-center gap-2">
-              <Ship className="w-6 h-6 text-cyan-600" />
+              <Ship className="w-6 h-6 text-sky-600" />
               {id ? `Modifier l'Opération Acconage #${id}` : "Nouvelle Opération d'Acconage"}
             </h1>
             <p className="text-sm text-on-surface-variant">
@@ -171,7 +171,7 @@ export default function AcconageEditPage() {
 
         <div className="bg-surface border border-outline rounded-2xl p-6 space-y-4 shadow-sm">
           <h2 className="font-bold text-sm text-on-surface border-b border-outline pb-2 flex items-center gap-2">
-            <Layers className="w-4 h-4 text-cyan-600" /> Volumes & Moyens Portiques
+            <Layers className="w-4 h-4 text-sky-600" /> Volumes & Moyens Portiques
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

@@ -42,7 +42,7 @@ export default function AcconageViewPage() {
   if (!id) {
     return (
       <div className="p-6 max-w-2xl mx-auto text-center space-y-4">
-        <Anchor className="w-16 h-16 text-cyan-500/40 mx-auto" />
+        <Anchor className="w-16 h-16 text-sky-500/40 mx-auto" />
         <h1 className="text-xl font-bold text-on-surface">Consultation d'une Opération d'Acconage</h1>
         <p className="text-sm text-on-surface-variant">
           Veuillez sélectionner une escale ou opération depuis le tableau de bord acconage, ou renseigner son identifiant.
@@ -124,7 +124,7 @@ export default function AcconageViewPage() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-on-surface flex items-center gap-2">
-              <Ship className="w-6 h-6 text-cyan-600" />
+              <Ship className="w-6 h-6 text-sky-600" />
               {operation.nom_navire || `Navire Escale #${operation.numero_escale || operation.id}`}
             </h1>
             <p className="text-sm text-on-surface-variant">
@@ -175,7 +175,7 @@ export default function AcconageViewPage() {
         {/* Cadences & Moyens Déployés */}
         <div className="bg-surface border border-outline rounded-2xl p-5 space-y-4">
           <h2 className="font-bold text-sm text-on-surface border-b border-outline pb-2 flex items-center gap-2">
-            <Layers className="w-4 h-4 text-cyan-600" /> Moyens Nautiques & Cadences
+            <Layers className="w-4 h-4 text-sky-600" /> Moyens Nautiques & Cadences
           </h2>
           <div className="space-y-2 text-xs">
             {[

@@ -95,7 +95,7 @@ export default function MaintenanceEditPage() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-on-surface flex items-center gap-2">
-              <Wrench className="w-6 h-6 text-amber-600" />
+              <Wrench className="w-6 h-6 text-orange-600" />
               {id ? `Modifier l'Ordre de Travail #${id}` : 'Créer un Ordre de Travail GMAO'}
             </h1>
             <p className="text-sm text-on-surface-variant">
