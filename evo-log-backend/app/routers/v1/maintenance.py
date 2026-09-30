@@ -223,6 +223,7 @@ TYPES_MAINTENANCE = ("preventive", "curative", "corrective", "visite_technique",
                      "pneumatique", "premiere_mise")
 STATUTS_ATELIER = ("planifie", "en_attente", "en_cours", "attente_pieces",
                    "termine", "annule")
+PRIORITES_ATELIER = ("basse", "normale", "urgente", "critique")
 
 
 def _resoudre_vehicule(db: Session, payload: dict) -> Optional[Vehicule]:
@@ -298,6 +299,13 @@ def _valider_champs(payload: dict):
             raise HTTPException(
                 status_code=400,
                 detail=f"Type de maintenance inconnu : {payload['type_maintenance']}. Attendu : {list(TYPES_MAINTENANCE)}.",
+            )
+    if "priorite" in payload and payload["priorite"]:
+        p = str(payload["priorite"]).strip().lower()
+        if p not in PRIORITES_ATELIER:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Priorite d'atelier inconnue : {payload['priorite']}. Attendu : {list(PRIORITES_ATELIER)}.",
             )
 
 
