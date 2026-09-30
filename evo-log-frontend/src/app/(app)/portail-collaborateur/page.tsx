@@ -268,6 +268,7 @@ export default function PortailCollaborateurHubPage() {
             );
           })}
         </div>
+        )}
       </div>
     </div>
   );
