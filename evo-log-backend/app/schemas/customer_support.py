@@ -137,6 +137,14 @@ class ContractResponse(ContractCreate):
 
 
 # ─── Support : tickets & incidents ────────────────────────────────────────────
+# Jeux de valeurs reellement utilises par la table support_tickets. Les
+# colonnes sont des String libres : le domaine est donc rappele ici et
+# verifie dans le router, sinon un statut invente rendrait le ticket
+# invisible aux filtres de la console support.
+TICKET_STATUTS = ("ouvert", "en_cours", "resolu", "ferme")
+TICKET_PRIORITES = ("basse", "normale", "haute", "urgente")
+
+
 class TicketCreate(BaseModel):
     sujet: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = None

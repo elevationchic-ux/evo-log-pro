@@ -1795,10 +1795,10 @@ type AdvancedSubModuleEntry = {
 const ADVANCED_SUBMODULES: AdvancedSubModuleEntry[] = [
   // 🚢 Opérations Portuaires & Acconage
   { family: 'port-operations', label: 'Acconage & Manutention', path: '/acconage', icon: Ship, badge: 'Avancé', description: 'Opérations d acconage, escales et navires (CRUD complet)', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'ACCONAGE'] },
-  { family: 'port-operations', label: 'Acconage Avancé', path: '/acconage-avance', icon: Anchor, badge: 'Avancé', description: 'Functions portuaires avancées (cadres, postes, rendements)', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'ACCONAGE'] },
+  { family: 'port-operations', label: 'Acconage Avancé', path: '/acconage-avance', icon: Anchor, badge: 'Avancé', description: 'Fonctions portuaires avancées (cadres, postes, rendements)', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'ACCONAGE'] },
   { family: 'port-operations', label: 'Cycle de Vie Conteneurs', path: '/container-lifecycle', icon: Boxes, badge: 'Avancé', description: 'Suivi bout-en-bout du conteneur du port a la restitution', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'MAGASIN'] },
   { family: 'port-operations', label: 'Connaissement (B/L)', path: '/bill-of-loading', icon: FileText, badge: 'Doc', description: 'Emission et gestion des bills of lading', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'TRANSIT'] },
-  { family: 'port-operations', label: 'Incidents Portuaires', path: '/port-incidents', icon: AlertTriangle, badge: 'QSE', description: 'Declaraance et suivi des incidents de quai', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'QHSE'] },
+  { family: 'port-operations', label: 'Incidents Portuaires', path: '/port-incidents', icon: AlertTriangle, badge: 'QSE', description: 'Déclaration et suivi des incidents de quai', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS', 'QHSE'] },
   { family: 'port-operations', label: 'Performance Portuaire', path: '/port-performance', icon: BarChart3, badge: 'KPI', description: 'Indicateurs de cadence et de productivite portuaire', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MANAGER'] },
   { family: 'port-operations', label: 'Grille Tarifaire Port', path: '/port-pricing', icon: Tag, badge: 'Tarifs', description: 'Barème des prestations portuaires et cotations', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PORT_OPERATIONS'] },
 
@@ -1854,7 +1854,7 @@ const ADVANCED_SUBMODULES: AdvancedSubModuleEntry[] = [
   { family: 'admin-tenant', label: 'Données de Référence (Master Data)', path: '/master-data', icon: Layers, badge: 'Avancé', description: 'Articles, categories, tiers et referentiels maitre', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
   { family: 'admin-tenant', label: 'Fiche Entreprise (OHADA)', path: '/company', icon: Building, badge: 'Legal', description: 'Identite legale OHADA : NIF, RCCM, agrements, RIB', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
   { family: 'admin-tenant', label: 'GED & Documents', path: '/documents', icon: FileText, badge: 'GED', description: 'Gestion electronique des documents et archive', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
-  { family: 'admin-tenant', label: 'Intégrations API', path: '/integration', icon: Wifi, badge: 'API', description: 'Connecteurs et integractions tiers (API partenaires)', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+  { family: 'admin-tenant', label: 'Intégrations API', path: '/integration', icon: Wifi, badge: 'API', description: 'Connecteurs et intégrations tiers (API partenaires)', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
   { family: 'admin-tenant', label: 'Support & Tickets', path: '/support', icon: MessageSquare, badge: 'Helpdesk', description: 'Guichet d assistance et tickets internes', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
 ];
 
