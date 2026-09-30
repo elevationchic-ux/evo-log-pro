@@ -78,6 +78,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session, status]);
 
   const logout = useCallback(async () => {
+    // Phase 4 Tranche C : pointe de depart best-effort AVANT de purger le token.
+    // Reservee aux collaborateurs de terrain (niveau 3) ; l'echec de cet appel
+    // ne doit JAMAIS empecher la deconnexion (le depart est optionnel / peut
+    // renvoyer 400 si aucune arrivee n'a ete enregistree aujourd'hui).
+    if (user && user.roleLevel === 3) {
+      try {
+        await authAPI.pointerDepart();
+      } catch (e) {
+        console.warn("Pointage de depart ignore", e);
+      }
+    }
+
     setUser(null);
     setSessionExpiresAt(null);
     setSessionExpired(false);
@@ -99,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Déconnexion NextAuth sans redirection immédiate (pour voir la belle page de logout)
     signOut({ redirect: false });
-  }, []);
+  }, [user]);
 
   const renewSession = useCallback(() => {
     if (user) {
