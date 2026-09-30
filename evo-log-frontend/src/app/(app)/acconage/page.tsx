@@ -1,10 +1,31 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { acconageAPI } from '@/lib/api-client';
-import { Anchor, Plus, Search, CheckCircle2, Ship, Package, X } from 'lucide-react';
+import { Anchor, Plus, Search, Ship, Package, X } from 'lucide-react';
 import { toast } from 'sonner';
+
+// Badge du statut reellement persiste sur l'operation. Une operation n'est
+// jamais presentee comme terminee sans que la base le dise.
+function statutBadge(statut?: string): string {
+  const s = String(statut || '').toUpperCase();
+  if (s === 'TERMINE') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+  if (s === 'EN_COURS') return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20';
+  if (s === 'ANNULE') return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+  return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+}
+
+const TYPES_OPERATION = [
+  { value: 'dechargement_conteneur', label: 'Déchargement conteneurs' },
+  { value: 'chargement_conteneur', label: 'Chargement conteneurs' },
+  { value: 'manutention_vrac', label: 'Manutention vrac' },
+  { value: 'transbordement', label: 'Transbordement' },
+  { value: 'arrimage', label: 'Arrimage / déarrimage' },
+];
+
+const UNITES = ['TEU', 'tonne', 'm³', 'colis', 'lot'];
 
 export default function AcconagePage() {
   const [mounted, setMounted] = useState(false);
@@ -12,10 +33,13 @@ export default function AcconagePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Form states
-  const [vesselName, setVesselName] = useState('');
-  const [operationType, setOperationType] = useState('DECHARGEMENT_CONTENEUR');
-  const [containerCount, setContainerCount] = useState(1);
+  // Form states : uniquement des champs portés par la table operations_acconage
+  const [escaleId, setEscaleId] = useState('');
+  const [operationType, setOperationType] = useState('dechargement_conteneur');
+  const [marchandise, setMarchandise] = useState('');
+  const [quantite, setQuantite] = useState('');
+  const [unite, setUnite] = useState('TEU');
+  const [equipement, setEquipement] = useState('');
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
@@ -31,6 +55,19 @@ export default function AcconagePage() {
     enabled: mounted,
   });
 
+  // Escales existantes : une opération d'acconage ne peut être enregistrée que
+  // sur une escale déjà présente au port (aucune escale créée à la volée).
+  const { data: escalesData, isLoading: escalesLoading } = useQuery({
+    queryKey: ['acconage-escales'],
+    queryFn: async () => {
+      const res = await acconageAPI.getEscales();
+      return res.data?.items || res.data || (Array.isArray(res) ? res : []);
+    },
+    enabled: mounted && isModalOpen,
+  });
+
+  const escales = Array.isArray(escalesData) ? escalesData : [];
+
   const createMutation = useMutation({
     mutationFn: async (payload: any) => {
       const res = await acconageAPI.createAcconage(payload);
@@ -40,21 +77,32 @@ export default function AcconagePage() {
       toast.success("Opération d'acconage enregistrée avec succès !");
       queryClient.invalidateQueries({ queryKey: ['acconage'] });
       setIsModalOpen(false);
-      setVesselName('');
+      setEscaleId('');
+      setMarchandise('');
+      setQuantite('');
+      setEquipement('');
       setNotes('');
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.detail || "Erreur lors de l'enregistrement.");
+      const detail = err?.response?.data?.detail;
+      toast.error(
+        typeof detail === 'string'
+          ? detail
+          : "Erreur lors de l'enregistrement de l'opération."
+      );
     },
   });
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     createMutation.mutate({
-      nom_navire: vesselName || 'MSC TOKYO IV',
+      escale_id: Number(escaleId),
       type_operation: operationType,
-      nombre_conteneurs: Number(containerCount),
-      remarques: notes || 'RAS grue de quai',
+      marchandise: marchandise.trim() || null,
+      quantite: quantite === '' ? null : Number(quantite),
+      unite: unite,
+      equipement: equipement.trim() || null,
+      notes: notes.trim() || null,
     });
   };
 
@@ -62,7 +110,7 @@ export default function AcconagePage() {
 
   const items = Array.isArray(data) ? data : [];
   const filteredItems = items.filter((i: any) =>
-    (String(i.nom_navire || '') + ' ' + String(i.type_operation || ''))
+    (String(i.nom_navire || '') + ' ' + String(i.numero_escale || '') + ' ' + String(i.type_operation || ''))
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
@@ -102,7 +150,7 @@ export default function AcconagePage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher par navire..."
+              placeholder="Rechercher par navire ou escale..."
               className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
             />
           </div>
@@ -112,34 +160,57 @@ export default function AcconagePage() {
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="bg-slate-950 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
               <tr>
-                <th className="px-6 py-4">Navire / Escalier</th>
+                <th className="px-6 py-4">Navire / Escale</th>
                 <th className="px-6 py-4">Type d'Opération</th>
-                <th className="px-6 py-4 text-center">Nombre Conteneurs</th>
+                <th className="px-6 py-4">Marchandise traitée</th>
                 <th className="px-6 py-4 text-right">Statut Quai</th>
+                <th className="px-6 py-4 text-right">Fiche</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {isLoading ? (
-                <tr><td colSpan={4} className="p-12 text-center text-slate-400">Chargement de l'acconage...</td></tr>
+                <tr><td colSpan={5} className="p-12 text-center text-slate-400">Chargement de l'acconage...</td></tr>
               ) : filteredItems.length === 0 ? (
-                <tr><td colSpan={4} className="p-8 text-center text-slate-500">Aucune opération d'acconage trouvée.</td></tr>
+                <tr><td colSpan={5} className="p-8 text-center text-slate-500">Aucune opération d'acconage trouvée.</td></tr>
               ) : (
                 filteredItems.map((item: any, idx: number) => (
                   <tr key={item.id || idx} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-6 py-4 font-bold text-slate-100 flex items-center gap-2">
-                      <Ship className="w-4 h-4 text-cyan-400" />
-                      {item.nom_navire || 'MSC TOKYO IV'}
+                    <td className="px-6 py-4 font-bold text-slate-100">
+                      <div className="flex items-center gap-2">
+                        <Ship className="w-4 h-4 text-cyan-400 shrink-0" />
+                        <span>{item.nom_navire || 'Navire non rattaché'}</span>
+                      </div>
+                      <div className="ml-6 text-xs font-mono text-slate-500">
+                        {item.numero_escale || 'escale non rattachée'}
+                        {item.quai ? ` • ${item.quai}` : ''}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 font-semibold text-slate-200">
-                      {item.type_operation || 'DECHARGEMENT_CONTENEUR'}
+                    <td className="px-6 py-4 font-semibold text-slate-200 capitalize">
+                      {item.type_operation || '—'}
                     </td>
-                    <td className="px-6 py-4 text-center font-mono font-bold text-cyan-400">
-                      {item.nombre_conteneurs || 12} TEU
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <Package className="w-4 h-4 text-slate-500 shrink-0" />
+                        <span>{item.marchandise || 'Non renseignée'}</span>
+                      </div>
+                      {item.quantite != null && (
+                        <div className="ml-6 text-xs font-mono text-cyan-400">
+                          {item.quantite} {item.unite || ''}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        <CheckCircle2 className="w-3 h-3" /> TERMINÉ
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${statutBadge(item.statut)}`}>
+                        {(item.statut || 'planifie').replace(/_/g, ' ').toUpperCase()}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                      <Link
+                        href={`/acconage/view?id=${item.id}`}
+                        className="text-xs font-semibold text-cyan-400 hover:text-cyan-300"
+                      >
+                        Ouvrir
+                      </Link>
                     </td>
                   </tr>
                 ))
@@ -152,7 +223,7 @@ export default function AcconagePage() {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 text-white shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 text-white shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <h3 className="text-lg font-bold">Enregistrement Opération Acconage</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-200">
@@ -162,48 +233,102 @@ export default function AcconagePage() {
 
             <form onSubmit={handleCreate} className="space-y-4 pt-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Nom du Navire / Porte-Conteneurs</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Escale concernée *</label>
+                {escalesLoading ? (
+                  <div className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-500">
+                    Chargement des escales...
+                  </div>
+                ) : escales.length === 0 ? (
+                  <div className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-400">
+                    Aucune escale enregistrée au port. Créez d'abord l'escale dans
+                    le module Escales & Navires.
+                  </div>
+                ) : (
+                  <select
+                    required
+                    value={escaleId}
+                    onChange={(e) => setEscaleId(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+                  >
+                    <option value="">— Sélectionner une escale —</option>
+                    {escales.map((es: any) => (
+                      <option key={es.id} value={es.id}>
+                        {es.numero_escale}
+                        {es.nom_navire ? ` • ${es.nom_navire}` : es.navire?.nom ? ` • ${es.navire.nom}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Type d'Opération *</label>
+                <select
+                  value={operationType}
+                  onChange={(e) => setOperationType(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+                >
+                  {TYPES_OPERATION.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Marchandise manutentionnée</label>
                 <input
                   type="text"
-                  required
-                  value={vesselName}
-                  onChange={(e) => setVesselName(e.target.value)}
-                  placeholder="ex: CMA CGM BENIN"
+                  value={marchandise}
+                  onChange={(e) => setMarchandise(e.target.value)}
+                  placeholder="ex: Sacs de ciment, bananes, pièces détachées"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Type d'Opération</label>
-                  <select
-                    value={operationType}
-                    onChange={(e) => setOperationType(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
-                  >
-                    <option value="DECHARGEMENT_CONTENEUR">Déchargement Conteneurs</option>
-                    <option value="CHARGEMENT_CONTENEUR">Chargement Conteneurs</option>
-                    <option value="MANUTENTION_VRAC">Manutention Vrac</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Nombre d'Unités (TEU)</label>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Quantité traitée</label>
                   <input
                     type="number"
-                    min={1}
-                    value={containerCount}
-                    onChange={(e) => setContainerCount(Number(e.target.value))}
+                    min={0}
+                    step="0.01"
+                    value={quantite}
+                    onChange={(e) => setQuantite(e.target.value)}
+                    placeholder="ex: 420"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
                   />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Unité</label>
+                  <select
+                    value={unite}
+                    onChange={(e) => setUnite(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+                  >
+                    {UNITES.map((u) => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Remarques / Grue de quai</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Équipement de quai affecté</label>
+                <input
+                  type="text"
+                  value={equipement}
+                  onChange={(e) => setEquipement(e.target.value)}
+                  placeholder="ex: Portique STS 02, Grue Gottwald #1"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Remarques d'exploitation</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="ex: Grue Gottwald #2 affectée"
+                  placeholder="ex: Rotation sous séquestre, équipe de 12 dockers"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 h-20"
                 />
               </div>
@@ -218,10 +343,10 @@ export default function AcconagePage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={createMutation.isPending}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-600/30"
+                  disabled={createMutation.isPending || !escaleId}
+                  className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-600/30 disabled:opacity-50"
                 >
-                  {createMutation.isPending ? 'Enregistrement...' : 'Valider L\'Opération'}
+                  {createMutation.isPending ? 'Enregistrement...' : "Valider L'Opération"}
                 </button>
               </div>
             </form>

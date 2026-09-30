@@ -964,6 +964,68 @@ un validateur identifie.
 
 ---
 
+## 22. Batch 20 — Réintégration en stock des retours clients : la liaison promise au §21 est devenue réelle (migration 029)
+
+Annonce au §21 (« Reste ») : la reintegration physique en stock des retours
+n'etait **pas modelisee** — `RetourClient` n'avait aucune colonne vers une
+ligne de stock, et le batch 17 avait donc (à juste titre) refuse d'inventer un
+mouvement. Le rapport posait la condition : « une migration ajoutant cette
+liaison serait le seul moyen honnete de la rendre reelle ». Le batch 20 est
+cette migration, plus le circuit qui l'exploite.
+
+### Audit prealable
+
+- Frontend : `grep kpi/rotation|kpi/precision|magasin-avance/kpi` sur tout
+  `src/` → **0 consommateur**. Le point « reste » equivalent du §21 est clos
+  sans correction : aucun ecran n'affiche ces KPI, donc aucun faux chiffre
+  n'est visible.
+- Chaîne Alembic : lineaire, tete `028_full_orm_parity` au debut du batch ;
+  conventions 024 (colonne + FK par introspection, batch SQLite) et 027
+  (non-destructive, downgrade sans effet assume) appliquees.
+
+### Corrections Zero-Mock
+
+| Qui | Quoi |
+|---|---|
+| `migrations/versions/029_add_retour_stock_link.py` | `retours_client.stock_id` (Integer, **NULLable**, index, FK vers `stocks.id` en mode batch SQLite / natif PostgreSQL). IDEMPOTENT par introspection, NON DESTRUCTIF, **aucune valeur ecrite** : les retours existants restent « ligne non precisee ». Downgrade volontairement sans effet (convention 027 : une colonne en trop ne casse rien, une donnee perdue est irreversible). |
+| `app/models/magasin_avance.py` | Colonne `stock_id` avec commentaire de contrat : NULL = `/traiter` ne reintegre RIEN. |
+| Schémas | `RetourClientCreate.stock_id: Optional[int]` (saisie explicite), `RetourClientResponse.stock_id` echo reel. `RetourClientUpdate` **n'inclut pas** `stock_id` : la liaison se declare a la creation, pas en retouche. |
+| `POST /retours` | Verifie l'existence de la ligne de stock si fournie (400 explicite — FK SQLite non controlee par defaut). |
+| `PUT /retours/{id}/traiter` | Reintegration **reelle** quand elle est modelisee : si `stock_id` renseignee, decision `accepte` et action ≠ `destruction` → `quantite_disponible` augmentee + **un `MouvementStock` ENTREE journalise** (avant/apres/raison/`reference = numero_retour`/operateur), dans le MEME commit que la decision (tout ou rien). Garde : quantite retournee absente ou nulle → **400 avant toute ecriture** (la decision reste `en_attente`, verrouillee par test). Sinon : **zero mouvement**, et la raison est tracee dans notes (`PAS DE REINTEGRATION STOCK : ligne de stock non precisee…`). `destruction` et `refuse` ne bougent jamais le stock. |
+
+### Verification
+
+- `python -m pytest tests/unit/test_magasin_avance_retour_stock.py -q` : ✅ **6 passed** — dont « la migration n'invente aucune valeur » (ancien retour reste NULL apres upgrade), « re-execution sure » (no-op), et le 400 tout-ou-rien sur quantite absente.
+- Non-régression : `test_magasin_avance_retours_litiges.py` (batch 17) ✅ **9 passed** sans modification — son verrou « aucun mouvement quand la liaison n'existe pas » reste exact (les retours sans `stock_id` ne produisent toujours rien).
+- `test_migrations_chain.py` ✅ **2 passed** : la chaine complete (029 inclus) monte jusqu'a la tete et redescend a `base` proprement — le test est head-agnostique, aucune edition necessaire.
+- Suite complete (commande CI) : ✅ **645 passed, 2 xfailed, 0 failed** (344 s), `PYTEST_EXIT=0`, **`DB_CHANGED=False`** (mtime/taille `kamlog_erp.db` identiques avant/apres).
+- `compileall` ✅ EXIT=0 ; `import app.main` ✅ OK (1138 chemins OpenAPI) ; `tsc --noEmit` ✅ EXIT=0 ; `audit_frontend.py --strict-honesty` ✅ EXIT=0 (batch sans changement frontend).
+
+### Reste (hors perimetre du batch, signale)
+
+- Etat reel verifie par introspection : la base de dev `kamlog_erp.db` porte
+  DEJA la colonne `retours_client.stock_id` (creee par `create_all` a la
+  derniere startup, la table ayant ete materialisee apres le changement de
+  modele) — assertion controlee, pas supposee. Le chemin de production reste
+  `alembic upgrade head` (029, puis les tranches concurrentlyes au-dela).
+  - Side effect declare : la table de dev porte encore les colonnes heritees
+  `article_id`/`etat`/`action_effectuee`/`date_traitement` des anciens schemas
+  fantomes (NULLables, jamais lues par le code reconstruit) ; la convention
+  027 est non-destructive, elles seront purgees le jour ou une decision de
+  nettoyage de schema est prise — pas silencieusement.
+- La **valeur** du retour reintegre (prix unitaire, lot, etat « bon pour
+  réemploi ») n'est pas modelisee non plus : le mouvement est journalise au
+  prix existant de la ligne de stock, et c'est la stricte verite du modele.
+
+➡️ Zero-Mock applique au retour : refuser d'inventer une reintegration tant
+que la liaison n'existe pas etait la bonne decision ; ne la rendre possible
+que par une migration reelle, puis journaliser un `MouvementStock` seulement
+quand l'operateur a designe la ligne de retour ET que la marchandise n'est pas
+detruite, est la suite logique — une absence de reintegration se declare dans
+les notes, elle ne se simule pas.
+
+---
+
 * Aucun acte à valeur légale (validation CNCC, dépôt GUCE/SYDONIA, quittance, bulletin CNPS,
   paiement mobile money) n'est jamais affiché comme "fait" s'il ne l'est pas : soit c'est réel,
   soit l'API répond **501 avec la raison exacte**.

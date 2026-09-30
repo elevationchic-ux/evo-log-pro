@@ -76,8 +76,8 @@ async def create_escale(escale_data: EscaleCreate, db: Session = Depends(get_db)
 # et non par une colonne inventee.
 
 TYPES_OPERATION = (
-    "chargement", "dechargement", "dechargement_conteneur", "transbordement",
-    "arrimage", "depannage", "manutention",
+    "chargement", "chargement_conteneur", "dechargement", "dechargement_conteneur",
+    "manutention", "manutention_vrac", "transbordement", "arrimage", "depannage",
 )
 
 
