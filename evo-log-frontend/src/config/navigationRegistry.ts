@@ -1860,17 +1860,55 @@ const ADVANCED_SUBMODULES: AdvancedSubModuleEntry[] = [
 
 // Applique l'enrichissement de façon idempotente (aucune duplication, aucune
 // exception si une famille manque). Exécuté une seule fois au chargement du module.
-for (const entry of ADVANCED_SUBMODULES) {
-  const family = NAVIGATION_REGISTRY[entry.family];
-  if (!family) continue;
-  if (family.subModules.some((s) => s.path === entry.path)) continue;
-  family.subModules.push({
-    label: entry.label,
-    path: entry.path,
-    icon: entry.icon,
-    badge: entry.badge,
-    description: entry.description,
-    businessProcess: 'Modules avancés',
-    requiredRoles: entry.requiredRoles,
-  });
-}
+const applyAdvanced = (entries: AdvancedSubModuleEntry[]) => {
+  for (const entry of entries) {
+    const family = NAVIGATION_REGISTRY[entry.family];
+    if (!family) continue;
+    if (family.subModules.some((s) => s.path === entry.path)) continue;
+    family.subModules.push({
+      label: entry.label,
+      path: entry.path,
+      icon: entry.icon,
+      badge: entry.badge,
+      description: entry.description,
+      businessProcess: 'Modules avancés',
+      requiredRoles: entry.requiredRoles,
+    });
+  }
+};
+applyAdvanced(ADVANCED_SUBMODULES);
+
+// ----------------------------------------------------------------------------
+// ONDE 2 — écrans métier RéELS restés hors menu (aucun doublon avec les pages
+// canoniques déjà câblées). Ce sont des pages substantielles (5 à 47 Ko) des
+// arbres legacy /finance, /parc, /rh qui exposent des fonctionnalités que les
+// modules canoniques n'ont pas (facturation détaillée, encaissements,
+// réquisitions, saisie bancaire, contrôle d'accès parc, plan du yard, congés…),
+// plus quelques consoles transverses (notifications, API publique/partenaire,
+// fournisseurs, passerelle de paiement). Chaque `path` vérifié existant → 0 lien
+// mort. Idempotent et réversible comme l'onde 1.
+// ----------------------------------------------------------------------------
+const ADVANCED_SUBMODULES_WAVE2: AdvancedSubModuleEntry[] = [
+  // 💰 Finance OHADA —深度 : facturation/encaissements non couverts par /finance-ohada/*
+  { family: 'finance-ohada', label: 'Facturation & Billing', path: '/finance/billing', icon: Receipt, badge: 'Avancé', description: 'Cycle de facturation détaillé et generation des documents', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Encaissements Clients', path: '/finance/encaissements', icon: ArrowUpDown, badge: 'Avancé', description: 'Suivi des reglements et encaissements clients', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Réquisitions d’Achat', path: '/finance/requisitions', icon: ShoppingCart, badge: 'Avancé', description: 'Demandes internes d’achat et circuit de validation', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Saisie Transaction Bancaire', path: '/finance/saisie-transaction-bancaire', icon: Banknote, badge: 'Banque', description: 'Saisie et rapprochement des transactions bancaires', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Vue d’Ensemble Trésorerie', path: '/finance/overview', icon: TrendingUp, badge: 'KPI', description: 'Tableau de bord de synthese de la tresorerie', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Passerelle de Paiement', path: '/gateway', icon: CreditCard, badge: 'Paiement', description: 'Console de la passerelle de paiement et des moyens', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+
+  // 🚧 Parc & Yard — gate/plan absent de /parc-vehicules/*
+  { family: 'parc-vehicules', label: 'Contrôle d’Accès (Gate)', path: '/parc/gate', icon: Shield, badge: 'Gate', description: 'Entree/sortie du parc, controle et affectation des emplacements', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PARC', 'MAGASIN'] },
+  { family: 'parc-vehicules', label: 'Plan du Parc (Yard Map)', path: '/parc/yard-map', icon: MapPin, badge: 'Yard', description: 'Carte interactive du parc et occupation des zones', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PARC'] },
+  { family: 'parc-vehicules', label: 'Zones & Emplacements', path: '/parc/zones', icon: Grid, badge: 'Zonage', description: 'Definition des zones et emplacements du parc', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PARC'] },
+
+  // 🧑‍💼 RH — congés non couverts par /rh-personnel/*
+  { family: 'rh-personnel', label: 'Gestion des Congés', path: '/rh/conges', icon: Calendar, badge: 'Avancé', description: 'Demandes, validations et suivi des conges du personnel', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'RH'] },
+
+  // ⚙️ Consoles transverses
+  { family: 'admin-tenant', label: 'Centre de Notifications', path: '/notification-system', icon: Bell, badge: 'System', description: 'Parametres et historique du systeme de notifications', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+  { family: 'admin-tenant', label: 'Fournisseurs (CRUD)', path: '/fournisseurs', icon: Users, badge: 'Tiers', description: 'Registre complet des fournisseurs et partenaires', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+  { family: 'admin-saas', label: 'API Partenaire', path: '/partner-api', icon: Wifi, badge: 'API', description: 'Administration des acces et cles API partenaires', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+  { family: 'admin-saas', label: 'API Publique', path: '/public-api', icon: Globe, badge: 'API', description: 'Portail de documentation de l’API publique', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+];
+applyAdvanced(ADVANCED_SUBMODULES_WAVE2);
