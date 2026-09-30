@@ -15,13 +15,26 @@ router = APIRouter()
 
 @router.post("/taxation/simuler", response_model=TaxationResultResponse, summary="Simuler la liquidation des droits et taxes en douane")
 def simuler_taxation(payload: SimulationTaxationRequest, db: Session = Depends(get_db)):
-    """Calcule le Droit de Douane (TEC CEMAC), TVA 19.25%, Redevance informatique et précompte IS."""
-    return TaxationDouaniereService.calculer_droits_et_taxes(
-        valeur_cif_xaf=payload.valeur_cif_xaf,
-        code_sh=payload.code_sh,
-        regime=payload.regime,
-        db=db,
-    )
+    """Calcule le Droit de Douane (TEC CEMAC), TVA 19.25%, Redevance informatique et précompte IS.
+
+    Délégué au moteur UNIQUE ``app.services.taxation_douaniere``. La réponse
+    porte ``source_taux`` et ``simulation`` pour que l'écran affiche honnêtement
+    d'où vient le taux (nomenclature officielle ou hypothèse de simulation).
+    """
+    try:
+        return TaxationDouaniereService.calculer_droits_et_taxes(
+            valeur_cif_xaf=payload.valeur_cif_xaf,
+            code_sh=payload.code_sh,
+            regime=payload.regime,
+            db=db,
+            origine=payload.origine,
+            categorie_tec=payload.categorie_tec,
+            taux_dd_explicite=payload.taux_dd_explicite,
+        )
+    except ValueError as exc:
+        # Ex. categorie TEC hors 0..3 : on repond 400 avec le motif lisible,
+        # jamais un 500 muet qui masquerait une donnee invalide.
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.post("/dum/creer", summary="Créer une DUM avec liquidation automatique")

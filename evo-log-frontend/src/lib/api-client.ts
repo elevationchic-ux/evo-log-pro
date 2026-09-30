@@ -751,13 +751,6 @@ export const notificationsAPI = {
     apiClient.delete('/api/notifications/read'),
 };
 
-// â”€â”€â”€ Service Incidents (Ticketing) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-export const incidentsAPI = {
-  getIncidents: () => apiClient.get('/api/incidents'),
-  getClientIncidents: (tiersId: number) => apiClient.get(`/api/incidents/client/${tiersId}`),
-  createIncident: (data: unknown) => apiClient.post('/api/incidents', data),
-  updateIncident: (id: number, data: unknown) => apiClient.patch(`/api/incidents/${id}`, data),
-};
 
 // â”€â”€â”€ Service Ressources Humaines (RH) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const rhAPI = {
@@ -843,9 +836,12 @@ export const aiAPI = {
 export const acconageAPI = {
   getAcconages: (params?: Record<string, unknown>) => apiClient.get('/api/v1/acconage', { params }),
   getAcconage: (id: number) => apiClient.get(`/api/v1/acconage/${id}`),
+  // Une operation d'acconage ne s'enregistre que sur une escale existante ;
+  // les listes alimentent le selecteur du formulaire (nom du navire via navires).
+  getEscales: (params?: Record<string, unknown>) => apiClient.get('/api/v1/acconage/escales', { params }),
+  getNavires: (params?: Record<string, unknown>) => apiClient.get('/api/v1/acconage/navires', { params }),
   createAcconage: (data: unknown) => apiClient.post('/api/v1/acconage', data),
   updateAcconage: (id: number, data: unknown) => apiClient.put(`/api/v1/acconage/${id}`, data),
-  deleteAcconage: (id: number) => apiClient.delete(`/api/v1/acconage/${id}`),
   importBaplie: (data: { escale_id: number; edi_content: string }) => apiClient.post('/api/v1/acconage/baplie/import', data),
   exportBaplie: (escaleId: number) => apiClient.get(`/api/v1/acconage/baplie/export/${escaleId}`),
   getYardState: () => apiClient.get('/api/v1/acconage/yard/state'),
@@ -859,8 +855,7 @@ export const transitAPI = {
   getTransits: (params?: Record<string, unknown>) => apiClient.get('/api/v1/transit/dossiers', { params }),
   getTransit: (id: number) => apiClient.get(`/api/v1/transit-avance/dossiers/${id}`),
   createTransit: (data: unknown) => apiClient.post('/api/v1/transit-avance/dossiers', data),
-  updateTransit: (id: number, data: unknown) => apiClient.put(`/api/v1/transit-avance/dossiers/${id}`, data),
-  deleteTransit: (id: number) => apiClient.delete(`/api/v1/transit-avance/dossiers/${id}`)
+  updateTransit: (id: number, data: unknown) => apiClient.put(`/api/v1/transit-avance/dossiers/${id}`, data)
 };
 
 // â”€â”€â”€ Service Maintenance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -869,7 +864,6 @@ export const maintenanceAPI = {
   getMaintenance: (id: number) => apiClient.get(`/api/v1/maintenance/${id}`),
   createMaintenance: (data: unknown) => apiClient.post('/api/v1/maintenance', data),
   updateMaintenance: (id: number, data: unknown) => apiClient.put(`/api/v1/maintenance/${id}`, data),
-  deleteMaintenance: (id: number) => apiClient.delete(`/api/v1/maintenance/${id}`),
   destockerPieces: (data: unknown) => apiClient.post('/api/v1/maintenance/destockage-pieces', data),
   getCarnetEntretien: (vin: string) => apiClient.get(`/api/v1/maintenance/carnet-entretien/${vin}`),
   diagnostiquerTelematics: (immat: string) => apiClient.get(`/api/v1/maintenance/telematics/obd2/${immat}`),

@@ -70,6 +70,9 @@ class TaxationDouaniereService:
         code_sh: str,
         regime: str = "IM4",
         db: Optional[Session] = None,
+        origine: str = "HORS_ZONE",
+        categorie_tec: Optional[int] = None,
+        taux_dd_explicite: Optional[float] = None,
     ) -> Dict[str, Any]:
         from app.services.taxation_douaniere import calculer_liquidation
 
@@ -78,6 +81,9 @@ class TaxationDouaniereService:
             db=db,
             code_sh=code_sh,
             regime=regime,
+            origine=origine,
+            categorie_tec=categorie_tec,
+            taux_dd_explicite=taux_dd_explicite,
             # Quand la position SH est absente de la nomenclature (tables non
             # importees, cf. P1 #1), on retombe sur le taux "produit fini" 20%
             # MAIS le resultat est alors marque simulation=True / source_taux.
