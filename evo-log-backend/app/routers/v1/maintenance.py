@@ -1,8 +1,8 @@
 ﻿"""
 Maintenance router - manages equipment, vehicle maintenance, spare parts, and telematics
 
-CRD rÃ©el sur le modele Maintenance (table `maintenances`) : aucun ordre de
-travail codÃ© en dur. Les KPIs sont calcules depuis la base, pas inventes.
+CRD réel sur le modele Maintenance (table `maintenances`) : aucun ordre de
+travail codé en dur. Les KPIs sont calcules depuis la base, pas inventes.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
@@ -166,7 +166,7 @@ async def obtenir_carnet_entretien(vin_chassis: str, db: Session = Depends(get_d
     }
 
 
-# ============ TÃ‰LÃ‰MATIQUE IOT & CODES DÃ‰FAUTS CAN-BUS OBD2 ============
+# ============ TÉLÉMATIQUE IOT & CODES DÉFAUTS CAN-BUS OBD2 ============
 @router.get("/telematics/obd2/{immatriculation}")
 async def diagnostiquer_telematics_obd2(immatriculation: str):
     """Real-time CAN-Bus / OBD2 engine diagnostics and DTC codes"""
@@ -203,14 +203,14 @@ async def obtenir_kpis_maintenance(
 # ============ ECRAN ATELIER : CREATION + FICHE DETAILLEE ============
 #
 # Routes parametriques declarees EN DERNIER : `/maintenance/{maintenance_id}`
-# absorbe tout segment (y compris Â« stats Â», Â« ordres Â», Â« analytics Â»). Placee
+# absorbe tout segment (y compris « stats », « ordres », « analytics »). Placee
 # apres les routes litterales, l'ordre de resolution FastAPI conserve ces
 # dernieres. Inverser les deux rendrait /maintenance/stats invisible.
 #
 # `POST /api/v1/maintenance` etait appele par /maintenance/edit et
 # /maintenance (page) sans route declaree : c'est l'enveloppe rattrape-tout
 # `pending_modules` qui repondait 202 {accepted:false}, et l'ecran affichait
-# Â« Nouvel ordre de travail cree Â» sur une donnee jamais ecrite en base.
+# « Nouvel ordre de travail cree » sur une donnee jamais ecrite en base.
 
 CHAMPS_COLONNE = (
     "type_maintenance", "date_debut", "date_fin", "kilometrage", "description",
@@ -266,7 +266,7 @@ def _resoudre_vehicule(db: Session, payload: dict) -> Optional[Vehicule]:
         raise HTTPException(
             status_code=400,
             detail=(
-                f"Aucun vehicule porte l'immatriculation Â« {plaque} Â» dans ce compte : "
+                f"Aucun vehicule porte l'immatriculation « {plaque} » dans ce compte : "
                 "impossible d'ouvrir un ordre de travail sur un vehicule inexistant."
             ),
         )
