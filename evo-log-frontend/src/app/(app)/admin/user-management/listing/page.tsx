@@ -220,7 +220,6 @@ export default function UserManagementPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {filtered.map(user => {
-                const roleCfg = roleColors[user.role] || "text-slate-400 bg-slate-400/10 border-slate-400/30";
                 const acc = accreditationsByUser.get(user.id);
                 return (
                   <tr key={user.id} className="hover:bg-muted/20 transition-colors">
@@ -266,7 +265,7 @@ export default function UserManagementPage() {
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
                         <button className="p-1.5 rounded-lg hover:bg-blue-500/10 text-muted-foreground hover:text-blue-400 transition-colors" title="Voir"><Eye size={14} /></button>
-                        <button className="p-1.5 rounded-lg hover:bg-amber-500/10 text-muted-foreground hover:text-amber-400 transition-colors" title="Modifier"><Edit size={14} /></button>
+                        <button onClick={() => setEditUser(user)} className="p-1.5 rounded-lg hover:bg-amber-500/10 text-muted-foreground hover:text-amber-400 transition-colors" title="Modifier"><Edit size={14} /></button>
                         <button onClick={() => toggleStatut(user.id)} className={`p-1.5 rounded-lg transition-colors ${user.statut === "ACTIF" ? "hover:bg-red-500/10 text-muted-foreground hover:text-red-400" : "hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-400"}`} title={user.statut === "ACTIF" ? "Suspendre" : "Réactiver"}>
                           {user.statut === "ACTIF" ? <UserX size={14} /> : <UserCheck size={14} />}
                         </button>
@@ -279,6 +278,56 @@ export default function UserManagementPage() {
           </table>
         </div>
       </div>
+
+      {/* Modale "Utilisateur ≠ Rôle" : identité employé séparée des casquettes. */}
+      {editUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setEditUser(null)} aria-hidden="true" />
+          <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-foreground">Modifier l'utilisateur</h2>
+                <p className="text-xs text-muted-foreground">{editUser.prenom} {editUser.nom} · {editUser.email}</p>
+              </div>
+              <button onClick={() => setEditUser(null)} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground" aria-label="Fermer"><X size={18} /></button>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Identité employé</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">Matricule</label>
+                  <input className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/30" placeholder="MAT-0001" value={form.matricule} onChange={e => setForm(p => ({ ...p, matricule: e.target.value }))} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">Poste / fonction</label>
+                  <input className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/30" placeholder="Cariste, déclarant…" value={form.job_title} onChange={e => setForm(p => ({ ...p, job_title: e.target.value }))} />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Casquettes (rôles)</h3>
+              <p className="text-[11px] text-muted-foreground">Un collaborateur peut porter plusieurs rôles ; l'accès découle du plus privilégié.</p>
+              <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1">
+                {assignableRoles.map(r => {
+                  const active = selectedRoles.includes(r);
+                  return (
+                    <button key={r} type="button" onClick={() => toggleRole(r)} className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${active ? "bg-indigo-600 text-white border-indigo-500" : "bg-background text-muted-foreground border-border hover:border-slate-500"}`}>{r}</button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button onClick={() => setEditUser(null)} className="px-4 py-2 rounded-xl border border-border text-sm hover:bg-accent transition-colors">Annuler</button>
+              <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium transition-colors">
+                {saveMutation.isPending ? "Enregistrement…" : "Enregistrer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
