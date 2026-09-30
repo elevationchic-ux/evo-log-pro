@@ -1,8 +1,8 @@
-"""
+﻿"""
 Maintenance router - manages equipment, vehicle maintenance, spare parts, and telematics
 
-CRD réel sur le modele Maintenance (table `maintenances`) : aucun ordre de
-travail codé en dur. Les KPIs sont calcules depuis la base, pas inventes.
+CRD rÃ©el sur le modele Maintenance (table `maintenances`) : aucun ordre de
+travail codÃ© en dur. Les KPIs sont calcules depuis la base, pas inventes.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
@@ -166,7 +166,7 @@ async def obtenir_carnet_entretien(vin_chassis: str, db: Session = Depends(get_d
     }
 
 
-# ============ TÉLÉMATIQUE IOT & CODES DÉFAUTS CAN-BUS OBD2 ============
+# ============ TÃ‰LÃ‰MATIQUE IOT & CODES DÃ‰FAUTS CAN-BUS OBD2 ============
 @router.get("/telematics/obd2/{immatriculation}")
 async def diagnostiquer_telematics_obd2(immatriculation: str):
     """Real-time CAN-Bus / OBD2 engine diagnostics and DTC codes"""
@@ -203,20 +203,20 @@ async def obtenir_kpis_maintenance(
 # ============ ECRAN ATELIER : CREATION + FICHE DETAILLEE ============
 #
 # Routes parametriques declarees EN DERNIER : `/maintenance/{maintenance_id}`
-# absorbe tout segment (y compris « stats », « ordres », « analytics »). Placee
+# absorbe tout segment (y compris Â« stats Â», Â« ordres Â», Â« analytics Â»). Placee
 # apres les routes litterales, l'ordre de resolution FastAPI conserve ces
 # dernieres. Inverser les deux rendrait /maintenance/stats invisible.
 #
 # `POST /api/v1/maintenance` etait appele par /maintenance/edit et
 # /maintenance (page) sans route declaree : c'est l'enveloppe rattrape-tout
 # `pending_modules` qui repondait 202 {accepted:false}, et l'ecran affichait
-# « Nouvel ordre de travail cree » sur une donnee jamais ecrite en base.
+# Â« Nouvel ordre de travail cree Â» sur une donnee jamais ecrite en base.
 
 CHAMPS_COLONNE = (
     "type_maintenance", "date_debut", "date_fin", "kilometrage", "description",
     "cout", "realisateur", "statut", "notes", "priorite", "pieces",
 )
-CHAMPS_VEhicule = ("vehicule_id", "immatriculation_camion",
+CHAMPS_VEHICULE = ("vehicule_id", "immatriculation_camion",
                    "vehicule_immatriculation", "immatriculation")
 
 TYPES_MAINTENANCE = ("preventive", "curative", "corrective", "visite_technique",
@@ -266,7 +266,7 @@ def _resoudre_vehicule(db: Session, payload: dict) -> Optional[Vehicule]:
         raise HTTPException(
             status_code=400,
             detail=(
-                f"Aucun vehicule porte l'immatriculation « {plaque} » dans ce compte : "
+                f"Aucun vehicule porte l'immatriculation Â« {plaque} Â» dans ce compte : "
                 "impossible d'ouvrir un ordre de travail sur un vehicule inexistant."
             ),
         )
@@ -275,7 +275,7 @@ def _resoudre_vehicule(db: Session, payload: dict) -> Optional[Vehicule]:
 
 def _valider_champs(payload: dict):
     """Refuse toute cle inconnue au lieu de la jeter silencieusement."""
-    autorisees = set(CHAMPS_COLONNE) | set(CHAMPS_VEhicule)
+    autorisees = set(CHAMPS_COLONNE) | set(CHAMPS_VEHICULE)
     inconnues = sorted(k for k in payload if k not in autorisees)
     if inconnues:
         raise HTTPException(
@@ -369,7 +369,7 @@ async def modifier_maintenance(
             detail=f"Ordre de maintenance {maintenance_id} introuvable.",
         )
     _valider_champs(payload)
-    if any(k in payload for k in CHAMPS_VEhicule):
+    if any(k in payload for k in CHAMPS_VEHICULE):
         row.vehicule_id = _resoudre_vehicule(db, payload).id
     _appliquer_champs(row, payload)
     db.commit()

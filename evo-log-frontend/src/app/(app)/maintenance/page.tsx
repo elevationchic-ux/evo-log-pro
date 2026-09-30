@@ -16,6 +16,7 @@ export default function MaintenancePage() {
   const [truckId, setTruckId] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('NORMALE');
+  const [typeMaintenance, setTypeMaintenance] = useState('PREVENTIVE');
 
   useEffect(() => {
     setMounted(true);

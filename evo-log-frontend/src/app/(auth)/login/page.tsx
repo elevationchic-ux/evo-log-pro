@@ -11,6 +11,19 @@ import { saveTwoFactorChallenge } from '@/lib/2fa-challenge';
 import { toast } from 'sonner';
 import { Sparkles, Ship, Lock, User as UserIcon, ArrowRight, ShieldCheck, KeyRound, AlertTriangle, CheckCircle2, Radio, Compass, Anchor, Eye, EyeOff } from 'lucide-react';
 
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** Vrai si l'échec est TRANSITOIRE (fenêtre de redéploiement Railway) : aucune
+ *  réponse réseau (DNS/timeout/connexion coupée) ou 502/503/504 du proxy. Ces
+ *  états n'atteignent PAS l'app FastAPI, donc le rate-limit de /auth/login
+ *  (slowapi) n'est pas incrémenté : on peut re-pollers sans risquer un 429
+ *  auto-infligé. Une 4xx (401/403/422/429) est définitive -> jamais retentée. */
+function isTransientApiError(err: any): boolean {
+  if (!err || err.response === undefined) return true;
+  const s = err.response?.status;
+  return s === 502 || s === 503 || s === 504;
+}
+
 export default function LoginPage() {
   const router = useRouter();
 
@@ -63,8 +76,33 @@ export default function LoginPage() {
       // backend sait si le compte exige un second facteur, et il le declare
       // dans le corps de la reponse (`two_factor_required`)  une information
       // que la plomberie signIn() de next-auth v4 ne peut pas remonter.
-      const res = await apiClient.post('/auth/login', { username: email, password });
-      const data = res.data || {};
+      // Connexion patiente : sous l'auto-deploy Railway (un commit = un
+      // redéploiement), l'API est parfois en plein redémarrage et le proxy
+      // renvoie 502 / coupe la connexion. Tant que l'échec est transitoire on
+      // re-tente jusqu'à une fenêtre maximale, au lieu d'afficher une erreur
+      // immédiate que l'utilisateur prendrait pour un compte invalide. Comme un
+      // 502 de proxy n'atteint pas l'app, le compteur de tentatives (rate-limit)
+      // du backend n'est pas incrémenté : ce polling est sûr.
+      const DEADLINE = Date.now() + 40000;
+      let data: Record<string, any> | null = null;
+      let lastErr: any = null;
+      for (;;) {
+        try {
+          const r = await apiClient.post('/auth/login', { username: email, password });
+          data = r.data || {};
+          break;
+        } catch (err: any) {
+          if (isTransientApiError(err) && Date.now() < DEADLINE) {
+            setStatusNote('Serveur en cours de redémarrage (redéploiement)… reconnexion automatique…');
+            await sleep(2500);
+            continue;
+          }
+          lastErr = err;
+          break;
+        }
+      }
+      setStatusNote(null);
+      if (data === null) throw lastErr; // échec définitif -> traité par le catch ci-dessous
 
       if (data.two_factor_required) {
         if (!data.two_factor_token) {
@@ -128,6 +166,10 @@ export default function LoginPage() {
         setErrorMessage('Ce compte est désactivé. Contactez un administrateur.');
       } else if (status === 429) {
         setErrorMessage('Trop de tentatives. Réessayez dans une minute.');
+      } else if (isTransientApiError(err)) {
+        // Fenêtre de redéploiement toujours active après l'attente patiente :
+        // message explicite (et non « identifiants ») pour ne pas induire en erreur.
+        setErrorMessage('Le serveur est en cours de redémarrage (redéploiement). Réessayez dans quelques secondes.');
       } else if (err?.response) {
         setErrorMessage(typeof detail === 'string' ? detail : 'Le serveur a refusé la connexion.');
       } else {
@@ -135,6 +177,7 @@ export default function LoginPage() {
       }
     } finally {
       setIsLoading(false);
+      setStatusNote(null);
     }
   };
 
@@ -461,6 +504,13 @@ export default function LoginPage() {
             {errorMessage && (
               <div className="p-3 bg-red-950/80 border border-red-500/50 rounded-xl text-red-300 text-xs font-semibold animate-in fade-in duration-200">
                 {errorMessage}
+              </div>
+            )}
+
+            {statusNote && !errorMessage && (
+              <div className="p-3 bg-amber-950/60 border border-amber-500/40 rounded-xl text-amber-200 text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200">
+                <span className="w-3 h-3 border-2 border-amber-300 border-t-transparent rounded-full animate-spin shrink-0" />
+                {statusNote}
               </div>
             )}
 
