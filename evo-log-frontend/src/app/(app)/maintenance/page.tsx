@@ -215,15 +215,35 @@ export default function MaintenancePage() {
 
             <form onSubmit={handleCreate} className="space-y-4 pt-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Immatriculation Véhicule</label>
-                <input
-                  type="text"
-                  required
-                  value={truckId}
-                  onChange={(e) => setTruckId(e.target.value)}
-                  placeholder="ex: LT-901-BA"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-orange-500 font-mono"
-                />
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Camion du parc</label>
+                {vehiculesLoading ? (
+                  <div className="w-full px-4 py-2.5 text-sm bg-slate-950 border border-slate-800 rounded-xl text-slate-500">
+                    Chargement du parc…
+                  </div>
+                ) : vehicules.length === 0 ? (
+                  <div className="w-full px-4 py-2.5 text-sm bg-slate-950 border border-slate-800 rounded-xl text-slate-400">
+                    Aucun véhicule au parc —{' '}
+                    <Link href="/parc" className="text-orange-400 font-semibold hover:text-orange-300">
+                      enregistrer un véhicule
+                    </Link>
+                  </div>
+                ) : (
+                  <select
+                    required
+                    value={vehiculeId}
+                    onChange={(e) => setVehiculeId(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-orange-500 font-mono"
+                  >
+                    <option value="">— Sélectionner un camion —</option>
+                    {vehicules.map((v: any) => (
+                      <option key={v.id} value={String(v.id)}>
+                        {v.immatriculation}
+                        {v.type_vehicule ? ` • ${v.type_vehicule}` : ''}
+                        {v.marque || v.modele ? ` • ${[v.marque, v.modele].filter(Boolean).join(' ')}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div>
