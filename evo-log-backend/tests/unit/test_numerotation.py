@@ -79,8 +79,18 @@ def test_separation_par_entreprise(db: Session):
 
 
 class _FakeUser:
+    # Ce fake existe pour épingler l'identité (id=1) dans la séquence de
+    # numérotation, pas pour tester les droits. Depuis le batch 22,
+    # /finance exige require_perm : l'identité doit donc porter les mêmes
+    # attributs que le faux super-utilisateur du conftest (un vrai User ORM
+    # les a toujours — is_superuser est une colonne), sinon le repli
+    # modules_allowed du moteur accède à des attributs inexistants.
     id = 1
     username = "test"
+    email = "test@numerotation.local"
+    is_active = True
+    is_superuser = True
+    role_level = 0
     company_id = None
 
 
