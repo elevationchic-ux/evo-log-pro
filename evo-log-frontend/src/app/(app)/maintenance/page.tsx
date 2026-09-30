@@ -1,10 +1,22 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { maintenanceAPI } from '@/lib/api-client';
-import { Wrench, Plus, Search, CheckCircle2, Clock, Truck, X } from 'lucide-react';
+import { Wrench, Plus, Search, Clock, Truck, X } from 'lucide-react';
 import { toast } from 'sonner';
+
+// Couleur du badge d'atelier selon le statut reellement persiste. Une valeur
+// absente de la base reste grisee : elle n'est pas requalifiee « apprete ».
+function statutBadge(statut?: string): string {
+  const s = String(statut || '').toUpperCase();
+  if (s === 'TERMINE') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+  if (s === 'EN_COURS') return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+  if (s === 'ATTENTE_PIECES') return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+  if (s === 'ANNULE') return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+  return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+}
 
 export default function MaintenancePage() {
   const [mounted, setMounted] = useState(false);
@@ -50,10 +62,13 @@ export default function MaintenancePage() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
+    // Aucun remplacement par une valeur par defaut : l'API refuse une
+    // immatriculation inconnue au parc, et l'erreur est affichee telle quelle.
     createMutation.mutate({
-      immatriculation_camion: truckId || 'LT-901-BA',
-      description: description || 'Vidange moteur 50.000km',
+      immatriculation_camion: truckId.trim(),
+      description: description.trim(),
       priorite: priority,
+      type_maintenance: typeMaintenance,
     });
   };
 
@@ -111,36 +126,48 @@ export default function MaintenancePage() {
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="bg-slate-950 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
               <tr>
+                <th className="px-6 py-4">Ordre de Travail Atelier en Cours</th>
+              </tr>
+              <tr>
                 <th className="px-6 py-4">Véhicule / Immatriculation</th>
                 <th className="px-6 py-4">Nature de la Réparation</th>
                 <th className="px-6 py-4 text-center">Priorité</th>
                 <th className="px-6 py-4 text-right">Statut Intervention</th>
+                <th className="px-6 py-4 text-right">Fiche</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {isLoading ? (
-                <tr><td colSpan={4} className="p-12 text-center text-slate-400">Chargement de l'atelier...</td></tr>
+                <tr><td colSpan={5} className="p-12 text-center text-slate-400">Chargement de l'atelier...</td></tr>
               ) : filteredItems.length === 0 ? (
-                <tr><td colSpan={4} className="p-8 text-center text-slate-500">Aucun ordre de travail enregistré.</td></tr>
+                <tr><td colSpan={5} className="p-8 text-center text-slate-500">Aucun ordre de travail enregistré.</td></tr>
               ) : (
                 filteredItems.map((item: any, idx: number) => (
                   <tr key={item.id || idx} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-100 flex items-center gap-2 font-mono">
                       <Truck className="w-4 h-4 text-amber-400" />
-                      {item.immatriculation_camion || 'LT-901-BA'}
+                      {item.immatriculation_camion || item.vehicule || '—'}
                     </td>
                     <td className="px-6 py-4 font-semibold text-slate-200">
-                      {item.description || 'Vidange moteur 50.000km'}
+                      {item.description || '—'}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        {item.priorite || 'NORMALE'}
+                        {item.priorite || 'NON RENSEIGNÉE'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        <CheckCircle2 className="w-3 h-3" /> APPRÊTÉ
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${statutBadge(item.statut)}`}>
+                        {item.statut || 'PLANIFIÉ'}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                      <Link
+                        href={`/maintenance/view?id=${item.id}`}
+                        className="text-xs font-semibold text-amber-400 hover:text-amber-300"
+                      >
+                        Ouvrir
+                      </Link>
                     </td>
                   </tr>
                 ))

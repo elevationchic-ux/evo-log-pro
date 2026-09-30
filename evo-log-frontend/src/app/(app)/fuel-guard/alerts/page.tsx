@@ -66,11 +66,12 @@ export default function FuelGuardAlertsPage() {
       }
       for (const t of tickets) {
         if (t.notes && RE_ANOMALIE.test(t.notes)) {
+          const date = fmtDate(t.date_plein);
           found.push({
             cle: `sig-${t.id}`,
             type: 'signalement',
             immatriculation: t.immatriculation || 'Véhicule non précisé',
-            detail: t.notes,
+            detail: date ? `${t.notes} (${date})` : t.notes,
             valeur: t.conso_l100 ?? null,
           });
         }
