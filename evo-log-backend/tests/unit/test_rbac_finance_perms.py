@@ -152,7 +152,11 @@ def test_caissier_403_sur_creation_facture_avant_ecriture(client_caissier, db):
     r = client_caissier.post(f"{BASE}/factures", json={})
     assert r.status_code == 403, r.text
     assert "facturation.facture.create" in r.text
+    # Les DEUX tables de factures coexistent (OHADA + exploitation) : le refus
+    # doit intervenir avant toute ecriture, dans l'une comme dans l'autre.
+    from app.models.finance import Facture as FactureSimple
     from app.models.finance_ohada import FactureNew
+    assert db.query(FactureSimple).count() == 0, "le refus doit preceder toute ecriture"
     assert db.query(FactureNew).count() == 0, "le refus doit preceder toute ecriture"
 
 

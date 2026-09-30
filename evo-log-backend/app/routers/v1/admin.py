@@ -112,6 +112,9 @@ def get_users(
             "tenant": company_name,
             "company_id": u.company_id,
             "phone": u.phone,
+            # Modele "Utilisateur != Role" : identite employe separee des casquettes.
+            "matricule": u.matricule,
+            "job_title": u.job_title,
             "last_login": u.last_login.isoformat() if u.last_login else None,
             "created_at": u.created_at.isoformat() if u.created_at else None
         })
@@ -165,6 +168,8 @@ def create_user(
         full_name=full_name,
         phone=phone,
         company_id=company_id,
+        matricule=payload.get("matricule"),
+        job_title=payload.get("job_title"),
         is_active=payload.get("is_active", True),
         is_superuser=(role_name.upper() == "SUPER_ADMIN"),
         role_level=0 if role_name.upper() == "SUPER_ADMIN" else (1 if role_name.upper() == "ADMIN" else 3)
