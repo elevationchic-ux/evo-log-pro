@@ -126,9 +126,6 @@ export default function MaintenancePage() {
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="bg-slate-950 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
               <tr>
-                <th className="px-6 py-4">Ordre de Travail Atelier en Cours</th>
-              </tr>
-              <tr>
                 <th className="px-6 py-4">Véhicule / Immatriculation</th>
                 <th className="px-6 py-4">Nature de la Réparation</th>
                 <th className="px-6 py-4 text-center">Priorité</th>
@@ -212,17 +209,33 @@ export default function MaintenancePage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Niveau de Priorité</label>
-                <select
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
-                >
-                  <option value="NORMALE">Normale</option>
-                  <option value="URGENTE">Urgente (Immobilisation)</option>
-                  <option value="PREVENTIVE">Préventive (Visite périodique)</option>
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Nature de l'intervention</label>
+                  <select
+                    value={typeMaintenance}
+                    onChange={(e) => setTypeMaintenance(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="PREVENTIVE">Préventive (vidange, filtres)</option>
+                    <option value="CURATIVE">Curative (panne, réparation)</option>
+                    <option value="VISITE_TECHNIQUE">Visite technique / antipollution</option>
+                    <option value="PNEUMATIQUE">Pneumatiques</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Niveau de Priorité</label>
+                  <select
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="NORMALE">Normale</option>
+                    <option value="URGENTE">Urgente (immobilisation)</option>
+                    <option value="CRITIQUE">Critique (sécurité)</option>
+                  </select>
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">

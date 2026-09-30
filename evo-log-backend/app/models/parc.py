@@ -73,6 +73,11 @@ class Maintenance(Base):
     __tablename__ = "maintenances"
     
     id = Column(Integer, primary_key=True, index=True)
+    # Isolation multi-tenant (migration 032) : un ordre de travail atelier ne
+    # doit etre lisible que par son entreprise. Sans cette colonne, la table
+    # n'etait pas portee par le filtre tenant global et toute la GMAO d'un
+    # tenant etait visible des autres. Renseigne depuis le vehicule rattache.
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
     vehicule_id = Column(Integer, ForeignKey('vehicules.id'))
     type_maintenance = Column(String(50))  # e.g., "preventive", "corrective", "premiere_mise"
     # Champs collects par l'ecran atelier (maintenance/edit) : sans colonne,
