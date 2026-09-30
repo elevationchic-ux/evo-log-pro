@@ -5,7 +5,7 @@ from typing import List
 from datetime import datetime, date
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.permissions import require_perm
 from app.models.user import User
 from app.schemas.finance import (
     PlanComptableOHADACreate, PlanComptableOHADAUpdate, PlanComptableOHADAResponse,
@@ -48,7 +48,7 @@ def lister_plan_comptable(
     skip: int = 0,
     limit: int = 200,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.plan_comptable.read"))
 ):
     """Comptes du plan OHADA reellement enregistres, classes par numero.
 
@@ -76,7 +76,7 @@ def lister_plan_comptable(
 def creer_compte(
     compte: PlanComptableOHADACreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.plan_comptable.create"))
 ):
     """Create OHADA account"""
     return PlanComptableOHADAService.creer_compte(
@@ -90,7 +90,7 @@ def mettre_a_jour_compte(
     compte_id: int,
     compte: PlanComptableOHADAUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.plan_comptable.modify"))
 ):
     """Update OHADA account"""
     c = db.query(PlanComptableOHADA).filter(PlanComptableOHADA.id == compte_id).first()
@@ -110,7 +110,7 @@ def mettre_a_jour_compte(
 def creer_ecriture(
     ecriture: EcritureComptableCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.journal.create"))
 ):
     """Create accounting entry"""
     return EcritureComptableService.creer_ecriture(
@@ -123,7 +123,7 @@ def creer_ecriture(
 def valider_ecriture(
     ecriture_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.journal.approve"))
 ):
     """Validate accounting entry"""
     return EcritureComptableService.valider_ecriture(db, ecriture_id, current_user.username)
@@ -134,7 +134,7 @@ def mettre_a_jour_ecriture(
     ecriture_id: int,
     ecriture: EcritureComptableUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.journal.modify"))
 ):
     """Update accounting entry"""
     e = db.query(EcritureComptable).filter(EcritureComptable.id == ecriture_id).first()
@@ -154,7 +154,7 @@ def mettre_a_jour_ecriture(
 def creer_exercice(
     exercice: ExerciceComptableCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.exercice.create"))
 ):
     """Create fiscal year"""
     return ExerciceComptableService.creer_exercice(
@@ -167,7 +167,7 @@ def creer_exercice(
 def cloturer_exercice(
     exercice_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.exercice.approve"))
 ):
     """Close fiscal year"""
     return ExerciceComptableService.cloturer_exercice(db, exercice_id, current_user.username)
@@ -178,7 +178,7 @@ def mettre_a_jour_exercice(
     exercice_id: int,
     exercice: ExerciceComptableUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.exercice.modify"))
 ):
     """Update fiscal year"""
     e = db.query(ExerciceComptable).filter(ExerciceComptable.id == exercice_id).first()
@@ -198,7 +198,7 @@ def mettre_a_jour_exercice(
 def creer_facture(
     facture: FactureCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("facturation.facture.create"))
 ):
     """Créer une facture.
 
@@ -217,7 +217,7 @@ def ajouter_ligne_facture(
     facture_id: int,
     ligne: LigneFactureCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("facturation.facture.modify"))
 ):
     """Add line to invoice"""
     return FactureService.ajouter_ligne_facture(
@@ -232,7 +232,7 @@ def mettre_a_jour_facture(
     facture: FactureUpdate,
     source: str = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("facturation.facture.modify"))
 ):
     """Update invoice.
 
@@ -280,7 +280,7 @@ def mettre_a_jour_facture(
 def telecharger_facture_pdf(
     facture_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("facturation.facture.export"))
 ):
     """Télécharger la facture au format PDF (mentions DGI/OHADA incluses).
 
@@ -321,7 +321,7 @@ def telecharger_facture_pdf(
 def enregistrer_reglement(
     reglement: ReglementCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("tresorerie.mouvement.create"))
 ):
     """Record payment"""
     return ReglementService.enregistrer_reglement(
@@ -335,7 +335,7 @@ def mettre_a_jour_reglement(
     reglement_id: int,
     reglement: ReglementUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("tresorerie.mouvement.modify"))
 ):
     """Update payment"""
     r = db.query(Reglement).filter(Reglement.id == reglement_id).first()
@@ -355,7 +355,7 @@ def mettre_a_jour_reglement(
 def creer_declaration_tva(
     declaration: TVADeclarableCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.create"))
 ):
     """Create VAT declaration"""
     return TVADeclarableService.creer_declaration_tva(
@@ -369,7 +369,7 @@ def mettre_a_jour_declaration_tva(
     declaration_id: int,
     declaration: TVADeclarableUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.modify"))
 ):
     """Update VAT declaration"""
     d = db.query(TVADeclarable).filter(TVADeclarable.id == declaration_id).first()
@@ -389,7 +389,7 @@ def mettre_a_jour_declaration_tva(
 def creer_retenue_source(
     retenue: RetenueSourceCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.create"))
 ):
     """Create withholding tax"""
     return RetenueSourceService.creer_retenue_source(
@@ -403,7 +403,7 @@ def mettre_a_jour_retenue_source(
     retenue_id: int,
     retenue: RetenueSourceUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.modify"))
 ):
     """Update withholding tax"""
     r = db.query(RetenueSource).filter(RetenueSource.id == retenue_id).first()
@@ -423,7 +423,7 @@ def mettre_a_jour_retenue_source(
 def creer_declaration_is(
     declaration: ISDeclarableCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.create"))
 ):
     """Create corporate tax declaration"""
     return ISDeclarableService.creer_declaration_is(
@@ -437,7 +437,7 @@ def mettre_a_jour_declaration_is(
     declaration_id: int,
     declaration: ISDeclarableUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.modify"))
 ):
     """Update corporate tax declaration"""
     d = db.query(ISDeclarable).filter(ISDeclarable.id == declaration_id).first()
@@ -457,7 +457,7 @@ def mettre_a_jour_declaration_is(
 def creer_centimes(
     centimes: CentimesAdditionnelsCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.create"))
 ):
     """Create additional local tax"""
     return CentimesAdditionnelsService.creer_centimes(
@@ -471,7 +471,7 @@ def mettre_a_jour_centimes(
     centimes_id: int,
     centimes: CentimesAdditionnelsUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.modify"))
 ):
     """Update additional local tax"""
     c = db.query(CentimesAdditionnels).filter(CentimesAdditionnels.id == centimes_id).first()
@@ -491,7 +491,7 @@ def mettre_a_jour_centimes(
 def creer_patente(
     patente: PatenteCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.create"))
 ):
     """Create business license tax"""
     return PatenteService.creer_patente(
@@ -505,7 +505,7 @@ def mettre_a_jour_patente(
     patente_id: int,
     patente: PatenteUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.modify"))
 ):
     """Update business license tax"""
     p = db.query(Patente).filter(Patente.id == patente_id).first()
@@ -525,7 +525,7 @@ def mettre_a_jour_patente(
 def creer_bilan(
     bilan: BilanCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.create"))
 ):
     """Create balance sheet"""
     return BilanService.creer_bilan(
@@ -538,7 +538,7 @@ def mettre_a_jour_bilan(
     bilan_id: int,
     bilan: BilanUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.bilan.modify"))
 ):
     """Update balance sheet"""
     b = db.query(Bilan).filter(Bilan.id == bilan_id).first()
@@ -558,7 +558,7 @@ def mettre_a_jour_bilan(
 def creer_compte_resultat(
     compte: CompteResultatCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.compte_resultat.create"))
 ):
     """Create income statement"""
     return CompteResultatService.creer_compte_resultat(
@@ -572,7 +572,7 @@ def mettre_a_jour_compte_resultat(
     compte_id: int,
     compte: CompteResultatUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("comptabilite.compte_resultat.modify"))
 ):
     """Update income statement"""
     c = db.query(CompteResultat).filter(CompteResultat.id == compte_id).first()
@@ -592,7 +592,7 @@ def mettre_a_jour_compte_resultat(
 def signer_facture(
     signature: SignatureElectroniqueCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("facturation.facture.approve"))
 ):
     """Sign invoice electronically"""
     return SignatureElectroniqueService.signer_facture(
@@ -606,7 +606,7 @@ def mettre_a_jour_signature(
     signature_id: int,
     signature: SignatureElectroniqueUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("facturation.facture.modify"))
 ):
     """Update electronic signature"""
     s = db.query(SignatureElectronique).filter(SignatureElectronique.id == signature_id).first()
@@ -625,7 +625,7 @@ def mettre_a_jour_signature(
 def rapport_fiscal(
     exercice_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fiscalite.declarations.read"))
 ):
     """Generate fiscal report"""
     return FinanceReportingService.rapport_fiscal(db, exercice_id)
@@ -636,7 +636,7 @@ def rapport_fiscal(
 def list_factures(
     statut: str = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("facturation.facture.read"))
 ):
     """Liste des factures reellement persistees, les deux tables confondues.
 
@@ -715,7 +715,7 @@ def list_factures(
 @router.get("/encaissements")
 def list_encaissements(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("tresorerie.mouvement.read"))
 ):
     """Liste des reglements/encaissements du tenant courant (table paiements)."""
     from app.models.finance import Paiement
@@ -744,7 +744,7 @@ def list_encaissements(
 def creer_encaissement(
     payload: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("tresorerie.mouvement.create"))
 ):
     """Enregistrer un reglement sur une facture.
 
@@ -870,7 +870,7 @@ def creer_encaissement(
 @router.get("/kpis")
 def get_finance_kpis(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("facturation.facture.read"))
 ):
     """KPIs financiers consolidés pour les tableaux de bord.
 
@@ -929,7 +929,7 @@ def get_finance_kpis(
 @router.get("/analytics/chart-data")
 def get_finance_chart_data(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("facturation.facture.read"))
 ):
     """Séries temporelles de chiffre d'affaires, agrégées par mois réel.
 

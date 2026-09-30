@@ -7527,36 +7527,6 @@
    ],
    "enums": {}
   },
-  "OperationAcconageCreate": {
-   "champs": [
-    "date_debut",
-    "date_fin_prevue",
-    "navire_id",
-    "nombre_conteneurs",
-    "numero_operation",
-    "observations",
-    "statut",
-    "type_operation"
-   ],
-   "enums": {}
-  },
-  "OperationAcconageResponse": {
-   "champs": [
-    "created_at",
-    "date_debut",
-    "date_fin_effective",
-    "date_fin_prevue",
-    "id",
-    "navire_id",
-    "nombre_conteneurs",
-    "numero_operation",
-    "observations",
-    "statut",
-    "type_operation",
-    "updated_at"
-   ],
-   "enums": {}
-  },
   "OpportunitySchema": {
    "champs": [
     "client_name",
@@ -9708,6 +9678,7 @@
     "motif",
     "notes",
     "quantite",
+    "stock_id",
     "type_retour"
    ],
    "enums": {}
@@ -9726,6 +9697,7 @@
     "operateur",
     "quantite",
     "statut",
+    "stock_id",
     "type_retour"
    ],
    "enums": {}
@@ -10094,8 +10066,11 @@
   },
   "SimulationTaxationRequest": {
    "champs": [
+    "categorie_tec",
     "code_sh",
+    "origine",
     "regime",
+    "taux_dd_explicite",
     "valeur_cif_xaf"
    ],
    "enums": {}
@@ -10645,8 +10620,16 @@
     "cci_cemac",
     "devise",
     "droit_douane_dd",
+    "note",
+    "origine",
     "precompte_is",
+    "prelevement_ohada",
     "redevance_informatique",
+    "regime",
+    "simulation",
+    "source_taux",
+    "taux_dd",
+    "taux_tva",
     "total_a_liquider_xaf",
     "tva_1925",
     "valeur_cif_xaf"
@@ -10843,6 +10826,17 @@
     "resolved_at",
     "statut",
     "sujet"
+   ],
+   "enums": {}
+  },
+  "TicketUpdate": {
+   "champs": [
+    "assigne_a",
+    "categorie",
+    "description",
+    "module_concerne",
+    "priorite",
+    "statut"
    ],
    "enums": {}
   },
@@ -11808,6 +11802,9 @@
    ]
   },
   "/api/v1/auth/logout": {
+   "post": []
+  },
+  "/api/v1/auth/pointer-depart": {
    "post": []
   },
   "/api/v1/auth/change-password": {
@@ -13334,6 +13331,14 @@
     "TicketResponse"
    ]
   },
+  "/api/v1/support/tickets/{ticket_id}": {
+   "get": [
+    "TicketResponse"
+   ],
+   "put": [
+    "TicketResponse"
+   ]
+  },
   "/api/v1/support/incidents": {
    "get": [],
    "post": [
@@ -13547,25 +13552,15 @@
    ]
   },
   "/api/v1/acconage/": {
-   "get": [
-    "OperationAcconageResponse"
-   ],
-   "post": [
-    "OperationAcconageResponse"
-   ]
+   "get": [],
+   "post": []
   },
   "/api/v1/acconage": {
-   "get": [
-    "OperationAcconageResponse"
-   ],
-   "post": [
-    "OperationAcconageResponse"
-   ]
+   "get": [],
+   "post": []
   },
   "/api/v1/acconage/operations": {
-   "post": [
-    "OperationAcconageResponse"
-   ]
+   "post": []
   },
   "/api/v1/acconage/dossier-marchandise": {
    "get": []
@@ -13591,6 +13586,10 @@
   "/api/v1/acconage/facturation-quai/{escale_id}/generer-facture": {
    "post": []
   },
+  "/api/v1/acconage/{operation_id}": {
+   "get": [],
+   "put": []
+  },
   "/api/v1/transit/dossiers": {
    "get": [
     "DossierTransitResponse",
@@ -13607,10 +13606,12 @@
    ]
   },
   "/api/v1/maintenance/": {
-   "get": []
+   "get": [],
+   "post": []
   },
   "/api/v1/maintenance": {
-   "get": []
+   "get": [],
+   "post": []
   },
   "/api/v1/maintenance/stats": {
    "get": []
@@ -13632,6 +13633,10 @@
   },
   "/api/v1/maintenance/analytics/kpis": {
    "get": []
+  },
+  "/api/v1/maintenance/{maintenance_id}": {
+   "get": [],
+   "put": []
   },
   "/api/v1/qhse/analyses-risques": {
    "post": [
@@ -15768,7 +15773,8 @@
    "get": []
   },
   "/api/v1/b2b-portal/quotes": {
-   "post": []
+   "post": [],
+   "get": []
   },
   "/api/v1/b2b-portal/booking": {
    "post": []
@@ -16451,6 +16457,9 @@
    ]
   },
   "/api/auth/logout": {
+   "post": []
+  },
+  "/api/auth/pointer-depart": {
    "post": []
   },
   "/api/auth/change-password": {

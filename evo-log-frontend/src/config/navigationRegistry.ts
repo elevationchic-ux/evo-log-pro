@@ -1912,3 +1912,16 @@ const ADVANCED_SUBMODULES_WAVE2: AdvancedSubModuleEntry[] = [
   { family: 'admin-saas', label: 'API Publique', path: '/public-api', icon: Globe, badge: 'API', description: 'Portail de documentation de l’API publique', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
 ];
 applyAdvanced(ADVANCED_SUBMODULES_WAVE2);
+
+// ----------------------------------------------------------------------------
+// ONDE 3 — derniers écrans métier RéELS non doublonnés restés hors menu.
+// (Les routes /logout, /settings, /chauffeur, /audit, /role, /tenant, /tiers,
+// /suppliers restent volontairement hors liste : actions systéme ou doublons
+// des modules canoniques djá câblés.)
+// ----------------------------------------------------------------------------
+const ADVANCED_SUBMODULES_WAVE3: AdvancedSubModuleEntry[] = [
+  { family: 'finance-ohada', label: 'Acquisitions & Immobilisations', path: '/acquisition', icon: TrendingUp, badge: 'Immo', description: 'Suivi des acquisitions et entrees d’immobilisations', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'qhse-securite', label: 'Registre QHSE', path: '/qhse', icon: Shield, badge: 'Avancé', description: 'Registre general QHSE (liste, creation, consultation)', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'QHSE'] },
+  { family: 'admin-saas', label: 'Administration Agence', path: '/admin-agency', icon: Building, badge: 'Agence', description: 'Pilotage des agences et points de service du tenant', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
+];
+applyAdvanced(ADVANCED_SUBMODULES_WAVE3);
