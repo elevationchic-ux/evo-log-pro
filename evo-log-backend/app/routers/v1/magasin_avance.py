@@ -1163,7 +1163,7 @@ def refuser_reception(
 # perte silencieuse. Batch 20 (migration 029) : la liaison stock_id existe
 # enfin dans le modele ; /traiter reintegre reellement le stock QUAND la ligne
 # est precisee a la creation et que la marchandise n'est pas detruite, et
-# l'écrit dans notes quand elle ne peut pas le faire. Sinon : aucun mouvement.
+# l'ecrit dans notes quand elle ne peut pas le faire. Sinon : aucun mouvement.
 
 
 def _prochaine_rotation_numero(db, modele, champ, prefix):
