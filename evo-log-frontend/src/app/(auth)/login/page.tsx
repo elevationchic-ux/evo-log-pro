@@ -49,6 +49,7 @@ export default function LoginPage() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [pendingRoles, setPendingRoles] = useState<string[]>([]);
+  const [pendingLevel, setPendingLevel] = useState<number>(3);
 
   // Splash animation timer
   useEffect(() => {

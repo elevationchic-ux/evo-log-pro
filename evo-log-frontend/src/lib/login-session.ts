@@ -13,6 +13,9 @@ export interface LoginOutcome {
   ok: boolean
   /** Roles effectifs renvoyes par le backend ; vide si la session a echoue. */
   roles: string[]
+  /** Niveau hiérarchique (0 CADC / 1 admin / 2 chef / 3 collaborateur). Sert a
+   *  l'atterrissage "Hub par défaut" (Phase 4). 3 par defaut si absent. */
+  roleLevel: number
   /** Le backend impose un changement de mot de passe a la premiere connexion. */
   mustChangePassword: boolean
   /** Message lisible, toujours dans la langue du chrome (FR par defaut). */
@@ -27,7 +30,7 @@ export interface LoginOutcome {
  */
 export async function establishSession(ticket: string): Promise<LoginOutcome> {
   if (!ticket) {
-    return { ok: false, roles: [], mustChangePassword: false, message: 'Aucun jeton de session recu.' }
+    return { ok: false, roles: [], roleLevel: 3, mustChangePassword: false, message: 'Aucun jeton de session recu.' }
   }
   const res = await signIn('credentials', { ticket, redirect: false })
   if (res?.error) {
@@ -35,6 +38,7 @@ export async function establishSession(ticket: string): Promise<LoginOutcome> {
     return {
       ok: false,
       roles: [],
+      roleLevel: 3,
       mustChangePassword: false,
       message: "La session n'a pas pu etre ouverte. Relancez la connexion.",
     }
@@ -45,6 +49,7 @@ export async function establishSession(ticket: string): Promise<LoginOutcome> {
   return {
     ok: !!session?.user,
     roles,
+    roleLevel: Number(user.role_level ?? 3),
     mustChangePassword: !!user.must_change_password,
   }
 }

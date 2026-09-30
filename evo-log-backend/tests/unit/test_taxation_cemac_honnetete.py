@@ -45,13 +45,15 @@ def test_categorie_tec_explicite_source_categorie_tec(client):
     assert body["droit_douane_dd"] == 5_000.0
 
 
-def test_taux_manuel_prioritaire_n_est_plus_une_simulation(client):
+def test_taux_manuel_prioritaire_source_manuelle(client):
+    """Un taux saisi a la main est prioritaire sur la categorie TEC, mais reste
+    signale comme simulation (il ne provient pas de la nomenclature officielle)."""
     resp = _post(client, code_sh="9999.99.99", taux_dd_explicite=10)
     assert resp.status_code == 200, resp.text
     body = resp.json()
     assert body["source_taux"] == "manuel"
     assert body["taux_dd"] == 0.10
-    assert body["simulation"] is False
+    assert body["simulation"] is True
     assert body["droit_douane_dd"] == 10_000.0
 
 

@@ -95,13 +95,27 @@ function toSessionUser(p: BackendSession, accessToken: string, refreshToken?: st
   }
 }
 
-/** Aterrage par defaut selon les roles renvoyes par le backend. */
-export function landingRouteFor(roles: string[]): string {
+/** Aterrage par defaut selon les roles + le niveau hiérarchique renvoyes par le
+ *  backend (Phase 4 — Hub par défaut).
+ *
+ *  Regles :
+ *  - un role metier specifique (chauffeur, magasinier, transport, finance) garde
+ *    son portail dedie « enhardi » ;
+ *  - un simple COLLABORATEUR (role_level 3) sans role metier atterrit sur le Hub
+ *    adaptatif `/portail-collaborateur`, qui ne presente que les portails autorises
+ *    pour son profil (et non un tableau de bord executif qui ne le concerne pas) ;
+ *  - les niveaux 0/1/2 (CADC / admin entreprise / chef de departement) restent
+ *    sur le dashboard global.
+ *  Le roleLevel est optionnel pour preserver les appels historiques : sans lui,
+ *  on retombe sur l'ancien comportement (dashboard global). */
+export function landingRouteFor(roles: string[], roleLevel?: number): string {
   if (roles.includes('CHAUFFEUR')) return '/chauffeur'
   if (roles.includes('ADMIN') || roles.includes('MANAGER')) return '/dashboard/global'
   if (roles.includes('MAGASINIER') || roles.includes('MAGASIN')) return '/magasin/dashboard'
   if (roles.includes('TRANSPORT') || roles.includes('DISPATCHER')) return '/transport/control'
   if (roles.includes('FINANCE')) return '/finance/overview'
+  // Hub par défaut : collaborateur (niveau 3) sans rôle métier dédié.
+  if (roleLevel === 3) return '/portail-collaborateur'
   return '/dashboard/global'
 }
 
