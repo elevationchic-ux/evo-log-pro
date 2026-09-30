@@ -188,16 +188,17 @@ def test_migration_029_idempotente_sans_donnee_inventee(tmp_path, monkeypatch):
     monkeypatch.setenv("DATABASE_URL", url)
     cfg = _make_config()
 
-    # On simule l'etat PRE-batch 20 : la table existe, sans stock_id.
+    # On monte la chaine jusqu'à 028 (etat pré-batch 20), puis on ramène
+    # manuellement retours_client a sa forme HERITEE (sans stock_id) : c'est
+    # exactement la situation d'une base migree ou la revision 029 doit agir.
+    command.upgrade(cfg, "028_full_orm_parity")
     engine = create_engine(url)
     with engine.begin() as conn:
+        conn.execute(text("DROP TABLE IF EXISTS retours_client"))
         conn.execute(text(
             'CREATE TABLE retours_client ('
             'id INTEGER PRIMARY KEY, numero_retour VARCHAR(50), '
             'client_id INTEGER, motif VARCHAR(200))'
-        ))
-        conn.execute(text(
-            'CREATE TABLE stocks (id INTEGER PRIMARY KEY, code_article VARCHAR(50))'
         ))
         conn.execute(text(
             "INSERT INTO retours_client (id, numero_retour, client_id) "
