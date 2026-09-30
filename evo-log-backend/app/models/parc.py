@@ -75,6 +75,10 @@ class Maintenance(Base):
     id = Column(Integer, primary_key=True, index=True)
     vehicule_id = Column(Integer, ForeignKey('vehicules.id'))
     type_maintenance = Column(String(50))  # e.g., "preventive", "corrective", "premiere_mise"
+    # Champs collects par l'ecran atelier (maintenance/edit) : sans colonne,
+    # la saisie etait silencieusement jetee a l'enregistrement (migration 031).
+    priorite = Column(String(20))  # basse, normale, urgente, critique
+    pieces = Column(Text)  # pieces rechange declarees pour l'intervention
     date_debut = Column(DateTime(timezone=True))
     date_fin = Column(DateTime(timezone=True))
     kilometrage = Column(Integer)
