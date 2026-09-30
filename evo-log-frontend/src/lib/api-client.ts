@@ -497,6 +497,10 @@ export const purchaseAPI = {
 export const parcAPI = {
   getZones: (params?: Record<string, unknown>) =>
     apiClient.get('/api/parc/zones', { params }),
+  // Parc automobile reel (table vehicules) : sert le selecteur de camion de
+  // l'atelier et tout ecran qui doit citer une immatriculation existante.
+  getVehicules: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/parc/vehicules', { params }),
   getEmplacements: (params?: Record<string, unknown>) =>
     apiClient.get('/api/parc/emplacements', { params }),
   getStock: (params?: Record<string, unknown>) =>
