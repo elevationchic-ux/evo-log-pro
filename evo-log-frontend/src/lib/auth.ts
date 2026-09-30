@@ -142,7 +142,7 @@ export const authOptions: NextAuthOptions = {
 
           // Call backend auth API
           const identifier = (credentials as any)?.email || credentials?.username
-          const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
+          const res = await fetchWithColdStartRetry(`${API_BASE}/api/v1/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

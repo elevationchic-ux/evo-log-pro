@@ -110,10 +110,19 @@ def get_dossiers(
     missions = (
         db.query(Mission)
         .filter(Mission.client_id == client.id)
-        .options(joinedload(Mission.conteneur))
         .order_by(Mission.id.desc())
         .all()
     )
+    # Mission n'a pas de relation ORM vers les conteneurs : on resout la table
+    # ``conteneurs`` (cible de la cle etrangere conteneur_id) en une seule
+    # requete, et le numero reste absent s'il n'est pas rattache.
+    ids_conteneurs = sorted({m.conteneur_id for m in missions if m.conteneur_id})
+    numeros = {}
+    if ids_conteneurs:
+        numeros = {
+            c.id: c.numero
+            for c in db.query(Conteneur).filter(Conteneur.id.in_(ids_conteneurs)).all()
+        }
 
     items = [
         {
@@ -140,13 +149,13 @@ def get_dossiers(
             "reference": m.reference,
             "type": m.type_mission,
             "description": (
-                f"{m.point_depart or 'depart non renseigne'}  "
+                f"{m.point_depart or 'depart non renseigne'} -> "
                 f"{m.point_arrivee or 'arrivee non renseignee'}"
             ),
             "statut": m.statut.value if hasattr(m.statut, "value") else m.statut,
             "date_debut_prevue": _dt(m.date_debut_prevue),
             "date_fin_reelle": _dt(m.date_fin_reelle),
-            "conteneur": getattr(m.conteneur, "numero", None),
+            "conteneur": numeros.get(m.conteneur_id),
             "numero_bl": m.numero_bl,
             "distance_km": _float(m.distance_km),
         }
@@ -180,7 +189,7 @@ def get_factures(
     items = []
     for f in factures:
         # Somme reelle des paiements CONFIRMES uniquement : un paiement en
-        # attente d'un prestataire externe ne reduction pas le solde.
+        # attente de confirmation externe ne reduit pas le solde.
         paye = (
             db.query(func.coalesce(func.sum(Paiement.montant), 0))
             .filter(Paiement.facture_id == f.id, Paiement.statut == PaiementStatus.CONFIRME)
@@ -237,7 +246,7 @@ def calculate_quote(
 
     Les prix ne viennent d'aucune constante du code : chaque ligne correspond a
     une ligne active de la table ``tarifs``. Si aucune grille ne couvre le
-    service demande, la reponse est 400  un devis ne peut pas etre fabrique.
+    service demande, la reponse est 400 : un devis ne peut pas etre fabrique.
     """
     service = (payload.get("service_type") or payload.get("type_service") or "").strip().upper()
     if not service:
@@ -274,7 +283,7 @@ def calculate_quote(
     for t in lignes_tarif:
         prix = float(t.prix or 0)
         tva_pct = float(t.tva or 0)
-        # Percoit par unite de conteneur quand l'unite l'indique, sinon forfait.
+        # Facture par unite de conteneur quand l'unite l'indique, sinon forfait.
         par_unite = (t.unite or "").strip().lower() in ("conteneur", "tc", "unite", "each", "u")
         qte = quantite if par_unite else 1
         ht = round(prix * qte, 2)
@@ -376,7 +385,7 @@ def create_booking(
 ):
     """Enleve le conteneur en creant une MISSION REELLE dans le module transport.
 
-    Le creneau demande doit etre resolvables : date + plage « HH:MM-HH:MM ».
+    Le creneau demande doit etre resolvable : date + plage « HH:MM-HH:MM ».
     Aucun horodatage n'est invente, aucun numero de bon n'est simule : la
     reference retournee est celle de la mission persistee.
     """
@@ -402,21 +411,29 @@ def create_booking(
             status_code=400,
             detail="creneau_horaire invalide : format attendu HH:MM-HH:MM.",
         )
-    debut = datetime.combine(jour, __import__("datetime").time(int(m.group(1)), int(m.group(2))))
-    fin = datetime.combine(jour, __import__("datetime").time(int(m.group(3)), int(m.group(4))))
+    debut = datetime.combine(jour, time_type(int(m.group(1)), int(m.group(2))))
+    fin = datetime.combine(jour, time_type(int(m.group(3)), int(m.group(4))))
+    if fin <= debut:
+        raise HTTPException(
+            status_code=400,
+            detail="creneau_horaire incoherent : l'heure de fin doit suivre l'heure de debut.",
+        )
 
-    numero_conteneur = (payload.get("numero_conteneur") or "").strip()
+    numero_conteneur = (payload.get("numero_conteneur") or "").strip().upper()
     conteneur_id = None
     if numero_conteneur:
-        conteneur = db.query(ConteneurCycle).filter(
-            ConteneurCycle.numero == numero_conteneur.upper()
-        ).first()
-        conteneur_id = conteneur.id if conteneur else None
+        # La cle etrangere missions.conteneur_id pointe vers la table
+        # ``conteneurs`` (parc acconage), pas vers conteneurs_cycle.
+        trouve = (
+            db.query(Conteneur).filter(Conteneur.numero == numero_conteneur).first()
+        )
+        conteneur_id = trouve.id if trouve else None
 
     mission = Mission(
         company_id=_id_enterprise(current_user),
         reference=_reference_unique(db, Mission, Mission.reference, "BKG"),
         client_id=client.id,
+        conteneur_id=conteneur_id,
         type_mission="enlevement",
         statut=MissionStatus.PLANIFIEE,
         date_debut_prevue=debut,
@@ -430,7 +447,7 @@ def create_booking(
             + (
                 "rattache au parc conteneurs."
                 if conteneur_id
-                else "| aucun conteneur porte ce numero en base : lien non etabli."
+                else ": aucun conteneur porte ce numero en base, lien non etabli."
             )
         ),
     )
@@ -469,7 +486,6 @@ def track_cargo(
     inconnue renvoie 404 (pas un faux parcours).
     """
     from app.services.dossier_marchandise import consigner_dossier_marchandise
-    from fastapi import HTTPException as _HE
 
     ref = (query or "").strip()
     if len(ref) < 4:
@@ -477,7 +493,7 @@ def track_cargo(
 
     try:
         dossier = consigner_dossier_marchandise(db, numero_conteneur=ref, numero_bl=ref)
-    except _HE as exc:
+    except HTTPException as exc:
         if exc.status_code == 404:
             raise HTTPException(
                 status_code=404,
@@ -575,8 +591,7 @@ def process_checkout(
     if montant <= 0 or montant > solde:
         raise HTTPException(
             status_code=400,
-            detail=f"Montant hors solde : le reste du est {solde} {facture.devise}.",
-        )
+            detail=f"Montant hors solde : le reste du est {solde} {facture.devise}.",        )
 
     telephone = (payload.get("phone") or payload.get("telephone") or "").strip()
     paiement = Paiement(

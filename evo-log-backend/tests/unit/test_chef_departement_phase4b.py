@@ -234,19 +234,33 @@ def test_create_planning_invalid_date_is_400(wb_client, sandbox):
 # 3. Contrainte publication "au mercredi"
 # --------------------------------------------------------------------------- #
 def test_create_planning_confirme_future_week_ok_before_deadline(wb_client, sandbox):
-    """CONFIRME pour la semaine suivante est OK si on est avant le mercredi precedent."""
-    resp = wb_client.post(
-        "/api/v1/departement/planning",
-        headers=_auth(sandbox["chef_token"]),
-        json={
-            "employe_id": sandbox["ops_a_id"],
-            "date_jour": sandbox["next_week_monday"].isoformat(),
-            "quart": "NUIT",
-            "poste_assigne": "Poste Nuit",
-            "statut": "CONFIRME",
-        },
-    )
-    # Le test passe si aujourdhui <= mercredi de cette semaine (mardi = OK).
+    """CONFIRME pour la semaine suivante est OK si today <= mercredi precedent.
+
+    Date FIGEE au lundi de la semaine courante : sinon l'assertion dependrait
+    du jour reel d'execution (jeudi > mercredi precedent -> 400 legitime). On
+    rend le test deterministe, a l'image du test "after deadline" sibling.
+    """
+    real_iso = _date.today().isocalendar()
+    fake_today = _date.fromisocalendar(real_iso[0], real_iso[1], 1)  # lundi
+    with patch("app.routers.v1.chef_departement._date") as mock_date:
+        mock_date.today.return_value = fake_today
+        mock_date.fromisocalendar = _date.fromisocalendar
+        mock_date.fromisoformat = _date.fromisoformat
+        mock_date.resolution = _date.resolution
+        fake_iso = fake_today.isocalendar()
+        target_monday = _date.fromisocalendar(fake_iso[0], fake_iso[1] + 1, 1)
+        resp = wb_client.post(
+            "/api/v1/departement/planning",
+            headers=_auth(sandbox["chef_token"]),
+            json={
+                "employe_id": sandbox["ops_a_id"],
+                "date_jour": target_monday.isoformat(),
+                "quart": "NUIT",
+                "poste_assigne": "Poste Nuit",
+                "statut": "CONFIRME",
+            },
+        )
+    # Lundi <= mercredi precedent de la semaine cible -> publication ouverte.
     assert resp.status_code == 201, resp.text
 
 
