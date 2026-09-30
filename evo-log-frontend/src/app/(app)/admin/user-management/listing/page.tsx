@@ -102,11 +102,51 @@ export default function UserManagementPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
   });
 
-  const roles = [...new Set(users.map(u => u.role))];
+  // --- Editeur "Utilisateur != Role" : identite (matricule/poste) + casquettes ---
+  const [editUser, setEditUser] = useState<UserEntry | null>(null);
+  const [form, setForm] = useState({ matricule: "", job_title: "" });
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const { data: roleCatalog = [] } = useQuery({
+    queryKey: ["admin-roles-catalog"],
+    queryFn: async () => (await adminAPI.getRoles()).data || [],
+  });
+  const assignableRoles: string[] = (Array.isArray(roleCatalog) ? roleCatalog : [])
+    .map((r: any) => r.name as string)
+    .filter(Boolean);
+
+  useEffect(() => {
+    if (editUser) {
+      setForm({ matricule: editUser.matricule || "", job_title: editUser.job_title || "" });
+      setSelectedRoles(editUser.roles || []);
+    }
+  }, [editUser]);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (!editUser) return;
+      // 1) identite employe, 2) casquettes (role_level derive cote backend).
+      await adminAPI.updateUser(editUser.id, { matricule: form.matricule, job_title: form.job_title });
+      await adminAPI.assignUserRoles(editUser.id, selectedRoles);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success("Utilisateur mis à jour (identité & casquettes).");
+      setEditUser(null);
+    },
+    onError: (err: any) => {
+      const detail = err?.response?.data?.detail;
+      toast.error(detail || "Échec de la mise à jour.");
+    },
+  });
+
+  const toggleRole = (name: string) =>
+    setSelectedRoles(prev => prev.includes(name) ? prev.filter(r => r !== name) : [...prev, name]);
+
+  const roles = [...new Set(users.flatMap(u => u.roles))];
 
   const filtered = users.filter(u => {
     const matchSearch = search === "" || `${u.prenom} ${u.nom}`.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()) || u.departement.toLowerCase().includes(search.toLowerCase());
-    const matchRole = filterRole === "TOUS" || u.role === filterRole;
+    const matchRole = filterRole === "TOUS" || u.roles.includes(filterRole);
     const matchStatut = filterStatut === "TOUS" || u.statut === filterStatut;
     return matchSearch && matchRole && matchStatut;
   });
@@ -191,13 +231,20 @@ export default function UserManagementPage() {
                         </div>
                         <div>
                           <p className="font-medium text-foreground">{user.prenom} {user.nom}</p>
-                          <p className="text-xs text-muted-foreground">{user.telephone}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {user.job_title ? <span className="inline-flex items-center gap-1"><Briefcase size={11} />{user.job_title}</span> : user.telephone}
+                            {user.matricule && <span className="ml-2 font-mono text-[11px] text-slate-500">{user.matricule}</span>}
+                          </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{user.email}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${roleCfg}`}>{user.role}</span>
+                      <div className="flex flex-wrap gap-1">
+                        {user.roles.map(r => (
+                          <span key={r} className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${roleColors[r] || "text-slate-400 bg-slate-400/10 border-slate-400/30"}`}>{r}</span>
+                        ))}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{user.departement}</td>
                     <td className="px-4 py-3">
