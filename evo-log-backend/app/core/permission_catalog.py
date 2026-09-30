@@ -29,10 +29,20 @@ DOMAINS: Dict[str, Dict] = {
     "finance": {
         "label": "Finance & Comptabilite",
         "modules": {
-            "comptabilite": {"label": "Comptabilite SYSCOHADA", "sub_modules": {"journal": ACTIONS, "grand_livre": ["read", "export"], "balance": ["read", "export"], "bilan": ["read", "approve", "export"], "lettrage": ["read", "modify"]}},
+            # Batch 22 : le routeur /finance expose plan comptable, exercices,
+            # bilans et comptes de resultat — des realites metier qui n'avaient
+            # encore AUCUN code dans le catalogue (le routeur etait en auth
+            # simple faute de droit applicable). Plutot que de les plaquer de
+            # force sur « journal », sous-modules dedies, alignes sur les
+            # ecrans. bilan etendu car creer/modifier un bilan est distinct de
+            # l'approuver.
+            "comptabilite": {"label": "Comptabilite SYSCOHADA", "sub_modules": {"journal": ACTIONS, "grand_livre": ["read", "export"], "balance": ["read", "export"], "bilan": ["read", "create", "modify", "approve", "export"], "lettrage": ["read", "modify"], "plan_comptable": ["read", "create", "modify"], "exercice": ["read", "create", "modify", "approve"], "compte_resultat": ["read", "create", "modify"]}},
             "tresorerie": {"label": "Tresorerie", "sub_modules": {"mouvement": ACTIONS, "rapprochement": ["read", "modify"]}},
             "facturation": {"label": "Facturation", "sub_modules": {"facture": ACTIONS, "devis": ACTIONS, "avoir": ACTIONS}},
-            "fiscalite": {"label": "Fiscalite (CEMAC)", "sub_modules": {"tva": ["read", "modify", "approve", "export"], "declarations": ["read", "create", "approve", "export"]}},
+            # declarations + modify : une declaration fiscale se corrige avant
+            # d'être depotree ; le depot lui-meme reste l'approve (501 tant que
+            # GUCE/SYDONIA n'existe pas — batches precedents).
+            "fiscalite": {"label": "Fiscalite (CEMAC)", "sub_modules": {"tva": ["read", "modify", "approve", "export"], "declarations": ["read", "create", "modify", "approve", "export"]}},
             "immobilisations": {"label": "Immobilisations", "sub_modules": {"actif": ACTIONS, "amortissement": ["read", "create", "modify"]}},
         },
     },
@@ -82,16 +92,29 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ("CHEF_COMPTABLE", 2, "Chef comptable : voir et valider tout le departement comptable", [
         "comptabilite.*.*", "tresorerie.*.read", "tresorerie.mouvement.approve",
         "facturation.*.read", "facturation.facture.approve", "facturation.*.export",
-        "fiscalite.*.read", "fiscalite.declarations.approve", "immobilisations.*.read",
+        "facturation.facture.create", "facturation.facture.modify",
+        "fiscalite.*.read", "fiscalite.declarations.create", "fiscalite.declarations.modify",
+        "fiscalite.declarations.approve", "immobilisations.*.read",
     ]),
     ("COMPTABLE", 3, "Comptable : saisie et consultation de ses ecritures", [
         "comptabilite.journal.read", "comptabilite.journal.create", "comptabilite.journal.modify",
         "comptabilite.grand_livre.read", "comptabilite.balance.read", "comptabilite.lettrage.read",
-        "comptabilite.lettrage.modify", "tresorerie.mouvement.read", "tresorerie.mouvement.create",
-        "facturation.facture.read", "facturation.facture.create", "fiscalite.tva.read",
+        "comptabilite.lettrage.modify",
+        # Batch 22 : le comptable consulte le plan et les exercices, corrige
+        # reglements et factures, telecharge les PDF — mais ne valide
+        # (journal.approve), ne clot pas l'exercice et ne signe pas.
+        "comptabilite.plan_comptable.read", "comptabilite.exercice.read",
+        "tresorerie.mouvement.read", "tresorerie.mouvement.create", "tresorerie.mouvement.modify",
+        "facturation.facture.read", "facturation.facture.create", "facturation.facture.modify",
+        "facturation.facture.export", "fiscalite.tva.read",
+    ]),
+    ("CAISSIER", 3, "Caissier : encaissements, reglements et soldes de tresorerie", [
+        "tresorerie.mouvement.read", "tresorerie.mouvement.create", "tresorerie.mouvement.modify",
+        "facturation.facture.read",
     ]),
     ("AUDITEUR", 3, "Auditeur : lecture transversale, aucune ecriture", [
         "comptabilite.*.read", "tresorerie.*.read", "facturation.*.read",
+        "fiscalite.*.read",
         "transport.*.read", "magasin.*.read", "transit.*.read", "audit.journal.read",
     ]),
     ("TRANSIT_PRINCIPAL", 2, "Transitaire principal : gestion et validation des dossiers", [
