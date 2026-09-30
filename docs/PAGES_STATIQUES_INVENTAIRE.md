@@ -2,8 +2,8 @@
 
 - Genere le : 2026-10-01
 - Total pages scannees : 348
-- Pages branchees sur le backend : 297
-- Pages encore statiques : 51
+- Pages branchees sur le backend : 298
+- Pages encore statiques : 50
 
 ## Pages statiques
 
@@ -25,7 +25,6 @@
 | `/finance/transactions` | non (vitrine/maintenance) | - |
 | `/finance-ohada/dashboard` | non (vitrine/maintenance) | - |
 | `/finance-ohada/invoicing` | non (vitrine/maintenance) | - |
-| `/finance-ohada/taxes-cemac` | non (vitrine/maintenance) | - |
 | `/fiscalite-cameroun` | non (vitrine/maintenance) | - |
 | `/integration-cameroun` | non (vitrine/maintenance) | - |
 | `/magasin/ia-chat` | non (vitrine/maintenance) | - |

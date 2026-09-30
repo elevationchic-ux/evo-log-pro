@@ -24,7 +24,7 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
     <div
       ref={ref}
       className={cn(
-        'fixed z-50 gap-4 bg-background p-6 shadow-lg',
+        'fixed z-[100] gap-4 bg-background p-6 shadow-lg',
         side === 'right' && 'inset-y-0 right-0 h-full w-3/4 sm:max-w-sm',
         side === 'left' && 'inset-y-0 left-0 h-full w-3/4 sm:max-w-sm',
         side === 'top' && 'inset-x-0 top-0 h-auto',

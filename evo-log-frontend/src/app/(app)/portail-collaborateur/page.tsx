@@ -8,6 +8,7 @@ import {
   ShieldAlert, TrendingUp, Users, ArrowRight, CheckCircle2,
   Lock, Sparkles, Navigation, Globe, Compass, ShieldCheck
 } from 'lucide-react';
+import AdaptiveModuleGrid, { AdaptiveModule } from '@/components/hub/AdaptiveModuleGrid';
 
 interface PortalCard {
   id: string;
@@ -134,6 +135,21 @@ export default function PortailCollaborateurHubPage() {
     return roles.some(role => userRoles.includes(role.toUpperCase()));
   };
 
+  // UI adaptative (Phase 4) : le nb de portails ACCESSIBLES diminue avec le rôle.
+  // >= 6 accessibles -> grille riche classique ; < 6 -> anneau orbital (les
+  // portails atteignables gravitent autour du noyau), sans changer les href.
+  const portalItems: AdaptiveModule[] = ALL_PORTALS.map((p) => ({
+    id: p.id,
+    title: p.title,
+    subtitle: p.subtitle,
+    href: p.href,
+    icon: p.icon,
+    gradient: p.gradient,
+    badge: p.badge,
+    allowed: checkAccess(p.requiredRoles),
+  }));
+  const allowedCount = portalItems.filter((i) => i.allowed).length;
+
   return (
     <div className="space-y-8 pb-12">
       {/* Banner Principal */}
@@ -169,6 +185,21 @@ export default function PortailCollaborateurHubPage() {
           <span className="text-xs font-mono text-slate-500">8 Espaces Intégrés End-to-End</span>
         </div>
 
+        {allowedCount < 6 ? (
+          <>
+            <AdaptiveModuleGrid
+              items={portalItems}
+              threshold={6}
+              centerTitle="Hub"
+              centerSubtitle={`${allowedCount} portail${allowedCount > 1 ? 's' : ''} accessible${allowedCount > 1 ? 's' : ''}`}
+            />
+            {allowedCount < ALL_PORTALS.length && (
+              <p className="text-xs text-slate-500 mt-5 text-center">
+                D'autres portails métier existent mais restent restreints selon votre rôle.
+              </p>
+            )}
+          </>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {ALL_PORTALS.map((portal) => {
             const isAllowed = checkAccess(portal.requiredRoles);
