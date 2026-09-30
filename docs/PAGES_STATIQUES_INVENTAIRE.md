@@ -2,8 +2,8 @@
 
 - Genere le : 2026-10-01
 - Total pages scannees : 348
-- Pages branchees sur le backend : 296
-- Pages encore statiques : 52
+- Pages branchees sur le backend : 297
+- Pages encore statiques : 51
 
 ## Pages statiques
 
@@ -55,7 +55,6 @@
 | `/transit-douane/dashboard` | non (vitrine/maintenance) | - |
 | `/transit-douane/declarations` | non (vitrine/maintenance) | - |
 | `/transit-douane/dossiers-cemac` | non (vitrine/maintenance) | - |
-| `/transit-douane/taxation-cameroun` | OUI (a verifier : mock visible) | - |
 | `/transport-avance` | non (vitrine/maintenance) | - |
 | `/register` | non (vitrine/maintenance) | - |
 | `/reset-password` | non (vitrine/maintenance) | - |

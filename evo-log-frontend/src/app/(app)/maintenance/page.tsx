@@ -149,7 +149,7 @@ export default function MaintenancePage() {
                       {item.description || '—'}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${prioriteBadge(item.priorite)}`}>
                         {item.priorite || 'NON RENSEIGNÉE'}
                       </span>
                     </td>
