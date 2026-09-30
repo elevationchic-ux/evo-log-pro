@@ -2,8 +2,8 @@
 
 - Genere le : 2026-10-01
 - Total pages scannees : 348
-- Pages branchees sur le backend : 293
-- Pages encore statiques : 55
+- Pages branchees sur le backend : 294
+- Pages encore statiques : 54
 
 ## Pages statiques
 
@@ -31,7 +31,6 @@
 | `/integration-cameroun` | non (vitrine/maintenance) | - |
 | `/magasin/ia-chat` | non (vitrine/maintenance) | - |
 | `/maintenance-gmao/dashboard` | non (vitrine/maintenance) | - |
-| `/mobile-chauffeur/rapport-carburant` | non (vitrine/maintenance) | - |
 | `/paiement-local` | non (vitrine/maintenance) | - |
 | `/parc-vehicules/documents` | non (vitrine/maintenance) | - |
 | `/port-operations/dashboard` | non (vitrine/maintenance) | - |
