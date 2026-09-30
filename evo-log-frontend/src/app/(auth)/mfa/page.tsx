@@ -178,7 +178,7 @@ export default function MfaPage() {
       });
       setPhase('done');
       toast.success(t('Mot de passe mis à jour.', 'Password updated.'));
-      router.push(landingRouteFor(rolesAfterVerify));
+      router.push(landingRouteFor(rolesAfterVerify, levelAfterVerify));
       router.refresh();
     } catch (err: any) {
       const detail = err?.response?.data?.detail;

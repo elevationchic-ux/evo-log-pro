@@ -86,7 +86,7 @@ export default function MaintenancePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-semibold mb-2 border border-amber-500/20">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 text-orange-400 text-xs font-semibold mb-2 border border-orange-500/20">
             <Wrench className="w-3.5 h-3.5" />
             K-Maintenance • Gestion de l'Atelier Logistique & Pneumatiques
           </div>
@@ -96,7 +96,7 @@ export default function MaintenancePage() {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold px-5 py-3 rounded-xl text-sm shadow-lg shadow-amber-600/30 transition-all hover:scale-[1.02]"
+          className="inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-500 text-white font-semibold px-5 py-3 rounded-xl text-sm shadow-lg shadow-amber-600/30 transition-all hover:scale-[1.02]"
         >
           <Plus className="w-4 h-4" />
           Créer un Ordre de Travail
@@ -142,7 +142,7 @@ export default function MaintenancePage() {
                 filteredItems.map((item: any, idx: number) => (
                   <tr key={item.id || idx} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-100 flex items-center gap-2 font-mono">
-                      <Truck className="w-4 h-4 text-amber-400" />
+                      <Truck className="w-4 h-4 text-orange-400" />
                       {item.immatriculation_camion || item.vehicule || '—'}
                     </td>
                     <td className="px-6 py-4 font-semibold text-slate-200">
@@ -249,7 +249,7 @@ export default function MaintenancePage() {
                 <button
                   type="submit"
                   disabled={createMutation.isPending}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-600/30"
+                  className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-amber-600/30"
                 >
                   {createMutation.isPending ? 'Création...' : 'Créer l\'Ordre'}
                 </button>
