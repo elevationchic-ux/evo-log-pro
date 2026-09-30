@@ -591,7 +591,8 @@ def process_checkout(
     if montant <= 0 or montant > solde:
         raise HTTPException(
             status_code=400,
-            detail=f"Montant hors solde : le reste du est {solde} {facture.devise}.",        )
+            detail=f"Montant hors solde : le reste a regler est {solde} {facture.devise}.",
+        )
 
     telephone = (payload.get("phone") or payload.get("telephone") or "").strip()
     paiement = Paiement(
@@ -619,7 +620,7 @@ def process_checkout(
         "numero_facture": facture.numero_facture,
         "montant": float(paiement.montant),
         "statut": paiement.statut.value if hasattr(paiement.statut, "value") else paiement.statut,
-        "solde_restant": round(solde - montant, 2),
+        "solde_restant_xaf": round(solde - montant, 2),
         "avertissement": (
             "Paiement enregistré en attente : aucune passerelle bancaire ou Mobile Money "
             "n'a confirme le debit. Le solde de la facture ne sera reduit qu'a la confirmation."
@@ -637,7 +638,7 @@ def get_notification_preferences(
 
     La table ``preferences_notification`` est portee par l'utilisateur : le
     ``client_id`` passe par le frontend n'est pas une cle de lecture (il ne
-    correspond a rien en base), il est donc ignore plutot que subit.
+    correspond a rien en base), il est donc ignore explicitement ici.
     """
     rows = (
         db.query(PreferenceNotification)
