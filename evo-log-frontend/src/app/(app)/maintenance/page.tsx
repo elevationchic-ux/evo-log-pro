@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { maintenanceAPI } from '@/lib/api-client';
+import { maintenanceAPI, parcAPI } from '@/lib/api-client';
 import { Wrench, Plus, Search, Clock, Truck, X } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -54,6 +54,18 @@ export default function MaintenancePage() {
     },
     enabled: mounted,
   });
+
+  // Camions reellement au parc : un ordre de travail ne peut etre ouvert que sur
+  // un vehicule existant, la plaque n'est donc plus saisie a la main.
+  const { data: vehiculesData, isLoading: vehiculesLoading } = useQuery({
+    queryKey: ['parc-vehicules'],
+    queryFn: async () => {
+      const res = await parcAPI.getVehicules({ limit: 500 });
+      return res.data?.items || res.data || (Array.isArray(res) ? res : []);
+    },
+    enabled: mounted && isModalOpen,
+  });
+  const vehicules = Array.isArray(vehiculesData) ? vehiculesData : [];
 
   const createMutation = useMutation({
     mutationFn: async (payload: any) => {

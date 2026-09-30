@@ -183,8 +183,6 @@ def test_migration_033_seed_complete_et_idempotente(tmp_path, monkeypatch):
 def test_migration_033_refuse_explicitement_base_sans_tables_rbac(tmp_path, monkeypatch):
     """Une base stubbee a 032 sans tables RBAC ne doit PAS passer 033 en
     silence : l'erreur doit nommer la precondition manquante."""
-    import sqlalchemy.exc
-
     db_file = tmp_path / "mig033_guard.db"
     url = f"sqlite:///{db_file.as_posix()}"
     monkeypatch.setenv("DATABASE_URL", url)
