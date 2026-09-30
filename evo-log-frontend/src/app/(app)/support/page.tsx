@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 export default function SupportPage() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
@@ -40,6 +41,7 @@ export default function SupportPage() {
       const res = await supportAPI.getTickets();
       const raw = res.data?.items || res.data || [];
       setTickets(Array.isArray(raw) ? raw : []);
+      setError(null);
     } catch (err: any) {
       console.error(err);
       setError(err?.response?.data?.detail || 'Erreur lors du chargement des tickets.');
@@ -58,7 +60,7 @@ export default function SupportPage() {
     setSubmitting(true);
     try {
       await supportAPI.createTicket(newTicket).catch(() => {
-        return incidentsAPI.createIncident({
+        return supportAPI.createIncident({
           titre: newTicket.sujet,
           type: newTicket.categorie,
           priorite: newTicket.priorite,
@@ -197,11 +199,27 @@ export default function SupportPage() {
               ) : filteredTickets.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="p-12 text-center">
-                    <CheckCircle2 className="w-12 h-12 text-emerald-500/40 mx-auto mb-3" />
-                    <h3 className="font-semibold text-on-surface text-base">Aucun incident ou ticket actif</h3>
-                    <p className="text-xs text-on-surface-variant mt-1 max-w-md mx-auto">
-                      Tous les systèmes fonctionnent nominalement. Cliquez sur "Ouvrir un Ticket" si vous rencontrez une anomalie.
-                    </p>
+                    {error ? (
+                      <>
+                        <AlertTriangle className="w-12 h-12 text-amber-500/50 mx-auto mb-3" />
+                        <h3 className="font-semibold text-on-surface text-base">Tickets indisponibles</h3>
+                        <p className="text-xs text-on-surface-variant mt-1 max-w-md mx-auto">{error}</p>
+                        <button
+                          onClick={loadTickets}
+                          className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl border border-outline text-on-surface hover:bg-surface-container transition-colors"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" /> Réessayer
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-12 h-12 text-emerald-500/40 mx-auto mb-3" />
+                        <h3 className="font-semibold text-on-surface text-base">Aucun ticket enregistré</h3>
+                        <p className="text-xs text-on-surface-variant mt-1 max-w-md mx-auto">
+                          Aucun ticket d&apos;assistance n&apos;a encore été ouvert. Cliquez sur &quot;Ouvrir un Ticket&quot; pour signaler une anomalie.
+                        </p>
+                      </>
+                    )}
                   </td>
                 </tr>
               ) : (
