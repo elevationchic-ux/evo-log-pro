@@ -914,9 +914,17 @@ export const procurementAPI = {
 };
 
 // ─── Service Compliance & Réglementation ──────────────────────────────────────────
+// ─── Service Compliance & Réglementation ──────────────────────────────────────────
 export const complianceAPI = {
-  getAudits: () => apiClient.get('/api/v1/k-modules/compliance/audits'),
-  createAudit: (data: unknown) => apiClient.post('/api/v1/k-modules/compliance/audits', data),
+  // Registre reel : tables audits_qualite et normes_certifications, exposees
+  // par le router QHSE. L'ancien /k-modules/compliance/audits etait un stub
+  // qui repondait 501 sans modele ; les ecrans consomment maintenant la donnee.
+  getAudits: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/qhse/audits', { params }),
+  createAudit: (data: unknown) => apiClient.post('/api/v1/qhse/audits', data),
+  updateAudit: (id: number, data: unknown) => apiClient.put(`/api/v1/qhse/audits/${id}`, data),
+  getCertifications: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/qhse/certifications', { params }),
 };
 
 // ─── Service BI & Analytics Executive ──────────────────────────────────────────
