@@ -38,14 +38,14 @@ const STATUT_LABELS: Record<string, string> = {
 };
 
 function xaf(n: number | null | undefined): string {
-  if (n === null || n === undefined) return '—';
+  if (n === null || n === undefined) return '';
   return Math.round(n).toLocaleString('fr-FR');
 }
 
 function dateCourte(iso: string | null): string {
-  if (!iso) return '—';
+  if (!iso) return '';
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-FR');
 }
 
 export default function TransitDouaneDeclarations() {
@@ -164,9 +164,9 @@ export default function TransitDouaneDeclarations() {
                       <div className="font-bold text-cyan-400">{d.numero_dum}</div>
                       <div className="text-[11px] text-slate-400 font-sans">{d.regime_douanier}</div>
                     </td>
-                    <td className="py-3.5 px-4 font-sans text-slate-100 font-semibold">{d.importateur ?? '—'}</td>
+                    <td className="py-3.5 px-4 font-sans text-slate-100 font-semibold">{d.importateur ?? ''}</td>
                     <td className="py-3.5 px-4 font-sans text-slate-300 max-w-[220px]">
-                      <div className="truncate">{d.marchandise ?? '—'}</div>
+                      <div className="truncate">{d.marchandise ?? ''}</div>
                       <div className="text-[11px] text-slate-500">{d.nomenclature ?? ''}</div>
                     </td>
                     <td className="py-3.5 px-4 text-right font-bold text-slate-200">{xaf(d.valeur_douane_xaf)}</td>

@@ -34,9 +34,9 @@ const STATUT_LABELS: Record<string, string> = {
 };
 
 function dateCourte(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "";
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("fr-FR");
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("fr-FR");
 }
 
 export default function FinanceTransactionsPage() {
@@ -191,8 +191,8 @@ export default function FinanceTransactionsPage() {
                 {filtered.map(t => (
                   <tr key={t.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs font-bold text-emerald-400">{t.reference ?? `ENC-${t.id}`}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.facture_id != null ? `#${t.facture_id}` : "—"}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.mode_paiement ?? "—"}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.facture_id != null ? `#${t.facture_id}` : ""}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{t.mode_paiement ?? ""}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{dateCourte(t.date_paiement)}</td>
                     <td className="px-4 py-3 font-bold text-base text-emerald-400">+{fmtNum(t.montant)}</td>
                     <td className="px-4 py-3">

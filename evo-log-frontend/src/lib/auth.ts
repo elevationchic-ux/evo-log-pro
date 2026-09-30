@@ -96,7 +96,7 @@ function toSessionUser(p: BackendSession, accessToken: string, refreshToken?: st
 }
 
 /** Aterrage par defaut selon les roles + le niveau hiérarchique renvoyes par le
- *  backend (Phase 4 — Hub par défaut).
+ *  backend (Phase 4  Hub par défaut).
  *
  *  Regles :
  *  - un role metier specifique (chauffeur, magasinier, transport, finance) garde

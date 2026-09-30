@@ -1,6 +1,6 @@
 'use client';
 
-// Phase 4 — UI adaptative.
+// Phase 4  UI adaptative.
 //
 // Le principe (cf. plan) : "le nombre de sous-modules affichés diminue avec le
 // niveau d'accès ; en dessous de 6 modules, rendu alternatif en anneaux orbitant
@@ -8,7 +8,7 @@
 //
 // Ce composant est PUREMENT PRÉSENTATIONNEL : il reçoit une liste de modules
 // DÉJÀ filtrés en accessibilité par l'appelant (qui connaît les rôles/niveau de
-// l'utilisateur). Il ne décide aucune autorisation lui-même — la vérité d'accès
+// l'utilisateur). Il ne décide aucune autorisation lui-même  la vérité d'accès
 // reste côté backend/garde de session. Les href sont transmis tels quels : on ne
 // réécrit jamais un chemin selon le mode d'affichage.
 //
@@ -59,11 +59,10 @@ function GridRender({ items }: { items: AdaptiveModule[] }) {
             key={m.id}
             href={m.href}
             aria-disabled={!allowed}
-            className={`group relative flex flex-col justify-between rounded-2xl border p-5 transition-all duration-200 ${
-              allowed
+            className={`group relative flex flex-col justify-between rounded-2xl border p-5 transition-all duration-200 ${allowed
                 ? 'bg-slate-900 border-slate-700 hover:-translate-y-1 hover:shadow-xl hover:border-indigo-500/50'
                 : 'bg-slate-800/60 border-slate-700/70 opacity-60 cursor-not-allowed'
-            }`}
+              }`}
           >
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-3">

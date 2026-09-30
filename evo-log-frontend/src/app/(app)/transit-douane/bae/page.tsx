@@ -16,14 +16,14 @@ export default function TransitDouaneBae() {
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-100 flex items-center gap-3">
           <Globe className="w-8 h-8 text-cyan-400" />
-          BAE — Transit Communautaire CEMAC
+          BAE  Transit Communautaire CEMAC
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
           Bulletins d&apos;Analyse et d&apos;Expédition (BAE), cautionnements, apurement et contentieux.
         </p>
       </div>
 
-      {/* Honest unavailable state — no data source wired */}
+      {/* Honest unavailable state  no data source wired */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl shadow-xl p-10">
         <div className="max-w-xl mx-auto text-center space-y-4">
           <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto">

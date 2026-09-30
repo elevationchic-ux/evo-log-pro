@@ -125,7 +125,7 @@ export default function MobileChauffeurEPODPage() {
     const signature = canvas ? canvas.toDataURL('image/png') : '';
     setSubmitting(true);
     try {
-      const note = `État: ${etatMarchandise}${observation.trim() ? ` — ${observation.trim()}` : ''}`;
+      const note = `État: ${etatMarchandise}${observation.trim() ? `  ${observation.trim()}` : ''}`;
       const res: any = await transportAPI.livrerMission(mission.id, {
         signature,
         nom_receptionnaire: nomReceptionnaire.trim(),
@@ -161,7 +161,7 @@ export default function MobileChauffeurEPODPage() {
         <div className="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-10">
           <div className="flex items-center gap-2">
             <PenLine className="w-5 h-5 text-emerald-400" />
-            <div className="text-xs font-black text-slate-100">e-POD — Bon de Livraison Électronique</div>
+            <div className="text-xs font-black text-slate-100">e-POD  Bon de Livraison Électronique</div>
           </div>
         </div>
         <div className="p-6 max-w-lg mx-auto text-center space-y-3">
@@ -185,7 +185,7 @@ export default function MobileChauffeurEPODPage() {
         <div className="flex items-center gap-2">
           <PenLine className="w-5 h-5 text-emerald-400" />
           <div>
-            <div className="text-xs font-black text-slate-100">e-POD — Bon de Livraison Électronique</div>
+            <div className="text-xs font-black text-slate-100">e-POD  Bon de Livraison Électronique</div>
             <div className="text-[11px] font-mono text-emerald-400">Mission : {mission.reference}</div>
           </div>
         </div>
@@ -206,7 +206,7 @@ export default function MobileChauffeurEPODPage() {
           {mission.camion?.immatriculation && (
             <div className="flex items-center gap-2 text-xs">
               <Truck className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-              <span className="text-slate-300">{mission.camion.immatriculation}{mission.camion.marque ? ` — ${mission.camion.marque}` : ''}</span>
+              <span className="text-slate-300">{mission.camion.immatriculation}{mission.camion.marque ? `  ${mission.camion.marque}` : ''}</span>
             </div>
           )}
           <div className="flex items-center gap-2 text-xs">
@@ -234,10 +234,10 @@ export default function MobileChauffeurEPODPage() {
             {(['BON', 'ENDOMMAGE', 'MANQUANT'] as const).map(etat => (
               <button key={etat} onClick={() => !signed && setEtatMarchandise(etat)}
                 className={`py-2 rounded-xl text-[11px] font-black border transition-all cursor-pointer ${etatMarchandise === etat
-                    ? etat === 'BON' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50'
-                      : etat === 'ENDOMMAGE' ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
-                        : 'bg-red-500/20 text-red-400 border-red-500/50'
-                    : 'bg-slate-800 text-slate-500 border-slate-700'
+                  ? etat === 'BON' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50'
+                    : etat === 'ENDOMMAGE' ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
+                      : 'bg-red-500/20 text-red-400 border-red-500/50'
+                  : 'bg-slate-800 text-slate-500 border-slate-700'
                   }`}>{etat}</button>
             ))}
           </div>

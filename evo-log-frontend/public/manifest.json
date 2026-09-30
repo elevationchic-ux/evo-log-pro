@@ -1,7 +1,7 @@
 {
-  "name": "EVO-LOG — ERP Logistique & Portuaire",
+  "name": "EVO-LOG  ERP Logistique & Portuaire",
   "short_name": "EVO-LOG",
-  "description": "Plateforme ERP Logistique SaaS Multi-Entreprises — Logistique, Transit & Acconage Portuaire. Par CADC Cameroun.",
+  "description": "Plateforme ERP Logistique SaaS Multi-Entreprises  Logistique, Transit & Acconage Portuaire. Par CADC Cameroun.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -9,7 +9,11 @@
   "theme_color": "#f59e0b",
   "orientation": "portrait-primary",
   "lang": "fr",
-  "categories": ["business", "productivity", "utilities"],
+  "categories": [
+    "business",
+    "productivity",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "/icons/favicon-16x16.png",

@@ -156,8 +156,16 @@ def _brancher_auth(client):
     from app.main import app
 
     class FakeUser:
+        # Depuis le batch 22, /finance exige require_perm : le fake doit porter
+        # les mêmes attributs que le faux super-utilisateur du conftest (un vrai
+        # User ORM les a toujours  is_superuser est une colonne), sinon le repli
+        # modules_allowed du moteur accède à des attributs inexistants.
         id = 1
         username = "test"
+        email = "test@pdf.local"
+        is_active = True
+        is_superuser = True
+        role_level = 0
         company_id = None
 
     app.dependency_overrides[get_current_user] = lambda: FakeUser()

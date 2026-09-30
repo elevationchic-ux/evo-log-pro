@@ -1,4 +1,4 @@
-"""Batch 21 — RBAC granulaire sur /magasin-avance (43 endpoints).
+"""Batch 21  RBAC granulaire sur /magasin-avance (43 endpoints).
 
 Verifie, sans rien simuler :
   1. chaque code require_perm() du routeur existe au catalogue officiel ;

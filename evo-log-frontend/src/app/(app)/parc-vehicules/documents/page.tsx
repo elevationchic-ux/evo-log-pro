@@ -40,7 +40,7 @@ const CATEGORIES: Record<string, string> = {
 };
 
 const fmtDate = (iso?: string | null) => {
-  if (!iso) return '—';
+  if (!iso) return '';
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? String(iso) : d.toLocaleDateString('fr-FR');
 };
@@ -50,7 +50,7 @@ const fmtDate = (iso?: string | null) => {
 const statutDocument = (dateExp?: string | null) => {
   if (!dateExp) return { label: 'Sans échéance enregistrée', cls: 'text-on-surface-variant' };
   const d = new Date(dateExp);
-  if (Number.isNaN(d.getTime())) return { label: '—', cls: 'text-on-surface-variant' };
+  if (Number.isNaN(d.getTime())) return { label: '', cls: 'text-on-surface-variant' };
   const jours = Math.ceil((d.getTime() - Date.now()) / 86_400_000);
   if (jours < 0) return { label: 'Expiré', cls: 'text-red-400 font-bold' };
   if (jours <= 60) return { label: 'À renouveler', cls: 'text-amber-400 font-bold' };
@@ -278,7 +278,7 @@ export default function ParcVehiculesDocumentsPage() {
                   </div>
                 ) : (
                   <p className="pt-2 border-t border-outline/50 text-[11px] text-on-surface-variant/70">
-                    Métadonnée enregistrée — binaire stocké dans la GED dédiée.
+                    Métadonnée enregistrée  binaire stocké dans la GED dédiée.
                   </p>
                 )}
               </div>
@@ -305,9 +305,9 @@ export default function ParcVehiculesDocumentsPage() {
                   required
                   className="w-full p-2 bg-surface-container-low border border-outline rounded-xl text-on-surface font-mono focus:outline-none focus:border-primary"
                 >
-                  <option value="">— Sélectionner un véhicule —</option>
+                  <option value=""> Sélectionner un véhicule </option>
                   {vehicules.map(v => (
-                    <option key={v.id} value={v.id}>{v.immatriculation}{v.marque ? ` — ${v.marque}` : ''}</option>
+                    <option key={v.id} value={v.id}>{v.immatriculation}{v.marque ? `  ${v.marque}` : ''}</option>
                   ))}
                 </select>
               </div>

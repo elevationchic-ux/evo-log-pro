@@ -52,9 +52,9 @@ function xaf(n: number): string {
   return Math.round(n).toLocaleString('fr-FR');
 }
 function dateCourte(iso: string | null): string {
-  if (!iso) return '—';
+  if (!iso) return '';
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-FR');
 }
 
 export default function FinanceOhadaDashboardPage() {
@@ -88,11 +88,11 @@ export default function FinanceOhadaDashboardPage() {
 
   const cards = kpis
     ? [
-        { label: 'Chiffre d&apos;affaires', value: `${millions(kpis.chiffre_affaires)} M`, sub: 'FCFA facturé (TTC)', icon: Wallet, color: 'text-emerald-400' },
-        { label: 'Encaissé', value: `${millions(kpis.total_encaisse)} M`, sub: 'FCFA réglés', icon: Landmark, color: 'text-blue-400' },
-        { label: 'Impayé', value: `${millions(kpis.montant_impaye)} M`, sub: 'FCFA restant dû', icon: Receipt, color: 'text-amber-400' },
-        { label: 'Trésorerie disponible', value: `${millions(kpis.tresorerie_disponible)} M`, sub: 'Comptes de classe 5', icon: TrendingUp, color: 'text-violet-400' },
-      ]
+      { label: 'Chiffre d&apos;affaires', value: `${millions(kpis.chiffre_affaires)} M`, sub: 'FCFA facturé (TTC)', icon: Wallet, color: 'text-emerald-400' },
+      { label: 'Encaissé', value: `${millions(kpis.total_encaisse)} M`, sub: 'FCFA réglés', icon: Landmark, color: 'text-blue-400' },
+      { label: 'Impayé', value: `${millions(kpis.montant_impaye)} M`, sub: 'FCFA restant dû', icon: Receipt, color: 'text-amber-400' },
+      { label: 'Trésorerie disponible', value: `${millions(kpis.tresorerie_disponible)} M`, sub: 'Comptes de classe 5', icon: TrendingUp, color: 'text-violet-400' },
+    ]
     : [];
 
   return (
@@ -152,21 +152,21 @@ export default function FinanceOhadaDashboardPage() {
             })}
           </div>
 
-        {/* Recovery + doubtful */}
-        {kpis && (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="erp-card p-6">
-              <p className="text-sm font-semibold text-on-surface-variant">Taux de recouvrement</p>
-              <p className="text-2xl font-bold text-emerald-400 mt-1">{kpis.taux_recouvrement}%</p>
-              <p className="text-xs text-slate-500 mt-1">{xaf(kpis.total_encaisse)} encaissés sur {xaf(kpis.chiffre_affaires)} facturés</p>
+          {/* Recovery + doubtful */}
+          {kpis && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="erp-card p-6">
+                <p className="text-sm font-semibold text-on-surface-variant">Taux de recouvrement</p>
+                <p className="text-2xl font-bold text-emerald-400 mt-1">{kpis.taux_recouvrement}%</p>
+                <p className="text-xs text-slate-500 mt-1">{xaf(kpis.total_encaisse)} encaissés sur {xaf(kpis.chiffre_affaires)} facturés</p>
+              </div>
+              <div className="erp-card p-6">
+                <p className="text-sm font-semibold text-on-surface-variant">Créances douteuses (&gt; 90 jours)</p>
+                <p className="text-2xl font-bold text-amber-400 mt-1">{xaf(kpis.creances_douteuses)} FCFA</p>
+                <p className="text-xs text-slate-500 mt-1">Factures échues non réglées</p>
+              </div>
             </div>
-            <div className="erp-card p-6">
-              <p className="text-sm font-semibold text-on-surface-variant">Créances douteuses (&gt; 90 jours)</p>
-              <p className="text-2xl font-bold text-amber-400 mt-1">{xaf(kpis.creances_douteuses)} FCFA</p>
-              <p className="text-xs text-slate-500 mt-1">Factures échues non réglées</p>
-            </div>
-          </div>
-        )}
+          )}
 
           {/* Recent invoices */}
           <div className="erp-card">

@@ -10,9 +10,9 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app tests` | ✅ EXIT=0 |
-| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 21) | ✅ **659 passed, 2 xfailed, 0 failed** (538 s) au run definitif du batch 21, `PYTEST_EXIT=0`. Le batch 21 ajoute 7 tests ; les autres evoluations de total (625 → 645 → 659) incluent des tests d'une session concurrente (tranches devis 030, maintenance 031/032), sans echec imputable aux lots 16 a 21. Historique : le run du batch 18 etait **rouge de cause externe** (commits WIP concurrents, attribution prouvee par worktree temoin), re-vert des le batch 19 (§20/§21). Les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`**  corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17 a §22 ; au run du batch 21 le hash etait **illisible** — base verrouillee par un process de dev concurrent — declare comme tel plutot que pretendu). |
+| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 21) | ✅ **659 passed, 2 xfailed, 0 failed** (538 s) au run definitif du batch 21, `PYTEST_EXIT=0`. Le batch 21 ajoute 7 tests ; les autres evoluations de total (625 → 645 → 659) incluent des tests d'une session concurrente (tranches devis 030, maintenance 031/032), sans echec imputable aux lots 16 a 21. Historique : le run du batch 18 etait **rouge de cause externe** (commits WIP concurrents, attribution prouvee par worktree temoin), re-vert des le batch 19 (§20/§21). Les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`**  corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17 a §22 ; au run du batch 21 le hash etait **illisible**  base verrouillee par un process de dev concurrent  declare comme tel plutot que pretendu). |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (1140 routes OpenAPI au batch 21) |
-| `npx tsc --noEmit` (frontend) | ❌ au 01/10 (batch 21) : erreur dans `transit-douane/dashboard/page.tsx` (import `ReceiptText` inexistant dans lucide-react), **commise par une session concurrente**, aucun lien avec le lot 16-21 — voir §23. Etait ✅ EXIT=0 aux batches precedents. |
+| `npx tsc --noEmit` (frontend) | ❌ au 01/10 (batch 21) : erreur dans `transit-douane/dashboard/page.tsx` (import `ReceiptText` inexistant dans lucide-react), **commise par une session concurrente**, aucun lien avec le lot 16-21  voir §23. Etait ✅ EXIT=0 aux batches precedents. |
 
 ---
 
@@ -901,12 +901,12 @@ lignes comptees, un stock reellement ajuste et une ligne de registre par ecart.
 
 ---
 
-## 21. Batch 19 — Réceptions fournisseur, colis et service fantôme : le dernier bloc de `magasin_avance` reconstruit
+## 21. Batch 19  Réceptions fournisseur, colis et service fantôme : le dernier bloc de `magasin_avance` reconstruit
 
 Annonce au §20 (« Reste ») : apres les sorties (batch 16), les retours/litiges/KPI
 (batch 17), les inventaires/fournisseurs/reappro (batch 18), il restait dans
 `/api/v1/magasin-avance` le trio `/receptions`, le trio `/colis` et le service
-`magasin_avance_service.py` — tous morts du meme syndrome « champs fantomes ».
+`magasin_avance_service.py`  tous morts du meme syndrome « champs fantomes ».
 Le module est desormais **integralement reconstruit sur les modeles reels**.
 
 ### Constat (audit)
@@ -925,7 +925,7 @@ Le module est desormais **integralement reconstruit sur les modeles reels**.
 | Qui | Quoi |
 |---|---|
 | `schemas/magasin_avance.py` | Schemas alignes sur le modele : `BonReceptionCreate/Update/Response`, `LigneBonReceptionCreate/Response`, `RefusBonReception` (motif obligatoire), `ColisCreate/Update/Response` ; schemas fantomes `Colis*` supprimes |
-| Receptions (6 endpoints) | `GET /receptions` (filtres reels statut/fournisseur/entrepot), `POST` (BR-YYYYMMDD-NNNN anti-collision, verification existence fournisseur + entrepot + commande liee, statut initial `en_attente`), `PATCH` (seulement `en_attente` — bon valide/refuse immuable), `POST /{id}/lignes` (stock reel, quantite > 0, **conformite CALCULEE** : `conforme` seulement si quantite commandee fournie et egale, sinon `ecart` — jamais de saisie libre), `PUT /{id}/valider` (exige des lignes ; augmente reellement `quantite_disponible` ; **un `MouvementStock` ENTREE journalise par ligne** avec avant/apres/prix/operateur ; met a jour le registre `LigneCommandeFournisseur.quantite_recue/date_reception/statut=recu` ; bascule la commande en `livree` + `date_livraison_reelle` quand toutes ses lignes sont recues ; tracabilite `[VALIDE …]` dans notes ; decision unique), `PUT /{id}/refuser` (**motif ecrit obligatoire**, aucun stock ne bouge — la marchandise refusee n'est pas entree) |
+| Receptions (6 endpoints) | `GET /receptions` (filtres reels statut/fournisseur/entrepot), `POST` (BR-YYYYMMDD-NNNN anti-collision, verification existence fournisseur + entrepot + commande liee, statut initial `en_attente`), `PATCH` (seulement `en_attente`  bon valide/refuse immuable), `POST /{id}/lignes` (stock reel, quantite > 0, **conformite CALCULEE** : `conforme` seulement si quantite commandee fournie et egale, sinon `ecart`  jamais de saisie libre), `PUT /{id}/valider` (exige des lignes ; augmente reellement `quantite_disponible` ; **un `MouvementStock` ENTREE journalise par ligne** avec avant/apres/prix/operateur ; met a jour le registre `LigneCommandeFournisseur.quantite_recue/date_reception/statut=recu` ; bascule la commande en `livree` + `date_livraison_reelle` quand toutes ses lignes sont recues ; tracabilite `[VALIDE …]` dans notes ; decision unique), `PUT /{id}/refuser` (**motif ecrit obligatoire**, aucun stock ne bouge  la marchandise refusee n'est pas entree) |
 | Colis (5 endpoints) | `GET /colis`, `POST` (CO-YYYYMMDD-NNNN, poids/volume non negatifs, type dans la liste metier, bon de sortie lie verifie), `PATCH` (numero immuable), `PUT /{id}/etiqueter` (`date_etiquetage` = jour reel, **decision unique** : un colis deja etiquete ne recoit pas une 2e date), `PUT /{id}/palettiser` (le modele n'a **aucune** colonne palette → la ref est tracee dans `emplacement`, seule localisation reelle, au lieu d'inventer une donnee perduee) |
 | Frontend | Nouvelle `inventaireAPI` branchee sur le vrai circuit inventaire du batch 18 (creation campagne → comptages → validation) ; la page `magasin/saisie-inventaire-physique` n'appelle plus `/receptions` ; `StockItem` porte desormais `entrepot_id` (colonne reelle du `StockResponse`) et un garde « une campagne = un entrepot » presente l'erreur au lieu de poster un payload invalide ; methode morte `completeReception` supprimee ; methodes receptions de `magasinAPI` realineees sur le nouveau contrat |
 
@@ -934,15 +934,15 @@ Le module est desormais **integralement reconstruit sur les modeles reels**.
 La session applicative tourne avec `autoflush=False` : le COUNT qui decide si
 toutes les lignes d'une commande sont recues lisait les statuts **PRECEDENTS**
 en base, et la commande restait eternellement « en cours » malgre un 200 de
-validation. Un `db.flush()` explicite avant le comptage corrige le cas —
+validation. Un `db.flush()` explicite avant le comptage corrige le cas 
 decouvert par le test `test_reception_valider_avec_commande_met_jour_le_registre`,
 pas par la relecture.
 
 ### Verification
 
-- `python -m pytest tests/unit/test_magasin_avance_receptions_colis.py -q` : ✅ **9 passed** — dont les assertions d'honnetete « le refus ne bouge pas le stock », « la validation cree bien un MouvementStock par ligne » et « le service fantome est purge » (`test_service_fantome_purge`).
-- Tests cibles magasin (5 fichiers joues ensemble, re-verifie a la fin du batch) : ✅ **50 passed** — b19 : 9, b18 : 9, b17 : 9, b16 : 10, `test_magasin_store` : 14.
-- **Suite complete (commande CI `pytest tests`) : ✅ 625 passed, 2 xfailed, 0 failed**, `PYTEST_EXIT=0` — le rouge du batch 18 etait bien externe ; le re-run promis au §20 est fait et **vert**. `DB_CHANGED=False` (mtime/taille `kamlog_erp.db` identiques avant/apres chaque run definitif).
+- `python -m pytest tests/unit/test_magasin_avance_receptions_colis.py -q` : ✅ **9 passed**  dont les assertions d'honnetete « le refus ne bouge pas le stock », « la validation cree bien un MouvementStock par ligne » et « le service fantome est purge » (`test_service_fantome_purge`).
+- Tests cibles magasin (5 fichiers joues ensemble, re-verifie a la fin du batch) : ✅ **50 passed**  b19 : 9, b18 : 9, b17 : 9, b16 : 10, `test_magasin_store` : 14.
+- **Suite complete (commande CI `pytest tests`) : ✅ 625 passed, 2 xfailed, 0 failed**, `PYTEST_EXIT=0`  le rouge du batch 18 etait bien externe ; le re-run promis au §20 est fait et **vert**. `DB_CHANGED=False` (mtime/taille `kamlog_erp.db` identiques avant/apres chaque run definitif).
 - `python -m compileall -q app` : ✅ EXIT=0 ; `import app.main` : ✅ OK (1137 chemins OpenAPI).
 - `npx tsc --noEmit` : ✅ EXIT=0 ; `python evo-log-frontend/scripts/audit_frontend.py --strict-honesty` : ✅ EXIT=0.
 
@@ -952,7 +952,7 @@ pas par la relecture.
   lots portent hors du module (ex. : `KPIStockService` etant purges, d'eventuels
   tableaux de bord qui consommeraient `/kpi/*` restent a verifier cote frontend,
   et la reintegration physique en stock des **retours clients** n'est pas
-  modelisee — le modele `RetourClient` n'a pas de `stock_id`, le batch 17 a donc
+  modelisee  le modele `RetourClient` n'a pas de `stock_id`, le batch 17 a donc
   refuse d'inventer un mouvement ; une migration ajouteant cette liaison serait
   le seul moyen honnete de la rendre reelle).
 
@@ -964,10 +964,10 @@ un validateur identifie.
 
 ---
 
-## 22. Batch 20 — Réintégration en stock des retours clients : la liaison promise au §21 est devenue réelle (migration 029)
+## 22. Batch 20  Réintégration en stock des retours clients : la liaison promise au §21 est devenue réelle (migration 029)
 
 Annonce au §21 (« Reste ») : la reintegration physique en stock des retours
-n'etait **pas modelisee** — `RetourClient` n'avait aucune colonne vers une
+n'etait **pas modelisee**  `RetourClient` n'avait aucune colonne vers une
 ligne de stock, et le batch 17 avait donc (à juste titre) refuse d'inventer un
 mouvement. Le rapport posait la condition : « une migration ajoutant cette
 liaison serait le seul moyen honnete de la rendre reelle ». Le batch 20 est
@@ -990,14 +990,14 @@ cette migration, plus le circuit qui l'exploite.
 | `migrations/versions/029_add_retour_stock_link.py` | `retours_client.stock_id` (Integer, **NULLable**, index, FK vers `stocks.id` en mode batch SQLite / natif PostgreSQL). IDEMPOTENT par introspection, NON DESTRUCTIF, **aucune valeur ecrite** : les retours existants restent « ligne non precisee ». Downgrade volontairement sans effet (convention 027 : une colonne en trop ne casse rien, une donnee perdue est irreversible). |
 | `app/models/magasin_avance.py` | Colonne `stock_id` avec commentaire de contrat : NULL = `/traiter` ne reintegre RIEN. |
 | Schémas | `RetourClientCreate.stock_id: Optional[int]` (saisie explicite), `RetourClientResponse.stock_id` echo reel. `RetourClientUpdate` **n'inclut pas** `stock_id` : la liaison se declare a la creation, pas en retouche. |
-| `POST /retours` | Verifie l'existence de la ligne de stock si fournie (400 explicite — FK SQLite non controlee par defaut). |
+| `POST /retours` | Verifie l'existence de la ligne de stock si fournie (400 explicite  FK SQLite non controlee par defaut). |
 | `PUT /retours/{id}/traiter` | Reintegration **reelle** quand elle est modelisee : si `stock_id` renseignee, decision `accepte` et action ≠ `destruction` → `quantite_disponible` augmentee + **un `MouvementStock` ENTREE journalise** (avant/apres/raison/`reference = numero_retour`/operateur), dans le MEME commit que la decision (tout ou rien). Garde : quantite retournee absente ou nulle → **400 avant toute ecriture** (la decision reste `en_attente`, verrouillee par test). Sinon : **zero mouvement**, et la raison est tracee dans notes (`PAS DE REINTEGRATION STOCK : ligne de stock non precisee…`). `destruction` et `refuse` ne bougent jamais le stock. |
 
 ### Verification
 
-- `python -m pytest tests/unit/test_magasin_avance_retour_stock.py -q` : ✅ **6 passed** — dont « la migration n'invente aucune valeur » (ancien retour reste NULL apres upgrade), « re-execution sure » (no-op), et le 400 tout-ou-rien sur quantite absente.
-- Non-régression : `test_magasin_avance_retours_litiges.py` (batch 17) ✅ **9 passed** sans modification — son verrou « aucun mouvement quand la liaison n'existe pas » reste exact (les retours sans `stock_id` ne produisent toujours rien).
-- `test_migrations_chain.py` ✅ **2 passed** : la chaine complete (029 inclus) monte jusqu'a la tete et redescend a `base` proprement — le test est head-agnostique, aucune edition necessaire.
+- `python -m pytest tests/unit/test_magasin_avance_retour_stock.py -q` : ✅ **6 passed**  dont « la migration n'invente aucune valeur » (ancien retour reste NULL apres upgrade), « re-execution sure » (no-op), et le 400 tout-ou-rien sur quantite absente.
+- Non-régression : `test_magasin_avance_retours_litiges.py` (batch 17) ✅ **9 passed** sans modification  son verrou « aucun mouvement quand la liaison n'existe pas » reste exact (les retours sans `stock_id` ne produisent toujours rien).
+- `test_migrations_chain.py` ✅ **2 passed** : la chaine complete (029 inclus) monte jusqu'a la tete et redescend a `base` proprement  le test est head-agnostique, aucune edition necessaire.
 - Suite complete (commande CI) : ✅ **645 passed, 2 xfailed, 0 failed** (344 s), `PYTEST_EXIT=0`, **`DB_CHANGED=False`** (mtime/taille `kamlog_erp.db` identiques avant/apres).
 - `compileall` ✅ EXIT=0 ; `import app.main` ✅ OK (1138 chemins OpenAPI) ; `tsc --noEmit` ✅ EXIT=0 ; `audit_frontend.py --strict-honesty` ✅ EXIT=0 (batch sans changement frontend).
 
@@ -1006,13 +1006,13 @@ cette migration, plus le circuit qui l'exploite.
 - Etat reel verifie par introspection : la base de dev `kamlog_erp.db` porte
   DEJA la colonne `retours_client.stock_id` (creee par `create_all` a la
   derniere startup, la table ayant ete materialisee apres le changement de
-  modele) — assertion controlee, pas supposee. Le chemin de production reste
+  modele)  assertion controlee, pas supposee. Le chemin de production reste
   `alembic upgrade head` (029, puis les tranches concurrentlyes au-dela).
   - Side effect declare : la table de dev porte encore les colonnes heritees
   `article_id`/`etat`/`action_effectuee`/`date_traitement` des anciens schemas
   fantomes (NULLables, jamais lues par le code reconstruit) ; la convention
   027 est non-destructive, elles seront purgees le jour ou une decision de
-  nettoyage de schema est prise — pas silencieusement.
+  nettoyage de schema est prise  pas silencieusement.
 - La **valeur** du retour reintegre (prix unitaire, lot, etat « bon pour
   réemploi ») n'est pas modelisee non plus : le mouvement est journalise au
   prix existant de la ligne de stock, et c'est la stricte verite du modele.
@@ -1021,12 +1021,12 @@ cette migration, plus le circuit qui l'exploite.
 que la liaison n'existe pas etait la bonne decision ; ne la rendre possible
 que par une migration reelle, puis journaliser un `MouvementStock` seulement
 quand l'operateur a designe la ligne de retour ET que la marchandise n'est pas
-detruite, est la suite logique — une absence de reintegration se declare dans
+detruite, est la suite logique  une absence de reintegration se declare dans
 les notes, elle ne se simule pas.
 
 ---
 
-## 23. Batch 21 — RBAC granulaire sur `/magasin-avance` : 43 endpoints qui n'attendaient qu'un droit
+## 23. Batch 21  RBAC granulaire sur `/magasin-avance` : 43 endpoints qui n'attendaient qu'un droit
 
 ### Contexte et choix de la cible
 
@@ -1034,7 +1034,7 @@ Le backlog (`TODO.md`, phase 6) porte une ligne ⏳ : « Étendre `require_perm`
 au-dela des domaines coeur (~323 routes restantes) ». Audit de l'etat reel :
 une session concurrente a deja converti transport/comptabilite/magasin
 (8 fichiers, ~180 appels `require_perm`). Les 43 endpoints de
-`magasin_avance.py` — reconstruits aux batches 16-20 — etaient les plus gros
+`magasin_avance.py`  reconstruits aux batches 16-20  etaient les plus gros
 restants proteges par la **seule authentification** : n'importe quel
 utilisateur connecte pouvait valider une reception, traiter un retour ou
 exporter les KPI. C'est cette cible qui a ete traitee, sans chevauchement
@@ -1045,7 +1045,7 @@ avec la session concurrente (aucun de ses fichiers n'est touche).
 Un script one-shot (`scripts/scratch_apply_magasin_perms.py`) remplace
 chaque `Depends(get_current_user)` par `Depends(require_perm("…"))` avec une
 table (methode + chemin) → code : **toute route sans mapping ou tout mapping
-sans route fait echouer le script** — pas de protection « par defaut »
+sans route fait echouer le script**  pas de protection « par defaut »
 inventee. Resultat : 43/43 converties, 19 codes distincts, zero code fantome
 (reverifie contre `iter_permission_rows()` du catalogue).
 
@@ -1057,7 +1057,7 @@ inventee. Resultat : 43/43 converties, 19 codes distincts, zero code fantome
 | Inventaires | `magasin.inventaire.read/create/modify` ; **valider** `…approve` |
 | Receptions | `achats.reception.read/create/modify` ; **valider/refuser** `…approve` |
 | Retours / litiges | declaration `magasin.mouvement.create` ; **traiter/resoudre** `…approve` |
-| Reappro automatique | `achats.commande.create` — un vrai acte d'achat, pas un geste de depot |
+| Reappro automatique | `achats.commande.create`  un vrai acte d'achat, pas un geste de depot |
 | KPI rotation | `magasin.mouvement.export` ; precision = lecture d'inventaire |
 
 ### Roles : le catalogue complet, avec deux bugs reels trouves par les tests
@@ -1070,7 +1070,7 @@ l'execution (14 codes, **aucune approval**) ; nouveau `CHEF_MAGASIN` level 2
 versions des tests ont signale deux vraies incoherences de conception,
 corrigees dans le catalogue : le chef ne pouvait pas **creer** une reception
 (pourtant il les valide), et regle « tout sauf approve pour le magasinier »
-lui aurait donne la commande d'achat automatique — refusee desormais, avec
+lui aurait donne la commande d'achat automatique  refusee desormais, avec
 assertion rouge explicite.
 
 ### Migration 033 + tests
@@ -1080,7 +1080,7 @@ assertion rouge explicite.
   ne supprime rien, downgrade = pass (convention 027). Garde explicite :
   tables RBAC absentes → **RuntimeError nommant la precondition** au lieu de
   passer en silence. Tete de chaine verifiee : `033_rbac_magasin_grants`.
-- `tests/unit/test_rbac_magasin_perms.py` : ✅ **7 passed** — parite
+- `tests/unit/test_rbac_magasin_perms.py` : ✅ **7 passed**  parite
   catalogue, coverage MAGASINIER/CHEF_MAGASIN dans les deux sens (vert
   autorise, rouge interdit), **403 HTTP reel** avec utilisateur limite
   (lecture 200 / declaration 403 / approval 403 **avant toute ecriture**,
@@ -1089,28 +1089,28 @@ assertion rouge explicite.
 
 ### Verification
 
-- Non-régression ciblée : moteur RBAC + batches 17/18/19/20 + chaîne migrations ✅ **45 passed** — dont `test_magasin_avance_inventaires_fournisseurs.py` (batch 19) dont les utilisateurs SuperAdmin passent par le bypass level 0/1 du moteur, aucun test d'identité à réécrire.
+- Non-régression ciblée : moteur RBAC + batches 17/18/19/20 + chaîne migrations ✅ **45 passed**  dont `test_magasin_avance_inventaires_fournisseurs.py` (batch 19) dont les utilisateurs SuperAdmin passent par le bypass level 0/1 du moteur, aucun test d'identité à réécrire.
 - Suite complete (commande CI) : ✅ **659 passed, 2 xfailed, 0 failed** (538 s), `PYTEST_EXIT=0`. Le delta vs 645 inclut les 7 tests du batch 21 et des tests d'une session concurrente. Control `DB_CHANGED` **impossible ce run** : `kamlog_erp.db` verrouille par un process de dev concurrent (Get-FileHash echoue) ; l'absence de pollution repose sur le contrat conftest (`DATABASE_URL=:memory:` force, exit 0 = aucun fallback vers l'engine reel), et le hash n'a pas ete declare a tort.
 - `compileall` ✅ EXIT=0 ; `import app.main` ✅ OK (**1140** chemins OpenAPI, derive concurrente inclue).
-- Frontend : **aucun changement batch 21** ; `audit_frontend.py --strict-honesty` ✅ EXIT=0. `tsc --noEmit` ❌ **rouge de cause externe** : import `ReceiptText` inexistant dans `lucide-react`, committe par la session concurrente sur `transit-douane/dashboard/page.tsx` (ni mon fichier, ni mon lot) — signale, volontairement **ne corrige pas** pour ne pas ecraser une session active.
+- Frontend : **aucun changement batch 21** ; `audit_frontend.py --strict-honesty` ✅ EXIT=0. `tsc --noEmit` ❌ **rouge de cause externe** : import `ReceiptText` inexistant dans `lucide-react`, committe par la session concurrente sur `transit-douane/dashboard/page.tsx` (ni mon fichier, ni mon lot)  signale, volontairement **ne corrige pas** pour ne pas ecraser une session active.
 
 ### Reste (hors perimetre du batch, signale)
 
 - ~40 autres routeurs restent proteges par la seule authentification (rh 43,
-  qhse 43, transit_avance 40, acconage_avance 38, finance 37…) — la ligne ⏳
+  qhse 43, transit_avance 40, acconage_avance 38, finance 37…)  la ligne ⏳
   du TODO phase 6 n'est pas close ; chaque future tranche devra le meme
   mapping explicite + alignement roles.
 - `visible_user_ids` n'est toujours pas branche sur les listes portant
   `created_by`/`department_id` (2e moitie de la ligne ⏳).
 - La description de role `MAGASINIER` changee dans le catalogue ne remet pas
   a jour la colonne `description` des lignes existantes (033 est additive
-  sur les liens, pas sur les metastadonnees) — cosmetique, declare.
+  sur les liens, pas sur les metastadonnees)  cosmetique, declare.
 - L'erreur `tsc` concurrente devra etre reparee par son auteur ou dans un
   lot dedie transit-douane.
 
 ➡️ Zero-Mock applique a l'autorisation : un endpoint qui « reussit » devant
 n'importe qui est une faille habillee en fonctionnalite ; ici chaque droit
- requis existe au catalogue, chaque role qui doit agir peut agir — et la
+ requis existe au catalogue, chaque role qui doit agir peut agir  et la
  preuve du 403 est un appel HTTP reel, pas une assertion sur un mock.
 
 ---

@@ -30,7 +30,7 @@ DOMAINS: Dict[str, Dict] = {
         "label": "Finance & Comptabilite",
         "modules": {
             # Batch 22 : le routeur /finance expose plan comptable, exercices,
-            # bilans et comptes de resultat — des realites metier qui n'avaient
+            # bilans et comptes de resultat  des realites metier qui n'avaient
             # encore AUCUN code dans le catalogue (le routeur etait en auth
             # simple faute de droit applicable). Plutot que de les plaquer de
             # force sur « journal », sous-modules dedies, alignes sur les
@@ -41,7 +41,7 @@ DOMAINS: Dict[str, Dict] = {
             "facturation": {"label": "Facturation", "sub_modules": {"facture": ACTIONS, "devis": ACTIONS, "avoir": ACTIONS}},
             # declarations + modify : une declaration fiscale se corrige avant
             # d'être depotree ; le depot lui-meme reste l'approve (501 tant que
-            # GUCE/SYDONIA n'existe pas — batches precedents).
+            # GUCE/SYDONIA n'existe pas  batches precedents).
             "fiscalite": {"label": "Fiscalite (CEMAC)", "sub_modules": {"tva": ["read", "modify", "approve", "export"], "declarations": ["read", "create", "modify", "approve", "export"]}},
             "immobilisations": {"label": "Immobilisations", "sub_modules": {"actif": ACTIONS, "amortissement": ["read", "create", "modify"]}},
         },
@@ -101,7 +101,7 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "comptabilite.grand_livre.read", "comptabilite.balance.read", "comptabilite.lettrage.read",
         "comptabilite.lettrage.modify",
         # Batch 22 : le comptable consulte le plan et les exercices, corrige
-        # reglements et factures, telecharge les PDF — mais ne valide
+        # reglements et factures, telecharge les PDF  mais ne valide
         # (journal.approve), ne clot pas l'exercice et ne signe pas.
         "comptabilite.plan_comptable.read", "comptabilite.exercice.read",
         "tresorerie.mouvement.read", "tresorerie.mouvement.create", "tresorerie.mouvement.modify",

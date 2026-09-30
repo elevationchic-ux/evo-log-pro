@@ -3,7 +3,7 @@
 La table ``maintenances`` ne portait pas de ``company_id``. Le filtre tenant
 global (``app/core/tenant_enforcement.py``) ne reecrit que les entites qui
 possedent cette colonne : ``GET /api/v1/maintenance``, ``/stats`` et
-``/analytics/kpis`` etaient donc lus **sans aucune isolation** — un utilisateur
+``/analytics/kpis`` etaient donc lus **sans aucune isolation**  un utilisateur
 authentifie voyait toute la GMAO de tous les tenants, y compris les couts
 d'atelier et les immatriculations.
 

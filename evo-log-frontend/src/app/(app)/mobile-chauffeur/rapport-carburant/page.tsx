@@ -94,7 +94,7 @@ export default function MobileChauffeurCarburantPage() {
       setReceipt({ ref, date: fmtDateTime(body?.date_plein) || new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) });
       setSubmitted(true);
       if (consoL100 && parseFloat(consoL100) > SEUIL_ALERTE_L100) {
-        toast.warning(`Consommation anormale enregistrée : ${consoL100} L/100km — signal FuelGuard consigné`);
+        toast.warning(`Consommation anormale enregistrée : ${consoL100} L/100km  signal FuelGuard consigné`);
       } else {
         toast.success('Rapport carburant transmis au dispatching');
       }

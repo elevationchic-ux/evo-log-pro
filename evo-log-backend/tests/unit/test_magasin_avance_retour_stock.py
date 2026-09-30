@@ -1,8 +1,8 @@
-"""Batch 20 — Réintégration en stock des retours clients (migration 029).
+"""Batch 20  Réintégration en stock des retours clients (migration 029).
 
 Le batch 17 avait reconstruit le circuit /retours SANS aucun mouvement de
 stock, parce que le modele RetourClient ne portait aucune liaison vers une
-ligne de stock — et qu'inventer cette liaison aurait ete du faux. Le rapport
+ligne de stock  et qu'inventer cette liaison aurait ete du faux. Le rapport
 §21 l'avait declare : « une migration ajoutant cette liaison serait le seul
 moyen honnete de la rendre reelle ». La migration 029 l'ajoute (stock_id
 NULLable), et ces tests verrouillent le comportement NEUF :
@@ -13,7 +13,7 @@ NULLable), et ces tests verrouillent le comportement NEUF :
   precisee, que la decision est `accepte` et que l'action n'est pas
   `destruction` ;
 * destruction / refus / absence de liaison : ZERO mouvement ecrit, et la
-  raison est tracee dans notes — jamais un mouvement poli mais faux ;
+  raison est tracee dans notes  jamais un mouvement poli mais faux ;
 * la migration 029 est idempotente et ne devine aucune donnee (colonne
   NULLable, valeurs existantes laissees a NULL).
 """
@@ -136,7 +136,7 @@ def test_retour_destruction_et_refus_ne_bougent_pas_le_stock(client, db):
 def test_retour_sans_ligne_accepte_trace_l_absence_de_reintegration(client, db):
     cli = _seed_client(db, code="CLI-B20C")
     # Pas de stock_id : le retour est reel, la decision est prise, mais la
-    # reintegration physique est IMPOSSIBLE a ecrire — et cela doit etre
+    # reintegration physique est IMPOSSIBLE a ecrire  et cela doit etre
     # declare, pas simule.
     r = client.post(BASE + "/retours", json={
         "client_id": cli.id, "motif": "retour sans ligne designee", "quantite": 2})
@@ -147,7 +147,7 @@ def test_retour_sans_ligne_accepte_trace_l_absence_de_reintegration(client, db):
     assert "PAS DE REINTEGRATION STOCK" in rep.json()["notes"]
     assert db.query(MouvementStock).count() == 0
     # NB : stock_id n'est pas modifiable par PATCH (contrat RetourClientUpdate) ;
-    # la voie honnete est la creation avec la liaison — verrouillee plus haut.
+    # la voie honnete est la creation avec la liaison  verrouillee plus haut.
 
 
 def test_retour_quantite_absente_refuse_toute_fausse_reintegration(client, db):

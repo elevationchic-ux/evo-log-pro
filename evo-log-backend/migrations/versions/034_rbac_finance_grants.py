@@ -3,7 +3,7 @@
 Contexte : /api/v1/finance (37 endpoints) est passe de la simple authentification
 a ``require_perm``. Le catalogue a du etre complete car le plan comptable, les
 exercices, les bilans (create/modify) et les comptes de resultat n'avaient
-AUCUN code applicable — les plaquer sur « journal » aurait ete du bricolage.
+AUCUN code applicable  les plaquer sur « journal » aurait ete du bricolage.
 Nouveaux roles/grants : CAISSIER (creation), COMPTABLE/CHEF_COMPTABLE/AUDITEUR
 etendus.
 

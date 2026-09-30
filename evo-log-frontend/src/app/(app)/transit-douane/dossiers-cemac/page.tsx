@@ -36,14 +36,14 @@ const STATUT_STYLES: Record<string, string> = {
 };
 
 function xaf(n: number | null | undefined): string {
-  if (n === null || n === undefined) return '—';
+  if (n === null || n === undefined) return '';
   return Math.round(n).toLocaleString('fr-FR');
 }
 
 function dateCourte(iso: string | null | undefined): string {
-  if (!iso) return '—';
+  if (!iso) return '';
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-FR');
 }
 
 function axe(d: Dossier): string {
@@ -173,7 +173,7 @@ export default function TransitDouaneDossiersCemac() {
                       <div>{f.type_transit}</div>
                       <div className="text-[11px] text-slate-500">{f.regime_douanier}</div>
                     </td>
-                    <td className="py-3.5 px-4 font-sans text-slate-300 max-w-[220px] truncate">{f.marchandise ?? '—'}</td>
+                    <td className="py-3.5 px-4 font-sans text-slate-300 max-w-[220px] truncate">{f.marchandise ?? ''}</td>
                     <td className="py-3.5 px-4 text-right font-bold text-amber-400">{xaf(f.montant_total)}</td>
                     <td className="py-3.5 px-4 text-slate-400">{dateCourte(f.date_ouverture)}</td>
                     <td className="py-3.5 px-4 text-center">

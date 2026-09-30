@@ -80,9 +80,9 @@ export default function AcconagePage() {
   const escales = Array.isArray(escalesData) ? escalesData : [];
   const nomsNavires: Record<number, string> = Array.isArray(naviresData)
     ? naviresData.reduce((acc: Record<number, string>, n: any) => {
-        if (n?.id != null && n?.nom) acc[n.id] = n.nom;
-        return acc;
-      }, {})
+      if (n?.id != null && n?.nom) acc[n.id] = n.nom;
+      return acc;
+    }, {})
     : {};
 
   const createMutation = useMutation({
@@ -203,7 +203,7 @@ export default function AcconagePage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 font-semibold text-slate-200 capitalize">
-                      {item.type_operation || '—'}
+                      {item.type_operation || ''}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-slate-300">
@@ -267,7 +267,7 @@ export default function AcconagePage() {
                     onChange={(e) => setEscaleId(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500"
                   >
-                    <option value="">— Sélectionner une escale —</option>
+                    <option value=""> Sélectionner une escale </option>
                     {escales.map((es: any) => (
                       <option key={es.id} value={es.id}>
                         {es.numero_escale}

@@ -171,10 +171,10 @@ export default function MaintenancePage() {
                   <tr key={item.id || idx} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-100 flex items-center gap-2 font-mono">
                       <Truck className="w-4 h-4 text-orange-400" />
-                      {item.immatriculation_camion || item.vehicule || '—'}
+                      {item.immatriculation_camion || item.vehicule || ''}
                     </td>
                     <td className="px-6 py-4 font-semibold text-slate-200">
-                      {item.description || '—'}
+                      {item.description || ''}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${prioriteBadge(item.priorite)}`}>
@@ -222,7 +222,7 @@ export default function MaintenancePage() {
                   </div>
                 ) : vehicules.length === 0 ? (
                   <div className="w-full px-4 py-2.5 text-sm bg-slate-950 border border-slate-800 rounded-xl text-slate-400">
-                    Aucun véhicule au parc —{' '}
+                    Aucun véhicule au parc {' '}
                     <Link href="/parc" className="text-orange-400 font-semibold hover:text-orange-300">
                       enregistrer un véhicule
                     </Link>
@@ -234,7 +234,7 @@ export default function MaintenancePage() {
                     onChange={(e) => setVehiculeId(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-orange-500 font-mono"
                   >
-                    <option value="">— Sélectionner un camion —</option>
+                    <option value=""> Sélectionner un camion </option>
                     {vehicules.map((v: any) => (
                       <option key={v.id} value={String(v.id)}>
                         {v.immatriculation}

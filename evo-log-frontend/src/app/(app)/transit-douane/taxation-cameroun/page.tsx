@@ -44,7 +44,7 @@ const SOURCE_LABELS: Record<string, { texte: string; cls: string }> = {
   nomenclature_cemac: { texte: 'Taux issu de la nomenclature CEMAC enregistrée en base', cls: 'text-emerald-400' },
   manuel: { texte: 'Taux saisi manuellement (aucune position SH trouvée en base)', cls: 'text-blue-400' },
   categorie_tec: { texte: 'Simulation basée sur la catégorie TEC sélectionnée', cls: 'text-amber-400' },
-  defaut_simulation: { texte: 'Simulation — position SH absente de la nomenclature, taux par défaut (produit fini 20%) appliqué', cls: 'text-amber-400' },
+  defaut_simulation: { texte: 'Simulation  position SH absente de la nomenclature, taux par défaut (produit fini 20%) appliqué', cls: 'text-amber-400' },
   exoneration_origine: { texte: 'Droit de douane exonéré au titre de l’origine (CEMAC / ZLECAF)', cls: 'text-emerald-400' },
 };
 
@@ -246,9 +246,9 @@ export default function TransitDouaneTaxationPage() {
                 onChange={e => setRegime(e.target.value)}
                 className="w-full h-11 px-4 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-amber-500"
               >
-                <option value="IM4">IM4 — Mise à la consommation</option>
-                <option value="IM7">IM7 — Entrepôt (DD/TVA non liquidés)</option>
-                <option value="T1">T1 — Transit (DD/TVA non liquidés)</option>
+                <option value="IM4">IM4  Mise à la consommation</option>
+                <option value="IM7">IM7  Entrepôt (DD/TVA non liquidés)</option>
+                <option value="T1">T1  Transit (DD/TVA non liquidés)</option>
               </select>
             </div>
             <div>
@@ -276,10 +276,10 @@ export default function TransitDouaneTaxationPage() {
                 className="w-full h-11 px-4 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-amber-500"
               >
                 <option value="">Auto (défaut simulation)</option>
-                <option value="0">Cat. 0 — 0 %</option>
-                <option value="1">Cat. 1 — 5 %</option>
-                <option value="2">Cat. 2 — 10 %</option>
-                <option value="3">Cat. 3 — 20 %</option>
+                <option value="0">Cat. 0  0 %</option>
+                <option value="1">Cat. 1  5 %</option>
+                <option value="2">Cat. 2  10 %</option>
+                <option value="3">Cat. 3  20 %</option>
               </select>
             </div>
             <div>

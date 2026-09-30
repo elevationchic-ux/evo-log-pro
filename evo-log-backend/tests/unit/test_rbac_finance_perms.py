@@ -1,10 +1,10 @@
-"""Batch 22 — RBAC granulaire sur /api/v1/finance (37 endpoints).
+"""Batch 22  RBAC granulaire sur /api/v1/finance (37 endpoints).
 
 Meme discipline que le batch 21 :
   1. parite catalogue : aucun code fantome dans le routeur ;
   2. MATRICE COMPLETE role x code : pour les 24 codes utilises, chaque role
      finance a une attente explicite (autorise OU refuse), calculee par le
-     VRAI moteur has_perm() — pas un mock, pas un sous-ensemble choisi ;
+     VRAI moteur has_perm()  pas un mock, pas un sous-ensemble choisi ;
   3. HTTP reel : caissier = 200 sur ses encaissements, 403 sur la creation
      de facture (le refus precede toute ecriture) ;
   4. migration 034 : seeds CAISSIER + codes neufs du catalogue, idempotente,

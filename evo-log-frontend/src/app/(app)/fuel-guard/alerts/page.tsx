@@ -60,7 +60,7 @@ export default function FuelGuardAlertsPage() {
             type: 'surconsommation',
             immatriculation: v.immatriculation,
             valeur: v.conso_moyenne_l100,
-            detail: `${v.conso_moyenne_l100.toFixed(1)} L/100km sur ${v.tickets} plein(s) mesure(s) — seuil ${SEUIL_L100}`,
+            detail: `${v.conso_moyenne_l100.toFixed(1)} L/100km sur ${v.tickets} plein(s) mesure(s)  seuil ${SEUIL_L100}`,
           });
         }
       }
@@ -133,7 +133,7 @@ export default function FuelGuardAlertsPage() {
                 <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
                 <div>
                   <div className="text-sm font-black text-red-300">
-                    {a.immatriculation} — {a.type === 'surconsommation' ? 'Surconsommation mesurée' : 'Signalement chauffeur'}
+                    {a.immatriculation}  {a.type === 'surconsommation' ? 'Surconsommation mesurée' : 'Signalement chauffeur'}
                   </div>
                   <div className="text-xs text-slate-400 mt-0.5">{a.detail}</div>
                 </div>

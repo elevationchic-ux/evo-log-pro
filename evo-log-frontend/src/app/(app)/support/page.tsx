@@ -290,7 +290,7 @@ export default function SupportPage() {
                       )}
                     </td>
                     <td className="px-4 py-3.5 font-mono text-xs text-slate-400 whitespace-nowrap">
-                      {tk.reference || '—'}
+                      {tk.reference || ''}
                     </td>
                     <td className="px-4 py-3.5 text-xs">{moduleLabel(tk.module_concerne)}</td>
                     <td className="px-4 py-3.5">
@@ -311,7 +311,7 @@ export default function SupportPage() {
                         onChange={(e) =>
                           statutMutation.mutate({ id: Number(tk.id), statut: e.target.value })
                         }
-                        aria-label={`${t.support.colStatut} — ${tk.reference || tk.sujet || tk.id}`}
+                        aria-label={`${t.support.colStatut}  ${tk.reference || tk.sujet || tk.id}`}
                         className={`min-h-[36px] px-2 py-1 rounded-lg text-xs font-semibold border bg-transparent focus:outline-none focus:border-slate-500 ${statutBadge(tk.statut)}`}
                       >
                         {STATUTS.map(s => (

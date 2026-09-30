@@ -29,9 +29,9 @@ const num = (v: number | string | null | undefined): number => {
 };
 const fmt = (n: number) => Math.round(n).toLocaleString('fr-FR');
 const dateCourte = (iso: string | null) => {
-  if (!iso) return '—';
+  if (!iso) return '';
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-FR');
 };
 
 export default function ComptabiliteOhadaDashboard() {
@@ -135,7 +135,7 @@ export default function ComptabiliteOhadaDashboard() {
         </div>
       ) : (
         <>
-          {/* KPI Cards — dérivées des écritures réelles */}
+          {/* KPI Cards  dérivées des écritures réelles */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl hover:border-violet-500/40 transition-all">
               <div className="flex items-center justify-between text-slate-400 mb-2">
@@ -236,11 +236,11 @@ export default function ComptabiliteOhadaDashboard() {
                       <tr key={e.id} className="hover:bg-slate-800/40">
                         <td className="py-3 px-3 text-slate-400">{dateCourte(e.date_ecriture)}</td>
                         <td className="py-3 px-3 font-bold text-violet-400">{e.numero_piece ?? e.numero_ecriture}</td>
-                        <td className="py-3 px-3"><span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">{e.journal ?? '—'}</span></td>
-                        <td className="py-3 px-3 font-bold">{e.compte_id ?? '—'}</td>
+                        <td className="py-3 px-3"><span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">{e.journal ?? ''}</span></td>
+                        <td className="py-3 px-3 font-bold">{e.compte_id ?? ''}</td>
                         <td className="py-3 px-3 font-sans max-w-[240px] truncate" title={e.libelle}>{e.libelle}</td>
-                        <td className="py-3 px-3 text-right font-bold text-slate-100">{num(e.debit) > 0 ? fmt(num(e.debit)) : '—'}</td>
-                        <td className="py-3 px-3 text-right font-bold text-slate-100">{num(e.credit) > 0 ? fmt(num(e.credit)) : '—'}</td>
+                        <td className="py-3 px-3 text-right font-bold text-slate-100">{num(e.debit) > 0 ? fmt(num(e.debit)) : ''}</td>
+                        <td className="py-3 px-3 text-right font-bold text-slate-100">{num(e.credit) > 0 ? fmt(num(e.credit)) : ''}</td>
                         <td className="py-3 px-3 text-center">
                           <span className={`px-2 py-0.5 rounded ${e.valider ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
                             {e.valider ? 'Validée' : 'En attente'}

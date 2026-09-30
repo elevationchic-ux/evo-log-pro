@@ -43,13 +43,13 @@ const STATUT_LABELS: Record<string, string> = {
 const STATUT_FILTERS = ['ALL', 'emise', 'brouillon', 'payee_partiellement', 'payee', 'retard', 'annulee'];
 
 function xaf(n: number | null): string {
-  if (n === null || n === undefined) return '—';
+  if (n === null || n === undefined) return '';
   return Math.round(n).toLocaleString('fr-FR');
 }
 function dateCourte(iso: string | null): string {
-  if (!iso) return '—';
+  if (!iso) return '';
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-FR');
 }
 
 export default function FinanceOhadaInvoicing() {
@@ -156,11 +156,10 @@ export default function FinanceOhadaInvoicing() {
             <button
               key={st}
               onClick={() => setFilterStatus(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${
-                filterStatus === st
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${filterStatus === st
                   ? 'bg-emerald-600/30 text-emerald-300 border-emerald-500'
                   : 'bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800'
-              }`}
+                }`}
             >
               {st === 'ALL' ? 'Toutes' : (STATUT_LABELS[st] ?? st)}
             </button>

@@ -137,7 +137,7 @@ export default function FinanceOhadaTaxesCemac() {
         <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Droits &amp; Taxes en attente</div>
           <div className="text-2xl font-black text-amber-400 font-mono">
-            {loading ? '—' : xaf(totalEnAttente)}
+            {loading ? '' : xaf(totalEnAttente)}
           </div>
           <div className="text-[11px] text-slate-400 mt-2">
             {pending.length} déclaration{pending.length > 1 ? 's' : ''} non liquidée{pending.length > 1 ? 's' : ''} (estimation EVO-LOG)
@@ -147,7 +147,7 @@ export default function FinanceOhadaTaxesCemac() {
         <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Droits douaniers liquidés ({moisCourant})</div>
           <div className="text-2xl font-black text-slate-100 font-mono">
-            {loading ? '—' : xaf(droitsLiquidesMois)}
+            {loading ? '' : xaf(droitsLiquidesMois)}
           </div>
           <div className="text-[11px] text-slate-400 mt-2">
             {liquidesMois.length} DUM liquidée{liquidesMois.length > 1 ? 's' : ''} ce mois
@@ -157,7 +157,7 @@ export default function FinanceOhadaTaxesCemac() {
         <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Télétransmission SYDONIA</div>
           <div className="text-2xl font-black text-slate-100 font-mono">
-            {loading ? '—' : `${sydoniaReelles} / ${dums.length}`}
+            {loading ? '' : `${sydoniaReelles} / ${dums.length}`}
           </div>
           <div className="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
@@ -213,7 +213,7 @@ export default function FinanceOhadaTaxesCemac() {
                     <tr key={d.id} className="hover:bg-slate-800/40 transition-colors">
                       <td className="py-3.5 px-4 font-bold text-emerald-400">{d.numero_dum}</td>
                       <td className="py-3.5 px-4 font-sans">
-                        <div className="text-slate-100 font-semibold">{d.marchandise || '—'}</div>
+                        <div className="text-slate-100 font-semibold">{d.marchandise || ''}</div>
                         <div className="text-[11px] text-slate-500">{d.nomenclature || 'code SH non renseigné'}</div>
                       </td>
                       <td className="py-3.5 px-4 text-right text-slate-400">{xaf(d.valeur_douane_xaf)}</td>

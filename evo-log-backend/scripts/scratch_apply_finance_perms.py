@@ -13,7 +13,7 @@ import sys
 TARGET = "app/routers/v1/finance.py"
 
 MAPPING = {
-    # Plan comptable SYSCOHADA : sous-module dedie (batch 22) — la creation
+    # Plan comptable SYSCOHADA : sous-module dedie (batch 22)  la creation
     # d'un compte n'est pas une ecriture de journal.
     ("get", "/plan-comptable"): "comptabilite.plan_comptable.read",
     ("post", "/plan-comptable"): "comptabilite.plan_comptable.create",
@@ -41,7 +41,7 @@ MAPPING = {
     ("post", "/encaissements"): "tresorerie.mouvement.create",
     # Declarations fiscales CEMAC : preparer = create/modify ; le depot
     # reel reste 501 (aucune integration GUCE) donc aucun approve n'est
-    # expose ici — les endpoints maps sont des brouillons de declaration.
+    # expose ici  les endpoints maps sont des brouillons de declaration.
     ("post", "/tva-declarations"): "fiscalite.declarations.create",
     ("put", "/tva-declarations/{declaration_id}"): "fiscalite.declarations.modify",
     ("post", "/retenues-source"): "fiscalite.declarations.create",

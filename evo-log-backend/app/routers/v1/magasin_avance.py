@@ -1349,7 +1349,7 @@ def traiter_retour(
             raise HTTPException(
                 status_code=400,
                 detail="Quantite retournee absente ou nulle : rien a reintegrer "
-                       "en stock — corrigez le retour avant de traiter")
+                       "en stock  corrigez le retour avant de traiter")
 
     r.statut = decision
     r.action = payload.action if decision == "accepte" else None

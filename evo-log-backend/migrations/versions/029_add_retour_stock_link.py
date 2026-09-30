@@ -8,7 +8,7 @@ Contexte (P2 issu du batch 17, relance au §21 du rapport Zero-Mock) :
     Le circuit /api/v1/magasin-avance/retours reconstruit au batch 17 devait
     refuser toute reintegration en stock : le modele ``RetourClient`` n'avait
     AUCUNE colonne reliant un retour a une ligne de ``stocks``. Ecrire un
-    ``MouvementStock`` a ce stade aurait ete inventer une donnee — le rapport
+    ``MouvementStock`` a ce stade aurait ete inventer une donnee  le rapport
     l'a declare explicitement : « une migration ajoutant cette liaison serait
     le seul moyen honnete de la rendre reelle ». La voici.
 

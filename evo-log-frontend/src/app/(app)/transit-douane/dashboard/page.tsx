@@ -77,13 +77,13 @@ export default function TransitDouaneDashboardPage() {
 
   const kpis = stats
     ? [
-        { label: 'Déclarations totales', value: stats.total_declarations, sub: 'enregistrées', icon: FileText, color: 'text-amber-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
-        { label: 'En attente', value: stats.en_attente, sub: 'à valider', icon: Package, color: 'text-blue-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
-        { label: 'Validées', value: stats.validees, sub: 'contrôlées', icon: Stamp, color: 'text-cyan-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
-        { label: 'Liquidées', value: stats.liquidees, sub: 'droits acquittés', icon: Scale, color: 'text-emerald-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
-        { label: 'Recettes fiscales', value: `${millions(stats.recettes_fiscales_totales_xaf)} M`, sub: 'XAF cumulés', icon: Receipt, color: 'text-emerald-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
-        { label: 'Droits de douane', value: `${millions(stats.droits_douane_total_xaf)} M`, sub: 'XAF cumulés', icon: TrendingUp, color: 'text-amber-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
-      ]
+      { label: 'Déclarations totales', value: stats.total_declarations, sub: 'enregistrées', icon: FileText, color: 'text-amber-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
+      { label: 'En attente', value: stats.en_attente, sub: 'à valider', icon: Package, color: 'text-blue-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
+      { label: 'Validées', value: stats.validees, sub: 'contrôlées', icon: Stamp, color: 'text-cyan-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
+      { label: 'Liquidées', value: stats.liquidees, sub: 'droits acquittés', icon: Scale, color: 'text-emerald-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
+      { label: 'Recettes fiscales', value: `${millions(stats.recettes_fiscales_totales_xaf)} M`, sub: 'XAF cumulés', icon: Receipt, color: 'text-emerald-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
+      { label: 'Droits de douane', value: `${millions(stats.droits_douane_total_xaf)} M`, sub: 'XAF cumulés', icon: TrendingUp, color: 'text-amber-400', bg: 'bg-slate-900/80', border: 'border-slate-800' },
+    ]
     : [];
 
   const filtered = rows.filter(r => {
@@ -181,8 +181,8 @@ export default function TransitDouaneDashboardPage() {
                     {filtered.map((row) => (
                       <tr key={row.id} className="hover:bg-slate-800/30 transition-colors">
                         <td className="px-4 py-3 font-mono font-bold text-amber-300">{row.numero_dum}</td>
-                        <td className="px-4 py-3 text-slate-200 font-medium">{row.importateur ?? '—'}</td>
-                        <td className="px-4 py-3 text-slate-400 hidden md:table-cell max-w-48 truncate">{row.marchandise ?? '—'}</td>
+                        <td className="px-4 py-3 text-slate-200 font-medium">{row.importateur ?? ''}</td>
+                        <td className="px-4 py-3 text-slate-400 hidden md:table-cell max-w-48 truncate">{row.marchandise ?? ''}</td>
                         <td className="px-4 py-3 font-mono text-slate-300 hidden lg:table-cell text-right">
                           {millions(row.valeur_douane_xaf)} M
                         </td>

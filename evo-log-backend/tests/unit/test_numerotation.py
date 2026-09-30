@@ -83,7 +83,7 @@ class _FakeUser:
     # numérotation, pas pour tester les droits. Depuis le batch 22,
     # /finance exige require_perm : l'identité doit donc porter les mêmes
     # attributs que le faux super-utilisateur du conftest (un vrai User ORM
-    # les a toujours — is_superuser est une colonne), sinon le repli
+    # les a toujours  is_superuser est une colonne), sinon le repli
     # modules_allowed du moteur accède à des attributs inexistants.
     id = 1
     username = "test"

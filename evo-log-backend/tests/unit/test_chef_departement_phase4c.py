@@ -1,4 +1,4 @@
-"""Phase 4 Tranche C — Pointage automatique a la connexion + depart.
+"""Phase 4 Tranche C  Pointage automatique a la connexion + depart.
 
 Couvre les utilitaires ``app.utils.pointage`` ET le bout-en-bout HTTP reel :
   - ``auto_pointage_arrivee`` : cree une PointageVacation a l'arrivee (niveau 3

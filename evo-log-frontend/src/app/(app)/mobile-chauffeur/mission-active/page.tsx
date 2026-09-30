@@ -63,9 +63,9 @@ export default function MobileChauffeurMissionPage() {
     if (next !== statut) {
       setStatut(next);
       const msgs: Record<string, string> = {
-        EN_ROUTE: 'Départ enregistré — Mission en route !',
-        ARRIVE: 'Arrivée signalée — En attente de déchargement',
-        LIVRE: 'Livraison confirmée — e-POD à signer'
+        EN_ROUTE: 'Départ enregistré  Mission en route !',
+        ARRIVE: 'Arrivée signalée  En attente de déchargement',
+        LIVRE: 'Livraison confirmée  e-POD à signer'
       };
       toast.success(msgs[next] ?? '');
       if (next === 'EN_ROUTE') setKm(0);
@@ -74,9 +74,9 @@ export default function MobileChauffeurMissionPage() {
   };
 
   const statutConfig: Record<typeof statut, { label: string; color: string; bg: string }> = {
-    CHARGE: { label: 'Chargé — En attente départ', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30' },
+    CHARGE: { label: 'Chargé  En attente départ', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30' },
     EN_ROUTE: { label: 'En route', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/30' },
-    ARRIVE: { label: 'Arrivé — Déchargement', color: 'text-violet-400', bg: 'bg-violet-500/10 border-violet-500/30' },
+    ARRIVE: { label: 'Arrivé  Déchargement', color: 'text-violet-400', bg: 'bg-violet-500/10 border-violet-500/30' },
     LIVRE: { label: 'Livraison confirmée ✓', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30' },
   };
 

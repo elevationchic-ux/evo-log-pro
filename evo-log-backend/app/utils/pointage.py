@@ -67,7 +67,7 @@ def auto_pointage_arrivee(db: Session, user: User) -> Optional[Dict[str, Any]]:
             .first()
         )
         if existing:
-            # Deja pointe — renvoyer l'info existante.
+            # Deja pointe  renvoyer l'info existante.
             return {
                 "pointe": True,
                 "deja_pointe": True,
