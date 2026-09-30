@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: 'Plateforme ERP Logistique SaaS Multi-Entreprises de Classe Mondiale par Code Axis Digital Cameroun (CADC) — Logistique, Transit & Acconage Portuaire.',
   icons: {
     icon: [
+      // ICO (legacy browsers & OS taskbar)
+      { url: '/favicon.ico', sizes: '16x16 32x32', type: 'image/x-icon' },
       // SVG (vectoriel — parfait à toutes les tailles, modern browsers)
       { url: '/favicon.svg', type: 'image/svg+xml' },
       // PNG fallbacks
@@ -34,7 +36,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport = {
-  themeColor: '#0f172a',
+  themeColor: '#f59e0b',
   width: 'device-width',
   initialScale: 1,
   // Le zoom pincement est RÉAUTORISÉ (WCAG 1.4.4) : l'ancien

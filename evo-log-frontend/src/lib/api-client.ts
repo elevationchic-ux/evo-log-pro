@@ -914,7 +914,6 @@ export const procurementAPI = {
 };
 
 // ─── Service Compliance & Réglementation ──────────────────────────────────────────
-// ─── Service Compliance & Réglementation ──────────────────────────────────────────
 export const complianceAPI = {
   // Registre reel : tables audits_qualite et normes_certifications, exposees
   // par le router QHSE. L'ancien /k-modules/compliance/audits etait un stub
