@@ -128,6 +128,7 @@ export default function LoginPage() {
 
       const roles = outcome.roles;
       setPendingRoles(roles);
+      setPendingLevel(outcome.roleLevel);
 
       // La regle vient du backend (users.must_change_password), pas d'une
       // comparaison cote client sur le mot de passe saisi.
@@ -153,7 +154,7 @@ export default function LoginPage() {
       }
 
       setTimeout(() => {
-        router.push(landingRouteFor(roles));
+        router.push(landingRouteFor(roles, outcome.roleLevel));
         router.refresh();
       }, 500);
     } catch (err: any) {
@@ -210,7 +211,7 @@ export default function LoginPage() {
     setPasswordSuccess(true);
     setTimeout(() => {
       setMustChangePassword(false);
-      router.push(landingRouteFor(pendingRoles));
+      router.push(landingRouteFor(pendingRoles, pendingLevel));
       router.refresh();
     }, 1200);
   };
