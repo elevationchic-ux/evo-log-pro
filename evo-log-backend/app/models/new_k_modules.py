@@ -17,7 +17,7 @@ class CotationDevis(Base):
     marge_nette_pct = Column(Float, default=15.0)
     statut = Column(String(50), default="SOUMIS") # SOUMIS, ACCEPTE, REJETE
     created_at = Column(DateTime, default=datetime.utcnow)
-    # Portee client du portail B2B (migration 029) : rattache le devis a un
+    # Portee client du portail B2B (migration 030) : rattache le devis a un
     # client reel du tenant. NULL = cotation sans compte client identifie.
     client_id = Column(Integer, ForeignKey("clients.id"), nullable=True, index=True)
     # Detail des lignes tarifaires ayant produit le montant : copie des lignes

@@ -2,8 +2,8 @@
 
 - Genere le : 2026-10-01
 - Total pages scannees : 348
-- Pages branchees sur le backend : 289
-- Pages encore statiques : 59
+- Pages branchees sur le backend : 293
+- Pages encore statiques : 55
 
 ## Pages statiques
 
@@ -29,14 +29,10 @@
 | `/fiscalite-cameroun` | non (vitrine/maintenance) | - |
 | `/fuel-guard/alerts` | non (vitrine/maintenance) | - |
 | `/integration-cameroun` | non (vitrine/maintenance) | - |
-| `/logout` | non (vitrine/maintenance) | - |
 | `/magasin/ia-chat` | non (vitrine/maintenance) | - |
 | `/maintenance-gmao/dashboard` | non (vitrine/maintenance) | - |
-| `/mobile-chauffeur/epod-signature` | non (vitrine/maintenance) | - |
-| `/mobile-chauffeur/mission-active` | non (vitrine/maintenance) | - |
 | `/mobile-chauffeur/rapport-carburant` | non (vitrine/maintenance) | - |
 | `/paiement-local` | non (vitrine/maintenance) | - |
-| `/parc-vehicules/dashboard` | non (vitrine/maintenance) | - |
 | `/parc-vehicules/documents` | non (vitrine/maintenance) | - |
 | `/port-operations/dashboard` | non (vitrine/maintenance) | - |
 | `/portail-collaborateur` | non (vitrine/maintenance) | - |

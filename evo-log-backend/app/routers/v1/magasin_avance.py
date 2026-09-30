@@ -1160,9 +1160,10 @@ def refuser_reception(
 # Batch 17 : reconstruit sur le modele REEL RetourClient. L'ancienne version
 # inventait article_id/etat a la creation (TypeError 500 systematique) et
 # ecrivait action_effectuee/date_traitement  colonnes inexistantes, donc
-# perte silencieuse. Attention : le modele ne porte PAS de stock_id  la
-# reintegration physique en stock n'est pas modelisee ; aucun mouvement de
-# stock n'est ici INVENTE (Zero-Mock).
+# perte silencieuse. Batch 20 (migration 029) : la liaison stock_id existe
+# enfin dans le modele ; /traiter reintegre reellement le stock QUAND la ligne
+# est precisee a la creation et que la marchandise n'est pas detruite, et
+# l'écrit dans notes quand elle ne peut pas le faire. Sinon : aucun mouvement.
 
 
 def _prochaine_rotation_numero(db, modele, champ, prefix):
@@ -1207,9 +1208,11 @@ def enregistrer_retour(
     """Enregistre un retour client (statut initial `en_attente`).
 
     Validations reelles : client existant, bon de sortie existant si lie,
-    motif non vide, quantite > 0 si precisee, type dans la liste metier.
+    ligne de stock existante si precisee (batch 20), motif non vide,
+    quantite > 0 si precisee, type dans la liste metier.
     """
     from app.models.magasin_avance import RetourClient, BonSortie
+    from app.models.magasin import Stock
     from app.models.tiers import Client
 
     TYPES_RETOUR = ("defectif", "mauvais_quantite", "refus", "erreur_livraison")
@@ -1222,6 +1225,11 @@ def enregistrer_retour(
             raise HTTPException(
                 status_code=400,
                 detail=f"Bon de sortie {retour.bon_sortie_id} inexistant")
+    if retour.stock_id is not None:
+        if not db.query(Stock).filter(Stock.id == retour.stock_id).first():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Ligne de stock {retour.stock_id} inexistante")
     motif = (retour.motif or "").strip()
     if not motif:
         raise HTTPException(status_code=400, detail="Un retour exige un motif non vide")
@@ -1236,6 +1244,7 @@ def enregistrer_retour(
         numero_retour=_prochaine_rotation_numero(db, RetourClient, "numero_retour", "RT"),
         client_id=retour.client_id,
         bon_sortie_id=retour.bon_sortie_id,
+        stock_id=retour.stock_id,
         date_retour=date.today(),
         type_retour=retour.type_retour,
         motif=motif,
@@ -1288,11 +1297,17 @@ def traiter_retour(
     remplacement/remboursement/destruction) ou `refuse`.
 
     La date de traitement est TRACEE dans notes (le modele n'a pas de colonne
-    date_traitement)  rien n'est ecrit dans des colonnes inventees. Aucun
-    mouvement de stock : la reintegration physique n'est pas modelisee sur
-    RetourClient (pas de stock_id) et ne sera pas inventee.
+    date_traitement)  rien n'est ecrit dans des colonnes inventees.
+
+    Reintegration en stock (batch 20, migration 029) : elle n'est physique-
+    ment admissible que si le retour porte une `stock_id` (ligne de retour
+    precisee a la creation) et que la marchandise n'est pas detruite. Sinon :
+    AUCUN mouvement ecrit, et la raison est tracee dans notes. Batch 17 :
+    la liaison n'existait pas dans le modele, aucun mouvement etait invente ;
+    desormais le mouvement EST reel quand la liaison est reellement saisie.
     """
     from app.models.magasin_avance import RetourClient
+    from app.models.magasin import Stock, MouvementStock, MouvementType
     ACTIONS = ("remplacement", "remboursement", "destruction")
 
     r = db.query(RetourClient).filter(RetourClient.id == retour_id).first()
@@ -1318,11 +1333,54 @@ def traiter_retour(
     if payload.cout_traitement is not None and float(payload.cout_traitement) < 0:
         raise HTTPException(status_code=400, detail="cout_traitement ne peut pas etre negatif")
 
+    # Tout ou rien : la ligne de retour doit exister AVANT d'ecrire la decision
+    # (le meme commit porte decision + eventuel mouvement).
+    stock = None
+    reintegrable = (decision == "accepte" and payload.action != "destruction"
+                    and r.stock_id is not None)
+    if reintegrable:
+        stock = db.query(Stock).filter(Stock.id == r.stock_id).first()
+        if not stock:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Ligne de stock {r.stock_id} du retour introuvable : "
+                       "reintegration impossible")
+        if r.quantite is None or float(r.quantite) <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Quantite retournee absente ou nulle : rien a reintegrer "
+                       "en stock — corrigez le retour avant de traiter")
+
     r.statut = decision
     r.action = payload.action if decision == "accepte" else None
     r.cout_traitement = payload.cout_traitement
     trace = (f"[TRAITE {date.today().isoformat()} par utilisateur {current_user.id}] "
              f"{decision}" + (f" ({r.action})" if r.action else ""))
+
+    if stock is not None:
+        avant = float(stock.quantite_disponible or 0)
+        delta = float(r.quantite)
+        db.add(MouvementStock(
+            company_id=stock.company_id,
+            reference=r.numero_retour,
+            stock_id=stock.id,
+            type_mouvement=MouvementType.ENTREE,
+            quantite=delta,
+            quantite_avant=avant,
+            quantite_apres=avant + delta,
+            raison=f"Retour client {r.numero_retour} ({r.action})",
+            document_reference=r.numero_retour,
+            operateur_id=current_user.id,
+        ))
+        stock.quantite_disponible = avant + delta
+        trace += f"  REINTEGRE en stock {stock.id} : {delta}"
+    elif decision == "accepte" and payload.action != "destruction":
+        # Honnetete : la marchandise revient mais SANS ligne designate ou sans
+        # quantite comptee  aucun mouvement n'est ecrit, et c'est declare.
+        trace += ("  PAS DE REINTEGRATION STOCK : "
+                  + ("ligne de stock non precisee sur le retour"
+                     if r.stock_id is None else "quantite retournee absente"))
+
     if payload.notes:
         trace += f"  {payload.notes}"
     r.notes = f"{r.notes + chr(10) if r.notes else ''}{trace}"
