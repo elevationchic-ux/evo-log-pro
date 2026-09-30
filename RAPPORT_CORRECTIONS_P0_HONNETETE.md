@@ -901,6 +901,69 @@ lignes comptees, un stock reellement ajuste et une ligne de registre par ecart.
 
 ---
 
+## 21. Batch 19 — Réceptions fournisseur, colis et service fantôme : le dernier bloc de `magasin_avance` reconstruit
+
+Annonce au §20 (« Reste ») : apres les sorties (batch 16), les retours/litiges/KPI
+(batch 17), les inventaires/fournisseurs/reappro (batch 18), il restait dans
+`/api/v1/magasin-avance` le trio `/receptions`, le trio `/colis` et le service
+`magasin_avance_service.py` — tous morts du meme syndrome « champs fantomes ».
+Le module est desormais **integralement reconstruit sur les modeles reels**.
+
+### Constat (audit)
+
+| Element | Cause de mort | Ce qui se passait vraiment |
+|---|---|---|
+| `POST /receptions` | `BonReception(commande_id=…)` | colonne reelle `commande_fournisseur_id` → TypeError → 500 garanti |
+| `POST /receptions/{id}/lignes` | `LigneBonReception(bon_id, article_id, emplacement_id=…)` | colonnes reelles `bon_reception_id`, `stock_id`, `emplacement` (chaine) → 500 garanti |
+| `PUT /receptions/{id}/valider` | lisait `LigneBonReception.bon_id`, `Stock.article_id`, ecrivait `stock.quantite`, inventait `Stock(...article_id=…)`, signait `date_validation=utcnow()` sur une colonne **Date** | AttributeError 500 ; et si le code etait passe, **tout l'apport en stock etait perdu silencieusement** (`quantite` n'existe pas, la colonne reelle est `quantite_disponible`) |
+| `POST /colis` (via `ColisService`) | `reference_colis`, `date_creation`, `code_barres`, `palette_id`, `date_palettisation` | modele reel : `numero_colis`, `date_etiquetage`, `emplacement` → TypeError ou ecriture sur attribut Python sans colonne = perte silencieuse |
+| `magasin_avance_service.py` | **5 classes fantomes** (`ReceptionService`, `SortieService`, `RetourService`, `ColisService`, `KPIStockService`) sans consommateur reel, ecrivant toutes sur des colonnes inexistantes | code mort  purgue avec commentaire pointant vers les vrais circuits (batches 16 a 19) ; le `ReceptionService` des tests d'acquisition est une AUTRE classe (`acquisition_service.py`), non touchee |
+| Frontend `saisie-inventaire-physique` | postait un payload d'**inventaire** sur `/magasin-avance/receptions` (route morte de surcroit) | **422 permanent** : l'ecran « enregistrer les ecarts » n'enregistrait rien |
+
+### Corrections Zero-Mock
+
+| Qui | Quoi |
+|---|---|
+| `schemas/magasin_avance.py` | Schemas alignes sur le modele : `BonReceptionCreate/Update/Response`, `LigneBonReceptionCreate/Response`, `RefusBonReception` (motif obligatoire), `ColisCreate/Update/Response` ; schemas fantomes `Colis*` supprimes |
+| Receptions (6 endpoints) | `GET /receptions` (filtres reels statut/fournisseur/entrepot), `POST` (BR-YYYYMMDD-NNNN anti-collision, verification existence fournisseur + entrepot + commande liee, statut initial `en_attente`), `PATCH` (seulement `en_attente` — bon valide/refuse immuable), `POST /{id}/lignes` (stock reel, quantite > 0, **conformite CALCULEE** : `conforme` seulement si quantite commandee fournie et egale, sinon `ecart` — jamais de saisie libre), `PUT /{id}/valider` (exige des lignes ; augmente reellement `quantite_disponible` ; **un `MouvementStock` ENTREE journalise par ligne** avec avant/apres/prix/operateur ; met a jour le registre `LigneCommandeFournisseur.quantite_recue/date_reception/statut=recu` ; bascule la commande en `livree` + `date_livraison_reelle` quand toutes ses lignes sont recues ; tracabilite `[VALIDE …]` dans notes ; decision unique), `PUT /{id}/refuser` (**motif ecrit obligatoire**, aucun stock ne bouge — la marchandise refusee n'est pas entree) |
+| Colis (5 endpoints) | `GET /colis`, `POST` (CO-YYYYMMDD-NNNN, poids/volume non negatifs, type dans la liste metier, bon de sortie lie verifie), `PATCH` (numero immuable), `PUT /{id}/etiqueter` (`date_etiquetage` = jour reel, **decision unique** : un colis deja etiquete ne recoit pas une 2e date), `PUT /{id}/palettiser` (le modele n'a **aucune** colonne palette → la ref est tracee dans `emplacement`, seule localisation reelle, au lieu d'inventer une donnee perduee) |
+| Frontend | Nouvelle `inventaireAPI` branchee sur le vrai circuit inventaire du batch 18 (creation campagne → comptages → validation) ; la page `magasin/saisie-inventaire-physique` n'appelle plus `/receptions` ; `StockItem` porte desormais `entrepot_id` (colonne reelle du `StockResponse`) et un garde « une campagne = un entrepot » presente l'erreur au lieu de poster un payload invalide ; methode morte `completeReception` supprimee ; methodes receptions de `magasinAPI` realineees sur le nouveau contrat |
+
+### Piège technique rencontré et corrigé (declare)
+
+La session applicative tourne avec `autoflush=False` : le COUNT qui decide si
+toutes les lignes d'une commande sont recues lisait les statuts **PRECEDENTS**
+en base, et la commande restait eternellement « en cours » malgre un 200 de
+validation. Un `db.flush()` explicite avant le comptage corrige le cas —
+decouvert par le test `test_reception_valider_avec_commande_met_jour_le_registre`,
+pas par la relecture.
+
+### Verification
+
+- `python -m pytest tests/unit/test_magasin_avance_receptions_colis.py -q` : ✅ **9 passed** — dont les assertions d'honnetete « le refus ne bouge pas le stock », « la validation cree bien un MouvementStock par ligne » et « le service fantome est purge » (`test_service_fantome_purge`).
+- Tests cibles magasin (5 fichiers joues ensemble, re-verifie a la fin du batch) : ✅ **50 passed** — b19 : 9, b18 : 9, b17 : 9, b16 : 10, `test_magasin_store` : 14.
+- **Suite complete (commande CI `pytest tests`) : ✅ 625 passed, 2 xfailed, 0 failed**, `PYTEST_EXIT=0` — le rouge du batch 18 etait bien externe ; le re-run promis au §20 est fait et **vert**. `DB_CHANGED=False` (mtime/taille `kamlog_erp.db` identiques avant/apres chaque run definitif).
+- `python -m compileall -q app` : ✅ EXIT=0 ; `import app.main` : ✅ OK (1137 chemins OpenAPI).
+- `npx tsc --noEmit` : ✅ EXIT=0 ; `python evo-log-frontend/scripts/audit_frontend.py --strict-honesty` : ✅ EXIT=0.
+
+### Reste (hors perimetre du batch, signale)
+
+- Le module `magasin_avance` n'a plus d'endpoint mort identifie ; les prochains
+  lots portent hors du module (ex. : `KPIStockService` etant purges, d'eventuels
+  tableaux de bord qui consommeraient `/kpi/*` restent a verifier cote frontend,
+  et la reintegration physique en stock des **retours clients** n'est pas
+  modelisee — le modele `RetourClient` n'a pas de `stock_id`, le batch 17 a donc
+  refuse d'inventer un mouvement ; une migration ajouteant cette liaison serait
+  le seul moyen honnete de la rendre reelle).
+
+➡️ Zero-Mock applique a la reception : un 200 « bon valide » qui n'augmente
+aucune quantite reelle et ne journalise aucun mouvement est une ecriture
+mensongere au sens comptable du mot ; la version reconstruite ne peut repondre
+200 qu'avec un stock reellement augmente, une ligne de registre par apport et
+un validateur identifie.
+
+---
+
 * Aucun acte à valeur légale (validation CNCC, dépôt GUCE/SYDONIA, quittance, bulletin CNPS,
   paiement mobile money) n'est jamais affiché comme "fait" s'il ne l'est pas : soit c'est réel,
   soit l'API répond **501 avec la raison exacte**.

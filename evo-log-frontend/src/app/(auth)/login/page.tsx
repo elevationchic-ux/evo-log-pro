@@ -8,6 +8,7 @@ import { apiClient } from '@/lib/api-client';
 import { establishSession } from '@/lib/login-session';
 import { landingRouteFor } from '@/lib/auth';
 import { saveTwoFactorChallenge } from '@/lib/2fa-challenge';
+import { toast } from 'sonner';
 import { Sparkles, Ship, Lock, User as UserIcon, ArrowRight, ShieldCheck, KeyRound, AlertTriangle, CheckCircle2, Radio, Compass, Anchor, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
@@ -93,6 +94,21 @@ export default function LoginPage() {
         setMustChangePassword(true);
         setIsLoading(false);
         return;
+      }
+
+      // Phase 4 Tranche C : notification non-bloquante du pointage d'arrivee
+      // automatique (le backend l'a enregistree pendant /auth/login). On
+      // n'invente rien : si le backend n'a rien renvoyé (rôle non concerné),
+      // aucun toast. Un retard est affiche honnetement avec l'ecart calcule.
+      const pi = data.pointage_info;
+      if (pi && pi.pointe) {
+        if (pi.deja_pointe) {
+          toast.info(`Déjà pointé aujourd'hui (arrivée ${pi.heure_arrivee}).`);
+        } else if (pi.retard && typeof pi.ecart_minutes === 'number') {
+          toast.warning(`Arrivée enregistrée à ${pi.heure_arrivee} · en retard de ${pi.ecart_minutes} min.`);
+        } else {
+          toast.success(`Arrivée pointée à ${pi.heure_arrivee}.`);
+        }
       }
 
       setTimeout(() => {

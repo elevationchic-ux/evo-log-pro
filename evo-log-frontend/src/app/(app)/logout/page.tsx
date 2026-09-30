@@ -1,11 +1,29 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { signOut } from 'next-auth/react';
 import { LogOut, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '@/components/layout/AuthProvider';
+import { authAPI } from '@/lib/api-client';
 
 export default function LogoutPage() {
   const [countdown, setCountdown] = useState(3);
+  const { user } = useAuth();
+  const departDone = useRef(false);
+
+  // Phase 4 Tranche C : pointe de depart best-effort a l'entree de l'ecran de
+  // deconnexion. C'est le VRAI chemin de deconnexion declenche par l'en-tete
+  // (router.push('/logout')), distinct de AuthProvider.logout. Reserve aux
+  // collaborateurs de terrain (niveau 3) ; l'appel ne bloque JAMAIS la
+  // deconnexion (400 si aucune arrivee aujourd'hui = ignore silencieusement).
+  useEffect(() => {
+    if (departDone.current) return;
+    if (user && user.roleLevel === 3) {
+      departDone.current = true;
+      authAPI.pointerDepart().catch((e) => console.warn('Pointage de depart ignore', e));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
