@@ -834,9 +834,9 @@ export const gatewayAPI = {
   delete: (id: number) => apiClient.delete(`/api/v1/gateway/${id}`),
 };
 
-export const aiAPI = {
-  sendMessage: (message: string) => apiClient.post('/api/v1/ai/assistant/chat', { message })
-};
+// Supprime : aucun ecran n'appelait /api/v1/ai/assistant/chat, qui repond 501.
+// Maintenir cette methette aurait fait croire a un assistant IA disponible.
+
 
 // â”€â”€â”€ Service Accostage (Acconage) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const acconageAPI = {
