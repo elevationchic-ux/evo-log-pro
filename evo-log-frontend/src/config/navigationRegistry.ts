@@ -1894,16 +1894,12 @@ const ADVANCED_SUBMODULES_WAVE2: AdvancedSubModuleEntry[] = [
   { family: 'finance-ohada', label: 'Encaissements Clients', path: '/finance/encaissements', icon: ArrowUpDown, badge: 'Avancé', description: 'Suivi des reglements et encaissements clients', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
   { family: 'finance-ohada', label: 'Réquisitions d’Achat', path: '/finance/requisitions', icon: ShoppingCart, badge: 'Avancé', description: 'Demandes internes d’achat et circuit de validation', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
   { family: 'finance-ohada', label: 'Saisie Transaction Bancaire', path: '/finance/saisie-transaction-bancaire', icon: Banknote, badge: 'Banque', description: 'Saisie et rapprochement des transactions bancaires', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
-  { family: 'finance-ohada', label: 'Vue d’Ensemble Trésorerie', path: '/finance/overview', icon: TrendingUp, badge: 'KPI', description: 'Tableau de bord de synthese de la tresorerie', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
   { family: 'finance-ohada', label: 'Passerelle de Paiement', path: '/gateway', icon: CreditCard, badge: 'Paiement', description: 'Console de la passerelle de paiement et des moyens', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
 
   // 🚧 Parc & Yard  gate/plan absent de /parc-vehicules/*
   { family: 'parc-vehicules', label: 'Contrôle d’Accès (Gate)', path: '/parc/gate', icon: Shield, badge: 'Gate', description: 'Entree/sortie du parc, controle et affectation des emplacements', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PARC', 'MAGASIN'] },
   { family: 'parc-vehicules', label: 'Plan du Parc (Yard Map)', path: '/parc/yard-map', icon: MapPin, badge: 'Yard', description: 'Carte interactive du parc et occupation des zones', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PARC'] },
   { family: 'parc-vehicules', label: 'Zones & Emplacements', path: '/parc/zones', icon: Grid, badge: 'Zonage', description: 'Definition des zones et emplacements du parc', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'PARC'] },
-
-  // 🧑‍💼 RH  congés non couverts par /rh-personnel/*
-  { family: 'rh-personnel', label: 'Gestion des Congés', path: '/rh/conges', icon: Calendar, badge: 'Avancé', description: 'Demandes, validations et suivi des conges du personnel', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'RH'] },
 
   // ⚙️ Consoles transverses
   { family: 'admin-tenant', label: 'Centre de Notifications', path: '/notification-system', icon: Bell, badge: 'System', description: 'Parametres et historique du systeme de notifications', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
