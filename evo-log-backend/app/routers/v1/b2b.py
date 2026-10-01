@@ -79,6 +79,60 @@ def create_quote(
     return quote
 
 
+@router.put("/portal/{company_id}/quotes/{quote_id}")
+def update_quote(
+    company_id: int,
+    quote_id: int,
+    payload: dict = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Decide un devis deja emis : colonne statut de cotations_devis.
+
+    La table etait alimentee mais aucune route ne permettait de la faire
+    evoluer : un devis reste bloque a SOUMIS. Seules les colonnes reellement
+    existantes sont modifiables (statut, marge_nette_pct, notes de grille);
+    tout le reste est refuse plutot qu'ignore silencieusement.
+    """
+    TenantSecurity.check_company_access(current_user, company_id)
+    quote = db.query(CotationDevis).filter(
+        CotationDevis.id == quote_id,
+        CotationDevis.company_id == company_id,
+    ).first()
+    if quote is None:
+        raise HTTPException(status_code=404, detail="Devis introuvable")
+
+    inconnus = set(payload) - {"statut", "marge_nette_pct"}
+    if inconnus:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Champs non modifiables sur un devis: {', '.join(sorted(inconnus))}",
+        )
+
+    if "statut" in payload:
+        statut = str(payload["statut"]).strip().upper()
+        # Domain reel de la colonne (models/new_k_modules.py).
+        if statut not in ("SOUMIS", "ACCEPTE", "REJETE"):
+            raise HTTPException(
+                status_code=422,
+                detail=f"statut inconnu: {statut} (attendu: SOUMIS, ACCEPTE, REJETE)",
+            )
+        quote.statut = statut
+
+    if "marge_nette_pct" in payload:
+        try:
+            marge = float(payload["marge_nette_pct"])
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail="marge_nette_pct doit etre numerique")
+        if marge < 0 or marge > 100:
+            raise HTTPException(status_code=422, detail="marge_nette_pct doit etre entre 0 et 100")
+        quote.marge_nette_pct = marge
+
+    db.commit()
+    db.refresh(quote)
+    return quote
+
+
 @router.get("/portal/{company_id}/chat")
 def get_chat_messages(
     company_id: int,

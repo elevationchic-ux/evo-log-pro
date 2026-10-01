@@ -1923,3 +1923,65 @@ const ADVANCED_SUBMODULES_WAVE3: AdvancedSubModuleEntry[] = [
   { family: 'admin-tenant', label: 'Tiers (clients & fournisseurs)', path: '/tiers', icon: Users, badge: 'Tiers', description: 'Annuaire unifie des tiers : clients, fournisseurs, partenaires', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
 ];
 applyAdvanced(ADVANCED_SUBMODULES_WAVE3);
+
+// ============================================================================
+// RÉSOLVEUR D'IDENTITÉ DE MODULE (source de vérité unique)
+// ----------------------------------------------------------------------------
+// L'identité du module affiché (thème, en-tête, fil d'Ariane, surbrillance
+// sidebar, bulle orbitale) NE DOIT PLUS dépendre du 1er segment de l'URL : de
+// nombreuses familles canoniques câblent leurs sous-modules sous des préfixes
+// legacy (ex. finance-ohada → /finance/billing, admin-tenant → /admin/agencies,
+// superadmin-cadc → /admin/super-admin/*). Une résolution par segment faisait
+// basculer l'écran vers un AUTRE module (« un autre module s'ouvre et tourne »).
+//
+// On résout désormais par PROPRIÉTÉ dans le registre : le chemin enregistré
+// (path de famille OU path de sous-module) dont l'URL correspond avec le
+// PLUS LONG préfixe gagne → la page présente toujours le module qui la liste.
+// L'index est construit paresseusement au premier appel, donc APRES exécution
+// de toutes les ondes d'enrichissement (qui tournent à l'éval du module).
+// ============================================================================
+let _moduleOwnershipIndex: [string, string][] | null = null;
+
+function _normalizeNavPath(p: string): string {
+  return (p || '').split('?')[0].split('#')[0].replace(/\/+$/, '') || '/';
+}
+
+function _buildModuleOwnershipIndex(): [string, string][] {
+  const pairs: [string, string][] = [];
+  for (const [key, fam] of Object.entries(NAVIGATION_REGISTRY)) {
+    const collect = (raw?: string) => {
+      if (!raw) return;
+      const clean = _normalizeNavPath(raw);
+      if (clean && clean !== '/') pairs.push([clean, key]);
+    };
+    collect(fam.path);
+    (fam.subModules || []).forEach((s) => collect(s.path));
+  }
+  // Déduplique (1er gagnant) puis trie par longueur décroissante : le préfixe
+  // le plus spécifique domine (ex. /admin/super-admin/... bat /admin/agencies).
+  const uniq = Array.from(new Map(pairs.map((x) => [x[0], x[1]])));
+  uniq.sort((a, b) => b[0].length - a[0].length);
+  return uniq;
+}
+
+/**
+ * Retourne la clé de famille canonique à laquelle appartient une URL, ou
+ * 'dashboard' en dernier recours. À utiliser partout où l'on dérivait
+ * l'identité d'un module depuis `pathname.split('/')[1]`.
+ */
+export function resolveModuleKeyForPath(pathname: string): string {
+  if (!_moduleOwnershipIndex) _moduleOwnershipIndex = _buildModuleOwnershipIndex();
+  const clean = _normalizeNavPath(pathname || '');
+  if (!clean || clean === '/') return 'dashboard';
+  // (a) correspondance exacte, (b) plus long préfixe à frontière de segment.
+  for (const [p, key] of _moduleOwnershipIndex) {
+    if (clean === p || clean.startsWith(p + '/')) return key;
+  }
+  // (c) fallback : 1er segment → clé de registre, puis alias legacy.
+  const seg = clean.split('/')[1] || '';
+  if (!seg) return 'dashboard';
+  if (NAVIGATION_REGISTRY[seg]) return seg;
+  const aliased = LEGACY_ALIAS[seg];
+  if (aliased && NAVIGATION_REGISTRY[aliased]) return aliased;
+  return 'dashboard';
+}
