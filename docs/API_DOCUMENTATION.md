@@ -16,7 +16,7 @@ Pour les schémas OpenAPI interactifs, la validation des contrats Pydantic et l'
 
 ---
 
-## 🗺️ Cartographie Complète des 19 Routeurs FastAPI
+## 🗺️ Cartographie des Routeurs FastAPI
 
 | Préfixe Routeur | Domaine Métier | Description & Entités associées |
 | --- | --- | --- |
