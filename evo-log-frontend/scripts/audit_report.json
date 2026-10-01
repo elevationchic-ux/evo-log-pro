@@ -3,7 +3,7 @@
     "broken_links": 0,
     "dead_buttons": 0,
     "fake_data": 0,
-    "api_gaps": 32,
+    "api_gaps": 31,
     "ghost_routes": 0
   },
   "modules": {
@@ -155,10 +155,6 @@
         {
           "file": "lib/api-client.ts",
           "detail": "/api/v1/k-modules/bi-analytics/executive-summary"
-        },
-        {
-          "file": "lib/api-client.ts",
-          "detail": "/api/v1/k-modules/compliance/audits"
         },
         {
           "file": "lib/api-client.ts",
