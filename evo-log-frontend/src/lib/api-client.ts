@@ -942,8 +942,26 @@ export const complianceAPI = {
 };
 
 // ─── Service BI & Analytics Executive ──────────────────────────────────────────
+// /k-modules/bi-analytics/executive-summary repondait 501 et aucune table
+// « KPI executive » n'existe : la synthese est donc calculee a la volee depuis
+// les aggregats reels de chaque module. Un module dont la KPI échoue vaut 0
+// reel (les endpoints backend ne fabriquent jamais de valeur par defaut) : la
+// synthese n'invente rien.
 export const biAnalyticsAPI = {
-  getSummary: () => apiClient.get('/api/v1/k-modules/bi-analytics/executive-summary'),
+  getSummary: async () => {
+    const [fin, trans, mag, port] = await Promise.all([
+      financeAPI.getKpis().catch(() => null),
+      transportAPI.getKpis().catch(() => null),
+      magasinAPI.getKpis().catch(() => null),
+      apiClient.get('/api/v1/port-performance/kpis').catch(() => null),
+    ]);
+    return {
+      finance: fin?.data ?? null,
+      transport: trans?.data ?? null,
+      magasin: mag?.data ?? null,
+      port: port?.data ?? null,
+    };
+  },
 };
 
 // ─── Service Support & Litiges ──────────────────────────────────────────
