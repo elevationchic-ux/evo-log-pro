@@ -173,6 +173,38 @@ export const MODULE_PALETTE: Record<string, ModulePaletteEntry> = {
     bgGradient: 'from-rose-600 to-red-700',
     sidebar: { activeAccent: 'text-rose-500 border-rose-500', activeBgSubtle: 'bg-rose-600/10', brandIconBg: 'bg-rose-700' },
   },
+  'portail-commercial': {
+    hex: '#F59E0B',
+    glow: 'shadow-amber-500/50 border-amber-500/60',
+    bgGradient: 'from-amber-500 to-yellow-600',
+    sidebar: { activeAccent: 'text-amber-400 border-amber-400', activeBgSubtle: 'bg-amber-500/10', brandIconBg: 'bg-amber-600' },
+  },
+
+  // ── Ecrans autonomes sans module majeur ──
+  // Ces 3 cles etaient absentes de la palette ET des alias : getModulePalette()
+  // retombait sur « dashboard » (indigo). Le header, la sidebar, le dropdown et
+  // la bulle orbitale affichaient donc la couleur d'un autre module alors que la
+  // page elle-meme etait coloree autrement — violation de la regle « une couleur
+  // par module ». Les teintes ci-dessous reprennent celles declarees par le
+  // registre de navigation, qui devient aligne sur ce fichier.
+  'annuaire-prestataires': {
+    hex: '#D97706',
+    glow: 'shadow-amber-500/50 border-amber-500/60',
+    bgGradient: 'from-amber-600 to-yellow-600',
+    sidebar: { activeAccent: 'text-amber-500 border-amber-500', activeBgSubtle: 'bg-amber-600/10', brandIconBg: 'bg-amber-700' },
+  },
+  'chef-personnel': {
+    hex: '#059669',
+    glow: 'shadow-emerald-500/50 border-emerald-500/60',
+    bgGradient: 'from-emerald-600 to-teal-600',
+    sidebar: { activeAccent: 'text-emerald-500 border-emerald-500', activeBgSubtle: 'bg-emerald-600/10', brandIconBg: 'bg-emerald-700' },
+  },
+  'departement': {
+    hex: '#0EA5E9',
+    glow: 'shadow-sky-500/50 border-sky-500/60',
+    bgGradient: 'from-sky-600 to-cyan-600',
+    sidebar: { activeAccent: 'text-sky-400 border-sky-400', activeBgSubtle: 'bg-sky-500/10', brandIconBg: 'bg-sky-600' },
+  },
 };
 
 /** Alias legacy → module majeur de la palette (hérite de sa couleur). */

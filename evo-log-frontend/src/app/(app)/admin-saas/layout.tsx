@@ -20,10 +20,11 @@ export default function AdminSaasLayout({ children }: { children: React.ReactNod
   const { user, loading } = useAuth();
 
   const isSuperAdmin = Boolean(
-    (user as any)?.is_superuser ||
+    (user as any)?.isSuperuser ||
+    Number((user as any)?.roleLevel ?? 9) === 0 ||
     user?.roles?.some((r) => {
       const u = (r || '').toUpperCase();
-      return u === 'SUPER_ADMIN' || u === 'SUPERADMIN';
+      return u === 'SUPER_ADMIN' || u === 'SUPERADMIN' || u === 'CADC';
     })
   );
 
