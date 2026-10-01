@@ -2,8 +2,8 @@
 
 - Genere le : 2026-10-01
 - Total pages scannees : 348
-- Pages branchees sur le backend : 305
-- Pages encore statiques : 43
+- Pages branchees sur le backend : 308
+- Pages encore statiques : 40
 
 ## Pages statiques
 
@@ -16,8 +16,6 @@
 | `/admin/journal` | non (vitrine/maintenance) | - |
 | `/admin-tenant/dashboard` | non (vitrine/maintenance) | - |
 | `/admin-tenant/global-settings` | non (vitrine/maintenance) | - |
-| `/bi/margins` | non (vitrine/maintenance) | - |
-| `/compliance/audits` | non (vitrine/maintenance) | - |
 | `/cotations/calculateur` | non (vitrine/maintenance) | - |
 | `/dashboard` | non (vitrine/maintenance) | - |
 | `/dashboard/process-flow` | non (vitrine/maintenance) | - |
@@ -28,7 +26,6 @@
 | `/paiement-local` | non (vitrine/maintenance) | - |
 | `/port-operations/dashboard` | non (vitrine/maintenance) | - |
 | `/portail-collaborateur` | non (vitrine/maintenance) | - |
-| `/procurement/orders` | non (vitrine/maintenance) | - |
 | `/reports/bibliotheque-modeles-enregistres` | non (vitrine/maintenance) | - |
 | `/reports/custom` | non (vitrine/maintenance) | - |
 | `/reports/generateur-rapports-personnalises` | non (vitrine/maintenance) | - |
