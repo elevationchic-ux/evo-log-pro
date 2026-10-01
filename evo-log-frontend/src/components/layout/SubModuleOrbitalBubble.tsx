@@ -105,9 +105,13 @@ export default function SubModuleOrbitalBubble() {
   }, [isSuperUser]);
 
   // Résolution du module actif à partir du pathname (pour colorer la bulle).
+  // Via la PROPRIÉTÉ registre : cohérent avec sidebar/en-tête même sous préfixe
+  // legacy ; retombée 'dashboard' (ou 1er module visible) si non rattaché.
+  const resolvedModuleKey = resolveModuleKeyForPath(pathname);
   const activeModuleKey =
-    Object.keys(NAVIGATION_REGISTRY).find((k) => k !== "dashboard" && pathname.startsWith(`/${k}`)) ||
-    (pathname.startsWith("/dashboard") || pathname === "/" ? "dashboard" : filteredNav[0]?.key);
+    resolvedModuleKey !== "dashboard" && NAVIGATION_REGISTRY[resolvedModuleKey]
+      ? resolvedModuleKey
+      : (pathname.startsWith("/dashboard") || pathname === "/" ? "dashboard" : filteredNav[0]?.key);
 
   const activeOrbit =
     filteredNav.find((m) => m.key === activeModuleKey) || filteredNav[0] || NAVIGATION_REGISTRY.dashboard;

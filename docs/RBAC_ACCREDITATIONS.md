@@ -231,3 +231,42 @@ Migrations chaînées de façon linéaire : `020_rbac_granulaire_accreditations`
 `020_add_gap_bridge_tables` (tête unique vérifiée). Gardes idempotents par
 introspection (`sa.inspect`) + `batch_alter_table` (SQLite) ; seed en try/except pour
 ne jamais bloquer un déploiement.
+
+---
+
+## 12. Gouvernance multi-niveaux SaaS (Phases 1-4)
+
+Brique transversale au-dessus du RBAC granulaire : une **échelle de
+`role_level`** à quatre cran, matérialisée par trois routers dédiés, avec une
+**double garde** (backend + filtrage de navigation frontend par `role_level`)
+garantissant l'**invisibilité** d'un niveau supérieur pour un niveau inférieur.
+
+| Niv. | Profil | Router (garde) | Portée |
+| --- | --- | --- | --- |
+| `0` | Super-Admin **CADC** | `saas_console` (`require_superadmin`) | Multi-tenant global : entreprises, plans/`max_modules`, allocation modules, accréditations, prestataires. |
+| `1` | **Admin Entreprise** | `company_admin` (`require_company_admin` + scope `company_id`) | Son entreprise uniquement ; modules = alloués ∩ plan, le reste « verrouillé ». |
+| `2` | **Chef de département** | `chef_departement` (scope `department_id`) | Son département : roster, planning, présence. |
+| `3` | **Collaborateur** | Hub par défaut `/portail-collaborateur` | Ce qui le concerne + modules autorisés, sauf accréditation du chef. |
+
+### Utilisateur ≠ Rôle (beaucoup-à-beaucoup)
+
+Le **rôle prime sur l'utilisateur** pour l'accès (§2/§3). Un `User` n'est plus
+confondu avec sa casquette : il porte une **identité employé** (`matricule`,
+`job_title`) indépendante de ses **`roles`** (via la table `user_roles`).
+
+- `PUT /api/v1/admin/users/{id}/roles` remplace l'ensemble des casquettes d'un
+  utilisateur. `User.role_level` est **re-dérivé** comme le `level` **minimal** des
+  rôles accordés (le plus privilégié l'emporte).
+- **Anti-escalade** : un acteur qui n'est pas Super-Admin ne peut ni accorder
+  `SUPER_ADMIN`, ni un rôle de niveau inférieur au sien (→ `403`). Les niveaux 0/1
+  continuent de bypasser la granularité dans `can()` (§3).
+- Les rôles standard (`STANDARD_ROLES`) absents de la table `roles` sont
+  matérialisés à la volée (get-or-create) pour que l'affectation reste effective
+  même sans seed préalable.
+
+### Présence rattachée au niveau 3
+
+La pointe d'arrivée automatique (§ Phase 4) ne s'écrit **que** pour un utilisateur de
+niveau 3 rattaché à un département, en **meilleure effort** et idempotente par jour ;
+elle ne modifie en rien la résolution des permissions (le `PointageVacation` reste une
+donnée RH, pas un droit d'accès).

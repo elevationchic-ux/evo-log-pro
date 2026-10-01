@@ -5,7 +5,7 @@ from typing import List
 from datetime import datetime, date
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.permissions import require_perm
 from app.models.user import User
 from app.schemas.acconage import (
     NavireCreate, NavireResponse, EscaleCreate, EscaleUpdate, EscaleResponse,
@@ -35,7 +35,7 @@ router = APIRouter(tags=["Acconage"])  # monte sur /api/v1/acconage-avance par m
 def creer_navire(
     navire: NavireCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.navire.create"))
 ):
     """Create ship/vessel record"""
     n = Navire(**navire.model_dump())
@@ -48,7 +48,7 @@ def creer_navire(
 @router.get("/navires", response_model=List[NavireResponse])
 def lister_navires(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.navire.read"))
 ):
     """List all ships"""
     return db.query(Navire).filter(Navire.is_active == True).all()
@@ -58,7 +58,7 @@ def lister_navires(
 def obtenir_navire(
     navire_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.navire.read"))
 ):
     """Get ship by ID"""
     navire = db.query(Navire).filter(Navire.id == navire_id).first()
@@ -73,7 +73,7 @@ def lister_escales(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.escale.read"))
 ):
     """List port calls with resolved ship name"""
     escales = db.query(Escale).order_by(Escale.id.desc()).offset(skip).limit(min(limit, 500)).all()
@@ -104,7 +104,7 @@ def lister_escales(
 def creer_escale(
     escale: EscaleCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.escale.create"))
 ):
     """Create port call/berth (resolves or registers the ship by name)"""
     import random
@@ -137,7 +137,7 @@ def mettre_a_jour_escale(
     escale_id: int,
     escale: EscaleUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.escale.modify"))
 ):
     """Update port call"""
     e = db.query(Escale).filter(Escale.id == escale_id).first()
@@ -156,7 +156,7 @@ def mettre_a_jour_escale(
 def rapport_escale(
     escale_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.escale.read"))
 ):
     """Generate complete port call report"""
     return AcconageReportingService.rapport_escale(db, escale_id)
@@ -167,7 +167,7 @@ def rapport_escale(
 def creer_stowage_plan(
     plan: StowagePlanCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.stowage.create"))
 ):
     """Create stowage plan for container positioning"""
     return StowagePlanService.creer_stowage_plan(
@@ -180,7 +180,7 @@ def ajouter_position_conteneur(
     plan_id: int,
     position: PositionConteneurCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.stowage.modify"))
 ):
     """Add container position to stowage plan"""
     return StowagePlanService.ajouter_position_conteneur(
@@ -195,7 +195,7 @@ def ajouter_position_conteneur(
 def valider_stowage_plan(
     plan_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.stowage.approve"))
 ):
     """Validate stowage plan"""
     return StowagePlanService.valider_stowage_plan(db, plan_id)
@@ -206,7 +206,7 @@ def valider_stowage_plan(
 def creer_grue(
     grue: GrueCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.moyen.create"))
 ):
     """Create crane/handling equipment"""
     return GrueService.creer_grue(
@@ -220,7 +220,7 @@ def mettre_a_jour_grue(
     grue_id: int,
     grue: GrueUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.moyen.modify"))
 ):
     """Update crane status"""
     g = db.query(Grue).filter(Grue.id == grue_id).first()
@@ -239,7 +239,7 @@ def mettre_a_jour_grue(
 def reserver_grue(
     reservation: ReservationGrueCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.reservation.create"))
 ):
     """Reserve crane for operation"""
     return GrueService.reserver_grue(
@@ -253,7 +253,7 @@ def obtenir_grues_disponibles(
     date_debut: datetime,
     date_fin: datetime,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.moyen.read"))
 ):
     """Get available cranes for time period"""
     return GrueService.obtenir_grues_disponibles(db, date_debut, date_fin)
@@ -264,7 +264,7 @@ def obtenir_grues_disponibles(
 def creer_remorqueur(
     remorqueur: RemorqueurCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.moyen.create"))
 ):
     """Create tugboat"""
     return RemorqueurService.creer_remorqueur(
@@ -278,7 +278,7 @@ def mettre_a_jour_remorqueur(
     remorqueur_id: int,
     remorqueur: RemorqueurUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.moyen.modify"))
 ):
     """Update tugboat"""
     r = db.query(Remorqueur).filter(Remorqueur.id == remorqueur_id).first()
@@ -297,7 +297,7 @@ def mettre_a_jour_remorqueur(
 def enregistrer_amarage(
     amarage: AmarageCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.escale.modify"))
 ):
     """Record berthing operation"""
     return RemorqueurService.enregistrer_amarage(
@@ -311,7 +311,7 @@ def enregistrer_amarage(
 def creer_conteneur(
     conteneur: ConteneurCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.conteneur.create"))
 ):
     """Create container record"""
     return ConteneurService.creer_conteneur(
@@ -326,7 +326,7 @@ def enregistrer_inspection_phasanitaire(
     conteneur_id: int,
     conforme: bool,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.conteneur.modify"))
 ):
     """Record phytosanitary inspection"""
     return ConteneurService.enregistrer_inspection_phasanitaire(db, conteneur_id, conforme)
@@ -337,7 +337,7 @@ def enregistrer_inspection_phasanitaire(
 def emettre_connaissement(
     bl: ConnaissementCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.connaissement.create"))
 ):
     """Issue Bill of Lading"""
     return ConnaissementService.emettre_connaissement(
@@ -352,7 +352,7 @@ def mettre_a_jour_connaissement(
     bl_id: int,
     bl: ConnaissementUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.connaissement.modify"))
 ):
     """Update Bill of Lading"""
     b = db.query(Connaissement).filter(Connaissement.id == bl_id).first()
@@ -372,7 +372,7 @@ def mettre_a_jour_connaissement(
 def creer_packing_list(
     pl: PackingListCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.packing_list.create"))
 ):
     """Create packing list entry"""
     return PackingListService.creer_packing_list(
@@ -388,7 +388,7 @@ def lister_manifestes(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.manifeste.read"))
 ):
     """List cargo manifests"""
     manifestes = db.query(Manifeste).order_by(Manifeste.id.desc()).offset(skip).limit(min(limit, 500)).all()
@@ -418,7 +418,7 @@ def lister_manifestes(
 def creer_manifeste(
     manifeste: ManifesteCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.manifeste.create"))
 ):
     """Create cargo manifest"""
     return ManifesteService.creer_manifeste(
@@ -434,7 +434,7 @@ def ajouter_marchandise_dangereuse(
     manifeste_id: int,
     md: MarchandiseDangereuseCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.manifeste.modify"))
 ):
     """Add dangerous goods declaration"""
     return ManifesteService.ajouter_marchandise_dangereuse(
@@ -448,7 +448,7 @@ def mettre_a_jour_manifeste(
     manifeste_id: int,
     manifeste: ManifesteUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.manifeste.modify"))
 ):
     """Update manifest"""
     m = db.query(Manifeste).filter(Manifeste.id == manifeste_id).first()
@@ -468,7 +468,7 @@ def mettre_a_jour_manifeste(
 def calculer_surestarie(
     surestarie: SurestarieCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.frais.create"))
 ):
     """Calculate demurrage charges"""
     return SurestarieService.calculer_surestarie(
@@ -481,7 +481,7 @@ def calculer_surestarie(
 def obtenir_surestaries_encours(
     escale_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.frais.read"))
 ):
     """Get pending demurrage charges for port call"""
     return SurestarieService.obtenir_surestaries_encours(db, escale_id)
@@ -492,7 +492,7 @@ def mettre_a_jour_surestarie(
     surestarie_id: int,
     surestarie: SurestarieUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.frais.modify"))
 ):
     """Update demurrage status"""
     s = db.query(Surestarie).filter(Surestarie.id == surestarie_id).first()
@@ -512,7 +512,7 @@ def mettre_a_jour_surestarie(
 def appliquer_thc(
     thc: THCCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.frais.create"))
 ):
     """Apply Terminal Handling Charge"""
     return THCService.appliquer_thc(
@@ -526,7 +526,7 @@ def mettre_a_jour_thc(
     thc_id: int,
     thc: THCUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.frais.modify"))
 ):
     """Update THC status"""
     t = db.query(TerminalHandlingCharge).filter(TerminalHandlingCharge.id == thc_id).first()
@@ -546,7 +546,7 @@ def mettre_a_jour_thc(
 def enregistrer_nettoyage(
     nettoyage: NettoyageCaleCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.nettoyage.create"))
 ):
     """Record hold cleaning operation"""
     return NettoyageCaleService.enregistrer_nettoyage(
@@ -562,7 +562,7 @@ def completer_nettoyage(
     inspecteur_id: int,
     observations: str = "",
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.nettoyage.modify"))
 ):
     """Complete hold cleaning with inspection"""
     return NettoyageCaleService.completer_nettoyage(
@@ -603,7 +603,7 @@ def affecter_docker_temporaire(
     escale_id: int,
     payload: DockerTemporaireCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.dockers.create"))
 ):
     """Assign temporary external docker to an escale shift.
     Access automatically expires when escale.statut becomes TERMINE."""
@@ -649,7 +649,7 @@ def affecter_docker_temporaire(
 def lister_dockers_temporaires(
     escale_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.dockers.read"))
 ):
     """List all temporary dockers for an escale. Expired automatically when escale is TERMINE."""
     escale = db.query(Escale).filter(Escale.id == escale_id).first()
@@ -677,7 +677,7 @@ def modifier_docker_temporaire(
     docker_id: int,
     payload: DockerTemporaireUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.dockers.modify"))
 ):
     """Update temporary docker record (shift, EPI status, daily rate, observations)"""
     try:
@@ -702,7 +702,7 @@ def modifier_docker_temporaire(
 def retirer_docker_temporaire(
     docker_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.dockers.delete"))
 ):
     """Remove temporary docker from current escale assignment"""
     try:
@@ -720,7 +720,7 @@ def retirer_docker_temporaire(
 def cloturer_dockers_escale(
     escale_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("acconage.dockers.approve"))
 ):
     """Expire ALL temporary dockers when escale is closed. Called automatically on escale TERMINE."""
     try:
