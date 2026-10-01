@@ -773,6 +773,12 @@ export const rhAPI = {
       : apiClient.put(`/api/rh/conges/${id}/rejeter`, null, { params: { motif_refus: commentaire } }),
   getPaie: (params?: Record<string, unknown>) => apiClient.get('/api/rh/paie/bulletin', { params }),
   createFichePaie: (data: unknown) => apiClient.post('/api/rh/paie/bulletin', data),
+  // Registre des emargements (PointageVacation) expose par le module Chef du
+  // Personnel : GET /api/v1/chef-personnel/pointages, reserve RH/DRH/Direction.
+  getPointages: (datePointage?: string) =>
+    apiClient.get('/api/chef-personnel/pointages', {
+      params: datePointage ? { date_pointage: datePointage } : {},
+    }),
   importEmployesExcel: (data: FormData) => apiClient.post('/api/rh/employes/import-excel', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
