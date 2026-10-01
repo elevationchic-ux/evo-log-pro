@@ -28,7 +28,9 @@ def user(db):
 def authed(client, user):
     app.dependency_overrides[get_current_user] = lambda: user
     yield client
-    app.dependency_overrides.clear()
+    # Pop cible (contrat conftest) : jamais clear(), qui emporterait aussi
+    # l'override get_db de la fixture client.
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 # --------------------------------------------------------------------------- #

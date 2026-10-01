@@ -923,7 +923,6 @@ export const trackingAPI = {
 export const procurementAPI = {
   getOrders: (params?: Record<string, unknown>) =>
     apiClient.get('/api/v1/acquisition/bons-commande', { params }),
-  getOrder: (id: number) => apiClient.get(`/api/v1/acquisition/bons-commande/${id}`),
   createOrder: (data: unknown) => apiClient.post('/api/v1/acquisition/bons-commande', data),
   updateOrder: (id: number, data: unknown) => apiClient.put(`/api/v1/acquisition/bons-commande/${id}`, data),
   validateOrder: (id: number) => apiClient.put(`/api/v1/acquisition/bons-commande/${id}/valider`),

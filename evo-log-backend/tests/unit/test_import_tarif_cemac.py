@@ -106,12 +106,25 @@ def _brancher_auth():
     from app.main import app
 
     class _U:
+        # Meme contrat que le faux super-utilisateur du conftest : un vrai
+        # User ORM porte is_superuser (colonne); le fake doit l'avoir aussi.
         id = 1
         username = "douanier"
+        is_active = True
+        is_superuser = True
+        role_level = 0
         company_id = None
 
     app.dependency_overrides[get_current_user] = lambda: _U()
     return app
+
+
+def _debrancher_auth():
+    # Pop cible (contrat conftest) : jamais clear(), qui emporterait aussi
+    # l'override get_db de la fixture client.
+    from app.core.security import get_current_user
+    from app.main import app
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 def test_put_taux_refuse_sans_provenance(client, db):
@@ -127,7 +140,7 @@ def test_put_taux_refuse_sans_provenance(client, db):
                        json={"taux_dd": 5})
         assert r.status_code == 400   # pas de source_reference -> refus
     finally:
-        app.dependency_overrides.clear()
+        _debrancher_auth()
 
 
 def test_put_taux_avec_provenance_et_liste(client, db):
@@ -149,4 +162,4 @@ def test_put_taux_avec_provenance_et_liste(client, db):
         assert lst.status_code == 200, lst.text
         assert any(x["code_hs"] == "85176210" for x in lst.json())
     finally:
-        app.dependency_overrides.clear()
+        _debrancher_auth()
