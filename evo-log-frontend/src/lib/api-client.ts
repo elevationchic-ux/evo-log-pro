@@ -835,7 +835,7 @@ export const gatewayAPI = {
 };
 
 // Supprime : aucun ecran n'appelait /api/v1/ai/assistant/chat, qui repond 501.
-// Maintenir cette methette aurait fait croire a un assistant IA disponible.
+// Garder cette methode aurait fait croire a un assistant IA disponible.
 
 
 // â”€â”€â”€ Service Accostage (Acconage) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
