@@ -916,9 +916,17 @@ export const trackingAPI = {
 // carburant reels via transportAPI.getFuel() (/api/v1/transport/fuel).
 
 // ─── Service Procurement & Achats ──────────────────────────────────────────
+// Registre reel : table bons_commande (router acquisition). L'ancien
+// /k-modules/procurement/orders repondait 501. Contrat de creation
+// (BonCommandeCreate) : numero_bc, fournisseur_id, date_prevue_livraison,
+// destinataire, lieu_livraison, conditions_paiement, notes.
 export const procurementAPI = {
-  getOrders: () => apiClient.get('/api/v1/k-modules/procurement/orders'),
-  createOrder: (data: unknown) => apiClient.post('/api/v1/k-modules/procurement/orders', data),
+  getOrders: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/acquisition/bons-commande', { params }),
+  getOrder: (id: number) => apiClient.get(`/api/v1/acquisition/bons-commande/${id}`),
+  createOrder: (data: unknown) => apiClient.post('/api/v1/acquisition/bons-commande', data),
+  updateOrder: (id: number, data: unknown) => apiClient.put(`/api/v1/acquisition/bons-commande/${id}`, data),
+  validateOrder: (id: number) => apiClient.put(`/api/v1/acquisition/bons-commande/${id}/valider`),
 };
 
 // ─── Service Compliance & Réglementation ──────────────────────────────────────────

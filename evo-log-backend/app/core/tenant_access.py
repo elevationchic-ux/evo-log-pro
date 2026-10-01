@@ -46,7 +46,7 @@ def can_access_module(user: Optional[User], module_name: str) -> bool:
     """Check whether a user may access a module within their company and department."""
     if user is None:
         return False
-    # getattr:defensif : un vrai User ORM porte toujours is_superuser (colonne),
+    # getattr() defensif : un vrai User ORM porte toujours is_superuser (colonne),
     # mais les identites de test duck-typées peuvent l'omettre -> pas de crash.
     if getattr(user, "is_superuser", False):
         return True
@@ -72,7 +72,7 @@ def can_access_module(user: Optional[User], module_name: str) -> bool:
 def ensure_company_scope(user: User, company_id: Optional[int], *, allow_none: bool = False):
     if company_id is None and allow_none:
         return
-    if user.is_superuser:
+    if getattr(user, "is_superuser", False):
         return
     if company_id is None or user.company_id != company_id:
         raise HTTPException(

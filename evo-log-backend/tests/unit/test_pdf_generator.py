@@ -194,8 +194,12 @@ def test_endpoint_facture_pdf(client, db):
             assert resp.status_code == 501
             assert "PDF" in resp.json()["detail"]
     finally:
+        # Pop cible (contrat conftest) : clear() emporterait l'override
+        # get_db de la fixture et les requetes suivantes toucheraient la
+        # base reelle. On ne retire que l'identite qu'on a injectee.
+        from app.core.security import get_current_user
         from app.main import app
-        app.dependency_overrides.clear()
+        app.dependency_overrides.pop(get_current_user, None)
 
 
 def test_endpoint_facture_pdf_exige_auth(unauthenticated):

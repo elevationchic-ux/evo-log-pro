@@ -118,4 +118,6 @@ def test_routeur_factures_sans_numero_delivre_sequence_legale(client, db):
         assert r2.status_code == 201, r2.text
         assert r2.json()["numero_facture"] == "FAC-2026-0002"
     finally:
-        app.dependency_overrides.clear()
+        # Pop cible (contrat conftest) : jamais clear(), qui emporterait
+        # aussi l'override get_db de la fixture client.
+        app.dependency_overrides.pop(get_current_user, None)
