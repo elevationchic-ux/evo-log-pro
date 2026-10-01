@@ -91,8 +91,8 @@ def update_quote(
 
     La table etait alimentee mais aucune route ne permettait de la faire
     evoluer : un devis reste bloque a SOUMIS. Seules les colonnes reellement
-    existantes sont modifiables (statut, marge_nette_pct, notes de grille);
-    tout le reste est refuse plutot qu'ignore silencieusement.
+    existantes sont modifiables (statut, marge_nette_pct) ; toute autre cle
+    est refusee plutot qu'ignoree silencieusement.
     """
     TenantSecurity.check_company_access(current_user, company_id)
     quote = db.query(CotationDevis).filter(

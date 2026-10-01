@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { MODULE_PALETTE, getModulePalette } from '@/config/modulePalette';
+import { resolveModuleKeyForPath } from '@/config/navigationRegistry';
 
 const VALID_MODULES = [
   // Modules principaux de l'architecture ERP portuaire
@@ -304,8 +305,10 @@ export function useModuleTheme() {
   const pathname = usePathname();
 
   const currentModule = useMemo((): string => {
-    const seg = pathname.split('/')[1] || 'dashboard';
-    return VALID_MODULES.includes(seg as any) ? seg : 'dashboard';
+    // Identité résolue par PROPRIÉTÉ dans le registre (et non par le 1er
+    // segment d'URL) : une page listée sous une famille canonique reste dans
+    // cette famille, même si son URL est sous un préfixe legacy.
+    return resolveModuleKeyForPath(pathname);
   }, [pathname]);
 
   const theme = MODULE_THEME_CONFIG[currentModule] || DEFAULT_THEME;
