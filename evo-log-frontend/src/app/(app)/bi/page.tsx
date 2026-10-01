@@ -165,7 +165,8 @@ export default function BiAnalyticsPage() {
 
       <p className="text-xs text-slate-500">
         {t(
-          « Aucune marge ni rentabilité n'est calculée ici : l'ERP ne stocke pas de revenu par mission, seulement un coût estimé et un coût réel. » /!\
+          "Aucune marge n'est affichée : l'ERP ne stocke pas de revenu par mission, seulement un coût estimé et un coût réel. L'écran « Écarts de coûts » travaille sur ces deux colonnes.",
+          'No margin is shown: the ERP does not store revenue per mission, only an estimated cost and an actual cost. The “Cost variances” screen works on those two columns.'
         )}
       </p>
     </div>
