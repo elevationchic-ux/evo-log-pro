@@ -112,5 +112,53 @@ export const MODULE_NAMES: Record<string, string> = {
   'fiscalite-cameroun': 'Fiscalité Cameroun', 'paiement-local': 'Paiements Locaux',
 };
 
+// ── Clés canoniques des familles du registre ───────────────────────────────
+// getModuleName/getModuleIcon/getModuleColor n'étaient indexés que par les noms
+// LEGACY (finance, rh, parc…). Le résolveur d'identité (navigationRegistry)
+// renvoie désormais les clés canoniques (finance-ohada, rh-personnel…). On
+// ajoute libellés, icônes et couleurs pour que l'en-tête reste cohérent.
+const CANONICAL_NAMES: Record<string, string> = {
+  'port-operations': 'Opérations Portuaires & Quai',
+  'transit-douane': 'Transit & Douane CEMAC',
+  'transport-flotte': 'K-Transport & Flotte TMS',
+  'magasin-stock': 'K-Magasin WMS & Stock',
+  'comptabilite-ohada': 'Comptabilité OHADA',
+  'finance-ohada': 'K-Finance & Trésorerie',
+  'parc-vehicules': 'K-Parc Véhicules & GMAO',
+  'rh-personnel': 'Ressources Humaines & Paie',
+  'qhse-securite': 'K-QHSE & Sécurité Portuaire',
+  'client-b2b': 'Portail Client B2B & CRM',
+  'reports-bi': 'K-Analytics BI Executive',
+  'admin-saas': 'Gouvernance Plateforme SaaS',
+  'superadmin-cadc': 'Console Super-Admin CADC',
+  'admin-tenant': "Administration de l'Entreprise",
+};
+const CANONICAL_ICONS: Record<string, string> = {
+  'port-operations': '🚢', 'transit-douane': '🛃', 'transport-flotte': '🚛',
+  'magasin-stock': '📦', 'comptabilite-ohada': '📚', 'finance-ohada': '💰',
+  'parc-vehicules': '🚗', 'rh-personnel': '👥', 'qhse-securite': '🛡️',
+  'client-b2b': '🤝', 'reports-bi': '📊', 'admin-saas': '👑',
+  'superadmin-cadc': '👑', 'admin-tenant': '🏢',
+};
+// Couleur canonique → objet legacy du domaine le plus proche (mêmes 6 nuances).
+const CANONICAL_COLOR_ALIAS: Record<string, string> = {
+  'port-operations': 'acconage', 'transit-douane': 'transit', 'transport-flotte': 'transport',
+  'magasin-stock': 'magasin', 'comptabilite-ohada': 'parc', 'finance-ohada': 'finance',
+  'parc-vehicules': 'maintenance', 'rh-personnel': 'rh', 'qhse-securite': 'qhse',
+  'client-b2b': 'client-portal', 'reports-bi': 'bi', 'admin-saas': 'admin',
+  'superadmin-cadc': 'cotations', 'admin-tenant': 'admin',
+};
+Object.assign(MODULE_NAMES, CANONICAL_NAMES);
+Object.assign(MODULE_ICONS, CANONICAL_ICONS);
+for (const [canon, legacy] of Object.entries(CANONICAL_COLOR_ALIAS)) {
+  if (MODULE_COLORS[legacy] && !MODULE_COLORS[canon]) MODULE_COLORS[canon] = MODULE_COLORS[legacy];
+}
+
 export const getModuleColor = (module: string): ModuleColorConfig =>
   MODULE_COLORS[module] || MODULE_COLORS.auth;
+
+export const getModuleIcon = (module: string): string =>
+  MODULE_ICONS[module] || '📋';
+
+export const getModuleName = (module: string): string =>
+  MODULE_NAMES[module] || 'Module';

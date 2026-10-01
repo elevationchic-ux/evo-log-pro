@@ -197,13 +197,14 @@ def test_operateur_403_sur_cloture_dockers(client_operateur):
     assert r.status_code == 403, r.text
 
 
-def test_operateur_200_sur_reservation_grue(client_operateur):
+def test_operateur_accede_a_la_porte_reservation_grue(client_operateur):
     # Reservation d'execution : l'operateur la porte (reservation.create).
     # Sans corps valide le handler repondrait 422 ; ici on verifie d'abord que
-    # LA PORTE n'est pas fermee : statut != 403.
+    # LA PORTE n'est pas fermee : ni 403 (droit refuse) ni 500 (crash).
     r = client_operateur.post(f"{BASE}/grues/reservations", json={})
-    assert r.status_code != 403, (
-        "reservation.create doit etre accessible a l'operateur, pas refuse")
+    assert r.status_code in (200, 201, 400, 404, 422), (
+        f"reservation.create doit etre accessible a l'operateur, "
+        f"reel={r.status_code} : {r.text[:200]}")
 
 
 def test_transit_principal_200_lecture_403_ecriture(client_transit):
