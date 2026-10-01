@@ -108,10 +108,10 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
     color: m.color,
     subModules: m.subModules,
   }))
+  const activeModuleKey = resolveModuleKeyForPath(pathname)
   const isModuleActive = (path: string) => {
-    const seg = path.split('/')[1]
-    if (!seg) return false
-    return pathname === `/${seg}` || pathname.startsWith(`/${seg}/`)
+    const key = resolveModuleKeyForPath(path)
+    return key === activeModuleKey
   }
 
 
@@ -324,9 +324,11 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                                 aria-selected={active}
                                 onClick={() => {
                                   setIsModuleMenuOpen(false);
-                                  const currentRoot = pathname ? pathname.replace(/^\/+/, '').split('/')[0] : '';
-                                  const targetRoot = m.path ? m.path.replace(/^\/+/, '').split('/')[0] : '';
-                                  if (currentRoot && targetRoot && currentRoot !== targetRoot) {
+                                  // Transition (1,7 s) seulement pour un vrai
+                                  // changement de module, pas un changement de
+                                  // préfixe legacy au sein du même module.
+                                  const targetKey = resolveModuleKeyForPath(m.path);
+                                  if (activeModuleKey && targetKey && activeModuleKey !== targetKey) {
                                     triggerDomainTransition(m.path, 1700);
                                   } else {
                                     router.push(m.path);
