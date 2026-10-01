@@ -50,7 +50,7 @@ DOMAINS: Dict[str, Dict] = {
         "label": "Operations portuaires & logistiques",
         "modules": {
             # Batch 23 : sous-modules dedies a l'activite reelle du quai
-            # (navires, arrimage, moyens, reservisons, connaissements, frais
+            # (navires, arrimage, moyens, reservations, connaissements, frais
             # portuaires, dockers) — les plaquer sur « escale » aurait ete du
             # bricolage et un wildcard acconage.*.* sans nuance.
             "acconage": {"label": "Acconage", "sub_modules": {"escale": ACTIONS, "manifeste": ["read", "create", "modify"], "stevedoring": ACTIONS, "navire": ["read", "create", "modify"], "stowage": ["create", "modify", "approve"], "moyen": ["read", "create", "modify"], "reservation": ["create", "modify"], "conteneur": ["create", "modify"], "connaissement": ["create", "modify"], "packing_list": ["create"], "frais": ["read", "create", "modify"], "nettoyage": ["create", "modify"], "dockers": ["read", "create", "modify", "delete", "approve"]}},
@@ -161,6 +161,28 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ]),
     ("QHSE", 3, "Officier QHSE : conformite et incidents", [
         "gouvernance.*.read", "transport.*.read", "parc.documents.read",
+    ]),
+    # Batch 23 : le circuit d'acconage (navire -> escale -> arrimage ->
+    # manutention -> connaissements -> frais) est pilote par le chef
+    # d'exploitation ; l'operateurexecute au quai sans jamais approuver
+    # (valider le plan d'arrimage, cloturer les dockers, emettre un
+    # connaissement ou contester un frais restent des actes du chef).
+    ("CHEF_EXPLOITATION", 2, "Chef d'exploitation du terminal : pilotage complet de l'acconage", [
+        "acconage.*.*",
+        "magasin.stock.read", "transport.*.read",
+    ]),
+    ("OPERATEUR_ACCONAGE", 3, "Operateur d'acconage : execution au quai, sans validation", [
+        "acconage.navire.read", "acconage.escale.read", "acconage.escale.create",
+        "acconage.escale.modify",
+        "acconage.stowage.create", "acconage.stowage.modify",
+        "acconage.moyen.read", "acconage.reservation.create", "acconage.reservation.modify",
+        "acconage.conteneur.create", "acconage.conteneur.modify",
+        "acconage.manifeste.read", "acconage.manifeste.create", "acconage.manifeste.modify",
+        "acconage.packing_list.create",
+        "acconage.frais.read", "acconage.frais.create",
+        "acconage.nettoyage.create", "acconage.nettoyage.modify",
+        "acconage.dockers.read", "acconage.dockers.create", "acconage.dockers.modify",
+        "acconage.dockers.delete",
     ]),
 ]
 

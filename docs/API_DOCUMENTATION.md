@@ -66,3 +66,55 @@ Pour les schémas OpenAPI interactifs, la validation des contrats Pydantic et l'
 > (`require_perm`) et par **visibilité hiérarchique** (`visible_user_ids`). La matrice
 > ci-dessus reste le niveau grossier `modules_allowed` (fallback). Détail complet :
 > [`RBAC_ACCREDITATIONS.md`](./RBAC_ACCREDITATIONS.md).
+
+---
+
+## 🧭 Gouvernance SaaS multi-niveaux & Présence (Phases 1-4)
+
+Le modèle d'accès s'articule autour de `User.role_level` :
+
+| Niveau | Profil | Surface dédiée |
+| --- | --- | --- |
+| `0` | Super-Admin **CADC** | `/api/v1/saas/console` + UI `admin/super-admin/*` |
+| `1` | **Admin Entreprise** | `/api/v1/company-admin` + UI `admin/*` |
+| `2` | **Chef de département** | `/api/v1/departement` + UI `departement/*` |
+| `3` | **Collaborateur** | Hub par défaut `/portail-collaborateur` |
+
+### Présence / pointage automatique (`/api/v1/auth`)
+
+- **Arrivée** : à chaque ouverture de session effective (`POST /auth/login` et
+  `POST /auth/2fa/verify`), une pointe d'arrivée est **auto-enregistrée** pour un
+  collaborateur de niveau 3 rattaché à un département (idempotente par jour, meilleure
+  effort : ne bloque **jamais** la connexion). L'écart à l'heure de début du
+  `PlanningGarde` du jour est calculé (retard au-delà d'une tolérance de 5 min) et
+  renvoyé dans `pointage_info`, affiché en toast au login.
+- **Départ** : `POST /api/v1/auth/pointer-depart` (authentifié) clôture la journée et
+  calcule `heures_effectives` (gère le passage de minuit pour les quarts de nuit).
+  Côté UI, le départ est tenté en best-effort à la déconnexion.
+
+### Planning du département (`/api/v1/departement/planning`)
+
+Publication des gardes **confirmées** contrainte « **au mercredi de la semaine
+préalable** » : au-delà de cette date, la confirmation renvoie `400 Publication
+fermée`. Les écritures restent scopées au département de l'agent.
+
+### Utilisateur ≠ Rôle (beaucoup-à-beaucoup)
+
+Un `User` porte son **identité employé** (`matricule`, `job_title`) séparée de ses
+**casquettes** (`roles`). Le rôle détermine l'accès ; un utilisateur peut cumuler
+plusieurs rôles.
+
+- `GET/POST/PUT /api/v1/admin/users` : lit/écrit l'identité (`matricule`, `job_title`).
+- `PUT /api/v1/admin/users/{user_id}/roles` : remplace l'ensemble des casquettes
+  (liste de noms de rôles). `role_level` est **re-dérivé** du rôle le plus privilégié ;
+  les rôles standard absents de la base sont matérialisés (get-or-create).
+  **Anti-escalade** : un non-Super-Admin ne peut ni accorder `SUPER_ADMIN` ni un rôle
+  plus privilégié que le sien (`403`).
+
+### UX adaptative (front)
+
+- **Hub par défaut** : `landingRouteFor(roles, roleLevel)` redirige un collaborateur
+  sans rôle métier vers `/portail-collaborateur` (et non le dashboard exécutif).
+- **Rendu adaptatif** : `AdaptiveModuleGrid` affiche une grille au-delà de 6 modules
+  accessibles, sinon un **anneau orbital** (les modules gravitent autour du noyau),
+  **sans jamais modifier les `href`**.
