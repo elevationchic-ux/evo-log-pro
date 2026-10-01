@@ -114,9 +114,3 @@ export const MODULE_NAMES: Record<string, string> = {
 
 export const getModuleColor = (module: string): ModuleColorConfig =>
   MODULE_COLORS[module] || MODULE_COLORS.auth;
-
-export const getModuleIcon = (module: string): string =>
-  MODULE_ICONS[module] || '📋';
-
-export const getModuleName = (module: string): string =>
-  MODULE_NAMES[module] || 'Module';
