@@ -164,7 +164,7 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ]),
     # Batch 23 : le circuit d'acconage (navire -> escale -> arrimage ->
     # manutention -> connaissements -> frais) est pilote par le chef
-    # d'exploitation ; l'operateurexecute au quai sans jamais approuver
+    # d'exploitation ; l'operateur execute au quai sans jamais approuver
     # (valider le plan d'arrimage, cloturer les dockers, emettre un
     # connaissement ou contester un frais restent des actes du chef).
     ("CHEF_EXPLOITATION", 2, "Chef d'exploitation du terminal : pilotage complet de l'acconage", [

@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   Lock,
 } from "lucide-react";
-import { NAVIGATION_REGISTRY, ModuleNavConfig, SubModuleItem } from "@/config/navigationRegistry";
+import { NAVIGATION_REGISTRY, ModuleNavConfig, SubModuleItem, resolveModuleKeyForPath } from "@/config/navigationRegistry";
 import { localizeTitle, localizeSubLabel } from "@/config/navI18n";
 import { useSettings } from "@/components/layout/SettingsProvider";
 import { useI18n } from "@/hooks/useI18n";

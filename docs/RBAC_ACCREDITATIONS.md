@@ -1,6 +1,6 @@
 # RBAC granulaire, accréditations & espaces communs
 
-**Dernière mise à jour :** 25 septembre 2026  *aligné code au 25/09/2026*.
+**Dernière mise à jour :** 1er octobre 2026  *aligné code au 01/10/2026 (gouvernance SaaS Phases 1-4, cf. §12)*.
 
 Ce document décrit le modèle d'autorisation effectif du backend EVO-LOG : le
 moteur de permissions granulaires, la visibilité hiérarchique, les accréditations
