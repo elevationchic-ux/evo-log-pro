@@ -910,11 +910,10 @@ export const trackingAPI = {
   createEpod: (data: unknown) => apiClient.post('/api/v1/transport-international/preuves-livraison', data),
 };
 
-// ─── Service FuelGuard Anti-Fraude ──────────────────────────────────────────
-export const fuelGuardAPI = {
-  getSensors: () => apiClient.get('/api/v1/k-modules/fuel-guard/sensors'),
-  createSensor: (data: unknown) => apiClient.post('/api/v1/k-modules/fuel-guard/sensors', data),
-};
+// ─── Service FuelGuard (contrôle carburant) ─────────────────────────────────
+// Supprime : /k-modules/fuel-guard/sensors repondait 501 et aucune telemetrie
+// IoT de niveau de reservoir n'existe. L'ecran consomme desormais les tickets
+// carburant reels via transportAPI.getFuel() (/api/v1/transport/fuel).
 
 // ─── Service Procurement & Achats ──────────────────────────────────────────
 export const procurementAPI = {

@@ -46,7 +46,9 @@ def can_access_module(user: Optional[User], module_name: str) -> bool:
     """Check whether a user may access a module within their company and department."""
     if user is None:
         return False
-    if user.is_superuser:
+    # getattr:defensif : un vrai User ORM porte toujours is_superuser (colonne),
+    # mais les identites de test duck-typées peuvent l'omettre -> pas de crash.
+    if getattr(user, "is_superuser", False):
         return True
     if not module_name:
         return True
