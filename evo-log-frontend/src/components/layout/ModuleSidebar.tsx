@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { NAVIGATION_REGISTRY, ModuleNavConfig } from "@/config/navigationRegistry";
+import { NAVIGATION_REGISTRY, ModuleNavConfig, resolveModuleKeyForPath } from "@/config/navigationRegistry";
 import { localizeTitle, localizeSubLabel } from "@/config/navI18n";
 import { useSettings } from "@/components/layout/SettingsProvider";
 import { useDomainTransition } from "@/components/shared/DomainTransitionContext";
@@ -166,8 +166,9 @@ export default function ModuleSidebar({
       {/* Navigation List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-1">
         {filteredNav.map((item) => {
-          const rootPathPrefix = item.path.split('/')[1] ? `/${item.path.split('/')[1]}` : item.path;
-          const isActive = pathname.startsWith(rootPathPrefix);
+          // Identité résolue par propriété dans le registre : le module reste
+          // surligné même si la page active vit sous un préfixe legacy.
+          const isActive = resolveModuleKeyForPath(pathname) === item.key;
           const isAllowed = checkModuleAccess(item.key);
           const Icon = item.icon;
           const title = localizeTitle(item, language);

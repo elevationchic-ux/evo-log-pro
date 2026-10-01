@@ -42,6 +42,9 @@ Pour les schémas OpenAPI interactifs, la validation des contrats Pydantic et l'
 | `/api/v1/rbac` | RBAC granulaire | Catalogue de permissions, rôles & grants, permissions d'un rôle (GET/PUT), `/permissions/check` |
 | `/api/v1/accreditations` | Accréditations | Habilitations nominatives datées (`permission` / `scope`), gestion admin + `mes-accreditations` |
 | `/api/v1/shared-access` | Espaces communs | Modules communs par entreprise (`GET`, `POST`, `DELETE`, `/initialiser`) |
+| `/api/v1/saas/console` | Console SuperAdmin CADC (niv. 0) | CRUD entreprises + upload logo, plans d'abonnement (`max_modules`), allocation de modules, accréditations entreprises, demandes d'accréditation (approuver/refuser), annuaire prestataires. Garde `require_superadmin`. |
+| `/api/v1/company-admin` | Administration Entreprise (niv. 1) | Profil société, CRUD collaborateurs scopés, responsabilités/statuts, modules alloués/verrouillés + demandes d'accréditation vers le CADC. Garde `require_company_admin` + scope `company_id`. |
+| `/api/v1/departement` | Espace Département (niv. 2) | Vue d'ensemble, roster membres/candidats, affectation, **planning** (publication « au mercredi » de la semaine précédente), **présence/pointage** + validation. Épinglé au `department_id` de l'agent. |
 
 ---
 

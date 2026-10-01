@@ -905,6 +905,10 @@ export const cotationsAPI = {
   // nature_fret, montant_estime_xaf.
   createQuote: (companyId: number, data: unknown) =>
     apiClient.post(`/api/v1/b2b/portal/${companyId}/quotes`, data),
+  // Decision du devis : PUT admet uniquement statut (SOUMIS/ACCEPTE/REJETE)
+  // et marge_nette_pct. Toute autre cle renvoie un 422 explicite.
+  updateQuote: (companyId: number, quoteId: number, data: { statut?: string; marge_nette_pct?: number }) =>
+    apiClient.put(`/api/v1/b2b/portal/${companyId}/quotes/${quoteId}`, data),
 };
 
 // ─── Service RFQ prestataires (demandes de devis de sous-traitance) ──────────
