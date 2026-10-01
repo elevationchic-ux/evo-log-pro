@@ -891,11 +891,27 @@ export const qhseAPI = {
   getBilanCSSTCNPS: (annee = 2026) => apiClient.get(`/api/v1/qhse/csst-cnps/bilan?annee=${annee}`)
 };
 
-// ─── Service Cotations (demandes de devis aux prestataires) ──────────────────
-// Registre reel : table demandes_cotation_prestataires (router prestataires,
-// garde-fou require_purchase_access). L'ancien /k-modules/cotations etait un
-// stub 501 sans modele ; le contrat ci-dessous porte les champs reels.
+// ─── Service Cotations & Devis (tarification fret) ──────────────────────────
+// Registre reel : table cotations_devis (reference, client_nom, origine,
+// destination, nature_fret, montant_estime_xaf, marge_nette_pct, statut
+// SOUMIS/ACCEPTE/REJETE, client_id, detail_lignes). L'ancien
+// /api/v1/k-modules/cotations etait un stub 501 ; les ecrans commerciaux
+// consomment desormais les devis reellement persistes.
+// company_id = la societe de l'utilisateur connecte (garde TenantSecurity).
 export const cotationsAPI = {
+  getQuotes: (companyId: number, params?: Record<string, unknown>) =>
+    apiClient.get(`/api/v1/b2b/portal/${companyId}/quotes`, { params }),
+  // createQuote exige : reference, client_nom, origine, destination,
+  // nature_fret, montant_estime_xaf.
+  createQuote: (companyId: number, data: unknown) =>
+    apiClient.post(`/api/v1/b2b/portal/${companyId}/quotes`, data),
+};
+
+// ─── Service RFQ prestataires (demandes de devis de sous-traitance) ──────────
+// Registre reel : table demandes_cotation_prestataires (router prestataires,
+// garde-fou require_purchase_access). Distinct des devis clients ci-dessus :
+// ici on consulte un sous-traitant agree, on ne tarifie pas un client.
+export const rfqPrestatairesAPI = {
   listPrestataires: (params?: Record<string, unknown>) =>
     apiClient.get('/api/v1/prestataires', { params }),
   getCotations: () => apiClient.get('/api/v1/prestataires/cotations'),
