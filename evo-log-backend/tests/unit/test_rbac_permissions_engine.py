@@ -238,4 +238,6 @@ def test_permissions_catalog_endpoint_ok_for_admin(client, db):
     assert resp.status_code == 200
     tree = resp.json()
     assert any(dom["key"] == "finance" for dom in tree)
-    app.dependency_overrides.clear()
+    # Pop cible (contrat conftest) : jamais clear(), qui emporterait aussi
+    # l'override get_db de la fixture client.
+    app.dependency_overrides.pop(get_current_user, None)

@@ -201,4 +201,6 @@ def test_api_facture_accepte_escale_id(db: Session, client):
         assert fac.escale_id == escale.id
         assert fac.conteneur_id == conteneur.id
     finally:
-        app.dependency_overrides.clear()
+        # Pop cible (contrat conftest) : jamais clear(), qui emporterait
+        # aussi l'override get_db de la fixture client.
+        app.dependency_overrides.pop(get_current_user, None)
