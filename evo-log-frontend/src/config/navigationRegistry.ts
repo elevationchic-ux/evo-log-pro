@@ -14,7 +14,7 @@ import {
   LayoutDashboard, Layers, Grid, FileCheck, ShoppingCart, RotateCcw,
   ArrowRightLeft, Bot, CheckCircle2, Inbox, AlertTriangle
 } from 'lucide-react';
-import { getModulePalette } from './modulePalette';
+import { getModulePalette, LEGACY_ALIAS } from './modulePalette';
 import { MODULE_TITLES_EN } from './navI18n';
 
 export interface SubModuleItem {

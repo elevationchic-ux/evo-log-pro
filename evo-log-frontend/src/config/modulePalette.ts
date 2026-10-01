@@ -176,7 +176,7 @@ export const MODULE_PALETTE: Record<string, ModulePaletteEntry> = {
 };
 
 /** Alias legacy → module majeur de la palette (hérite de sa couleur). */
-const LEGACY_ALIAS: Record<string, string> = {
+export const LEGACY_ALIAS: Record<string, string> = {
   transport: 'transport-flotte',
   finance: 'finance-ohada',
   magasin: 'magasin-stock',
