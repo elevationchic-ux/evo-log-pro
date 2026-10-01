@@ -891,10 +891,17 @@ export const qhseAPI = {
   getBilanCSSTCNPS: (annee = 2026) => apiClient.get(`/api/v1/qhse/csst-cnps/bilan?annee=${annee}`)
 };
 
-// ─── Service Cotations & Tarification ──────────────────────────────────────────
+// ─── Service Cotations (demandes de devis aux prestataires) ──────────────────
+// Registre reel : table demandes_cotation_prestataires (router prestataires,
+// garde-fou require_purchase_access). L'ancien /k-modules/cotations etait un
+// stub 501 sans modele ; le contrat ci-dessous porte les champs reels.
 export const cotationsAPI = {
-  getCotations: () => apiClient.get('/api/v1/k-modules/cotations'),
-  createCotation: (data: unknown) => apiClient.post('/api/v1/k-modules/cotations', data),
+  listPrestataires: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/prestataires', { params }),
+  getCotations: () => apiClient.get('/api/v1/prestataires/cotations'),
+  // CotationCreate : prestataire_id, titre_besoin, description_besoin,
+  // urgence, date_intervention_souhaitee, lieu_intervention, budget_max_estime.
+  createCotation: (data: unknown) => apiClient.post('/api/v1/prestataires/cotations', data),
 };
 
 // ─── Service Tracking & e-POD ──────────────────────────────────────────
