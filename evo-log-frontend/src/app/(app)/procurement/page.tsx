@@ -452,12 +452,15 @@ export default function ProcurementPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4 pt-4">
               {fournisseurs.length === 0 && !fournisseursQuery.isLoading ? (
-                <p className="text-sm rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400 p-3">
-                  {t(
-                    <>Aucun fournisseur n'est enregistré. Ajoutez-le d'abord.{''},
-                    'No supplier on record. Add one first.'
-                  )}
-                </p>
+                <div className="text-sm rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400 p-3">
+                  <p>{t('Aucun fournisseur nest enregistré : la liste est vide.', 'No supplier on record: the list is empty.')}</p>
+                  <Link
+                    href="/fournisseurs"
+                    className="inline-flex min-h-[44px] items-center gap-1 text-xs font-bold underline mt-1"
+                  >
+                    {t('Ajouter un fournisseur', 'Add a supplier')}
+                  </Link>
+                </div>
               ) : null}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
