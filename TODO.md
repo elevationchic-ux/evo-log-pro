@@ -59,7 +59,8 @@
 - ✅ Frontend : session NextAuth enrichie, `lib/permissions.ts`, hook `useCan`, `PermissionGuard` mode `code`, filtrage navigation additif
 - ✅ Pages admin réelles : arbre de permissions par rôle, accréditations, espaces communs
 - ✅ Tests unitaires moteur (`tests/unit/test_rbac_permissions_engine.py`, 10 cas)
-- ⏳ Étendre `require_perm` au-delà des domaines cœur (~323 routes restantes) et brancher `visible_user_ids` sur les listes portant `created_by`/`department_id`
+- ✅ Extension RBAC par tranche de routeur : `/magasin-avance` 43 endpoints (batch 21, roles MAGASINIER/CHEF_MAGASIN, migration 033) puis `/api/v1/finance` 37 endpoints (batch 22, sous-modules plan_comptable/exercice/compte_resultat + role CAISSIER, migration 034) — mapping explicite (methode+chemin)→code, parite catalogue verifiee, tests role×code (rapport §23/§24)
+- ⏳ Étendre `require_perm` au-delà des domaines cœur : **48 routeurs `v1` encore protégés par la seule authentification** (rh, qhse, transit_avance, acconage_avance, magasin_douane, integration, … — inventaire précis rapport §24) ; brancher aussi `visible_user_ids` sur les listes portant `created_by`/`department_id`
 
 ---
 

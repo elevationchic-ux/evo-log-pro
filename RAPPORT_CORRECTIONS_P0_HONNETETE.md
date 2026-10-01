@@ -1120,9 +1120,11 @@ n'importe qui est une faille habillee en fonctionnalite ; ici chaque droit
 ### Contexte et choix de la cible
 
 Toujours la ligne ⏳ du `TODO.md` (phase 6, « etendre `require_perm` au-dela des
-domaines coeur »). Audit de l'etat reel : 48 routeurs `v1` restent proteges par la
-**seule authentification**. `finance.py` (37 endpoints, 0 `require_perm`, aucun
-commit concurrent depuis 2026-09-30 18:00) est choisi : domaine sensible (factures,
+domaines coeur »). Audit de l'etat reel : apres les conversions deja faites
+(domaines coeur par une session concurrente, puis `magasin_avance` batch 21),
+**49 routeurs `v1` restent proteges par la seule authentification** ; `finance.py`
+(37 endpoints, 0 `require_perm`, aucun commit concurrent depuis 2026-09-30 18:00)
+est choisi : domaine sensible (factures,
 ecritures, fiscal, tresorerie), aucun chevauchement avec la session concurrente.
 N'importe quel utilisateur connecte pouvait creer une facture, cloturer un exercice
 ou exporter le PDF signe.
@@ -1202,7 +1204,7 @@ complets, commentaire a l'appui. Apres reparation : non-regression ciblee ✅
 
 ### Reste (hors perimetre du batch, signale)
 
-- **47 autres routeurs** restent proteges par la seule authentification (rh, qhse 38,
+- **48 autres routeurs** (inventorieres apres conversion finance) restent proteges par la seule authentification (rh, qhse 38,
   transit_avance 40, acconage_avance 38, magasin_douane 35, integration 28,
   acquisition 27, documents 25, gap_bridges 24, notifications/reporting 23…) — la
   ligne ⏳ du TODO phase 6 n'est pas close ; chaque tranche devra le meme mapping
