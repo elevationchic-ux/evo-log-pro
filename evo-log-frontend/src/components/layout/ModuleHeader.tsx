@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { getModuleIcon, getModuleName } from '../../config/moduleColors'
-import { NAVIGATION_REGISTRY } from '../../config/navigationRegistry'
+import { NAVIGATION_REGISTRY, resolveModuleKeyForPath } from '../../config/navigationRegistry'
 import { localizeTitle, localizeSubLabel } from '../../config/navI18n'
 import { ModuleType } from './ModuleSidebar'
 import { useModuleTheme } from '../../hooks/useModuleTheme'
