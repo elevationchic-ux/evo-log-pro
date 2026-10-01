@@ -55,8 +55,12 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
 
-  const moduleIcon = getModuleIcon(currentModule)
-  const moduleName = getModuleName(currentModule)
+  // Identité résolue par propriété registre (cohérente avec sidebar/thème) ;
+  // retombe sur la prop currentModule si la page n'est rattachée à aucune famille.
+  const resolvedHeaderKey = resolveModuleKeyForPath(pathname)
+  const headerModuleKey = resolvedHeaderKey !== 'dashboard' ? resolvedHeaderKey : String(currentModule || 'dashboard')
+  const moduleIcon = getModuleIcon(headerModuleKey)
+  const moduleName = getModuleName(headerModuleKey)
   // themeClasses now uses CSS-variable-based dark-aware utility
   const themeClasses = theme.headerClasses || 'module-badge-admin'
 
