@@ -204,9 +204,12 @@ export default function ModuleSidebar({
                   title={title}
                   onClick={(e) => {
                     if (isMobile && onClose) onClose();
-                    const currentRoot = pathname ? pathname.replace(/^\/+/, '').split('/')[0] : '';
-                    const targetRoot = item.path ? item.path.replace(/^\/+/, '').split('/')[0] : '';
-                    if (currentRoot && targetRoot && currentRoot !== targetRoot) {
+                    // Ne déclencher l'animation de transition (1,7 s) que pour un
+                    // VRAI changement de module (propriété registre), plus pour un
+                    // simple changement de préfixe legacy au sein du même module.
+                    const currentKey = resolveModuleKeyForPath(pathname);
+                    const targetKey = resolveModuleKeyForPath(item.path);
+                    if (currentKey && targetKey && currentKey !== targetKey) {
                       e.preventDefault();
                       triggerDomainTransition(item.path, 1700);
                     }
