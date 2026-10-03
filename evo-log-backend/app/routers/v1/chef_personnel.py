@@ -25,9 +25,15 @@ SUPERVISED_ROLES = {"SECRETAIRE", "GARDIEN", "AGENT_ENTRETIEN", "SUPPORT_IT"}
 
 
 def resolve_current_user(
-    identity: str = Depends(get_current_user),
+    identity = Depends(get_current_user),
     db: Session = Depends(get_db)
 ) -> User:
+    # get_current_user renvoie deja un User ORM valide et actif : le passer
+    # tel quel. Sans ce cas, str(User) ne matchait ni username ni email et
+    # tout le module repondait 401 meme avec un jeton legitime. La chaine
+    # (id numerique ou email/username) reste acceptee pour la compat legacy.
+    if isinstance(identity, User):
+        return identity
     user = None
     if isinstance(identity, str) and identity.isdigit():
         user = db.query(User).filter(User.id == int(identity)).first()
