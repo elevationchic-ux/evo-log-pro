@@ -123,5 +123,5 @@ def test_rapport_executif_agrege_kpi_reels(client, db):
 
 def test_rapport_inexistant_404(client):
     assert client.get(f"{BASE}/rapports/999999").status_code == 404
-    assert client.put(f"{BASE}/rapports/999999/generer").status_code in (404, 500)
+    assert client.put(f"{BASE}/rapports/999999/generer").status_code == 404
     assert client.delete(f"{BASE}/rapports/999999").status_code == 404
