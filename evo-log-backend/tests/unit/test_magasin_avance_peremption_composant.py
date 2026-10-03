@@ -56,12 +56,14 @@ def test_peremption_numero_serie_roundtrip(client, db):
         "stock_id": stock.id,
         "date_peremption": expiry,
         "lot_numero": "LOT-A1",
+        "quantite": 12,
         "numero_serie": "SN-0001",
     })
     assert r.status_code == 201, r.text
     data = r.json()
     assert data["stock_id"] == stock.id
     assert data["lot_numero"] == "LOT-A1"
+    assert float(data["quantite"]) == 12.0
     # le numero de serie traverse reellement la base (pas un champ fantome)
     assert data["numero_serie"] == "SN-0001"
 
@@ -78,6 +80,7 @@ def test_peremption_sans_numero_serie_est_nullable(client, db):
         "stock_id": stock.id,
         "date_peremption": expiry,
         "lot_numero": "LOT-B2",
+        "quantite": 7,
     })
     assert r.status_code == 201, r.text
     data = r.json()

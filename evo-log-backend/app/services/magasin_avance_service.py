@@ -21,6 +21,7 @@ class PeremptionService:
         stock_id: int,
         date_peremption: date,
         lot_numero: str,
+        quantite: float,
         numero_serie: Optional[str] = None
     ) -> Peremption:
         """Register expiration date for lot/serial tracking"""
@@ -28,6 +29,7 @@ class PeremptionService:
             stock_id=stock_id,
             date_peremption=date_peremption,
             lot_numero=lot_numero,
+            quantite=quantite,
             numero_serie=numero_serie
         )
         db.add(peremption)

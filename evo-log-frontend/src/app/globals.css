@@ -277,6 +277,85 @@
   }
 
   /* ══════════════════════════════════════════════════════════════════
+     THEME CLAIR sobre (option utilisateur). Identite sombre conservee
+     par defaut ; ce bloc n'agit que quand <html class="light"> est pose.
+     Palette neutre froide, une seule couleur d'accent (primaire assombri
+     pour le contraste sur fond clair), aucun repli en dur sur les pages.
+     ══════════════════════════════════════════════════════════════════ */
+  .light {
+    color-scheme: light;
+
+    --background: 220 20% 98%;
+    --on-background: 222 40% 12%;
+
+    --surface: 0 0% 100%;
+    --on-surface: 222 40% 12%;
+    --surface-variant: 220 16% 92%;
+    --on-surface-variant: 220 14% 40%;
+
+    --primary: 217 85% 48%;
+    --on-primary: 0 0% 100%;
+    --primary-container: 217 90% 92%;
+    --on-primary-container: 217 85% 28%;
+
+    --secondary: 160 60% 38%;
+    --on-secondary: 0 0% 100%;
+    --secondary-container: 160 60% 90%;
+    --on-secondary-container: 160 60% 22%;
+
+    --tertiary: 43 90% 40%;
+    --on-tertiary: 0 0% 100%;
+    --tertiary-container: 43 95% 90%;
+    --on-tertiary-container: 43 80% 24%;
+
+    --error: 4 75% 45%;
+    --on-error: 0 0% 100%;
+    --error-container: 4 80% 92%;
+    --on-error-container: 4 75% 28%;
+
+    --outline: 220 14% 72%;
+    --outline-variant: 220 16% 86%;
+
+    /* Surface containers (paliers clairs ascendants) */
+    --surface-container-lowest: 0 0% 100%;
+    --surface-container-low: 220 24% 98%;
+    --surface-container: 220 18% 96%;
+    --surface-container-high: 220 15% 92%;
+    --surface-container-highest: 220 13% 88%;
+
+    --EVO-LOG-primary: 217 85% 48%;
+
+    /* Badges module : version claire sobre (teinte pale + texte fonce).
+       Le filet .light plus bas force [class*="module-badge-"] de facon
+       equivalente, mais on aligne aussi les variables pour les usages
+       qui consomme directement hsl(var(--module-*-bg/text)). */
+    --module-port-operations-bg: 199 80% 92%;
+    --module-port-operations-text: 199 75% 30%;
+    --module-transit-douane-bg: 217 85% 93%;
+    --module-transit-douane-text: 217 80% 32%;
+    --module-transport-flotte-bg: 189 80% 91%;
+    --module-transport-flotte-text: 189 75% 28%;
+    --module-magasin-stock-bg: 38 90% 92%;
+    --module-magasin-stock-text: 38 80% 30%;
+    --module-finance-ohada-bg: 160 70% 91%;
+    --module-finance-ohada-text: 160 65% 26%;
+    --module-comptabilite-ohada-bg: 258 80% 93%;
+    --module-comptabilite-ohada-text: 258 70% 34%;
+    --module-parc-vehicules-bg: 25 90% 92%;
+    --module-parc-vehicules-text: 25 80% 32%;
+    --module-qhse-securite-bg: 0 85% 93%;
+    --module-qhse-securite-text: 0 75% 34%;
+    --module-rh-personnel-bg: 330 80% 93%;
+    --module-rh-personnel-text: 330 70% 34%;
+    --module-client-b2b-bg: 173 70% 91%;
+    --module-client-b2b-text: 173 65% 26%;
+    --module-admin-tenant-bg: 215 60% 93%;
+    --module-admin-tenant-text: 215 55% 32%;
+    --module-reports-bi-bg: 271 80% 93%;
+    --module-reports-bi-text: 271 70% 36%;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
      Dark-only net : remappe les utilitaires Tailwind legacy (slate/gray/
      white) vers les tokens M3 sombre. Les pages qui ont encore des classes
      de theme clair sont ainsi forcees au dark sans retouche page par page.
