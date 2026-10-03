@@ -67,11 +67,15 @@ def obtenir_stock_fefo(
     from app.models.magasin_avance import Peremption
     from app.models.magasin import Stock
     from sqlalchemy import and_
-    
-    peremptions = db.query(Peremption).join(Stock).filter(
+
+    # article_id = Stock.id ; les lots rattaches via Peremption.stock_id. La
+    # disponibilite porte sur le lot (Peremption.quantite). Stock.article_id /
+    # Stock.quantite sont des colonnes fantomes (attribut reel : code_article ;
+    # quantite_disponible) et levaient un AttributeError.
+    peremptions = db.query(Peremption).filter(
         and_(
-            Stock.article_id == article_id,
-            Stock.quantite > 0,
+            Peremption.stock_id == article_id,
+            Peremption.quantite > 0,
             Peremption.date_peremption >= date.today()
         )
     ).order_by(Peremption.date_peremption.asc()).all()
@@ -92,11 +96,11 @@ def obtenir_peremptions_critiques(
     
     date_limite = date.today() + timedelta(days=jours_critique)
     
-    peremptions = db.query(Peremption).join(Stock).filter(
+    peremptions = db.query(Peremption).filter(
         and_(
             Peremption.date_peremption <= date_limite,
             Peremption.date_peremption >= date.today(),
-            Stock.quantite > 0
+            Peremption.quantite > 0
         )
     ).order_by(Peremption.date_peremption.asc()).all()
     

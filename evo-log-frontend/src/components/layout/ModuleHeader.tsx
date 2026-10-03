@@ -38,11 +38,9 @@ type ModuleHeaderProps = {
 }
 
 export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) {
-  const { theme } = useModuleTheme()
   const router = useRouter()
   const pathname = usePathname()
   const t = useI18n()
-  const { triggerDomainTransition } = useDomainTransition()
 
   const [searchValue, setSearchValue] = useState('')
   const [showSuggestion, setShowSuggestion] = useState(false)
@@ -57,10 +55,10 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
   // retombe sur la prop currentModule si la page n'est rattachée à aucune famille.
   const resolvedHeaderKey = resolveModuleKeyForPath(pathname)
   const headerModuleKey = resolvedHeaderKey !== 'dashboard' ? resolvedHeaderKey : String(currentModule || 'dashboard')
-  const moduleIcon = getModuleIcon(headerModuleKey)
+  const headerFamily = NAVIGATION_REGISTRY[headerModuleKey]
+  const HeaderIcon = headerFamily?.icon
+  const headerColor = headerFamily?.color
   const moduleName = getModuleName(headerModuleKey)
-  // themeClasses now uses CSS-variable-based dark-aware utility
-  const themeClasses = theme.headerClasses || 'module-badge-admin'
 
   const { user, logout, sessionExpiresAt, renewSession, sessionExpired } = useAuth()
   const suggestionRef = useRef<HTMLDivElement>(null)

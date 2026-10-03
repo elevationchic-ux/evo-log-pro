@@ -1236,62 +1236,26 @@ export function resolveDomainLoadingConfig(routeOrKey: string): DomainLoadingCon
 }
 
 /**
- * Écran de chargement → module majeur auquel il appartient.
- * Sans cette table, un écran « sous-domaine » (acconage-avance, real-customs,
- * container-lifecycle, port-incidents, shift-planning…) n'a aucune entrée dans
- * modulePalette et hériterait par repli de la couleur du dashboard (indigo) :
- * le module changerait de teinte d'une page à l'autre, ce que la règle
- * « une couleur unique par module » interdit.
+ * Écrans de chargement dont la clé n'est NI une entrée de MODULE_PALETTE NI un
+ * LEGACY_ALIAS : sans ce pont, getModulePalette() retomberait sur le dashboard
+ * (indigo) et le module afficherait une teinte différente de celle de sa page,
+ * de sa sidebar et de sa bulle orbitale — violation de « une couleur unique par
+ * module ». Ces vues sont rattachées à leur module majeur réel.
+ *
+ * NB : toutes les AUTRES clés (acconage, transit, transport, finance, magasin,
+ * parc, qhse, rh, bi, admin, cotations, procurement, fuel-guard, maintenance,
+ * fiscalite-cameroun, client-portal…) sont laissées telles quelles : getModulePalette
+ * résout déjà leur parent via LEGACY_ALIAS, ce qui garantit l'identité chromatique
+ * avec le reste de l'application (une seule et même fonction de référence).
  */
 export const LOADING_TO_MODULE: Record<string, string> = {
-  // Port Operations (acconage, conteneurs, incidents, quarts, douane réelle)
-  acconage: 'port-operations',
   'acconage-avance': 'port-operations',
   'real-customs': 'port-operations',
   'container-lifecycle': 'port-operations',
   'port-incidents': 'port-operations',
   'shift-planning': 'port-operations',
-  // Transit & Douane
-  transit: 'transit-douane',
-  'portail-declarant': 'portail-declarant',
-  // Transport & Flotte
-  transport: 'transport-flotte',
   chauffeur: 'portail-chauffeur',
-  'fuel-guard': 'fuel-guard',
-  // Magasin
-  magasin: 'magasin-stock',
-  'portail-magasinier': 'portail-magasinier',
-  // Parc & Maintenance
-  parc: 'parc-vehicules',
-  maintenance: 'parc-vehicules',
-  'portail-technicien': 'portail-technicien',
-  // QHSE
-  qhse: 'qhse-securite',
-  'portail-qhse': 'portail-qhse',
-  // RH
-  rh: 'rh-personnel',
-  'portail-employe': 'portail-employe',
-  'chef-personnel': 'chef-personnel',
-  'portail-frais': 'portail-frais',
-  // Collaboratif
-  chat: 'chat',
-  'portail-collaborateur': 'portail-collaborateur',
-  // Client & Commercial
-  'client-portal': 'client-b2b',
-  cotations: 'portail-commercial',
-  'portail-commercial': 'portail-commercial',
-  // Achats & Fournisseurs (rattachés à la gouvernance, comme l'alias du registre)
-  procurement: 'admin-tenant',
-  purchase: 'admin-tenant',
-  fournisseurs: 'admin-tenant',
-  // Finance & Comptabilité
-  finance: 'finance-ohada',
-  'fiscalite-cameroun': 'finance-ohada',
-  // Décisionnel & Admin
-  bi: 'reports-bi',
-  admin: 'admin-tenant',
-  'admin-saas': 'admin-saas',
-  dashboard: 'dashboard',
+  purchase: 'finance-ohada',
 };
 
 /**
