@@ -72,7 +72,6 @@ export default function ModuleSidebar({
   const pathname = usePathname();
   const { data: session } = useSession();
   const { language } = useSettings();
-  const { triggerDomainTransition } = useDomainTransition();
 
   // Access Warning Modal State
   const [deniedModalItem, setDeniedModalItem] = useState<{ label: string; key: string } | null>(null);

@@ -23,6 +23,16 @@ DOMAINS: Dict[str, Dict] = {
             "roles": {"label": "Roles & permissions", "sub_modules": {"matrice": ["read", "modify"], "accreditations": ACTIONS}},
             "departments": {"label": "Departements", "sub_modules": {"organisation": ACTIONS}},
             "audit": {"label": "Piste d'audit", "sub_modules": {"journal": ["read", "export"]}},
+            # Batch 24 : le routeur /qhse (38 endpoints + 3 endpoints publics
+            # reconvertis) n'avait AUCUN code. Sous-modules alignes sur les
+            # objets reels du routeur : analyse de risque, plan/action de
+            # prevention, EPI, accident du travail (declarer = acte en soi),
+            # investigation, certification, audit interne, HACCP (plan + CCP
+            # = un seul objet, le plan ; les enregistrements de controle
+            # quotidien sont un objet separate), formation, indicateur,
+            # rapport annuel, enregistrements generiques, permis de travail
+            # et consultation de la matrice IMDG.
+            "qhse": {"label": "QHSE (qualite, hygiene, securite, environnement)", "sub_modules": {"risque": ["create", "modify"], "prevention": ["create", "modify"], "epi": ["create", "modify"], "accident": ["read", "create", "modify"], "investigation": ["read", "create", "modify"], "certification": ["read", "create", "modify"], "audit": ["read", "create", "modify"], "haccp": ["create", "modify"], "controle": ["create", "modify"], "formation": ["read", "create", "modify"], "indicateur": ["create", "modify"], "rapport": ["read"], "enregistrement": ["read", "create", "modify", "delete"], "permis": ["create"], "imdg": ["read"]}},
             "settings": {"label": "Parametres entreprise", "sub_modules": {"generaux": ["read", "modify"], "communs": ["read", "modify"]}},
         },
     },
@@ -120,6 +130,9 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "comptabilite.*.read", "tresorerie.*.read", "facturation.*.read",
         "fiscalite.*.read",
         "transport.*.read", "magasin.*.read", "transit.*.read", "audit.journal.read",
+        # Batch 24 : meme lecture transversale sur le QHSE (rapports annuels
+        # includes), sans jamais d'ecriture.
+        "qhse.*.read",
     ]),
     ("TRANSIT_PRINCIPAL", 2, "Transitaire principal : gestion et validation des dossiers", [
         "transit.*.*", "acconage.*.read", "magasin.stock.read", "fiscalite.declarations.read",
@@ -159,8 +172,13 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ("ADMIN_RH", 2, "Administrateur RH : gestion complete du personnel", [
         "rh.*.*", "paie.*.read", "paie.bulletin.create", "conges.*.*",
     ]),
-    ("QHSE", 3, "Officier QHSE : conformite et incidents", [
+    ("QHSE", 3, "Officier QHSE : conformite, incidents et pilotage du systeme", [
         "gouvernance.*.read", "transport.*.read", "parc.documents.read",
+        # Batch 24 : l'officier porte desormais tout le module qhse. Pas
+        # d'action « approve » n'expose ici : declarer un accident ou mener
+        # une investigation sont deja des actes completes, pas des brouillons
+        # a valider par un tiers.
+        "qhse.*.*",
     ]),
     # Batch 23 : le circuit d'acconage (navire -> escale -> arrimage ->
     # manutention -> connaissements -> frais) est pilote par le chef
