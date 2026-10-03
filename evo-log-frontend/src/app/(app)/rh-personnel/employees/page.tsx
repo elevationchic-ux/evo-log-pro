@@ -154,7 +154,7 @@ export default function RhPersonnelEmployees() {
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-slate-500 font-sans">
                     {employees.length === 0
-                      ? 'Aucun collaborateur enregistré. La table s\'remplit dès que des fiches sont créées via le module RH.'
+                      ? 'Aucun collaborateur enregistré. Cette table se remplit dès que des fiches sont créées via le module RH.'
                       : 'Aucun résultat pour cette recherche.'}
                   </td>
                 </tr>
