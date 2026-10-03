@@ -19,7 +19,7 @@ from app.models.magasin import Stock, MouvementStock, Entrepot
 from app.models.magasin import (
     Article, Commande, LigneCommande, OrdreTransfert, BandeLivraison
 )
-from app.models.transit import DossierTransit, DeclarationDouaniere
+from app.models.transit import DossierTransit, DeclarationDouaniere, CautionDouaniere, DumCustomsRecord
 from app.models.audit import AuditLog
 from app.models.outbox import OutboxEvent
 from app.models.numerotation import SequenceNumerotation
@@ -49,7 +49,7 @@ __all__ = [
     "Customer", "ContractCustomer", "SupportTicket", "SupportIncident", "FleetDocument",
     "Stock", "MouvementStock", "Entrepot",
     "Article", "Commande", "LigneCommande", "OrdreTransfert", "BandeLivraison",
-    "DossierTransit", "DeclarationDouaniere",
+    "DossierTransit", "DeclarationDouaniere", "CautionDouaniere", "DumCustomsRecord",
     "AuditLog",
     "OutboxEvent",
     "SequenceNumerotation",
