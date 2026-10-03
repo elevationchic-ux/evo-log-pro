@@ -66,7 +66,7 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
   const soundEnabledRef = useRef(true)
   const notificationIdRef = useRef(0)
 
-  const { soundEnabled, toggleSound, showSoundBadge, triggerSoundBadge, language, setLanguage } = useSettings()
+  const { soundEnabled, toggleSound, showSoundBadge, triggerSoundBadge, language, setLanguage, theme, setTheme } = useSettings()
 
   const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false)
   const [openNavKey, setOpenNavKey] = useState<string | null>(null)
@@ -631,6 +631,27 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                             {soundEnabled ? 'volume_up' : 'volume_off'}
                           </span>
                           {soundEnabled ? t.shell.soundOn : t.shell.soundOff}
+                        </button>
+                      </div>
+
+                      {/* Theme (sombre par défaut, clair en option) */}
+                      <div className="flex items-center justify-between px-1">
+                        <span className="text-on-surface text-xs font-medium">{language === 'fr' ? 'Thème' : 'Theme'}</span>
+                        <button
+                          type="button"
+                          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                          className={`flex items-center gap-1 px-3 py-2 min-h-11 rounded-lg border border-outline text-[11px] font-bold ${
+                            theme === 'light' ? 'bg-primary/10 text-primary' : 'bg-surface-container text-on-surface-variant'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[14px]">
+                            {theme === 'light' ? 'light_mode' : 'dark_mode'}
+                          </span>
+                          {theme === 'light'
+                            ? (language === 'fr' ? 'Clair' : 'Light')
+                            : theme === 'system'
+                              ? (language === 'fr' ? 'Système' : 'System')
+                              : (language === 'fr' ? 'Sombre' : 'Dark')}
                         </button>
                       </div>
                     </div>
