@@ -53,6 +53,13 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark" suppressHydrationWarning>
       <head>
+        {/* Anti-flash thème : applique dark/light avant le premier paint à partir
+            de localStorage. Défaut = sombre (identité principale de l'ERP). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=document.documentElement;var t=localStorage.getItem('evolog_erp_theme');var light=false;if(t==='light'){light=true;}else if(t==='system'){light=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches;}d.classList.remove('dark','light');if(light){d.classList.add('light');d.style.colorScheme='light';}else{d.classList.add('dark');d.style.colorScheme='dark';}}catch(e){var r=document.documentElement;r.classList.remove('dark','light');r.classList.add('dark');}})();`,
+          }}
+        />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

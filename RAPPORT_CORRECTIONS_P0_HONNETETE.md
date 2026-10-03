@@ -1328,6 +1328,93 @@ respectivement la securite du navire, un titre juridique et une paie ; ils ne
 peuvent plus etre accomplis par « n'importe qui connecte »  et la preuve du
 refus est un HTTP 403 reel, pas une assertion sur un mock.
 
+## 26. Batch 24  RBAC granulaire sur `/api/v1/qhse` + dé fabrication de 3 endpoints publics
+
+**Contexte et choix de la cible.** L'audit de concurrence du debut de lot montre le depot
+`transit_avance` (40 endpoints) comme la plus grosse cible restante, mais c'est le domaine
+actif d'une session concurrente (commits `tenant_access.py`, `magasin_avance_service.py`
+entre autres, auto-push toutes les ~2 min)  on l'evite. `qhse` (38 endpoints auth-seuls)
+presente une particularite que les lots precedents n'avaient pas : **3 de ses endpoints
+etaient PUBLICS, sans aucune authentification**, et fabriquaient des actes reglementaires.
+C'est le pire cas du mandat Zero-Mock (un acte legal invente, accessible a un tiers non
+connecte)  il passe avant le simple cloisonnement RBAC. Cible retenue : `qhse`, 41 routes
+converties au total.
+
+**Les 3 endpoints fabriques, avant  apres (le coeur du lot).**
+
+| Route (etait publique) | Ce qu'elle inventait | Devenu |
+|---|---|---|
+| `POST /permis-travail` | un permis « APPROUVE_ACTIF » signe par trois personnes fictives (Chef Exploitation PAD, « M. Mbida », « Commandant Surete Portuaire ») avec horodatages du jour | **501** via `not_implemented` : un permis de travail (feu/hauteur/espace confiné) engage la responsabilite penale des signataires ; aucune signature ne peut etre datee pour un tiers qui ne l'a pas posee. Le code d'intention `qhse.permis.create` existe, la porte est authentifiee+autorisee avant le 501. |
+| `GET /csst-cnps/bilan` | un « bilan officiel CNPS/CSST » : 2 850 000 heures, 3 accidents, 42 jours d'arret, TF/TG calcules, certifications ISO « actives »  identiques pour tous les tenants | **501** : une declaration annuelle a valeur declarative aupres de la CNPS ; des chiffres inventes exposent l'entreprise. Les chiffres reels deja saisis restent accessibles via `/rapports/securite/{annee}` (code `qhse.rapport.read`). |
+| `POST /imdg/segregation` | verdict « CONFORME_CODE_IMDG » et « prescriptions pompiers » sur une matrice reduite a 2 regles, testees par `"1" in "".join(classes)` | **garde honnete** : le calcul (2 regles majeures) est legitime mais devient un **aide-memoire assume**  plus de pretendu « CONFORME », un champ `avertissement` explicite « NON REGLEMENTAIRE, ne remplace pas la matrice officielle ». Correction d'un **vrai bug** a l'occasion : la concatenation provoquait des faux positifs (`4.1`+`3` → `"4.13"` contenant `1` et `3`) et negatifs (`5.1`+`3` → `"5.13"` ne contenant pas `5.1`) ; la comparaison est desormais exacte par classe. |
+
+Les trois sont desormais Derriere `require_perm` (respectivement `qhse.permis.create`,
+`qhse.rapport.read`, `qhse.imdg.read`)  plus aucun endpoint public.
+
+**Conversions RBAC (38 routes restantes).** Table explicite (methode + chemin) → code,
+meme mecanisme d'echec que les batches 21/22/23 (route sans mapping, mapping sans route ou
+`Depends(get_current_user)` restant = script rouge). Resultat : **41 routes converties,
+34 codes distincts, 0 reste**. Decisions semantiques notables : declarer un accident =
+`create` (l'acte de signalement est complet en soi, pas un brouillon a faire valider) ;
+le plan HACCP et ses points critiques CCP forment un seul objet documentaire (`haccp.*`)
+tandis que l'enregistrement de controle quotidien est l'execution mesuree (`controle.*`) ;
+les KPI/rapports annuels exposent `qhse.rapport.read` (lecture de ce qui est aggrege).
+
+**Catalogue et roles.** Le module `qhse` etait **absent du catalogue** (le role QHSE du
+GRANT_TABLE ne couvrait que gouvernance/transport/parc). Ajout de 15 sous-modules (risque,
+prevention, epi, accident, investigation, certification, audit, haccp, controle, formation,
+indicateur, rapport, enregistrement, permis, imdg) = 34 codes. Role `QHSE` rendu operant
+(`qhse.*.*`) ; `CHEF_EXPLOITATION` recoit les 6 codes qu'un chef de terminal porte really
+(declarer/amender un accident, demander un permis, consulter l'IMDG, signaler un risque) ;
+`AUDITEUR` recoit `qhse.*.read` (lecture transversale, jamais d'ecriture).
+
+**Migration `036_rbac_qhse_grants`** (tete verifiee, chaine lineaire apres 035) : purement
+additive (codes du catalogue inseres, liens `role_permissions` manquants ajoutés, role
+absent cree), `downgrade = pass`, garde `RuntimeError` nommant la precondition 020 si les
+tables RBAC manquent. Constat exact, verifie par une migration de demonstration sur base
+temporaire : en base neuve, 020 seode deja le catalogue **vivant**, donc le role QHSE porte
+`qhse.*.*` et 036 n'ajoute aucun lien redondant (idempotence testee) ; la valeur reelle de
+036 est pour les bases ayant execute 020 **avant** l'extension du catalogue.
+
+**Tests  `tests/unit/test_rbac_qhse_perms.py` (18 tests, 18/18 au premier run).**
+(1) parite catalogue (exactement 34 codes) ; (2) matrice role x code calculee par le VRAI
+`has_perm()` sur 4 roles (QHSE= tout, CHEF=6 explicites, AUDITEUR= les 8 `*.read`,
+TRANSIT_PRINCIPAL= default-deny total), avec garde interne que les listes citent des codes
+reels du routeur ; (3) HTTP reel : officier 200 sur `/accidents`, auditeur 403 sur
+declaration d'accident et suppression d'enregistrement (403 avant 422/404, preuve que le
+droit passe avant le corps), chef 403 sur controle HACCP mais porte la declaration
+d'accident (« porte ouverte », jamis 500) ; (4) honnetete : permis 501, bilan 501, IMDG
+avec `avertissement` et sans « CONFORME », plus regression specifique du faux positif de
+concatenation (`4.1`+`3` → compatible) ; (5) migration 036 : codes neufs presents, liens
+QHSE == grants, idempotence, garde sur base sans tables.
+
+**Zero fallout anticipe, verifie.** Aucune trafic de test sur le prefixe converti
+(`test_qhse.py` est au niveau service/modeles, jamais HTTP sur `/api/v1/qhse`)  la lecon
+des « faux users » du batch 22 est appliquee preventivement : non-regression ciblee
+(tests qhse + engine + RBAC magasin/finance/acconage) **67 passed / 0 failed** du premier
+coup.
+
+**Verification du lot.** Suite complete `python -m pytest tests` : **EXIT=0, 733 passed,
+1 xfailed, 0 failed** (547 s). Baseline batch 23 = 705/2/0 ; le lot ajoute ses 18 tests,
+le reste de la derive (+~9 tests collectes, un xfail passe) est imputable a la session
+concurrente active, sans echec. `compileall app` EXIT=0 ; `import app.main` = **1145 routes
+OpenAPI** (1142 au batch 23 ; les conversions RBAC n'ajoutent aucune route, le +3 est
+d'origine concurrente) ; base `kamlog_erp.db` **touchee** (horodatage 28/09 inchange,
+antérieur aux runs)  l'isolation tient ; audit frontend `--strict-honnetete` OK ;
+`npx tsc --noEmit` **✅ EXIT=0** (la rougeur `portail-commercial/page.tsx` du batch 23 a
+ete reparee par son auteur entre-temps).
+
+**Reste.** **47 routeurs `v1` / 469 endpoints** encore proteges par la seule authentification
+(derive concurrente ; `qhse` est sorti de la liste). Prochaines candidates naturelles :
+`transit_avance` (40, domaine actif d'une session concurrente  a re-auditer au moment du
+lot), `magasin_douane` (35, reutilisera probablement les codes magasin/transit existants).
+
+➡️ Zero-Mock applique au QHSE : la securite au sens propre. Un permis de travail, une
+declaration CNPS et un verdict de conformite IMDG sont des actes qui engagent la
+responsabilite penale ou declarative de l'entreprise ; ils ne peuvent plus etre inventes
+par un endpoint public, et le refus d'acces est un HTTP 403/501 reel, pas une assertion
+sur un mock.
+
 ---
 
 * Aucun acte à valeur légale (validation CNCC, dépôt GUCE/SYDONIA, quittance, bulletin CNPS,
