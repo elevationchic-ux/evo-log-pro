@@ -78,8 +78,8 @@ export default function SubModuleOrbitalBubble() {
 
   // Liste des modules autorisés
   const filteredNav: ModuleNavConfig[] = useMemo(() => {
-    return Object.values(NAVIGATION_REGISTRY).filter(
-      (m) => m.key !== "superadmin-cadc" || isSuperUser
+    return (Object.values(NAVIGATION_REGISTRY) as ModuleNavConfig[]).filter(
+      (m: ModuleNavConfig) => m.key !== "superadmin-cadc" || isSuperUser
     );
   }, [isSuperUser]);
 
