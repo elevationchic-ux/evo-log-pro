@@ -48,7 +48,8 @@ def enregistrer_peremption(
         stock_id=peremption.stock_id,
         date_peremption=peremption.date_peremption,
         lot_numero=peremption.lot_numero,
-        numero_serie=peremption.numero_serie
+        numero_serie=peremption.numero_serie,
+        quantite=peremption.quantite
     )
     db.add(p)
     db.commit()

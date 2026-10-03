@@ -13,6 +13,7 @@ class PeremptionBase(BaseModel):
 
 class PeremptionCreate(PeremptionBase):
     stock_id: int
+    quantite: float  # colonne reelle NOT NULL de Peremption (quantite du lot) ; etait omise
 
 
 class PeremptionResponse(PeremptionBase):
