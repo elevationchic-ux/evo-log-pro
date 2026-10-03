@@ -433,7 +433,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   // ============================================================================
   'comptabilite-ohada': {
     key: 'comptabilite-ohada',
-    title: '📚 Comptabilité OHADA (Sage)',
+    title: 'Comptabilité OHADA (Sage)',
     path: '/comptabilite-ohada/dashboard',
     icon: BookOpen,
     color: '#8b5cf6',
@@ -529,7 +529,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   // ============================================================================
   'finance-ohada': {
     key: 'finance-ohada',
-    title: '💰 K-Finance & Trésorerie',
+    title: 'K-Finance & Trésorerie',
     path: '/finance-ohada/dashboard',
     icon: DollarSign,
     color: '#10b981',
@@ -614,7 +614,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   // ============================================================================
   'parc-vehicules': {
     key: 'parc-vehicules',
-    title: '🚗 K-Parc Véhicules & GMAO',
+    title: 'K-Parc Véhicules & GMAO',
     path: '/parc-vehicules/dashboard',
     icon: Wrench,
     color: '#f97316',
@@ -684,7 +684,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   // ============================================================================
   'rh-personnel': {
     key: 'rh-personnel',
-    title: '👥 Ressources Humaines & Paie',
+    title: 'Ressources Humaines & Paie',
     path: '/rh-personnel/dashboard',
     icon: Users,
     color: '#ec4899',
