@@ -8,7 +8,7 @@ import random
 import string
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.permissions import require_perm
 from app.core.not_implemented import not_implemented
 from app.models.user import User
 from app.schemas.qhse import (
@@ -64,7 +64,7 @@ def _registre_dict(e: RegistreEntry) -> dict:
 def creer_analyse_risque(
     analyse: AnalyseRisqueCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.risque.create"))
 ):
     """Create risk analysis"""
     return AnalyseRisqueService.creer_analyse_risque(
@@ -80,7 +80,7 @@ def mettre_a_jour_analyse(
     analyse_id: int,
     analyse: AnalyseRisqueUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.risque.modify"))
 ):
     """Update risk analysis"""
     a = db.query(AnalyseRisque).filter(AnalyseRisque.id == analyse_id).first()
@@ -100,7 +100,7 @@ def mettre_a_jour_analyse(
 def creer_action_prevention(
     action: ActionPreventionCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.prevention.create"))
 ):
     """Create prevention action"""
     return ActionPreventionService.creer_action_prevention(
@@ -114,7 +114,7 @@ def mettre_a_jour_action(
     action_id: int,
     action: ActionPreventionUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.prevention.modify"))
 ):
     """Update prevention action"""
     a = db.query(ActionPrevention).filter(ActionPrevention.id == action_id).first()
@@ -134,7 +134,7 @@ def mettre_a_jour_action(
 def creer_plan_prevention(
     plan: PlanPreventionCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.prevention.create"))
 ):
     """Create prevention plan"""
     return PlanPreventionService.creer_plan_prevention(
@@ -148,7 +148,7 @@ def mettre_a_jour_plan(
     plan_id: int,
     plan: PlanPreventionUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.prevention.modify"))
 ):
     """Update prevention plan"""
     p = db.query(PlanPrevention).filter(PlanPrevention.id == plan_id).first()
@@ -168,7 +168,7 @@ def mettre_a_jour_plan(
 def ajouter_epi(
     epi: EPIRequisCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.epi.create"))
 ):
     """Add required PPE"""
     return EPIRequisService.ajouter_epi(
@@ -182,7 +182,7 @@ def mettre_a_jour_epi(
     epi_id: int,
     epi: EPIRequisUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.epi.modify"))
 ):
     """Update required PPE"""
     e = db.query(EPIRequis).filter(EPIRequis.id == epi_id).first()
@@ -202,7 +202,7 @@ def mettre_a_jour_epi(
 def lister_accidents(
     skip: int = 0, limit: int = 200,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.accident.read"))
 ):
     """Registre reel des accidents du travail declares (persistance SQLAlchemy)."""
     rows = db.query(AccidentTravail).order_by(desc(AccidentTravail.id)).offset(skip).limit(limit).all()
@@ -227,7 +227,7 @@ def lister_accidents(
 def declarer_accident(
     accident: AccidentTravailCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.accident.create"))
 ):
     """Declare work accident"""
     created = AccidentTravailService.declarer_accident(
@@ -255,7 +255,7 @@ def mettre_a_jour_accident(
     accident_id: int,
     accident: AccidentTravailUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.accident.modify"))
 ):
     """Update work accident"""
     a = db.query(AccidentTravail).filter(AccidentTravail.id == accident_id).first()
@@ -275,7 +275,7 @@ def mettre_a_jour_accident(
 def lister_investigations(
     skip: int = 0, limit: int = 200,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.investigation.read"))
 ):
     """Registre reel des enquetes / plans d'actions correctives (CAPA)."""
     rows = db.query(InvestigationAccident).order_by(desc(InvestigationAccident.id)).offset(skip).limit(limit).all()
@@ -300,7 +300,7 @@ def lister_investigations(
 def creer_investigation(
     investigation: InvestigationAccidentCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.investigation.create"))
 ):
     """Create accident investigation"""
     created = InvestigationAccidentService.creer_investigation(
@@ -324,7 +324,7 @@ def mettre_a_jour_investigation(
     investigation_id: int,
     investigation: InvestigationAccidentUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.investigation.modify"))
 ):
     """Update accident investigation"""
     i = db.query(InvestigationAccident).filter(InvestigationAccident.id == investigation_id).first()
@@ -344,7 +344,7 @@ def mettre_a_jour_investigation(
 def creer_certification(
     certification: NormeCertificationCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.certification.create"))
 ):
     """Create ISO certification"""
     return NormeCertificationService.creer_certification(
@@ -359,7 +359,7 @@ def mettre_a_jour_certification(
     certification_id: int,
     certification: NormeCertificationUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.certification.modify"))
 ):
     """Update ISO certification"""
     c = db.query(NormeCertification).filter(NormeCertification.id == certification_id).first()
@@ -379,7 +379,7 @@ def mettre_a_jour_certification(
 def creer_audit(
     audit: AuditQualiteCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.audit.create"))
 ):
     """Create quality audit"""
     return AuditQualiteService.creer_audit(
@@ -393,7 +393,7 @@ def mettre_a_jour_audit(
     audit_id: int,
     audit: AuditQualiteUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.audit.modify"))
 ):
     """Update quality audit"""
     a = db.query(AuditQualite).filter(AuditQualite.id == audit_id).first()
@@ -413,7 +413,7 @@ def mettre_a_jour_audit(
 def creer_plan_haccp(
     plan: HACCPPlanCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.haccp.create"))
 ):
     """Create HACCP plan"""
     return HACCPPlanService.creer_plan_haccp(
@@ -426,7 +426,7 @@ def mettre_a_jour_plan_haccp(
     plan_id: int,
     plan: HACCPPlanUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.haccp.modify"))
 ):
     """Update HACCP plan"""
     p = db.query(HACCPPlan).filter(HACCPPlan.id == plan_id).first()
@@ -446,7 +446,7 @@ def mettre_a_jour_plan_haccp(
 def ajouter_ccp(
     ccp: PointCritiqueCCPCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.haccp.create"))
 ):
     """Add critical control point"""
     return PointCritiqueCCPService.ajouter_ccp(
@@ -460,7 +460,7 @@ def mettre_a_jour_ccp(
     ccp_id: int,
     ccp: PointCritiqueCCPUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.haccp.modify"))
 ):
     """Update critical control point"""
     c = db.query(PointCritiqueCCP).filter(PointCritiqueCCP.id == ccp_id).first()
@@ -480,7 +480,7 @@ def mettre_a_jour_ccp(
 def enregistrer_controle(
     enregistrement: EnregistrementHACCPCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.controle.create"))
 ):
     """Record HACCP control"""
     return EnregistrementHACCPService.enregistrer_controle(
@@ -494,7 +494,7 @@ def mettre_a_jour_enregistrement(
     enregistrement_id: int,
     enregistrement: EnregistrementHACCPUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.controle.modify"))
 ):
     """Update HACCP record"""
     e = db.query(EnregistrementHACCP).filter(EnregistrementHACCP.id == enregistrement_id).first()
@@ -514,7 +514,7 @@ def mettre_a_jour_enregistrement(
 def creer_formation(
     formation: FormationQHSECreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.formation.create"))
 ):
     """Create QHSE training"""
     return FormationQHSEService.creer_formation(
@@ -528,7 +528,7 @@ def mettre_a_jour_formation(
     formation_id: int,
     formation: FormationQHSEUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.formation.modify"))
 ):
     """Update QHSE training"""
     f = db.query(FormationQHSE).filter(FormationQHSE.id == formation_id).first()
@@ -548,7 +548,7 @@ def mettre_a_jour_formation(
 def creer_indicateur(
     indicateur: IndicateurQHSECreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.indicateur.create"))
 ):
     """Create QHSE indicator"""
     return IndicateurQHSEService.creer_indicateur(
@@ -562,7 +562,7 @@ def mettre_a_jour_valeur(
     indicateur_id: int,
     valeur_actuelle: float,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.indicateur.modify"))
 ):
     """Update indicator value"""
     return IndicateurQHSEService.mettre_a_jour_valeur(db, indicateur_id, valeur_actuelle)
@@ -573,7 +573,7 @@ def mettre_a_jour_indicateur(
     indicateur_id: int,
     indicateur: IndicateurQHSEUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.indicateur.modify"))
 ):
     """Update QHSE indicator"""
     i = db.query(IndicateurQHSE).filter(IndicateurQHSE.id == indicateur_id).first()
@@ -592,7 +592,7 @@ def mettre_a_jour_indicateur(
 def rapport_securite(
     annee: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.rapport.read"))
 ):
     """Generate safety report"""
     return QHSEReportingService.rapport_securite(db, annee)
@@ -603,7 +603,7 @@ def rapport_securite(
 def lister_formations_qhse(
     skip: int = 0, limit: int = 200,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.formation.read"))
 ):
     rows = db.query(FormationQHSE).order_by(desc(FormationQHSE.id)).offset(skip).limit(limit).all()
     data = [
@@ -624,7 +624,7 @@ def lister_formations_qhse(
 def lister_audits_qhse(
     skip: int = 0, limit: int = 200,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.audit.read"))
 ):
     rows = db.query(AuditQualite).order_by(desc(AuditQualite.id)).offset(skip).limit(limit).all()
     data = [
@@ -645,7 +645,7 @@ def lister_audits_qhse(
 def lister_certifications_qhse(
     skip: int = 0, limit: int = 200,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.certification.read"))
 ):
     rows = db.query(NormeCertification).order_by(desc(NormeCertification.id)).offset(skip).limit(limit).all()
     data = [
@@ -670,7 +670,7 @@ QHSE_REGISTRY = "qhse-inspections"
 @router.get("/")
 def lister_enregistrements_qhse_root(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.enregistrement.read"))
 ):
     """Liste des rapports d'inspection QHSE reellement enregistres par la structure."""
     q = db.query(RegistreEntry).filter(RegistreEntry.registry == QHSE_REGISTRY)
@@ -686,7 +686,7 @@ def lister_enregistrements_qhse_root(
 def creer_enregistrement_qhse_root(
     payload: dict = Body(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.enregistrement.create"))
 ):
     """Enregistre un rapport d'inspection / signalement QHSE (donnees reelles du formulaire)."""
     entry = RegistreEntry(
@@ -707,7 +707,7 @@ def creer_enregistrement_qhse_root(
 def lire_enregistrement_qhse(
     record_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.enregistrement.read"))
 ):
     e = db.query(RegistreEntry).filter(
         RegistreEntry.id == record_id, RegistreEntry.registry == QHSE_REGISTRY
@@ -722,7 +722,7 @@ def modifier_enregistrement_qhse(
     record_id: int,
     payload: dict = Body(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.enregistrement.modify"))
 ):
     e = db.query(RegistreEntry).filter(
         RegistreEntry.id == record_id, RegistreEntry.registry == QHSE_REGISTRY
@@ -745,7 +745,7 @@ def modifier_enregistrement_qhse(
 def supprimer_enregistrement_qhse(
     record_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("qhse.enregistrement.delete"))
 ):
     e = db.query(RegistreEntry).filter(
         RegistreEntry.id == record_id, RegistreEntry.registry == QHSE_REGISTRY
@@ -764,7 +764,7 @@ def supprimer_enregistrement_qhse(
 @router.post("/permis-travail")
 def creer_permis_travail_api(
     payload: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_perm("qhse.permis.create")),
 ):
     """Permis de travail debranche cote serveur (501) : aucune signature simulee."""
     from app.services.qhse_service import WorkPermitsIMDGService
@@ -777,7 +777,7 @@ def creer_permis_travail_api(
 @router.post("/imdg/segregation")
 def verifier_compatibilite_imdg_api(
     payload: dict,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_perm("qhse.imdg.read")),
 ):
     """Contrainte de segregation IMDG : aide-memoire, remplace la matrice officielle"""
     from app.services.qhse_service import WorkPermitsIMDGService
@@ -794,7 +794,7 @@ def verifier_compatibilite_imdg_api(
 @router.get("/csst-cnps/bilan")
 def obtenir_bilan_csst_cnps(
     annee: int = 2026,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_perm("qhse.rapport.read")),
 ):
     """Bilan officiel CNPS/CSST : 501 (aucune donnee saisie, rien d'invente)."""
     from app.services.qhse_service import WorkPermitsIMDGService

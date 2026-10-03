@@ -43,72 +43,8 @@
   "appel": "/api/v1/parc/ocr-extract",
   "brut": "/api/parc/ocr-extract",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 513,
+  "ligne": 515,
   "genre": "repond_501",
   "route": "/api/v1/parc/ocr-extract"
- },
- {
-  "appel": "/api/v1/ai/assistant/chat",
-  "brut": "/api/v1/ai/assistant/chat",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 836,
-  "genre": "repond_501",
-  "route": "/api/v1/ai/assistant/chat"
- },
- {
-  "appel": "/api/v1/k-modules/cotations",
-  "brut": "/api/v1/k-modules/cotations",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 894,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/cotations"
- },
- {
-  "appel": "/api/v1/k-modules/cotations",
-  "brut": "/api/v1/k-modules/cotations",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 895,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/cotations"
- },
- {
-  "appel": "/api/v1/k-modules/fuel-guard/sensors",
-  "brut": "/api/v1/k-modules/fuel-guard/sensors",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 906,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/fuel-guard/sensors"
- },
- {
-  "appel": "/api/v1/k-modules/fuel-guard/sensors",
-  "brut": "/api/v1/k-modules/fuel-guard/sensors",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 907,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/fuel-guard/sensors"
- },
- {
-  "appel": "/api/v1/k-modules/procurement/orders",
-  "brut": "/api/v1/k-modules/procurement/orders",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 912,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/procurement/orders"
- },
- {
-  "appel": "/api/v1/k-modules/procurement/orders",
-  "brut": "/api/v1/k-modules/procurement/orders",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 913,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/procurement/orders"
- },
- {
-  "appel": "/api/v1/k-modules/bi-analytics/executive-summary",
-  "brut": "/api/v1/k-modules/bi-analytics/executive-summary",
-  "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 931,
-  "genre": "repond_501",
-  "route": "/api/v1/k-modules/bi-analytics/executive-summary"
  }
 ]
