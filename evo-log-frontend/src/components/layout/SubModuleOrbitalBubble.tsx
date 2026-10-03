@@ -129,12 +129,41 @@ export default function SubModuleOrbitalBubble() {
     return filteredNav.find((m) => m.key === targetKey) || filteredNav[0];
   }, [pinnedModuleKey, hoveredModuleKey, activeModuleKey, filteredNav]);
 
-  // ── Drag FAB (souris + tactile) ──
+  // ── Drag FAB : mousemove/mouseup attachés sur window pour drag fluide même hors du bouton ──
+  const isDraggingRef = useRef(false);
+
   const beginDrag = (clientX: number, clientY: number) => {
+    isDraggingRef.current = false;
     setIsDragging(false);
     dragStartRef.current = { startX: clientX, startY: clientY, posX: position.x, posY: position.y };
+
+    const onMouseMove = (e: MouseEvent) => {
+      const deltaX = dragStartRef.current.startX - e.clientX;
+      const deltaY = e.clientY - dragStartRef.current.startY;
+      if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+        isDraggingRef.current = true;
+        setIsDragging(true);
+      }
+      setPosition({
+        x: Math.max(10, Math.min(window.innerWidth - 70, dragStartRef.current.posX + deltaX)),
+        y: Math.max(80, Math.min(window.innerHeight - 80, dragStartRef.current.posY + deltaY)),
+      });
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.setTimeout(() => {
+        isDraggingRef.current = false;
+        setIsDragging(false);
+      }, 0);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
   };
-  const moveDrag = (clientX: number, clientY: number) => {
+
+  const moveDragTouch = (clientX: number, clientY: number) => {
     const deltaX = dragStartRef.current.startX - clientX;
     const deltaY = clientY - dragStartRef.current.startY;
     if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) setIsDragging(true);
@@ -181,22 +210,23 @@ export default function SubModuleOrbitalBubble() {
         className="fixed z-[85] select-none cursor-grab active:cursor-grabbing"
       >
         <button
-          onMouseDown={(e) => beginDrag(e.clientX, e.clientY)}
-          onMouseMove={(e) => isDragging && moveDrag(e.clientX, e.clientY)}
-          onMouseUp={() => window.setTimeout(() => setIsDragging(false), 0)}
+          onMouseDown={(e) => { e.preventDefault(); beginDrag(e.clientX, e.clientY); }}
           onTouchStart={(e) => beginDrag(e.touches[0].clientX, e.touches[0].clientY)}
-          onTouchMove={(e) => isDragging && moveDrag(e.touches[0].clientX, e.touches[0].clientY)}
+          onTouchMove={(e) => { e.preventDefault(); moveDragTouch(e.touches[0].clientX, e.touches[0].clientY); }}
           onTouchEnd={() => window.setTimeout(() => setIsDragging(false), 0)}
           onClick={() => {
-            if (!isDragging) setIsOpen((o) => !o);
+            if (!isDraggingRef.current) setIsOpen((o) => !o);
           }}
-          className="relative w-14 h-14 rounded-full bg-slate-900 border-2 flex items-center justify-center shadow-2xl transition-transform hover:scale-105 active:scale-95"
+          className={`relative w-14 h-14 rounded-full bg-slate-900 border-2 flex items-center justify-center shadow-2xl transition-transform ${isDragging ? 'cursor-grabbing scale-110 shadow-amber-400/30' : 'cursor-grab hover:scale-105 active:scale-95'}`}
           style={{ borderColor: activeOrbit.color }}
           aria-label={t.shell.bubbleTitle}
-          title={t.shell.bubbleTitle}
+          title={isDragging ? 'Relâchez pour repositionner' : t.shell.bubbleTitle}
         >
+          {isDragging && (
+            <span className="absolute -inset-1 rounded-full border-2 border-dashed border-amber-400/60 animate-spin" style={{ animationDuration: '3s' }} />
+          )}
           <div
-            className={`w-11 h-11 rounded-full bg-gradient-to-tr ${activeOrbit.bgGradient} flex items-center justify-center text-white shadow-inner`}
+            className={`w-11 h-11 rounded-full bg-gradient-to-tr ${activeOrbit.bgGradient} flex items-center justify-center text-white shadow-inner transition-opacity ${isDragging ? 'opacity-80' : ''}`}
           >
             {isOpen ? <X className="w-6 h-6" /> : <MainIcon className="w-6 h-6" />}
           </div>

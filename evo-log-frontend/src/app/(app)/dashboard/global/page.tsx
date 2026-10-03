@@ -102,6 +102,17 @@ const fmtM = (v: Num, unit = 'M', locale = 'fr-FR') =>
 
 const fmtInt = (v: Num, locale = 'fr-FR') => (v === null ? '' : v.toLocaleString(locale))
 
+const ERP_DOMAINS = [
+  { id: 'all', label: 'Tous', labelEn: 'All' },
+  { id: 'maritime', label: 'Maritime & Quai', labelEn: 'Maritime & Port', keys: ['port-operations', 'transit-douane', 'portail-declarant'] },
+  { id: 'transport', label: 'Transport & Parc', labelEn: 'Transport & Fleet', keys: ['transport-flotte', 'parc-vehicules', 'portail-chauffeur', 'portail-technicien'] },
+  { id: 'entrepot', label: 'Entreposage & Stock', labelEn: 'Warehouse & Stock', keys: ['magasin-stock', 'portail-magasinier', 'annuaire-prestataires'] },
+  { id: 'finance', label: 'Finance & OHADA', labelEn: 'Finance & OHADA', keys: ['comptabilite-ohada', 'finance-ohada', 'portail-frais', 'portail-commercial'] },
+  { id: 'rh', label: 'Ressources Humaines', labelEn: 'Human Resources', keys: ['rh-personnel', 'chef-personnel', 'portail-employe', 'portail-collaborateur', 'departement'] },
+  { id: 'qhse', label: 'Sécurité & QHSE', labelEn: 'Safety & QHSE', keys: ['qhse-securite', 'portail-qhse'] },
+  { id: 'direction', label: 'Direction & CADC', labelEn: 'Governance & CADC', keys: ['dashboard', 'client-b2b', 'reports-bi', 'chat', 'admin-tenant', 'admin-saas', 'superadmin-cadc'] },
+] as const
+
 export default function GlobalDashboard() {
   const router = useRouter()
   const t = useI18n()
@@ -118,6 +129,8 @@ export default function GlobalDashboard() {
   const [revenueMonths, setRevenueMonths] = useState<RevenuePoint[]>([])
   const [zones, setZones] = useState<ZoneOccupation[]>([])
   const [activity, setActivity] = useState<ActivityItem[]>([])
+  const [quickNavDomain, setQuickNavDomain] = useState<string>('all')
+  const [quickNavQuery, setQuickNavQuery] = useState<string>('')
 
   const load = useCallback(async () => {
     const [finRes, transRes, magRes, chartRes, facturesRes, encaisRes, zonesRes] =
@@ -411,42 +424,147 @@ export default function GlobalDashboard() {
         </div>
       </div>
 
-      {/* 🚀 All ERP Modules Quick Access Grid */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2 pb-3 border-b border-slate-800">
-          <Zap className="w-5 h-5 text-amber-400" /> {t.dash.quickNavTitle}
-        </h2>
+      {/* 🚀 All 28 ERP Modules Quick Access Grid with Domain Filters */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                {t.dash.quickNavTitle}
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                  {Object.keys(NAVIGATION_REGISTRY).length} modules
+                </span>
+              </h2>
+              <p className="text-xs text-slate-400">
+                Accès direct instantané à l'ensemble des modules opérationnels et portails
+              </p>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          {[
-            { label: t.dash.adminErp, href: '/admin', icon: ShieldCheck, color: 'text-amber-400' },
-            { label: t.dash.modTransport, href: '/transport/control', icon: Truck, color: 'text-emerald-400' },
-            { label: t.dash.modWarehouse, href: '/magasin/dashboard', icon: Package, color: 'text-indigo-400' },
-            { label: t.dash.modFinance, href: '/finance/overview', icon: CreditCard, color: 'text-cyan-400' },
-            { label: t.dash.modStevedoring, href: '/acconage', icon: Building, color: 'text-purple-400' },
-            { label: t.dash.modQhse, href: '/qhse', icon: ShieldAlert, color: 'text-red-400' },
-            { label: t.dash.modCustoms, href: '/transit', icon: Globe, color: 'text-yellow-400' },
-            { label: t.dash.modMaintenance, href: '/maintenance', icon: RefreshCw, color: 'text-blue-400' },
-            { label: 'e-POD & GPS', href: '/tracking', icon: Radio, color: 'text-emerald-400' },
-            { label: 'FuelGuard', href: '/fuel-guard', icon: Fuel, color: 'text-orange-400' },
-            { label: 'Procurement', href: '/procurement', icon: ShoppingCart, color: 'text-pink-400' },
-            { label: t.dash.modAnalytics, href: '/bi', icon: BarChart3, color: 'text-amber-400' },
-          ].map((m, idx) => {
-            const IconComponent = m.icon
-            return (
-              <Link
-                key={idx}
-                href={m.href}
-                className="bg-slate-950 hover:bg-slate-800/80 border border-slate-800 p-3.5 rounded-2xl flex flex-col items-center text-center gap-2 transition hover:scale-105 active:scale-95 group shadow-md"
+          {/* Recherche rapide de module */}
+          <div className="relative w-full md:w-64">
+            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={quickNavQuery}
+              onChange={(e) => setQuickNavQuery(e.target.value)}
+              placeholder="Filtrer les modules..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-7 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+            />
+            {quickNavQuery && (
+              <button
+                type="button"
+                onClick={() => setQuickNavQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-300"
               >
-                <div className={`p-2.5 rounded-xl bg-slate-900 border border-slate-800 ${m.color} group-hover:scale-110 transition`}>
-                  <IconComponent className="w-5 h-5" />
-                </div>
-                <span className="text-xs font-bold text-slate-200 group-hover:text-amber-400 transition">{m.label}</span>
-              </Link>
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Onglets de filtrage par domaine pour éviter le scroll pénible */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          {ERP_DOMAINS.map((dom) => {
+            const isActive = quickNavDomain === dom.id
+            const label = language === 'en' ? dom.labelEn : dom.label
+            const count =
+              dom.id === 'all'
+                ? Object.keys(NAVIGATION_REGISTRY).length
+                : (dom as any).keys?.filter((k: string) => NAVIGATION_REGISTRY[k])?.length || 0
+
+            return (
+              <button
+                key={dom.id}
+                type="button"
+                onClick={() => setQuickNavDomain(dom.id)}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  isActive
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                    : 'bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <span>{label}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                    isActive ? 'bg-slate-950/20 text-slate-950 font-black' : 'bg-slate-800 text-slate-400'
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
             )
           })}
         </div>
+
+        {/* Grille filtrée des modules */}
+        {(() => {
+          const allModules = Object.values(NAVIGATION_REGISTRY) as ModuleNavConfig[]
+          const activeDomainObj = ERP_DOMAINS.find((d) => d.id === quickNavDomain)
+          const domainKeys = (activeDomainObj as any)?.keys as string[] | undefined
+
+          const filtered = allModules.filter((mod) => {
+            if (domainKeys && !domainKeys.includes(mod.key)) return false
+            if (quickNavQuery) {
+              const q = quickNavQuery.toLowerCase().trim()
+              const title = localizeTitle(mod, language).toLowerCase()
+              const area = (mod.businessArea || '').toLowerCase()
+              const key = mod.key.toLowerCase()
+              const hasSubMatch = mod.subModules.some((s) =>
+                s.label.toLowerCase().includes(q) || (s.tcode || '').toLowerCase().includes(q)
+              )
+              return title.includes(q) || area.includes(q) || key.includes(q) || hasSubMatch
+            }
+            return true
+          })
+
+          if (filtered.length === 0) {
+            return (
+              <div className="py-12 text-center text-xs text-slate-500 bg-slate-950/40 rounded-2xl border border-slate-800/60">
+                Aucun module ne correspond aux critères sélectionnés.
+              </div>
+            )
+          }
+
+          return (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-3">
+              {filtered.map((mod) => {
+                const IconComponent = mod.icon || LayoutDashboard
+                return (
+                  <Link
+                    key={mod.key}
+                    href={mod.path}
+                    className="bg-slate-950/90 hover:bg-slate-800/90 border border-slate-800/90 hover:border-slate-700 p-3 rounded-2xl flex flex-col items-center text-center gap-2 transition-all hover:scale-105 active:scale-95 group shadow-md"
+                    style={{
+                      borderBottomColor: mod.color,
+                      borderBottomWidth: '2px',
+                    }}
+                  >
+                    <div
+                      className="p-2.5 rounded-xl text-white shadow group-hover:scale-110 transition-transform"
+                      style={{
+                        background: `linear-gradient(135deg, ${mod.color}, #0f172a)`,
+                      }}
+                    >
+                      <IconComponent className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0 w-full">
+                      <span className="text-xs font-bold text-slate-100 group-hover:text-amber-400 transition-colors line-clamp-1">
+                        {localizeTitle(mod, language)}
+                      </span>
+                      <span className="block text-[10px] text-slate-400 truncate mt-0.5">
+                        {mod.subModules.length} sous-modules
+                      </span>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )
+        })()}
       </div>
 
       {/* 📡 Last document activity  issu des écritures réelles */}
