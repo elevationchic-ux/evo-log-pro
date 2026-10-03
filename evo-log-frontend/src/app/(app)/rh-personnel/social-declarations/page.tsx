@@ -30,6 +30,7 @@ export default function RhPersonnelSocialDeclarations() {
   const [bulletins, setBulletins] = useState<Bulletin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const charger = useCallback(async () => {
     setLoading(true);
@@ -71,13 +72,9 @@ export default function RhPersonnelSocialDeclarations() {
   const filtered = brouillons.filter(b =>
     !searchQuery || b.periode.includes(searchQuery)
   );
-  const [searchQuery, setSearchQuery] = useState('');
 
   function exporterBrouillon() {
-    if (brouillons.length === 0) {
-      setError(null);
-      return;
-    }
+    if (brouillons.length === 0) return;
     exportToCSV(
       brouillons.map(b => ({
         periode: b.periode,
