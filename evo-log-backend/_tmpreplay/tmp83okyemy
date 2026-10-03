@@ -1,0 +1,15 @@
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 001_initial, Initial schema creation
+INFO  [alembic.runtime.migration] Running upgrade 001_initial -> 002_complete_models, Add complete models for all modules
+INFO  [alembic.runtime.migration] Running upgrade 002_complete_models -> 003_add_remaining_models, Add remaining models for Version 2.0
+INFO  [alembic.runtime.migration] Running upgrade 003_add_remaining_models -> 004_add_advanced_models, Add advanced RH, warehouse, and transport models
+INFO  [alembic.runtime.migration] Running upgrade 004_add_advanced_models -> 005_add_acconage_transit_avance, Add advanced acconage, transit, warehouse and transport international models
+INFO  [alembic.runtime.migration] Running upgrade 005_add_acconage_transit_avance -> 006_add_multi_tenant_saas, Add multi-tenant SAAS tables
+INFO  [alembic.runtime.migration] Running upgrade 006_add_multi_tenant_saas -> 007_add_cameroun_cemac, Add Cameroon/CEMAC specific models - Ports, Customs, Transit, Containers
+INFO  [alembic.runtime.migration] Running upgrade 007_add_cameroun_cemac -> 008_add_cameroun_cemac_phase2, Add Cameroon/CEMAC specific models - Ports, Customs, Transit, Containers, Fiscalite, Regulatory, Training
+INFO  [alembic.runtime.migration] Running upgrade 008_add_cameroun_cemac_phase2 -> 008_add_comptabilite_avance_complete, add_comptabilite_avance_complete
+INFO  [alembic.runtime.migration] Running upgrade 008_add_comptabilite_avance_complete -> 009_add_transport_avance_complete, add_transport_avance_complete
+INFO  [alembic.runtime.migration] Running upgrade 009_add_transport_avance_complete -> 010_add_outbox_events, add durable outbox events
+INFO  [alembic.runtime.migration] Running upgrade 010_add_outbox_events -> 20260919_add_quote_company_scope, Add tenant scope to B2B quotes.
+INFO  [alembic.runtime.migration] Running upgrade 20260919_add_quote_company_scope -> 011_tenant_scope_roots, isolation multi-tenant: company_id sur les racines transactionnelles

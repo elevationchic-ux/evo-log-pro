@@ -2372,18 +2372,18 @@
   },
   "ComposantKitCreate": {
    "champs": [
-    "article_composant_id",
     "kit_id",
-    "quantite"
+    "quantite",
+    "stock_id"
    ],
    "enums": {}
   },
   "ComposantKitResponse": {
    "champs": [
-    "article_composant_id",
     "id",
     "kit_id",
-    "quantite"
+    "quantite",
+    "stock_id"
    ],
    "enums": {}
   },
@@ -16003,10 +16003,27 @@
   "/api/v1/gps-tracking/stats/flotte": {
    "get": []
   },
+  "/api/v1/real-customs/dossiers": {
+   "get": [],
+   "post": []
+  },
   "/api/v1/real-customs/camcis/circuits/{numero_dum}": {
    "get": []
   },
+  "/api/v1/real-customs/camcis/circuits": {
+   "post": []
+  },
   "/api/v1/real-customs/camcis/teletransmettre": {
+   "post": []
+  },
+  "/api/v1/real-customs/cautions": {
+   "get": [],
+   "post": []
+  },
+  "/api/v1/real-customs/cautions/statut": {
+   "get": []
+  },
+  "/api/v1/real-customs/cautions/apurer": {
    "post": []
   },
   "/api/v1/real-customs/camcis/export-edi/{numero_dum}": {
@@ -16014,12 +16031,6 @@
   },
   "/api/v1/real-customs/guce/formalites/{dossier_id}": {
    "get": []
-  },
-  "/api/v1/real-customs/cautions/statut": {
-   "get": []
-  },
-  "/api/v1/real-customs/cautions/apurer": {
-   "post": []
   },
   "/api/v1/port-incidents/": {
    "get": [],

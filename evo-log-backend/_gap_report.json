@@ -16,30 +16,6 @@
   "route": null
  },
  {
-  "appel": "/api/v1/real-customs/cautions/statut",
-  "brut": "/api/v1/real-customs/cautions/statut",
-  "fichier": "evo-log-frontend/src/app/(app)/real-customs/page.tsx",
-  "ligne": 43,
-  "genre": "repond_501",
-  "route": "/api/v1/real-customs/cautions/statut"
- },
- {
-  "appel": "/api/v1/real-customs/camcis/circuits/{p}",
-  "brut": "/api/v1/real-customs/camcis/circuits/{p}",
-  "fichier": "evo-log-frontend/src/app/(app)/real-customs/page.tsx",
-  "ligne": 56,
-  "genre": "repond_501",
-  "route": "/api/v1/real-customs/camcis/circuits/{numero_dum}"
- },
- {
-  "appel": "/api/v1/real-customs/camcis/teletransmettre",
-  "brut": "/api/v1/real-customs/camcis/teletransmettre",
-  "fichier": "evo-log-frontend/src/app/(app)/real-customs/page.tsx",
-  "ligne": 69,
-  "genre": "repond_501",
-  "route": "/api/v1/real-customs/camcis/teletransmettre"
- },
- {
   "appel": "/api/v1/parc/ocr-extract",
   "brut": "/api/parc/ocr-extract",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
