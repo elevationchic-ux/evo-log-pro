@@ -1348,7 +1348,7 @@ converties au total.
 | `GET /csst-cnps/bilan` | un « bilan officiel CNPS/CSST » : 2 850 000 heures, 3 accidents, 42 jours d'arret, TF/TG calcules, certifications ISO « actives »  identiques pour tous les tenants | **501** : une declaration annuelle a valeur declarative aupres de la CNPS ; des chiffres inventes exposent l'entreprise. Les chiffres reels deja saisis restent accessibles via `/rapports/securite/{annee}` (code `qhse.rapport.read`). |
 | `POST /imdg/segregation` | verdict « CONFORME_CODE_IMDG » et « prescriptions pompiers » sur une matrice reduite a 2 regles, testees par `"1" in "".join(classes)` | **garde honnete** : le calcul (2 regles majeures) est legitime mais devient un **aide-memoire assume**  plus de pretendu « CONFORME », un champ `avertissement` explicite « NON REGLEMENTAIRE, ne remplace pas la matrice officielle ». Correction d'un **vrai bug** a l'occasion : la concatenation provoquait des faux positifs (`4.1`+`3` → `"4.13"` contenant `1` et `3`) et negatifs (`5.1`+`3` → `"5.13"` ne contenant pas `5.1`) ; la comparaison est desormais exacte par classe. |
 
-Les trois sont desormais Derriere `require_perm` (respectivement `qhse.permis.create`,
+Les trois sont desormais derriere `require_perm` (respectivement `qhse.permis.create`,
 `qhse.rapport.read`, `qhse.imdg.read`)  plus aucun endpoint public.
 
 **Conversions RBAC (38 routes restantes).** Table explicite (methode + chemin) → code,

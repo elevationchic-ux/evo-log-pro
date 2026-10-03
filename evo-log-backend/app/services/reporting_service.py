@@ -137,6 +137,10 @@ class RapportService:
         if not rapport:
             raise ValueError("Rapport non trouvé")
         
+        debut = datetime.utcnow()
+        rapport.statut = "en_cours"
+        db.commit()
+
         # La « generation » actuelle ne calcule toujours aucune ligne : elle
         # horodate et bascule le statut, rien de plus. L'ancien code
         # simulationnait time.sleep(1) puis inventait nombre_lignes = 1000 ;
