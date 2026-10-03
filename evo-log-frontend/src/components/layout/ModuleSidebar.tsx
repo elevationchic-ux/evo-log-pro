@@ -258,19 +258,22 @@ export default function ModuleSidebar({
                         href={sub.path}
                         title={localizeSubLabel(sub.label, language)}
                         onClick={() => isMobile && onClose && onClose()}
-                        className={`flex min-w-0 items-center justify-between gap-2 py-1.5 px-2.5 min-h-9 text-xs rounded-lg transition-colors group border ${
+                        className={`flex min-w-0 items-center justify-between gap-2 py-1.5 px-2.5 min-h-9 text-xs rounded-r-md transition-colors group border border-transparent ${
                           isSubActive
-                            ? "font-bold"
-                            : "border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 font-medium"
+                            ? "bg-slate-800/50 font-semibold text-slate-100"
+                            : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/40 font-medium"
                         }`}
-                        style={isSubActive ? { backgroundColor: `${item.color}30`, color: `${item.color}dd`, borderColor: `${item.color}60` } : undefined}
+                        style={isSubActive ? { boxShadow: `inset 2px 0 0 0 ${item.color}` } : undefined}
                       >
                         <div className="flex min-w-0 flex-1 items-center gap-2">
                           {SubIcon && <SubIcon className="w-3.5 h-3.5 shrink-0 opacity-70 group-hover:opacity-100" />}
                           <span className="truncate min-w-0">{localizeSubLabel(sub.label, language)}</span>
                         </div>
+                        {isSubActive && (
+                          <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} aria-hidden="true" />
+                        )}
                         {sub.badge && (
-                          <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 border border-slate-700 shrink-0">
+                          <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 shrink-0">
                             {sub.badge}
                           </span>
                         )}
@@ -295,10 +298,10 @@ export default function ModuleSidebar({
             aria-expanded={!isCollapsed}
           >
             {isCollapsed ? (
-              <ChevronRight className="w-4 h-4 text-indigo-400" />
+              <ChevronRight className="w-4 h-4 text-slate-400" />
             ) : (
               <>
-                <ChevronLeft className="w-4 h-4 text-indigo-400" />
+                <ChevronLeft className="w-4 h-4 text-slate-400" />
                 <span>{language === "en" ? 'Collapse sidebar' : 'Rétracter la sidebar'}</span>
               </>
             )}
