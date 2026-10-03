@@ -45,7 +45,7 @@ function libelleStatut(s: string | null, t: (fr: string, en: string) => string) 
   if (s === 'ACCEPTE') return t('Accepté', 'Accepted');
   if (s === 'REJETE') return t('Rejeté', 'Rejected');
   if (s === 'SOUMIS') return t('Soumis', 'Submitted');
-  return s || '—';
+  return s || '';
 }
 
 const FORM_VIDE = {
@@ -161,12 +161,12 @@ export default function CotationsPage() {
   const reload = () => devisQuery.refetch();
 
   const formatDate = (d: string | null) =>
-    d ? new Date(d).toLocaleDateString(loc, { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+    d ? new Date(d).toLocaleDateString(loc, { day: '2-digit', month: 'short', year: 'numeric' }) : '';
 
   const champ =
     (k: keyof typeof FORM_VIDE) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setForm((f) => ({ ...f, [k]: e.target.value }));
+      (e: React.ChangeEvent<HTMLInputElement>) =>
+        setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,13 +194,13 @@ export default function CotationsPage() {
           <p className="text-slate-400 text-sm mt-1">
             {enAttente > 0
               ? t(
-                  `${enAttente} devis en attente de décision sur ${devis.length} enregistré(s).`,
-                  `${enAttente} of ${devis.length} quote(s) awaiting a decision.`
-                )
+                `${enAttente} devis en attente de décision sur ${devis.length} enregistré(s).`,
+                `${enAttente} of ${devis.length} quote(s) awaiting a decision.`
+              )
               : t(
-                  `${devis.length} devis enregistré(s), aucun en attente.`,
-                  `${devis.length} quote(s) on record, none pending.`
-                )}
+                `${devis.length} devis enregistré(s), aucun en attente.`,
+                `${devis.length} quote(s) on record, none pending.`
+              )}
           </p>
         </div>
 
@@ -317,9 +317,9 @@ export default function CotationsPage() {
                   <td colSpan={7} className="p-8 text-center text-slate-500">
                     {devis.length === 0
                       ? t(
-                          'Aucun devis enregistré. Émettez le premier avec « Nouveau devis ».',
-                          'No quote on record. Issue the first one with “New quote”.'
-                        )
+                        'Aucun devis enregistré. Émettez le premier avec « Nouveau devis ».',
+                        'No quote on record. Issue the first one with “New quote”.'
+                      )
                       : t('Aucun devis ne correspond à la recherche.', 'No quote matches your search.')}
                   </td>
                 </tr>
@@ -330,25 +330,25 @@ export default function CotationsPage() {
                       {d.reference || `#${d.id}`}
                       <div className="text-xs font-normal text-slate-400 truncate max-w-[220px]" title={d.client_nom}>
                         <Truck className="w-3 h-3 inline mr-1 -mt-0.5" />
-                        {d.client_nom || '—'}
+                        {d.client_nom || ''}
                       </div>
                       <div className="text-xs font-normal text-slate-500">{formatDate(d.created_at)}</div>
                     </td>
                     <td className="px-6 py-4 max-w-[260px]">
                       <span className="block truncate" title={`${d.origine} → ${d.destination}`}>
-                        {d.origine || '—'} → {d.destination || '—'}
+                        {d.origine || ''} → {d.destination || ''}
                       </span>
                     </td>
                     <td className="px-6 py-4 max-w-[200px] truncate" title={d.nature_fret}>
-                      {d.nature_fret || '—'}
+                      {d.nature_fret || ''}
                     </td>
                     <td className="px-6 py-4 text-right font-mono font-bold whitespace-nowrap text-emerald-400">
                       {d.montant_estime_xaf != null
                         ? `${Number(d.montant_estime_xaf).toLocaleString(loc)} XAF`
-                        : '—'}
+                        : ''}
                     </td>
                     <td className="px-6 py-4 text-right font-mono whitespace-nowrap">
-                      {d.marge_nette_pct != null ? `${Number(d.marge_nette_pct).toLocaleString(loc)} %` : '—'}
+                      {d.marge_nette_pct != null ? `${Number(d.marge_nette_pct).toLocaleString(loc)} %` : ''}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${statutBadge(d.statut)}`}>
@@ -376,7 +376,7 @@ export default function CotationsPage() {
                           </button>
                         </div>
                       ) : (
-                        <p className="text-right text-xs text-slate-600">—</p>
+                        <p className="text-right text-xs text-slate-600"></p>
                       )}
                     </td>
                   </tr>

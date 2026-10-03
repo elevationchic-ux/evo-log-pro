@@ -51,7 +51,7 @@ DOMAINS: Dict[str, Dict] = {
         "modules": {
             # Batch 23 : sous-modules dedies a l'activite reelle du quai
             # (navires, arrimage, moyens, reservations, connaissements, frais
-            # portuaires, dockers) — les plaquer sur « escale » aurait ete du
+            # portuaires, dockers)  les plaquer sur « escale » aurait ete du
             # bricolage et un wildcard acconage.*.* sans nuance.
             "acconage": {"label": "Acconage", "sub_modules": {"escale": ACTIONS, "manifeste": ["read", "create", "modify"], "stevedoring": ACTIONS, "navire": ["read", "create", "modify"], "stowage": ["create", "modify", "approve"], "moyen": ["read", "create", "modify"], "reservation": ["create", "modify"], "conteneur": ["create", "modify"], "connaissement": ["create", "modify"], "packing_list": ["create"], "frais": ["read", "create", "modify"], "nettoyage": ["create", "modify"], "dockers": ["read", "create", "modify", "delete", "approve"]}},
             "transit": {"label": "Transit & Douane", "sub_modules": {"dossier": ACTIONS, "declaration": ACTIONS, "tarification": ["read", "modify", "approve"]}},

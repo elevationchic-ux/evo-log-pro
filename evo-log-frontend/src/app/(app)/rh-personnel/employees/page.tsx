@@ -89,7 +89,7 @@ export default function RhPersonnelEmployees() {
             Fiches Collaborateurs & Contrats
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            {total} collaborateur(s) enregistré(s) — type de contrat, date d&apos;embauche et salaire issues du contrat portant.
+            {total} collaborateur(s) enregistré(s)  type de contrat, date d&apos;embauche et salaire issues du contrat portant.
           </p>
         </div>
 
@@ -161,36 +161,35 @@ export default function RhPersonnelEmployees() {
               ) : filtered.map(e => (
                 <tr key={e.id} className="hover:bg-slate-800/40 transition-colors">
                   <td className="py-3.5 px-4">
-                    <div className="font-bold text-pink-400">{e.matricule || '—'}</div>
+                    <div className="font-bold text-pink-400">{e.matricule || ''}</div>
                     <div className="font-sans text-slate-100 font-bold text-sm">{e.full_name}</div>
                   </td>
                   <td className="py-3.5 px-4 font-sans">
-                    <div className="text-slate-100 font-medium">{e.poste || '—'}</div>
-                    <div className="text-[11px] text-slate-400 font-mono">{e.departement || '—'}</div>
+                    <div className="text-slate-100 font-medium">{e.poste || ''}</div>
+                    <div className="text-[11px] text-slate-400 font-mono">{e.departement || ''}</div>
                   </td>
                   <td className="py-3.5 px-4">
                     <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300">
                       {e.type_contrat || 'Sans contrat'}
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 text-slate-300">{e.date_embauche ? e.date_embauche.slice(0, 10) : '—'}</td>
+                  <td className="py-3.5 px-4 text-slate-300">{e.date_embauche ? e.date_embauche.slice(0, 10) : ''}</td>
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-2 text-slate-400">
                       {e.phone ? <Phone className="w-3 h-3" /> : null}
-                      <span className="truncate max-w-[140px]">{e.phone || e.email || '—'}</span>
+                      <span className="truncate max-w-[140px]">{e.phone || e.email || ''}</span>
                     </div>
                   </td>
                   <td className="py-3.5 px-4 text-right text-slate-200">
-                    {e.salaire_base != null ? `${Math.round(e.salaire_base).toLocaleString()} XAF` : '—'}
+                    {e.salaire_base != null ? `${Math.round(e.salaire_base).toLocaleString()} XAF` : ''}
                   </td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                      e.en_conge
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${e.en_conge
                         ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                         : e.statut === 'actif'
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                    }`}>
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                      }`}>
                       {e.en_conge ? 'en congé' : (e.statut || 'inactif')}
                     </span>
                   </td>

@@ -1,4 +1,4 @@
-"""Tests Phase 4 (Tranche F) — modèle "Utilisateur != Role" dans l'admin.
+"""Tests Phase 4 (Tranche F)  modèle "Utilisateur != Role" dans l'admin.
 
 Formalise separement :
   * l'IDENTITE employe (matricule, job_title) exposee en lecture + ecriture ;

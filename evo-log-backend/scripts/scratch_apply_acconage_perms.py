@@ -13,7 +13,7 @@ import sys
 TARGET = "app/routers/v1/acconage_avance.py"
 
 MAPPING = {
-    # Navires : registre propre (sous-module dedie batch 23) — un navire n'est
+    # Navires : registre propre (sous-module dedie batch 23)  un navire n'est
     # pas une escale.
     ("post", "/navires"): "acconage.navire.create",
     ("get", "/navires"): "acconage.navire.read",

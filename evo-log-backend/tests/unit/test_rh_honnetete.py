@@ -96,10 +96,30 @@ def test_conges_liste_vide(client):
     assert r.json() == []
 
 
-def test_pointages_registre_vide(client):
-    r = client.get(URL_POINTAGES)
-    assert r.status_code == 200, r.text
-    assert r.json() == []
+def test_pointages_registre_vide(client, db):
+    # Le module chef-personnel exige une habilitation : on autentifie un vrai
+    # User superuser (resolve_current_user le passe tel quel depuis le fix).
+    from app.core.security import get_current_user
+    from app.main import app
+
+    chef = User(
+        username="chef.rh", email="chef.rh@rh.test", hashed_password="x",
+        full_name="Chef du Personnel", is_active=True, is_superuser=True,
+        role_level=0, company_id=None,
+    )
+    db.add(chef)
+    db.commit()
+    db.refresh(chef)
+
+    saved = app.dependency_overrides.get(get_current_user)
+    app.dependency_overrides[get_current_user] = lambda: chef
+    try:
+        r = client.get(URL_POINTAGES)
+        assert r.status_code == 200, r.text
+        assert r.json() == []
+    finally:
+        if saved is not None:
+            app.dependency_overrides[get_current_user] = saved
 
 
 # --------------------------------------------------------------------------- #
@@ -118,7 +138,7 @@ def test_bulletin_restitue_les_valeurs_reelles(client, db):
     assert float(f["cotisations_cnps"]) == 21_000.0
     assert float(f["retenues_fiscales"]) == 54_000.0
     assert float(f["net_a_payer"]) == 415_000.0
-    assert f["periode"] == "2026-3"
+    assert f["periode"] == "2026-03"
     # Le statut remonte dans sa valeur d'enum, en minuscules.
     assert f["statut"] == "en_attente"
 

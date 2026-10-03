@@ -103,7 +103,7 @@ export default function RhPersonnelSocialDeclarations() {
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-100 flex items-center gap-3">
             <FileCheck className="w-8 h-8 text-pink-400" />
-            Déclarations Sociales & DIPE — Brouillons
+            Déclarations Sociales & DIPE  Brouillons
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Cotisations agrégées à partir des bulletins de paie réellement enregistrés.

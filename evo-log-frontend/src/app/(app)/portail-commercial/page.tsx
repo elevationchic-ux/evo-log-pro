@@ -82,7 +82,7 @@ function libelleStatut(s: string | null, t: (fr: string, en: string) => string) 
   if (s === 'ACCEPTE') return t('Accepté', 'Accepted');
   if (s === 'REJETE') return t('Rejeté', 'Rejected');
   if (s === 'SOUMIS') return t('Soumis', 'Submitted');
-  return s || '—';
+  return s || '';
 }
 
 function badgeStatut(s: string | null) {
@@ -124,7 +124,7 @@ export default function PortailCommercialPage() {
 
   const fmt = (v: number | null | undefined, decimals = 0) =>
     v === null || v === undefined || Number.isNaN(v)
-      ? '—'
+      ? ''
       : new Intl.NumberFormat(loc, { maximumFractionDigits: decimals }).format(v);
 
   // ── Données réelles ────────────────────────────────────────────────────────
@@ -273,8 +273,8 @@ export default function PortailCommercialPage() {
 
   const champTarif =
     (k: keyof typeof FORM_TARIF, type = 'text') =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setFormTarif((f) => ({ ...f, [k]: e.target.value }));
+      (e: React.ChangeEvent<HTMLInputElement>) =>
+        setFormTarif((f) => ({ ...f, [k]: e.target.value }));
 
   // ── Onglet devis : décision ────────────────────────────────────────────────
   const decision = useMutation({
@@ -375,11 +375,10 @@ export default function PortailCommercialPage() {
               key={o.key}
               type="button"
               onClick={() => setOnglet(o.key)}
-              className={`flex min-h-[44px] items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-colors ${
-                actif
+              className={`flex min-h-[44px] items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-colors ${actif
                   ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40'
                   : 'text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent'
-              }`}
+                }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
               <span>{o.label}</span>
@@ -529,7 +528,7 @@ export default function PortailCommercialPage() {
                   aria-label={t('Sélectionner un client', 'Select a client')}
                   className="w-full min-h-[44px] px-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
                 >
-                  <option value="">{t('— Choisir dans le portefeuille —', '— Pick from the portfolio —')}</option>
+                  <option value="">{t(' Choisir dans le portefeuille ', ' Pick from the portfolio ')}</option>
                   {clients.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}{c.code ? ` (${c.code})` : ''}</option>
                   ))}
@@ -548,9 +547,8 @@ export default function PortailCommercialPage() {
                     type="text"
                     value={entete[k]}
                     onChange={(e) => setEntete((f) => ({ ...f, [k]: e.target.value }))}
-                    className={`w-full min-h-[44px] px-3 rounded-xl bg-slate-950 border text-sm text-slate-100 focus:outline-none focus:border-amber-500 ${
-                      k === 'reference' && referenceDejaPrise ? 'border-rose-500' : 'border-slate-800'
-                    }`}
+                    className={`w-full min-h-[44px] px-3 rounded-xl bg-slate-950 border text-sm text-slate-100 focus:outline-none focus:border-amber-500 ${k === 'reference' && referenceDejaPrise ? 'border-rose-500' : 'border-slate-800'
+                      }`}
                   />
                   {k === 'reference' && referenceDejaPrise && (
                     <p className="text-[11px] text-rose-400 mt-1">{t('Référence déjà utilisée.', 'Reference already used.')}</p>
@@ -666,10 +664,10 @@ export default function PortailCommercialPage() {
                       <td className="px-6 py-4 max-w-[280px]">
                         <span className="block truncate" title={tr.designation}>{tr.designation}</span>
                       </td>
-                      <td className="px-6 py-4 text-slate-400">{tr.categorie || '—'}</td>
-                      <td className="px-6 py-4 text-slate-400">{tr.unite || '—'}</td>
+                      <td className="px-6 py-4 text-slate-400">{tr.categorie || ''}</td>
+                      <td className="px-6 py-4 text-slate-400">{tr.unite || ''}</td>
                       <td className="px-6 py-4 text-right font-mono whitespace-nowrap">{fmt(tr.prix)} {tr.devise}</td>
-                      <td className="px-6 py-4 text-right font-mono whitespace-nowrap">{tr.tva ? `${fmt(tr.tva, 2)} %` : '—'}</td>
+                      <td className="px-6 py-4 text-right font-mono whitespace-nowrap">{tr.tva ? `${fmt(tr.tva, 2)} %` : ''}</td>
                     </tr>
                   ))
                 )}
@@ -825,15 +823,14 @@ export default function PortailCommercialPage() {
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-slate-100 break-words">{c.name}</p>
                         <p className="text-[11px] text-slate-500 font-mono">
-                          {c.code || `#${c.id}`} · {c.city || '—'} · {c.phone || '—'} · {c.email || '—'}
+                          {c.code || `#${c.id}`} · {c.city || ''} · {c.phone || ''} · {c.email || ''}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className={`px-2.5 py-1 rounded-full border text-[11px] font-bold ${
-                          c.is_active
+                        <span className={`px-2.5 py-1 rounded-full border text-[11px] font-bold ${c.is_active
                             ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                             : 'bg-slate-500/10 text-slate-400 border-slate-500/30'
-                        }`}>
+                          }`}>
                           {c.is_active ? t('Actif', 'Active') : t('Inactif', 'Inactive')}
                         </span>
                         <button

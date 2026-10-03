@@ -107,7 +107,7 @@ export default function ProcurementOrdersSubPage() {
   };
 
   const formatDate = (d: string | null) =>
-    d ? new Date(d).toLocaleDateString(loc, { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+    d ? new Date(d).toLocaleDateString(loc, { day: '2-digit', month: 'short', year: 'numeric' }) : '';
 
   return (
     <div className="max-w-5xl mx-auto py-6 sm:py-8 px-4 text-white animate-in fade-in duration-500 space-y-6">
@@ -237,7 +237,7 @@ export default function ProcurementOrdersSubPage() {
                           </p>
                           <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
                             <CheckCircle2 className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                            {t('validé par', 'approved by')} {b.valide_par || '—'}
+                            {t('validé par', 'approved by')} {b.valide_par || ''}
                             {b.date_validation ? ` · ${formatDate(b.date_validation)}` : ''}
                           </p>
                         </div>

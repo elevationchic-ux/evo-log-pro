@@ -57,7 +57,7 @@ export default function SecurityReportsPage() {
         reference: a.numero_audit ?? '',
         scope: a.scope ?? '',
         period: a.date_debut || a.date_fin
-          ? `${formatDate(a.date_debut) || '—'} → ${formatDate(a.date_fin) || '—'}`
+          ? `${formatDate(a.date_debut) || ''} → ${formatDate(a.date_fin) || ''}`
           : '',
         author: a.auditeur ?? '',
         typeAudit: a.type_audit ?? '',
@@ -171,7 +171,7 @@ export default function SecurityReportsPage() {
               <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
                 <div className="text-right">
                   <div className="text-xs text-slate-400">{t('Statut', 'Status')}</div>
-                  <div className="text-sm font-bold text-slate-200 font-mono uppercase">{rep.status || '—'}</div>
+                  <div className="text-sm font-bold text-slate-200 font-mono uppercase">{rep.status || ''}</div>
                 </div>
 
                 <button

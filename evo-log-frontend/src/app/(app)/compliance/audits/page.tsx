@@ -43,7 +43,7 @@ export default function ComplianceAuditsSubPage() {
 
   const certs = certsQuery.data ?? [];
   const today = new Date();
-  const fmt = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(loc) : '—');
+  const fmt = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(loc) : '');
 
   // Taux de couverture calculé sur les certificats réellement en base :
   // certificat actif et non expiré. Rien n'est supposé ni arrondi.
@@ -113,9 +113,9 @@ export default function ComplianceAuditsSubPage() {
                   {couverture === null
                     ? t('Certificats en base : 0', 'Certificates on record: 0')
                     : t(
-                        `${valides.length} certificat(s) actif(s) sur ${certs.length} — couverture ${couverture}%`,
-                        `${valides.length} active certificate(s) out of ${certs.length} — ${couverture}% coverage`
-                      )}
+                      `${valides.length} certificat(s) actif(s) sur ${certs.length}  couverture ${couverture}%`,
+                      `${valides.length} active certificate(s) out of ${certs.length}  ${couverture}% coverage`
+                    )}
                 </h4>
                 <p className="text-xs text-slate-400">
                   {t('Un certificat est compté comme valide si son statut est « actif » et sa date d’expiration postérieure à aujourd’hui.', 'A certificate counts as valid when its status is “actif” and its expiry date is in the future.')}
@@ -146,15 +146,14 @@ export default function ComplianceAuditsSubPage() {
                       ) : null}
                     </div>
                     <span
-                      className={`shrink-0 inline-flex items-center self-start sm:self-auto px-3 py-1 rounded-full text-xs font-semibold border ${
-                        c.statut !== 'actif'
+                      className={`shrink-0 inline-flex items-center self-start sm:self-auto px-3 py-1 rounded-full text-xs font-semibold border ${c.statut !== 'actif'
                           ? 'bg-slate-600/20 text-slate-400 border-slate-600/40'
                           : expireBientot
                             ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                             : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                      }`}
+                        }`}
                     >
-                      {(c.statut ?? '—').toString().toUpperCase()}
+                      {(c.statut ?? '').toString().toUpperCase()}
                       {expireBientot && c.statut === 'actif' ? ' • ' + t('expiration < 90 j', 'expiring < 90 d') : ''}
                     </span>
                   </li>

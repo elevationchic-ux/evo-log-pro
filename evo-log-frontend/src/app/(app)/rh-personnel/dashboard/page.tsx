@@ -52,7 +52,7 @@ export default function RhPersonnelDashboard() {
     } catch {
       setError(
         'Indicateurs indisponibles : le serveur n\'a pas répondu. ' +
-        'Aucun chiffre n\'est affiché sans avoir été lu en base — ni effectif, ni masse salariale.'
+        'Aucun chiffre n\'est affiché sans avoir été lu en base  ni effectif, ni masse salariale.'
       );
     } finally {
       setLoading(false);
@@ -140,7 +140,7 @@ export default function RhPersonnelDashboard() {
         </div>
       )}
 
-      {/* KPI Cards — deduites des enregistrements reels */}
+      {/* KPI Cards  deduites des enregistrements reels */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Effectif enregistré</div>
@@ -163,7 +163,7 @@ export default function RhPersonnelDashboard() {
           </div>
           <div className="text-[11px] text-slate-400 mt-2">
             {masseSalarialePeriode.count > 0
-              ? `Net versé : ${masseSalarialePeriode.net.toLocaleString()} XAF — ${masseSalarialePeriode.count} fiche(s) enregistrée(s)`
+              ? `Net versé : ${masseSalarialePeriode.net.toLocaleString()} XAF  ${masseSalarialePeriode.count} fiche(s) enregistrée(s)`
               : 'Aucune fiche de paie enregistrée : somme = 0, rien n\'est estimé.'}
           </div>
         </div>

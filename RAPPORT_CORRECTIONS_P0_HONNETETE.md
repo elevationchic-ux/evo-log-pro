@@ -10,9 +10,9 @@
 | Contrôle | Résultat |
 |---|---|
 | `python -m compileall app tests` | ✅ EXIT=0 |
-| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 22) | ✅ **691 passed, 2 xfailed, 0 failed** (475 s) au run definitif du batch 22, `PYTEST_EXIT=0`. Le batch 22 ajoute 12 tests ; les evoluations de total (625 → 645 → 659 → 691) incluent aussi des tests d'une session concurrente (tranches devis 030, maintenance 031/032, RBAC transport/comptabilite/magasin), sans echec imputable aux lots 16 a 22. Historique : le run du batch 18 etait **rouge de cause externe** (commits WIP concurrents, attribution prouvee par worktree temoin), re-vert des le batch 19 (§20/§21). Les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`**  corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17 a §22 ; au run du batch 21 le hash etait **illisible**  base verrouillee par un process de dev concurrent  declare comme tel plutot que pretendu ; au run du batch 22 il etait **lisible et vierge** — horodatage de la base anterieur au run, voir §24). |
+| `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 22) | ✅ **691 passed, 2 xfailed, 0 failed** (475 s) au run definitif du batch 22, `PYTEST_EXIT=0`. Le batch 22 ajoute 12 tests ; les evoluations de total (625 → 645 → 659 → 691) incluent aussi des tests d'une session concurrente (tranches devis 030, maintenance 031/032, RBAC transport/comptabilite/magasin), sans echec imputable aux lots 16 a 22. Historique : le run du batch 18 etait **rouge de cause externe** (commits WIP concurrents, attribution prouvee par worktree temoin), re-vert des le batch 19 (§20/§21). Les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`**  corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17 a §22 ; au run du batch 21 le hash etait **illisible**  base verrouillee par un process de dev concurrent  declare comme tel plutot que pretendu ; au run du batch 22 il etait **lisible et vierge**  horodatage de la base anterieur au run, voir §24). |
 | `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (**1141** routes OpenAPI au batch 22, +1 derive concurrente vs 1140 au batch 21) |
-| `npx tsc --noEmit` (frontend) | ✅ **EXIT=0** au batch 22 — l'erreur `ReceiptText` signalee au §23 (commise par une session concurrente sur `transit-douane/dashboard/page.tsx`) a depuis ete reparee par son auteur. etait ❌ au run du batch 21, ✅ aux batches precedents. |
+| `npx tsc --noEmit` (frontend) | ✅ **EXIT=0** au batch 22  l'erreur `ReceiptText` signalee au §23 (commise par une session concurrente sur `transit-douane/dashboard/page.tsx`) a depuis ete reparee par son auteur. etait ❌ au run du batch 21, ✅ aux batches precedents. |
 
 ---
 
@@ -1139,14 +1139,14 @@ fantome (revue contre `iter_permission_rows()` ; `scripts/scratch_check_perm_cod
 
 | Secteur | Decisions semantiques |
 |---|---|
-| Plan comptable SYSCOHADA | `comptabilite.plan_comptable.read/create/modify` — creer un compte n'est **pas** une ecriture de journal |
+| Plan comptable SYSCOHADA | `comptabilite.plan_comptable.read/create/modify`  creer un compte n'est **pas** une ecriture de journal |
 | Ecritures | saisie `journal.create`, corriger `journal.modify`, **valider** `journal.approve` (l'approbation reste un acte distinct, jamais donne au comptable par defaut) |
 | Exercices | ouvrir `exercice.create`, **cloturer** `exercice.approve` |
 | Facturation | creer/lignes/maj `facture.create/modify`, PDF `facture.export`, **signature electronique** `facture.approve` |
 | Reglements / encaissements | = mouvements de **tresorerie** (`mouvement.read/create/modify`) |
-| Declarations fiscales CEMAC | preparer seulement `declarations.create/modify` ; le depot reel reste **501** (aucune integration GUCE) donc **aucun approve expose** — les endpoints sont des brouillons |
+| Declarations fiscales CEMAC | preparer seulement `declarations.create/modify` ; le depot reel reste **501** (aucune integration GUCE) donc **aucun approve expose**  les endpoints sont des brouillons |
 | Etats de synthese | creer/modifier bilan/CR ≠ les approuver (`bilan.approve` reserve aux etats validates) |
-| KPI / series | `facturation.facture.read` — convention alignee sur `transport_avance` (kpi → read du domaine qui calcule) |
+| KPI / series | `facturation.facture.read`  convention alignee sur `transport_avance` (kpi → read du domaine qui calcule) |
 
 ### Catalogue : sous-modules dedies, pas de plaquage
 
@@ -1164,7 +1164,7 @@ create/modify, `fiscalite.declarations` enrichi modify. Cotes roles : nouveau
   (codes manquants, role CAISSIER, liens supplementaires par role cible) ; ne
   supprime rien, `downgrade = pass`, garde **RuntimeError** nommant la precondition
   si les tables RBAC absentes. Tete de chaine verifiee : `034_rbac_finance_grants`.
-- `tests/unit/test_rbac_finance_perms.py` : ✅ **12 passed des le premier run** —
+- `tests/unit/test_rbac_finance_perms.py` : ✅ **12 passed des le premier run** 
   parite catalogue (24 codes), **matrice complete role × code** avec attentes
   explicites par role (DIRECTEUR tout, CHEF tout sauf mouvement create/modify,
   COMPTABLE 11 codes, CAISSIER 4 codes, AUDITEUR lecture seule), test « chaque code
@@ -1180,7 +1180,7 @@ Le run de non-regression cible a d'abord donne **2 failed, 50 passed** :
 `AttributeError: '_FakeUser' object has no attribute 'is_superuser'`. Cause reelle
 et non masquee : des que `/finance` exige `require_perm`, un utilisateur sans lignes
 de permissions granulaires tombe sur le repli `can_access_module`, qui lit
-directement `user.is_superuser` — les faux minimalistes (id/username/company_id)
+directement `user.is_superuser`  les faux minimalistes (id/username/company_id)
 n'avaient pas cette colonne. Choix : **reparer les faux** (un vrai `User` ORM porte
 toujours `is_superuser`, `role_level`, `email`, `is_active`) plutot qu'affaiblir
 l'acces securite du moteur. Les deux leurres portent desormais les attributs
@@ -1199,28 +1199,28 @@ complets, commentaire a l'appui. Apres reparation : non-regression ciblee ✅
 - `compileall app` ✅ EXIT=0 ; `import app.main` ✅ OK (**1141** chemins OpenAPI,
   derive concurrente +1 inclue).
 - Frontend : **aucun changement batch 22** ; `audit_frontend.py --strict-honesty`
-  ✅ ; `tsc --noEmit` ✅ **EXIT=0** — l'erreur `ReceiptText` signalee au §23 (cause
+  ✅ ; `tsc --noEmit` ✅ **EXIT=0**  l'erreur `ReceiptText` signalee au §23 (cause
   externe) a depuis ete reparee par son auteur.
 
 ### Reste (hors perimetre du batch, signale)
 
 - **48 autres routeurs** (inventorieres apres conversion finance) restent proteges par la seule authentification (rh, qhse 38,
   transit_avance 40, acconage_avance 38, magasin_douane 35, integration 28,
-  acquisition 27, documents 25, gap_bridges 24, notifications/reporting 23…) — la
+  acquisition 27, documents 25, gap_bridges 24, notifications/reporting 23…)  la
   ligne ⏳ du TODO phase 6 n'est pas close ; chaque tranche devra le meme mapping
   explicite + alignement roles + migration additive.
 - `visible_user_ids` n'est toujours pas branche sur les listes portant
   `created_by`/`department_id` (2e moitie de la ligne ⏳).
 - Les metastadonnees `description` des roles changes dans le catalogue ne sont pas
-  reecrites par la migration 034 (additive sur les liens) — cosmetique, declare.
+  reecrites par la migration 034 (additive sur les liens)  cosmetique, declare.
 - Convention retenue pour les prochains lots : tout leurre d'identite destinant a
   passer une garde `require_perm` doit porter `is_superuser`/`role_level`/`email`/
   `is_active`, faute de quoi il tombe sur le repli `can_access_module`.
 
 ➡️ Zero-Mock applique a la finance : un droit d'approbation comptable ou fiscale
 n'est jamais accorde « par defaut » ; la cloture d'exercice, la signature de facture
-et l'approval d'ecriture restent des actes distincts, et le depot fiscal — qui
-n'existe pas sans GUCE — n'expose aucun bouton « approuve » mensonger.
+et l'approval d'ecriture restent des actes distincts, et le depot fiscal  qui
+n'existe pas sans GUCE  n'expose aucun bouton « approuve » mensonger.
 
 ---
 

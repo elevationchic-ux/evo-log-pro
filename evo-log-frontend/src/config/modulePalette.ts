@@ -184,7 +184,7 @@ export const MODULE_PALETTE: Record<string, ModulePaletteEntry> = {
   // Ces 3 cles etaient absentes de la palette ET des alias : getModulePalette()
   // retombait sur « dashboard » (indigo). Le header, la sidebar, le dropdown et
   // la bulle orbitale affichaient donc la couleur d'un autre module alors que la
-  // page elle-meme etait coloree autrement — violation de la regle « une couleur
+  // page elle-meme etait coloree autrement  violation de la regle « une couleur
   // par module ». Les teintes ci-dessous reprennent celles declarees par le
   // registre de navigation, qui devient aligne sur ce fichier.
   'annuaire-prestataires': {

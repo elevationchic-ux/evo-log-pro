@@ -42,7 +42,7 @@ interface Bulletin {
 const STATUTS_PAIE = ['en_attente', 'paye', 'annule'];
 
 function fmt(n: number | null | undefined): string {
-  return n == null ? '—' : Math.round(n).toLocaleString();
+  return n == null ? '' : Math.round(n).toLocaleString();
 }
 
 export default function RHPaiePage() {
@@ -51,7 +51,7 @@ export default function RHPaiePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Saisie de la fiche — le calcul CNPS/IRGM reste cote serveur (PaieService,
+  // Saisie de la fiche  le calcul CNPS/IRGM reste cote serveur (PaieService,
   // source unique des baremes Cameroun/CEMAC) : cet ecran ne re-invente aucun taux.
   const [employeId, setEmployeId] = useState('');
   const [mois, setMois] = useState(new Date().getMonth() + 1);
@@ -143,7 +143,7 @@ export default function RHPaiePage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-white flex items-center gap-2">
-          <Calculator className="w-6 h-6 text-amber-400" /> Paie Cameroun — Fiches enregistrées
+          <Calculator className="w-6 h-6 text-amber-400" /> Paie Cameroun  Fiches enregistrées
         </h1>
         <p className="text-xs text-slate-400 mt-0.5">
           Le calcul CNPS / IRGM est effectué côté serveur (PaieService, barèmes Cameroun/CEMAC) :
@@ -183,11 +183,11 @@ export default function RHPaiePage() {
               className="w-full h-11 px-4 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-amber-500"
             >
               <option value="">
-                {employes.length === 0 ? '— Aucun collaborateur enregistré —' : '— Sélectionner —'}
+                {employes.length === 0 ? ' Aucun collaborateur enregistré ' : ' Sélectionner '}
               </option>
               {employes.map(emp => (
                 <option key={emp.id} value={emp.id}>
-                  {emp.full_name}{emp.poste ? ` — ${emp.poste}` : ''}
+                  {emp.full_name}{emp.poste ? `  ${emp.poste}` : ''}
                 </option>
               ))}
             </select>
@@ -195,7 +195,7 @@ export default function RHPaiePage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1.5">Période — mois</label>
+              <label className="block text-xs font-bold text-slate-300 uppercase mb-1.5">Période  mois</label>
               <input type="number" value={mois} onChange={e => setMois(+e.target.value)} min={1} max={12}
                 className="w-full h-11 px-4 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono" />
             </div>
@@ -246,11 +246,11 @@ export default function RHPaiePage() {
             <Calculator className="w-4 h-4" /> {saving ? 'Calcul serveur en cours…' : 'Calculer & Enregistrer (serveur)'}
           </button>
 
-          {/* Bulletin retourne par le serveur — valeurs reellement frappees */}
+          {/* Bulletin retourne par le serveur  valeurs reellement frappees */}
           {b && (
             <div className="bg-slate-950 border border-emerald-500/30 rounded-2xl p-4 space-y-1.5">
               <div className="text-xs font-bold text-emerald-300 flex items-center gap-2 mb-2">
-                <CheckCircle2 className="w-4 h-4" /> Bulletin {b.reference} — calculé par le serveur
+                <CheckCircle2 className="w-4 h-4" /> Bulletin {b.reference}  calculé par le serveur
               </div>
               {[
                 { label: 'Salaire de base', v: b.salaire_base },
@@ -271,7 +271,7 @@ export default function RHPaiePage() {
               ))}
               {b.taux_cnps != null && (
                 <div className="text-[10px] text-slate-500 pt-1">
-                  Taux CNPS effectivement appliqué : {(b.taux_cnps * 100).toFixed(2)} % du brut — retrouvé à partir des retenues réelles.
+                  Taux CNPS effectivement appliqué : {(b.taux_cnps * 100).toFixed(2)} % du brut  retrouvé à partir des retenues réelles.
                 </div>
               )}
             </div>
@@ -313,17 +313,16 @@ export default function RHPaiePage() {
                     <tr key={f.id} className="hover:bg-slate-800/30">
                       <td className="px-3 py-2.5 font-mono text-amber-300">{f.reference}</td>
                       <td className="px-3 py-2.5 text-slate-200 font-bold">{nomEmploye(f.employe_id)}</td>
-                      <td className="px-3 py-2.5 font-mono text-slate-400">{f.periode ?? '—'}</td>
+                      <td className="px-3 py-2.5 font-mono text-slate-400">{f.periode ?? ''}</td>
                       <td className="px-3 py-2.5 text-right font-mono text-slate-300">{fmt(f.salaire_brut)}</td>
                       <td className="px-3 py-2.5 text-right font-mono text-pink-400">{fmt(f.cotisations_cnps)}</td>
                       <td className="px-3 py-2.5 text-right font-mono text-amber-400">{fmt(f.retenues_fiscales)}</td>
                       <td className="px-3 py-2.5 text-right font-mono font-black text-emerald-400">{fmt(f.net_a_payer)}</td>
                       <td className="px-3 py-2.5 text-center">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          f.statut === 'paye' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${f.statut === 'paye' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             : f.statut === 'annule' ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                        }`}>{f.statut}</span>
+                              : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                          }`}>{f.statut}</span>
                       </td>
                     </tr>
                   ))}

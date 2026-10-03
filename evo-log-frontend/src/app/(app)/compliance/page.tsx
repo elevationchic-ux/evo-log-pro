@@ -162,7 +162,7 @@ export default function CompliancePage() {
                 <option key={s} value={s}>
                   {s === 'en_cours' ? t('En cours', 'In progress')
                     : s === 'complete' ? t('Terminé', 'Completed')
-                    : t('Annulé', 'Cancelled')}
+                      : t('Annulé', 'Cancelled')}
                 </option>
               ))}
             </select>
@@ -210,9 +210,9 @@ export default function CompliancePage() {
                   <td colSpan={7} className="p-8 text-center text-slate-500">
                     {audits.length === 0
                       ? t(
-                          'Aucun audit enregistré. Créez-le depuis le module QHSE & Sécurité.',
-                          'No audit on record. Create one from the QHSE & Security module.'
-                        )
+                        'Aucun audit enregistré. Créez-le depuis le module QHSE & Sécurité.',
+                        'No audit on record. Create one from the QHSE & Security module.'
+                      )
                       : t('Aucun audit ne correspond à la recherche.', 'No audit matches your search.')}
                   </td>
                 </tr>
@@ -226,29 +226,29 @@ export default function CompliancePage() {
                       </td>
                       <td className="px-6 py-4 font-semibold text-slate-200">
                         {cert
-                          ? `${cert.norme} — ${cert.numero_certificat}`
+                          ? `${cert.norme}  ${cert.numero_certificat}`
                           : t('Sans certification rattachée', 'No linked certificate')}
                       </td>
                       <td className="px-6 py-4">
                         {a.type_audit
                           ? a.type_audit === 'interne' ? t('Interne', 'Internal')
                             : a.type_audit === 'externe' ? t('Externe', 'External')
-                            : a.type_audit === 'certification' ? t('Certification', 'Certification')
-                            : a.type_audit
-                          : '—'}
+                              : a.type_audit === 'certification' ? t('Certification', 'Certification')
+                                : a.type_audit
+                          : ''}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {a.date_debut || a.date_fin
-                          ? `${a.date_debut ? new Date(a.date_debut).toLocaleDateString(loc) : '—'} → ${a.date_fin ? new Date(a.date_fin).toLocaleDateString(loc) : '—'}`
-                          : '—'}
+                          ? `${a.date_debut ? new Date(a.date_debut).toLocaleDateString(loc) : ''} → ${a.date_fin ? new Date(a.date_fin).toLocaleDateString(loc) : ''}`
+                          : ''}
                       </td>
-                      <td className="px-6 py-4">{a.auditeur || '—'}</td>
+                      <td className="px-6 py-4">{a.auditeur || ''}</td>
                       <td className="px-6 py-4 max-w-[240px] truncate" title={a.non_conformites ?? undefined}>
-                        {a.non_conformites || '—'}
+                        {a.non_conformites || ''}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${statutAuditBadge(a.statut)}`}>
-                          {(a.statut ?? '—').toString().toUpperCase()}
+                          {(a.statut ?? '').toString().toUpperCase()}
                         </span>
                       </td>
                     </tr>

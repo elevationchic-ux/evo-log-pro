@@ -126,10 +126,10 @@ export default function FuelGuardPage() {
       {/* KPI reels */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: t('Tickets enregistrés', 'Tickets recorded'), value: String(data?.total ?? '—') },
-          { label: t('Litres cumulés', 'Total litres'), value: data ? `${data.litres_total.toLocaleString(loc)} L` : '—' },
-          { label: t('Coût cumulé (XAF)', 'Total cost (XAF)'), value: data ? data.cout_total.toLocaleString(loc) : '—' },
-          { label: t('Prix moyen / litre', 'Average price / litre'), value: data && prixMoyen > 0 ? `${prixMoyen.toLocaleString(loc)} XAF` : '—' },
+          { label: t('Tickets enregistrés', 'Tickets recorded'), value: String(data?.total ?? '') },
+          { label: t('Litres cumulés', 'Total litres'), value: data ? `${data.litres_total.toLocaleString(loc)} L` : '' },
+          { label: t('Coût cumulé (XAF)', 'Total cost (XAF)'), value: data ? data.cout_total.toLocaleString(loc) : '' },
+          { label: t('Prix moyen / litre', 'Average price / litre'), value: data && prixMoyen > 0 ? `${prixMoyen.toLocaleString(loc)} XAF` : '' },
         ].map((k) => (
           <div key={k.label} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5">
             <div className="text-xs text-slate-400 uppercase tracking-wider">{k.label}</div>
@@ -164,11 +164,10 @@ export default function FuelGuardPage() {
               type="button"
               onClick={() => setSeuilsOnly((v) => !v)}
               aria-pressed={seuilsOnly}
-              className={`min-h-[44px] px-4 rounded-xl text-sm font-semibold border transition-colors ${
-                seuilsOnly
+              className={`min-h-[44px] px-4 rounded-xl text-sm font-semibold border transition-colors ${seuilsOnly
                   ? 'bg-cyan-600 border-cyan-500 text-white'
                   : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
-              }`}
+                }`}
             >
               {t('Anomalies seules', 'Anomalies only')}
             </button>
@@ -225,23 +224,22 @@ export default function FuelGuardPage() {
                         ) : null}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {tk.date_plein ? new Date(tk.date_plein).toLocaleString(loc, { dateStyle: 'short', timeStyle: 'short' }) : '—'}
+                        {tk.date_plein ? new Date(tk.date_plein).toLocaleString(loc, { dateStyle: 'short', timeStyle: 'short' }) : ''}
                       </td>
                       <td className="px-6 py-4 text-right font-mono">{tk.litres.toLocaleString(loc)}</td>
-                      <td className="px-6 py-4 text-right font-mono">{tk.prix_litre != null ? tk.prix_litre.toLocaleString(loc) : '—'}</td>
+                      <td className="px-6 py-4 text-right font-mono">{tk.prix_litre != null ? tk.prix_litre.toLocaleString(loc) : ''}</td>
                       <td className="px-6 py-4 text-right font-mono">{tk.cout.toLocaleString(loc)}</td>
                       <td className="px-6 py-4 text-right font-mono">
                         {tk.conso_l100 != null
                           ? tk.conso_l100.toLocaleString(loc, { maximumFractionDigits: 1 })
-                          : t('— (index manquant)', '— (odometer missing)')}
+                          : t(' (index manquant)', ' (odometer missing)')}
                       </td>
                       <td className="px-6 py-4 text-xs max-w-[180px] truncate" title={tk.station ?? undefined}>
-                        {tk.station || '—'}
+                        {tk.station || ''}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
-                          anomalie ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-slate-600/20 text-slate-300 border-slate-600/40'
-                        }`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${anomalie ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-slate-600/20 text-slate-300 border-slate-600/40'
+                          }`}>
                           {anomalie ? t('À contrôler', 'To review') : t('Nominal', 'Nominal')}
                         </span>
                       </td>

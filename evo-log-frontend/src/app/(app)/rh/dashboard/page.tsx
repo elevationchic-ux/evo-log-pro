@@ -23,11 +23,13 @@ interface Employe {
 
 interface Conge {
   id: number;
+  employe_id: number | null;
   employe_nom: string | null;
   type_conge: string | null;
   date_debut: string | null;
   date_fin: string | null;
   nombre_jours: number | null;
+  motif: string | null;
   statut: string;
   date_demande: string | null;
 }
@@ -330,10 +332,4 @@ export default function RHDashboardPage() {
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+ 

@@ -28,7 +28,7 @@ interface Bulletin {
 }
 
 function fmt(n: number | null | undefined): string {
-  return n == null ? '—' : Math.round(n).toLocaleString();
+  return n == null ? '' : Math.round(n).toLocaleString();
 }
 
 export default function RhPersonnelPayrollOhada() {
@@ -153,7 +153,7 @@ export default function RhPersonnelPayrollOhada() {
         </div>
       )}
 
-      {/* KPI Cards — sommes des fiches chargees */}
+      {/* KPI Cards  sommes des fiches chargees */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Net enregistré (XAF)</div>
@@ -237,7 +237,7 @@ export default function RhPersonnelPayrollOhada() {
                     <div className="font-bold text-pink-400">{p.reference}</div>
                     <div className="font-sans text-slate-100 font-bold">{noms.get(p.employe_id) || `Employé #${p.employe_id}`}</div>
                   </td>
-                  <td className="py-3.5 px-4 text-slate-300">{p.periode ?? '—'}</td>
+                  <td className="py-3.5 px-4 text-slate-300">{p.periode ?? ''}</td>
                   <td className="py-3.5 px-4 text-right text-slate-200">{fmt(p.salaire_base)}</td>
                   <td className="py-3.5 px-4 text-right text-slate-300">{fmt(p.indemnite_heures_sup + p.primes)}</td>
                   <td className="py-3.5 px-4 text-right font-bold text-slate-100">{fmt(p.salaire_brut)}</td>
@@ -247,11 +247,10 @@ export default function RhPersonnelPayrollOhada() {
                     {fmt(p.net_a_payer)} XAF
                   </td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                      p.statut === 'paye' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${p.statut === 'paye' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                         : p.statut === 'annule' ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                        : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                    }`}>{p.statut}</span>
+                          : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                      }`}>{p.statut}</span>
                   </td>
                 </tr>
               ))}

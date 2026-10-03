@@ -12,7 +12,7 @@ import Link from 'next/link';
 // Aucune table « KPI executive » n'existe dans l'ERP : ce tableau de bord
 // agrège les agrégats réellement calculés par chaque module (finance,
 // transport, magasin, port). Un module sans droit d'accès ou sans écriture
-// affiche « — » ou 0 réel : rien n'est supposé.
+// affiche «  » ou 0 réel : rien n'est supposé.
 type Synthese = {
   finance: {
     chiffre_affaires: number;
@@ -57,13 +57,13 @@ export default function BiAnalyticsPage() {
 
   const s = summaryQuery.data;
   const nf = (v: number | null | undefined, digits = 0) =>
-    v == null ? '—' : v.toLocaleString(loc, { maximumFractionDigits: digits });
+    v == null ? '' : v.toLocaleString(loc, { maximumFractionDigits: digits });
 
   const cards = [
     {
       icon: DollarSign,
       label: t("Chiffre d'affaires facturé", 'Billed turnover'),
-      value: s?.finance ? `${nf(s.finance.chiffre_affaires)} XAF` : '—',
+      value: s?.finance ? `${nf(s.finance.chiffre_affaires)} XAF` : '',
       hint: s?.finance
         ? t(`${nf(s.finance.total_factures)} facture(s) • ${nf(s.finance.taux_recouvrement, 1)} % recouvré`, `${nf(s.finance.total_factures)} invoice(s) • ${nf(s.finance.taux_recouvrement, 1)} % collected`)
         : t('Finance OHADA : accès ou agrégat indisponible', 'OHADA Finance: aggregate unavailable'),
@@ -71,7 +71,7 @@ export default function BiAnalyticsPage() {
     {
       icon: Truck,
       label: t('Missions de transport', 'Transport missions'),
-      value: s?.transport ? nf(s.transport.missions_total) : '—',
+      value: s?.transport ? nf(s.transport.missions_total) : '',
       hint: s?.transport
         ? t(`${nf(s.transport.missions_terminees)} clôturées • ${nf(s.transport.missions_en_cours)} en cours`, `${nf(s.transport.missions_terminees)} closed • ${nf(s.transport.missions_en_cours)} in progress`)
         : t('Transport & Flotte : agrégat indisponible', 'Transport & Fleet: aggregate unavailable'),
@@ -79,7 +79,7 @@ export default function BiAnalyticsPage() {
     {
       icon: Warehouse,
       label: t('Valeur du stock', 'Stock value'),
-      value: s?.magasin ? `${nf(s.magasin.valeur_stock)} XAF` : '—',
+      value: s?.magasin ? `${nf(s.magasin.valeur_stock)} XAF` : '',
       hint: s?.magasin
         ? t(`${nf(s.magasin.nb_articles)} article(s) • ${nf(s.magasin.nb_alertes_min)} sous le minimum`, `${nf(s.magasin.nb_articles)} item(s) • ${nf(s.magasin.nb_alertes_min)} below minimum`)
         : t('Magasin & Stock : agrégat indisponible', 'Warehouse & Stock: aggregate unavailable'),
@@ -87,7 +87,7 @@ export default function BiAnalyticsPage() {
     {
       icon: Ship,
       label: t('Conteneurs traités', 'Containers handled'),
-      value: s?.port ? nf(s.port.conteneurs_traites) : '—',
+      value: s?.port ? nf(s.port.conteneurs_traites) : '',
       hint: s?.port
         ? t(`sur ${s.port.periode_jours} j • cycle moyen ${nf(s.port.temps_cycle_moyen_heures, 1)} h`, `over ${s.port.periode_jours} d • average cycle ${nf(s.port.temps_cycle_moyen_heures, 1)} h`)
         : t('Opérations portuaires : agrégat indisponible', 'Port operations: aggregate unavailable'),

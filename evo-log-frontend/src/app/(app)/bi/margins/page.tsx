@@ -9,7 +9,7 @@ import { useSettings } from '@/components/layout/SettingsProvider';
 
 // L'ERP ne conserve aucun revenu par mission : une « marge » serait donc
 // inventée. Ce que les missions stockent réellement, c'est un coût estimé et
-// un coût réel — la page compare donc ces deux colonnes, regroupées par
+// un coût réel  la page compare donc ces deux colonnes, regroupées par
 // corridor saisi (point_depart → point_arrivee).
 type Mission = {
   id: number;
@@ -157,7 +157,7 @@ export default function BiMarginsSubPage() {
                     </div>
                     <div>
                       <div className="text-slate-500 uppercase tracking-wider">{t('Coût réel relevé', 'Recorded actual cost')}</div>
-                      <div className="font-mono text-slate-200">{c.mesurees > 0 ? `${fmt(c.reel)} XAF` : '—'}</div>
+                      <div className="font-mono text-slate-200">{c.mesurees > 0 ? `${fmt(c.reel)} XAF` : ''}</div>
                     </div>
                   </div>
                 </li>

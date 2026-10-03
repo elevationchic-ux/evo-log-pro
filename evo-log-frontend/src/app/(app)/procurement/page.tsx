@@ -53,7 +53,7 @@ function libelleStatut(s: string | null, t: (fr: string, en: string) => string) 
   if (s === 'valide') return t('Validé', 'Approved');
   if (s === 'livre') return t('Livré', 'Received');
   if (s === 'annule') return t('Annulé', 'Cancelled');
-  return s || '—';
+  return s || '';
 }
 
 type FormState = {
@@ -158,10 +158,10 @@ export default function ProcurementPage() {
       const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
       toast.error(
         detail ||
-          t(
-            "Le bon de commande n'a pas pu être enregistré.",
-            'The purchase order could not be saved.'
-          )
+        t(
+          "Le bon de commande n'a pas pu être enregistré.",
+          'The purchase order could not be saved.'
+        )
       );
     },
   });
@@ -221,7 +221,7 @@ export default function ProcurementPage() {
   };
 
   const formatDate = (d: string | null) =>
-    d ? new Date(d).toLocaleDateString(loc, { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+    d ? new Date(d).toLocaleDateString(loc, { day: '2-digit', month: 'short', year: 'numeric' }) : '';
 
   const champ = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -241,13 +241,13 @@ export default function ProcurementPage() {
           <p className="text-slate-400 text-sm mt-1">
             {enBrouillon > 0
               ? t(
-                  `${enBrouillon} bon(s) en attente d'approbation sur ${bonsCommande.length} enregistré(s).`,
-                  `${enBrouillon} of ${bonsCommande.length} order(s) awaiting approval.`
-                )
+                `${enBrouillon} bon(s) en attente d'approbation sur ${bonsCommande.length} enregistré(s).`,
+                `${enBrouillon} of ${bonsCommande.length} order(s) awaiting approval.`
+              )
               : t(
-                  `${bonsCommande.length} bon(s) de commande enregistré(s).`,
-                  `${bonsCommande.length} purchase order(s) on record.`
-                )}
+                `${bonsCommande.length} bon(s) de commande enregistré(s).`,
+                `${bonsCommande.length} purchase order(s) on record.`
+              )}
           </p>
         </div>
 
@@ -354,13 +354,13 @@ export default function ProcurementPage() {
                   <td colSpan={7} className="p-8 text-center text-slate-500">
                     {bonsCommande.length === 0
                       ? t(
-                          'Aucun bon de commande enregistré. Créez le premier avec « Nouveau bon ».',
-                          'No purchase order yet. Create the first one with “New order”.'
-                        )
+                        'Aucun bon de commande enregistré. Créez le premier avec « Nouveau bon ».',
+                        'No purchase order yet. Create the first one with “New order”.'
+                      )
                       : t(
-                          'Aucun bon de commande ne correspond à la recherche.',
-                          'No purchase order matches your search.'
-                        )}
+                        'Aucun bon de commande ne correspond à la recherche.',
+                        'No purchase order matches your search.'
+                      )}
                   </td>
                 </tr>
               ) : (
@@ -382,10 +382,10 @@ export default function ProcurementPage() {
                       </td>
                       <td className="px-6 py-4 max-w-[260px]">
                         <span className="block truncate" title={b.destinataire ?? undefined}>
-                          {b.destinataire || '—'}
+                          {b.destinataire || ''}
                         </span>
                         <span className="block text-xs text-slate-400 truncate" title={b.lieu_livraison ?? undefined}>
-                          {b.lieu_livraison || '—'}
+                          {b.lieu_livraison || ''}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -399,7 +399,7 @@ export default function ProcurementPage() {
                       <td className="px-6 py-4 text-right font-mono font-bold whitespace-nowrap">
                         {b.montant_total != null
                           ? `${Number(b.montant_total).toLocaleString(loc)} ${b.devise || 'XAF'}`
-                          : t('— (non saisi)', '— (not set)')}
+                          : t(' (non saisi)', ' (not set)')}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${statutBadge(b.statut)}`}>
@@ -422,7 +422,7 @@ export default function ProcurementPage() {
                             {t('Approuver', 'Approve')}
                           </button>
                         ) : (
-                          <span className="text-xs text-slate-600">—</span>
+                          <span className="text-xs text-slate-600"></span>
                         )}
                       </td>
                     </tr>
@@ -493,7 +493,7 @@ export default function ProcurementPage() {
                     onChange={champ('fournisseur_id')}
                     className="min-h-[44px] w-full bg-slate-950 border border-slate-800 rounded-xl px-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
                   >
-                    <option value="">{t('— choisir —', '— select —')}</option>
+                    <option value="">{t(' choisir ', ' select ')}</option>
                     {fournisseurs.map((f) => (
                       <option key={f.id} value={String(f.id)}>
                         {f.name}{f.code ? ` (${f.code})` : ''}

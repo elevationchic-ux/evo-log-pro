@@ -179,13 +179,13 @@ export default function RhPersonnelTimeAttendance() {
                     <div className="text-[11px] text-slate-400">{r.employe_role}</div>
                   </td>
                   <td className="py-3.5 px-4 text-slate-300">{r.date_pointage}</td>
-                  <td className="py-3.5 px-4 text-center font-bold text-emerald-400">{r.heure_arrivee || '—'}</td>
-                  <td className="py-3.5 px-4 text-center font-bold text-blue-400">{r.heure_depart || '—'}</td>
+                  <td className="py-3.5 px-4 text-center font-bold text-emerald-400">{r.heure_arrivee || ''}</td>
+                  <td className="py-3.5 px-4 text-center font-bold text-blue-400">{r.heure_depart || ''}</td>
                   <td className="py-3.5 px-4 text-right font-bold text-slate-200">{r.heures_effectives} h</td>
                   <td className="py-3.5 px-4 text-right">
                     {r.droit_panier_nuit
                       ? <span className="text-amber-400 font-bold">{r.montant_panier.toLocaleString()} XAF</span>
-                      : <span className="text-slate-500">—</span>}
+                      : <span className="text-slate-500"></span>}
                   </td>
                   <td className="py-3.5 px-4 text-center">
                     {r.est_valide ? (

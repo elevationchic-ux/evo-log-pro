@@ -4,7 +4,7 @@ Contexte : /api/v1/acconage-avance (38 endpoints) est passe de la simple
 authentification a ``require_perm``. Le catalogue ne couvrait que escale /
 manifeste / stevedoring ; l'activite reelle du terminal (navires, plan
 d'arrimage, grues et remorqueurs, reservations, connaissements, frais
-portuaires, dockers temporaires) n'avait AUCUN code applicable — les plaquer
+portuaires, dockers temporaires) n'avait AUCUN code applicable  les plaquer
 sur « escale » aurait ete du bricolage.
 
 Nouveaux roles : CHEF_EXPLOITATION (level 2, pilotage complet) et
