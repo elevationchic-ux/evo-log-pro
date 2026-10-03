@@ -1501,13 +1501,40 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
     requiredRoles: ['COMMERCIAL', 'CHARGE_AFFAIRES', 'DIRECTEUR_COMMERCIAL', 'ADMIN', 'SUPER_ADMIN'],
     subModules: [
       {
-        label: 'Simulateur Cotation CEMAC',
-        path: '/portail-commercial',
-        icon: TrendingUp,
+        label: 'Chiffrage sur Grille Tarifaire',
+        path: '/portail-commercial?tab=chiffrage',
+        icon: Calculator,
         badge: 'Ventes',
         tcode: 'KSAL_CRM',
-        description: 'Cotation express transport corridor, pipeline devis et encours clients',
+        description: 'Chiffrage bâti sur les tarifs saisis, puis émission du devis client',
         businessProcess: 'Prospection commerciale'
+      },
+      {
+        label: 'Grille Tarifaire d Exploitation',
+        path: '/portail-commercial?tab=tarifs',
+        icon: Tag,
+        badge: 'Tarifs',
+        tcode: 'KSAL_TRF',
+        description: 'Saisie et consultation des lignes tarifaires de la société',
+        businessProcess: 'Paramétrage prix de vente'
+      },
+      {
+        label: 'Devis Émis & Décisions',
+        path: '/portail-commercial?tab=devis',
+        icon: FileText,
+        badge: 'Circuit',
+        tcode: 'KSAL_QUO',
+        description: 'Registre des devis et validation acceptation ou rejet',
+        businessProcess: 'Négociation et closing'
+      },
+      {
+        label: 'Portefeuille Clients & Encours',
+        path: '/portail-commercial?tab=clients',
+        icon: Users,
+        badge: 'Comptes',
+        tcode: 'KSAL_CLI',
+        description: 'Comptes clients du registre des tiers et encours facturé encaissé',
+        businessProcess: 'Suivi de portefeuille'
       }
     ]
   },

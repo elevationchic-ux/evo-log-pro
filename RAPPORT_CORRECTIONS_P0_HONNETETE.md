@@ -1224,6 +1224,112 @@ n'existe pas sans GUCE  n'expose aucun bouton « approuve » mensonger.
 
 ---
 
+## 25. Batch 23  RBAC granulaire sur `/api/v1/acconage-avance` : 38 endpoints du quai
+
+### Contexte et choix de la cible
+
+Toujours la ligne ⏳ du `TODO.md` (phase 6). Nouveau depart d'audit : **49
+routeurs `v1`** encore proteges par la seule authentification. Trois gros
+candidates : `transit_avance` (40), `acconage_avance` (38), `qhse` (38). Choix
+guide par l'honnetete architecturale et la non-interference : `transit_avance`
+est le domaine actif de la session concurrente (elle y commute frontend et
+backend depuis trois jours)  **ecarte** pour ne pas ecraser son travail en
+cours ; `qhse` n'a **aucun code au catalogue** (il faudrait inventer tout un
+domaine dans le meme mouvement  garde pour un lot dedie) ; `acconage_avance`
+cumule : fichier intact depuis le 26/09, module `acconage` deja couvert
+partiellement au catalogue (escale/manifeste/stevedoring), et 38 endpoints
+reels d'acconage portuaire.
+
+### Conversion (38/38, 30 codes, meme discipline)
+
+`scripts/scratch_apply_acconage_perms.py` : table (methode + chemin) → code
+explicite, echec si route sans mapping ou mapping sans route, zero reste
+`get_current_user`. Parite contre le catalogue : « inconnus : AUCUN ».
+
+| Secteur | Decisions semantiques |
+|---|---|
+| Navires | nouveau sous-module `acconage.navire` — un navire n'est pas une escale |
+| Escales + rapport + **amarage** | `escale.read/create/modify` ; l'amarage est un jalon de l'escale, pas un objet a vie propre → `escale.modify` (pas de sous-module gonfle) |
+| Stowage | preparer `stowage.create/modify` ; **valider l'arrimage** `stowage.approve` (engage la securite du chargement) |
+| Grues / remorqueurs | registre = `moyen.read/create/modify` ; disponibilite = `moyen.read` |
+| Reservation de grue | objet propre → `reservation.create` |
+| Connaissements / packing-lists | `connaissement.create/modify`, `packing_list.create`  titres juridiques, hors portee des roles quai |
+| Manifestes | sous-module existant ; marchandises dangereuses = `manifeste.modify` |
+| Surestaries + THC | nouveau `acconage.frais` (calcul = create, lecture = read, contestation = modify  acte du chef) |
+| Dockers temporaires | affecter/lister/modifier/retirer = CRUD `dockers` ; **cloturer** (paie engagee) `dockers.approve` |
+
+### Catalogue + roles : 10 sous-modules neufs, deux roles metier
+
+Sous-modules ajoutes a `acconage` : `navire`, `stowage`, `moyen`,
+`reservation`, `conteneur`, `connaissement`, `packing_list`, `frais`,
+`nettoyage`, `dockers`. Roles : nouveau **`CHEF_EXPLOITATION`** level 2
+(`acconage.*.*` + lecture magasin/transport) et **`OPERATEUR_ACCONAGE`**
+level 3 (23 codes d'execution, **huit refus explicites** verifies rouges :
+navire.create, stowage.approve, moyen.create/modify, connaissement
+create/modify, frais.modify, dockers.approve). `TRANSIT_PRINCIPAL` conserve
+son `acconage.*.read` (lecture seule, deja seedee) ; `DECLARANT` ne voit que
+le manifeste.
+
+### Migration 035 + tests
+
+- `migrations/versions/035_rbac_acconage_grants.py` : purement additive,
+  `downgrade = pass`, garde RuntimeError si tables RBAC absentes ; tete de
+  chaine verifiee `035_rbac_acconage_grants`.
+- `tests/unit/test_rbac_acconage_perms.py` : ✅ **14 passed des le premier
+  run** — parite (30 codes), **matrice 4 roles × 30 codes** avec garde-fou
+  interne (les listes operateur doivent epuiser l'ensemble), « chaque code a
+  un role porteur », **403 HTTP reels** (operateur refuse sur valider-stowage
+  / emettre-connaissement / cloture-dockers  le 403 avant meme le 404 prouve
+  que le droit est verifie avant la base ; transitaire principal 200 en
+  lecture / 403 a la creation d'escale), test de **porte ouverte** sur la
+  reservation de grue (ni 403 ni 500), idempotence 035 et refus sur base
+  sans tables.
+
+### Pas de fallout fake-user, et c'est verifie  pas suppose
+
+La convention du batch 22 (les leurres d'identite doivent porter
+`is_superuser`/`role_level`) a ete appliquee en amont : grep des tests visant
+`/api/v1/acconage-avance` → **aucun trafic de test sur le prefixe converti** ;
+la non-regression ciblee (acconage + moteur + rbac 21/22 + chaine migrations +
+audit gaps) passe du premier coup : ✅ **54 passed, 0 failed**.
+
+### Verification
+
+- Suite complete (commande CI) : ✅ **705 passed, 2 xfailed, 0 failed**
+  (442 s), `PYTEST_EXIT=0`. Delta vs 691 = exactement les 14 tests du lot.
+- `DB_CHANGED` : `kamlog_erp.db` toujours date du 9/28 03:35, anterieur a
+  tous les runs → base de dev intacte.
+- `compileall app` ✅ EXIT=0 ; `import app.main` ✅ (**1142** chemins
+  OpenAPI, +1 d'origine concurrente — la conversion n'ajoute aucune route).
+- Frontend : **aucun changement batch 23** ; `audit --strict-honesty` ✅ ;
+  `tsc --noEmit` ❌ **rouge de cause externe** : erreur de syntaxe
+  (`TS1005 '}' expected`) dans `portail-commercial/page.tsx`, fichier **non
+  committe** (etat `M`) d'une session concurrente active  signale,
+  volontairement non corrige (precedent du §23 : l'auteur avait repare le
+  sien).
+
+### Reste (hors perimetre du batch, signale)
+
+- **47 routeurs / 498 endpoints** encore proteges par la seule
+  authentification — dont une part legitime (self-service `auth.py`,
+  endpoints utilisateur courant) ; les prochains lots naturels :
+  `qhse` (38, avec creation d'un domaine catalogue complet),
+  `magasin_douane` (35), `integration` (28), `acquisition` (27) ;
+  `transit_avance` (40) n'interviendra que quand la session concurrente
+  l'aura libere.
+- `visible_user_ids` toujours non branche sur les listes `created_by` /
+  `department_id` (2e moitie de la ligne ⏳).
+- Les descriptions de roles changees dans le catalogue restent cosmetiques
+  en base (migrations additives sur les liens uniquement) — declare depuis §23.
+
+➡️ Zero-Mock applique au quai : valider un plan d'arrimage, emettre un
+connaissement ou cloturer la liste des dockers sont des actes qui engagent
+respectivement la securite du navire, un titre juridique et une paie ; ils ne
+peuvent plus etre accomplis par « n'importe qui connecte »  et la preuve du
+refus est un HTTP 403 reel, pas une assertion sur un mock.
+
+---
+
 * Aucun acte à valeur légale (validation CNCC, dépôt GUCE/SYDONIA, quittance, bulletin CNPS,
   paiement mobile money) n'est jamais affiché comme "fait" s'il ne l'est pas : soit c'est réel,
   soit l'API répond **501 avec la raison exacte**.

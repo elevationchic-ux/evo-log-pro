@@ -1,9 +1,9 @@
 # Inventaire des pages statiques (aucun branchement API)
 
-- Genere le : 2026-10-01
+- Genere le : 2026-10-03
 - Total pages scannees : 348
-- Pages branchees sur le backend : 308
-- Pages encore statiques : 40
+- Pages branchees sur le backend : 315
+- Pages encore statiques : 33
 
 ## Pages statiques
 
@@ -34,13 +34,6 @@
 | `/reports/templates` | non (vitrine/maintenance) | - |
 | `/reports-bi/data-export` | non (vitrine/maintenance) | - |
 | `/reports-bi/report-generator` | non (vitrine/maintenance) | - |
-| `/rh/dashboard` | non (vitrine/maintenance) | - |
-| `/rh/paie` | non (vitrine/maintenance) | - |
-| `/rh-personnel/dashboard` | non (vitrine/maintenance) | - |
-| `/rh-personnel/employees` | non (vitrine/maintenance) | - |
-| `/rh-personnel/payroll-ohada` | non (vitrine/maintenance) | - |
-| `/rh-personnel/social-declarations` | non (vitrine/maintenance) | - |
-| `/rh-personnel/time-attendance` | non (vitrine/maintenance) | - |
 | `/settings` | non (vitrine/maintenance) | - |
 | `/settings/system/audit-health` | non (vitrine/maintenance) | - |
 | `/transit-douane/bae` | non (vitrine/maintenance) | - |

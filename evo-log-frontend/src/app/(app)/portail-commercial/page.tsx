@@ -506,7 +506,7 @@ export default function PortailCommercialPage() {
                 <span className="font-mono text-slate-100">{fmt(revient)} XAF</span>
               </div>
               <div className="flex justify-between text-emerald-400">
-                <span>{t(`Marge (${fmt(marge, 1)} %)`, `Margin (${fmt(marge, 1)} %)`)</span>
+                <span>{t(`Marge (${fmt(marge, 1)} %)`, `Margin (${fmt(marge, 1)} %)`)}</span>
                 <span className="font-mono">+{fmt(revient * marge / 100)} XAF</span>
               </div>
               <div className="flex items-baseline justify-between pt-2 border-t border-amber-500/30">
