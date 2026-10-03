@@ -35,10 +35,23 @@ export const MODULE_TITLES_EN: Record<string, string> = {
 
 export type Localizable = { title: string; titleEn?: string };
 
+// Sobriété ERP : les titres de modules sont rendus avec leur ICÔNE LUCIDE
+// dédiée ; les emoji en tête de titre (🚢 📦 👑 …) sont donc retirés à
+// l'affichage (source de vérité unique pour toutes les surfaces : sidebar,
+// en-tête, bulle orbitale, menus). La règle couvre pictogrammes, sélecteur de
+// variation (U+FE0F), ZWJ (U+200D) et espaces qui les accompagnent.
+const LEADING_EMOJI =
+  /^[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\s]+/u;
+
+/** Retire les emoji et espaces en tête d'un libellé (rendu sobre). */
+export function stripLeadingEmoji(value: string): string {
+  return value.replace(LEADING_EMOJI, '').trimStart();
+}
+
 /** Retourne le titre anglais si disponible et langue === 'en', sinon le français. */
 export function localizeTitle(item: Localizable, lang: 'fr' | 'en'): string {
-  if (lang === 'en' && item.titleEn) return item.titleEn;
-  return item.title;
+  const raw = lang === 'en' && item.titleEn ? item.titleEn : item.title;
+  return stripLeadingEmoji(raw);
 }
 
 // Source de vérité pour la traduction FR/EN des LIBELLES DE SOUS-MODULES.

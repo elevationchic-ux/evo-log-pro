@@ -33,7 +33,10 @@ import {
   ShieldAlert,
   Fuel,
   Globe,
-  Activity
+  Activity,
+  Search,
+  Layers,
+  LayoutDashboard
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -41,6 +44,8 @@ import { getRouteFromTCode } from '@/utils/tcodeLookup'
 import { financeAPI, transportAPI, magasinAPI } from '@/lib/api-client'
 import { useI18n } from '@/hooks/useI18n'
 import { useSettings } from '@/components/layout/SettingsProvider'
+import { NAVIGATION_REGISTRY, ModuleNavConfig } from '@/config/navigationRegistry'
+import { localizeTitle } from '@/config/navI18n'
 
 type Num = number | null
 
