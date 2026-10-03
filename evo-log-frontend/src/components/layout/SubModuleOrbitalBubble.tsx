@@ -531,7 +531,7 @@ export default function SubModuleOrbitalBubble() {
 
                                   <div className="flex items-center gap-1">
                                     {sub.tcode && (
-                                      <span className="font-mono text-[10px] text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
+                                      <span className="font-mono text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">
                                         {sub.tcode}
                                       </span>
                                     )}
@@ -544,7 +544,7 @@ export default function SubModuleOrbitalBubble() {
                                 </div>
 
                                 <div className="min-w-0 flex-1">
-                                  <span className="block text-xs font-bold text-slate-100 group-hover:text-indigo-300 transition-colors truncate">
+                                  <span className="block text-xs font-bold text-slate-100 group-hover:text-white transition-colors truncate">
                                     {localizeSubLabel(sub.label, language)}
                                   </span>
                                   {sub.description && (
