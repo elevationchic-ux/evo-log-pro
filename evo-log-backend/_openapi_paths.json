@@ -263,6 +263,7 @@
  "/api/v1/b2b/portal/{company_id}/chat",
  "/api/v1/b2b/portal/{company_id}/invoices",
  "/api/v1/b2b/portal/{company_id}/quotes",
+ "/api/v1/b2b/portal/{company_id}/quotes/{quote_id}",
  "/api/v1/b2b/portal/{company_id}/reports/{type_rapport}",
  "/api/v1/b2b/portal/{company_id}/shipments",
  "/api/v1/b2b/portal/{company_id}/stats",

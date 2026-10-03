@@ -15373,6 +15373,9 @@
    "get": [],
    "post": []
   },
+  "/api/v1/b2b/portal/{company_id}/quotes/{quote_id}": {
+   "put": []
+  },
   "/api/v1/b2b/portal/{company_id}/chat": {
    "get": [],
    "post": []

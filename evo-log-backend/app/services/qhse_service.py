@@ -478,76 +478,87 @@ class WorkPermitsIMDGService:
 
     @staticmethod
     def creer_permis_travail(payload: Dict[str, Any]) -> Dict[str, Any]:
-        """Circuit de validation électronique des permis de feu, hauteur et espace confiné"""
-        type_permis = payload.get("type_permis", "PERMIS_DE_FEU")
-        permis_id = f"PT-{datetime.now().strftime('%Y%m%d')}-{type_permis[:3]}"
-        
-        return {
-            "permis_id": permis_id,
-            "type_permis": type_permis,
-            "zone_intervention": payload.get("zone", "Quai 14 - Atelier Soudure Navire"),
-            "demandeur": payload.get("demandeur", "Entreprise Maritime Services"),
-            "exécutant": payload.get("executant", "M. Mbida - Soudeur Certifié"),
-            "validite_heures": 8,
-            "statut": "APPROUVE_ACTIF",
-            "signatures_validees": [
-                {"role": "Donneur d'Ordre", "signataire": "Chef Exploitation PAD", "date": datetime.now().isoformat()},
-                {"role": "Exécutant", "signataire": payload.get("executant", "M. Mbida"), "date": datetime.now().isoformat()},
-                {"role": "Officier de Sécurité ISPS", "signataire": "Commandant Sûreté Portuaire", "date": datetime.now().isoformat()}
-            ],
-            "mesures_securite": [
-                "Extincteur CO2 5kg à proximité immédiate vérifié",
-                "Éloignement des matières combustibles dans un rayon de 10 mètres",
-                "Périmètre de sécurité balisé par rubalise jaune/noire",
-                "Surveillance continue 30 minutes après fin des travaux de point chaud"
-            ]
-        }
+        """Batch 24 : DEBRANCHE (501). L'ancienne version fabriquait un permis
+        « APPROUVE_ACTIF » avec trois signatures tripartites datees (donneur
+        d'ordre, executant, officier ISPS) : un permis de travail (feu,
+        hauteur, espace confine) est un acte de securite engageant la
+        responsabilite penale de ses signataires, il ne peut pas etre simule.
+        """
+        not_implemented(
+            "Emission d'un permis de travail (feu / hauteur / espace confiné)",
+            "des modèles persistants par permis (demandeur, exécutant, zone, "
+            "validité) et un circuit de signature tripartite où chaque signataire "
+            "est un utilisateur authentifié du tenant ; aucune signature ne peut "
+            "être horodatée pour un tiers qui ne l'a pas posée",
+        )
 
     @staticmethod
     def verifier_segregation_imdg(classes_imdg: List[str]) -> Dict[str, Any]:
-        """Matrice de compatibilité de stockage des conteneurs dangereux (Code IMDG 41-22)"""
-        # Table of segregation conflicts
+        """Aide-mémoire de ségrégation (Code IMDG 41-22) : deux règles majeures
+        seulement, sur comparaison EXACTE de classes.
+
+        Batch 24 : l'ancienne version testait « "1" in "".join(classes) » — la
+        concaténation faisait des faux positifs ("4.1"+"3" → "4.13" contenant
+        "1" et "3") et des faux négatifs ("5.1"+"3" → "5.13" ne contenant pas
+        "5.1"). Une matrice IMDG complète (classes 1 à 9, amendements, prescriptions
+        « à distance » vs « séparé ») exige le référentiel officiel : cette
+        fonction reste un rappel, jamais une décision d'arrimage.
+        """
+        classes = {c.strip() for c in classes_imdg if c and c.strip()}
         conflits = []
         is_compatible = True
 
-        if "1" in "".join(classes_imdg) and ("3" in "".join(classes_imdg) or "5.1" in "".join(classes_imdg)):
-            conflits.append("INCOMPATIBILITÉ MAJEURE : Classe 1 (Explosifs) et Classe 3/5.1 (Inflammables/Comburants). Ségrégation minimale: 24 mètres ou cloison pare-feu.")
+        # Classe 1 (explosifs) vs classes 3 / 5.1 : incompatibilité majeure.
+        if "1" in classes and ({"3", "5.1"} & classes):
+            conflits.append(
+                "INCOMPATIBILITÉ MAJEURE : Classe 1 (Explosifs) et Classe 3/5.1 "
+                "(Inflammables/Comburants). Ségrégation minimale : 24 mètres ou "
+                "cloison pare-feu."
+            )
             is_compatible = False
 
-        if "4.3" in "".join(classes_imdg) and "8" in "".join(classes_imdg):
-            conflits.append("ATTENTION : Classe 4.3 (Dégage gaz inflammable au contact de l'eau) et Classe 8 (Acides corrosifs). Séparation obligatoire.")
+        # Classe 4.3 (gaz inflammable au contact de l'eau) vs classe 8 (corrosifs).
+        if "4.3" in classes and "8" in classes:
+            conflits.append(
+                "ATTENTION : Classe 4.3 (Dégage gaz inflammable au contact de "
+                "l'eau) et Classe 8 (Acides corrosifs). Séparation obligatoire."
+            )
             is_compatible = False
 
         return {
-            "classes_analysees": classes_imdg,
+            "classes_analysees": sorted(classes),
             "compatible": is_compatible,
-            "niveau_segregation": "CONFORME_CODE_IMDG" if is_compatible else "INTERDICTION_COHABITATION",
+            # Jamais « CONFORME_CODE_IMDG » : la conformité se prononce sur la
+            # matrice officielle en vigueur, pas sur cet aide-mémoire. Nom de
+            # champ conserve (niveau_segregation) pour la carte API existante.
+            "niveau_segregation": "AUCUNE_REGLE_MAJEURE_DETECTEE" if is_compatible else "REGLE_MAJEURE_ENFREINTEE",
             "conflits_identifies": conflits,
-            "prescriptions_pompiers": "Kits d'intervention spécialisés mousse anti-solvant et tenues étanches classe B disponibles à la capitainerie."
+            "avertissement": (
+                "AIDE-MÉMOIRE NON RÉGLEMENTAIRE : vérifie seulement 2 règles de "
+                "ségrégation parmi les prescriptions de la matrice IMDG en vigueur. "
+                "Ne remplace pas la consultation de la matrice officielle (Code IMDG, "
+                "colonne de segregation) pour décider un co-arrimage ou un stockage."
+            ),
         }
 
     @staticmethod
     def bilan_annuel_csst_cnps(annee: int = 2026) -> Dict[str, Any]:
-        """Rapport annuel officiel pour le Comité de Sécurité (CSST) et la CNPS Cameroun"""
-        heures_travaillees = 2850000
-        nb_accidents_avec_arret = 3
-        jours_arret = 42
-
-        # Normes internationales OIT / CNPS
-        taux_frequence = round((nb_accidents_avec_arret / heures_travaillees) * 1000000, 2)
-        taux_gravite = round((jours_arret / heures_travaillees) * 1000, 3)
-
-        return {
-            "annee": annee,
-            "organisme_destinataire": "Caisse Nationale de Prévoyance Sociale (CNPS) Cameroun & CSST Inter-entreprises",
-            "heures_exposition_risque": heures_travaillees,
-            "accidents_avec_arret": nb_accidents_avec_arret,
-            "jours_perdus_arret": jours_arret,
-            "taux_frequence_tf": taux_frequence,
-            "taux_gravite_tg": taux_gravite,
-            "evaluation_performance": "PERFORMANCE_EXCELLENTE (TF < 2.0)",
-            "certifications_actives": ["ISO 45001:2018 (Santé & Sécurité)", "ISO 14001:2015 (Environnement)", "Code ISPS Maritime"]
-        }
+        """Batch 24 : DEBRANCHE (501). L'ancienne version renvoyait un « bilan
+        officiel CNPS/CSST » avec heures d'exposition (2 850 000), accidents,
+        jours d'arret et certifications ISO fabriques en dur, pour n'importe
+        quel tenant. Une declaration annuelle a valeur declarative aupres de
+        la CNPS : des chiffres inventes exposent l'entreprise. La stat basee
+        en DB (accidents declares, risques) reste disponible via
+        QHSEReportingService.rapport_securite.
+        """
+        not_implemented(
+            f"Bilan annuel officiel CSST/CNPS {annee}",
+            "la saisie réelle des heures d'exposition au risque par le tenant "
+            "(les accidentés et jours d'arrêt proviennent déjà des AccidentTravail "
+            "en base ; il manque la dénominateur heures travaillées). Aucun taux "
+            "TF/TG n'est calculé avant saisie — voir /api/v1/qhse/rapports/securite/"
+            f"{annee} pour les chiffres réellement déclarés dans la base"
+        )
 
 
 # Facade service for backward compatibility

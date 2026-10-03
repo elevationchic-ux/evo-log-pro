@@ -270,7 +270,7 @@ export default function SubModuleOrbitalBubble() {
                       onClick={() => handleSetViewMode("orb")}
                       className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                         viewMode === "orb"
-                          ? "bg-indigo-600 text-white shadow"
+                          ? "bg-slate-700 text-white"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
                       title="Affichage Orbe Gravitationnelle & Arbre de Compétences"
@@ -315,7 +315,7 @@ export default function SubModuleOrbitalBubble() {
                       ? "Rechercher un module, code T-Code ou sous-module..."
                       : t.shell.bubbleSearch
                   }
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-8 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-8 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-slate-500 transition-colors"
                 />
                 {query && (
                   <button
@@ -338,11 +338,11 @@ export default function SubModuleOrbitalBubble() {
                 <div className="md:w-80 lg:w-96 shrink-0 border-b md:border-b-0 md:border-r border-slate-800/80 bg-slate-950/70 flex flex-col overflow-hidden">
                   <div className="p-3 border-b border-slate-800/60 bg-slate-900/40 flex items-center justify-between">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <Sparkles className="w-3.5 h-3.5 text-slate-500" />
                       Pôles & Modules ({filteredNav.length})
                     </span>
                     <span className="text-[10px] text-slate-400">
-                      {pinnedModuleKey ? "📌 Verrouillé" : "Survolez / Cliquez"}
+                      {pinnedModuleKey ? "Verrouillé" : "Survolez / Cliquez"}
                     </span>
                   </div>
 
