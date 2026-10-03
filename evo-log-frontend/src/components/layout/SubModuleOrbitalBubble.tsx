@@ -596,7 +596,8 @@ export default function SubModuleOrbitalBubble() {
                             className="w-full flex items-center gap-3 mb-2 text-left group"
                           >
                             <span
-                              className={`shrink-0 w-9 h-9 rounded-lg bg-gradient-to-tr ${mod.bgGradient} text-white flex items-center justify-center shadow`}
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                              style={{ backgroundColor: `${mod.color}22`, color: mod.color }}
                             >
                               <ModIcon className="w-5 h-5" />
                             </span>
