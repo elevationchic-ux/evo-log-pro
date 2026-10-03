@@ -9,7 +9,6 @@ import string
 
 from app.core.database import get_db
 from app.core.permissions import require_perm
-from app.core.not_implemented import not_implemented
 from app.models.user import User
 from app.schemas.qhse import (
     AnalyseRisqueCreate, AnalyseRisqueUpdate, AnalyseRisqueResponse,

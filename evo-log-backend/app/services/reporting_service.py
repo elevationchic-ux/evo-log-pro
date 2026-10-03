@@ -137,20 +137,15 @@ class RapportService:
         if not rapport:
             raise ValueError("Rapport non trouvé")
         
-        debut = datetime.utcnow()
-        rapport.statut = "en_cours"
-        rapport.date_generation = debut
-        db.commit()
-        
-        # Simulate report generation
-        import time
-        time.sleep(1)
-        
+        # La « generation » actuelle ne calcule toujours aucune ligne : elle
+        # horodate et bascule le statut, rien de plus. L'ancien code
+        # simulationnait time.sleep(1) puis inventait nombre_lignes = 1000 ;
+        # ce compteur reste NULL tant qu'aucune agregation reelle n'existe,
+        # l'ecran affiche « non calcule » au lieu d'un faux succes.
         fin = datetime.utcnow()
         rapport.statut = "disponible"
         rapport.date_generation = fin
         rapport.duree_generation = int((fin - debut).total_seconds())
-        rapport.nombre_lignes = 1000
         
         db.commit()
         db.refresh(rapport)

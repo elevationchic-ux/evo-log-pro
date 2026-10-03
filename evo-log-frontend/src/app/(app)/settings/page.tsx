@@ -22,7 +22,7 @@ import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const { user } = useAuth()
-  const { language, setLanguage } = useSettings()
+  const { language, setLanguage, theme, setTheme } = useSettings()
 
   const [fullName, setFullName] = useState(user?.fullName || 'Utilisateur ERP')
   const [email, setEmail] = useState(user?.email || 'user@evo-log.cm')
@@ -213,10 +213,31 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 gap-4">
               <div>
-                {/* Identité sombre unique : le thème clair est désactivé, seule la langue est configurable. */}
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Thème Visuel</label>
-                <div className="w-full h-10 px-3 flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white">
-                  <Palette className="w-4 h-4 text-amber-400" /> 🌙 Thème Sombre Optimal (identité unique)
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { id: 'dark', fr: 'Sombre', en: 'Dark', icon: 'dark_mode' },
+                    { id: 'light', fr: 'Clair', en: 'Light', icon: 'light_mode' },
+                    { id: 'system', fr: 'Système', en: 'System', icon: 'settings_brightness' },
+                  ] as const).map((opt) => {
+                    const selected = theme === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setTheme(opt.id)}
+                        aria-pressed={selected}
+                        className={`h-10 px-3 flex items-center justify-center gap-2 rounded-xl text-xs font-bold border transition ${
+                          selected
+                            ? 'bg-primary text-on-primary border-primary'
+                            : 'bg-slate-950 text-white border-slate-800 hover:border-amber-500'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">{opt.icon}</span>
+                        {language === 'en' ? opt.en : opt.fr}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
