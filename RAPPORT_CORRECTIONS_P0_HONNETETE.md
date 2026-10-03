@@ -1383,7 +1383,7 @@ TRANSIT_PRINCIPAL= default-deny total), avec garde interne que les listes citent
 reels du routeur ; (3) HTTP reel : officier 200 sur `/accidents`, auditeur 403 sur
 declaration d'accident et suppression d'enregistrement (403 avant 422/404, preuve que le
 droit passe avant le corps), chef 403 sur controle HACCP mais porte la declaration
-d'accident (« porte ouverte », jamis 500) ; (4) honnetete : permis 501, bilan 501, IMDG
+d'accident (« porte ouverte », jamais 500) ; (4) honnetete : permis 501, bilan 501, IMDG
 avec `avertissement` et sans « CONFORME », plus regression specifique du faux positif de
 concatenation (`4.1`+`3` → compatible) ; (5) migration 036 : codes neufs presents, liens
 QHSE == grants, idempotence, garde sur base sans tables.
