@@ -217,20 +217,20 @@ export default function SubModuleOrbitalBubble() {
           onClick={() => {
             if (!isDraggingRef.current) setIsOpen((o) => !o);
           }}
-          className={`relative w-14 h-14 rounded-full bg-slate-900 border-2 flex items-center justify-center shadow-2xl transition-transform ${isDragging ? 'cursor-grabbing scale-110 shadow-amber-400/30' : 'cursor-grab hover:scale-105 active:scale-95'}`}
+          className={`relative w-14 h-14 rounded-full bg-slate-900 border-2 flex items-center justify-center shadow-2xl transition-transform ${isDragging ? 'cursor-grabbing scale-110' : 'cursor-grab hover:scale-105 active:scale-95'}`}
           style={{ borderColor: activeOrbit.color }}
           aria-label={t.shell.bubbleTitle}
           title={isDragging ? 'Relâchez pour repositionner' : t.shell.bubbleTitle}
         >
           {isDragging && (
-            <span className="absolute -inset-1 rounded-full border-2 border-dashed border-amber-400/60 animate-spin" style={{ animationDuration: '3s' }} />
+            <span className="absolute -inset-1 rounded-full border-2 border-dashed border-slate-500/60 animate-spin" style={{ animationDuration: '3s' }} />
           )}
           <div
-            className={`w-11 h-11 rounded-full bg-gradient-to-tr ${activeOrbit.bgGradient} flex items-center justify-center text-white shadow-inner transition-opacity ${isDragging ? 'opacity-80' : ''}`}
+            className={`flex h-11 w-11 items-center justify-center rounded-full bg-slate-800 text-slate-100 transition-opacity ${isDragging ? 'opacity-80' : ''}`}
           >
             {isOpen ? <X className="w-6 h-6" /> : <MainIcon className="w-6 h-6" />}
           </div>
-          <span className="absolute -top-1 -right-1 bg-slate-950 text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded-full border border-amber-500/40 shadow">
+          <span className="absolute -top-1 -right-1 bg-slate-950 text-slate-300 font-semibold text-[10px] px-2 py-0.5 rounded-full border border-slate-700">
             {filteredNav.length}
           </span>
         </button>
@@ -246,7 +246,7 @@ export default function SubModuleOrbitalBubble() {
             <header className="shrink-0 border-b border-slate-800 bg-slate-950/80 px-4 py-3 flex flex-col gap-2.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center text-white shadow-md shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-200 shrink-0">
                     <Orbit className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">

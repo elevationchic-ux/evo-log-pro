@@ -150,21 +150,50 @@ def test_tec_non_duplique():
 # 4. FEFO  Premier Perime, Premier Sorti
 #
 # Service reel : PeremptionService.obtenir_stock_fefo(db, article_id, qte)
-# Etat : la fonction fait reference a Stock.article_id, attribut inexistant
-# sur le modele Stock (colonnes reelles : code_article). Le service est donc
-# non fonctionnel en l'etat  xfail tant que la jointure n'est pas corrigee.
+# Corrige : l'ancien code citait Stock.article_id / Stock.quantite (colonnes
+# INEXISTANTES sur Stock : identite reelle code_article, quantite reelle
+# quantite_disponible)  AttributeError garanti a chaque appel. Filtre desormais
+# sur Peremption.stock_id + Peremption.quantite. Test reel sur modele, xfail leve.
 # ══════════════════════════════════════════════════════════════════════════════
 
 
-@pytest.mark.xfail(
-    reason="Service FEFO fait reference a Stock.article_id (colonne inexistante) ; "
-           "P1 gap : corriger la jointure avant de pouvoir tester le tri reel.",
-    strict=True,
-)
-def test_fefo_tri_reel():
+def test_fefo_tri_reel(db):
+    """FEFO reel : lots non perimes et disponibles, tries par date_peremption
+    croissante ; lot perime et lot a quantite nulle exclus."""
+    from datetime import date, timedelta
     from app.services.magasin_avance_service import PeremptionService
-    # Will fail due to Stock.article_id bug in the service
-    raise NotImplementedError("Blocked by service bug")
+    from app.models.tenant import Company
+    from app.models.magasin import Stock
+    from app.models.magasin_avance import Peremption
+
+    today = date.today()
+    company = Company(code="FEFO1", nom="Co FEFO", is_active=True,
+                      modules_actives='["magasin"]')
+    db.add(company)
+    db.commit()
+    db.refresh(company)
+    stock = Stock(company_id=company.id, code_article="ART-1",
+                  designation="Article test", quantite_disponible=100)
+    db.add(stock)
+    db.commit()
+    db.refresh(stock)
+
+    def _lot(lot, exp_days, qty):
+        db.add(Peremption(stock_id=stock.id, lot_numero=lot,
+                          date_peremption=today + timedelta(days=exp_days),
+                          quantite=qty, statut="actif"))
+        db.commit()
+
+    # Insertion volontairement hors ordre chronologique pour verifier le tri.
+    _lot("L-MILIEU", 20, 5)
+    _lot("L-PROCHE", 5, 5)
+    _lot("L-LOIN", 60, 5)
+    _lot("L-PERIME", -3, 5)   # perime  exclut
+    _lot("L-VIDE", 10, 0)     # quantite nulle  exclut
+
+    lots = [p.lot_numero for p in
+            PeremptionService.obtenir_stock_fefo(db, stock.id, 3)]
+    assert lots == ["L-PROCHE", "L-MILIEU", "L-LOIN"]
 
 
 # ══════════════════════════════════════════════════════════════════════════════

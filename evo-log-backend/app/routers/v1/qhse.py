@@ -9,6 +9,7 @@ import string
 
 from app.core.database import get_db
 from app.core.security import get_current_user
+from app.core.not_implemented import not_implemented
 from app.models.user import User
 from app.schemas.qhse import (
     AnalyseRisqueCreate, AnalyseRisqueUpdate, AnalyseRisqueResponse,
@@ -756,26 +757,46 @@ def supprimer_enregistrement_qhse(
 
 
 # ============ PERMIS DE TRAVAIL DÉMATÉRIALISÉS ============
+# Batch 24 : cette route etait PUBLIQUE (aucune auth) et renvoyait un permis
+# « APPROUVE_ACTIF » avec trois signatures tripartites datees inventees. Un
+# permis de travail est un acte de securite au sens du code du travail ; la
+# validation ne peut pas etre simulee. 501 explicite, voir le service.
 @router.post("/permis-travail")
-def creer_permis_travail_api(payload: dict):
-    """Generate electronic work permit (Hot work, height, confined space) with tripartite validation"""
+def creer_permis_travail_api(
+    payload: dict,
+    current_user: User = Depends(get_current_user),
+):
+    """Permis de travail debranche cote serveur (501) : aucune signature simulee."""
     from app.services.qhse_service import WorkPermitsIMDGService
     return WorkPermitsIMDGService.creer_permis_travail(payload)
 
 
 # ============ MATRICE SÉGRÉGATION PRODUITS CHIMIQUES IMDG ============
+# Batch 24 : aide-memoire de segregation (consultation de la matrice) ->
+# qhse.imdg.read. La reponse est explicitement non reglementaire (see service).
 @router.post("/imdg/segregation")
-def verifier_compatibilite_imdg_api(payload: dict):
-    """Check dangerous goods segregation compatibility per IMDG Code 41-22"""
+def verifier_compatibilite_imdg_api(
+    payload: dict,
+    current_user: User = Depends(get_current_user),
+):
+    """Contrainte de segregation IMDG : aide-memoire, remplace la matrice officielle"""
     from app.services.qhse_service import WorkPermitsIMDGService
     classes = payload.get("classes_imdg", ["3", "8"])
     return WorkPermitsIMDGService.verifier_segregation_imdg(classes)
 
 
 # ============ BILAN ANNUEL OFFICIEL CSST & CNPS CAMEROUN ============
+# Batch 24 : la route etait publique et renvoyait un « bilan officiel » avec
+# heures d'exposition, accidents et certifications fabriques en dur. Une
+# declaration CNPS/CSST a valeur declarative : 501 tant que les heures
+# reelles ne sont pas saisies. Les chiffres bases en DB restent consultables
+# via /rapports/securite/{annee}.
 @router.get("/csst-cnps/bilan")
-def obtenir_bilan_csst_cnps(annee: int = 2026):
-    """Generate official CSST / CNPS safety statistics (Frequency Rate TF and Severity Rate TG)"""
+def obtenir_bilan_csst_cnps(
+    annee: int = 2026,
+    current_user: User = Depends(get_current_user),
+):
+    """Bilan officiel CNPS/CSST : 501 (aucune donnee saisie, rien d'invente)."""
     from app.services.qhse_service import WorkPermitsIMDGService
     return WorkPermitsIMDGService.bilan_annuel_csst_cnps(annee)
 

@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
+from app.core.not_implemented import not_implemented
 from app.models.qhse import (
     AnalyseRisque, ActionPrevention, PlanPrevention, EPIRequis,
     AccidentTravail, InvestigationAccident, NormeCertification, AuditQualite,
