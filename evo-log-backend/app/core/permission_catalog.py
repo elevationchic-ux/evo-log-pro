@@ -188,6 +188,11 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ("CHEF_EXPLOITATION", 2, "Chef d'exploitation du terminal : pilotage complet de l'acconage", [
         "acconage.*.*",
         "magasin.stock.read", "transport.*.read",
+        # Batch 24 : le chef n'est pas officier QHSE, mais c'est lui qui
+        # declare les accidents du quai, demande un permis de travail,
+        # consulte la segregation IMDG avant co-stivage et signale un risque.
+        "qhse.accident.read", "qhse.accident.create", "qhse.accident.modify",
+        "qhse.permis.create", "qhse.imdg.read", "qhse.risque.create",
     ]),
     ("OPERATEUR_ACCONAGE", 3, "Operateur d'acconage : execution au quai, sans validation", [
         "acconage.navire.read", "acconage.escale.read", "acconage.escale.create",

@@ -40,15 +40,22 @@ class PeremptionService:
         """
         Get stock using FEFO (First Expired, First Out)
         Returns lots sorted by expiration date
+
+        article_id designe la cle entiere de l'article, c-a-d Stock.id ; chaque
+        lot (Peremption) y est rattache via Peremption.stock_id. La disponibilite
+        et la date portent sur le LOT, pas sur la fiche Stock. (Le code precedent
+        citait Stock.article_id / Stock.quantite, colonnes INEXISTANTES sur Stock
+        -- identite reelle code_article, quantites quantite_disponible /
+        quantite_reservee -- ce qui levait un AttributeError au moindre appel.)
         """
-        peremptions = db.query(Peremption).join(Stock).filter(
+        peremptions = db.query(Peremption).filter(
             and_(
-                Stock.article_id == article_id,
-                Stock.quantite > 0,
+                Peremption.stock_id == article_id,
+                Peremption.quantite > 0,
                 Peremption.date_peremption >= date.today()
             )
         ).order_by(Peremption.date_peremption.asc()).all()
-        
+
         return peremptions
     
     @staticmethod
@@ -56,11 +63,11 @@ class PeremptionService:
         """Get stock expiring within critical period"""
         date_limite = date.today() + timedelta(days=jours_critique)
         
-        peremptions = db.query(Peremption).join(Stock).filter(
+        peremptions = db.query(Peremption).filter(
             and_(
                 Peremption.date_peremption <= date_limite,
                 Peremption.date_peremption >= date.today(),
-                Stock.quantite > 0
+                Peremption.quantite > 0
             )
         ).order_by(Peremption.date_peremption.asc()).all()
         
@@ -69,10 +76,10 @@ class PeremptionService:
     @staticmethod
     def obtenir_peremptions_expirees(db: Session) -> List[Peremption]:
         """Get expired stock for quarantine"""
-        return db.query(Peremption).join(Stock).filter(
+        return db.query(Peremption).filter(
             and_(
                 Peremption.date_peremption < date.today(),
-                Stock.quantite > 0
+                Peremption.quantite > 0
             )
         ).all()
 
