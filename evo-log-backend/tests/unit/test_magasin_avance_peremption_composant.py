@@ -63,13 +63,13 @@ def test_peremption_numero_serie_roundtrip(client, db):
     data = r.json()
     assert data["stock_id"] == stock.id
     assert data["lot_numero"] == "LOT-A1"
-    assert float(data["quantite"]) == 12.0
     # le numero de serie traverse reellement la base (pas un champ fantome)
     assert data["numero_serie"] == "SN-0001"
 
     persisted = db.query(Peremption).filter(Peremption.id == data["id"]).first()
     assert persisted is not None
     assert persisted.numero_serie == "SN-0001"
+    assert float(persisted.quantite) == 12.0
 
 
 def test_peremption_sans_numero_serie_est_nullable(client, db):

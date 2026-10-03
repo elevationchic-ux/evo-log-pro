@@ -465,6 +465,112 @@
   .dark .border-green-100, .dark .border-green-200 { border-color: rgb(34 197 94 / 0.3) !important; }
   .dark .border-purple-100, .dark .border-purple-200 { border-color: rgb(168 85 247 / 0.3) !important; }
   .dark .border-indigo-100, .dark .border-indigo-200 { border-color: rgb(99 102 241 / 0.3) !important; }
+
+  /* ══════════════════════════════════════════════════════════════════
+     Light-only net : miroir inverse du filet .dark. Les pages sont ecrites
+     "dark-first" (bg-slate-900, text-white, border-slate-800...) : ici on
+     inverse l'echelle neutre (slate/gray/zinc/neutral + blanc/noir) vers
+     des surfaces claires et un texte fonce, SANS retoucher les 337 pages.
+     Les couleurs semantiques plein (bg-{c}-500, text-{c}-600..900) et les
+     scims bg-black/xx sont laisses tels quels (deja lisibles sur clair).
+     ══════════════════════════════════════════════════════════════════ */
+  /* Fonds dark-first -> surfaces claires */
+  .light .bg-slate-950,
+  .light .bg-gray-950,
+  .light .bg-zinc-950,
+  .light .bg-neutral-950 { background-color: hsl(var(--surface-container-lowest)) !important; }
+  .light .bg-slate-900,
+  .light .bg-gray-900,
+  .light .bg-zinc-900,
+  .light .bg-neutral-900 { background-color: hsl(var(--surface)) !important; }
+  .light .bg-slate-800,
+  .light .bg-gray-800,
+  .light .bg-zinc-800,
+  .light .bg-neutral-800 { background-color: hsl(var(--surface-container)) !important; }
+  .light .bg-slate-700,
+  .light .bg-gray-700,
+  .light .bg-zinc-700,
+  .light .bg-neutral-700 { background-color: hsl(var(--surface-container-high)) !important; }
+  .light .bg-slate-600,
+  .light .bg-gray-600,
+  .light .bg-zinc-600 { background-color: hsl(var(--surface-container-highest)) !important; }
+  .light .bg-slate-500,
+  .light .bg-slate-400 { background-color: hsl(var(--surface-variant)) !important; }
+
+  /* Variantes opacité (bg-slate-800/60, bg-slate-900/90...) par sous-chaîne */
+  .light [class*="bg-slate-950/"],
+  .light [class*="bg-gray-950/"] { background-color: hsl(var(--surface-container-lowest) / 0.9) !important; }
+  .light [class*="bg-slate-900/"],
+  .light [class*="bg-gray-900/"],
+  .light [class*="bg-zinc-900/"] { background-color: hsl(var(--surface) / 0.88) !important; }
+  .light [class*="bg-slate-800/"],
+  .light [class*="bg-gray-800/"] { background-color: hsl(var(--surface-container) / 0.7) !important; }
+  .light [class*="bg-slate-700/"] { background-color: hsl(var(--surface-container-high) / 0.7) !important; }
+
+  /* Survol (hover) des surfaces neutres */
+  .light .hover\:bg-slate-900:hover,
+  .light .hover\:bg-slate-800:hover,
+  .light .hover\:bg-gray-800:hover { background-color: hsl(var(--surface-container)) !important; }
+  .light .hover\:bg-slate-700:hover,
+  .light .hover\:bg-slate-600:hover { background-color: hsl(var(--surface-container-high)) !important; }
+  .light .hover\:bg-slate-50:hover,
+  .light .hover\:bg-slate-100:hover,
+  .light .hover\:bg-gray-100:hover { background-color: hsl(var(--surface-container-low)) !important; }
+
+  /* Texte light-first -> texte fonce (echelle neutre) */
+  .light .text-slate-50,
+  .light .text-slate-100,
+  .light .text-slate-200,
+  .light .text-slate-300 { color: hsl(var(--on-surface)) !important; }
+  .light .text-slate-400,
+  .light .text-gray-400,
+  .light .text-gray-500,
+  .light .text-slate-500 { color: hsl(var(--on-surface-variant)) !important; }
+  .light .hover\:text-slate-100:hover,
+  .light .hover\:text-slate-200:hover,
+  .light .hover\:text-white:hover { color: hsl(var(--on-surface)) !important; }
+
+  /* Blanc : titre/blanc sur fond neutre -> fonce ; MAIS on preserve le
+     blanc des controles pleins (l'element porte lui-meme un bg-*). */
+  .light .text-white:not([class*="bg-"]):not([class*="text-on-"]) { color: hsl(var(--on-surface)) !important; }
+  .light [class*="text-white/"]:not([class*="bg-"]) { color: hsl(var(--on-surface) / 0.72) !important; }
+
+  /* Bordures / separateurs neutres */
+  .light .border-slate-800,
+  .light .border-gray-800,
+  .light .border-slate-700,
+  .light .border-gray-700 { border-color: hsl(var(--outline-variant)) !important; }
+  .light .border-slate-600,
+  .light .border-slate-500,
+  .light .border-slate-400,
+  .light .border-gray-500 { border-color: hsl(var(--outline)) !important; }
+  .light [class*="border-slate-800/"],
+  .light [class*="border-slate-700/"],
+  .light [class*="border-white/"] { border-color: hsl(var(--outline-variant)) !important; }
+  .light .divide-slate-800 > *,
+  .light .divide-slate-700 > *,
+  .light .divide-gray-800 > * { border-color: hsl(var(--outline-variant)) !important; }
+  .light .ring-slate-700,
+  .light .ring-slate-600,
+  .light .ring-slate-500,
+  .light .ring-slate-800 { --tw-ring-color: hsl(var(--outline)) !important; }
+
+  /* Gradients slate-9xx aplatis en surface claire sobre */
+  .light [class*="bg-gradient"][class*="slate-9"] {
+    background-image: none !important;
+    background-color: hsl(var(--surface)) !important;
+  }
+
+  /* Placeholder herite sombre -> gris fonce leger */
+  .light input::placeholder,
+  .light textarea::placeholder { color: hsl(var(--on-surface-variant) / 0.7) !important; }
+
+  /* Badges module : sobre et neutre en clair (remplace la teinte saturée) */
+  .light [class*="module-badge-"] {
+    background-color: hsl(220 16% 95%) !important;
+    color: hsl(220 20% 28%) !important;
+    border-color: hsl(220 14% 88%) !important;
+  }
 }
 
 @layer base {

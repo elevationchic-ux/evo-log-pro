@@ -15,7 +15,7 @@
 // télétransmission, quittance) et suit son cautionnement. Toutes les valeurs
 // affichées viennent des tables cautions_douanieres / dum_customs_records ;
 // tant que rien n'est saisi, l'écran dit « non enregistré », jamais un chiffre
-# par défaut.
+// par défaut.
 //
 // Teinte : sky #0EA5E9 = identité du module Port Operations (modulePalette).
 // Les pastilles VERT/BLEU/JAUNE/ROUGE restent sémantiques (couleur du circuit

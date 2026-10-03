@@ -39,20 +39,34 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (savedSound !== null) setSoundEnabled(savedSound === 'true');
 
     const savedTheme = localStorage.getItem(THEME_SETTINGS_KEY) as ThemePreference;
-    if (savedTheme) setThemeState('dark'); // thème clair désactivé (identité sombre unique)
+    if (savedTheme) setThemeState(savedTheme); // sombre par défaut, clair/système si mémorisé
 
     const savedLang = localStorage.getItem(LANG_SETTINGS_KEY) as LanguagePreference;
     if (savedLang) setLanguageState(savedLang);
   }, []);
 
   useEffect(() => {
-    // Identité visuelle unique de l'ERP : thème sombre forcé (charte slate/onyx).
-    // Les 337 pages sont écrites en sombre ; le mode clair est désactivé jusqu'à
-    // une éventuelle passe de thématisation complète (hors périmètre actuel).
+    // Applique le thème choisi sur <html> (sombre par défaut, clair/système
+    // en option). La classe effective pilote les tokens + filets CSS .dark/.light.
     const root = window.document.documentElement;
-    root.classList.remove('light');
-    root.classList.add('dark');
-  }, []);
+    const apply = (pref: ThemePreference) => {
+      const isLight =
+        pref === 'light' ||
+        (pref === 'system' &&
+          typeof window.matchMedia === 'function' &&
+          window.matchMedia('(prefers-color-scheme: light)').matches);
+      root.classList.toggle('light', isLight);
+      root.classList.toggle('dark', !isLight);
+      root.style.colorScheme = isLight ? 'light' : 'dark';
+    };
+    apply(theme);
+    if (theme === 'system' && typeof window.matchMedia === 'function') {
+      const mq = window.matchMedia('(prefers-color-scheme: light)');
+      const onChange = () => apply('system');
+      mq.addEventListener?.('change', onChange);
+      return () => mq.removeEventListener?.('change', onChange);
+    }
+  }, [theme]);
 
   useEffect(() => {
     // La langue choisie doit être visible du DOM, pas seulement du state React :
