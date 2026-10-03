@@ -128,14 +128,18 @@ class RapportResponse(RapportBase):
     graphiques: Optional[dict] = None
     tables: Optional[dict] = None
     statut: str
-    cree_par: int
+    # Colonnes NULLables en base : imposer un int faisait planter la
+    # validation de reponse (ResponseValidationError) des qu'un champ
+    # etait vide — c'etait le cas de tout POST /rapports (cree_par,
+    # nombre_lignes et duree_generation non renseignes).
+    cree_par: Optional[int] = None
     date_creation: datetime
     date_generation: Optional[datetime] = None
     date_expiration: Optional[datetime] = None
     fichier: Optional[str] = None
     taille_octets: Optional[int] = None
-    nombre_lignes: int
-    duree_generation: int
+    nombre_lignes: Optional[int] = None
+    duree_generation: Optional[int] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     
