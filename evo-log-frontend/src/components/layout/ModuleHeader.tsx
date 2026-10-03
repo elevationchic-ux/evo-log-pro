@@ -295,12 +295,13 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
             <div className="relative">
               <button
                 onClick={() => setIsModuleMenuOpen(!isModuleMenuOpen)}
-                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-bold uppercase tracking-wide transition-all hover:opacity-90 ${themeClasses}`}
+                className="flex items-center gap-2 rounded-lg border border-outline bg-surface-container-low px-2.5 py-1.5 text-[12px] font-semibold tracking-wide text-on-surface transition-colors hover:bg-surface-container"
                 aria-haspopup="listbox"
                 aria-expanded={isModuleMenuOpen}
               >
-                <span className="material-symbols-outlined text-[16px]">{moduleIcon}</span>
-                <span className="hidden max-w-[120px] truncate sm:block">{moduleName}</span>
+                {HeaderIcon ? <HeaderIcon className="h-4 w-4 shrink-0 text-on-surface-variant" /> : null}
+                <span className="hidden max-w-[140px] truncate sm:block">{moduleName}</span>
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: headerColor }} aria-hidden="true" />
                 <span className="material-symbols-outlined text-[14px] opacity-70">expand_more</span>
               </button>
 
@@ -324,22 +325,15 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                                 aria-selected={active}
                                 onClick={() => {
                                   setIsModuleMenuOpen(false);
-                                  // Transition (1,7 s) seulement pour un vrai
-                                  // changement de module, pas un changement de
-                                  // préfixe legacy au sein du même module.
-                                  const targetKey = resolveModuleKeyForPath(m.path);
-                                  if (activeModuleKey && targetKey && activeModuleKey !== targetKey) {
-                                    triggerDomainTransition(m.path, 1700);
-                                  } else {
-                                    router.push(m.path);
-                                  }
+                                  // Navigation directe : pas de rotation plein écran.
+                                  router.push(m.path);
                                 }}
                                 className="flex min-w-0 flex-1 items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors hover:bg-surface-container-low"
                               >
-                                <span className="shrink-0" style={{ color: active ? m.color : undefined }}>
+                                <span className="shrink-0 text-on-surface-variant">
                                   <Icon className="h-[18px] w-[18px]" />
                                 </span>
-                                <span className={`truncate ${active ? 'font-semibold' : ''}`} style={{ color: active ? m.color : undefined }}>{m.label}</span>
+                                <span className={`truncate ${active ? 'font-semibold text-on-surface' : 'text-on-surface'}`}>{m.label}</span>
                               </button>
                               {m.subModules.length > 0 && (
                                 <button

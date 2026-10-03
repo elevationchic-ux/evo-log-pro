@@ -1,7 +1,0 @@
-INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
-INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
-INFO  [alembic.runtime.migration] Running upgrade  -> 001_initial, Initial schema creation
-INFO  [alembic.runtime.migration] Running upgrade 001_initial -> 002_complete_models, Add complete models for all modules
-INFO  [alembic.runtime.migration] Running upgrade 002_complete_models -> 003_add_remaining_models, Add remaining models for Version 2.0
-INFO  [alembic.runtime.migration] Running upgrade 003_add_remaining_models -> 004_add_advanced_models, Add advanced RH, warehouse, and transport models
-INFO  [alembic.runtime.migration] Running upgrade 004_add_advanced_models -> 005_add_acconage_transit_avance, Add advanced acconage, transit, warehouse and transport international models

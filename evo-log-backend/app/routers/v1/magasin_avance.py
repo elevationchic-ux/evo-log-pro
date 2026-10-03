@@ -117,10 +117,10 @@ def obtenir_peremptions_expirees(
     from app.models.magasin import Stock
     from sqlalchemy import and_
     
-    return db.query(Peremption).join(Stock).filter(
+    return db.query(Peremption).filter(
         and_(
             Peremption.date_peremption < date.today(),
-            Stock.quantite > 0
+            Peremption.quantite > 0
         )
     ).all()
 
