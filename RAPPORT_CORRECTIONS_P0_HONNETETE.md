@@ -1364,7 +1364,7 @@ les KPI/rapports annuels exposent `qhse.rapport.read` (lecture de ce qui est agg
 GRANT_TABLE ne couvrait que gouvernance/transport/parc). Ajout de 15 sous-modules (risque,
 prevention, epi, accident, investigation, certification, audit, haccp, controle, formation,
 indicateur, rapport, enregistrement, permis, imdg) = 34 codes. Role `QHSE` rendu operant
-(`qhse.*.*`) ; `CHEF_EXPLOITATION` recoit les 6 codes qu'un chef de terminal porte really
+(`qhse.*.*`) ; `CHEF_EXPLOITATION` recoit les 6 codes qu'un chef de terminal porte reellement
 (declarer/amender un accident, demander un permis, consulter l'IMDG, signaler un risque) ;
 `AUDITEUR` recoit `qhse.*.read` (lecture transversale, jamais d'ecriture).
 
@@ -1372,7 +1372,7 @@ indicateur, rapport, enregistrement, permis, imdg) = 34 codes. Role `QHSE` rendu
 additive (codes du catalogue inseres, liens `role_permissions` manquants ajoutés, role
 absent cree), `downgrade = pass`, garde `RuntimeError` nommant la precondition 020 si les
 tables RBAC manquent. Constat exact, verifie par une migration de demonstration sur base
-temporaire : en base neuve, 020 seode deja le catalogue **vivant**, donc le role QHSE porte
+temporaire : en base neuve, 020 seede deja le catalogue **vivant**, donc le role QHSE porte
 `qhse.*.*` et 036 n'ajoute aucun lien redondant (idempotence testee) ; la valeur reelle de
 036 est pour les bases ayant execute 020 **avant** l'extension du catalogue.
 
