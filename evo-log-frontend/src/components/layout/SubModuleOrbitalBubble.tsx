@@ -470,7 +470,7 @@ export default function SubModuleOrbitalBubble() {
                         <button
                           type="button"
                           onClick={() => navigate(currentFocusedModule.path)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-on-primary hover:opacity-90 text-xs font-semibold transition-opacity"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           <span>Accéder au Hub</span>
@@ -489,7 +489,7 @@ export default function SubModuleOrbitalBubble() {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between text-xs text-slate-400 font-semibold px-1">
                           <span className="flex items-center gap-1.5">
-                            <Layers className="w-3.5 h-3.5 text-indigo-400" />
+                            <Layers className="w-3.5 h-3.5 text-slate-400" />
                             Compétences & Processus Intégrés ({currentFocusedModule?.subModules.length})
                           </span>
                           <span className="text-[11px] text-slate-400">
@@ -510,7 +510,7 @@ export default function SubModuleOrbitalBubble() {
                                 onClick={() => navigate(sub.path)}
                                 className={`group flex flex-col p-3 rounded-xl border text-left transition-all ${
                                   isCurrent
-                                    ? "bg-slate-800 border-emerald-500/80 text-white ring-1 ring-emerald-500/30"
+                                    ? "bg-slate-800 border-primary/50 text-white"
                                     : "bg-slate-900/80 border-slate-800 text-slate-300 hover:bg-slate-850 hover:border-slate-700 hover:text-white"
                                 }`}
                               >
