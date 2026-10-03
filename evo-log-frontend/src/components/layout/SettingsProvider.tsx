@@ -28,6 +28,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemePreference>('dark');
   const [language, setLanguageState] = useState<LanguagePreference>('fr');
   const soundBadgeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Refs pour le son de clic : lues dans le gestionnaire global sans re-binding.
+  const soundEnabledRef = useRef(true);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const lastClickAtRef = useRef(0);
 
   useEffect(() => {
     // Load all settings from localStorage on mount

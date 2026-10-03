@@ -67,7 +67,7 @@ class KitArticleResponse(KitArticleBase):
 
 class ComposantKitBase(BaseModel):
     kit_id: int
-    article_composant_id: int
+    stock_id: int  # colonne reelle de ComposantKit (l'ancien nom article_composant_id etait fantome)
     quantite: float
 
 

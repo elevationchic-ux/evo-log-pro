@@ -279,7 +279,7 @@ def ajouter_composant(
     from app.models.magasin_avance import ComposantKit
     c = ComposantKit(
         kit_id=kit_id,
-        article_composant_id=composant.article_composant_id,
+        stock_id=composant.stock_id,
         quantite=composant.quantite
     )
     db.add(c)
