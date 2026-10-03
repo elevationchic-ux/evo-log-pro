@@ -139,7 +139,10 @@ def mettre_a_jour_valeur_kpi(
     current_user: User = Depends(get_current_user)
 ):
     """Update KPI value"""
-    return KPIService.mettre_a_jour_valeur(db, kpi_id, derniere_valeur)
+    try:
+        return KPIService.mettre_a_jour_valeur(db, kpi_id, derniere_valeur)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="KPI non trouvé")
 
 
 @router.put("/kpis/{kpi_id}", response_model=KPIResponse)
@@ -183,7 +186,12 @@ def generer_rapport(
     current_user: User = Depends(get_current_user)
 ):
     """Generate report"""
-    return RapportService.generer_rapport(db, rapport_id)
+    # Le service leve ValueError sur id inconnu : sans conversion, l'ecran
+    # recevait une 500 nue a la place d'un 404 honnete.
+    try:
+        return RapportService.generer_rapport(db, rapport_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Rapport non trouvé")
 
 
 @router.put("/rapports/{rapport_id}", response_model=RapportResponse)
@@ -261,7 +269,10 @@ def actualiser_tableau_bord(
     current_user: User = Depends(get_current_user)
 ):
     """Update operational dashboard data"""
-    return TableauBordOperationnelService.actualiser_donnees(db, tableau_id)
+    try:
+        return TableauBordOperationnelService.actualiser_donnees(db, tableau_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Tableau de bord non trouvé")
 
 
 @router.put("/tableaux-bord/{tableau_id}", response_model=TableauBordOperationnelResponse)

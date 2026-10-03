@@ -11,8 +11,7 @@ import logging
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Body
-from app.core.not_implemented import not_implemented
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy import func, desc
 from sqlalchemy.orm import Session
 
@@ -370,12 +369,9 @@ async def workshop_create(
     return {"id": m.id, "message": "Ordre d'atelier enregistre"}
 
 
-@router.post("/api/v1/parc/ocr-extract")
-async def ocr_extract(file: UploadFile = File(...)):
-    not_implemented(
-        "Extraction OCR cote serveur",
-        "un moteur OCR (Tesseract, AWS Textract ou Google Vision) installe et configure",
-    )
+# /api/v1/parc/ocr-extract SUPPRIME : aucun moteur OCR cote serveur n'est
+# installe et la route renvoyait un 501 (bouton mort). L'ecran gate du parc
+# est desormais une saisie guidee honnete (checksum ISO 6346 cote client).
 
 
 # ─── Magasin : synthese declarations & prediction ──────────────────────────
