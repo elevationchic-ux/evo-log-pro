@@ -11,7 +11,7 @@
 |---|---|
 | `python -m compileall app tests` | ✅ EXIT=0 |
 | `python -m pytest tests` (commande exacte de la CI, suite complete batches 2 a 23) | ✅ **705 passed, 2 xfailed, 0 failed** (442 s) au run definitif du batch 23, `PYTEST_EXIT=0`. Le batch 23 ajoute 14 tests (delta 691 → 705 exactement cela) ; les evoluations precedentes (625 → 645 → 659 → 691) incluent aussi des tests d'une session concurrente (tranches devis 030, maintenance 031/032, RBAC transport/comptabilite/magasin), sans echec imputable aux lots 16 a 23. Historique : le run du batch 18 etait **rouge de cause externe** (commits WIP concurrents, attribution prouvee par worktree temoin), re-vert des le batch 19 (§20/§21). Les 2 « failures » annoncees a tort en batch 12 ne se reproduisaient pas (§15, retraction) ; la vraie cause des fluctuations d'ordre etait un trou d'isolation du harnais pytest qui **ecrivait dans la base de dev `kamlog_erp.db`**  corrige, verrouille par meta-tests et `DB_CHANGED=False` sur chaque run definitif (§16, confirme aux §17 a §25 ; au run du batch 21 le hash etait **illisible**  base verrouillee par un process de dev concurrent  declare comme tel plutot que pretendu ; aux runs des batches 22 et 23 il etait **lisible et vierge**  horodatage de la base anterieur aux runs, voir §24/§25). |
-| `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (**1142** routes OpenAPI au batch 23 ; +1 d'origine concurrente depuis 1141 au batch 22 — les conversions RBAC n'ajoutent aucune route) |
+| `import app.main` (tous routers chargés, plus aucun ImportError avalé) | ✅ OK  endpoint `/api/v1/finance/factures/{id}/pdf` déclaré (**1142** routes OpenAPI au batch 23 ; +1 d'origine concurrente depuis 1141 au batch 22  les conversions RBAC n'ajoutent aucune route) |
 | `npx tsc --noEmit` (frontend) | ❌ au run du batch 23 : `TS1005 '}' expected` dans `portail-commercial/page.tsx`, fichier **non committe** (etat `M`) d'une session concurrente active, aucun lien avec le lot 16-23  voir §25. ✅ EXIT=0 au run du batch 22 (l'erreur `ReceiptText` du §23, cause concurrente, avait ete reparee par son auteur). |
 
 ---
@@ -1248,7 +1248,7 @@ explicite, echec si route sans mapping ou mapping sans route, zero reste
 
 | Secteur | Decisions semantiques |
 |---|---|
-| Navires | nouveau sous-module `acconage.navire` — un navire n'est pas une escale |
+| Navires | nouveau sous-module `acconage.navire`  un navire n'est pas une escale |
 | Escales + rapport + **amarage** | `escale.read/create/modify` ; l'amarage est un jalon de l'escale, pas un objet a vie propre → `escale.modify` (pas de sous-module gonfle) |
 | Stowage | preparer `stowage.create/modify` ; **valider l'arrimage** `stowage.approve` (engage la securite du chargement) |
 | Grues / remorqueurs | registre = `moyen.read/create/modify` ; disponibilite = `moyen.read` |
@@ -1276,7 +1276,7 @@ le manifeste.
   `downgrade = pass`, garde RuntimeError si tables RBAC absentes ; tete de
   chaine verifiee `035_rbac_acconage_grants`.
 - `tests/unit/test_rbac_acconage_perms.py` : ✅ **14 passed des le premier
-  run** — parite (30 codes), **matrice 4 roles × 30 codes** avec garde-fou
+  run**  parite (30 codes), **matrice 4 roles × 30 codes** avec garde-fou
   interne (les listes operateur doivent epuiser l'ensemble), « chaque code a
   un role porteur », **403 HTTP reels** (operateur refuse sur valider-stowage
   / emettre-connaissement / cloture-dockers  le 403 avant meme le 404 prouve
@@ -1300,7 +1300,7 @@ audit gaps) passe du premier coup : ✅ **54 passed, 0 failed**.
 - `DB_CHANGED` : `kamlog_erp.db` toujours date du 9/28 03:35, anterieur a
   tous les runs → base de dev intacte.
 - `compileall app` ✅ EXIT=0 ; `import app.main` ✅ (**1142** chemins
-  OpenAPI, +1 d'origine concurrente — la conversion n'ajoute aucune route).
+  OpenAPI, +1 d'origine concurrente  la conversion n'ajoute aucune route).
 - Frontend : **aucun changement batch 23** ; `audit --strict-honesty` ✅ ;
   `tsc --noEmit` ❌ **rouge de cause externe** : erreur de syntaxe
   (`TS1005 '}' expected`) dans `portail-commercial/page.tsx`, fichier **non
@@ -1311,7 +1311,7 @@ audit gaps) passe du premier coup : ✅ **54 passed, 0 failed**.
 ### Reste (hors perimetre du batch, signale)
 
 - **47 routeurs / 498 endpoints** encore proteges par la seule
-  authentification — dont une part legitime (self-service `auth.py`,
+  authentification  dont une part legitime (self-service `auth.py`,
   endpoints utilisateur courant) ; les prochains lots naturels :
   `qhse` (38, avec creation d'un domaine catalogue complet),
   `magasin_douane` (35), `integration` (28), `acquisition` (27) ;
@@ -1320,7 +1320,7 @@ audit gaps) passe du premier coup : ✅ **54 passed, 0 failed**.
 - `visible_user_ids` toujours non branche sur les listes `created_by` /
   `department_id` (2e moitie de la ligne ⏳).
 - Les descriptions de roles changees dans le catalogue restent cosmetiques
-  en base (migrations additives sur les liens uniquement) — declare depuis §23.
+  en base (migrations additives sur les liens uniquement)  declare depuis §23.
 
 ➡️ Zero-Mock applique au quai : valider un plan d'arrimage, emettre un
 connaissement ou cloturer la liste des dockers sont des actes qui engagent

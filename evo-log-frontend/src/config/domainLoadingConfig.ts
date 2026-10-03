@@ -1239,7 +1239,7 @@ export function resolveDomainLoadingConfig(routeOrKey: string): DomainLoadingCon
  * Écrans de chargement dont la clé n'est NI une entrée de MODULE_PALETTE NI un
  * LEGACY_ALIAS : sans ce pont, getModulePalette() retomberait sur le dashboard
  * (indigo) et le module afficherait une teinte différente de celle de sa page,
- * de sa sidebar et de sa bulle orbitale — violation de « une couleur unique par
+ * de sa sidebar et de sa bulle orbitale  violation de « une couleur unique par
  * module ». Ces vues sont rattachées à leur module majeur réel.
  *
  * NB : toutes les AUTRES clés (acconage, transit, transport, finance, magasin,

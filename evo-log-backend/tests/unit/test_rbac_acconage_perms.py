@@ -4,7 +4,7 @@ Meme discipline que les batches 21/22 :
   1. parite catalogue : aucun code fantome dans le routeur ;
   2. MATRICE COMPLETE role x code : pour les 30 codes utilises, chaque role
      concerné par l'acconage a une attente explicite (autorise OU refuse),
-     calculee par le VRAI moteur has_perm() — pas un mock ;
+     calculee par le VRAI moteur has_perm()  pas un mock ;
   3. HTTP reel : operateur = 200 sur la lecture d'escales, 403 sur la
      validation du plan d'arrimage, l'emission d'un connaissement et la
      cloture des dockers ; transitaire principal (lecture seule acconage)

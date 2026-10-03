@@ -179,9 +179,8 @@ export default function ModuleSidebar({
                 key={item.path}
                 onClick={() => setDeniedModalItem({ label: title, key: item.key })}
                 title={language === 'en' ? `Module ${title} is not included in your profile. Click for details.` : `Module ${title} non inclus dans votre profil. Cliquez pour voir les détails.`}
-                className={`flex items-center gap-3 py-2.5 rounded-xl text-sm font-semibold opacity-40 bg-slate-950/40 border border-slate-800 text-slate-500 cursor-not-allowed transition-all hover:opacity-65 hover:bg-slate-950/70 ${
-                  isCollapsed ? "px-2 justify-center" : "px-3"
-                }`}
+                className={`flex items-center gap-3 py-2.5 rounded-xl text-sm font-semibold opacity-40 bg-slate-950/40 border border-slate-800 text-slate-500 cursor-not-allowed transition-all hover:opacity-65 hover:bg-slate-950/70 ${isCollapsed ? "px-2 justify-center" : "px-3"
+                  }`}
               >
                 <Icon className="w-5 h-5 shrink-0 text-slate-400" />
                 {!isCollapsed && (
@@ -203,16 +202,14 @@ export default function ModuleSidebar({
                   onClick={() => {
                     if (isMobile && onClose) onClose();
                     // Navigation directe : la transition plein écran (1,7 s) a
-                    // été retirée — un ERP « carré » ne doit pas faire tourner
+                    // été retirée  un ERP « carré » ne doit pas faire tourner
                     // l'écran entre deux modules.
                   }}
-                  className={`flex-1 min-w-0 flex items-center gap-3 py-2.5 rounded-r-lg text-sm font-semibold transition-colors group border border-transparent ${
-                    isCollapsed ? "px-2 justify-center" : "px-3"
-                  } ${
-                    isActive
+                  className={`flex-1 min-w-0 flex items-center gap-3 py-2.5 rounded-r-lg text-sm font-semibold transition-colors group border border-transparent ${isCollapsed ? "px-2 justify-center" : "px-3"
+                    } ${isActive
                       ? "bg-slate-800/60 text-slate-100"
                       : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/40"
-                  }`}
+                    }`}
                   style={isActive ? { boxShadow: `inset 2px 0 0 0 ${item.color}` } : undefined}
                 >
                   <Icon className={`w-5 h-5 shrink-0 ${isActive ? "text-slate-100" : "text-slate-400 group-hover:text-slate-200"}`} />
@@ -250,11 +247,10 @@ export default function ModuleSidebar({
                         href={sub.path}
                         title={localizeSubLabel(sub.label, language)}
                         onClick={() => isMobile && onClose && onClose()}
-                        className={`flex min-w-0 items-center justify-between gap-2 py-1.5 px-2.5 min-h-9 text-xs rounded-r-md transition-colors group border border-transparent ${
-                          isSubActive
+                        className={`flex min-w-0 items-center justify-between gap-2 py-1.5 px-2.5 min-h-9 text-xs rounded-r-md transition-colors group border border-transparent ${isSubActive
                             ? "bg-slate-800/50 font-semibold text-slate-100"
                             : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/40 font-medium"
-                        }`}
+                          }`}
                         style={isSubActive ? { boxShadow: `inset 2px 0 0 0 ${item.color}` } : undefined}
                       >
                         <div className="flex min-w-0 flex-1 items-center gap-2">

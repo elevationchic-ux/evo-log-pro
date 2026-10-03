@@ -77,7 +77,7 @@ MAPPING = {
     ("put", "/{record_id}"): "qhse.enregistrement.modify",
     ("delete", "/{record_id}"): "qhse.enregistrement.delete",
     # Permis de travail : la route est desormais 501 (aucune signature
-    # simulee) mais le code d'intention existe — celui qui pourra emettre un
+    # simulee) mais le code d'intention existe  celui qui pourra emettre un
     # permis reel le portera.
     ("post", "/permis-travail"): "qhse.permis.create",
     # Segregation IMDG : consultation de l'aide-memoire -> read.

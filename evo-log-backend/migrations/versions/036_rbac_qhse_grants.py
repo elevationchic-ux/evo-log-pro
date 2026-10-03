@@ -1,7 +1,7 @@
 """036 seed RBAC qhse (batch 24) : module qhse complet + role QHSE operant.
 
 Contexte : /api/v1/qhse (38 endpoints auth-seuls + 3 endpoints PUBLICS sans
-aucune authentification) n'avait AUCUN code dans le catalogue — le role QHSE
+aucune authentification) n'avait AUCUN code dans le catalogue  le role QHSE
 du GRANT_TABLE ne couvrait que gouvernance/transport/parc. Les 41 routes sont
 desormais protegees par require_perm sur 34 codes (15 sous-modules : risque,
 prevention, epi, accident, investigation, certification, audit, haccp,

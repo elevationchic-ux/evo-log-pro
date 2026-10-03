@@ -20,7 +20,7 @@ import { useSettings } from '@/components/layout/SettingsProvider';
 // colonne temps_cycle_heures de la table cycles_conteneurs).
 //
 // Aucune valeur de repli : quand un module ne répond pas (droits insuffisants,
-// agrégat vide), la carte affiche « — » et le motif, jamais un chiffre.
+// agrégat vide), la carte affiche «  » et le motif, jamais un chiffre.
 //
 // Teinte : violet = module « reports-bi » (modulePalette).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -59,49 +59,49 @@ export default function ReportsDashboardPage() {
     label: string; value: string; hint: string;
     icon: React.ComponentType<{ className?: string }>; tone: string;
   }[] = [
-    {
-      label: t("Chiffre d'affaires facturé", 'Invoiced revenue'),
-      value: fin ? `${nombre(fin.chiffre_affaires)} FCFA` : '—',
-      hint: fin
-        ? t(`${nombre(fin.total_factures)} facture(s), ${nombre(fin.total_encaisse)} FCFA encaissé(s)`,
+      {
+        label: t("Chiffre d'affaires facturé", 'Invoiced revenue'),
+        value: fin ? `${nombre(fin.chiffre_affaires)} FCFA` : '',
+        hint: fin
+          ? t(`${nombre(fin.total_factures)} facture(s), ${nombre(fin.total_encaisse)} FCFA encaissé(s)`,
             `${nombre(fin.total_factures)} invoice(s), ${nombre(fin.total_encaisse)} FCFA collected`)
-        : t('Agrégat finance indisponible.', 'Finance aggregate unavailable.'),
-      icon: DollarSign,
-      tone: 'text-emerald-400',
-    },
-    {
-      label: t('Missions transport', 'Transport missions'),
-      value: trans ? `${nombre(trans.missions_total ?? 0)}` : '—',
-      hint: trans
-        ? t(`${nombre(trans.missions_terminees ?? 0)} terminée(s), ${nombre(trans.missions_en_cours ?? 0)} en cours`,
+          : t('Agrégat finance indisponible.', 'Finance aggregate unavailable.'),
+        icon: DollarSign,
+        tone: 'text-emerald-400',
+      },
+      {
+        label: t('Missions transport', 'Transport missions'),
+        value: trans ? `${nombre(trans.missions_total ?? 0)}` : '',
+        hint: trans
+          ? t(`${nombre(trans.missions_terminees ?? 0)} terminée(s), ${nombre(trans.missions_en_cours ?? 0)} en cours`,
             `${nombre(trans.missions_terminees ?? 0)} completed, ${nombre(trans.missions_en_cours ?? 0)} in progress`)
-        : t('Agrégat transport indisponible.', 'Transport aggregate unavailable.'),
-      icon: Truck,
-      tone: 'text-cyan-400',
-    },
-    {
-      label: t('Valeur du stock', 'Stock value'),
-      value: mag ? `${nombre(mag.valeur_stock)} FCFA` : '—',
-      hint: mag
-        ? t(`${nombre(mag.nb_articles ?? 0)} article(s) · ${nombre(mag.mouvements_jour ?? 0)} mouvement(s) du jour`,
+          : t('Agrégat transport indisponible.', 'Transport aggregate unavailable.'),
+        icon: Truck,
+        tone: 'text-cyan-400',
+      },
+      {
+        label: t('Valeur du stock', 'Stock value'),
+        value: mag ? `${nombre(mag.valeur_stock)} FCFA` : '',
+        hint: mag
+          ? t(`${nombre(mag.nb_articles ?? 0)} article(s) · ${nombre(mag.mouvements_jour ?? 0)} mouvement(s) du jour`,
             `${nombre(mag.nb_articles ?? 0)} item(s) · ${nombre(mag.mouvements_jour ?? 0)} movements today`)
-        : t('Agrégat magasin indisponible.', 'Warehouse aggregate unavailable.'),
-      icon: Boxes,
-      tone: 'text-amber-400',
-    },
-    {
-      label: t('Temps de cycle portuaire', 'Port cycle time'),
-      value: port ? `${nombre(port.temps_cycle_moyen_heures, 1)} h` : '—',
-      hint: port
-        ? t(
+          : t('Agrégat magasin indisponible.', 'Warehouse aggregate unavailable.'),
+        icon: Boxes,
+        tone: 'text-amber-400',
+      },
+      {
+        label: t('Temps de cycle portuaire', 'Port cycle time'),
+        value: port ? `${nombre(port.temps_cycle_moyen_heures, 1)} h` : '',
+        hint: port
+          ? t(
             `Moyenne sur ${nombre(port.periode_jours)} j · ${nombre(port.conteneurs_traites ?? 0)} conteneur(s) traité(s)`,
             `Average over ${nombre(port.periode_jours)} days · ${nombre(port.conteneurs_traites ?? 0)} container(s) handled`
           )
-        : t('Agrégat portuaire indisponible.', 'Port aggregate unavailable.'),
-      icon: Anchor,
-      tone: 'text-sky-400',
-    },
-  ];
+          : t('Agrégat portuaire indisponible.', 'Port aggregate unavailable.'),
+        icon: Anchor,
+        tone: 'text-sky-400',
+      },
+    ];
 
   const retours: { href: string; label: string; desc: string; icon: React.ComponentType<{ className?: string }>; tone: string }[] = [
     {
@@ -224,23 +224,23 @@ export default function ReportsDashboardPage() {
             ) : null}
             {trans ? (
               <>
-                <Ligne label={t('Camions disponibles', 'Available trucks')} valeur={nombre(trans.camions_disponibles ?? 0) ?? '—'} />
-                <Ligne label={t('En maintenance', 'Under maintenance')} valeur={nombre(trans.camions_en_maintenance ?? 0) ?? '—'} />
+                <Ligne label={t('Camions disponibles', 'Available trucks')} valeur={nombre(trans.camions_disponibles ?? 0) ?? ''} />
+                <Ligne label={t('En maintenance', 'Under maintenance')} valeur={nombre(trans.camions_en_maintenance ?? 0) ?? ''} />
                 <Ligne label={t('Disponibilité flotte', 'Fleet availability')} valeur={`${nombre(trans.taux_disponibilite, 1)} %`} />
-                <Ligne label={t('Chauffeurs', 'Drivers')} valeur={nombre(trans.chauffeurs_total ?? 0) ?? '—'} />
+                <Ligne label={t('Chauffeurs', 'Drivers')} valeur={nombre(trans.chauffeurs_total ?? 0) ?? ''} />
               </>
             ) : null}
             {mag ? (
               <>
-                <Ligne label={t('Alertes stock minimum', 'Minimum stock alerts')} valeur={nombre(mag.nb_alertes_min ?? 0) ?? '—'} />
-                <Ligne label={t('Entrepôts', 'Warehouses')} valeur={nombre(mag.nb_entrepots ?? 0) ?? '—'} />
+                <Ligne label={t('Alertes stock minimum', 'Minimum stock alerts')} valeur={nombre(mag.nb_alertes_min ?? 0) ?? ''} />
+                <Ligne label={t('Entrepôts', 'Warehouses')} valeur={nombre(mag.nb_entrepots ?? 0) ?? ''} />
               </>
             ) : null}
           </div>
           <p className="text-[11px] text-slate-500 mt-3">
             {t(
-              'Un agrégat absent du module n’est pas remplacé : la carte affiche « — ».',
-              'A missing module aggregate is never substituted: the card shows “—”.'
+              'Un agrégat absent du module n’est pas remplacé : la carte affiche «  ».',
+              'A missing module aggregate is never substituted: the card shows “”.'
             )}
           </p>
         </div>
@@ -276,7 +276,7 @@ function Ligne({ label, valeur }: { label: string; valeur: string }) {
   return (
     <div className="rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 min-w-0">
       <p className="text-slate-500 uppercase font-bold text-[10px] truncate" title={label}>{label}</p>
-      <p className="font-mono text-slate-100 whitespace-nowrap">{valeur ?? '—'}</p>
+      <p className="font-mono text-slate-100 whitespace-nowrap">{valeur ?? ''}</p>
     </div>
   );
 }

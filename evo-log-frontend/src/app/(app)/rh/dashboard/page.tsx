@@ -175,7 +175,7 @@ export default function RHDashboardPage() {
         </div>
       )}
 
-      {/* KPIs — déduits des données réelles, jamais préremplis */}
+      {/* KPIs  déduits des données réelles, jamais préremplis */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
         {kpis.map((kpi, i) => {
           const Icon = kpi.icon;
@@ -192,7 +192,7 @@ export default function RHDashboardPage() {
         })}
       </div>
 
-      {/* Dept Repartition — comptée sur l'annuaire reel */}
+      {/* Dept Repartition  comptée sur l'annuaire reel */}
       {deptRepartition.length > 0 && (
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow">
           <h2 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2">
@@ -269,17 +269,17 @@ export default function RHDashboardPage() {
                   </tr>
                 ) : filteredEmps.map(emp => (
                   <tr key={emp.id} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="px-4 py-3 font-mono font-bold text-amber-300">{emp.matricule || '—'}</td>
+                    <td className="px-4 py-3 font-mono font-bold text-amber-300">{emp.matricule || ''}</td>
                     <td className="px-4 py-3 font-bold text-slate-200">{emp.full_name}</td>
-                    <td className="px-4 py-3 text-slate-400 hidden md:table-cell">{emp.poste || '—'}</td>
-                    <td className="px-4 py-3 text-slate-400 hidden lg:table-cell">{emp.departement || '—'}</td>
+                    <td className="px-4 py-3 text-slate-400 hidden md:table-cell">{emp.poste || ''}</td>
+                    <td className="px-4 py-3 text-slate-400 hidden lg:table-cell">{emp.departement || ''}</td>
                     <td className="px-4 py-3">
                       <span className={`text-[11px] px-2 py-0.5 rounded font-bold ${emp.type_contrat === 'CDI' ? 'text-blue-400 bg-blue-500/10' : 'text-amber-400 bg-amber-500/10'}`}>
                         {emp.type_contrat || 'Sans contrat'}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-mono text-slate-300 hidden md:table-cell">
-                      {emp.salaire_base != null ? `${Math.round(emp.salaire_base).toLocaleString()} XAF` : '—'}
+                      {emp.salaire_base != null ? `${Math.round(emp.salaire_base).toLocaleString()} XAF` : ''}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${statutColors[emp.statut ?? ''] || statutColors.inactif}`}>
@@ -294,7 +294,7 @@ export default function RHDashboardPage() {
         </div>
       )}
 
-      {/* Leave requests — decisions reelles via le backend */}
+      {/* Leave requests  decisions reelles via le backend */}
       {activeTab === 'conges' && (
         <div className="space-y-3">
           {loading ? (

@@ -497,7 +497,7 @@ class WorkPermitsIMDGService:
         """Aide-mémoire de ségrégation (Code IMDG 41-22) : deux règles majeures
         seulement, sur comparaison EXACTE de classes.
 
-        Batch 24 : l'ancienne version testait « "1" in "".join(classes) » — la
+        Batch 24 : l'ancienne version testait « "1" in "".join(classes) »  la
         concaténation faisait des faux positifs ("4.1"+"3" → "4.13" contenant
         "1" et "3") et des faux négatifs ("5.1"+"3" → "5.13" ne contenant pas
         "5.1"). Une matrice IMDG complète (classes 1 à 9, amendements, prescriptions
@@ -556,7 +556,7 @@ class WorkPermitsIMDGService:
             "la saisie réelle des heures d'exposition au risque par le tenant "
             "(les accidentés et jours d'arrêt proviennent déjà des AccidentTravail "
             "en base ; il manque la dénominateur heures travaillées). Aucun taux "
-            "TF/TG n'est calculé avant saisie — voir /api/v1/qhse/rapports/securite/"
+            "TF/TG n'est calculé avant saisie  voir /api/v1/qhse/rapports/securite/"
             f"{annee} pour les chiffres réellement déclarés dans la base"
         )
 
