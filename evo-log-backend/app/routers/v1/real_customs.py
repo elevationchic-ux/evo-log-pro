@@ -128,7 +128,7 @@ def enregistrer_dossier(payload: Dict[str, Any] = Body(...),
     if circuit:
         c = str(circuit).upper()
         if c not in CIRCUITS_VALIDES:
-            return {"detail": f"Circuit inconnu : {circuit}. Attendu VERT/BLEU/JAUNE/ROUGE.", "code": 422}, 422
+            raise HTTPException(status_code=422, detail=f"Circuit inconnu : {circuit}. Attendu VERT/BLEU/JAUNE/ROUGE.")
         row.circuit = c
         row.date_attribution_circuit = datetime.utcnow()
     db.commit()
@@ -172,7 +172,7 @@ def enregistrer_circuit(payload: Dict[str, Any] = Body(...),
     numero = (payload.get("numero_dum") or "").strip()
     circuit = (payload.get("circuit") or "").upper()
     if not numero or circuit not in CIRCUITS_VALIDES:
-        return {"detail": "numero_dum et circuit (VERT/BLEU/JAUNE/ROUGE) requis.", "code": 422}, 422
+        raise HTTPException(status_code=422, detail="numero_dum et circuit (VERT/BLEU/JAUNE/ROUGE) requis.")
     cid = _cid(user)
     row = db.query(DumCustomsRecord).filter(
         DumCustomsRecord.company_id == cid,
@@ -245,7 +245,7 @@ def creer_caution(payload: Dict[str, Any] = Body(...),
                   db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     plafond = payload.get("plafond_autorise_xaf")
     if plafond is None:
-        return {"detail": "Le plafond autorise est obligatoire.", "code": 422}, 422
+        raise HTTPException(status_code=422, detail="Le plafond autorise est obligatoire.")
     cid = _cid(user)
     reference = (payload.get("reference") or "").strip()
     if not reference:
@@ -254,7 +254,7 @@ def creer_caution(payload: Dict[str, Any] = Body(...),
     if db.query(CautionDouaniere).filter(
         CautionDouaniere.company_id == cid, CautionDouaniere.reference == reference
     ).first():
-        return {"detail": f"La reference {reference} existe deja.", "code": 409}, 409
+        raise HTTPException(status_code=409, detail=f"La reference {reference} existe deja.")
     row = CautionDouaniere(
         company_id=cid,
         reference=reference,
@@ -318,7 +318,7 @@ def apurer_caution(payload: Dict[str, Any] = Body(...),
         DumCustomsRecord.numero_dum == numero,
     ).first()
     if row is None:
-        return {"detail": f"Aucune DUM {numero} enregistree.", "code": 404}, 404
+        raise HTTPException(status_code=404, detail=f"Aucune DUM {numero} enregistree.")
     row.apure = True
     row.date_apurement = datetime.utcnow()
     quittance = payload.get("numero_quittance")

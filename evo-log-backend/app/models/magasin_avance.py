@@ -25,6 +25,7 @@ class Peremption(Base):
     id = Column(Integer, primary_key=True, index=True)
     stock_id = Column(Integer, ForeignKey('stocks.id'), nullable=False)
     lot_numero = Column(String(50), nullable=False)
+    numero_serie = Column(String(100))  # suivi serie (ajout idempotent 036) ; nullable
     date_fabrication = Column(Date)
     date_peremption = Column(Date, nullable=False)
     date_alerte = Column(Date)  # Alert date before expiration
