@@ -7,7 +7,6 @@ import { useSession } from "next-auth/react";
 import { NAVIGATION_REGISTRY, ModuleNavConfig, resolveModuleKeyForPath } from "@/config/navigationRegistry";
 import { localizeTitle, localizeSubLabel } from "@/config/navI18n";
 import { useSettings } from "@/components/layout/SettingsProvider";
-import { useDomainTransition } from "@/components/shared/DomainTransitionContext";
 import {
   LayoutDashboard,
   Truck,
@@ -202,17 +201,11 @@ export default function ModuleSidebar({
                 <Link
                   href={item.path}
                   title={title}
-                  onClick={(e) => {
+                  onClick={() => {
                     if (isMobile && onClose) onClose();
-                    // Ne déclencher l'animation de transition (1,7 s) que pour un
-                    // VRAI changement de module (propriété registre), plus pour un
-                    // simple changement de préfixe legacy au sein du même module.
-                    const currentKey = resolveModuleKeyForPath(pathname);
-                    const targetKey = resolveModuleKeyForPath(item.path);
-                    if (currentKey && targetKey && currentKey !== targetKey) {
-                      e.preventDefault();
-                      triggerDomainTransition(item.path, 1700);
-                    }
+                    // Navigation directe : la transition plein écran (1,7 s) a
+                    // été retirée — un ERP « carré » ne doit pas faire tourner
+                    // l'écran entre deux modules.
                   }}
                   className={`flex-1 min-w-0 flex items-center gap-3 py-2.5 rounded-r-lg text-sm font-semibold transition-colors group border border-transparent ${
                     isCollapsed ? "px-2 justify-center" : "px-3"
@@ -319,28 +312,28 @@ export default function ModuleSidebar({
             role="dialog"
             aria-modal="true"
             aria-labelledby="denied-module-title"
-            className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 max-w-md w-full my-8 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200 text-slate-100"
+            className="bg-slate-900 border border-slate-700 rounded-xl p-6 max-w-md w-full my-8 shadow-2xl space-y-4 animate-in fade-in duration-150 text-slate-100"
           >
-            <div className="w-12 h-12 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto">
-              <AlertTriangle className="w-6 h-6" />
+            <div className="w-11 h-11 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-lg flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-5 h-5" />
             </div>
 
             <div className="text-center space-y-2">
-              <span className="text-[11px] font-black tracking-widest text-amber-400 uppercase bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block">
+              <span className="text-[11px] font-bold tracking-widest text-slate-400 uppercase">
                 {language === "en" ? "Restricted Access" : "Accès Restreint"}
               </span>
-              <h3 id="denied-module-title" className="text-lg font-black">
+              <h3 id="denied-module-title" className="text-base font-bold">
                 {language === "en" ? "Module Not Authorized" : "Module Non Autorisé"}
               </h3>
-              <p className="text-xs text-slate-300 leading-relaxed font-medium bg-slate-950 p-3 rounded-2xl border border-slate-800">
+              <p className="text-xs text-slate-300 leading-relaxed font-medium bg-slate-950 p-3 rounded-lg border border-slate-800">
                 {language === "en" ? (
-                  <>Restricted access: your profile <b className="text-amber-400">[{userRoles.join(", ") || "User"}]</b> is not allowed to open the module <b className="text-white">[{deniedModalItem.label}]</b>. Please contact the platform administrator.</>
+                  <>Restricted access: your profile <b className="text-slate-100">[{userRoles.join(", ") || "User"}]</b> is not allowed to open the module <b className="text-white">[{deniedModalItem.label}]</b>. Please contact the platform administrator.</>
                 ) : (
-                  <>Accès restreint : Votre profil <b className="text-amber-400">[{userRoles.join(", ") || "Utilisateur"}]</b> n'est pas autorisé à accéder au module <b className="text-white">[{deniedModalItem.label}]</b>. Veuillez contacter l'Admin CADC.</>
+                  <>Accès restreint : Votre profil <b className="text-slate-100">[{userRoles.join(", ") || "Utilisateur"}]</b> n'est pas autorisé à accéder au module <b className="text-white">[{deniedModalItem.label}]</b>. Veuillez contacter l'Admin CADC.</>
                 )}
               </p>
-              <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl text-left text-xs font-mono text-slate-400 space-y-1">
-                <div>• {language === "en" ? "Module code" : "Code module"} : <span className="text-amber-400">{deniedModalItem.key}</span></div>
+              <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-lg text-left text-xs font-mono text-slate-400 space-y-1">
+                <div>• {language === "en" ? "Module code" : "Code module"} : <span className="text-slate-200">{deniedModalItem.key}</span></div>
                 <div>• {language === "en" ? "Your authorized modules" : "Vos modules autorisés"} : <span className="text-slate-200">{userModules.length > 0 ? userModules.join(", ") : (language === "en" ? "None" : "Aucun")}</span></div>
               </div>
             </div>
@@ -348,7 +341,7 @@ export default function ModuleSidebar({
             <button
               type="button"
               onClick={() => setDeniedModalItem(null)}
-              className="w-full py-3 min-h-11 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black rounded-xl text-xs hover:brightness-110 transition-all cursor-pointer shadow-lg shadow-amber-500/20"
+              className="w-full py-2.5 min-h-11 bg-primary text-on-primary font-semibold rounded-lg text-xs hover:opacity-90 transition-opacity cursor-pointer"
             >
               {language === "en" ? "Got it / Close" : "Compris / Fermer"}
             </button>

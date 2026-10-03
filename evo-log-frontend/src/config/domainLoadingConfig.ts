@@ -2,6 +2,15 @@
 // SOURCE DE VÉRITÉ OFFICIELLE DES 28 DÉPARTEMENTS ET GRANDS MODULES EVO-LOG ERP
 // Chaque département possède son identité visuelle, sa palette chromatique,
 // sa localisation institutionnelle, ses messages de diagnostic et son animation parlante.
+//
+// ATTENTION COULEUR : l'identité chromatique n'est PAS décidée ici. `modulePalette.ts`
+// est la source de vérité unique (« une couleur unique par module »). Les 49 écrans de
+// chargement ci-dessous sont des vus d'un même module (ex. « acconage », « acconage-avance »
+// et « port-incidents » sont trois vues du module port-operations) : ils doivent donc
+// hériter de la teinte de leur module parent. La boucle de normalisation en fin de fichier
+// écrase primaryColor à partir de modulePalette, ce qui rend toute dérive impossible.
+
+import { getModulePalette } from './modulePalette';
 
 export type DomainAnimationType =
   | 'syscohada-ledger'       // 1. Comptabilité OHADA : Balance bilatérale Débit/Crédit, comptes en orbite
@@ -1224,4 +1233,90 @@ export function resolveDomainLoadingConfig(routeOrKey: string): DomainLoadingCon
   }
 
   return DOMAIN_LOADING_CONFIGS.dashboard;
+}
+
+/**
+ * Écran de chargement → module majeur auquel il appartient.
+ * Sans cette table, un écran « sous-domaine » (acconage-avance, real-customs,
+ * container-lifecycle, port-incidents, shift-planning…) n'a aucune entrée dans
+ * modulePalette et hériterait par repli de la couleur du dashboard (indigo) :
+ * le module changerait de teinte d'une page à l'autre, ce que la règle
+ * « une couleur unique par module » interdit.
+ */
+export const LOADING_TO_MODULE: Record<string, string> = {
+  // Port Operations (acconage, conteneurs, incidents, quarts, douane réelle)
+  acconage: 'port-operations',
+  'acconage-avance': 'port-operations',
+  'real-customs': 'port-operations',
+  'container-lifecycle': 'port-operations',
+  'port-incidents': 'port-operations',
+  'shift-planning': 'port-operations',
+  // Transit & Douane
+  transit: 'transit-douane',
+  'portail-declarant': 'portail-declarant',
+  // Transport & Flotte
+  transport: 'transport-flotte',
+  chauffeur: 'portail-chauffeur',
+  'fuel-guard': 'fuel-guard',
+  // Magasin
+  magasin: 'magasin-stock',
+  'portail-magasinier': 'portail-magasinier',
+  // Parc & Maintenance
+  parc: 'parc-vehicules',
+  maintenance: 'parc-vehicules',
+  'portail-technicien': 'portail-technicien',
+  // QHSE
+  qhse: 'qhse-securite',
+  'portail-qhse': 'portail-qhse',
+  // RH
+  rh: 'rh-personnel',
+  'portail-employe': 'portail-employe',
+  'chef-personnel': 'chef-personnel',
+  'portail-frais': 'portail-frais',
+  // Collaboratif
+  chat: 'chat',
+  'portail-collaborateur': 'portail-collaborateur',
+  // Client & Commercial
+  'client-portal': 'client-b2b',
+  cotations: 'portail-commercial',
+  'portail-commercial': 'portail-commercial',
+  // Achats & Fournisseurs (rattachés à la gouvernance, comme l'alias du registre)
+  procurement: 'admin-tenant',
+  purchase: 'admin-tenant',
+  fournisseurs: 'admin-tenant',
+  // Finance & Comptabilité
+  finance: 'finance-ohada',
+  'fiscalite-cameroun': 'finance-ohada',
+  // Décisionnel & Admin
+  bi: 'reports-bi',
+  admin: 'admin-tenant',
+  'admin-saas': 'admin-saas',
+  dashboard: 'dashboard',
+};
+
+/**
+ * Applique la palette officielle aux écrans de chargement.
+ * Exécutée à l'import : plus aucun écran ne peut afficher une teinte que
+ * modulePalette n'a pas accordée à son module. L'accent reste une nuance
+ * claire dérivée du hex du module (lisibilité preserve sur fond sombre).
+ */
+function teinteClaire(hex: string): string {
+  const melange = (c: number) => Math.round(c + (255 - c) * 0.34);
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (
+    '#' +
+    [melange(r), melange(g), melange(b)]
+      .map((v) => v.toString(16).padStart(2, '0'))
+      .join('')
+      .toUpperCase()
+  );
+}
+
+for (const [cle, cfg] of Object.entries(DOMAIN_LOADING_CONFIGS)) {
+  const moduleKey = LOADING_TO_MODULE[cle] ?? cle;
+  const hex = getModulePalette(moduleKey).hex;
+  cfg.primaryColor = hex;
+  cfg.accentColor = teinteClaire(hex);
 }
