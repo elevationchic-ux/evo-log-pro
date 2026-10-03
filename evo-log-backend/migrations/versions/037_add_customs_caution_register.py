@@ -32,7 +32,7 @@ import sqlalchemy as sa
 
 
 revision = "037_add_customs_caution_register"
-down_revision = "036_rbac_qhse_grants"
+down_revision = "036_add_peremption_numero_serie"
 branch_labels = None
 depends_on = None
 

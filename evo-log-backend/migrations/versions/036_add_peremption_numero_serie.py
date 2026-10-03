@@ -21,7 +21,7 @@ import sqlalchemy as sa
 
 
 revision = "036_add_peremption_numero_serie"
-down_revision = "035_rbac_acconage_grants"
+down_revision = "036_rbac_qhse_grants"
 branch_labels = None
 depends_on = None
 

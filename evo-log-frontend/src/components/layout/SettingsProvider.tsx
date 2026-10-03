@@ -87,6 +87,66 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }, 2000); // Show badge for 2 seconds
   }, []);
 
+  // ── Son de clic sobre (Web Audio, aucun asset, respecting toggle) ──────────
+  // feedback discret et « matière » sur les contrôles interactifs, pensé pour un
+  // outil métier grand public : très court (~60 ms), très bas niveau (~ -26 dB),
+  // filtré pour rester feutré. Aucun son si l'utilisateur coupe les notifications.
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
+
+  const ensureAudioCtx = useCallback((): AudioContext | null => {
+    if (typeof window === 'undefined') return null;
+    const AC = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AC) return null;
+    if (!audioCtxRef.current) audioCtxRef.current = new AC();
+    if (audioCtxRef.current.state === 'suspended') {
+      // Le premier clic EST le geste utilisateur requis par la politique autoplay.
+      void audioCtxRef.current.resume();
+    }
+    return audioCtxRef.current;
+  }, []);
+
+  const playClick = useCallback(() => {
+    if (!soundEnabledRef.current) return;
+    const now = Date.now();
+    if (now - lastClickAtRef.current < 45) return; // anti-bond (un seul clic / 45 ms)
+    lastClickAtRef.current = now;
+    const ctx = ensureAudioCtx();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(880, t);
+    osc.frequency.exponentialRampToValueAtTime(660, t + 0.05);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.05, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 2200;
+    osc.connect(lp);
+    lp.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.07);
+  }, [ensureAudioCtx]);
+
+  useEffect(() => {
+    // Uniquement les contrôles (pas les simples liens) pour rester sobre.
+    const SEL =
+      'button, [role="button"], [role="tab"], summary, input[type="submit"], input[type="checkbox"], input[type="radio"], select, [data-click-sound]';
+    const onClick = (e: MouseEvent) => {
+      const target = e.target;
+      if (!(target instanceof Element)) return;
+      if (!target.closest(SEL)) return;
+      playClick();
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
+  }, [playClick]);
+
   const value = {
     soundEnabled,
     toggleSound,
