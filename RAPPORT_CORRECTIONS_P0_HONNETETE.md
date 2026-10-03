@@ -1229,7 +1229,7 @@ n'existe pas sans GUCE  n'expose aucun bouton « approuve » mensonger.
 ### Contexte et choix de la cible
 
 Toujours la ligne ⏳ du `TODO.md` (phase 6). Nouveau depart d'audit : **49
-routeurs `v1`** encore proteges par la seule authentification. Trois gros
+routeurs `v1`** encore proteges par la seule authentification. Trois
 candidates : `transit_avance` (40), `acconage_avance` (38), `qhse` (38). Choix
 guide par l'honnetete architecturale et la non-interference : `transit_avance`
 est le domaine actif de la session concurrente (elle y commute frontend et

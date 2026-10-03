@@ -113,7 +113,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   // ============================================================================
   'port-operations': {
     key: 'port-operations',
-    title: '🚢 Opérations Portuaires & Quai',
+    title: 'Opérations Portuaires & Quai',
     path: '/port-operations/dashboard',
     icon: Ship,
     color: '#0ea5e9',

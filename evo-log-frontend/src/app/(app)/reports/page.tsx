@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import {
-  BarChart3, DollarSign, Package, Truck, Anchor, Boxes,
+  BarChart3, DollarSign, Truck, Anchor, Boxes,
   Layers, FileText, Sparkles, ArrowUpRight, RefreshCw, TrendingUp,
 } from 'lucide-react';
 import { biAnalyticsAPI } from '@/lib/api-client';

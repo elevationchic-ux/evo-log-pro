@@ -59,8 +59,8 @@
 - ✅ Frontend : session NextAuth enrichie, `lib/permissions.ts`, hook `useCan`, `PermissionGuard` mode `code`, filtrage navigation additif
 - ✅ Pages admin réelles : arbre de permissions par rôle, accréditations, espaces communs
 - ✅ Tests unitaires moteur (`tests/unit/test_rbac_permissions_engine.py`, 10 cas)
-- ✅ Extension RBAC par tranche de routeur : `/magasin-avance` 43 endpoints (batch 21, roles MAGASINIER/CHEF_MAGASIN, migration 033) puis `/api/v1/finance` 37 endpoints (batch 22, sous-modules plan_comptable/exercice/compte_resultat + role CAISSIER, migration 034)  mapping explicite (methode+chemin)→code, parite catalogue verifiee, tests role×code (rapport §23/§24)
-- ⏳ Étendre `require_perm` au-delà des domaines cœur : **48 routeurs `v1` encore protégés par la seule authentification** (rh, qhse, transit_avance, acconage_avance, magasin_douane, integration, …  inventaire précis rapport §24) ; brancher aussi `visible_user_ids` sur les listes portant `created_by`/`department_id`
+- ✅ Extension RBAC par tranche de routeur : `/magasin-avance` 43 endpoints (batch 21, roles MAGASINIER/CHEF_MAGASIN, migration 033) puis `/api/v1/finance` 37 endpoints (batch 22, sous-modules plan_comptable/exercice/compte_resultat + role CAISSIER, migration 034) puis `/api/v1/acconage-avance` 38 endpoints (batch 23, sous-modules navire/stowage/moyen/reservation/conteneur/connaissement/packing_list/frais/nettoyage/dockers + rôles CHEF_EXPLOITATION/OPERATEUR_ACCONAGE, migration 035)  mapping explicite (methode+chemin)→code, parite catalogue verifiee, tests role×code (rapport §23/§24/§25)
+- ⏳ Étendre `require_perm` au-delà des domaines cœur : **47 routeurs `v1` / 498 endpoints encore protégés par la seule authentification** (qhse, transit_avance, magasin_douane, integration, acquisition, documents, …  dont une part légitime : self-service `auth.py` ; inventaire précis rapport §25) ; brancher aussi `visible_user_ids` sur les listes portant `created_by`/`department_id`
 
 ---
 
