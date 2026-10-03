@@ -192,7 +192,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   // ============================================================================
   'transit-douane': {
     key: 'transit-douane',
-    title: '🛃 Transit & Douane CEMAC',
+    title: 'Transit & Douane CEMAC',
     path: '/transit-douane/dashboard',
     icon: Landmark,
     color: '#0284c7',
@@ -275,7 +275,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   // ============================================================================
   'transport-flotte': {
     key: 'transport-flotte',
-    title: '🚛 K-Transport & Flotte TMS',
+    title: 'K-Transport & Flotte TMS',
     path: '/transport-flotte/control-tower',
     icon: Truck,
     color: '#06b6d4',
@@ -353,7 +353,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   // ============================================================================
   'magasin-stock': {
     key: 'magasin-stock',
-    title: '📦 K-Magasin WMS & Stock',
+    title: 'K-Magasin WMS & Stock',
     path: '/magasin-stock/dashboard',
     icon: Package,
     color: '#f59e0b',
