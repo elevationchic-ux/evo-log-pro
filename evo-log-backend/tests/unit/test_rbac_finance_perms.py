@@ -46,7 +46,10 @@ def _codes_role(nom):
 # ── 1. Parite catalogue ──────────────────────────────────────────────────────
 def test_tous_les_codes_du_routeur_existent_au_catalogue():
     codes = _codes_utilises()
-    assert len(codes) == 24, f"attendu 24 codes distincts, trouve {len(codes)}"
+    # 25 codes : le chemin pieces (partie double) ajoute la LECTURE du journal
+    # au routeur finance (GET /finance/pieces),Decision metier explicite :
+    # tout role qui saisit une piece doit pouvoir relire les pieces existantes.
+    assert len(codes) == 25, f"attendu 25 codes distincts, trouve {len(codes)}"
     catalogue = {row[0] for row in iter_permission_rows()}
     fantomes = [c for c in codes if c not in catalogue]
     assert not fantomes, f"codes require_perm inconnus du catalogue: {fantomes}"
@@ -66,7 +69,8 @@ def _attentes():
         chef[c] = False
     comptable = {c: False for c in u}
     for c in (
-        "comptabilite.plan_comptable.read", "comptabilite.journal.create",
+        "comptabilite.plan_comptable.read", "comptabilite.journal.read",
+        "comptabilite.journal.create",
         "comptabilite.journal.modify", "comptabilite.exercice.read",
         "facturation.facture.create", "facturation.facture.modify",
         "facturation.facture.read", "facturation.facture.export",
