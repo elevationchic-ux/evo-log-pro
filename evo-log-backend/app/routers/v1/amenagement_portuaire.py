@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session
 from typing import Any, Dict, List, Optional
 
 import json
-from datetime import date
+from datetime import date, timedelta
 
 from app.core.database import get_db
 from app.core.not_implemented import not_implemented
@@ -140,6 +140,11 @@ def _check_unique(db: Session, model, field: str, value: Any, label: str,
 
 def _enum_catalog(model) -> List[Dict[str, str]]:
     return [{"code": m.name, "valeur": m.value} for m in model]
+
+
+def _dans_un_an(ref: date) -> date:
+    """Horizon glissant 12 mois (365 jours) — borne de veille, pas une duree contractuelle."""
+    return ref + timedelta(days=365)
 
 
 # ─── 0. Nomenclatures & perimetre ────────────────────────────────────────────
@@ -1205,16 +1210,17 @@ def synthese(
         "domaine": {
             "titres_actifs": _count(db, AutorisationDomaniale,
                                     AutorisationDomaniale.statut.in_(["DELIVRE", "SIGNATURE", "EN_VIGUEUR"])),
-            "titres_expirés": _count(db, AutorisationDomaniale,
-                                     AutorisationDomaniale.date_expiration.isnot(None),
-                                     AutorisationDomaniale.date_expiration < aujourd_hui),
+            "titres_expire": _count(db, AutorisationDomaniale,
+                                    AutorisationDomaniale.date_expiration.isnot(None),
+                                    AutorisationDomaniale.date_expiration < aujourd_hui),
             "concessions_en_vigueur": _count(db, ConcessionPortuaire,
                                              ConcessionPortuaire.statut == StatutContrat.EN_VIGUEUR),
-            "concessions_echeance_prochaine": _count(
+            "concessions_echeance_12_mois": _count(
                 db, ConcessionPortuaire,
+                ConcessionPortuaire.statut == StatutContrat.EN_VIGUEUR,
                 ConcessionPortuaire.date_echeance.isnot(None),
-                ConcessionPortuaire.date_echeance <= date(aujourd_hui.year + 1, aujourd_hui.month, aujourd_hui.day)
-                if aujourd_hui.month <= 12 else True,
+                ConcessionPortuaire.date_echeance >= aujourd_hui,
+                ConcessionPortuaire.date_echeance <= _dans_un_an(aujourd_hui),
             ),
         },
         "patrimoine": {
@@ -1244,8 +1250,8 @@ def synthese(
                                              AutorisationTravaux.statut.in_(
                                                  [StatutAutorisation.DEPOSEE, StatutAutorisation.COMPLEMENT_REQUIS])),
             "accordees": _count(db, AutorisationTravaux, AutorisationTravaux.statut == StatutAutorisation.ACCORDEE),
-            "expirees": _count(db, AutorisationTravales if False else AutorisationTravaux,
-                               AutorisationTravaux.statut == StatutAutorisation.EXPIREE),
+            "expirees": _count(db, AutorisationTravaux,
+                              AutorisationTravaux.statut == StatutAutorisation.EXPIREE),
         },
     }
 
