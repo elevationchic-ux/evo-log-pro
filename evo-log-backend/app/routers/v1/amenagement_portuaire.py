@@ -154,12 +154,18 @@ def _dans_un_an(ref: date) -> date:
 
 @router.get("/nomenclatures", summary="Vocabulaire metier du departement")
 def nomenclatures(user: User = Depends(require_perm("amenagement.projet.read"))):
-    """Enums reels du circuit camerounais (aucune valeur inventee, aucun defaut metier)."""
+    """Vocabulaire reel du circuit camerounais, tel que declare (aucune valeur inventee)."""
     return {
         "type_schema": _enum_catalog(TypeSchema),
         "statut_schema": _enum_catalog(StatutSchema),
         "type_projet": _enum_catalog(TypeProjet),
         "statut_projet": _enum_catalog(StatutProjet),
+        # La programmation n'est pas un enum en base (un etat notifie par
+        # l'administration peut sortir du cadre) : le vocabulaire que l'API
+        # ecrit est publie ici plutot que d'etre devine par le frontend.
+        "statut_document_programmation": [
+            {"code": v, "valeur": v} for v in STATUTS_PROGRAMMATION
+        ],
         "origine_financement": _enum_catalog(OrigineFinancement),
         "type_marche": _enum_catalog(TypeMarche),
         "code_marche": _enum_catalog(CodeMarche),
@@ -537,8 +543,8 @@ def viser_maturite(
     obj.numero_visa_maturite = numero_visa
     obj.date_visa_maturite = date_visa
     obj.autorite_visa_maturite = autorite_visa
-    if obj.statut in (None, "PREPARATION"):
-        obj.statut = "MATURITE_VISEE"
+    if obj.statut in (None, STATUT_PREPARATION):
+        obj.statut = STATUT_MATURITE_VISEE
     obj.date_verification = date.today()
     obj.auteur_saisie = getattr(user, "username", None) or obj.auteur_saisie
     db.commit()
@@ -560,8 +566,8 @@ def inscrire_pip(
     obj = _get_or_404(db, DocumentProgrammation, ident, "Dossier de programmation")
     obj.reference_pip_cdmt = reference_pip_cdmt
     obj.exercice = exercice
-    if obj.statut in (None, "PREPARATION", "MATURITE_VISEE"):
-        obj.statut = "INSCRIT_PIP"
+    if obj.statut in (None, STATUT_PREPARATION, STATUT_MATURITE_VISEE):
+        obj.statut = STATUT_INSCRIT_PIP
     obj.auteur_saisie = getattr(user, "username", None) or obj.auteur_saisie
     db.commit()
     db.refresh(obj)
