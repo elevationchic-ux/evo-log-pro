@@ -38,6 +38,8 @@ from app.models.amenagement_portuaire import (
     Dragage, AutorisationTravaux,
     STATUT_PREPARATION, STATUT_MATURITE_VISEE, STATUT_INSCRIT_PIP, STATUT_VISE,
     STATUTS_PROGRAMMATION,
+    STATUT_TITRE_DELIVREE, STATUT_TITRE_REFUSEE, STATUTS_TITRE_DOMANIAL,
+    TITRES_VALABLES,
     TypeSchema, StatutSchema, TypeProjet, StatutProjet, OrigineFinancement,
     TypeMarche, CodeMarche, StatutMarche, TypeTitreDomanial,
     TypeContratExploitation, StatutContrat, TypeInfrastructure,
@@ -793,7 +795,7 @@ def decider_titre(
     """Saisit la decision de l'autorite portuaire ; ne la remplace pas."""
     obj = _get_or_404(db, AutorisationDomaniale, ident, "Titre domanial")
     if accord:
-        obj.statut = "DELIVRE"
+        obj.statut = STATUT_TITRE_DELIVREE
         obj.date_signature = date_decision
         obj.date_effet = obj.date_effet or date_decision
     else:

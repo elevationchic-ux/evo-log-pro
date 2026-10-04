@@ -489,6 +489,32 @@ class MarcheAmenagement(Base):
 
 # ─── 5. Domanialité : titres d'occupation du domaine portuaire ───────────────
 
+# Vocabulaire des etats d'un titre d'occupation du domaine public. String(30)
+# et non enum en base : un arrete peut notifier un etat hors de ce cadre, qui
+# doit rester enregistrable tel quel. Sur ces valeurs, DEUX SEULES sont ecrites
+# par l'API (/titres-domaniaux/{id}/decision : DELIVRE ou REFUSE, sur decision
+# reellement prise) ; les autres sont saisies par l'agent quand l'autorite les
+# lui notifie. /nomenclatures publie cette liste au lieu de la laisser deviner.
+STATUT_TITRE_DEMANDEE = "DEMANDEE"
+STATUT_TITRE_EN_INSTRUCTION = "EN_INSTRUCTION"
+STATUT_TITRE_DELIVREE = "DELIVRE"
+STATUT_TITRE_SIGNLEE = "SIGNATURE"
+STATUT_TITRE_EN_VIGUEUR = "EN_VIGUEUR"
+STATUT_TITRE_REFUSEE = "REFUSE"
+STATUTS_TITRE_DOMANIAL = (
+    STATUT_TITRE_DEMANDEE,
+    STATUT_TITRE_EN_INSTRUCTION,
+    STATUT_TITRE_DELIVREE,
+    STATUT_TITRE_SIGNLEE,
+    STATUT_TITRE_EN_VIGUEUR,
+    STATUT_TITRE_REFUSEE,
+)
+# Les titres qui donnent aujourd'hui un droit exploitable sur le domaine.
+TITRES_VALABLES = (
+    STATUT_TITRE_DELIVREE, STATUT_TITRE_SIGNLEE, STATUT_TITRE_EN_VIGUEUR,
+)
+
+
 class AutorisationDomaniale(Base):
     """Titre d'occupation ou d'attribution dans le domaine portuaire.
 
@@ -522,7 +548,7 @@ class AutorisationDomaniale(Base):
     autorite_emettrice = Column(String(160))       # direction domainiale de l'autorité portuaire
     reference_deliberation = Column(String(120))
     piece_jointe = Column(String(300))
-    statut = Column(String(30), default="DEMANDEE", index=True)
+    statut = Column(String(30), default=STATUT_TITRE_DEMANDEE, index=True)
     motif_refus = Column(Text)
     source_reference = Column(String(200))
     date_verification = Column(Date)
@@ -681,6 +707,9 @@ class Dragage(Base):
     date_debut = Column(Date)
     date_fin = Column(Date)
     jours_arret = Column(Integer)                  # intempéries, pannes : faits relevés
+    # Etat d'avancement saisi par l'agent. Aucune route n'en ecrit une a sa
+    # place (consigner un leve bathymetrique ne clot pas une campagne), d'ou
+    # le String libre et l'absence de vocabulaire publie pour ce champ.
     statut = Column(String(30), default="PLANIFIEE", index=True)
     leve_bathymetrique_apres = Column(Boolean)
     date_releve = Column(Date)
