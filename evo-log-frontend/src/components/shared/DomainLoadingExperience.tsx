@@ -237,7 +237,7 @@ export default function DomainLoadingExperience({
             style={{
               backgroundColor: `${config.primaryColor}22`,
               borderColor: `${config.primaryColor}66`,
-              color: config.accentColor,
+              color: accentInk,
             }}
           >
             EV
@@ -256,7 +256,7 @@ export default function DomainLoadingExperience({
               style={{
                 backgroundColor: `${config.primaryColor}15`,
                 borderColor: `${config.primaryColor}55`,
-                color: config.accentColor,
+                color: accentInk,
               }}
             >
               Département N° {config.departmentNumber.toString().padStart(2, '0')}
@@ -276,7 +276,7 @@ export default function DomainLoadingExperience({
           <div
             className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl flex items-center justify-center border-2 backdrop-blur-md transition-transform duration-700"
             style={{
-              backgroundColor: 'rgba(15, 23, 42, 0.85)',
+              backgroundColor: medaillonBg,
               borderColor: `${config.primaryColor}88`,
               boxShadow: `0 14px 40px ${config.primaryColor}25`,
               animation: 'domainIconBreathe 3.5s ease-in-out infinite',
@@ -284,7 +284,7 @@ export default function DomainLoadingExperience({
           >
             <IconComponent
               className="w-12 h-12 sm:w-14 sm:h-14 transition-all duration-300 drop-shadow"
-              style={{ color: config.accentColor }}
+              style={{ color: accentInk }}
               strokeWidth={1.8}
             />
           </div>
@@ -293,7 +293,7 @@ export default function DomainLoadingExperience({
         {/* Indication d'accès */}
         <span
           className="text-xs sm:text-sm font-bold tracking-[0.25em] uppercase mb-2"
-          style={{ color: config.accentColor }}
+          style={{ color: accentInk }}
         >
           Ouverture de l&apos;espace
         </span>
@@ -332,7 +332,7 @@ export default function DomainLoadingExperience({
             </span>
             <span
               className="text-lg font-bold tabular-nums"
-              style={{ color: config.accentColor }}
+              style={{ color: accentInk }}
             >
               {activeProgress}%
             </span>
@@ -344,7 +344,7 @@ export default function DomainLoadingExperience({
               className="h-full rounded-full transition-all duration-150"
               style={{
                 width: `${activeProgress}%`,
-                background: `linear-gradient(90deg, ${config.primaryColor} 0%, ${config.accentColor} 100%)`,
+                background: `linear-gradient(90deg, ${config.primaryColor} 0%, ${accentInk} 100%)`,
                 boxShadow: `0 0 14px ${config.primaryColor}66`,
               }}
             />
