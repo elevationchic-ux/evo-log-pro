@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "evo-log-backend"))
 
 import app.models.port_cameroun  # noqa: F401  (referentiel des cibles de FK)
 import app.models.amenagement_portuaire as ap  # noqa: E402
+import sqlalchemy as sa  # noqa: E402
 from sqlalchemy.orm import configure_mappers  # noqa: E402
 
 configure_mappers()
@@ -78,6 +79,10 @@ NEW_PORT_COLS = ("autorite_portuaire", "tirant_eau_max")
 
 def _sa_type(col):
     t = col.type
+    # Text et Enum heritent de String : a tester AVANT, sinon le rendu perdrait
+    # le type reel (TEXT) au profit d'un VARCHAR sans taille.
+    if isinstance(t, sa.Text):
+        return "sa.Text()"
     if isinstance(t, sa.String):
         return f"sa.String({t.length})" if t.length else "sa.String()"
     if isinstance(t, sa.Numeric):
@@ -124,18 +129,35 @@ def _fks(table):
 def _indexes(table):
     out = []
     for col in table.columns:
-        if col.index:
-            uniq = "unique=True, " if col.unique else ""
-            out.append(f'        op.create_index("ix_{table.name}_{col.name}", "{table.name}", ["{col.name}"], {uniq}unique=True)'
-                       if col.unique else
-                       f'        op.create_index("ix_{table.name}_{col.name}", "{table.name}", ["{col.name}"])')
+        if not col.index:
+            continue
+        # index=True + unique=True : l'ORM genere un UNIQUE INDEX, pas une
+        # contrainte distincte. Le nom ix_<table>_<col> reprend la convention
+        # SQLAlchemy (et celle des migrations 024/028 deja en base).
+        suffix = ", unique=True" if col.unique else ""
+        out.append(
+            f'        op.create_index("ix_{table.name}_{col.name}", '
+            f'"{table.name}", ["{col.name}"]{suffix})'
+        )
     return out
 
+
+CONSTS = {
+    "SchemaDirecteur": "SCHEMA_DIRECTEUR",
+    "ProjetAmenagement": "PROJET",
+    "RegistreDTO": "DTO",
+    "MarcheAmenagement": "MARCHE",
+    "AutorisationDomaniale": "TITRE",
+    "ConcessionPortuaire": "CONCESSION",
+    "InfrastructurePortuaire": "INFRASTRUCTURE",
+    "Dragage": "DRAGAGE",
+    "AutorisationTravaux": "AUTORISATION",
+}
 
 blocs = []
 for cls in TABLES:
     t = cls.__table__
-    const = f"T_{cls.__name__.upper()}"
+    const = "T_" + CONSTS[cls.__name__]
     body = "\n".join(_cols(t) + _fks(t))
     idx = "\n".join(_indexes(t)) or "        pass"
     blocs.append(
@@ -144,7 +166,7 @@ for cls in TABLES:
     )
 
 consts = "\n".join(
-    f'T_{c.__name__.upper()} = "{c.__tablename__}"' for c in TABLES
+    f'T_{CONSTS[c.__name__]} = "{c.__tablename__}"' for c in TABLES
 )
 
 port_cols = '''
