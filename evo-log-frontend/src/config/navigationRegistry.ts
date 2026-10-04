@@ -12,7 +12,11 @@ import {
   BarChart3, PieChart, LineChart, FileText, BookOpen,
   Radio, Wifi, MessageSquare, Bell,
   LayoutDashboard, Layers, Grid, FileCheck, ShoppingCart, RotateCcw,
-  ArrowRightLeft, Bot, CheckCircle2, Inbox, AlertTriangle
+  ArrowRightLeft, Bot, CheckCircle2, Inbox, AlertTriangle,
+  // Identité du département Aménagement portuaire (registres réels du circuit
+  // camerounais : schéma directeur, PIP/CDMT, COLIFE, titre domanial, PPP…).
+  DraftingCompass, ScrollText, HardHat, CalendarRange, Gavel, Stamp,
+  FileSignature, Building2, Waves, FileBadge
 } from 'lucide-react';
 import { getModulePalette, LEGACY_ALIAS } from './modulePalette';
 import { MODULE_TITLES_EN } from './navI18n';
@@ -183,6 +187,140 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: 'Intégration systèmes',
         isCemacSpecific: true,
         requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'INTEGRATION']
+      }
+    ]
+  },
+
+  // ============================================================================
+  // 📐 MODULE 1-BIS: DÉPARTEMENT AMÉNAGEMENT PORTUAIRE (AUTONOME)
+  // ----------------------------------------------------------------------------
+  // Département autonome distinct de l'exploitation du quai : il tient le
+  // domaine public, les schémas directeurs, la programmation budgétaire, les
+  // marchés et les ouvrages des places de Douala, Kribi et Limbe. Les écrans
+  // n'affichent QUE ce qui est saisi en base (voir router
+  // /api/v1/amenagement-portuaire : nomenclatures, places et synthèse servies
+  // par l'API, téléprocédures institutionnelles annoncées 501).
+  // ============================================================================
+  'amenagement-portuaire': {
+    key: 'amenagement-portuaire',
+    title: 'Aménagement Portuaire & Domaine Public',
+    path: '/amenagement-portuaire/dashboard',
+    icon: DraftingCompass,
+    color: '#0e7490',
+    glow: 'shadow-cyan-600/50 border-cyan-600/60',
+    bgGradient: 'from-cyan-700 to-sky-900',
+    businessArea: 'Aménagement & Domaine Public Portuaire',
+    processPhase: 'Transverse: Structuration du Domaine, des Schémas & des Ouvrages',
+    requiredRoles: [
+      'ADMIN', 'SUPER_ADMIN', 'MANAGER',
+      // Rôles système réels créés par la migration 039 côté backend.
+      'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT',
+      'AUDITEUR', 'DIRECTEUR_FINANCIER', 'CHEF_EXPLOITATION',
+    ],
+    subModules: [
+      {
+        label: 'Centre de Pilotage Aménagement',
+        path: '/amenagement-portuaire/dashboard',
+        icon: LayoutDashboard,
+        badge: 'Synthèse',
+        tcode: 'KAMT_DSH',
+        description: 'Vue consolidée du domaine, de la programmation et des ouvrages (chiffres saisis uniquement)',
+        businessProcess: 'Pilotage de l\'aménagement',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'AUDITEUR', 'CHEF_EXPLOITATION', 'DIRECTEUR_FINANCIER', 'MANAGER']
+      },
+      {
+        label: 'Schémas Directeurs & Périmètres',
+        path: '/amenagement-portuaire/schemas-directeurs',
+        icon: ScrollText,
+        badge: 'Urbanisme',
+        tcode: 'KAMT_SCH',
+        description: 'Schéma directeur d\'aménagement, périmètre du domaine public et horizon de révision',
+        businessProcess: 'Planification du domaine',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'AUDITEUR']
+      },
+      {
+        label: "Projets d'Aménagement",
+        path: '/amenagement-portuaire/projets',
+        icon: HardHat,
+        badge: 'Portefeuille',
+        tcode: 'KAMT_PRJ',
+        description: 'Fiche technique, capacité additionnelle, maîtrise d\'ouvrage et avancement physique et financier',
+        businessProcess: 'Portefeuille de projets',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'AUDITEUR', 'CHEF_EXPLOITATION']
+      },
+      {
+        label: 'Programmation & Maturité (PIP/CDMT)',
+        path: '/amenagement-portuaire/programmation',
+        icon: CalendarRange,
+        badge: 'Budget',
+        tcode: 'KAMT_PIP',
+        description: 'Circuit réel : visa de maturité, inscription au PIP/CDMT, engagement visé par le contrôle financier',
+        businessProcess: 'Programmation des investissements',
+        isOhadaCompliant: true,
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'DIRECTEUR_FINANCIER']
+      },
+      {
+        label: 'Marchés Publics & PPP',
+        path: '/amenagement-portuaire/marches',
+        icon: Gavel,
+        badge: 'COLIFE',
+        tcode: 'KAMT_MCH',
+        description: 'DAO, avis COLIFE ou CIP, attribution, réceptions et contrats de partenariat (loi n° 2023/008)',
+        businessProcess: 'Passation des marchés',
+        isCemacSpecific: true,
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'DIRECTEUR_FINANCIER']
+      },
+      {
+        label: 'Titres Domaniaux & Occupations',
+        path: '/amenagement-portuaire/titres-domaniaux',
+        icon: Stamp,
+        badge: 'Domaine',
+        tcode: 'KAMT_DOM',
+        description: 'Autorisation d\'occupation, bail domanial et concession de terrain : assiette, redevance, échéance',
+        businessProcess: 'Gestion du domaine public',
+        isCemacSpecific: true,
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'AUDITEUR']
+      },
+      {
+        label: 'Concessions & Contrats d\'Exploitation',
+        path: '/amenagement-portuaire/concessions',
+        icon: FileSignature,
+        badge: 'Contrats',
+        tcode: 'KAMT_CCS',
+        description: 'Contrats de terminal : consistance des biens reversibles, investissements promis et réalisés',
+        businessProcess: 'Concession d\'exploitation',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'DIRECTEUR_FINANCIER']
+      },
+      {
+        label: 'Inventaire des Infrastructures',
+        path: '/amenagement-portuaire/infrastructures',
+        icon: Building2,
+        badge: 'Patrimoine',
+        tcode: 'KAMT_INF',
+        description: 'Ouvrages bâtis : quais, terre-pleins, digues — cotes, portance, inspections et état structural',
+        businessProcess: 'Inventaire du patrimoine',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'AUDITEUR', 'CHEF_EXPLOITATION']
+      },
+      {
+        label: 'Dragage & Profondeurs Disponibles',
+        path: '/amenagement-portuaire/dragage',
+        icon: Waves,
+        badge: 'Bathymétrie',
+        tcode: 'KAMT_DRG',
+        description: 'Campagnes, volumes mesurés et facturés, profondeur obtenue et relevé bathymétrique de clôture',
+        businessProcess: 'Maintien des profondeurs',
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'AUDITEUR', 'CHEF_EXPLOITATION']
+      },
+      {
+        label: 'Autorisations Administratives (EIES)',
+        path: '/amenagement-portuaire/autorisations',
+        icon: FileBadge,
+        badge: 'Conformité',
+        tcode: 'KAMT_AUT',
+        description: 'Études et permis : administration saisine, dates de dépôt, d\'accord et d\'expiration',
+        businessProcess: 'Conformité réglementaire',
+        isCemacSpecific: true,
+        requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'QHSE', 'AUDITEUR']
       }
     ]
   },
