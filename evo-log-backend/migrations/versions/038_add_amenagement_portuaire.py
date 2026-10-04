@@ -47,15 +47,15 @@ depends_on = None
 T_PORTS = "ports_cameroun"
 NEW_PORT_COLS = ("autorite_portuaire", "tirant_eau_max")
 
-T_SCHEMADIRECTEUR = "schemas_directeurs_amgt"
-T_PROJETAMENAGEMENT = "projets_amenagement"
-T_REGISTREDTO = "registres_dto_amgt"
-T_MARCHEAMENAGEMENT = "marches_amenagement"
-T_AUTORISATIONDOMANIALE = "autorisations_domaniales_amgt"
-T_CONCESSIONPORTUAIRE = "concessions_amenagement"
-T_INFRASTRUCTUREPORTUAIRE = "infrastructures_amenagees"
+T_SCHEMA_DIRECTEUR = "schemas_directeurs_amgt"
+T_PROJET = "projets_amenagement"
+T_DTO = "registres_dto_amgt"
+T_MARCHE = "marches_amenagement"
+T_TITRE = "autorisations_domaniales_amgt"
+T_CONCESSION = "concessions_amenagement"
+T_INFRASTRUCTURE = "infrastructures_amenagees"
 T_DRAGAGE = "campagnes_dragage"
-T_AUTORISATIONTRAVAUX = "autorisations_travaux_amgt"
+T_AUTORISATION = "autorisations_travaux_amgt"
 
 
 def upgrade():
@@ -63,15 +63,15 @@ def upgrade():
     insp = sa.inspect(bind)
     tables = set(insp.get_table_names())
 
-    if T_SCHEMADIRECTEUR not in tables:
+    if T_SCHEMA_DIRECTEUR not in tables:
         op.create_table(
-            T_SCHEMADIRECTEUR,
+            T_SCHEMA_DIRECTEUR,
             sa.Column("id", sa.Integer(), primary_key=True),
             sa.Column("code", sa.String(40), nullable=False),
             sa.Column("libelle", sa.String(200), nullable=False),
             sa.Column("port_id", sa.Integer(), nullable=True),
             sa.Column("type_schema", sa.String(17), nullable=False),
-            sa.Column("perimetre", sa.String(), nullable=True),
+            sa.Column("perimetre", sa.Text(), nullable=True),
             sa.Column("horizon_debut", sa.Integer(), nullable=True),
             sa.Column("horizon_fin", sa.Integer(), nullable=True),
             sa.Column("statut", sa.String(12), nullable=False),
@@ -84,37 +84,37 @@ def upgrade():
             sa.Column("budget_alloue_travaux_xaf", sa.Numeric(18, 2), nullable=True),
             sa.Column("superficie_totale_ha", sa.Numeric(14, 3), nullable=True),
             sa.Column("surface_eau_ha", sa.Numeric(14, 3), nullable=True),
-            sa.Column("zones_prevues", sa.String(), nullable=True),
-            sa.Column("lignes_directrices", sa.String(), nullable=True),
-            sa.Column("documents_sources", sa.String(), nullable=True),
+            sa.Column("zones_prevues", sa.Text(), nullable=True),
+            sa.Column("lignes_directrices", sa.Text(), nullable=True),
+            sa.Column("documents_sources", sa.Text(), nullable=True),
             sa.Column("source_reference", sa.String(200), nullable=True),
             sa.Column("date_verification", sa.Date(), nullable=True),
             sa.Column("auteur_saisie", sa.String(120), nullable=True),
-            sa.Column("notes", sa.String(), nullable=True),
+            sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("est_actif", sa.Boolean(), nullable=False),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
             sa.ForeignKeyConstraint(["port_id"], ["ports_cameroun.id"], name="fk_schemas_directeurs_amgt_port_id_ports_cameroun"),
         )
         op.create_index("ix_schemas_directeurs_amgt_id", "schemas_directeurs_amgt", ["id"])
-        op.create_index("ix_schemas_directeurs_amgt_code", "schemas_directeurs_amgt", ["code"], unique=True, unique=True)
+        op.create_index("ix_schemas_directeurs_amgt_code", "schemas_directeurs_amgt", ["code"], unique=True)
         op.create_index("ix_schemas_directeurs_amgt_port_id", "schemas_directeurs_amgt", ["port_id"])
         op.create_index("ix_schemas_directeurs_amgt_statut", "schemas_directeurs_amgt", ["statut"])
 
-    if T_PROJETAMENAGEMENT not in tables:
+    if T_PROJET not in tables:
         op.create_table(
-            T_PROJETAMENAGEMENT,
+            T_PROJET,
             sa.Column("id", sa.Integer(), primary_key=True),
             sa.Column("code_projet", sa.String(40), nullable=False),
             sa.Column("libelle", sa.String(200), nullable=False),
-            sa.Column("description", sa.String(), nullable=True),
+            sa.Column("description", sa.Text(), nullable=True),
             sa.Column("port_id", sa.Integer(), nullable=True),
             sa.Column("terminal_id", sa.Integer(), nullable=True),
             sa.Column("schema_id", sa.Integer(), nullable=True),
             sa.Column("type_ouvrage", sa.String(21), nullable=False),
             sa.Column("statut", sa.String(15), nullable=False),
             sa.Column("priorite", sa.String(20), nullable=True),
-            sa.Column("origines_financement", sa.String(), nullable=True),
+            sa.Column("origines_financement", sa.Text(), nullable=True),
             sa.Column("cout_previsionnel_xaf", sa.Numeric(18, 2), nullable=True),
             sa.Column("cout_reel_xaf", sa.Numeric(18, 2), nullable=True),
             sa.Column("devise", sa.String(6), nullable=True),
@@ -135,12 +135,12 @@ def upgrade():
             sa.Column("eies_obligatoire", sa.Boolean(), nullable=True),
             sa.Column("superficie_impactee_ha", sa.Numeric(14, 3), nullable=True),
             sa.Column("capacite_additionnelle", sa.String(120), nullable=True),
-            sa.Column("justificatif_utilite", sa.String(), nullable=True),
-            sa.Column("risques", sa.String(), nullable=True),
+            sa.Column("justificatif_utilite", sa.Text(), nullable=True),
+            sa.Column("risques", sa.Text(), nullable=True),
             sa.Column("source_reference", sa.String(200), nullable=True),
             sa.Column("date_verification", sa.Date(), nullable=True),
             sa.Column("auteur_saisie", sa.String(120), nullable=True),
-            sa.Column("notes", sa.String(), nullable=True),
+            sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("est_actif", sa.Boolean(), nullable=False),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
@@ -149,15 +149,15 @@ def upgrade():
             sa.ForeignKeyConstraint(["schema_id"], ["schemas_directeurs_amgt.id"], name="fk_projets_amenagement_schema_id_schemas_directeurs_amgt"),
         )
         op.create_index("ix_projets_amenagement_id", "projets_amenagement", ["id"])
-        op.create_index("ix_projets_amenagement_code_projet", "projets_amenagement", ["code_projet"], unique=True, unique=True)
+        op.create_index("ix_projets_amenagement_code_projet", "projets_amenagement", ["code_projet"], unique=True)
         op.create_index("ix_projets_amenagement_port_id", "projets_amenagement", ["port_id"])
         op.create_index("ix_projets_amenagement_schema_id", "projets_amenagement", ["schema_id"])
         op.create_index("ix_projets_amenagement_type_ouvrage", "projets_amenagement", ["type_ouvrage"])
         op.create_index("ix_projets_amenagement_statut", "projets_amenagement", ["statut"])
 
-    if T_REGISTREDTO not in tables:
+    if T_DTO not in tables:
         op.create_table(
-            T_REGISTREDTO,
+            T_DTO,
             sa.Column("id", sa.Integer(), primary_key=True),
             sa.Column("reference_dto", sa.String(80), nullable=False),
             sa.Column("exercice", sa.Integer(), nullable=False),
@@ -177,21 +177,21 @@ def upgrade():
             sa.Column("source_reference", sa.String(200), nullable=True),
             sa.Column("date_verification", sa.Date(), nullable=True),
             sa.Column("auteur_saisie", sa.String(120), nullable=True),
-            sa.Column("notes", sa.String(), nullable=True),
+            sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
             sa.ForeignKeyConstraint(["projet_id"], ["projets_amenagement.id"], name="fk_registres_dto_amgt_projet_id_projets_amenagement"),
             sa.ForeignKeyConstraint(["port_id"], ["ports_cameroun.id"], name="fk_registres_dto_amgt_port_id_ports_cameroun"),
         )
         op.create_index("ix_registres_dto_amgt_id", "registres_dto_amgt", ["id"])
-        op.create_index("ix_registres_dto_amgt_reference_dto", "registres_dto_amgt", ["reference_dto"], unique=True, unique=True)
+        op.create_index("ix_registres_dto_amgt_reference_dto", "registres_dto_amgt", ["reference_dto"], unique=True)
         op.create_index("ix_registres_dto_amgt_exercice", "registres_dto_amgt", ["exercice"])
         op.create_index("ix_registres_dto_amgt_projet_id", "registres_dto_amgt", ["projet_id"])
         op.create_index("ix_registres_dto_amgt_statut", "registres_dto_amgt", ["statut"])
 
-    if T_MARCHEAMENAGEMENT not in tables:
+    if T_MARCHE not in tables:
         op.create_table(
-            T_MARCHEAMENAGEMENT,
+            T_MARCHE,
             sa.Column("id", sa.Integer(), primary_key=True),
             sa.Column("reference", sa.String(80), nullable=False),
             sa.Column("designations", sa.String(300), nullable=False),
@@ -226,20 +226,20 @@ def upgrade():
             sa.Column("source_reference", sa.String(200), nullable=True),
             sa.Column("date_verification", sa.Date(), nullable=True),
             sa.Column("auteur_saisie", sa.String(120), nullable=True),
-            sa.Column("notes", sa.String(), nullable=True),
+            sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
             sa.ForeignKeyConstraint(["projet_id"], ["projets_amenagement.id"], name="fk_marches_amenagement_projet_id_projets_amenagement"),
             sa.ForeignKeyConstraint(["port_id"], ["ports_cameroun.id"], name="fk_marches_amenagement_port_id_ports_cameroun"),
         )
         op.create_index("ix_marches_amenagement_id", "marches_amenagement", ["id"])
-        op.create_index("ix_marches_amenagement_reference", "marches_amenagement", ["reference"], unique=True, unique=True)
+        op.create_index("ix_marches_amenagement_reference", "marches_amenagement", ["reference"], unique=True)
         op.create_index("ix_marches_amenagement_projet_id", "marches_amenagement", ["projet_id"])
         op.create_index("ix_marches_amenagement_statut", "marches_amenagement", ["statut"])
 
-    if T_AUTORISATIONDOMANIALE not in tables:
+    if T_TITRE not in tables:
         op.create_table(
-            T_AUTORISATIONDOMANIALE,
+            T_TITRE,
             sa.Column("id", sa.Integer(), primary_key=True),
             sa.Column("numero_piece", sa.String(80), nullable=False),
             sa.Column("type_titre", sa.String(34), nullable=False),
@@ -248,7 +248,7 @@ def upgrade():
             sa.Column("zone_id", sa.Integer(), nullable=True),
             sa.Column("beneficiaire", sa.String(200), nullable=False),
             sa.Column("objet", sa.String(300), nullable=True),
-            sa.Column("assiette", sa.String(), nullable=True),
+            sa.Column("assiette", sa.Text(), nullable=True),
             sa.Column("superficie_m2", sa.Numeric(14, 3), nullable=True),
             sa.Column("destination", sa.String(120), nullable=True),
             sa.Column("redevance_annuelle_xaf", sa.Numeric(18, 2), nullable=True),
@@ -263,11 +263,11 @@ def upgrade():
             sa.Column("reference_deliberation", sa.String(120), nullable=True),
             sa.Column("piece_jointe", sa.String(300), nullable=True),
             sa.Column("statut", sa.String(30), nullable=True),
-            sa.Column("motif_refus", sa.String(), nullable=True),
+            sa.Column("motif_refus", sa.Text(), nullable=True),
             sa.Column("source_reference", sa.String(200), nullable=True),
             sa.Column("date_verification", sa.Date(), nullable=True),
             sa.Column("auteur_saisie", sa.String(120), nullable=True),
-            sa.Column("notes", sa.String(), nullable=True),
+            sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
             sa.ForeignKeyConstraint(["port_id"], ["ports_cameroun.id"], name="fk_autorisations_domaniales_amgt_port_id_ports_cameroun"),
@@ -275,15 +275,15 @@ def upgrade():
             sa.ForeignKeyConstraint(["zone_id"], ["zones_portuaires.id"], name="fk_autorisations_domaniales_amgt_zone_id_zones_portuaires"),
         )
         op.create_index("ix_autorisations_domaniales_amgt_id", "autorisations_domaniales_amgt", ["id"])
-        op.create_index("ix_autorisations_domaniales_amgt_numero_piece", "autorisations_domaniales_amgt", ["numero_piece"], unique=True, unique=True)
+        op.create_index("ix_autorisations_domaniales_amgt_numero_piece", "autorisations_domaniales_amgt", ["numero_piece"], unique=True)
         op.create_index("ix_autorisations_domaniales_amgt_type_titre", "autorisations_domaniales_amgt", ["type_titre"])
         op.create_index("ix_autorisations_domaniales_amgt_port_id", "autorisations_domaniales_amgt", ["port_id"])
         op.create_index("ix_autorisations_domaniales_amgt_date_expiration", "autorisations_domaniales_amgt", ["date_expiration"])
         op.create_index("ix_autorisations_domaniales_amgt_statut", "autorisations_domaniales_amgt", ["statut"])
 
-    if T_CONCESSIONPORTUAIRE not in tables:
+    if T_CONCESSION not in tables:
         op.create_table(
-            T_CONCESSIONPORTUAIRE,
+            T_CONCESSION,
             sa.Column("id", sa.Integer(), primary_key=True),
             sa.Column("code_contrat", sa.String(60), nullable=False),
             sa.Column("nom_contrat", sa.String(200), nullable=False),
@@ -294,45 +294,45 @@ def upgrade():
             sa.Column("autorite_concedante", sa.String(160), nullable=False),
             sa.Column("concessionnaire", sa.String(200), nullable=False),
             sa.Column("groupe_final", sa.String(160), nullable=True),
-            sa.Column("objet", sa.String(), nullable=True),
-            sa.Column("perimetre", sa.String(), nullable=True),
+            sa.Column("objet", sa.Text(), nullable=True),
+            sa.Column("perimetre", sa.Text(), nullable=True),
             sa.Column("superficie_concedee_ha", sa.Numeric(14, 3), nullable=True),
             sa.Column("longueur_quai_ml", sa.Numeric(12, 2), nullable=True),
             sa.Column("capacite_contractuelle", sa.String(120), nullable=True),
             sa.Column("date_effet", sa.Date(), nullable=True),
             sa.Column("date_echeance", sa.Date(), nullable=True),
             sa.Column("duree_mois", sa.Integer(), nullable=True),
-            sa.Column("prolongations", sa.String(), nullable=True),
+            sa.Column("prolongations", sa.Text(), nullable=True),
             sa.Column("investissement_promis_xaf", sa.Numeric(18, 2), nullable=True),
             sa.Column("investissement_realise_xaf", sa.Numeric(18, 2), nullable=True),
             sa.Column("redevance_concession_xaf", sa.Numeric(18, 2), nullable=True),
             sa.Column("redevance_par_unite", sa.Numeric(18, 2), nullable=True),
             sa.Column("unite_redevance", sa.String(40), nullable=True),
-            sa.Column("clauses_revolution", sa.String(), nullable=True),
-            sa.Column("sanctions_contractuelles", sa.String(), nullable=True),
-            sa.Column("biens_reversibles", sa.String(), nullable=True),
+            sa.Column("clauses_revolution", sa.Text(), nullable=True),
+            sa.Column("sanctions_contractuelles", sa.Text(), nullable=True),
+            sa.Column("biens_reversibles", sa.Text(), nullable=True),
             sa.Column("reference_approbation", sa.String(120), nullable=True),
             sa.Column("date_approbation", sa.Date(), nullable=True),
             sa.Column("arret_travail", sa.Boolean(), nullable=True),
             sa.Column("source_reference", sa.String(200), nullable=True),
             sa.Column("date_verification", sa.Date(), nullable=True),
             sa.Column("auteur_saisie", sa.String(120), nullable=True),
-            sa.Column("notes", sa.String(), nullable=True),
+            sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
             sa.ForeignKeyConstraint(["port_id"], ["ports_cameroun.id"], name="fk_concessions_amenagement_port_id_ports_cameroun"),
             sa.ForeignKeyConstraint(["terminal_id"], ["terminaux_portuaires.id"], name="fk_concessions_amenagement_terminal_id_terminaux_portuaires"),
         )
         op.create_index("ix_concessions_amenagement_id", "concessions_amenagement", ["id"])
-        op.create_index("ix_concessions_amenagement_code_contrat", "concessions_amenagement", ["code_contrat"], unique=True, unique=True)
+        op.create_index("ix_concessions_amenagement_code_contrat", "concessions_amenagement", ["code_contrat"], unique=True)
         op.create_index("ix_concessions_amenagement_port_id", "concessions_amenagement", ["port_id"])
         op.create_index("ix_concessions_amenagement_type_contrat", "concessions_amenagement", ["type_contrat"])
         op.create_index("ix_concessions_amenagement_statut", "concessions_amenagement", ["statut"])
         op.create_index("ix_concessions_amenagement_date_echeance", "concessions_amenagement", ["date_echeance"])
 
-    if T_INFRASTRUCTUREPORTUAIRE not in tables:
+    if T_INFRASTRUCTURE not in tables:
         op.create_table(
-            T_INFRASTRUCTUREPORTUAIRE,
+            T_INFRASTRUCTURE,
             sa.Column("id", sa.Integer(), primary_key=True),
             sa.Column("code", sa.String(60), nullable=False),
             sa.Column("designation", sa.String(200), nullable=False),
@@ -363,11 +363,11 @@ def upgrade():
             sa.Column("regime_fiscal", sa.String(60), nullable=True),
             sa.Column("reversable", sa.Boolean(), nullable=True),
             sa.Column("operateur_entretien", sa.String(160), nullable=True),
-            sa.Column("sources_documents", sa.String(), nullable=True),
+            sa.Column("sources_documents", sa.Text(), nullable=True),
             sa.Column("source_reference", sa.String(200), nullable=True),
             sa.Column("date_verification", sa.Date(), nullable=True),
             sa.Column("auteur_saisie", sa.String(120), nullable=True),
-            sa.Column("notes", sa.String(), nullable=True),
+            sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("est_actif", sa.Boolean(), nullable=False),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
@@ -377,7 +377,7 @@ def upgrade():
             sa.ForeignKeyConstraint(["zone_id"], ["zones_portuaires.id"], name="fk_infrastructures_amenagees_zone_id_zones_portuaires"),
         )
         op.create_index("ix_infrastructures_amenagees_id", "infrastructures_amenagees", ["id"])
-        op.create_index("ix_infrastructures_amenagees_code", "infrastructures_amenagees", ["code"], unique=True, unique=True)
+        op.create_index("ix_infrastructures_amenagees_code", "infrastructures_amenagees", ["code"], unique=True)
         op.create_index("ix_infrastructures_amenagees_type_infrastructure", "infrastructures_amenagees", ["type_infrastructure"])
         op.create_index("ix_infrastructures_amenagees_port_id", "infrastructures_amenagees", ["port_id"])
         op.create_index("ix_infrastructures_amenagees_projet_id", "infrastructures_amenagees", ["projet_id"])
@@ -413,26 +413,26 @@ def upgrade():
             sa.Column("leve_bathymetrique_apres", sa.Boolean(), nullable=True),
             sa.Column("date_releve", sa.Date(), nullable=True),
             sa.Column("autorisation_administrative", sa.String(200), nullable=True),
-            sa.Column("impact_environnemental", sa.String(), nullable=True),
+            sa.Column("impact_environnemental", sa.Text(), nullable=True),
             sa.Column("source_reference", sa.String(200), nullable=True),
             sa.Column("date_verification", sa.Date(), nullable=True),
             sa.Column("auteur_saisie", sa.String(120), nullable=True),
-            sa.Column("notes", sa.String(), nullable=True),
+            sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
             sa.ForeignKeyConstraint(["port_id"], ["ports_cameroun.id"], name="fk_campagnes_dragage_port_id_ports_cameroun"),
             sa.ForeignKeyConstraint(["projet_id"], ["projets_amenagement.id"], name="fk_campagnes_dragage_projet_id_projets_amenagement"),
         )
         op.create_index("ix_campagnes_dragage_id", "campagnes_dragage", ["id"])
-        op.create_index("ix_campagnes_dragage_code_campagne", "campagnes_dragage", ["code_campagne"], unique=True, unique=True)
+        op.create_index("ix_campagnes_dragage_code_campagne", "campagnes_dragage", ["code_campagne"], unique=True)
         op.create_index("ix_campagnes_dragage_port_id", "campagnes_dragage", ["port_id"])
         op.create_index("ix_campagnes_dragage_projet_id", "campagnes_dragage", ["projet_id"])
         op.create_index("ix_campagnes_dragage_type_dragage", "campagnes_dragage", ["type_dragage"])
         op.create_index("ix_campagnes_dragage_statut", "campagnes_dragage", ["statut"])
 
-    if T_AUTORISATIONTRAVAUX not in tables:
+    if T_AUTORISATION not in tables:
         op.create_table(
-            T_AUTORISATIONTRAVAUX,
+            T_AUTORISATION,
             sa.Column("id", sa.Integer(), primary_key=True),
             sa.Column("reference", sa.String(80), nullable=False),
             sa.Column("type_autorisation", sa.String(20), nullable=False),
@@ -446,21 +446,21 @@ def upgrade():
             sa.Column("date_accord", sa.Date(), nullable=True),
             sa.Column("date_expiration", sa.Date(), nullable=True),
             sa.Column("numero_arrete", sa.String(120), nullable=True),
-            sa.Column("conditions_particulieres", sa.String(), nullable=True),
+            sa.Column("conditions_particulieres", sa.Text(), nullable=True),
             sa.Column("charges_enviro_xaf", sa.Numeric(18, 2), nullable=True),
             sa.Column("audit_date_prochaine", sa.Date(), nullable=True),
             sa.Column("piece_jointe", sa.String(300), nullable=True),
             sa.Column("source_reference", sa.String(200), nullable=True),
             sa.Column("date_verification", sa.Date(), nullable=True),
             sa.Column("auteur_saisie", sa.String(120), nullable=True),
-            sa.Column("notes", sa.String(), nullable=True),
+            sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
             sa.ForeignKeyConstraint(["projet_id"], ["projets_amenagement.id"], name="fk_autorisations_travaux_amgt_projet_id_projets_amenagement"),
             sa.ForeignKeyConstraint(["port_id"], ["ports_cameroun.id"], name="fk_autorisations_travaux_amgt_port_id_ports_cameroun"),
         )
         op.create_index("ix_autorisations_travaux_amgt_id", "autorisations_travaux_amgt", ["id"])
-        op.create_index("ix_autorisations_travaux_amgt_reference", "autorisations_travaux_amgt", ["reference"], unique=True, unique=True)
+        op.create_index("ix_autorisations_travaux_amgt_reference", "autorisations_travaux_amgt", ["reference"], unique=True)
         op.create_index("ix_autorisations_travaux_amgt_type_autorisation", "autorisations_travaux_amgt", ["type_autorisation"])
         op.create_index("ix_autorisations_travaux_amgt_projet_id", "autorisations_travaux_amgt", ["projet_id"])
         op.create_index("ix_autorisations_travaux_amgt_statut", "autorisations_travaux_amgt", ["statut"])
@@ -484,21 +484,21 @@ def downgrade():
                 batch.drop_column("tirant_eau_max")
             if "autorite_portuaire" in cols:
                 batch.drop_column("autorite_portuaire")
-    if T_AUTORISATIONTRAVAUX in tables:
-        op.drop_table(T_AUTORISATIONTRAVAUX)
+    if T_AUTORISATION in tables:
+        op.drop_table(T_AUTORISATION)
     if T_DRAGAGE in tables:
         op.drop_table(T_DRAGAGE)
-    if T_INFRASTRUCTUREPORTUAIRE in tables:
-        op.drop_table(T_INFRASTRUCTUREPORTUAIRE)
-    if T_CONCESSIONPORTUAIRE in tables:
-        op.drop_table(T_CONCESSIONPORTUAIRE)
-    if T_AUTORISATIONDOMANIALE in tables:
-        op.drop_table(T_AUTORISATIONDOMANIALE)
-    if T_MARCHEAMENAGEMENT in tables:
-        op.drop_table(T_MARCHEAMENAGEMENT)
-    if T_REGISTREDTO in tables:
-        op.drop_table(T_REGISTREDTO)
-    if T_PROJETAMENAGEMENT in tables:
-        op.drop_table(T_PROJETAMENAGEMENT)
-    if T_SCHEMADIRECTEUR in tables:
-        op.drop_table(T_SCHEMADIRECTEUR)
+    if T_INFRASTRUCTURE in tables:
+        op.drop_table(T_INFRASTRUCTURE)
+    if T_CONCESSION in tables:
+        op.drop_table(T_CONCESSION)
+    if T_TITRE in tables:
+        op.drop_table(T_TITRE)
+    if T_MARCHE in tables:
+        op.drop_table(T_MARCHE)
+    if T_DTO in tables:
+        op.drop_table(T_DTO)
+    if T_PROJET in tables:
+        op.drop_table(T_PROJET)
+    if T_SCHEMA_DIRECTEUR in tables:
+        op.drop_table(T_SCHEMA_DIRECTEUR)

@@ -110,7 +110,13 @@ def _cols(table):
             parts.append("nullable=True" if col.nullable else "nullable=False")
         if col.unique and not col.index:
             parts.append("unique=True")
-        out.append("            sa.Column(" + ", ".join(p for p in parts if p) + "),")
+        # server_default : seul now() est rendu (les autres defauts de l'ORM
+        # sont cote Python et n'ont rien a faire dans le DDL).
+        if col.server_default is not None:
+            arg = getattr(col.server_default, "arg", None)
+            if isinstance(arg, sa.sql.functions.Function):
+                parts.append("server_default=sa.func.now()")
+        out.append("            sa.Column(" + ", ".join(parts) + "),")
     return out
 
 
@@ -180,7 +186,8 @@ port_cols = '''
 '''
 
 downgrade = "\n".join(
-    f'    if T_{c.__name__.upper()} in tables:\n        op.drop_table(T_{c.__name__.upper()})'
+    f'    if T_{CONSTS[c.__name__]} in tables:\n'
+    f'        op.drop_table(T_{CONSTS[c.__name__]})'
     for c in reversed(TABLES)
 )
 

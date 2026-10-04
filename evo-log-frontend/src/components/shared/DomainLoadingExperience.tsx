@@ -13,6 +13,7 @@ import {
   resolveDomainLoadingConfig,
   DomainLoadingConfig
 } from '@/config/domainLoadingConfig';
+import { useSettings } from '@/components/layout/SettingsProvider';
 
 interface DomainLoadingExperienceProps {
   /**
@@ -155,6 +156,14 @@ export default function DomainLoadingExperience({
   customSubtitle,
   fullScreen = true,
 }: DomainLoadingExperienceProps) {
+  const { theme } = useSettings();
+  const isLight =
+    theme === 'light' ||
+    (theme === 'system' &&
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-color-scheme: light)').matches);
+
   const config = useMemo(() => resolveDomainLoadingConfig(targetDomain), [targetDomain]);
   const [internalProgress, setInternalProgress] = useState(0);
 
@@ -189,16 +198,28 @@ export default function DomainLoadingExperience({
 
   const IconComponent = useMemo(() => getDomainIcon(config), [config]);
 
+  // Palette adaptée au thème : le fond et les accents sont en styles inline
+  // (dégradés/lueur), donc le filet CSS .light ne peut pas les inverser ici.
+  const surfaceBase = isLight ? '#eef1f5' : '#030712';
+  const radialBg = isLight
+    ? `radial-gradient(circle at 50% 42%, ${config.primaryColor}14 0%, rgba(255, 255, 255, 0.85) 55%, ${surfaceBase} 100%)`
+    : `radial-gradient(circle at 50% 42%, ${config.primaryColor}18 0%, rgba(3, 7, 18, 0.95) 60%, #030712 100%)`;
+  const medaillonBg = isLight ? 'rgba(255, 255, 255, 0.82)' : 'rgba(15, 23, 42, 0.85)';
+  // En clair, la teinte "accent" (pastel, écrite pour le sombre) devient
+  // illisible : on bascule les textes/icônes d'accent sur la couleur primaire.
+  const accentInk = isLight ? config.primaryColor : config.accentColor;
+
+  const inkClass = isLight ? 'text-slate-800' : 'text-white';
   const containerClasses = fullScreen
-    ? 'fixed inset-0 z-[120] flex flex-col justify-between items-center p-6 sm:p-10 md:p-14 overflow-hidden select-none text-white'
-    : 'relative w-full min-h-[580px] flex flex-col justify-between items-center p-6 sm:p-10 overflow-hidden select-none text-white rounded-3xl border border-slate-800/80 shadow-2xl';
+    ? `fixed inset-0 z-[120] flex flex-col justify-between items-center p-6 sm:p-10 md:p-14 overflow-hidden select-none ${inkClass}`
+    : `relative w-full min-h-[580px] flex flex-col justify-between items-center p-6 sm:p-10 overflow-hidden select-none ${inkClass} rounded-3xl border border-slate-800/80 shadow-2xl`;
 
   return (
     <div
       className={containerClasses}
       style={{
-        backgroundColor: '#030712',
-        backgroundImage: `radial-gradient(circle at 50% 42%, ${config.primaryColor}18 0%, rgba(3, 7, 18, 0.95) 60%, #030712 100%)`,
+        backgroundColor: surfaceBase,
+        backgroundImage: radialBg,
       }}
     >
       {/* ── LUEUR D'AMBIANCE APAISANTE (Douce et feutrée, sans clignotement) ── */}
