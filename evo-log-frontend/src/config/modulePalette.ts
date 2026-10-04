@@ -26,7 +26,7 @@ export interface ModulePaletteEntry {
 }
 
 export const MODULE_PALETTE: Record<string, ModulePaletteEntry> = {
-  // ── 15 modules métier majeurs ──
+  // ── 16 modules métier majeurs ──
   dashboard: {
     hex: '#6366F1',
     glow: 'shadow-indigo-500/50 border-indigo-500/60',
@@ -254,6 +254,9 @@ export const LEGACY_ALIAS: Record<string, string> = {
   documents: 'admin-tenant',
   notifications: 'qhse-securite',
   support: 'admin-tenant',
+  // Clé courte du département d'aménagement (préfixe d'API
+  // /api/v1/amenagement-portuaire et ancienne appellation « amenagement »).
+  amenagement: 'amenagement-portuaire',
 };
 
 /** Retourne l'entrée de palette d'un module (majeur ou alias legacy). */

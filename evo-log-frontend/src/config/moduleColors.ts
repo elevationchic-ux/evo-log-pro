@@ -72,6 +72,10 @@ export const MODULE_COLORS: Record<string, ModuleColorConfig> = {
   'removal-slip': { primary: '#E67E22', primaryLight: '#F39C12', primaryDark: '#D35400', secondary: '#EB984E', accent: '#FDEBD0', background: '#FDF2E9', text: '#A04000' },
   reporting: { primary: '#9B59B6', primaryLight: '#AF7AC5', primaryDark: '#884EA0', secondary: '#C39BD3', accent: '#E8DAEF', background: '#F5EEF8', text: '#6C3483' },
   'public-api': { primary: '#1ABC9C', primaryLight: '#48C9B0', primaryDark: '#17A589', secondary: '#76D7C4', accent: '#D1F2EB', background: '#E8F8F5', text: '#0E6655' },
+  // Département autonome d'aménagement portuaire (Douala, Kribi, Limbé).
+  // Teinte propre, alignée sur modulePalette.ts (#0E7490) : l'aménagement
+  // partage le terrain des vues port-operations, mais pas leur responsabilité.
+  'amenagement-portuaire': { primary: '#0E7490', primaryLight: '#22D3EE', primaryDark: '#155E75', secondary: '#67E8F9', accent: '#CFFAFE', background: '#ECFEFF', text: '#164E63' },
 };
 
 export const MODULE_ICONS: Record<string, string> = {
