@@ -126,10 +126,14 @@ def upgrade():
                 f"INSERT INTO {T_PLAN} "
                 "(numero_compte, intitule, type_compte, classe, sous_classe, "
                 "devise, solde_debit, solde_credit, compte_centralisateur, actif, date_creation, created_at) "
-                "VALUES (:n, :i, :t, :c, :s, 'XAF', 0, 0, :cc, 1, :d, :ts)"
+                "VALUES (:n, :i, :t, :c, :s, 'XAF', 0, 0, :cc, :actif, :d, :ts)"
             ),
+            # Booleans lies via BOOLEENS PYTHON : PostgreSQL a de vrais colonnes
+            # BOOLEAN (un entier 1/0 leve DatatypeMismatch) ; l'adaptateur
+            # SQLAlchemy rend True/False correctement sur les deux moteurs.
             {"n": numero, "i": intitule, "t": type_name, "c": classe,
-             "s": sous_classe, "cc": 1 if central else 0, "d": date.today().isoformat(), "ts": TS},
+             "s": sous_classe, "cc": bool(central), "actif": True,
+             "d": date.today().isoformat(), "ts": TS},
         )
 
     # 2) Journaux auxiliaires
