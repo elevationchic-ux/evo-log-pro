@@ -6,7 +6,7 @@
 // thème du header/sidebar, dropdown, palette de commandes, bulle orbitale) doit
 // consommer CE fichier pour rester cohérente.
 //
-// Règle produit : "une couleur par module". Les 15 modules métier ont 15 teintes
+// Règle produit : "une couleur par module". Les 16 modules métier ont 16 teintes
 // distinctes ; les 8 portails de rôle ont chacun une teinte distincte. Dark-only.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -124,13 +124,13 @@ export const MODULE_PALETTE: Record<string, ModulePaletteEntry> = {
     sidebar: { activeAccent: 'text-green-400 border-green-400', activeBgSubtle: 'bg-green-500/10', brandIconBg: 'bg-green-600' },
   },
 
-  // departement autonome N°29 : l'amenagement portuaire (schema directeur,
-  // domaine public, gros obra) n'est pas l'exploitation du quai, mais il en
-  // partage le terrain. Il prend donc la FAMILLE MARITIME en teinte profonde
-  // (cyan-700 « encre de plan ») la meme famille que port-operations (sky-500
-  // « radar ») mais a l'oppose du spectre en luminosite. precedent deja admis
-  // dans ce fichier : portail-frais (teal-600) cote a cote de client-b2b
-  // (teal-500). Aucun module majeur ne porte #0E7490.
+  // Département autonome : l'aménagement portuaire (schéma directeur, domaine
+  // public, gros œuvre) n'est pas l'exploitation du quai, mais il en partage le
+  // terrain. Il prend donc la FAMILLE MARITIME en teinte profonde (cyan-700
+  // « encre de plan ») : même famille que port-operations (sky-500 « radar »),
+  // mais à l'opposé du spectre en luminosité. Précédent déjà admis dans ce
+  // fichier : portail-frais (teal-600) côtoie client-b2b (teal-500).
+  // Aucun module majeur ne porte #0E7490.
   'amenagement-portuaire': {
     hex: '#0E7490',
     glow: 'shadow-cyan-600/50 border-cyan-600/60',
