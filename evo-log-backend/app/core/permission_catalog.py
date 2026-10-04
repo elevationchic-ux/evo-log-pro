@@ -71,7 +71,9 @@ DOMAINS: Dict[str, Dict] = {
     },
     # Departement autonome : l'amenagement portuaire n'est pas l'exploitation
     # du quai. Le module porte les objets juridiques reels du circuit
-    # camerounais (schema directeur APN, programmation DTO, marches COLIFE/CIP
+    # camerounais (schema directeur APN ; programmation : fiche technique, visa
+    # de maturite (decret 2018/0492), PIP/CDMT, engagement vise par le controle
+    # financier ; marches COLIFE/CIP
     # et PPP loi 2023/008, titres domaniaux, concessions, ouvrages, dragage,
     # autorisations EIES). Pas de « delete » sur les pieces a valeur
     # documentaire : un schema directeur est abroge, une fiche technique annulee,
@@ -79,7 +81,7 @@ DOMAINS: Dict[str, Dict] = {
     "amenagement_portuaire": {
         "label": "Amenagement portuaire & domaine public",
         "modules": {
-            "amenagement": {"label": "Amenagement portuaire (Douala, Kribi, Limbe)", "sub_modules": {"schema_directeur": ["read", "create", "modify", "approve", "export"], "projet": ACTIONS, "dto": ["read", "create", "modify", "approve", "export"], "marche": ACTIONS, "titre_domanial": ACTIONS, "concession": ["read", "create", "modify", "approve", "export"], "infrastructure": ACTIONS, "dragage": ACTIONS, "autorisation": ["read", "create", "modify", "approve", "export"]}},
+            "amenagement": {"label": "Amenagement portuaire (Douala, Kribi, Limbe)", "sub_modules": {"schema_directeur": ["read", "create", "modify", "approve", "export"], "projet": ACTIONS, "programmation": ["read", "create", "modify", "approve", "export"], "marche": ACTIONS, "titre_domanial": ACTIONS, "concession": ["read", "create", "modify", "approve", "export"], "infrastructure": ACTIONS, "dragage": ACTIONS, "autorisation": ["read", "create", "modify", "approve", "export"]}},
         },
     },
     "transport": {

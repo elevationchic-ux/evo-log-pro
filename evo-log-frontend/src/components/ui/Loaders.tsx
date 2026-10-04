@@ -1,12 +1,22 @@
+'use client';
+
 import React from 'react';
+import { useSettings } from '@/components/layout/SettingsProvider';
 
 /**
  * FullScreenLoader: Écran de chargement ultra-pro & élégant CADC EM-ERP
  * Utilisé après la connexion et lors des transitions de routes principales
  */
 export const FullScreenLoader = () => {
+  const { theme } = useSettings();
+  const isLight =
+    theme === 'light' ||
+    (theme === 'system' &&
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-color-scheme: light)').matches);
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-between bg-slate-950 text-white z-[100] p-6 sm:p-12 font-sans select-none overflow-hidden animate-in fade-in duration-300">
+    <div className={`fixed inset-0 flex flex-col items-center justify-between z-[100] p-6 sm:p-12 font-sans select-none overflow-hidden animate-in fade-in duration-300 ${isLight ? 'bg-slate-50 text-slate-800' : 'bg-slate-950 text-white'}`}>
       {/* Dynamic Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-amber-500/15 via-yellow-500/10 to-amber-600/5 rounded-full blur-[140px] pointer-events-none animate-pulse" />
 
@@ -31,9 +41,15 @@ export const FullScreenLoader = () => {
           </div>
         </div>
 
-        <h1 className="text-3xl font-black bg-gradient-to-r from-amber-100 via-amber-300 to-amber-500 bg-clip-text text-transparent tracking-tight mb-2">
-          EVO-LOG SaaS
-        </h1>
+        {isLight ? (
+          <h1 className="text-3xl font-black text-amber-700 tracking-tight mb-2">
+            EVO-LOG SaaS
+          </h1>
+        ) : (
+          <h1 className="text-3xl font-black bg-gradient-to-r from-amber-100 via-amber-300 to-amber-500 bg-clip-text text-transparent tracking-tight mb-2">
+            EVO-LOG SaaS
+          </h1>
+        )}
         <p className="text-xs font-bold text-amber-400 uppercase tracking-widest animate-pulse">
           Chargement du Profil & Sécurisation de Session...
         </p>
