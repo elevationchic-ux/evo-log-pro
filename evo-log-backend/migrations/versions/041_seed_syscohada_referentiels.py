@@ -126,10 +126,11 @@ def upgrade():
                 f"INSERT INTO {T_PLAN} "
                 "(numero_compte, intitule, type_compte, classe, sous_classe, "
                 "devise, solde_debit, solde_credit, compte_centralisateur, actif, date_creation, created_at) "
-                "VALUES (:n, :i, :t, :c, :s, 'XAF', 0, 0, :cc, 1, :d, :ts)"
+                "VALUES (:n, :i, :t, :c, :s, 'XAF', 0, 0, :cc, :actif, :d, :ts)"
             ),
             {"n": numero, "i": intitule, "t": type_name, "c": classe,
-             "s": sous_classe, "cc": 1 if central else 0, "d": date.today().isoformat(), "ts": TS},
+             "s": sous_classe, "cc": central, "actif": True,
+             "d": date.today().isoformat(), "ts": TS},
         )
 
     # 2) Journaux auxiliaires
@@ -142,9 +143,10 @@ def upgrade():
                 f"INSERT INTO {T_JOURNAL} "
                 "(code_journal, nom_journal, type_journal, compte_centralisateur, "
                 "periodical, statut, devise, created_at) "
-                "VALUES (:code, :nom, :type, :comp, 1, 'actif', 'XAF', :ts)"
+                "VALUES (:code, :nom, :type, :comp, :per, 'actif', 'XAF', :ts)"
             ),
-            {"code": code, "nom": nom, "type": type_name, "comp": comp, "ts": TS},
+            {"code": code, "nom": nom, "type": type_name, "comp": comp,
+             "per": True, "ts": TS},
         )
 
     # 3) Exercice ouvert de l'annee courante
