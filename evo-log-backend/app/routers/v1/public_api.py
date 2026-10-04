@@ -130,7 +130,7 @@ async def get_public_ports(
             "nom": p.nom,
             "ville": p.ville,
             "autorite_portuaire": p.autorite_portuaire,
-            "tirant_eau_max": float(p.tirant_eau_max) if p.tirant_eau_max else None,
+            "tirant_eau_max": float(p.tirant_eau_max) if p.tirant_eau_max is not None else None,
             "nombre_terminaux": len(p.terminaux) if p.terminaux else 0
         }
         for p in ports

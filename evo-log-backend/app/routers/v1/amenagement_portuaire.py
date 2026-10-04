@@ -173,6 +173,9 @@ def nomenclatures(user: User = Depends(require_perm("amenagement.projet.read")))
         "code_marche": _enum_catalog(CodeMarche),
         "statut_marche": _enum_catalog(StatutMarche),
         "type_titre_domanial": _enum_catalog(TypeTitreDomanial),
+        "statut_titre_domanial": [
+            {"code": v, "valeur": v} for v in STATUTS_TITRE_DOMANIAL
+        ],
         "type_contrat": _enum_catalog(TypeContratExploitation),
         "statut_contrat": _enum_catalog(StatutContrat),
         "type_infrastructure": _enum_catalog(TypeInfrastructure),
@@ -805,7 +808,7 @@ def decider_titre(
                 detail="Un refus doit etre motive : la loi impose que la decision "
                        "de l'autorite portuaire soit ecrite et justifiee.",
             )
-        obj.statut = "REFUSE"
+        obj.statut = STATUT_TITRE_REFUSEE
         obj.motif_refus = motif_refus
     if autorite_emettrice:
         obj.autorite_emettrice = autorite_emettrice
@@ -1279,7 +1282,7 @@ def synthese(
         },
         "domaine": {
             "titres_actifs": _count(db, AutorisationDomaniale,
-                                    AutorisationDomaniale.statut.in_(["DELIVRE", "SIGNATURE", "EN_VIGUEUR"])),
+                                    AutorisationDomaniale.statut.in_(list(TITRES_VALABLES))),
             "titres_expire": _count(db, AutorisationDomaniale,
                                     AutorisationDomaniale.date_expiration.isnot(None),
                                     AutorisationDomaniale.date_expiration < aujourd_hui),
