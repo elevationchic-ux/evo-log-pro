@@ -251,16 +251,22 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ]),
     ("INGENIEUR_AMENAGEMENT", 3, "Ingenieur genie portuaire : etudes, suivi des travaux et inventaire du domaine", [
         "amenagement.*.read",
+        # Regle du role : il tient les neuf registres (saisie et correction), il
+        # ne tranche rien. Les create/modify couvrent donc les NEUF sous-modules
+        # -- concession comprise, le cahier des charges et la consistance des
+        # biens reversibles etant des pieces techniques --, tandis que les
+        # approve (actes d'engagement) et les delete restent du chef.
+        "amenagement.schema_directeur.create", "amenagement.schema_directeur.modify",
         "amenagement.projet.create", "amenagement.projet.modify",
         "amenagement.programmation.create", "amenagement.programmation.modify",
         "amenagement.marche.create", "amenagement.marche.modify",
         "amenagement.titre_domanial.create", "amenagement.titre_domanial.modify",
+        "amenagement.concession.create", "amenagement.concession.modify",
         "amenagement.infrastructure.create", "amenagement.infrastructure.modify",
         "amenagement.dragage.create", "amenagement.dragage.modify",
         "amenagement.autorisation.create", "amenagement.autorisation.modify",
-        "amenagement.schema_directeur.create", "amenagement.schema_directeur.modify",
-        # Un debootage de quai se coordonne avec l'exploitation : lecture
-        # utile, pas decision.
+        # Un quai mis hors service pour travaux se coordonne avec l'exploitation :
+        # lecture utile, pas decision.
         "port.quai.read",
     ]),
 ]
