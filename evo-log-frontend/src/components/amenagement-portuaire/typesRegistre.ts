@@ -177,14 +177,17 @@ export interface ConfigRegistre {
   lister: (params: Record<string, string | number | boolean>) => Promise<AxiosResponse>;
   creer: (data: ChargementRegistre) => Promise<AxiosResponse>;
   modifier: (id: number, data: ChargementRegistre) => Promise<AxiosResponse>;
-  /** Uniquement si le backend expose la route (projets, infrastructures).
-   *  Une pièce à valeur documentaire n'est jamais effacée : elle est abrogée,
-   *  annulée ou résiliée — d'où l'absence de supprimer sur la plupart. */
-  supprimer?: (id: number) => Promise<AxiosResponse>;
+  /** Aucune suppression « sèche » n'est exposée : les deux seules routes DELETE
+   *  du département (projets, infrastructures) exigent un MOTIF écrit, donc
+   *  passent par `actions` avec `action: 'delete'`. Une pièce à valeur
+   *  documentaire n'est quant à elle jamais effacée : elle est abrogée,
+   *  annulée ou résiliée — d'où l'absence de retrait sur la plupart. */
   colonnes: ColonneRegistre[];
   champs: ChampRegistre[];
   filtres?: FiltreRegistre[];
   actions?: ActionRegistre[];
+  /** Agrégats relus à la demande sur une ligne (routes GET dédiées). */
+  sondes?: SondeServeur[];
   circuits?: CircuitExterne[];
   /** Une seule ligne = une seule référence : le serveur renvoie 409. */
   unicite?: string;

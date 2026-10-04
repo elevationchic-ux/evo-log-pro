@@ -7,6 +7,7 @@
  */
 import type {
   ChampRegistre,
+  CleSonde,
   ColonneRegistre,
   LigneRegistre,
   Nomenclatures,
