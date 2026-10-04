@@ -1,7 +1,8 @@
 """Routeur du departement Amenagement portuaire (Douala, Kribi, Limbe).
 
 Ce que fait cette API : tenir le registre des actes d'amenagement du domaine
-portuaire — schemas directeurs, programmation (DTO), marches/PPP, titres
+portuaire — schemas directeurs, programmation (fiche technique, visa de
+maturité, PIP/CDMT, engagement), marches/PPP, titres
 domaniaux, concessions, ouvrages, dragages, autorisations environnementales.
 
 Ce qu'elle ne fait PAS (conscience du projet, see docs/RBAC_ACCREDITATIONS.md) :
@@ -125,7 +126,7 @@ def _get_or_404(db: Session, model, ident: int, label: str):
 
 def _check_unique(db: Session, model, field: str, value: Any, label: str,
                   exclude_id: Optional[int] = None) -> None:
-    """Reference metier unique : evite deux lignes pour un meme arrete ou DTO."""
+    """Reference metier unique : evite deux lignes pour un meme arrete ou une meme fiche."""
     if value is None:
         return
     q = db.query(model).filter(getattr(model, field) == value)
@@ -1217,7 +1218,8 @@ def synthese(
             StatutProjet.ATTRIBUE, StatutProjet.INSCRIT_PIP,
         ]),
     )
-    dto_manquants = _count(db, ProjetAmenagement, *pf, ProjetAmenagement.dto_reference.is_(None))
+    sans_fiche_technique = _count(db, ProjetAmenagement, *pf,
+                                  ProjetAmenagement.reference_fiche_technique.is_(None))
     cout_previsionnel = _sum(db, ProjetAmenagement.cout_previsionnel_xaf, *pf)
     cout_reel = _sum(db, ProjetAmenagement.cout_reel_xaf, *pf)
     marches_engages = _sum(
@@ -1251,7 +1253,7 @@ def synthese(
         "projets": {
             "total": _count(db, ProjetAmenagement, *pf),
             "en_cours": projets_en_cours,
-            "sans_dto": dto_manquants,
+            "sans_fiche_technique": sans_fiche_technique,
             "cout_previsionnel_total_xaf": cout_previsionnel,
             "cout_reel_total_xaf": cout_reel,
             "suivi_financier_complet": cout_previsionnel is not None and cout_reel is not None,

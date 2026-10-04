@@ -130,6 +130,23 @@ function getDomainIcon(config: DomainLoadingConfig) {
 }
 
 /**
+ * Assombrit une couleur hex (ex. #3b82f6) d'un facteur donné (0..1).
+ * Les teintes signature des modules sont écrites pour le fond SOMBRE (vives /
+ * claires) : posées telles quelles sur un fond CLAIR, les textes/icônes d'accent
+ * (pourcentage, libellés, médaillon, badge) deviennent illisibles. On les fonce
+ * pour garantir un contraste suffisant en thème clair, tout en gardant l'identité.
+ */
+function darkenHex(hex: string, amount: number): string {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
+  if (!m) return hex;
+  const f = 1 - Math.max(0, Math.min(1, amount));
+  const r = Math.round(parseInt(m[1], 16) * f);
+  const g = Math.round(parseInt(m[2], 16) * f);
+  const b = Math.round(parseInt(m[3], 16) * f);
+  return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+}
+
+/**
  * Nettoie les messages d'étapes des préfixes techniques (▶, ✓)
  * pour un affichage limpide et naturel.
  */
@@ -207,7 +224,7 @@ export default function DomainLoadingExperience({
   const medaillonBg = isLight ? 'rgba(255, 255, 255, 0.82)' : 'rgba(15, 23, 42, 0.85)';
   // En clair, la teinte "accent" (pastel, écrite pour le sombre) devient
   // illisible : on bascule les textes/icônes d'accent sur la couleur primaire.
-  const accentInk = isLight ? config.primaryColor : config.accentColor;
+  const accentInk = isLight ? darkenHex(config.primaryColor, 0.42) : config.accentColor;
 
   const inkClass = isLight ? 'text-slate-800' : 'text-white';
   const containerClasses = fullScreen

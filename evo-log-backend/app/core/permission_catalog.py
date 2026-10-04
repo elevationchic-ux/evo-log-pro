@@ -74,8 +74,8 @@ DOMAINS: Dict[str, Dict] = {
     # camerounais (schema directeur APN, programmation DTO, marches COLIFE/CIP
     # et PPP loi 2023/008, titres domaniaux, concessions, ouvrages, dragage,
     # autorisations EIES). Pas de « delete » sur les pieces a valeur
-    # documentaire : un schema directeur est abroge, un DTO annule, une
-    # concession resilie  jamais efface.
+    # documentaire : un schema directeur est abroge, une fiche technique annulee,
+    # une concession resilie  jamais efface.
     "amenagement_portuaire": {
         "label": "Amenagement portuaire & domaine public",
         "modules": {
