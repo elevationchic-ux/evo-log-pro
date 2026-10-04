@@ -117,12 +117,12 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ("DIRECTEUR_FINANCIER", 2, "Direction financiere : pilotage et validation de tous les modules finance", [
         "comptabilite.*.*", "tresorerie.*.*", "facturation.*.*", "fiscalite.*.*",
         "immobilisations.*.*", "achats.commande.approve",
-        # L'engagement des credits d'investissement passe par le DTO vise par
-        # le controle financier : le DAF instruit la ligne et l'approuve, il
-        # ne gere ni les travaux ni le domaine.
+        # L'engagement des credits d'investissement passe par la fiche technique
+        # visa de maturite puis le visa du controle financier : le DAF instruit
+        # la ligne et l'approuve, il ne gere ni les travaux ni le domaine.
         "amenagement.projet.read", "amenagement.marche.read",
-        "amenagement.concession.read", "amenagement.dto.read",
-        "amenagement.dto.approve", "amenagement.dto.export",
+        "amenagement.concession.read", "amenagement.programmation.read",
+        "amenagement.programmation.approve", "amenagement.programmation.export",
     ]),
     ("CHEF_COMPTABLE", 2, "Chef comptable : voir et valider tout le departement comptable", [
         "comptabilite.*.*", "tresorerie.*.read", "tresorerie.mouvement.approve",
@@ -154,7 +154,7 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         # Batch 24 : meme lecture transversale sur le QHSE (rapports annuels
         # includes), sans jamais d'ecriture.
         "qhse.*.read",
-        # L'auditeur verifie le domaine : lire les pieces a valeur (DTO,
+        # L'auditeur verifie le domaine : lire les pieces a valeur (programmation,
         # marches, titres, concessions) sans pouvoir y toucher.
         "amenagement.*.read",
     ]),
@@ -237,7 +237,7 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "acconage.dockers.delete",
     ]),
     # Departement amenagement portuaire. Le chef de departement porte les
-    # actes d'engagement (approbation d'un schema directeur, visa du DTO,
+    # actes d'engagement (approbation d'un schema directeur, visa de maturite,
     # attribution d'un marche, delivrance d'un titre domanial) ; l'ingenieur
     # preparatoire instruit et tient l'inventaire sans jamais trancher.
     ("CHEF_AMENAGEMENT_PORTUAIRE", 2, "Chef du departement amenagement portuaire : pilotage complet du domaine et des operations", [
@@ -252,7 +252,7 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ("INGENIEUR_AMENAGEMENT", 3, "Ingenieur genie portuaire : etudes, suivi des travaux et inventaire du domaine", [
         "amenagement.*.read",
         "amenagement.projet.create", "amenagement.projet.modify",
-        "amenagement.dto.create", "amenagement.dto.modify",
+        "amenagement.programmation.create", "amenagement.programmation.modify",
         "amenagement.marche.create", "amenagement.marche.modify",
         "amenagement.titre_domanial.create", "amenagement.titre_domanial.modify",
         "amenagement.infrastructure.create", "amenagement.infrastructure.modify",
