@@ -561,6 +561,16 @@
     background-color: hsl(var(--surface)) !important;
   }
 
+  /* Écran d'intro du login (seul hex arbitraire sombre du projet) :
+     bg-[#020c1b] + son lavis en dégradé -> fond clair sobre, texte foncé. */
+  .light [class*="bg-[#020c1b]"] {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--on-surface)) !important;
+  }
+  .light [class*="from-[#020c1b]"],
+  .light [class*="to-[#020c1b]"],
+  .light [class*="via-[#020c1b]"] { background-image: none !important; }
+
   /* Placeholder herite sombre -> gris fonce leger */
   .light input::placeholder,
   .light textarea::placeholder { color: hsl(var(--on-surface-variant) / 0.7) !important; }
