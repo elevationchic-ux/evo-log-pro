@@ -21,10 +21,23 @@ from sqlalchemy.orm import configure_mappers  # noqa: E402
 configure_mappers()
 
 TABLES = [
-    ap.SchemaDirecteur, ap.ProjetAmenagement, ap.DocumentProgrammation, ap.MarcheAmenagement,
-    ap.AutorisationDomaniale, ap.ConcessionPortuaire, ap.InfrastructurePortuaire,
-    ap.Dragage, ap.AutorisationTravaux,
+    ap.SchemaDirecteur, ap.ProjetAmenagement, ap.DocumentProgrammation,
+    ap.MarcheAmenagement, ap.AutorisationDomaniale, ap.ConcessionPortuaire,
+    ap.InfrastructurePortuaire, ap.Dragage, ap.AutorisationTravaux,
 ]
+
+# Nom de constante courte et legible dans la migration generee.
+CONSTS = {
+    "SchemaDirecteur": "SCHEMA_DIRECTEUR",
+    "ProjetAmenagement": "PROJET",
+    "DocumentProgrammation": "PROGRAMMATION",
+    "MarcheAmenagement": "MARCHE",
+    "AutorisationDomaniale": "TITRE",
+    "ConcessionPortuaire": "CONCESSION",
+    "InfrastructurePortuaire": "INFRASTRUCTURE",
+    "Dragage": "DRAGAGE",
+    "AutorisationTravaux": "AUTORISATION",
+}
 
 HEADER = '''"""038 : departement Amenagement portuaire (Douala, Kribi, Limbe).
 
@@ -96,8 +109,6 @@ def _sa_type(col):
         return "sa.Date()"
     if isinstance(t, sa.DateTime):
         return "sa.DateTime(timezone=True)"
-    if isinstance(t, sa.Text):
-        return "sa.Text()"
     raise AssertionError(f"Type non pris en charge : {t!r} ({col.name})")
 
 
@@ -149,32 +160,18 @@ def _indexes(table):
     return out
 
 
-CONSTS = {
-    "SchemaDirecteur": "SCHEMA_DIRECTEUR",
-    "ProjetAmenagement": "PROJET",
-    "DocumentProgrammation": "PROGRAMMATION",
-    "MarcheAmenagement": "MARCHE",
-    "AutorisationDomaniale": "TITRE",
-    "ConcessionPortuaire": "CONCESSION",
-    "InfrastructurePortuaire": "INFRASTRUCTURE",
-    "Dragage": "DRAGAGE",
-    "AutorisationTravaux": "AUTORISATION",
-}
-
 blocs = []
 for cls in TABLES:
     t = cls.__table__
     const = "T_" + CONSTS[cls.__name__]
     body = "\n".join(_cols(t) + _fks(t))
-    idx = "\n".join(_indexes(t)) or "        pass"
+    idx = "\n".join(_indexes(t))
     blocs.append(
         f'\n    if {const} not in tables:\n'
         f"        op.create_table(\n            {const},\n{body}\n        )\n{idx}"
     )
 
-consts = "\n".join(
-    f'T_{CONSTS[c.__name__]} = "{c.__tablename__}"' for c in TABLES
-)
+consts = "\n".join(f'T_{CONSTS[c.__name__]} = "{c.__tablename__}"' for c in TABLES)
 
 port_cols = '''
     # ── ports_cameroun : colonnes attendues par GET /api/v1/public/ports ──────
@@ -192,10 +189,18 @@ downgrade = "\n".join(
     for c in reversed(TABLES)
 )
 
-script = f'{HEADER}\n{consts}\n\n\ndef upgrade():\n    bind = op.get_bind()\n    insp = sa.inspect(bind)\n    tables = set(insp.get_table_names())\n'
+script = (
+    f'{HEADER}\n{consts}\n\n\ndef upgrade():\n'
+    '    bind = op.get_bind()\n    insp = sa.inspect(bind)\n'
+    '    tables = set(insp.get_table_names())\n'
+)
 script += "\n".join(blocs)
 script += port_cols
-script += f'\n\ndef downgrade():\n    bind = op.get_bind()\n    tables = set(sa.inspect(bind).get_table_names())\n    insp = sa.inspect(bind)\n'
+script += (
+    '\n\ndef downgrade():\n    bind = op.get_bind()\n'
+    '    insp = sa.inspect(bind)\n'
+    '    tables = set(insp.get_table_names())\n'
+)
 script += '    if T_PORTS in tables:\n        cols = {c["name"] for c in insp.get_columns(T_PORTS)}\n'
 script += '        with op.batch_alter_table(T_PORTS) as batch:\n'
 script += '            if "tirant_eau_max" in cols:\n                batch.drop_column("tirant_eau_max")\n'
