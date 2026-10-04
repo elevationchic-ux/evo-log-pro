@@ -197,6 +197,13 @@ function ChampSaisie({
       )}
 
       {aide && <span className="mt-1 block text-[11px] leading-relaxed text-slate-400">{aide}</span>}
+      {/* Vocabulaire d'une liste : les valeurs autorisées sont CELLES du
+          serveur, rappelées sous le champ au lieu d'être recopiées dans l'UI. */}
+      {champ.type === 'liste' && entrees.length > 0 && (
+        <span className="mt-1 block text-[11px] leading-relaxed text-slate-500">
+          {tVocabulaire(lang)} : {entrees.map((e) => e.valeur.replace(/[_-]+/g, ' ')).join(', ')}
+        </span>
+      )}
       {champ.depuisPlaces && places.length === 0 && (
         <span className="mt-1 block text-[11px] text-amber-300/80">
           {lang === 'en'
@@ -682,7 +689,7 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
                     <article key={ligne.id} className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
                       <div className="space-y-1.5">
                         {colonnesEssentielles.map((c) => {
-                          const cell = rendreCellule(c, ligne, lang, nomenclatures.data || null);
+                          const cell = rendreCellule(c, ligne, lang, nomenclatures.data || null, places.data || []);
                           return (
                             <div key={c.name} className="flex items-baseline justify-between gap-3">
                               <span className="text-[11px] uppercase tracking-wide text-slate-500">
