@@ -285,15 +285,15 @@
   .light {
     color-scheme: light;
 
-    --background: 220 20% 98%;
-    --on-background: 222 40% 12%;
+    --background: 220 18% 96%;
+    --on-background: 220 15% 28%;
 
-    --surface: 0 0% 100%;
-    --on-surface: 222 40% 12%;
+    --surface: 220 30% 98%;
+    --on-surface: 220 15% 28%;
     --surface-variant: 220 16% 92%;
-    --on-surface-variant: 220 14% 40%;
+    --on-surface-variant: 220 10% 46%;
 
-    --primary: 217 85% 48%;
+    --primary: 217 72% 52%;
     --on-primary: 0 0% 100%;
     --primary-container: 217 90% 92%;
     --on-primary-container: 217 85% 28%;
