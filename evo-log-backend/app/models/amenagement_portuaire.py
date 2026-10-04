@@ -109,7 +109,7 @@ class StatutProjet(str, enum.Enum):
 class OrigineFinancement(str, enum.Enum):
     BUDGET_AUTORITE_PORTUAIRE = "budget_autorite_portuaire"
     SUBVENTION_ETAT = "subvention_etat"
-    Pret_BAILLEUR = "pret_bailleur"                # BEI, AFD, BAD, JICA, Exim…
+    PRET_BAILLEUR = "pret_bailleur"                # BEI, AFD, BAD, JICA, Exim…
     PPP = "ppp"                                    # loi 2023/008
     CONCESSIONNAIRE = "concessionnaire"            # investissement privé amorti sur redevance
     AUTOFINANCEMENT = "autofinancement"
@@ -223,7 +223,7 @@ class StatutAutorisation(str, enum.Enum):
     COMPLEMENT_REQUIS = "complement_requis"
     ACCORDEE = "accordee"
     REFUSEE = "refusee"
-    EXPIREE = "expirée".replace("é", "e")
+    EXPIREE = "expiree"
     RENOUVELEE = "renouvelee"
 
 
@@ -310,14 +310,6 @@ class ProjetAmenagement(Base):
     maitre_doeuvre = Column(String(160))
     bureau_controle = Column(String(160))
     entreprise_attributaire = Column(String(200))
-    # use_alter : projets <-> marches se reference mutuellement (lance d'un
-    # cote, projet rattache de l'autre). Sans ALTER TABLE differe, le tri
-    # topologique de create_all echoue (la table cible n'existe pas encore).
-    marche_id = Column(
-        Integer,
-        ForeignKey("marches_amenagement.id", use_alter=True, name="fk_projets_amenagement_marche_id"),
-        nullable=True,
-    )
     dto_reference = Column(String(120))            # ligne DTO réelle (« DTO-2026-… »)
     date_notification_minepf = Column(Date)        # engagement visé par le contrôle financier
     eies_obligatoire = Column(Boolean)             # classification loi 96/012, saisie
@@ -339,9 +331,7 @@ class ProjetAmenagement(Base):
     marches = relationship(
         "MarcheAmenagement",
         back_populates="projet",
-        # deux FK relient marches -> projets (rattachement + marche_id de
-        # lancement) : sans foreign_keys explicite l'ORM ne sait pas laquelle.
-        foreign_keys="MarcheAmenagement.projet_id",
+        cascade="all, delete-orphan",
     )
     autorisations = relationship("AutorisationTravaux", back_populates="projet")
     infrastructures = relationship("InfrastructurePortuaire", back_populates="projet")
