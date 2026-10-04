@@ -1111,9 +1111,9 @@ def consigner_bathymetrie(
 def demande_exutoire(ident: int, user: User = Depends(require_perm("amenagement.dragage.approve"))):
     """L'autorisation de rejet releve du MINEPPT (501, aucune decision simulee)."""
     not_implemented(
-        "Demande dematerialisee d'exutoire de rejet de drague",
-        "un canal officiel aupre du MINEPPT / autorite portuaire pour "
-        "l'agrement des sites de disposal ; le module conserve deja la "
+        "Demande dematerialisee d'agrement d'un exutoire pour sediments de dragage",
+        "un canal officiel aupres du MINEPPT / de l'autorite portuaire pour "
+        "l'agrement des sites d'immersion ; le module conserve deja la "
         "reference de l'autorisation quand elle est notifiee"
     )
 
@@ -1184,7 +1184,7 @@ def depot_autorisation(ident: int, user: User = Depends(require_perm("amenagemen
     not_implemented(
         "Depot teleprogramme d'un dossier EIES / permis aupres du MINEPPT",
         "une interconnexion avec le guichet environnemental officiel ; le "
-        "module enregistre la date de depot et l'arrete quand ils sont notifiees"
+        "module enregistre la date de depot et l'arrete quand ils sont notifies"
     )
 
 
