@@ -39,7 +39,7 @@ comptable COMPTABLE global).
 """
 from sqlalchemy import (
     Column, Integer, String, Text, DateTime, Boolean, Date, Numeric,
-    ForeignKey, Enum, UniqueConstraint,
+    ForeignKey, Enum,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -310,7 +310,14 @@ class ProjetAmenagement(Base):
     maitre_doeuvre = Column(String(160))
     bureau_controle = Column(String(160))
     entreprise_attributaire = Column(String(200))
-    marche_id = Column(Integer, ForeignKey("marches_amenagement.id"), nullable=True)
+    # use_alter : projets <-> marches se reference mutuellement (lance d'un
+    # cote, projet rattache de l'autre). Sans ALTER TABLE differe, le tri
+    # topologique de create_all echoue (la table cible n'existe pas encore).
+    marche_id = Column(
+        Integer,
+        ForeignKey("marches_amenagement.id", use_alter=True, name="fk_projets_amenagement_marche_id"),
+        nullable=True,
+    )
     dto_reference = Column(String(120))            # ligne DTO réelle (« DTO-2026-… »)
     date_notification_minepf = Column(Date)        # engagement visé par le contrôle financier
     eies_obligatoire = Column(Boolean)             # classification loi 96/012, saisie
@@ -423,3 +430,252 @@ class MarcheAmenagement(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     projet = relationship("ProjetAmenagement", back_populates="marches")
+
+
+# ─── 5. Domanialité : titres d'occupation du domaine portuaire ───────────────
+
+class AutorisationDomaniale(Base):
+    """Titre d'occupation ou d'attribution dans le domaine portuaire.
+
+    Avant toute construction, l'opérateur doit obtenir un titre : autorisation
+    d'occupation temporaire, convention d'occupation (régime des AOT de la loi
+    2023/008), attribution du domaine portuaire par l'autorité, arrêté de
+    délimitation pour une extension. C'est le registre qui permet de répondre
+    à la question « qui est censé occuper cette parcelle, et à quel titre ? ».
+    """
+    __tablename__ = "autorisations_domaniales_amgt"
+
+    id = Column(Integer, primary_key=True, index=True)
+    numero_piece = Column(String(80), unique=True, nullable=False, index=True)
+    type_titre = Column(Enum(TypeTitreDomanial), nullable=False, index=True)
+    port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=True, index=True)
+    terminal_id = Column(Integer, ForeignKey("terminaux_portuaires.id"), nullable=True)
+    zone_id = Column(Integer, ForeignKey("zones_portuaires.id"), nullable=True)
+    beneficiaire = Column(String(200), nullable=False)   # raison sociale réelle
+    objet = Column(String(300))
+    assiette = Column(Text)                        # localisation / repères de la parcelle
+    superficie_m2 = Column(Numeric(14, 3))
+    destination = Column(String(120))              # stockage, exploitation, bâtiment, annexe
+    redevance_annuelle_xaf = Column(Numeric(18, 2))
+    taux_redevance = Column(String(60))            # barème applicable, saisi depuis la grille
+    date_demande = Column(Date)
+    date_signature = Column(Date)
+    date_effet = Column(Date)
+    date_expiration = Column(Date, index=True)
+    renouvelable = Column(Boolean)
+    delai_renouvellement_mois = Column(Integer)
+    autorite_emettrice = Column(String(160))       # direction domainiale de l'autorité portuaire
+    reference_deliberation = Column(String(120))
+    piece_jointe = Column(String(300))
+    statut = Column(String(30), default="DEMANDEE", index=True)
+    motif_refus = Column(Text)
+    source_reference = Column(String(200))
+    date_verification = Column(Date)
+    auteur_saisie = Column(String(120))
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    port = relationship("PortCameroun")
+    terminal = relationship("TerminalPortuaire")
+
+
+# ─── 6. Transfert d'exploitation : concessions, affermage, BOT ───────────────
+
+class ConcessionPortuaire(Base):
+    """Contrat de transfert (concession, affermage, BOT/CET, AOT).
+
+    Le port de Douala comme celui de Kribi sont exploités par des opérateurs
+    sous contrat avec l'autorité portuaire. Le suivi de l'aménagement exige de
+    connaître le périmètre concédé, la durée, les investissements promis
+    (obligations du concessionnaire) et l'état de leur réalisation : c'est
+    exactement ce qui détermine si un terminal peut être étendu ou repris.
+    """
+    __tablename__ = "concessions_amenagement"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code_contrat = Column(String(60), unique=True, nullable=False, index=True)
+    nom_contrat = Column(String(200), nullable=False)
+    port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=False, index=True)
+    terminal_id = Column(Integer, ForeignKey("terminaux_portuaires.id"), nullable=True)
+    type_contrat = Column(Enum(TypeContratExploitation), nullable=False, index=True)
+    statut = Column(Enum(StatutContrat), nullable=False, default=StatutContrat.NEGOCIATION, index=True)
+    autorite_concedante = Column(String(160), nullable=False)
+    concessionnaire = Column(String(200), nullable=False)
+    groupe_final = Column(String(160))             # actionnariat / maison mère, si connu
+    objet = Column(Text)
+    perimetre = Column(Text)                       # terminaux, postes, parcelles concernés
+    superficie_concedee_ha = Column(Numeric(14, 3))
+    longueur_quai_ml = Column(Numeric(12, 2))
+    capacite_contractuelle = Column(String(120))   # ex. « 150 000 EVP/an » inscrit au contrat
+    date_effet = Column(Date)
+    date_echeance = Column(Date, index=True)
+    duree_mois = Column(Integer)
+    prolongations = Column(Text)                   # JSON [{date, duree_mois, motif, reference}]
+    investissement_promis_xaf = Column(Numeric(18, 2))
+    investissement_realise_xaf = Column(Numeric(18, 2))
+    redevance_concession_xaf = Column(Numeric(18, 2))
+    redevance_par_unite = Column(Numeric(18, 2))
+    unite_redevance = Column(String(40))           # EVP, tonne, m2, jour
+    clauses_revolution = Column(Text)              # 5e/10e/15e année : taux, montant, référence
+    sanctions_contractuelles = Column(Text)
+    biens_reversibles = Column(Text)               # patrimoine remis à l'autorité en fin de contrat
+    reference_approbation = Column(String(120))    # décret/arrêté d'approbation réel
+    date_approbation = Column(Date)
+    arret_travail = Column(Boolean)                # mise à l'arrêt / redressement déclaratif
+    source_reference = Column(String(200))
+    date_verification = Column(Date)
+    auteur_saisie = Column(String(120))
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    port = relationship("PortCameroun")
+    terminal = relationship("TerminalPortuaire")
+
+
+# ─── 7. Patrimoine bâti : inventaire des installations ───────────────────────
+
+class InfrastructurePortuaire(Base):
+    """Ouvrage, aire ou réseau livré et à maintenir.
+
+    C'est la mémoire technique du domaine : un quai n'est pas seulement une
+    ligne du schéma directeur, c'est une longueur, un tirant d'eau, un état
+    structural et une date de visite. Les mesures (état, bathymétrie) sont
+    issues de rapports réels ; aucune valeur n'est estimée par le logiciel.
+    """
+    __tablename__ = "infrastructures_amenagees"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String(60), unique=True, nullable=False, index=True)
+    designation = Column(String(200), nullable=False)
+    type_infrastructure = Column(Enum(TypeInfrastructure), nullable=False, index=True)
+    port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=False, index=True)
+    terminal_id = Column(Integer, ForeignKey("terminaux_portuaires.id"), nullable=True)
+    projet_id = Column(Integer, ForeignKey("projets_amenagement.id"), nullable=True, index=True)
+    zone_id = Column(Integer, ForeignKey("zones_portuaires.id"), nullable=True)
+    emplacement = Column(String(200))
+    statut = Column(Enum(EtatInfrastructure), nullable=False, default=EtatInfrastructure.PROJETEE, index=True)
+    longueur_ml = Column(Numeric(12, 2))
+    largeur_m = Column(Numeric(10, 2))
+    superficie_m2 = Column(Numeric(14, 3))
+    profondeur_utile_m = Column(Numeric(8, 2))     # le long de l'ouvrage
+    hauteur_parement_m = Column(Integer)
+    portance_tonnes_m2 = Column(Numeric(8, 2))     # capacité de surcharge du terre-plein
+    capacite_teus = Column(Integer)
+    date_mise_service = Column(Date)
+    date_derniere_inspection = Column(Date)
+    periodicite_inspection_mois = Column(Integer)
+    prochaine_inspection = Column(Date)
+    etat_structural = Column(String(30))           # BON / A_SURVEILLER / DEGRADE / CRITIQUE (relevé)
+    note_genie_civil = Column(Numeric(5, 2))       # issue d'une expertise, jamais calculée ici
+    travaux_renovation_prevus = Column(Boolean)
+    estimation_renovation_xaf = Column(Numeric(18, 2))
+    valeur_patrimoniale_xaf = Column(Numeric(18, 2))
+    date_entree_patrimoine = Column(Date)
+    regime_fiscal = Column(String(60))             # domaine public / domaine privé de l'autorité
+    reversable = Column(Boolean)                   # réversible à l'État en fin de concession
+    operateur_entretien = Column(String(160))
+    sources_documents = Column(Text)               # JSON [str] : Plans, PV de réception, rapports
+    source_reference = Column(String(200))
+    date_verification = Column(Date)
+    auteur_saisie = Column(String(120))
+    notes = Column(Text)
+    est_actif = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    port = relationship("PortCameroun")
+    terminal = relationship("TerminalPortuaire")
+    projet = relationship("ProjetAmenagement", back_populates="infrastructures")
+
+
+# ─── 8. Dragage & chenal ─────────────────────────────────────────────────────
+
+class Dragage(Base):
+    """Campagne de dragage (construction, entretien, appréciation).
+
+    C'est l'acte d'aménagement le plus récurrent d'un port camerounais : la
+    vase du Wouri et le banc du chenal de Kribi imposent des campagnes
+    répétées, chacune encadrée par une autorisation, un volume mesuré et un
+    exutoire de rejet. Tous ces éléments proviennent de rapports de l'entreprise
+    et de l'administration — ils sont saisis, jamais devinés.
+    """
+    __tablename__ = "campagnes_dragage"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code_campagne = Column(String(60), unique=True, nullable=False, index=True)
+    libelle = Column(String(200), nullable=False)
+    port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=False, index=True)
+    projet_id = Column(Integer, ForeignKey("projets_amenagement.id"), nullable=True, index=True)
+    type_dragage = Column(Enum(TypeDragage), nullable=False, default=TypeDragage.ENTRETIEN, index=True)
+    zone_traitee = Column(String(200))             # chenal, avant-quai, bassin, tourne à quai
+    superficie_draguee_m2 = Column(Numeric(14, 3))
+    volume_mesure_m3 = Column(Numeric(18, 2))      # cubage relevé (levé bathymétrique)
+    volume_facture_m3 = Column(Numeric(18, 2))     # cubage contractuel payé
+    profondeur_avant_m = Column(Numeric(8, 2))
+    profondeur_visee_m = Column(Numeric(8, 2))
+    profondeur_obtenue_m = Column(Numeric(8, 2))
+    nature_sediment = Column(String(120))          # sable, vase, argile… (carottage)
+    exutoire_rejet = Column(String(200))           # disposal offshore / remblai précis
+    autorisation_rejet_reference = Column(String(120))
+    entreprise = Column(String(200))
+    type_drague = Column(String(80))               # drague à cutter, aspiratrice, preloader
+    cout_xaf = Column(Numeric(18, 2))
+    devise = Column(String(6), default="XAF")
+    date_debut = Column(Date)
+    date_fin = Column(Date)
+    jours_arret = Column(Integer)                  # intempéries, pannes : faits relevés
+    statut = Column(String(30), default="PLANIFIEE", index=True)
+    leve_bathymetrique_apres = Column(Boolean)
+    date_releve = Column(Date)
+    autorisation_administrative = Column(String(200))
+    impact_environnemental = Column(Text)
+    source_reference = Column(String(200))
+    date_verification = Column(Date)
+    auteur_saisie = Column(String(120))
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    port = relationship("PortCameroun")
+    projet = relationship("ProjetAmenagement")
+
+
+# ─── 9. Conformité : autorisations administratives & EIES ────────────────────
+
+class AutorisationTravaux(Base):
+    """Enregistrement d'une autorisation ou d'un visa administratif.
+
+    Le module n'adresse RIEN à l'administration : il tient le registre de ce
+    qui a été déposé et de ce qui a été notifié, avec les dates réelles. Un
+    champ NULL signifie « pas encore notifié ». C'est la seule façon honnête
+    de piloter un chantier sans simuler une réponse du MINEPPT ou du MINMIVT.
+    """
+    __tablename__ = "autorisations_travaux_amgt"
+
+    id = Column(Integer, primary_key=True, index=True)
+    reference = Column(String(80), unique=True, nullable=False, index=True)
+    type_autorisation = Column(Enum(TypeAutorisationTravaux), nullable=False, index=True)
+    projet_id = Column(Integer, ForeignKey("projets_amenagement.id"), nullable=True, index=True)
+    port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=True)
+    administration = Column(String(160))           # MINEPPT, MINMIVT, PAD, PAK, délégation régionale
+    categorie_projet = Column(String(40))          # classification loi 96/012 (1re/2e/3e catégorie)
+    objet = Column(String(300))
+    statut = Column(Enum(StatutAutorisation), nullable=False, default=StatutAutorisation.EN_PREPARATION, index=True)
+    date_depot = Column(Date)
+    date_accord = Column(Date)
+    date_expiration = Column(Date)
+    numero_arrete = Column(String(120))
+    conditions_particulieres = Column(Text)        # mesures d'atténuation prescrites
+    charges_enviro_xaf = Column(Numeric(18, 2))    # coût des mesures compensatoires chiffrées
+    audit_date_prochaine = Column(Date)            # échéance IEMU périodique
+    piece_jointe = Column(String(300))
+    source_reference = Column(String(200))
+    date_verification = Column(Date)
+    auteur_saisie = Column(String(120))
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    projet = relationship("ProjetAmenagement", back_populates="autorisations")
