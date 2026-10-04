@@ -360,6 +360,28 @@ class ProjetAmenagement(Base):
 
 # ─── 3. Programmation budgétaire : fiche technique & visas ───────────────────
 
+# Vocabulaire des etats d'un dossier de programmation. La colonne reste un
+# String(30) et non un enum PostgreSQL : un etat notifie par l'administration
+# (COLIFE, CIP, annulation d'exercice) peut sortir de ce cadre et doit pouvoir
+# etre saisi tel quel. Ces constantes sont neanmoins la SEULE source des
+# valeurs que l'API ecrit elle-meme, et /nomenclatures les publie au lieu de
+# laisser le frontend les deviner.
+STATUT_PREPARATION = "PREPARATION"
+STATUT_MATURITE_VISEE = "MATURITE_VISEE"
+STATUT_INSCRIT_PIP = "INSCRIT_PIP"
+STATUT_VISE = "VISE"
+STATUT_NOTIFIE = "NOTIFIE"
+STATUT_ANNULE = "ANNULE"
+STATUTS_PROGRAMMATION = (
+    STATUT_PREPARATION,      # dossier compose, rien n'est encore juge
+    STATUT_MATURITE_VISEE,   # visa de maturite appose (decret 2018/0492)
+    STATUT_INSCRIT_PIP,      # ligne publiee au PIP / CDMT
+    STATUT_VISE,             # visa du controle financier, credits engages
+    STATUT_NOTIFIE,          # notification recue du MINFI/MINEPAT (saisie agent)
+    STATUT_ANNULE,           # ligne retiree de la programmation (saisie agent)
+)
+
+
 class DocumentProgrammation(Base):
     """Chaîne de programmation d'un projet : fiche technique, maturité, PIP, visas.
 
@@ -385,9 +407,10 @@ class DocumentProgrammation(Base):
     montant_paye_xaf = Column(Numeric(18, 2))
     source_financement = Column(_enum(OrigineFinancement), nullable=True)
     chapitre = Column(String(120))                 # chapitre budgétaire déclaré
-    # PREPARATION / MATURITE_VISEE / INSCRIT_PIP / VISE / NOTIFIE / ANNULE :
-    # statut saisi, jamais dérivé automatiquement d'une date.
-    statut = Column(String(30), default="PREPARATION", index=True)
+    # Statut saisi, jamais derive automatiquement d'une date : les valeurs de
+    # l'API sont celles de STATUTS_PROGRAMMATION, une valeur hors vocabulaire
+    # notifiee par l'administration reste enregistrable telle quelle.
+    statut = Column(String(30), default=STATUT_PREPARATION, index=True)
     date_presentation = Column(Date)               # dépôt devant la commission technique
     # ── visa de maturité (décret 2018/0492) ──
     numero_visa_maturite = Column(String(80))

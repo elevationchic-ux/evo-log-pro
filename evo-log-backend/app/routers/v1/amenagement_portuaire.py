@@ -36,6 +36,8 @@ from app.models.amenagement_portuaire import (
     SchemaDirecteur, ProjetAmenagement, DocumentProgrammation, MarcheAmenagement,
     AutorisationDomaniale, ConcessionPortuaire, InfrastructurePortuaire,
     Dragage, AutorisationTravaux,
+    STATUT_PREPARATION, STATUT_MATURITE_VISEE, STATUT_INSCRIT_PIP, STATUT_VISE,
+    STATUTS_PROGRAMMATION,
     TypeSchema, StatutSchema, TypeProjet, StatutProjet, OrigineFinancement,
     TypeMarche, CodeMarche, StatutMarche, TypeTitreDomanial,
     TypeContratExploitation, StatutContrat, TypeInfrastructure,
@@ -505,7 +507,7 @@ def viser_programmation(
     obj.autorite_visa = autorite_visa
     if numero_engagement:
         obj.numero_engagement = numero_engagement
-    obj.statut = "VISE"
+    obj.statut = STATUT_VISE
     obj.date_verification = date.today()
     obj.auteur_saisie = getattr(user, "username", None) or obj.auteur_saisie
     db.commit()
