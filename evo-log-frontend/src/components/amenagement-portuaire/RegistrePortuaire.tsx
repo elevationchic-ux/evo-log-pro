@@ -878,5 +878,3 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
     </ModuleLayout>
   );
 }
-
-export { peutAfficherValeur } from './formatRegistre';
