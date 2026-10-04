@@ -366,10 +366,10 @@
     --module-reports-bi-bg: 271 80% 93%;
     --module-reports-bi-text: 271 70% 36%;
     /* Aménagement portuaire: version claire = papier calque légèrement bleuté,
-       texte « encre de plan » (sature plus bas que les autres bleus pour
-       rester lisible sans rivaliser avec transport-flotte). */
+       texte « encre de plan » foncé (contraste ~5,5:1 sur ce fond, soit AA sur
+       texte normal — un texte cyan clair serait illisible en jour). */
     --module-amenagement-portuaire-bg: 187 45% 91%;
-    --module-amenagement-portuaire-text: 187 70% 24%;
+    --module-amenagement-portuaire-text: 187 80% 25%;
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -819,6 +819,13 @@
     background-color: hsl(var(--module-reports-bi-bg));
     color: hsl(var(--module-reports-bi-text));
     border: 1px solid hsl(var(--module-reports-bi-text) / 0.25);
+  }
+  /* Département autonome (hors liste historique) : sa propre signature, sinon
+     useModuleTheme retomberait sur le gris admin et le thème serait faux. */
+  .module-badge-amenagement-portuaire {
+    background-color: hsl(var(--module-amenagement-portuaire-bg));
+    color: hsl(var(--module-amenagement-portuaire-text));
+    border: 1px solid hsl(var(--module-amenagement-portuaire-text) / 0.25);
   }
 
   /* Legacy modules */

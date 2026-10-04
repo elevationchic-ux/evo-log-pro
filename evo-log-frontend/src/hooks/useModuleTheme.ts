@@ -10,6 +10,9 @@ const VALID_MODULES = [
   'dashboard', 'port-operations', 'transit-douane', 'transport-flotte', 
   'magasin-stock', 'finance-ohada', 'comptabilite-ohada', 'parc-vehicules',
   'qhse-securite', 'rh-personnel', 'client-b2b', 'admin-tenant', 'reports-bi',
+  // Département autonome (dpt 29) : liste ICI et non par la boucle de
+  // normalisation, sinon le header lui collerait le badge gris « admin ».
+  'amenagement-portuaire',
   
   // Legacy modules (compatibilité transition)
   'admin', 'master-data', 'transport', 'finance', 'magasin', 'parc', 'rh', 
@@ -127,6 +130,17 @@ const MODULE_THEME_CONFIG: Record<string, ModuleThemeConfig> = {
     mainBackground: 'bg-slate-950',
     headerClasses: 'module-badge-reports-bi',
     sidebar: { activeAccent: 'text-violet-400 border-violet-400', activeBgSubtle: 'bg-violet-500/10', brandIconBg: 'bg-violet-600' },
+  },
+
+  // 29. Aménagement Portuaire & Domaine Public (📐 Département autonome)
+  //     Entrée explicite obligatoire : sans elle la boucle de normalisation
+  //     (MODULE_PALETTE → MODULE_THEME_CONFIG) lui affecterait le badge gris
+  //     « module-badge-admin », et le header afficherait un thème qui n'existe
+  //     pas. Les accents de sidebar sont réalignés sur la palette par la boucle.
+  'amenagement-portuaire': {
+    mainBackground: 'bg-slate-950',
+    headerClasses: 'module-badge-amenagement-portuaire',
+    sidebar: { activeAccent: 'text-cyan-300 border-cyan-300', activeBgSubtle: 'bg-cyan-700/10', brandIconBg: 'bg-cyan-700' },
   },
 
   // ═══════════════════════════════════════════════════════════════════════════════
