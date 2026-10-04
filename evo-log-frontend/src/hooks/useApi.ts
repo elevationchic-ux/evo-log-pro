@@ -6,7 +6,9 @@
  * Garde-fous communs à toutes les pages :
  *  - jamais d'écran blanc : tout échec produit un état classifié et actionnable ;
  *  - distinction explicite des cas : 404 (ressource inexistante), 401/403 (accès),
- *    5xx (panne backend), réseau (backend injoignable), succès vide (0 enregistrement) ;
+ *    501 (fonction volontairement non implémentée  le message du serveur est
+ *    remonté tel quel), 5xx (panne backend), réseau (backend injoignable),
+ *    succès vide (0 enregistrement) ;
  *  - refetch manuel, annulation des courses, et messages en français simple.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -17,6 +19,7 @@ export type ApiErrorKind =
   | 'empty'          // réponse OK mais 0 enregistrement
   | 'not_found'      // 404 : endpoint ou ressource absente
   | 'unauthorized'   // 401/403 : session ou permission
+  | 'not_implemented' // 501 : fonctionnalité assumée non développée (voir dessous)
   | 'server'         // 5xx : panne du service backend
   | 'network'        // backend injoignable / timeout
   | 'unknown';
@@ -30,6 +33,13 @@ export interface ApiErrorInfo {
   status?: number;
 }
 
+/** Le backend FastAPI répond en HTTPException : detail = message lisible (string)
+ *  ou liste d'erreurs de validation (422). On ne garde que la forme string. */
+function serverMessage(ax?: AxiosError): string | undefined {
+  const d = (ax?.response?.data as { detail?: unknown } | undefined)?.detail;
+  return typeof d === 'string' && d.trim() ? d.trim() : undefined;
+}
+
 export function classifyApiError(err: unknown): ApiErrorInfo {
   const ax = err as AxiosError;
   const status = ax?.response?.status;
@@ -41,6 +51,20 @@ export function classifyApiError(err: unknown): ApiErrorInfo {
   }
   if (status === 401 || status === 403) {
     return { kind: 'unauthorized', message: 'Accès refusé. Votre session a peut-être expiré ou votre rôle ne permet pas de voir ces données.', detail: tech, status };
+  }
+  // 501 n'est PAS une panne : c'est une déclaration d'honnêteté produit
+  // (app/core/not_implemented.py). Là où un autre projet afficherait un faux
+  // succès ou des données inventées, la route nomme la dépendance officielle
+  // manquante. Écraser ce message par « problème technique » ferait croire à un
+  // incident ; on remonte donc le texte du serveur, tel quel.
+  if (status === 501) {
+    return {
+      kind: 'not_implemented',
+      message: serverMessage(ax)
+        || 'Cette fonctionnalité n\u2019est pas implémentée côté serveur : le backend refuse un faux succès plutôt que d\u2019inventer une donnée.',
+      detail: tech,
+      status,
+    };
   }
   if (status && status >= 500) {
     return { kind: 'server', message: 'Le serveur rencontre un problème technique. Réessayez dans quelques instants.', detail: tech, status };
