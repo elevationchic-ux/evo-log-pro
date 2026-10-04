@@ -11,6 +11,7 @@ import { saveTwoFactorChallenge } from '@/lib/2fa-challenge';
 import { toast } from 'sonner';
 import { Sparkles, Ship, Lock, User as UserIcon, ArrowRight, ShieldCheck, KeyRound, AlertTriangle, CheckCircle2, Radio, Compass, Anchor, Eye, EyeOff } from 'lucide-react';
 import DomainLoadingExperience from '@/components/shared/DomainLoadingExperience';
+import { useSettings } from '@/components/layout/SettingsProvider';
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -27,6 +28,13 @@ function isTransientApiError(err: any): boolean {
 
 export default function LoginPage() {
   const router = useRouter();
+  const { theme } = useSettings();
+  const isLight =
+    theme === 'light' ||
+    (theme === 'system' &&
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-color-scheme: light)').matches);
 
   // Splash screen active on initial load
   const [showSplash, setShowSplash] = useState(true);
@@ -269,7 +277,9 @@ export default function LoginPage() {
         <div
           className="fixed inset-0 z-[100] flex flex-col items-center justify-between p-6 sm:p-12 overflow-hidden"
           style={{
-            background: 'radial-gradient(circle at center, #07152b 0%, #030d1d 55%, #01060e 100%)',
+            background: isLight
+              ? 'radial-gradient(circle at center, #f6f8fb 0%, #eceff3 55%, #e2e6ec 100%)'
+              : 'radial-gradient(circle at center, #07152b 0%, #030d1d 55%, #01060e 100%)',
             animation: splashProgress >= 100 ? 'splashFadeOut 0.5s ease-out forwards' : 'splashFadeIn 0.4s ease-out',
           }}
         >
@@ -354,11 +364,15 @@ export default function LoginPage() {
             <h1
               className="text-7xl sm:text-9xl font-black tracking-tighter mb-2 select-none"
               style={{
-                background: 'linear-gradient(180deg,#ffffff 0%,#fef08a 25%,#f59e0b 60%,#b45309 100%)',
+                background: isLight
+                  ? 'linear-gradient(180deg,#b45309 0%,#d97706 45%,#7c2d12 100%)'
+                  : 'linear-gradient(180deg,#ffffff 0%,#fef08a 25%,#f59e0b 60%,#b45309 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                filter: 'drop-shadow(0 0 35px rgba(245,158,11,0.5))',
+                filter: isLight
+                  ? 'drop-shadow(0 0 18px rgba(180,83,9,0.25))'
+                  : 'drop-shadow(0 0 35px rgba(245,158,11,0.5))',
                 animation: 'shimmerGlow 3s ease-in-out infinite',
               }}
             >
