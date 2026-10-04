@@ -530,7 +530,7 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
           <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <p className="text-sm text-slate-300 leading-relaxed">
             {t(
-              `Votre rôle ne dispose pas de la permission ${perm('read')}. Le registre existe côté serveur, mais sa consultation ne vous est pas ouverte : demandez cet habilitament à l'administrateur de votre tenant.`,
+              `Votre rôle ne dispose pas de la permission ${perm('read')}. Le registre existe côté serveur, mais sa consultation ne vous est pas ouverte : demandez cette habilitation à l'administrateur de votre tenant.`,
               `Your role does not hold the ${perm('read')} permission. The register exists on the server but is not open to you: request this accreditation from your tenant administrator.`,
             )}
           </p>
@@ -592,7 +592,7 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setFiltres({}); setTimeout(() => lignes.refetch(), 0); }}
+                  onClick={() => { setFiltres({}); lignes.refetch(); }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-[11px] font-semibold text-slate-300 hover:bg-slate-700"
                 >
                   {t('Tout afficher', 'Show all')}
@@ -744,7 +744,7 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
                         <button
                           type="button"
                           disabled={sondeCircuit}
-                          onClick={() => sonderCircuit(cle, 0, c.interroger)}
+                          onClick={() => sonderCircuit(cle, c.interroger)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-[11px] font-semibold text-slate-300 hover:bg-slate-700 disabled:opacity-50"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
