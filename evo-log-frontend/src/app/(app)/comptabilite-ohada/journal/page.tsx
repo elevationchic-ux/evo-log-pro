@@ -13,8 +13,9 @@ export interface EntryLine {
   id: string;
   date: string;
   piece: string;
-  journal: 'ACHATS' | 'VENTES' | 'BANQUE' | 'CAISSE' | 'OD' | 'SALAIRES' | 'AMORTISSEMENTS';
+  journal: string;
   compte: string;
+  compte_intitule: string;
   libelle: string;
   debit: number;
   credit: number;
@@ -22,9 +23,50 @@ export interface EntryLine {
   validated: boolean;
 }
 
+interface CompteAPI {
+  id: number;
+  numero_compte: string;
+  intitule: string;
+}
+
+interface JournalAPI {
+  id: number;
+  code_journal: string;
+  nom_journal: string;
+  type_journal: string;
+}
+
+interface PieceLigneSaisie {
+  compte_id: number | null;
+  debit: number;
+  credit: number;
+}
+
+const JOURNAL_TYPES = ['VENTES', 'ACHATS', 'BANQUE', 'CAISSE', 'SALAIRES', 'AMORTISSEMENTS', 'OD', 'TVA'] as const;
+
+const ligneVide = (): PieceLigneSaisie => ({ compte_id: null, debit: 0, credit: 0 });
+
+const detailErreur = async (res: Response): Promise<string> => {
+  try {
+    const body = await res.json();
+    const d = body?.detail;
+    if (typeof d === 'string') return d;
+    if (Array.isArray(d)) {
+      return d.map((e: Record<string, unknown>) => {
+        const loc = Array.isArray(e?.loc) ? e.loc.join('.') : '';
+        return `${loc ? `[${loc}] ` : ''}${String(e?.msg ?? '')}`;
+      }).join('; ');
+    }
+    return JSON.stringify(d ?? body);
+  } catch {
+    return `HTTP ${res.status}`;
+  }
+};
+
 export default function ComptabiliteOhadaJournal() {
   const [entries, setEntries] = useState<EntryLine[]>([]);
   const [loading, setLoading] = useState(true);
+  const [listeErreur, setListeErreur] = useState<string | null>(null);
   const [selectedJournal, setSelectedJournal] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewModal, setShowNewModal] = useState(false);
@@ -32,14 +74,75 @@ export default function ComptabiliteOhadaJournal() {
   const [isLettrageModalOpen, setIsLettrageModalOpen] = useState(false);
   const [lettrageCode, setLettrageCode] = useState('LA01');
 
-  // Saisie nouvelle écriture
+  // Referels reels lus depuis l'API (aucun compte codé en dur).
+  const [comptes, setComptes] = useState<CompteAPI[]>([]);
+  const [journaux, setJournaux] = useState<JournalAPI[]>([]);
+
+  // Saisie de piece en partie double : en-tete + lignes.
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
-  const [newJournal, setNewJournal] = useState<EntryLine['journal']>('VENTES');
+  const [newJournal, setNewJournal] = useState<string>('VENTES');
   const [newPiece, setNewPiece] = useState('');
-  const [newCompte, setNewCompte] = useState('411100');
   const [newLibelle, setNewLibelle] = useState('');
-  const [newDebit, setNewDebit] = useState<number>(0);
-  const [newCredit, setNewCredit] = useState<number>(0);
+  const [lignes, setLignes] = useState<PieceLigneSaisie[]>([ligneVide(), ligneVide()]);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const chargerReferentiels = async () => {
+      const headers = { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` };
+      try {
+        const res = await fetch('/api/v1/finance/plan-comptable?actif=true&limit=500', { headers });
+        if (res.ok) {
+          const data = await res.json();
+          setComptes(Array.isArray(data) ? data.map((c: CompteAPI) => ({
+            id: c.id, numero_compte: c.numero_compte, intitule: c.intitule,
+          })) : []);
+        } else {
+          setListeErreur(`Plan comptable inaccessible (${await detailErreur(res)})`);
+        }
+      } catch {
+        setListeErreur('Plan comptable inaccessible : API injoignable.');
+      }
+      try {
+        const res = await fetch('/api/v1/comptabilite-avance/journaux', { headers });
+        if (res.ok) {
+          const data = await res.json();
+          const brut = Array.isArray(data) ? data : (data?.journaux ?? data?.items ?? data?.data ?? []);
+          setJournaux(Array.isArray(brut) ? brut : []);
+        }
+      } catch {
+        /* le select fallback sur les types de journaux standards */
+      }
+    };
+    chargerReferentiels();
+  }, []);
+
+  const majLigne = (index: number, champ: 'compte_id' | 'debit' | 'credit', valeur: number | null) => {
+    setLignes(prev => prev.map((l, i) => {
+      if (i !== index) return l;
+      if (champ === 'debit' && (valeur ?? 0) > 0) return { ...l, debit: valeur ?? 0, credit: 0 };
+      if (champ === 'credit' && (valeur ?? 0) > 0) return { ...l, debit: 0, credit: valeur ?? 0 };
+      return { ...l, [champ]: valeur };
+    }));
+  };
+
+  const ajouterLigne = () => setLignes(prev => [...prev, ligneVide()]);
+
+  const retirerLigne = (index: number) =>
+    setLignes(prev => (prev.length > 2 ? prev.filter((_, i) => i !== index) : prev));
+
+  const totalDebitSaisie = lignes.reduce((a, l) => a + (Number(l.debit) || 0), 0);
+  const totalCreditSaisie = lignes.reduce((a, l) => a + (Number(l.credit) || 0), 0);
+  const ecartSaisie = Math.round((totalDebitSaisie - totalCreditSaisie) * 100) / 100;
+  const pieceEquilibree = Math.abs(ecartSaisie) < 0.01 && totalDebitSaisie > 0;
+  const blocageSaisie = (() => {
+    if (lignes.length < 2) return 'Une piece en partie double exige au moins 2 lignes.';
+    if (lignes.some(l => !l.compte_id)) return 'Chaque ligne doit porter un compte du plan comptable.';
+    if (lignes.some(l => (l.debit > 0 && l.credit > 0) || (l.debit <= 0 && l.credit <= 0))) {
+      return 'Chaque ligne doit porter exactement un cote : debit OU credit, non nul.';
+    }
+    if (!pieceEquilibree) return `Piece desequilibree : ecart debit - credit = ${ecartSaisie.toLocaleString()} XAF.`;
+    return null;
+  })();
 
   const fetchEntries = async () => {
     setLoading(true);
@@ -50,26 +153,54 @@ export default function ComptabiliteOhadaJournal() {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          setEntries(data.map((item: any) => ({
-            id: String(item.id || item.numero_ecriture),
-            date: item.date_ecriture || new Date().toISOString().split('T')[0],
-            piece: item.numero_piece || item.piece || 'PIECE',
-            journal: (item.journal || 'OD') as any,
-            compte: item.compte_numero || String(item.compte_id || '471000'),
-            libelle: item.libelle || '',
-            debit: parseFloat(item.debit || 0),
-            credit: parseFloat(item.credit || 0),
-            lettrage: item.lettrage || undefined,
-            validated: true
-          })));
+          // Une piece = un en-tete + ses lignes ; le livre-journal s'affiche
+          // ligne par ligne, avec les comptes reels de la piece.
+          const plats: EntryLine[] = [];
+          for (const item of data) {
+            const lines = Array.isArray(item.lignes) ? item.lignes : [];
+            const base = {
+              date: item.date_ecriture || new Date().toISOString().split('T')[0],
+              piece: item.numero_piece || item.numero_ecriture || 'PIECE',
+              journal: item.journal || 'OD',
+              lettrage: item.lettrage || undefined,
+              validated: Boolean(item.valider),
+            };
+            if (lines.length > 0) {
+              for (const l of lines) {
+                plats.push({
+                  ...base,
+                  id: `${item.id}-${l.id}`,
+                  compte: l.compte_numero || '',
+                  compte_intitule: l.compte_intitule || '',
+                  libelle: l.libelle_detail || item.libelle || '',
+                  debit: parseFloat(String(l.debit ?? 0)),
+                  credit: parseFloat(String(l.credit ?? 0)),
+                });
+              }
+            } else {
+              plats.push({
+                ...base,
+                id: String(item.id ?? item.numero_ecriture),
+                compte: item.compte_numero || String(item.compte_id ?? ''),
+                compte_intitule: '',
+                libelle: item.libelle || '',
+                debit: parseFloat(String(item.debit ?? 0)),
+                credit: parseFloat(String(item.credit ?? 0)),
+              });
+            }
+          }
+          setEntries(plats);
+          setListeErreur(null);
         } else {
           setEntries([]);
         }
       } else {
         setEntries([]);
+        setListeErreur(`Lecture du journal impossible (${await detailErreur(res)}).`);
       }
     } catch {
       setEntries([]);
+      setListeErreur('Lecture du journal impossible : API injoignable.');
     } finally {
       setLoading(false);
     }
@@ -80,7 +211,9 @@ export default function ComptabiliteOhadaJournal() {
   }, [selectedJournal]);
 
   const filteredEntries = entries.filter(e => {
-    const matchJournal = selectedJournal === 'ALL' || e.journal === selectedJournal;
+    const matchJournal = selectedJournal === 'ALL'
+      || e.journal === selectedJournal
+      || journaux.some(j => j.code_journal === e.journal && j.type_journal === selectedJournal);
     const matchSearch = e.piece.toLowerCase().includes(searchQuery.toLowerCase()) ||
       e.compte.toLowerCase().includes(searchQuery.toLowerCase()) ||
       e.libelle.toLowerCase().includes(searchQuery.toLowerCase());
@@ -91,48 +224,48 @@ export default function ComptabiliteOhadaJournal() {
   const totalCredit = filteredEntries.reduce((acc, curr) => acc + curr.credit, 0);
   const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
 
-  const handleAddEntry = async (e: React.FormEvent) => {
+  const handleAddPiece = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPiece || !newCompte || !newLibelle) {
-      toast.error('Veuillez renseigner tous les champs obligatoires');
+    if (blocageSaisie) {
+      toast.error(blocageSaisie);
       return;
     }
-
-    const payload = {
-      numero_piece: newPiece,
-      journal: newJournal,
-      compte_id: newCompte,
-      libelle: newLibelle,
-      debit: Number(newDebit) || 0,
-      credit: Number(newCredit) || 0,
-      date_ecriture: newDate
-    };
-
+    setSaving(true);
     try {
-      const res = await fetch('/api/v1/comptabilite-avance/ecritures', {
+      const res = await fetch('/api/v1/finance/pieces', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          date_ecriture: newDate,
+          libelle: newLibelle,
+          numero_piece: newPiece || null,
+          type_journal: newJournal,
+          lignes: lignes.map(l => ({
+            compte_id: l.compte_id,
+            debit: Number(l.debit) || 0,
+            credit: Number(l.credit) || 0,
+          })),
+        })
       });
       if (res.ok) {
-        toast.success(`Écriture enregistrée au journal ${newJournal}`);
+        const piece = await res.json();
+        toast.success(`Piece ${piece.numero_ecriture} enregistree (${lignes.length} lignes, equilibree)`);
         fetchEntries();
+        setShowNewModal(false);
+        setNewPiece('');
+        setNewLibelle('');
+        setLignes([ligneVide(), ligneVide()]);
       } else {
-        toast.error('Erreur serveur  écriture non enregistrée.');
+        toast.error(`Piece rejetee par le serveur : ${await detailErreur(res)}`);
       }
     } catch {
-      toast.error('Erreur réseau  écriture non enregistrée.');
+      toast.error('Erreur reseau piece non enregistree.');
+    } finally {
+      setSaving(false);
     }
-
-    setShowNewModal(false);
-    setNewPiece('');
-    setNewCompte('411100');
-    setNewLibelle('');
-    setNewDebit(0);
-    setNewCredit(0);
   };
 
   const handleApplyLettrage = () => {
