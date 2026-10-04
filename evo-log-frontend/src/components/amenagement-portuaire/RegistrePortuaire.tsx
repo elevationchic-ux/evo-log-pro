@@ -22,7 +22,7 @@
  *     par exemple), pas un texte générique qui masquerait le doublon.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pencil, Plus, RefreshCw, ShieldAlert, WifiOff, Trash2, PenLine, ExternalLink } from 'lucide-react';
+import { Pencil, Plus, RefreshCw, ShieldAlert, WifiOff, Trash2, PenLine, ExternalLink, ClipboardList } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AxiosError } from 'axios';
 
@@ -41,12 +41,14 @@ import type {
   LigneRegistre,
   Nomenclatures,
   PlacePortuaire,
+  SondeServeur,
 } from './typesRegistre';
 import {
   aideChamp,
   labelChamp,
   labelColonne,
   rendreCellule,
+  rendreCleSonde,
   saisieVide,
   tManquant,
   valeurSaisie,
@@ -365,22 +367,22 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
     }
   };
 
-  const supprimer = async (ligne: LigneRegistre) => {
-    if (!config.supprimer) return;
-    const lib = String(ligne[config.colonnes[0]?.name] ?? ligne.id);
-    if (!window.confirm(t(
-      `Retirer du registre la ligne « ${lib} » ? Cette action est irréversible et ne vaut pas abrogation de l'acte : enregistrez plutôt son annulation si la pièce a produit des effets.`,
-      `Remove line “${lib}” from the register? This is irreversible and does not repeal the act: record its cancellation instead if the document took effect.`,
-    ))) return;
-    setEnCours(true);
+  /* Sonde serveur : agrégats relus à la demande sur une ligne. L'écran
+     n'additionne rien, il montre les clés telles que renvoyées (une valeur
+     non calculable arrive à null et s'affiche « non enregistré »). */
+  const ouvrirSonde = async (sonde: SondeServeur, ligne: LigneRegistre) => {
+    setSondeOuverte(sonde);
+    setLigneSonde(ligne);
+    setBrutSonde(null);
+    setErreurSonde(null);
+    setChargementSonde(true);
     try {
-      await config.supprimer(ligne.id);
-      toast.success(t('Ligne retirée du registre.', 'Line removed from the register.'));
-      lignes.refetch();
+      const brut = (await sonde.interroger(ligne.id)).data;
+      setBrutSonde(brut && typeof brut === 'object' ? (brut as Record<string, unknown>) : null);
     } catch (err) {
-      toast.error(messageServeur(err, t('Suppression impossible.', 'Could not delete.')));
+      setErreurSonde(messageServeur(err, t('Lecture impossible.', 'Could not read.')));
     } finally {
-      setEnCours(false);
+      setChargementSonde(false);
     }
   };
 

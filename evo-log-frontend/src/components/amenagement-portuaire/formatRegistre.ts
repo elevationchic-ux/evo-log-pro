@@ -119,6 +119,35 @@ export function rendreCellule(
   }
 }
 
+/** Rend une clé de la réponse d'une sonde : un agrégat SERVEUR, jamais un
+ *  calcul fait ici. `null` (non calculable faute de saisie) reste un manquant. */
+export function rendreCleSonde(
+  cle: CleSonde,
+  brut: unknown,
+  lang: 'fr' | 'en',
+): { texte: string; manquant: boolean } {
+  if (brut === null || brut === undefined || (typeof brut === 'string' && brut.trim() === '')) {
+    return { texte: tManquant(lang), manquant: true };
+  }
+  switch (cle.type) {
+    case 'montant':
+      return typeof brut === 'number'
+        ? { texte: `${FORMAT_MONTANT.format(brut)} FCFA`, manquant: false }
+        : { texte: tManquant(lang), manquant: true };
+    case 'nombre':
+      if (typeof brut !== 'number') return { texte: String(brut), manquant: false };
+      return { texte: `${FORMAT_NOMBRE.format(brut)}${cle.unite ? ` ${cle.unite}` : ''}`, manquant: false };
+    case 'booleen':
+      if (brut === true) return { texte: lang === 'en' ? 'Yes' : 'Oui', manquant: false };
+      if (brut === false) return { texte: lang === 'en' ? 'No' : 'Non', manquant: false };
+      return { texte: String(brut), manquant: false };
+    case 'date':
+      return { texte: formaterDate(String(brut), lang), manquant: false };
+    default:
+      return { texte: typeof brut === 'object' ? JSON.stringify(brut) : String(brut), manquant: false };
+  }
+}
+
 /** Valeur d'un champ pour pré-remplir le formulaire d'édition. Une date
  *  datetime serveur est tronquée au jour pour <input type="date">. */
 export function valeurSaisie(v: ValeurCellule): string {
