@@ -355,29 +355,33 @@ export default function ComptabiliteOhadaJournal() {
         </div>
       </div>
 
-      {/* Onglets des 7 Journaux Auxiliaires */}
+      {/* Onglets des journaux auxiliaires (codes reels des journaux seeds) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none print:hidden">
-        {[
-          { key: 'ALL', label: 'Tous les Journaux' },
-          { key: 'VENTES', label: 'Journal des Ventes (VE)' },
-          { key: 'ACHATS', label: 'Journal des Achats (AC)' },
-          { key: 'BANQUE', label: 'Journal de Banque (BQ)' },
-          { key: 'CAISSE', label: 'Journal de Caisse (CA)' },
-          { key: 'SALAIRES', label: 'Journal des Salaires (OD-PAY)' },
-          { key: 'AMORTISSEMENTS', label: 'Dotations Amortissements (OD-DOT)' },
-          { key: 'OD', label: 'Opérations Diverses (OD)' }
-        ].map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setSelectedJournal(tab.key)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${selectedJournal === tab.key
-                ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
-                : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
-              }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        <button
+          key="ALL"
+          onClick={() => setSelectedJournal('ALL')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${selectedJournal === 'ALL'
+              ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
+              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
+            }`}
+        >
+          Tous les Journaux
+        </button>
+        {JOURNAL_TYPES.map(type => {
+          const j = journaux.find(x => String(x.type_journal || '').toUpperCase() === type);
+          return (
+            <button
+              key={type}
+              onClick={() => setSelectedJournal(type)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${selectedJournal === type
+                  ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
+                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
+                }`}
+            >
+              {j ? `${j.nom_journal} (${j.code_journal})` : `Journal ${type}`}
+            </button>
+          );
+        })}
       </div>
 
       {/* Barre de Recherche & Contrôles */}
