@@ -16,54 +16,13 @@ interface SYSCOHADAAccount {
   sens: 'DEBITEUR' | 'CREDITEUR';
 }
 
-const SYSCOHADA_PLAN: SYSCOHADAAccount[] = [
-  // Classe 1
-  { code: '101100', intitule: 'Capital Social Souscrit non Amorti', classe: 1, type: 'PASSIF', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '111100', intitule: 'Réserve Légale', classe: 1, type: 'PASSIF', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '121100', intitule: 'Report à Nouveau Créditeur', classe: 1, type: 'PASSIF', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '131100', intitule: 'Résultat Net de l Exercice (Bénéfice)', classe: 1, type: 'PASSIF', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '161100', intitule: 'Emprunts auprès des Établissements de Crédit', classe: 1, type: 'PASSIF', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-
-  // Classe 2
-  { code: '211100', intitule: 'Frais de Développement & Logiciels Informatiques', classe: 2, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '241100', intitule: 'Matériel Automobile & Tracteurs Routiers', classe: 2, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '241200', intitule: 'Semi-Remorques & Plateaux Porte-Conteneurs', classe: 2, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '244100', intitule: 'Matériel de Manutention Quai (Reachstackers)', classe: 2, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '284100', intitule: 'Amortissement du Matériel de Transport', classe: 2, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-
-  // Classe 3
-  { code: '311100', intitule: 'Marchandises en Magasin Portuaire MAG3', classe: 3, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '321100', intitule: 'Matières Consommables & Pièces de Rechange Flotte', classe: 3, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-
-  // Classe 4
-  { code: '401100', intitule: 'Fournisseurs d Exploitation (Carburant, Pièces)', classe: 4, type: 'PASSIF', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '411100', intitule: 'Clients Nationaux & Transitaires CEMAC', classe: 4, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '422100', intitule: 'Personnel - Rémunérations Dues Net', classe: 4, type: 'PASSIF', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '431100', intitule: 'Sécurité Sociale (CNPS Cameroun)', classe: 4, type: 'PASSIF', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '443100', intitule: 'État - TVA Facturée sur Prestations (19.25%)', classe: 4, type: 'PASSIF', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '445200', intitule: 'État - TVA Récupérable sur Achats & Services', classe: 4, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-
-  // Classe 5
-  { code: '512100', intitule: 'Afriland First Bank Cameroun', classe: 5, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '512200', intitule: 'Société Générale Cameroun (SGC)', classe: 5, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '531100', intitule: 'Caisse Principale Siège Douala Port', classe: 5, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '571100', intitule: 'Comptes Mobile Money Entreprise (OM / MOMO)', classe: 5, type: 'ACTIF', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-
-  // Classe 6
-  { code: '601100', intitule: 'Achats de Carburants Flotte (Gasoil)', classe: 6, type: 'CHARGE', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '611100', intitule: 'Transports Consommés & Sous-traitance', classe: 6, type: 'CHARGE', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '624100', intitule: 'Entretien & Réparations Véhicules Atelier GMAO', classe: 6, type: 'CHARGE', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '661100', intitule: 'Salaires & Traitements du Personnel', classe: 6, type: 'CHARGE', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-  { code: '681100', intitule: 'Dotations aux Amortissements d Exploitation', classe: 6, type: 'CHARGE', nature: 'CENTRALISATEUR', sens: 'DEBITEUR' },
-
-  // Classe 7
-  { code: '706100', intitule: 'Prestations de Fret Routier & Déplacements', classe: 7, type: 'PRODUIT', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '706200', intitule: 'Prestations de Manutention & Acconage Quai', classe: 7, type: 'PRODUIT', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '706300', intitule: 'Prestations de Dédouanement & Transit CEMAC', classe: 7, type: 'PRODUIT', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-  { code: '706400', intitule: 'Magasinage & Entreposage WMS Sous Douane', classe: 7, type: 'PRODUIT', nature: 'CENTRALISATEUR', sens: 'CREDITEUR' },
-];
-
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
+// Le sens normal d'un compte SYSCOHADA se derive de sa classe/type :
+// actifs et charges sont debiteurs, passifs et produits crediteurs.
+function sensNormal(type: string): 'DEBITEUR' | 'CREDITEUR' {
+  return type === 'ACTIF' || type === 'CHARGE' ? 'DEBITEUR' : 'CREDITEUR';
+}
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -71,8 +30,8 @@ function getToken(): string | null {
 }
 
 export default function ComptabiliteOhadaChartAccounts() {
-  const [accounts, setAccounts] = useState<SYSCOHADAAccount[]>(SYSCOHADA_PLAN);
-  const [loading, setLoading] = useState(false);
+  const [accounts, setAccounts] = useState<SYSCOHADAAccount[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClasse, setSelectedClasse] = useState<number | 'ALL'>('ALL');
@@ -85,23 +44,26 @@ export default function ComptabiliteOhadaChartAccounts() {
     setError(null);
     try {
       const token = getToken();
-      const res = await fetch(`${API_BASE}/comptabilite-avance/plan-comptable`, {
+      const res = await fetch(`${API_BASE}/finance/plan-comptable`, {
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       });
-      if (!res.ok) throw new Error(`${res.status}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        setAccounts(data.map((c: Record<string, unknown>) => ({
-          code: String(c.numero_compte ?? c.code ?? ''),
-          intitule: String(c.intitule ?? c.libelle ?? ''),
-          classe: Number(c.classe ?? String(c.numero_compte ?? '')[0] ?? 1),
-          type: String(c.type_compte ?? c.type ?? 'ACTIF') as SYSCOHADAAccount['type'],
-          nature: String(c.nature ?? 'CENTRALISATEUR') as SYSCOHADAAccount['nature'],
-          sens: String(c.sens ?? 'DEBITEUR') as SYSCOHADAAccount['sens'],
-        })));
-      }
-    } catch {
-      setError('Chargement API échoué  affichage du référentiel SYSCOHADA standard.');
+      setAccounts((Array.isArray(data) ? data : []).map((c: Record<string, unknown>) => {
+        const type = String(c.type_compte ?? 'ACTIF').toUpperCase() as SYSCOHADAAccount['type'];
+        return {
+          code: String(c.numero_compte ?? ''),
+          intitule: String(c.intitule ?? ''),
+          classe: Number(c.classe ?? String(c.numero_compte ?? '0')[0] ?? 1),
+          type,
+          nature: (c.compte_centralisateur ? 'CENTRALISATEUR' : 'DETAIL') as SYSCOHADAAccount['nature'],
+          sens: sensNormal(type),
+        };
+      }));
+    } catch (e) {
+      // Remontee honnete : aucune bascule vers un referentiel codé en dur.
+      setError(`Chargement du plan comptable impossible (${e instanceof Error ? e.message : 'erreur'}). Vérifiez l'API et vos droits.`);
+      setAccounts([]);
     } finally {
       setLoading(false);
     }
@@ -119,7 +81,7 @@ export default function ComptabiliteOhadaChartAccounts() {
     setSaving(true);
     try {
       const token = getToken();
-      const res = await fetch(`${API_BASE}/comptabilite-avance/plan-comptable`, {
+      const res = await fetch(`${API_BASE}/finance/plan-comptable`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,18 +91,25 @@ export default function ComptabiliteOhadaChartAccounts() {
           numero_compte: newAccount.code,
           intitule: newAccount.intitule,
           classe: newAccount.classe,
+          sous_classe: Number(newAccount.code[1] ?? 0),
           type_compte: newAccount.type,
-          nature: newAccount.nature,
-          sens: newAccount.sens,
+          compte_centralisateur: newAccount.nature === 'CENTRALISATEUR',
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        const detail = Array.isArray(body?.detail)
+          ? body.detail.map((d: Record<string, unknown>) => String(d.msg ?? '')).join('; ')
+          : String(body?.detail ?? `HTTP ${res.status}`);
+        toast.error(detail);
+        return;
+      }
       toast.success(`Compte ${newAccount.code} créé avec succès`);
       setShowCreateModal(false);
       setNewAccount({ code: '', intitule: '', classe: 1, type: 'ACTIF', nature: 'DETAIL', sens: 'DEBITEUR' });
       await loadAccounts();
     } catch {
-      toast.error('Erreur lors de la création du compte');
+      toast.error("Erreur lors de la création du compte (API injoignable)");
     } finally {
       setSaving(false);
     }
