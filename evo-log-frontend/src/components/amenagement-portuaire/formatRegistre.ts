@@ -69,7 +69,7 @@ export function libelleEnum(
   return trouvee ? humaniser(trouvee.valeur) : humaniser(valeur);
 }
 
-/** Rend une cellule prête à afficher ; le texte null signale un manquant. */
+/** Rend une cellule prête à afficher ; `manquant` signale une donnée absente. */
 export function rendreCellule(
   colonne: ColonneRegistre,
   ligne: LigneRegistre,
