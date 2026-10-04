@@ -32,7 +32,7 @@ from app.models.port_cameroun import TerminalPortuaire
 # dragage, autorisations). Importe ici pour que Base.metadata les connaisse des
 # que l'application demarre (create_all dev, autogenerate Alembic).
 from app.models.amenagement_portuaire import (
-    SchemaDirecteur, ProjetAmenagement, RegistreDTO, MarcheAmenagement,
+    SchemaDirecteur, ProjetAmenagement, DocumentProgrammation, MarcheAmenagement,
     AutorisationDomaniale, ConcessionPortuaire, InfrastructurePortuaire,
     Dragage, AutorisationTravaux,
 )
@@ -64,7 +64,7 @@ __all__ = [
     "SequenceNumerotation",
     "ConteneurCycle", "CycleConteneur", "DommageConteneur", "EmpotageDepotage", "InspectionConteneur",
     "TerminalPortuaire",
-    "SchemaDirecteur", "ProjetAmenagement", "RegistreDTO", "MarcheAmenagement",
+    "SchemaDirecteur", "ProjetAmenagement", "DocumentProgrammation", "MarcheAmenagement",
     "AutorisationDomaniale", "ConcessionPortuaire", "InfrastructurePortuaire",
     "Dragage", "AutorisationTravaux",
     "Company", "SubscriptionPlan", "Subscription", "Department", "B2BPortal", "TenantAuditLog",

@@ -17,6 +17,10 @@ réellement en vigueur au Cameroun :
      portuaire, sur subventions, ou en partenariat public-privé (loi
      n° 2023/008 du 25 juillet 2023 fixant le régime général des PPP : modes
      concessifs CET/BOT et autorisations d'occupation du domaine public) ;
+     avant tout engagement de crédit, le projet passe le circuit de
+     programmation des investissements publics : fiche / dossier technique,
+     visa de maturité (décret n° 2018/0492), inscription au PIP-CDMT, visa du
+     contrôle financier ;
   4. la passation obéit au régime des marchés publics camerounais (COLIFE /
      CIP pour la place de Douala) et la conformité environnementale à la loi
      n° 96/012 du 5 août 1996 (EIES, audit IEMU).
@@ -24,11 +28,12 @@ réellement en vigueur au Cameroun :
 PHILOSOPHIE DES DONNÉES — aucune donnée n'est inventée ici.
   * Les tables portent des COLONNES de provenance (source_reference,
     date_verification, autorite_emettrice) : une valeur n'existe que si un
-    agent l'a saisie depuis un document réel (schéma directeur approuvé, DTO
-    visé, arrêté, rapport de bathymétrie).
+    agent l'a saisie depuis un document réel (schéma directeur approuvé, visa
+    de maturité, arrêté, rapport de bathymétrie).
   * NULL veut dire « non renseigné », jamais « 0 » ni « moyenne de marché ».
   * Le module ne simule aucune téléprocédure : ce qui dépend d'un tiers
-    institutionnel (APN, COLIFE, MINMIVT, MINEPF) répond 501 côté routeur.
+    institutionnel (APN, COLIFE, MINMIVT, MINEPAT, MINFI) répond 501 côté
+    routeur.
 
 Modèle domanial : comme ``ports_cameroun`` et ``terminaux_portuaires`` (données
 de référence nationales), ces tables ne portent PAS de ``company_id`` — elles
@@ -353,19 +358,25 @@ class ProjetAmenagement(Base):
     infrastructures = relationship("InfrastructurePortuaire", back_populates="projet")
 
 
-# ─── 3. Programmation budgétaire : DTO ───────────────────────────────────────
+# ─── 3. Programmation budgétaire : fiche technique & visas ───────────────────
 
-class RegistreDTO(Base):
-    """Document Technique Outil — support légal de tout projet d'investissement.
+class DocumentProgrammation(Base):
+    """Chaîne de programmation d'un projet : fiche technique, maturité, PIP, visas.
 
-    Au Cameroun, la loi de finances exige un DTO visé par le contrôle
-    financier pour tout projet : sans lui, la passation du marché ne peut pas
-    être régularisée. Cette table en tient le registre, avec les visas réels.
+    Circuit réel camerounais (décret n° 2018/0492 fixant les modalités de
+    préparation des projets d'investissement public, manuel MINEPAT de
+    sélection des projets) : la fiche / le dossier technique est déposé devant
+    la commission technique, qui débouche sur un **visa de maturité** ; le
+    projet inscrit au PIP / cadre à moyen terme (CDMT) devient une ligne de loi
+    de finances ; l'engagement des crédits exige le **visa du contrôle
+    financier** (MINFI). Chaque référence et chaque date de cette table est
+    saisie depuis l'acte correspondant : le module ne produit aucun numéro et
+    ne valide rien à la place des commissions.
     """
-    __tablename__ = "registres_dto_amgt"
+    __tablename__ = "documents_programmation_amgt"
 
     id = Column(Integer, primary_key=True, index=True)
-    reference_dto = Column(String(80), unique=True, nullable=False, index=True)
+    reference_fiche_technique = Column(String(80), unique=True, nullable=False, index=True)
     exercice = Column(Integer, nullable=False, index=True)
     projet_id = Column(Integer, ForeignKey("projets_amenagement.id"), nullable=True, index=True)
     port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=True)
@@ -374,12 +385,21 @@ class RegistreDTO(Base):
     montant_paye_xaf = Column(Numeric(18, 2))
     source_financement = Column(_enum(OrigineFinancement), nullable=True)
     chapitre = Column(String(120))                 # chapitre budgétaire déclaré
+    # PREPARATION / MATURITE_VISEE / INSCRIT_PIP / VISE / NOTIFIE / ANNULE :
+    # statut saisi, jamais dérivé automatiquement d'une date.
     statut = Column(String(30), default="PREPARATION", index=True)
-    date_presentation = Column(Date)
+    date_presentation = Column(Date)               # dépôt devant la commission technique
+    # ── visa de maturité (décret 2018/0492) ──
+    numero_visa_maturite = Column(String(80))
+    date_visa_maturite = Column(Date)
+    autorite_visa_maturite = Column(String(160))   # commission / DGPIP émettrice
+    # ── inscription à la programmation pluriannuelle ──
+    reference_pip_cdmt = Column(String(120))       # ligne PIP ou CDMT telle que publiée
+    # ── engagement des crédits ──
     date_visa_controle_financier = Column(Date)
     autorite_visa = Column(String(160))
     numero_engagement = Column(String(80))
-    date_notification_minepf = Column(Date)
+    date_notification_minfi = Column(Date)
     source_reference = Column(String(200))
     date_verification = Column(Date)
     auteur_saisie = Column(String(120))
