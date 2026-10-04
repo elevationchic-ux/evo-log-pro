@@ -207,7 +207,7 @@ def lister_places(
         "total": len(rows),
         "note": (
             "Donnees issues du referentiel national des ports. Un champ NULL "
-            "signifie que l'information n'a pas encore etee saisie depuis un "
+            "signifie que l'information n'a pas encore ete saisie depuis un "
             "document officiel."
         ),
     }
