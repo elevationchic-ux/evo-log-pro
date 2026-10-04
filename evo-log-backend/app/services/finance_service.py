@@ -1,5 +1,6 @@
 """Finance service - OHADA accounting and financial management for Cameroon/CEMAC"""
 from datetime import datetime, date, timedelta
+from decimal import Decimal
 from typing import List, Optional, Dict, Any
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -8,7 +9,8 @@ from app.models.finance_ohada import (
     PlanComptableOHADA, EcritureComptableNew as EcritureComptable, ExerciceComptable, FactureNew as Facture, LigneFactureOHADA as LigneFacture,
     Reglement, TVADeclarable, RetenueSource, ISDeclarable, CentimesAdditionnels,
     Patente, Bilan, CompteResultat, SignatureElectronique,
-    TypeCompte, RegimeTVA, RegimeIS, StatutTaxe
+    TypeCompte, RegimeTVA, RegimeIS, StatutTaxe,
+    JournalAuxiliaire, LigneJournal, GrandLivreLigne, TypeJournal,
 )
 
 
