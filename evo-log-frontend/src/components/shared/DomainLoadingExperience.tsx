@@ -7,7 +7,8 @@ import {
   Landmark, KeyRound, MessageSquare, BookOpen, Layers,
   Fuel, AlertTriangle, Scale, Award,
   Clock, ShoppingCart, FileCheck, QrCode, Building,
-  Warehouse, UserCheck, Receipt, FileText, CheckCircle2
+  Warehouse, UserCheck, Receipt, FileText, CheckCircle2,
+  DraftingCompass
 } from 'lucide-react';
 import {
   resolveDomainLoadingConfig,
@@ -109,6 +110,12 @@ function getDomainIcon(config: DomainLoadingConfig) {
       return BarChart3;
     case 'rbac-matrix':
       return KeyRound;
+    // Compas de dessinateur : le département aménagement trace les périmètres et
+    // les schémas, il n'exploite pas le quai. Cas explicite indispensable : sans
+    // lui la branche « default » ci dessous verrait « port » dans la clé et
+    // rendrait le Ship des opérations portuaires (deux départements, même icône).
+    case 'port-blueprint':
+      return DraftingCompass;
     case 'strategic-compass':
     default:
       if (key.includes('compta')) return BookOpen;
