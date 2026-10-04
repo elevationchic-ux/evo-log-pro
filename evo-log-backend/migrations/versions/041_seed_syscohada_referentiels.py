@@ -146,9 +146,10 @@ def upgrade():
                 f"INSERT INTO {T_JOURNAL} "
                 "(code_journal, nom_journal, type_journal, compte_centralisateur, "
                 "periodical, statut, devise, created_at) "
-                "VALUES (:code, :nom, :type, :comp, 1, 'actif', 'XAF', :ts)"
+                "VALUES (:code, :nom, :type, :comp, :periodical, 'actif', 'XAF', :ts)"
             ),
-            {"code": code, "nom": nom, "type": type_name, "comp": comp, "ts": TS},
+            {"code": code, "nom": nom, "type": type_name, "comp": comp,
+             "periodical": True, "ts": TS},
         )
 
     # 3) Exercice ouvert de l'annee courante
