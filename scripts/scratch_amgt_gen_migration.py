@@ -73,6 +73,7 @@ depends_on = None
 # Ports du departement : colonnees mais JAMAIS remplies automatiquement.
 T_PORTS = "ports_cameroun"
 NEW_PORT_COLS = ("autorite_portuaire", "tirant_eau_max")
+'''
 
 
 def _sa_type(col):
@@ -169,7 +170,7 @@ script += '    if T_PORTS in tables:\n        cols = {c["name"] for c in insp.ge
 script += '        with op.batch_alter_table(T_PORTS) as batch:\n'
 script += '            if "tirant_eau_max" in cols:\n                batch.drop_column("tirant_eau_max")\n'
 script += '            if "autorite_portuaire" in cols:\n                batch.drop_column("autorite_portuaire")\n'
-script += downgrade + "\n            pass\n"
+script += downgrade + "\n"
 
 out = ROOT / "evo-log-backend" / "migrations" / "versions" / "038_add_amenagement_portuaire.py"
 out.write_text(script, encoding="utf-8")
