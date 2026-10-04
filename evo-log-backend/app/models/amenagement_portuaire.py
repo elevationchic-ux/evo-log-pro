@@ -336,7 +336,13 @@ class ProjetAmenagement(Base):
     port = relationship("PortCameroun")
     terminal = relationship("TerminalPortuaire")
     schema = relationship("SchemaDirecteur", back_populates="projets")
-    marches = relationship("MarcheAmenagement", back_populates="projet")
+    marches = relationship(
+        "MarcheAmenagement",
+        back_populates="projet",
+        # deux FK relient marches -> projets (rattachement + marche_id de
+        # lancement) : sans foreign_keys explicite l'ORM ne sait pas laquelle.
+        foreign_keys="MarcheAmenagement.projet_id",
+    )
     autorisations = relationship("AutorisationTravaux", back_populates="projet")
     infrastructures = relationship("InfrastructurePortuaire", back_populates="projet")
 
