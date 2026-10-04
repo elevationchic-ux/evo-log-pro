@@ -1085,6 +1085,32 @@ export const DOMAIN_LOADING_CONFIGS: Record<string, DomainLoadingConfig> = {
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // 29. AMÉNAGEMENT PORTUAIRE & DOMAINE PUBLIC (département autonome)
+  //     Registre des actes (schéma directeur, titre domanial, concession, PIP),
+  //     pas d'exécution de travaux : les étapes décrivent une lecture du
+  //     registre, jamais un chantier fictif.
+  // ═══════════════════════════════════════════════════════════════════════════
+  'amenagement-portuaire': {
+    key: 'amenagement-portuaire',
+    departmentNumber: 29,
+    domainName: 'DÉPARTEMENT AMÉNAGEMENT PORTUAIRE & DOMAINE PUBLIC',
+    subTitle: 'SCHÉMAS DIRECTEURS, DOMAINE PUBLIC, GROS ŒUVRE & CONCESSIONS — DOUALA, KRIBI, LIMBÉ',
+    badgeCode: 'REGISTRE DES ACTES D\'AMÉNAGEMENT • AUTORITÉ PORTUAIRE',
+    locationTag: 'PLAN DE MASSE DU PORT • ARRÊTÉ D\'AFFECTATION',
+    primaryColor: '#0E7490',
+    accentColor: '#67E8F9',
+    gradientBg: 'from-cyan-950 via-[#04222c] to-[#01090c]',
+    glowClass: 'shadow-cyan-600/50 border-cyan-600/60 text-cyan-300',
+    animationType: 'port-blueprint',
+    steps: [
+      '▶ Ouverture du registre des actes d\'aménagement (Douala, Kribi, Limbé)...',
+      '▶ Raccordement aux nomenclatures du domaine public et des ouvrages...',
+      '▶ Lecture des schémas directeurs, titres domaniaux & concessions saisies...',
+      '✓ Département aménagement prêt. Seules les données saisies sont affichées.',
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // TRANSVERSAL : DASHBOARD GLOBAL & COCKPIT NAVIRE → CLIENT
   // ═══════════════════════════════════════════════════════════════════════════
   dashboard: {
@@ -1119,7 +1145,15 @@ export function resolveDomainLoadingConfig(routeOrKey: string): DomainLoadingCon
     return DOMAIN_LOADING_CONFIGS[clean];
   }
 
-  // 2. Mappages fins vers les 28 départements
+  // 2. Mappages fins vers les 29 départements
+  // Dpt 29 : Aménagement Portuaire & Domaine Public. La clé canonique
+  // « amenagement-portuaire » tombe déjà dans la correspondance directe ci
+  // dessus ; cette règle rattrape la variante « amenagement » (nom du module
+  // dans le catalogue de permissions backend et alias legacy de modulePalette),
+  // qu'aucune règle mot-clé plus bas ne reconnaîtrait.
+  if (clean.includes('amenagement')) {
+    return DOMAIN_LOADING_CONFIGS['amenagement-portuaire'];
+  }
   // Dpt 1 : Comptabilité OHADA
   if (clean.includes('compta') || clean.includes('syscohada') || clean.includes('journal') || clean.includes('grand-livre') || clean.includes('cloture')) {
     return DOMAIN_LOADING_CONFIGS['comptabilite-ohada'];
