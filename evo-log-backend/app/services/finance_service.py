@@ -113,7 +113,7 @@ class PieceComptableService:
         return Decimal(str(valeur if valeur is not None else 0))
 
     @staticmethod
-    def _ serializer_ligne(ligne: LigneJournal) -> Dict[str, Any]:
+    def _serializer_ligne(ligne: LigneJournal) -> Dict[str, Any]:
         return {
             "id": ligne.id,
             "compte_id": ligne.compte_id,

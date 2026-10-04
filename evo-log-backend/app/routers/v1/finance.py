@@ -10,6 +10,7 @@ from app.models.user import User
 from app.schemas.finance import (
     PlanComptableOHADACreate, PlanComptableOHADAUpdate, PlanComptableOHADAResponse,
     EcritureComptableCreate, EcritureComptableUpdate, EcritureComptableResponse,
+    PieceCreate, PieceResponse,
     ExerciceComptableCreate, ExerciceComptableUpdate, ExerciceComptableResponse,
     FactureCreate, FactureUpdate, FactureResponse,
     LigneFactureCreate, LigneFactureUpdate, LigneFactureResponse,
@@ -28,7 +29,7 @@ from app.services.finance_service import (
     PlanComptableOHADAService, EcritureComptableService, ExerciceComptableService, FactureService,
     ReglementService, TVADeclarableService, RetenueSourceService, ISDeclarableService,
     CentimesAdditionnelsService, PatenteService, BilanService, CompteResultatService,
-    SignatureElectroniqueService, FinanceReportingService
+    SignatureElectroniqueService, FinanceReportingService, PieceComptableService
 )
 from app.models.finance_ohada import PlanComptableOHADA, EcritureComptableNew as EcritureComptable, ExerciceComptable, FactureNew as Facture, RetenueSource
 
@@ -105,17 +106,76 @@ def mettre_a_jour_compte(
     return c
 
 
-# ============ ECRITURES COMPTABLES ============
-@router.post("/ecritures", response_model=EcritureComptableResponse, status_code=status.HTTP_201_CREATED)
-def creer_ecriture(
-    ecriture: EcritureComptableCreate,
+# ============ PIECES COMPTABLES (PARTIE DOUBLE) ============
+@router.post("/pieces", response_model=PieceResponse, status_code=status.HTTP_201_CREATED)
+def creer_piece(
+    piece: PieceCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("comptabilite.journal.create"))
 ):
-    """Create accounting entry"""
-    return EcritureComptableService.creer_ecriture(
-        db, ecriture.numero_ecriture, ecriture.date_ecriture, ecriture.libelle,
-        ecriture.compte_id, ecriture.debit, ecriture.credit, ecriture.journal, ecriture.periode
+    """Creer une piece comptable reellement en partie double.
+
+    Le serveur controle : >= 2 lignes, une ligne = un debit OU un credit,
+    comptes existants et actifs, somme(debit) == somme(credit), date dans un
+    exercice ouvert, journal existant, numerotation continue par periode.
+    En-tete, lignes et grand livre sont ecrits dans une seule transaction.
+    """
+    return PieceComptableService.creer_piece(db, piece)
+
+
+@router.get("/pieces", response_model=List[PieceResponse])
+def lister_pieces(
+    periode: str = None,
+    journal_id: int = None,
+    statut: str = None,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.journal.read"))
+):
+    """Pieces comptables avec leurs lignes (en-tete enrichi)."""
+    return PieceComptableService.lister_pieces(
+        db, skip=skip, limit=limit, periode=periode, journal_id=journal_id, statut=statut
+    )
+
+
+@router.get("/pieces/{piece_id}", response_model=PieceResponse)
+def obtenir_piece(
+    piece_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.journal.read"))
+):
+    """Une piece : en-tete equilibre + ses lignes."""
+    return PieceComptableService.obtenir_piece(db, piece_id)
+
+
+@router.put("/pieces/{piece_id}/valider", response_model=PieceResponse)
+def valider_piece(
+    piece_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.journal.approve"))
+):
+    """Comptabiliser definitivement une piece : refuse tout desequilibre."""
+    return PieceComptableService.valider_piece(db, piece_id, current_user.username)
+
+
+# ============ ECRITURES COMPTABLES (CHEMIN PLAT SUPPRIME) ============
+@router.post("/ecritures", deprecated=True, status_code=status.HTTP_410_GONE)
+def creer_ecriture(
+    ecriture: EcritureComptableCreate = None,
+    current_user: User = Depends(require_perm("comptabilite.journal.create"))
+):
+    """410 : la creation d'ecriture 'plate' est supprimee (aucune ecriture
+    desequilibree ne doit plus pouvoir entrer dans la comptabilite).
+
+    Utilisez POST /api/v1/finance/pieces, qui impose la partie double.
+    """
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail=(
+            "Endpoint supersede : creez une piece equilibree via "
+            "POST /api/v1/finance/pieces (>= 2 lignes, somme debit == somme credit)."
+        ),
     )
 
 
