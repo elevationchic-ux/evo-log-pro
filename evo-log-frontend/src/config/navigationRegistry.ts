@@ -196,7 +196,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
   // ----------------------------------------------------------------------------
   // Département autonome distinct de l'exploitation du quai : il tient le
   // domaine public, les schémas directeurs, la programmation budgétaire, les
-  // marchés et les ouvrages des places de Douala, Kribi et Limbe. Les écrans
+  // marchés et les ouvrages des places de Douala, Kribi et Limbé. Les écrans
   // n'affichent QUE ce qui est saisi en base (voir router
   // /api/v1/amenagement-portuaire : nomenclatures, places et synthèse servies
   // par l'API, téléprocédures institutionnelles annoncées 501).
