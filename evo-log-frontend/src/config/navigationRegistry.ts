@@ -1834,6 +1834,11 @@ export function getFilteredNavigationForUser(
     'transit': ['transit', 'acconage'],
     'rh': ['rh', 'paie', 'conges'],
     'achats': ['achats', 'fournisseurs', 'cotations'],
+    // Département autonome : son module de catalogue s'appelle « amenagement »
+    // (codes amenagement.<registre>.<action>) alors que la clé de navigation est
+    // « amenagement-portuaire ». Sans cette ligne, un ingénieur d'aménagement
+    // porteur de droits granulaires ne verrait jamais son département.
+    'amenagement-portuaire': ['amenagement'],
   };
   const hasGranularAccessTo = (moduleKey: string): boolean => {
     if (userPermissions.length === 0) return false;

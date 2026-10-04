@@ -41,6 +41,7 @@ export type DomainAnimationType =
   | 'tax-dgi'                // 26. Fiscalité Cameroun : Sceau officiel DGI, TVA 19.25% et télédéclaration
   | 'bi-prism'               // 27. Décisionnel & BI : Prisme holographique 3D, matrice décisionnelle
   | 'rbac-matrix'            // 28. Admin & Gouvernance : Cylindre de clés cryptographiques RBAC
+  | 'port-blueprint'         // 29. Aménagement Portuaire : plan de schéma directeur, tracés de périmètre & levés bathymétriques
   | 'strategic-compass';     // Cockpit Global : Boussole gyroscopique 3 axes Navire → Client
 
 export interface DomainLoadingConfig {
