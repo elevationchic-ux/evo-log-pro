@@ -100,7 +100,7 @@ export const MODULE_ICONS: Record<string, string> = {
   goods: '🚢', incidents: '🔥', suppliers: '🏭',
   tenant: '🏢', tiers: '👥', transactions: '💱',
   role: '👤', 'reception-mag3': '📥', 'removal-slip': '📤',
-  reporting: '📊', 'public-api': '🌐',
+  reporting: '📊', 'public-api': '🌐', 'amenagement-portuaire': '📐',
 };
 
 export const MODULE_NAMES: Record<string, string> = {
@@ -136,6 +136,10 @@ const CANONICAL_NAMES: Record<string, string> = {
   'admin-saas': 'Gouvernance Plateforme SaaS',
   'superadmin-cadc': 'Console Super-Admin CADC',
   'admin-tenant': "Administration de l'Entreprise",
+  // Département autonome ajouté au registre : le résolveur d'identité renvoie
+  // sa clé canonique, qui doit donc exister ici (sinon l'en-tête retomberait
+  // sur le libellé générique « Module » et la couleur du portail d'authentification).
+  'amenagement-portuaire': 'Aménagement Portuaire & Domaine Public',
 };
 const CANONICAL_ICONS: Record<string, string> = {
   'port-operations': '🚢', 'transit-douane': '🛃', 'transport-flotte': '🚛',
@@ -143,6 +147,7 @@ const CANONICAL_ICONS: Record<string, string> = {
   'parc-vehicules': '🚗', 'rh-personnel': '👥', 'qhse-securite': '🛡️',
   'client-b2b': '🤝', 'reports-bi': '📊', 'admin-saas': '👑',
   'superadmin-cadc': '👑', 'admin-tenant': '🏢',
+  'amenagement-portuaire': '📐',
 };
 // Couleur canonique → objet legacy du domaine le plus proche (mêmes 6 nuances).
 const CANONICAL_COLOR_ALIAS: Record<string, string> = {

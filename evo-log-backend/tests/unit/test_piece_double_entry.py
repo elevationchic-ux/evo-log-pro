@@ -294,7 +294,8 @@ def test_seed_migration_idempotente(db):
     module = _charger_module_seed()
     connexion = db.connection()
     ctx = MigrationContext.configure(connexion)
-    ops = Operations(ctx)  # installe le proxy global `alembic.op` utilise par la migration
+    ops = Operations(ctx)  # `alembic.op` n'est utilisable qu'avec le proxy installe
+    Operations._install_proxy()
     try:
         module.upgrade()
         premiere = db.query(PlanComptableOHADA).count()
