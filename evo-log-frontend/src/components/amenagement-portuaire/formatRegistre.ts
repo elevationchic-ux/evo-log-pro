@@ -102,6 +102,14 @@ export function rendreCellule(
       if (!Array.isArray(v) || v.length === 0) return { texte: tManquant(lang), manquant: true };
       return { texte: v.map(String).join(' · '), manquant: false };
     }
+    case 'place': {
+      // port_id → nom servi par /places. Une place absente du référentiel
+      // national reste un manquant : on n'invente ni nom ni code.
+      if (estAbsent(v)) return { texte: tManquant(lang), manquant: true };
+      const place = places.find((p) => p.id === Number(v));
+      if (!place) return { texte: `#${v}`, manquant: true };
+      return { texte: place.nom || place.code, manquant: false };
+    }
     default: {
       if (estAbsent(v)) return { texte: tManquant(lang), manquant: true };
       const brut = Array.isArray(v) ? v.map(String).join(' · ') : String(v);

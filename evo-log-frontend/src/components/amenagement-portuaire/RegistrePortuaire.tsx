@@ -657,7 +657,7 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
                       {(lignes.data || []).map((ligne) => (
                         <tr key={ligne.id} className="border-b border-slate-800/60 hover:bg-slate-800/30">
                           {colonnesTable.map((c) => {
-                            const cell = rendreCellule(c, ligne, lang, nomenclatures.data || null);
+                            const cell = rendreCellule(c, ligne, lang, nomenclatures.data || null, places.data || []);
                             return (
                               <td
                                 key={c.name}
