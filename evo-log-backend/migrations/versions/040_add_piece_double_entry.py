@@ -1,20 +1,20 @@
 """040 : piece comptable en partie double (en-tete + lignes reels).
 
-Le module exposait une éecriture "plate" : une ligne unique portant a la fois
-un compte, un débit et un crédit, sans jamais contrôler l'équilibre
-somme(débit) == somme(crédit) ni exiger les deux contreparties d'une opération.
-La table `lignes_journal` (la structure multi-lignes d'une pièce) existait mais
-n'était remplie par aucun chemin d'écriture.
+Le module exposait une ecriture "plate" : une ligne unique portant a la fois
+un compte, un debit et un credit, sans jamais controler l'equilibre
+somme(debit) == somme(credit) ni exiger les deux contreparties d'une operation.
+La table `lignes_journal` (la structure multi-lignes d'une piece) existait mais
+n'etait remplie par aucun chemin d'ecriture.
 
-Cette migration prépare l'en-tête d'écriture (`ecritures_comptables_ohada`) a
-porter une VERITABLE piece équilibrée :
+Cette migration prepare l'en-tete d'ecriture (`ecritures_comptables_ohada`) a
+porter une VERITABLE piece equilibree :
 
-    - ``total_debit``  : somme des débits des lignes de la pièce.
+    - ``total_debit``  : somme des debits des lignes de la piece.
     - ``total_credit`` : somme des credits des lignes de la piece.
     - ``statut``       : brouillon | valide | comptabilise.
 
 Les lignes elles-memes vivent dans `lignes_journal` (deja presente) : une ligne
-= un compte + (debit OU credit). L'éequilibre et les regles metier sont appliques
+= un compte + (debit OU credit). L'equilibre et les regles metier sont appliques
 dans le service (`PieceComptableService`), pas ici.
 
 Proprietes (conventions 024/027/029/030/031/032/037) :
