@@ -22,7 +22,7 @@
  *     par exemple), pas un texte générique qui masquerait le doublon.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pencil, Plus, RefreshCw, ShieldAlert, WifiOff, Trash2, FileQuestion, ExternalLink } from 'lucide-react';
+import { Pencil, Plus, RefreshCw, ShieldAlert, WifiOff, Trash2, PenLine, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AxiosError } from 'axios';
 
