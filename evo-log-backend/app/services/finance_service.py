@@ -302,7 +302,7 @@ class PieceComptableService:
                 reference_document=piece_in.reference_document,
                 type_document=piece_in.type_document,
                 periode=periode,
-                journal=journal.nom_journal,
+                journal=journal.code_journal,
                 valider=True,
                 valide_par="saisie_piece",
                 date_validation=date.today(),
