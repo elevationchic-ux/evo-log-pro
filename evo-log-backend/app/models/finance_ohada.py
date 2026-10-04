@@ -76,10 +76,16 @@ class EcritureComptableNew(Base):
     date_ecriture = Column(Date, nullable=False)
     numero_piece = Column(String(50))
     libelle = Column(String(500), nullable=False)
-    compte_id = Column(Integer, ForeignKey('plan_comptable_ohada.id'))
+    compte_id = Column(Integer, ForeignKey('plan_comptable_ohada.id'), nullable=True)
     tiers_id = Column(Integer, ForeignKey('tiers.id'), nullable=True)
+    # Ligne plate heritee (un seul compte) : conservee par retro-compat. Desormais
+    # la piece reelle porte ses lignes dans `lignes_journal` (partie double) ; ici
+    # `debit`/`credit` de l'en-tete portent les TOTAUX de la piece (somme lignes).
     debit = Column(Numeric(15, 2), default=0)
     credit = Column(Numeric(15, 2), default=0)
+    total_debit = Column(Numeric(15, 2), default=0)   # somme des debits des lignes
+    total_credit = Column(Numeric(15, 2), default=0)  # somme des credits des lignes
+    statut = Column(String(20), default="brouillon")  # brouillon, valide, comptabilise
     devise = Column(String(3), default="XAF")
     reference_document = Column(String(100))
     type_document = Column(String(50))  # "facture", "avoir", "bq", "caisse"
@@ -97,6 +103,10 @@ class EcritureComptableNew(Base):
     compte = relationship("PlanComptableOHADA", back_populates="ecritures_comptables")
     exercice = relationship("ExerciceComptable")
     journal_auxiliaire = relationship("JournalAuxiliaire", back_populates="ecritures")
+    lignes_journal = relationship(
+        "LigneJournal", back_populates="ecriture",
+        cascade="all, delete-orphan", order_by="LigneJournal.order_line"
+    )
 
 
 class ExerciceComptable(Base):
@@ -469,7 +479,7 @@ class LigneJournal(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships
-    ecriture = relationship("EcritureComptableNew")
+    ecriture = relationship("EcritureComptableNew", back_populates="lignes_journal")
     journal = relationship("JournalAuxiliaire")
     compte = relationship("PlanComptableOHADA")
 
