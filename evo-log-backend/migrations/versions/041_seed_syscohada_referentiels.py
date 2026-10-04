@@ -28,6 +28,7 @@ journaux/exercice peuvent avoir ete etendus par l'exploitant, on ne casse rien).
 Revision ID: 041_seed_syscohada_referentiels
 Revises: 040_add_piece_double_entry
 Create Date: 2026-10-04
+
 """
 from alembic import op
 import sqlalchemy as sa
@@ -129,7 +130,7 @@ def upgrade():
                 "VALUES (:n, :i, :t, :c, :s, 'XAF', 0, 0, :cc, 1, :d, :ts)"
             ),
             {"n": numero, "i": intitule, "t": type_name, "c": classe,
-             "s": sous_classe, "cc": 1 if central else 0, "d": date.today().isoformat(), "ts": TS},
+             "s": sous_classe, "cc": central, "d": date.today().isoformat(), "ts": TS},
         )
 
     # 2) Journaux auxiliaires
@@ -166,3 +167,4 @@ def downgrade():
     # Donnees de reference : on ne les supprime pas en downgrade pour ne pas
     # detruire un referentiel que l'exploitant aurait complete. No-op honnete.
     pass
+
