@@ -291,10 +291,12 @@ class SchemaDirecteur(Base):
 class ProjetAmenagement(Base):
     """Opération d'aménagement inscrite à la programmation d'une place.
 
-    Le pilotage camerounais est documenté : un projet n'existe juridiquement
-    qu'à partir du moment où il est porté au DTO (Document Technique Outil,
-    loi de finances) et notifié au MINMIVT au titre de l'engagement des
-    crédits. Ces deux dates sont donc des champs saisis, jamais déduits.
+    Le pilotage camerounais est documenté : un projet d'investissement n'existe
+    juridiquement qu'après les étapes suivies par le MINEPAT (DGPIP) — fiche /
+    dossier technique, visa de maturité (décret n° 2018/0492 du Premier
+    Ministre), inscription au PIP-CDMT puis à la loi de finances, et engagement
+    des crédits visé par le contrôle financier du MINFI. Ces références et ces
+    dates sont donc des champs saisis depuis les actes réels, jamais déduits.
     """
     __tablename__ = "projets_amenagement"
 
@@ -324,8 +326,8 @@ class ProjetAmenagement(Base):
     maitre_doeuvre = Column(String(160))
     bureau_controle = Column(String(160))
     entreprise_attributaire = Column(String(200))
-    dto_reference = Column(String(120))            # ligne DTO réelle (« DTO-2026-… »)
-    date_notification_minepf = Column(Date)        # engagement visé par le contrôle financier
+    reference_fiche_technique = Column(String(120))  # fiche/dossier technique déposé (« FT-2026-… »)
+    date_notification_minfi = Column(Date)         # engagement visé par le contrôle financier
     eies_obligatoire = Column(Boolean)             # classification loi 96/012, saisie
     superficie_impactee_ha = Column(Numeric(14, 3))
     capacite_additionnelle = Column(String(120))   # ex. « 300 000 EVP/an », texte saisi
