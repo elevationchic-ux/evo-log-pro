@@ -135,6 +135,33 @@ export interface CircuitExterne {
   interroger: (id: number) => Promise<AxiosResponse>;
 }
 
+/** Clé d'une sonde : une seule entrée de la réponse serveur, affichée telle
+ *  quelle. Aucun libellé ne correspond à un calcul fait côté navigateur. */
+export interface CleSonde {
+  /** Nom EXACT de la clé renvoyée par la route. */
+  name: string;
+  label: string;
+  labelEn?: string;
+  type?: 'montant' | 'nombre' | 'booleen' | 'date' | 'texte';
+  unite?: string;
+}
+
+/** Lecture complémentaire en une ligne : la route existe et renvoie des
+ *  données agrégées par le serveur (écarts, totaux). Une valeur non calculable
+ *  y est NULL : l'écran l'affiche « non enregistré » au lieu de combler. */
+export interface SondeServeur {
+  id: string;
+  libelle: string;
+  libelleEn?: string;
+  /** Permission granulaire requise (défaut : lecture). */
+  action?: 'read' | 'modify' | 'approve';
+  interroger: (id: number) => Promise<AxiosResponse>;
+  cles: CleSonde[];
+  /** Rappel du périmètre exact de la route, en langage d'agent. */
+  note?: string;
+  noteEn?: string;
+}
+
 export interface ConfigRegistre {
   /** Sous-module dans le catalogue de permissions backend. */
   permSousModule: string;

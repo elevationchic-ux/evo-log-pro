@@ -946,7 +946,10 @@ export const amenagementAPI = {
   getProjet: (id: number) => apiClient.get(`${AMGT}/projets/${id}`),
   createProjet: (data: unknown) => apiClient.post(`${AMGT}/projets`, data),
   updateProjet: (id: number, data: unknown) => apiClient.put(`${AMGT}/projets/${id}`, data),
-  deleteProjet: (id: number) => apiClient.delete(`${AMGT}/projets/${id}`),
+  // Retrait declaratif : le backend exige un motif (>= 3 caracteres), jamais un
+  // effacement sec — la ligne reste, l'objet sort du portefeuille.
+  deleteProjet: (id: number, params: { motif: string }) =>
+    apiClient.delete(`${AMGT}/projets/${id}`, { params }),
   // Un relevé absent reste NULL : l'avancement n'est jamais calculé ici.
   saisirAvancement: (id: number, params: Record<string, unknown>) =>
     apiClient.post(`${AMGT}/projets/${id}/avancement`, null, { params }),
@@ -996,7 +999,10 @@ export const amenagementAPI = {
   getInfrastructure: (id: number) => apiClient.get(`${AMGT}/infrastructures/${id}`),
   createInfrastructure: (data: unknown) => apiClient.post(`${AMGT}/infrastructures`, data),
   updateInfrastructure: (id: number, data: unknown) => apiClient.put(`${AMGT}/infrastructures/${id}`, data),
-  deleteInfrastructure: (id: number) => apiClient.delete(`${AMGT}/infrastructures/${id}`),
+  // Sortie d'inventaire sur motif obligatoire (démolition, sortie de
+  // patrimoine, erreur de saisie) : l'ouvrage n'est jamais effacé sec.
+  deleteInfrastructure: (id: number, params: { motif: string }) =>
+    apiClient.delete(`${AMGT}/infrastructures/${id}`, { params }),
   consignerInspection: (id: number, params: { date_inspection: string; etat_structural?: string; note_genie_civil?: number; prochaine_inspection?: string }) =>
     apiClient.post(`${AMGT}/infrastructures/${id}/inspection`, null, { params }),
 
