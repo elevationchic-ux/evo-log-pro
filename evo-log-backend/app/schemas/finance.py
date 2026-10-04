@@ -89,6 +89,69 @@ class EcritureComptableResponse(EcritureComptableBase):
         from_attributes = True
 
 
+# Piece comptable en partie double (en-tete + lignes)
+class LignePieceCreate(BaseModel):
+    """Une ligne de piece : un compte + (debit OU credit), jamais les deux."""
+    compte_id: int
+    debit: float = 0
+    credit: float = 0
+    libelle_detail: Optional[str] = None
+    reference_document: Optional[str] = None
+
+
+class PieceCreate(BaseModel):
+    """En-tete d'une piece + ses lignes. L'equilibre (somme debit == somme
+    credit, >= 2 lignes, une contrepartie par ligne) est controle au serveur,
+    pas dans le schema, pour que la regle metier soit la seule source de verite.
+    """
+    date_ecriture: date
+    libelle: str
+    numero_piece: Optional[str] = None
+    journal_id: Optional[int] = None
+    type_journal: Optional[str] = None  # ACHATS/VENTES/BANQUE/CAISSE/OD/SALAIRES/AMORTISSEMENTS/TVA
+    tiers_id: Optional[int] = None
+    reference_document: Optional[str] = None
+    type_document: Optional[str] = None
+    lignes: List[LignePieceCreate]
+
+
+class LignePieceResponse(BaseModel):
+    id: int
+    compte_id: int
+    compte_numero: Optional[str] = None
+    compte_intitule: Optional[str] = None
+    debit: float
+    credit: float
+    libelle_detail: Optional[str] = None
+    order_line: int
+
+    class Config:
+        from_attributes = True
+
+
+class PieceResponse(BaseModel):
+    id: int
+    numero_ecriture: str
+    date_ecriture: date
+    libelle: str
+    numero_piece: Optional[str] = None
+    journal_id: Optional[int] = None
+    journal: Optional[str] = None
+    periode: Optional[str] = None
+    statut: Optional[str] = None
+    total_debit: float
+    total_credit: float
+    equilibree: bool
+    devise: str
+    valider: bool
+    exercice_id: Optional[int] = None
+    lignes: List[LignePieceResponse] = []
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
 # Exercice Comptable schemas
 class ExerciceComptableBase(BaseModel):
     numero_exercice: str
