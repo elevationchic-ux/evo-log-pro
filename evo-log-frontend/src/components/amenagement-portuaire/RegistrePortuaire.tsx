@@ -82,6 +82,12 @@ function champTriplet(v: unknown): Tri {
   return '';
 }
 
+/** Libellé d'interface (pas une donnée métier) : signale que les valeurs
+ *  affichées dessous proviennent de la nomenclature servie par le serveur. */
+function tVocabulaire(lang: 'fr' | 'en'): string {
+  return lang === 'en' ? 'Accepted values' : 'Valeurs admises';
+}
+
 /* ------------------------------ formulaire ------------------------------- */
 
 function ChampSaisie({
