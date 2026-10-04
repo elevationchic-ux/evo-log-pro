@@ -142,8 +142,8 @@ class ProjetAmenagementCreate(_Provenance):
     maitre_doeuvre: Optional[str] = None
     bureau_controle: Optional[str] = None
     entreprise_attributaire: Optional[str] = None
-    dto_reference: Optional[str] = None
-    date_notification_minepf: Optional[date] = None
+    reference_fiche_technique: Optional[str] = None
+    date_notification_minfi: Optional[date] = None
     eies_obligatoire: Optional[bool] = None
     superficie_impactee_ha: Optional[float] = None
     capacite_additionnelle: Optional[str] = None
@@ -176,8 +176,8 @@ class ProjetAmenagementUpdate(BaseModel):
     maitre_doeuvre: Optional[str] = None
     bureau_controle: Optional[str] = None
     entreprise_attributaire: Optional[str] = None
-    dto_reference: Optional[str] = None
-    date_notification_minepf: Optional[date] = None
+    reference_fiche_technique: Optional[str] = None
+    date_notification_minfi: Optional[date] = None
     eies_obligatoire: Optional[bool] = None
     superficie_impactee_ha: Optional[float] = None
     capacite_additionnelle: Optional[str] = None
@@ -216,8 +216,8 @@ class ProjetAmenagementOut(_Conf):
     maitre_doeuvre: Optional[str] = None
     bureau_controle: Optional[str] = None
     entreprise_attributaire: Optional[str] = None
-    dto_reference: Optional[str] = None
-    date_notification_minepf: Optional[date] = None
+    reference_fiche_technique: Optional[str] = None
+    date_notification_minfi: Optional[date] = None
     eies_obligatoire: Optional[bool] = None
     superficie_impactee_ha: Optional[float] = None
     capacite_additionnelle: Optional[str] = None
@@ -231,10 +231,13 @@ class ProjetAmenagementOut(_Conf):
     created_at: Optional[datetime] = None
 
 
-# ─── 3. Programmation budgétaire (DTO) ───────────────────────────────────────
+# ─── 3. Programmation : fiche technique, maturité, engagement ────────────────
 
-class RegistreDTOCreate(_Provenance):
-    reference_dto: str = Field(min_length=2, max_length=80)
+class DocumentProgrammationCreate(_Provenance):
+    reference_fiche_technique: str = Field(
+        min_length=2, max_length=80,
+        description="Reference reellement attribuee a la fiche / au dossier technique",
+    )
     exercice: int
     projet_id: Optional[int] = None
     port_id: Optional[int] = None
@@ -245,13 +248,17 @@ class RegistreDTOCreate(_Provenance):
     chapitre: Optional[str] = None
     statut: Optional[str] = None
     date_presentation: Optional[date] = None
+    numero_visa_maturite: Optional[str] = None
+    date_visa_maturite: Optional[date] = None
+    autorite_visa_maturite: Optional[str] = None
+    reference_pip_cdmt: Optional[str] = None
     date_visa_controle_financier: Optional[date] = None
     autorite_visa: Optional[str] = None
     numero_engagement: Optional[str] = None
-    date_notification_minepf: Optional[date] = None
+    date_notification_minfi: Optional[date] = None
 
 
-class RegistreDTOUpdate(BaseModel):
+class DocumentProgrammationUpdate(BaseModel):
     exercice: Optional[int] = None
     projet_id: Optional[int] = None
     port_id: Optional[int] = None
@@ -262,18 +269,22 @@ class RegistreDTOUpdate(BaseModel):
     chapitre: Optional[str] = None
     statut: Optional[str] = None
     date_presentation: Optional[date] = None
+    numero_visa_maturite: Optional[str] = None
+    date_visa_maturite: Optional[date] = None
+    autorite_visa_maturite: Optional[str] = None
+    reference_pip_cdmt: Optional[str] = None
     date_visa_controle_financier: Optional[date] = None
     autorite_visa: Optional[str] = None
     numero_engagement: Optional[str] = None
-    date_notification_minepf: Optional[date] = None
+    date_notification_minfi: Optional[date] = None
     source_reference: Optional[str] = None
     date_verification: Optional[date] = None
     notes: Optional[str] = None
 
 
-class RegistreDTOOut(_Conf):
+class DocumentProgrammationOut(_Conf):
     id: int
-    reference_dto: str
+    reference_fiche_technique: str
     exercice: int
     projet_id: Optional[int] = None
     port_id: Optional[int] = None
@@ -284,10 +295,14 @@ class RegistreDTOOut(_Conf):
     chapitre: Optional[str] = None
     statut: Optional[str] = None
     date_presentation: Optional[date] = None
+    numero_visa_maturite: Optional[str] = None
+    date_visa_maturite: Optional[date] = None
+    autorite_visa_maturite: Optional[str] = None
+    reference_pip_cdmt: Optional[str] = None
     date_visa_controle_financier: Optional[date] = None
     autorite_visa: Optional[str] = None
     numero_engagement: Optional[str] = None
-    date_notification_minepf: Optional[date] = None
+    date_notification_minfi: Optional[date] = None
     source_reference: Optional[str] = None
     date_verification: Optional[date] = None
     auteur_saisie: Optional[str] = None
