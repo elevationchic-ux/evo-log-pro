@@ -494,50 +494,73 @@ def lister_ecritures(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("comptabilite.journal.read"))
 ):
-    """Lister les écritures comptables avec filtres multicritères"""
-    from app.models.finance_ohada import EcritureComptableNew
+    """Lister les ecritures comptables avec filtres multicriteres.
+
+    Retourne l'EN-TETE de piece enrichi de ses lignes reelles (partie double) :
+    le frontend journal a besoin de voir les comptes debit/credit d'une
+    operation, pas une ligne plate inventee. Le filtre `journal` accepte le
+    code (VTE, BQ...), le nom ou le type (VENTES, BANQUE...).
+    """
+    from app.models.finance_ohada import EcritureComptableNew, JournalAuxiliaire, TypeJournal
+    from app.services.finance_service import PieceComptableService
+
     query = db.query(EcritureComptableNew)
     if journal and journal != 'ALL':
-        query = query.filter(EcritureComptableNew.journal == journal)
+        codes = [journal]
+        cle = journal.strip().upper()
+        if cle in TypeJournal.__members__:
+            codes += [
+                j.code_journal
+                for (j,) in db.query(JournalAuxiliaire.code_journal).filter(
+                    JournalAuxiliaire.type_journal == TypeJournal[cle]
+                ).all()
+            ]
+        noms = {r[0] for r in db.query(JournalAuxiliaire.nom_journal).filter(
+            JournalAuxiliaire.code_journal.in_(codes)
+        ).all()}
+        codes += sorted(noms)
+        query = query.filter(EcritureComptableNew.journal.in_(codes))
     if compte:
         query = query.filter(EcritureComptableNew.compte_id == compte)
     if date_debut:
         query = query.filter(EcritureComptableNew.date_ecriture >= date_debut)
     if date_fin:
         query = query.filter(EcritureComptableNew.date_ecriture <= date_fin)
-    return query.order_by(EcritureComptableNew.date_ecriture.desc(), EcritureComptableNew.id.desc()).all()
+    ecritures = query.order_by(
+        EcritureComptableNew.date_ecriture.desc(), EcritureComptableNew.id.desc()
+    ).all()
+
+    resultats = []
+    for e in ecritures:
+        d = PieceComptableService.serializer(e)
+        # Retro-compat du contrat d'honnetete : les champs de l'en-tete plat
+        # restent exposes tels qu'enregistres (jamais reinventes).
+        d["compte_id"] = e.compte_id
+        d["debit"] = float(e.debit or 0)
+        d["credit"] = float(e.credit or 0)
+        d["valider"] = bool(e.valider)
+        resultats.append(d)
+    return resultats
 
 
-@router.post("/ecritures", status_code=status.HTTP_201_CREATED)
+@router.post("/ecritures", status_code=status.HTTP_410_GONE, deprecated=True)
 def creer_ecriture(
-    data: dict,
-    db: Session = Depends(get_db),
+    data: dict = None,
     current_user: User = Depends(require_perm("comptabilite.journal.create"))
 ):
-    """Créer une écriture comptable avec équilibre et date"""
-    from app.models.finance_ohada import EcritureComptableNew
-    import uuid
-    from datetime import datetime
-    
-    numero = data.get("numero_ecriture") or f"ECR-{datetime.utcnow().strftime('%Y%m')}-{uuid.uuid4().hex[:6].upper()}"
-    date_ecr = data.get("date_ecriture") or date.today()
-    if isinstance(date_ecr, str):
-        date_ecr = datetime.strptime(date_ecr, "%Y-%m-%d").date()
-        
-    ecriture = EcritureComptableNew(
-        numero_ecriture=numero,
-        date_ecriture=date_ecr,
-        numero_piece=data.get("numero_piece") or data.get("piece", "PIECE-GEN"),
-        libelle=data.get("libelle", ""),
-        debit=data.get("debit", 0.0),
-        credit=data.get("credit", 0.0),
-        devise=data.get("devise", "XAF"),
-        journal=data.get("journal", "OD"),
-        reference_document=data.get("reference_document"),
-        periode=data.get("periode") or date_ecr.strftime("%Y-%m")
+    """410 Gone : l'ecriture "plate" (un compte, un debit et un credit sur la
+    meme ligne, sans contrepartie ni controle d'equilibre) est SUPPRIMEE.
+
+    Aucune ecriture desequilibree ne doit pouvoir entrer en comptabilite.
+    Le chemin reel est POST /api/v1/finance/pieces (PieceComptableService) :
+    >= 2 lignes, une contrepartie par ligne, somme(debit) == somme(credit),
+    exercice ouvert, journal existant, ecrit atomiquement avec le grand livre.
+    """
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail=(
+            "Cet endpoint est supprime (il acceptait des ecritures plates "
+            "desequilibrees). Utilisez POST /api/v1/finance/pieces."
+        ),
     )
-    db.add(ecriture)
-    db.commit()
-    db.refresh(ecriture)
-    return ecriture
 
