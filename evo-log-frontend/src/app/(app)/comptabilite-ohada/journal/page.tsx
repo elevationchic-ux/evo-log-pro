@@ -386,6 +386,11 @@ export default function ComptabiliteOhadaJournal() {
 
       {/* Barre de Recherche & Contrôles */}
       <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
+        {listeErreur && (
+          <div className="w-full flex items-center gap-2 text-[11px] text-red-400 font-semibold">
+            <AlertTriangle className="w-3.5 h-3.5" /> {listeErreur}
+          </div>
+        )}
         <div className="relative w-full sm:w-96">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
