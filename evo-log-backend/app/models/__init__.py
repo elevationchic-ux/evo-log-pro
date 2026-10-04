@@ -27,6 +27,15 @@ from app.models.conteneur_cycle import (
     ConteneurCycle, CycleConteneur, DommageConteneur, EmpotageDepotage, InspectionConteneur
 )
 from app.models.port_cameroun import TerminalPortuaire
+# Departement Amenagement portuaire : enregistre les tables du domaine public
+# (schemas directeurs, programmation, marches, titres, concessions, ouvrages,
+# dragage, autorisations). Importe ici pour que Base.metadata les connaisse des
+# que l'application demarre (create_all dev, autogenerate Alembic).
+from app.models.amenagement_portuaire import (
+    SchemaDirecteur, ProjetAmenagement, RegistreDTO, MarcheAmenagement,
+    AutorisationDomaniale, ConcessionPortuaire, InfrastructurePortuaire,
+    Dragage, AutorisationTravaux,
+)
 from app.models.tenant import Company, SubscriptionPlan, Subscription, Department, B2BPortal, TenantAuditLog
 from app.models.finance_ohada import (
     PlanComptableOHADA, EcritureComptableNew, ExerciceComptable, FactureNew, LigneFactureOHADA,
@@ -55,6 +64,9 @@ __all__ = [
     "SequenceNumerotation",
     "ConteneurCycle", "CycleConteneur", "DommageConteneur", "EmpotageDepotage", "InspectionConteneur",
     "TerminalPortuaire",
+    "SchemaDirecteur", "ProjetAmenagement", "RegistreDTO", "MarcheAmenagement",
+    "AutorisationDomaniale", "ConcessionPortuaire", "InfrastructurePortuaire",
+    "Dragage", "AutorisationTravaux",
     "Company", "SubscriptionPlan", "Subscription", "Department", "B2BPortal", "TenantAuditLog",
     "PlanComptableOHADA", "EcritureComptableNew", "ExerciceComptable", "FactureNew", "LigneFactureOHADA",
     "Reglement", "TVADeclarable", "RetenueSource", "ISDeclarable", "CentimesAdditionnels", "Patente",
