@@ -492,7 +492,7 @@ def modifier_programmation(
              summary="Attester le visa du controle financier")
 def viser_programmation(
     ident: int,
-    date_visa: date = Query(..., description="Date reellement apposee sur le DTO"),
+    date_visa: date = Query(..., description="Date reellement apposee sur le dossier"),
     autorite_visa: str = Query(..., min_length=2, description="Controleur financier / direction emisrice"),
     numero_engagement: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -512,13 +512,67 @@ def viser_programmation(
     return _to_out(obj)
 
 
-@router.post("/programmation/{ident}/notification-minepf", summary="Notification MINFI (501)")
+@router.post("/programmation/{ident}/visa-maturite", response_model=DocumentProgrammationOut,
+             summary="Attester le visa de maturite du dossier technique")
+def viser_maturite(
+    ident: int,
+    numero_visa: str = Query(..., min_length=2, description="Numero reel du visa de maturite"),
+    date_visa: date = Query(..., description="Date d'apposition du visa"),
+    autorite_visa: str = Query(..., min_length=2,
+                               description="Commission technique / DGPIP emettrice"),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_perm("amenagement.programmation.approve")),
+):
+    """Enregistre l'acte pris par la commission, ne le delivre pas.
+
+    Le visa de maturite (decret n° 2018/0492) sanctionne l'achevement de la
+    preparation d'un projet d'investissement public. Ce point d'application ne
+    peut pas l'emettre a la place de la commission : il saisit la reference, la
+    date et l'autorite telles qu'elles figurent sur la piece.
+    """
+    obj = _get_or_404(db, DocumentProgrammation, ident, "Dossier de programmation")
+    obj.numero_visa_maturite = numero_visa
+    obj.date_visa_maturite = date_visa
+    obj.autorite_visa_maturite = autorite_visa
+    if obj.statut in (None, "PREPARATION"):
+        obj.statut = "MATURITE_VISEE"
+    obj.date_verification = date.today()
+    obj.auteur_saisie = getattr(user, "username", None) or obj.auteur_saisie
+    db.commit()
+    db.refresh(obj)
+    return _to_out(obj)
+
+
+@router.post("/programmation/{ident}/inscription-pip", response_model=DocumentProgrammationOut,
+             summary="Attester l'inscription au PIP / CDMT")
+def inscrire_pip(
+    ident: int,
+    reference_pip_cdmt: str = Query(..., min_length=2,
+                                    description="Ligne telle que publiee au PIP ou au CDMT"),
+    exercice: int = Query(..., ge=2000, le=2100, description="Exercice d'inscription"),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_perm("amenagement.programmation.approve")),
+):
+    """La programmation releve du MINEPAT : seule la reference saisie est gardee."""
+    obj = _get_or_404(db, DocumentProgrammation, ident, "Dossier de programmation")
+    obj.reference_pip_cdmt = reference_pip_cdmt
+    obj.exercice = exercice
+    if obj.statut in (None, "PREPARATION", "MATURITE_VISEE"):
+        obj.statut = "INSCRIT_PIP"
+    obj.auteur_saisie = getattr(user, "username", None) or obj.auteur_saisie
+    db.commit()
+    db.refresh(obj)
+    return _to_out(obj)
+
+
+@router.post("/programmation/{ident}/notification-minfi", summary="Notification MINFI (501)")
 def notifier_minfi(ident: int, user: User = Depends(require_perm("amenagement.programmation.approve"))):
-    """Aucune interconnexion avec le MINFI/CELIBER n'est deployee ici (501)."""
+    """Aucune interconnexion avec le MINFI/MINEPAT n'est deployee ici (501)."""
     not_implemented(
         "Notification teletransmise d'un engagement au MINFI",
-        "un canal officiel de teletransmission des DTO vers le Tresor public / "
-        "MINFI (le depot reste papier ou email adresse au greffe)",
+        "un canal officiel de teletransmission des dossiers de programmation "
+        "vers le Tresor public / MINFI (le depot reste papier ou email adresse "
+        "au greffe)",
     )
 
 
