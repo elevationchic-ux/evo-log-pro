@@ -471,7 +471,6 @@ def test_refus_d_un_titre_domanial_doit_etre_motive(client_chef):
     r = client_chef.post(
         f"{BASE}/titres-domaniaux/{titre['id']}/decision?accord=false&date_decision=2026-06-02")
     assert r.status_code == 422, r.text
-    assert titre["id"] is not None
 
     ok = client_chef.post(
         f"{BASE}/titres-domaniaux/{titre['id']}/decision"
@@ -502,12 +501,20 @@ def test_delivrance_d_un_titre_enregistre_la_date_reelle(client_chef):
         "la duree du titre vient de l'acte : elle n'est pas calculee ici")
 
 
-def test_double_reference_refusee_plutot_que_doublon(client_chef):
+def test_double_reference_refusee_plutot_que_doublon(client_chef, db):
+    from app.models.port_cameroun import PortCameroun, TypePort
+
+    port = PortCameroun(code="KRI", nom="Port de Kribi", type_port=TypePort.MARCHANDISES,
+                        ville="Kribi", region="Sud")
+    db.add(port)
+    db.commit()
+
     _creer(client_chef, "/dragage", {
-        "code_campagne": "DRAG-PAD-2026-S1", "libelle": "Curage approche chenal",
+        "code_campagne": "DRAG-PAK-2026-S1", "libelle": "Curage de l'approche chenal",
+        "port_id": port.id,
     })
     r = client_chef.post(f"{BASE}/dragage", json={
-        "code_campagne": "DRAG-PAD-2026-S1", "libelle": "Doublon",
+        "code_campagne": "DRAG-PAK-2026-S1", "libelle": "Doublon", "port_id": port.id,
     })
     assert r.status_code == 409, r.text
 
@@ -528,14 +535,27 @@ def _scalar(url, sql):
         engine.dispose()
 
 
-@pytest.fixture
-def base_migrees(tmp_path, monkeypatch):
-    """Base jetable montee jusqu'a 039 (chaine complete, comme en production)."""
-    db_file = tmp_path / "mig039.db"
+@pytest.fixture(scope="module")
+def base_migrees(tmp_path_factory):
+    """Base jetable montee jusqu'a 039 (chaine complete, comme en production).
+
+    Scope module : monter 001->039 coute quelques secondes, les trois tests qui
+    lisent cette base sont purement en lecture.
+    """
+    import os
+
+    db_file = tmp_path_factory.mktemp("mig039") / "mig039.db"
     url = f"sqlite:///{db_file.as_posix()}"
-    monkeypatch.setenv("DATABASE_URL", url)
-    command.upgrade(_make_config(), "039_rbac_amenagement_grants")
-    return url
+    saved = os.environ.get("DATABASE_URL")
+    os.environ["DATABASE_URL"] = url
+    try:
+        command.upgrade(_make_config(), "039_rbac_amenagement_grants")
+        yield url
+    finally:
+        if saved is not None:
+            os.environ["DATABASE_URL"] = saved
+        else:
+            os.environ.pop("DATABASE_URL", None)
 
 
 def test_migration_039_seede_codes_et_roles_du_departement(base_migrees):

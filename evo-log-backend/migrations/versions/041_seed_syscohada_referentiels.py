@@ -31,7 +31,7 @@ Create Date: 2026-10-04
 """
 from alembic import op
 import sqlalchemy as sa
-from datetime import date
+from datetime import date, datetime
 
 
 revision = "041_seed_syscohada_referentiels"
@@ -103,6 +103,10 @@ JOURNAUX = [
 ANNEE = date.today().year
 EXERCICE = (f"EX{ANNEE}", ANNEE, date(ANNEE, 1, 1), date(ANNEE, 12, 31), "ouvert")
 
+# Horodatage explicite : la table porte un DEFAULT now() invalide sur SQLite,
+# donc on fournit created_at a chaque insert pour ne pas declencher la fonction.
+TS = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
 
 def _existing(bind, table, key_col):
     rows = bind.execute(sa.text(f"SELECT {key_col} FROM {table}")).all()
@@ -121,11 +125,11 @@ def upgrade():
             sa.text(
                 f"INSERT INTO {T_PLAN} "
                 "(numero_compte, intitule, type_compte, classe, sous_classe, "
-                "devise, solde_debit, solde_credit, compte_centralisateur, actif, date_creation) "
-                "VALUES (:n, :i, :t, :c, :s, 'XAF', 0, 0, :cc, 1, :d)"
+                "devise, solde_debit, solde_credit, compte_centralisateur, actif, date_creation, created_at) "
+                "VALUES (:n, :i, :t, :c, :s, 'XAF', 0, 0, :cc, 1, :d, :ts)"
             ),
             {"n": numero, "i": intitule, "t": type_name, "c": classe,
-             "s": sous_classe, "cc": 1 if central else 0, "d": date.today().isoformat()},
+             "s": sous_classe, "cc": 1 if central else 0, "d": date.today().isoformat(), "ts": TS},
         )
 
     # 2) Journaux auxiliaires
@@ -137,10 +141,10 @@ def upgrade():
             sa.text(
                 f"INSERT INTO {T_JOURNAL} "
                 "(code_journal, nom_journal, type_journal, compte_centralisateur, "
-                "periodical, statut, devise) "
-                "VALUES (:code, :nom, :type, :comp, 1, 'actif', 'XAF')"
+                "periodical, statut, devise, created_at) "
+                "VALUES (:code, :nom, :type, :comp, 1, 'actif', 'XAF', :ts)"
             ),
-            {"code": code, "nom": nom, "type": type_name, "comp": comp},
+            {"code": code, "nom": nom, "type": type_name, "comp": comp, "ts": TS},
         )
 
     # 3) Exercice ouvert de l'annee courante
