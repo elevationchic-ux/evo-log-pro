@@ -5,7 +5,11 @@ ports_cameroun, des 50 codes amenagement en table, et des liens RBAC des roles
 porteurs. Aucune donnee metier ne doit avoir ete inseree par la migration.
 """
 import json
+import os
 import sqlite3
+import sys
+
+sys.path.insert(0, os.getcwd())  # lance depuis evo-log-backend
 
 from app.models.amenagement_portuaire import (
     SchemaDirecteur, ProjetAmenagement, DocumentProgrammation, MarcheAmenagement,
@@ -67,8 +71,12 @@ for r in ROLES:
         "SELECT COUNT(*) FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id "
         "WHERE rp.role_id = ? AND p.code LIKE 'amenagement.%'", (rid,)
     ).fetchone()[0]
+    try:
+        mods_lues = json.loads(mods or "[]")
+    except (TypeError, ValueError):
+        mods_lues = mods  # role plus ancien, format different : affiche tel quel
     print(f"  {r:26s} level={level} system={bool(is_system)} liens={liens} "
-          f"liens_amenagement={amgt} modules={json.loads(mods or '[]')}")
+          f"liens_amenagement={amgt} modules={mods_lues}")
 
 print("\n-- aucune donnee metier injectee --")
 for t in TABLES:
