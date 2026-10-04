@@ -154,11 +154,11 @@ def upgrade():
         bind.execute(
             sa.text(
                 f"INSERT INTO {T_EXERCICE} "
-                "(numero_exercice, annee, date_debut, date_fin, statut, devise) "
-                "VALUES (:n, :a, :db, :df, :st, 'XAF')"
+                "(numero_exercice, annee, date_debut, date_fin, statut, devise, created_at) "
+                "VALUES (:n, :a, :db, :df, :st, 'XAF', :ts)"
             ),
             {"n": numero, "a": annee, "db": debut.isoformat(),
-             "df": fin.isoformat(), "st": statut},
+             "df": fin.isoformat(), "st": statut, "ts": TS},
         )
 
 
