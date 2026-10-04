@@ -124,6 +124,20 @@ export const MODULE_PALETTE: Record<string, ModulePaletteEntry> = {
     sidebar: { activeAccent: 'text-green-400 border-green-400', activeBgSubtle: 'bg-green-500/10', brandIconBg: 'bg-green-600' },
   },
 
+  // departement autonome N°29 : l'amenagement portuaire (schema directeur,
+  // domaine public, gros obra) n'est pas l'exploitation du quai, mais il en
+  // partage le terrain. Il prend donc la FAMILLE MARITIME en teinte profonde
+  // (cyan-700 « encre de plan ») la meme famille que port-operations (sky-500
+  // « radar ») mais a l'oppose du spectre en luminosite. precedent deja admis
+  // dans ce fichier : portail-frais (teal-600) cote a cote de client-b2b
+  // (teal-500). Aucun module majeur ne porte #0E7490.
+  'amenagement-portuaire': {
+    hex: '#0E7490',
+    glow: 'shadow-cyan-600/50 border-cyan-600/60',
+    bgGradient: 'from-cyan-700 to-sky-900',
+    sidebar: { activeAccent: 'text-cyan-300 border-cyan-300', activeBgSubtle: 'bg-cyan-700/10', brandIconBg: 'bg-cyan-700' },
+  },
+
   // ── 8 portails de rôle (teintes distinctes) ──
   'portail-employe': {
     hex: '#84CC16',
