@@ -207,7 +207,8 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "qhse.accident.read", "qhse.accident.create", "qhse.accident.modify",
         "qhse.permis.create", "qhse.imdg.read", "qhse.risque.create",
     ]),
-    ("OPERATEUR_ACCONAGE", 3, "Operateur d'acconage : execution au quai, sans validation", [        "acconage.navire.read", "acconage.escale.read", "acconage.escale.create",
+    ("OPERATEUR_ACCONAGE", 3, "Operateur d'acconage : execution au quai, sans validation", [
+        "acconage.navire.read", "acconage.escale.read", "acconage.escale.create",
         "acconage.escale.modify",
         "acconage.stowage.create", "acconage.stowage.modify",
         "acconage.moyen.read", "acconage.reservation.create", "acconage.reservation.modify",
@@ -218,6 +219,33 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "acconage.nettoyage.create", "acconage.nettoyage.modify",
         "acconage.dockers.read", "acconage.dockers.create", "acconage.dockers.modify",
         "acconage.dockers.delete",
+    ]),
+    # Departement amenagement portuaire. Le chef de departement porte les
+    # actes d'engagement (approbation d'un schema directeur, visa du DTO,
+    # attribution d'un marche, delivrance d'un titre domanial) ; l'ingenieur
+    # preparatoire instruit et tient l'inventaire sans jamais trancher.
+    ("CHEF_AMENAGEMENT_PORTUAIRE", 2, "Chef du departement amenagement portuaire : pilotage complet du domaine et des operations", [
+        "amenagement.*.*",
+        # Le chef d'amenagement instruit les dossiers qui engagent la caisse
+        # et doit donc lire la programmation finance ; il n'approuve rien cote
+        # comptable.
+        "comptabilite.journal.read", "tresorerie.mouvement.read",
+        "port.quai.read", "port.zone.read",
+        "qhse.certification.read", "qhse.enregistrement.read",
+    ]),
+    ("INGENIEUR_AMENAGEMENT", 3, "Ingenieur genie portuaire : etudes, suivi des travaux et inventaire du domaine", [
+        "amenagement.*.read",
+        "amenagement.projet.create", "amenagement.projet.modify",
+        "amenagement.dto.create", "amenagement.dto.modify",
+        "amenagement.marche.create", "amenagement.marche.modify",
+        "amenagement.titre_domanial.create", "amenagement.titre_domanial.modify",
+        "amenagement.infrastructure.create", "amenagement.infrastructure.modify",
+        "amenagement.dragage.create", "amenagement.dragage.modify",
+        "amenagement.autorisation.create", "amenagement.autorisation.modify",
+        "amenagement.schema_directeur.create", "amenagement.schema_directeur.modify",
+        # Un debootage de quai se coordonne avec l'exploitation : lecture
+        # utile, pas decision.
+        "port.quai.read",
     ]),
 ]
 
