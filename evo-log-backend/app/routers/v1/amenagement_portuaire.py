@@ -427,9 +427,10 @@ def saisir_avancement(
     return _to_out(obj)
 
 
-# ─── 3. Programmation budgétaire (DTO) ───────────────────────────────────────
+# ─── 3. Programmation : fiche technique, maturité, engagement ────────────────
 
-@router.get("/programmation", response_model=List[DocumentProgrammationOut], summary="Registre des DTO")
+@router.get("/programmation", response_model=List[DocumentProgrammationOut],
+            summary="Chaîne de programmation des projets")
 def lister_programmation(
     exercice: Optional[int] = Query(None),
     statut: Optional[str] = Query(None),
@@ -445,13 +446,14 @@ def lister_programmation(
 
 
 @router.post("/programmation", response_model=DocumentProgrammationOut, status_code=status.HTTP_201_CREATED,
-             summary="Inscrire une ligne DTO")
+             summary="Inscrire une fiche technique à la programmation")
 def creer_programmation(
     payload: DocumentProgrammationCreate,
     db: Session = Depends(get_db),
     user: User = Depends(require_perm("amenagement.programmation.create")),
 ):
-    _check_unique(db, DocumentProgrammation, "reference_fiche_technique", payload.reference_fiche_technique, "Reference DTO")
+    _check_unique(db, DocumentProgrammation, "reference_fiche_technique",
+                  payload.reference_fiche_technique, "Reference de fiche technique")
     obj = DocumentProgrammation()
     _apply(payload.model_dump(exclude_unset=True), obj, create=True)
     obj.auteur_saisie = obj.auteur_saisie or getattr(user, "username", None) or getattr(user, "email", None)
@@ -461,23 +463,25 @@ def creer_programmation(
     return _to_out(obj)
 
 
-@router.get("/programmation/{ident}", response_model=DocumentProgrammationOut, summary="Detail d'une ligne DTO")
+@router.get("/programmation/{ident}", response_model=DocumentProgrammationOut,
+            summary="Detail d'un dossier de programmation")
 def detail_programmation(
     ident: int,
     db: Session = Depends(get_db),
     user: User = Depends(require_perm("amenagement.programmation.read")),
 ):
-    return _to_out(_get_or_404(db, DocumentProgrammation, ident, "Ligne DTO"))
+    return _to_out(_get_or_404(db, DocumentProgrammation, ident, "Dossier de programmation"))
 
 
-@router.put("/programmation/{ident}", response_model=DocumentProgrammationOut, summary="Corriger une ligne DTO")
+@router.put("/programmation/{ident}", response_model=DocumentProgrammationOut,
+            summary="Corriger un dossier de programmation")
 def modifier_programmation(
     ident: int,
     payload: DocumentProgrammationUpdate,
     db: Session = Depends(get_db),
     user: User = Depends(require_perm("amenagement.programmation.modify")),
 ):
-    obj = _get_or_404(db, DocumentProgrammation, ident, "Ligne DTO")
+    obj = _get_or_404(db, DocumentProgrammation, ident, "Dossier de programmation")
     _apply(payload.model_dump(exclude_unset=True), obj, create=False)
     db.commit()
     db.refresh(obj)
@@ -495,7 +499,7 @@ def viser_programmation(
     user: User = Depends(require_perm("amenagement.programmation.approve")),
 ):
     """Enregistre le visa appose par le controle financier, ne le simule pas."""
-    obj = _get_or_404(db, DocumentProgrammation, ident, "Ligne DTO")
+    obj = _get_or_404(db, DocumentProgrammation, ident, "Dossier de programmation")
     obj.date_visa_controle_financier = date_visa
     obj.autorite_visa = autorite_visa
     if numero_engagement:
