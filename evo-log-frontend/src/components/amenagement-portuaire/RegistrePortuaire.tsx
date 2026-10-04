@@ -284,6 +284,12 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
   const [reponseCircuit, setReponseCircuit] = useState<string | null>(null);
   const [sondeCircuit, setSondeCircuit] = useState(false);
 
+  const [sondeOuverte, setSondeOuverte] = useState<SondeServeur | null>(null);
+  const [ligneSonde, setLigneSonde] = useState<LigneRegistre | null>(null);
+  const [brutSonde, setBrutSonde] = useState<Record<string, unknown> | null>(null);
+  const [erreurSonde, setErreurSonde] = useState<string | null>(null);
+  const [chargementSonde, setChargementSonde] = useState(false);
+
   const ouvrirCreation = () => {
     const init: Record<string, string> = {};
     config.champs.forEach((c) => {
@@ -471,35 +477,44 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
         </button>,
       );
     }
+    // Les actes en un clic (au sens large) sont proposés seulement si le rôle
+    // détient la permission granulaire correspondante, y compris le retrait
+    // declaratif (`action: 'delete'`), qui exige un motif écrit.
     (config.actions || [])
       .filter((a) => can(perm(a.action)))
       .forEach((a) => {
+        const retrait = a.action === 'delete';
         actionsLigne.push(
           <button
             key={a.id}
             type="button"
             onClick={() => ouvrirAction(a, ligne)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-cyan-900/40 border border-cyan-700/50 text-[11px] font-semibold text-cyan-200 hover:bg-cyan-800/50"
+            className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold ${retrait
+              ? 'bg-red-900/30 border-red-800/50 text-red-200 hover:bg-red-900/50'
+              : 'bg-cyan-900/40 border-cyan-700/50 text-cyan-200 hover:bg-cyan-800/50'}`}
             title={a.avertissement || t('Enregistrer cet acte', 'Record this act')}
           >
-            <PenLine className="w-3.5 h-3.5" />
+            {retrait ? <Trash2 className="w-3.5 h-3.5" /> : <PenLine className="w-3.5 h-3.5" />}
             {a.libelleEn && lang === 'en' ? a.libelleEn : a.libelle}
           </button>,
         );
       });
-    if (peutSupprimer && config.supprimer) {
-      actionsLigne.push(
-        <button
-          key="del"
-          type="button"
-          onClick={() => supprimer(ligne)}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-900/30 border border-red-800/50 text-[11px] font-semibold text-red-200 hover:bg-red-900/50"
-          title={t('Retirer la ligne', 'Remove the line')}
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>,
-      );
-    }
+    (config.sondes || [])
+      .filter((s) => can(perm(s.action || 'read')))
+      .forEach((s) => {
+        actionsLigne.push(
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => ouvrirSonde(s, ligne)}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-[11px] font-semibold text-slate-200 hover:bg-slate-700"
+            title={s.note || t('Relire les agrégats calculés par le serveur', 'Re-read the aggregates computed by the server')}
+          >
+            <ClipboardList className="w-3.5 h-3.5" />
+            {s.libelleEn && lang === 'en' ? s.libelleEn : s.libelle}
+          </button>,
+        );
+      });
     return actionsLigne;
   };
 
