@@ -201,7 +201,7 @@ def test_accepte_piece_equilibree_et_materialise_grand_livre(db, referentiel):
     assert len(resultat["lignes"]) == 2
 
     # En-tete reellement persiste avec ses lignes.
-    entete = db.query(EcritureComptableNew).get(resultat["id"])
+    entete = db.get(EcritureComptableNew, resultat["id"])
     assert float(entete.total_debit) == 5000
     assert float(entete.total_credit) == 5000
     assert db.query(LigneJournal).filter(LigneJournal.ecriture_id == entete.id).count() == 2
@@ -295,7 +295,7 @@ def test_seed_migration_idempotente(db):
     connexion = db.connection()
     ctx = MigrationContext.configure(connexion)
     ops = Operations(ctx)  # `alembic.op` n'est utilisable qu'avec le proxy installe
-    Operations._install_proxy()
+    ops._install_proxy()
     try:
         module.upgrade()
         premiere = db.query(PlanComptableOHADA).count()
@@ -307,7 +307,7 @@ def test_seed_migration_idempotente(db):
         deuxieme = db.query(PlanComptableOHADA).count()
         journaux_2 = db.query(JournalAuxiliaire).count()
     finally:
-        Operations._remove_proxy()
+        ops._remove_proxy()
 
     assert premiere == deuxieme
     assert journaux_1 == journaux_2

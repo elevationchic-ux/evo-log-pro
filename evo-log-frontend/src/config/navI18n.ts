@@ -15,6 +15,9 @@ export const MODULE_TITLES_EN: Record<string, string> = {
   'parc-vehicules': '🚗 K-Vehicle Fleet & CMMS',
   'rh-personnel': '👥 Human Resources & Payroll',
   'qhse-securite': '🛡️ K-QHSE & Port Safety',
+  // Département autonome : l'aménagement (domaine public, schémas, gros œuvre)
+  // se distingue nettement de l'exploitation du quai.
+  'amenagement-portuaire': '📐 Port Development & Public Domain',
   'client-b2b': '🤝 B2B Client Portal & CRM',
   'reports-bi': '📊 K-Executive BI Analytics',
   'admin-saas': '👑 SaaS Platform Governance',
@@ -161,6 +164,17 @@ export const SUBMODULE_LABELS_EN: Record<string, string> = {
   'Validation Congés & Absences N+1': 'N+1 Leave & Absence Approval',
   "Vue d'Ensemble Executive": 'Executive Overview',
   'États Financiers (Bilan, CR, TAFIRE)': 'Financial Statements (Balance Sheet, P&L, TAFIRE)',
+  // Département aménagement portuaire (libellés exacts du registre de navigation)
+  'Centre de Pilotage Aménagement': 'Port Development Command Center',
+  'Schémas Directeurs & Périmètres': 'Master Plans & Port Perimeters',
+  "Projets d'Aménagement": 'Development Projects Portfolio',
+  'Programmation & Maturité (PIP/CDMT)': 'Programming & Maturity (PIP/CDMT)',
+  'Marchés Publics & PPP': 'Public Contracts & PPPs',
+  'Titres Domaniaux & Occupations': 'State Land Titles & Occupations',
+  'Concessions & Contrats d\'Exploitation': 'Concessions & Operation Contracts',
+  'Inventaire des Infrastructures': 'Infrastructure Inventory',
+  'Dragage & Profondeurs Disponibles': 'Dredging & Available Depths',
+  'Autorisations Administratives (EIES)': 'Administrative Permits (EIES)',
 };
 
 /** Retourne le libellé anglais du sous-module si langue === 'en', sinon le français. */
