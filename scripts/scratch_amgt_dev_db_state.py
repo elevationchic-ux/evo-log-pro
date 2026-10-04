@@ -7,13 +7,20 @@ porteurs. Aucune donnee metier ne doit avoir ete inseree par la migration.
 import json
 import sqlite3
 
+from app.models.amenagement_portuaire import (
+    SchemaDirecteur, ProjetAmenagement, DocumentProgrammation, MarcheAmenagement,
+    AutorisationDomaniale, ConcessionPortuaire, InfrastructurePortuaire,
+    Dragage, AutorisationTravaux,
+)
+
 DB = "kamlog_erp.db"
 
-TABLES = [
-    "schemas_directeurs_amgt", "projets_amenagement", "documents_programmation_amgt",
-    "marches_amenagement", "autorisations_domaniales_amgt", "concessions_portuaires_amgt",
-    "infrastructures_portuaires_amgt", "dragages_amgt", "autorisations_travaux_amgt",
-]
+# Noms tires du modele (source de verite), jamais reecrits ici.
+TABLES = [c.__tablename__ for c in (
+    SchemaDirecteur, ProjetAmenagement, DocumentProgrammation, MarcheAmenagement,
+    AutorisationDomaniale, ConcessionPortuaire, InfrastructurePortuaire,
+    Dragage, AutorisationTravaux,
+)]
 
 ROLES = [
     "CHEF_AMENAGEMENT_PORTUAIRE", "INGENIEUR_AMENAGEMENT", "AUDITEUR",
