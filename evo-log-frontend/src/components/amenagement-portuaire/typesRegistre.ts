@@ -77,6 +77,9 @@ export type TypeColonne =
   | 'booleen'
   | 'enum'
   | 'liste'
+  /** port_id : résolu avec /places (référentiel national), jamais avec une
+   *  table de noms codée en dur. */
+  | 'place'
   | 'largeur';
 
 export interface ColonneRegistre {

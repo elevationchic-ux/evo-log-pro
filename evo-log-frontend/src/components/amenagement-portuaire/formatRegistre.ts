@@ -10,6 +10,7 @@ import type {
   ColonneRegistre,
   LigneRegistre,
   Nomenclatures,
+  PlacePortuaire,
   ValeurCellule,
 } from './typesRegistre';
 
@@ -68,12 +69,13 @@ export function libelleEnum(
   return trouvee ? humaniser(trouvee.valeur) : humaniser(valeur);
 }
 
-/** Rend une cellule prête à afficher ; null = manquant à signaler. */
+/** Rend une cellule prête à afficher ; le texte null signale un manquant. */
 export function rendreCellule(
   colonne: ColonneRegistre,
   ligne: LigneRegistre,
   lang: 'fr' | 'en',
   nomenclatures: Nomenclatures | null,
+  places: PlacePortuaire[] = [],
 ): { texte: string; manquant: boolean } {
   const v = ligne[colonne.name];
   switch (colonne.type) {
