@@ -69,6 +69,19 @@ DOMAINS: Dict[str, Dict] = {
             "port": {"label": "Operations portuaires", "sub_modules": {"quai": ACTIONS, "pesee": ["read", "create"], "zone": ACTIONS}},
         },
     },
+    # Departement autonome : l'amenagement portuaire n'est pas l'exploitation
+    # du quai. Le module porte les objets juridiques reels du circuit
+    # camerounais (schema directeur APN, programmation DTO, marches COLIFE/CIP
+    # et PPP loi 2023/008, titres domaniaux, concessions, ouvrages, dragage,
+    # autorisations EIES). Pas de « delete » sur les pieces a valeur
+    # documentaire : un schema directeur est abroge, un DTO annule, une
+    # concession resilie  jamais efface.
+    "amenagement_portuaire": {
+        "label": "Amenagement portuaire & domaine public",
+        "modules": {
+            "amenagement": {"label": "Amenagement portuaire (Douala, Kribi, Limbe)", "sub_modules": {"schema_directeur": ["read", "create", "modify", "approve", "export"], "projet": ACTIONS, "dto": ["read", "create", "modify", "approve", "export"], "marche": ACTIONS, "titre_domanial": ACTIONS, "concession": ["read", "create", "modify", "approve", "export"], "infrastructure": ACTIONS, "dragage": ACTIONS, "autorisation": ["read", "create", "modify", "approve", "export"]}},
+        },
+    },
     "transport": {
         "label": "Transport & Flotte",
         "modules": {
@@ -194,8 +207,7 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "qhse.accident.read", "qhse.accident.create", "qhse.accident.modify",
         "qhse.permis.create", "qhse.imdg.read", "qhse.risque.create",
     ]),
-    ("OPERATEUR_ACCONAGE", 3, "Operateur d'acconage : execution au quai, sans validation", [
-        "acconage.navire.read", "acconage.escale.read", "acconage.escale.create",
+    ("OPERATEUR_ACCONAGE", 3, "Operateur d'acconage : execution au quai, sans validation", [        "acconage.navire.read", "acconage.escale.read", "acconage.escale.create",
         "acconage.escale.modify",
         "acconage.stowage.create", "acconage.stowage.modify",
         "acconage.moyen.read", "acconage.reservation.create", "acconage.reservation.modify",
