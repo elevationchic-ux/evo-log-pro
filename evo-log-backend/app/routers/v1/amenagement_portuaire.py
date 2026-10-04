@@ -1214,7 +1214,7 @@ def synthese(
         db, ProjetAmenagement, *pf,
         ProjetAmenagement.statut.in_([
             StatutProjet.EN_CONSTRUCTION, StatutProjet.EN_ATTRIBUTION,
-            StatutProjet.ATTRIBUE, StatutProjet.INSCRIT_PROGRAMMATION,
+            StatutProjet.ATTRIBUE, StatutProjet.INSCRIT_PIP,
         ]),
     )
     dto_manquants = _count(db, ProjetAmenagement, *pf, ProjetAmenagement.dto_reference.is_(None))
