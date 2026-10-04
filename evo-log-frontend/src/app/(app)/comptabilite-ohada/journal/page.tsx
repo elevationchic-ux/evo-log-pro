@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   BookOpen, Plus, Search, Filter, Download, CheckCircle2,
   AlertTriangle, RefreshCw, Layers, ArrowUpDown, FileText, Check,
-  Printer, X, Tag
+  Printer, X, Tag, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import CompanyDocumentHeader, { CompanyDocumentFooter } from '@/components/documents/CompanyDocumentHeader';
@@ -463,7 +463,12 @@ export default function ComptabiliteOhadaJournal() {
                           {entry.journal}
                         </span>
                       </td>
-                      <td className="py-3 px-4 font-bold text-amber-300">{entry.compte}</td>
+                      <td className="py-3 px-4 font-bold text-amber-300">
+                        {entry.compte}
+                        {entry.compte_intitule && (
+                          <span className="block text-[10px] text-slate-500 font-sans font-normal truncate max-w-[180px]">{entry.compte_intitule}</span>
+                        )}
+                      </td>
                       <td className="py-3 px-4 text-slate-200 font-sans max-w-xs truncate">{entry.libelle}</td>
                       <td className="py-3 px-4 text-right font-bold text-emerald-400">
                         {entry.debit > 0 ? entry.debit.toLocaleString() : '-'}
@@ -494,21 +499,21 @@ export default function ComptabiliteOhadaJournal() {
         <CompanyDocumentFooter />
       </div>
 
-      {/* MODAL NOUVELLE ÉCRITURE */}
+      {/* MODAL SAISIE DE PIECE (PARTIE DOUBLE) */}
       {showNewModal && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-violet-500/40 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
+          <div className="bg-slate-900 border border-violet-500/40 rounded-3xl p-6 max-w-3xl w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-200 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-violet-400" />
-                Saisir une Écriture Comptable
+                Saisir une Piece en Partie Double
               </h3>
               <button onClick={() => setShowNewModal(false)} className="text-slate-400 hover:text-white p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddEntry} className="space-y-3">
+            <form onSubmit={handleAddPiece} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">Date</label>
@@ -524,85 +529,117 @@ export default function ComptabiliteOhadaJournal() {
                   <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">Journal</label>
                   <select
                     value={newJournal}
-                    onChange={e => setNewJournal(e.target.value as any)}
+                    onChange={e => setNewJournal(e.target.value)}
                     className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
                   >
-                    <option value="VENTES">Journal des Ventes (VE)</option>
-                    <option value="ACHATS">Journal des Achats (AC)</option>
-                    <option value="BANQUE">Journal de Banque (BQ)</option>
-                    <option value="CAISSE">Journal de Caisse (CA)</option>
-                    <option value="SALAIRES">Journal des Salaires (OD-PAY)</option>
-                    <option value="AMORTISSEMENTS">Dotations Amortissements (OD-DOT)</option>
-                    <option value="OD">Opérations Diverses (OD)</option>
+                    {JOURNAL_TYPES.map(t => {
+                      const j = journaux.find(x => String(x.type_journal || '').toUpperCase() === t);
+                      return <option key={t} value={t}>{j ? j.nom_journal : `Journal ${t} (${t})`}</option>;
+                    })}
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">N° de Pièce</label>
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">N° de Piece (facultatif)</label>
                   <input
                     type="text"
                     placeholder="FAC-2026-..."
                     value={newPiece}
                     onChange={e => setNewPiece(e.target.value)}
                     className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
-                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">Compte SYSCOHADA</label>
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">Libellé de la piece</label>
                   <input
                     type="text"
-                    placeholder="Ex: 411100, 706100..."
-                    value={newCompte}
-                    onChange={e => setNewCompte(e.target.value)}
-                    className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
+                    placeholder="Désignation de la transaction..."
+                    value={newLibelle}
+                    onChange={e => setNewLibelle(e.target.value)}
+                    className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
                     required
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">Libellé de l&apos;Écriture</label>
-                <input
-                  type="text"
-                  placeholder="Désignation de la transaction..."
-                  value={newLibelle}
-                  onChange={e => setNewLibelle(e.target.value)}
-                  className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
-                  required
-                />
+              {/* Lignes de la piece : un compte + debit OU credit par ligne */}
+              <div className="border border-slate-800 rounded-2xl overflow-hidden">
+                <div className="grid grid-cols-[1fr_120px_120px_32px] gap-2 bg-slate-950 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                  <span>Compte SYSCOHADA (plan réel)</span>
+                  <span className="text-right">Débit (XAF)</span>
+                  <span className="text-right">Crédit (XAF)</span>
+                  <span />
+                </div>
+                {lignes.map((ligne, index) => (
+                  <div key={index} className="grid grid-cols-[1fr_120px_120px_32px] gap-2 items-center px-3 py-2 border-b border-slate-800/60 last:border-b-0">
+                    <select
+                      value={ligne.compte_id ?? ''}
+                      onChange={e => majLigne(index, 'compte_id', e.target.value ? Number(e.target.value) : null)}
+                      className="h-9 px-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
+                      required
+                    >
+                      <option value="">— choisir un compte —</option>
+                      {comptes.map(c => (
+                        <option key={c.id} value={c.id}>{c.numero_compte} · {c.intitule}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="number" min="0" step="0.01"
+                      value={ligne.debit || ''}
+                      onChange={e => majLigne(index, 'debit', parseFloat(e.target.value) || 0)}
+                      placeholder="0"
+                      className="h-9 px-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono text-right"
+                    />
+                    <input
+                      type="number" min="0" step="0.01"
+                      value={ligne.credit || ''}
+                      onChange={e => majLigne(index, 'credit', parseFloat(e.target.value) || 0)}
+                      placeholder="0"
+                      className="h-9 px-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono text-right"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => retirerLigne(index)}
+                      disabled={lignes.length <= 2}
+                      title={lignes.length <= 2 ? 'Une piece en partie double exige au moins 2 lignes' : 'Retirer cette ligne'}
+                      className="h-9 w-8 flex items-center justify-center bg-slate-800 hover:bg-red-500/20 disabled:opacity-30 disabled:hover:bg-slate-800 text-slate-400 rounded-xl"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+                <div className="px-3 py-2 bg-slate-950/60">
+                  <button
+                    type="button"
+                    onClick={ajouterLigne}
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-[11px] font-bold flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Ajouter une ligne
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">Montant Débit (XAF)</label>
-                  <input
-                    type="number"
-                    value={newDebit || ''}
-                    onChange={e => {
-                      setNewDebit(parseFloat(e.target.value) || 0);
-                      if (parseFloat(e.target.value) > 0) setNewCredit(0);
-                    }}
-                    placeholder="0"
-                    className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">Montant Crédit (XAF)</label>
-                  <input
-                    type="number"
-                    value={newCredit || ''}
-                    onChange={e => {
-                      setNewCredit(parseFloat(e.target.value) || 0);
-                      if (parseFloat(e.target.value) > 0) setNewDebit(0);
-                    }}
-                    placeholder="0"
-                    className="w-full h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
-                  />
-                </div>
+              {/* Totaux en direct + blocage si desequilibre */}
+              <div className="flex items-center justify-between text-xs font-mono bg-slate-950 border border-slate-800 rounded-xl px-4 py-3">
+                <span className="text-slate-400">Total Débit : <b className="text-emerald-400">{totalDebitSaisie.toLocaleString()}</b></span>
+                <span className="text-slate-400">Total Crédit : <b className="text-blue-400">{totalCreditSaisie.toLocaleString()}</b></span>
+                <span className={`px-2.5 py-1 rounded-full font-bold flex items-center gap-1 ${pieceEquilibree ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                  {pieceEquilibree ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
+                  {pieceEquilibree ? 'Équilibrée (D=C)' : `Écart : ${ecartSaisie.toLocaleString()} XAF`}
+                </span>
               </div>
+              {blocageSaisie && (
+                <p className="text-[11px] text-amber-400 font-semibold flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5" /> {blocageSaisie}
+                </p>
+              )}
+              {comptes.length === 0 && (
+                <p className="text-[11px] text-red-400 font-semibold">
+                  Aucun compte chargé depuis /finance/plan-comptable — appliquez la migration de seed du plan SYSCOHADA côté backend.
+                </p>
+              )}
 
               <div className="pt-3 flex justify-end gap-2">
                 <button
@@ -614,9 +651,11 @@ export default function ComptabiliteOhadaJournal() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-bold shadow-lg"
+                  disabled={Boolean(blocageSaisie) || saving || comptes.length === 0}
+                  className="px-5 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-lg flex items-center gap-2"
                 >
-                  Enregistrer l&apos;Écriture
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  Enregistrer la Piece
                 </button>
               </div>
             </form>
