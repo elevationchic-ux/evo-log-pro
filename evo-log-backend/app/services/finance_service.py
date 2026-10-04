@@ -43,50 +43,361 @@ class PlanComptableOHADAService:
 
 
 class EcritureComptableService:
-    """Accounting entry service"""
-    
+    """Ecritures comptables : la partie double est la SEULE regle acceptee.
+
+    L'ancien chemin "plat" (un compte portant a la fois un debit et un credit,
+    sans contrepartie ni controle d'equilibre) produisait des ecritures
+    comptablement fausses. Il est supprime : `creer_ecriture` refuse desormais
+    tout ecriture non equilibree et renvoie vers la creation de piece.
+    """
+
     @staticmethod
-    def creer_ecriture(
-        db: Session,
-        numero_ecriture: str,
-        date_ecriture: date,
-        libelle: str,
-        compte_id: int,
-        debit: float,
-        credit: float,
-        journal: str,
-        periode: str
-    ) -> EcritureComptable:
-        """Create accounting entry"""
-        ecriture = EcritureComptable(
-            numero_ecriture=numero_ecriture,
-            date_ecriture=date_ecriture,
-            libelle=libelle,
-            compte_id=compte_id,
-            debit=debit,
-            credit=credit,
-            devise="XAF",
-            journal=journal,
-            periode=periode
+    def creer_ecriture(*_args, **_kwargs):
+        raise HTTPException(
+            status_code=410,
+            detail=(
+                "La creation d'ecriture 'plate' (un seul compte, non controlee en "
+                "equilibre) est supprimee. Utilisez POST /api/v1/finance/pieces "
+                "qui impose la partie double (>= 2 lignes, somme debit == somme credit)."
+            ),
         )
-        db.add(ecriture)
-        db.commit()
-        db.refresh(ecriture)
-        return ecriture
-    
+
     @staticmethod
     def valider_ecriture(db: Session, ecriture_id: int, valide_par: str) -> EcritureComptable:
-        """Validate accounting entry"""
+        """Valider une ecriture : refuse toute piece desequilibree."""
         ecriture = db.query(EcritureComptable).filter(EcritureComptable.id == ecriture_id).first()
         if not ecriture:
-            raise ValueError("Écriture comptable non trouvée")
-        
+            raise HTTPException(status_code=404, detail="Écriture comptable non trouvée")
+        lignes = ecriture.lignes_journal or []
+        if lignes:
+            total_d = sum((Decimal(str(l.debit or 0)) for l in lignes), Decimal("0"))
+            total_c = sum((Decimal(str(l.credit or 0)) for l in lignes), Decimal("0"))
+            if total_d != total_c:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Piece desequilibree : ecart debit-credit = {total_d - total_c}."
+                )
+        elif Decimal(str(ecriture.debit or 0)) != Decimal(str(ecriture.credit or 0)):
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    "Cette ecriture est 'plate' et desequilibree ; elle ne peut pas "
+                    "etre validee. Reprenez-la via POST /api/v1/finance/pieces."
+                ),
+            )
+
+        ecriture.statut = "valide"
         ecriture.valider = True
         ecriture.valide_par = valide_par
         ecriture.date_validation = date.today()
         db.commit()
         db.refresh(ecriture)
         return ecriture
+
+
+class PieceComptableService:
+    """Piece comptable SYSCOHADA reellement en partie double.
+
+    Une piece = un EN-TETE (`ecritures_comptables_ohada`) + des LIGNES
+    (`lignes_journal`), chaque ligne portant UN compte et un debit OU un credit.
+
+    Regles appliquees ici (et nulle part ailleurs), dans une transaction
+    unique : au moins 2 lignes, une seule colonne remplie par ligne, comptes
+    existants et actifs, somme(debit) == somme(credit), date comprise dans un
+    exercice OUVERT, journal existant, numerotation continue par periode sans
+    trou. Chaque ligne est egalement materialisee au grand livre.
+    """
+
+    @staticmethod
+    def _d(valeur: Any) -> Decimal:
+        return Decimal(str(valeur if valeur is not None else 0))
+
+    @staticmethod
+    def _ serializer_ligne(ligne: LigneJournal) -> Dict[str, Any]:
+        return {
+            "id": ligne.id,
+            "compte_id": ligne.compte_id,
+            "compte_numero": ligne.compte_numero,
+            "compte_intitule": ligne.compte_intitule,
+            "debit": float(ligne.debit or 0),
+            "credit": float(ligne.credit or 0),
+            "libelle_detail": ligne.libelle_detail,
+            "order_line": ligne.order_line,
+        }
+
+    @staticmethod
+    def serializer(piece: EcritureComptable) -> Dict[str, Any]:
+        total_debit = PieceComptableService._d(piece.total_debit)
+        total_credit = PieceComptableService._d(piece.total_credit)
+        return {
+            "id": piece.id,
+            "numero_ecriture": piece.numero_ecriture,
+            "date_ecriture": piece.date_ecriture,
+            "libelle": piece.libelle,
+            "numero_piece": piece.numero_piece,
+            "journal_id": piece.journal_id,
+            "journal": piece.journal,
+            "periode": piece.periode,
+            "statut": piece.statut,
+            "total_debit": float(total_debit),
+            "total_credit": float(total_credit),
+            "equilibree": total_debit == total_credit,
+            "devise": piece.devise,
+            "valider": bool(piece.valider),
+            "exercice_id": piece.exercice_id,
+            "lignes": [PieceComptableService._serializer_ligne(l) for l in (piece.lignes_journal or [])],
+            "created_at": piece.created_at,
+        }
+
+    @staticmethod
+    def _valider_lignes(lignes: List[Any]) -> None:
+        """Refuse toute ligne ne respectant pas la partie double (422)."""
+        if len(lignes) < 2:
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f"Partie double exigee : au moins 2 lignes de journal, "
+                    f"{len(lignes)} recue(s) - un debit et une contrepartie en credit."
+                ),
+            )
+        for index, ligne in enumerate(lignes, start=1):
+            debit = PieceComptableService._d(ligne.debit)
+            credit = PieceComptableService._d(ligne.credit)
+            if debit < 0 or credit < 0:
+                raise HTTPException(status_code=422, detail=f"Ligne {index}: montant negatif interdit.")
+            if (debit > 0) == (credit > 0):
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        f"Ligne {index}: une ligne porte soit un debit, soit un credit "
+                        f"(exactement l'un des deux, non nul)."
+                    ),
+                )
+
+    @staticmethod
+    def _charger_comptes(db: Session, lignes: List[Any]) -> Dict[int, PlanComptableOHADA]:
+        comptes = {}
+        for ligne in lignes:
+            if ligne.compte_id in comptes:
+                continue
+            compte = db.query(PlanComptableOHADA).filter(
+                PlanComptableOHADA.id == ligne.compte_id
+            ).first()
+            if not compte:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Compte {ligne.compte_id} inexistant dans le plan comptable.",
+                )
+            if not compte.actif:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Compte {compte.numero_compte} inactif : saisie refusee.",
+                )
+            comptes[compte.id] = compte
+        return comptes
+
+    @staticmethod
+    def _controle_equilibre(lignes: List[Any]) -> tuple:
+        total_debit = sum((PieceComptableService._d(l.debit) for l in lignes), Decimal("0"))
+        total_credit = sum((PieceComptableService._d(l.credit) for l in lignes), Decimal("0"))
+        if total_debit != total_credit:
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f"Piece desequilibree : total debit {total_debit} != total credit "
+                    f"{total_credit} (ecart {total_debit - total_credit})."
+                ),
+            )
+        return total_debit, total_credit
+
+    @staticmethod
+    def _exercice_ouvert(db: Session, date_ecriture: date) -> ExerciceComptable:
+        exercice = (
+            db.query(ExerciceComptable)
+            .filter(
+                ExerciceComptable.statut == "ouvert",
+                ExerciceComptable.date_debut <= date_ecriture,
+                ExerciceComptable.date_fin >= date_ecriture,
+            )
+            .first()
+        )
+        if not exercice:
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f"Aucun exercice ouvert ne couvre la date {date_ecriture.isoformat()} : "
+                    "ouvrez l'exercice correspondant avant de comptabiliser."
+                ),
+            )
+        return exercice
+
+    @staticmethod
+    def _resoudre_journal(db: Session, piece_in: Any) -> JournalAuxiliaire:
+        if piece_in.journal_id:
+            journal = db.query(JournalAuxiliaire).filter(
+                JournalAuxiliaire.id == piece_in.journal_id
+            ).first()
+            if not journal:
+                raise HTTPException(status_code=422, detail=f"Journal {piece_in.journal_id} inexistant.")
+            return journal
+        if piece_in.type_journal:
+            nom = piece_in.type_journal.strip().upper()
+            try:
+                type_journal = TypeJournal[nom]
+            except KeyError:
+                raise HTTPException(status_code=422, detail=f"Type de journal inconnu : '{piece_in.type_journal}'.")
+            journal = db.query(JournalAuxiliaire).filter(
+                JournalAuxiliaire.type_journal == type_journal
+            ).first()
+            if not journal:
+                raise HTTPException(status_code=422, detail=f"Aucun journal de type '{nom}' configure.")
+            return journal
+        raise HTTPException(
+            status_code=422,
+            detail="journal_id ou type_journal requis (ACHATS, VENTES, BANQUE, CAISSE, OD, SALAIRES, AMORTISSEMENTS, TVA).",
+        )
+
+    @staticmethod
+    def _prochain_numero(db: Session, date_ecriture: date) -> str:
+        """Numero ECR-AAAAMM-NNNN sequentiel par periode, sans trou.
+
+        Reprise sur le MAX deja pose pour la periode (pas de compteur qui
+        saute quand une insertion echoue)."""
+        patron = f"ECR-{date_ecriture.strftime('%Y%m')}-"
+        poses = db.query(EcritureComptable.numero_ecriture).filter(
+            EcritureComptable.numero_ecriture.like(patron + "%")
+        ).all()
+        courant = 0
+        for (numero,) in poses:
+            suffixe = str(numero)[len(patron):]
+            if suffixe.isdigit():
+                courant = max(courant, int(suffixe))
+        return f"{patron}{courant + 1:04d}"
+
+    @staticmethod
+    def creer_piece(db: Session, piece_in: Any) -> Dict[str, Any]:
+        """Cree une piece equilibree : en-tete + lignes + grand livre, atomique."""
+        lignes = list(piece_in.lignes or [])
+        PieceComptableService._valider_lignes(lignes)
+        comptes = PieceComptableService._charger_comptes(db, lignes)
+        total_debit, total_credit = PieceComptableService._controle_equilibre(lignes)
+        exercice = PieceComptableService._exercice_ouvert(db, piece_in.date_ecriture)
+        journal = PieceComptableService._resoudre_journal(db, piece_in)
+        periode = piece_in.date_ecriture.strftime("%Y-%m")
+
+        try:
+            piece = EcritureComptable(
+                numero_ecriture=PieceComptableService._prochain_numero(db, piece_in.date_ecriture),
+                date_ecriture=piece_in.date_ecriture,
+                numero_piece=piece_in.numero_piece,
+                libelle=piece_in.libelle,
+                compte_id=None,
+                tiers_id=piece_in.tiers_id,
+                debit=total_debit,
+                credit=total_credit,
+                total_debit=total_debit,
+                total_credit=total_credit,
+                statut="valide",
+                devise="XAF",
+                reference_document=piece_in.reference_document,
+                type_document=piece_in.type_document,
+                periode=periode,
+                journal=journal.nom_journal,
+                valider=True,
+                valide_par="saisie_piece",
+                date_validation=date.today(),
+                exercice_id=exercice.id,
+                journal_id=journal.id,
+            )
+            db.add(piece)
+            db.flush()
+
+            for index, ligne in enumerate(lignes, start=1):
+                compte = comptes[ligne.compte_id]
+                db.add(LigneJournal(
+                    ecriture_id=piece.id,
+                    journal_id=journal.id,
+                    compte_id=compte.id,
+                    compte_numero=compte.numero_compte,
+                    compte_intitule=compte.intitule,
+                    debit=PieceComptableService._d(ligne.debit),
+                    credit=PieceComptableService._d(ligne.credit),
+                    devise="XAF",
+                    reference_document=ligne.reference_document,
+                    libelle_detail=ligne.libelle_detail,
+                    order_line=index,
+                ))
+                db.add(GrandLivreLigne(
+                    compte_id=compte.id,
+                    ecriture_id=piece.id,
+                    date_ecriture=piece_in.date_ecriture,
+                    libelle=ligne.libelle_detail or piece_in.libelle,
+                    debit=PieceComptableService._d(ligne.debit),
+                    credit=PieceComptableService._d(ligne.credit),
+                    devise="XAF",
+                    journal=journal.code_journal,
+                    periode=periode,
+                ))
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+
+        db.refresh(piece)
+        return PieceComptableService.serializer(piece)
+
+    @staticmethod
+    def obtenir_piece(db: Session, piece_id: int) -> Dict[str, Any]:
+        piece = db.query(EcritureComptable).filter(EcritureComptable.id == piece_id).first()
+        if not piece:
+            raise HTTPException(status_code=404, detail="Piece comptable introuvable.")
+        return PieceComptableService.serializer(piece)
+
+    @staticmethod
+    def lister_pieces(
+        db: Session,
+        skip: int = 0,
+        limit: int = 100,
+        periode: Optional[str] = None,
+        journal_id: Optional[int] = None,
+        statut: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        q = db.query(EcritureComptable)
+        if periode:
+            q = q.filter(EcritureComptable.periode == periode)
+        if journal_id:
+            q = q.filter(EcritureComptable.journal_id == journal_id)
+        if statut:
+            q = q.filter(EcritureComptable.statut == statut)
+        pieces = q.order_by(EcritureComptable.date_ecriture.desc(), EcritureComptable.id.desc()).offset(skip).limit(limit).all()
+        return [PieceComptableService.serializer(p) for p in pieces]
+
+    @staticmethod
+    def valider_piece(db: Session, piece_id: int, valide_par: str) -> Dict[str, Any]:
+        piece = db.query(EcritureComptable).filter(EcritureComptable.id == piece_id).first()
+        if not piece:
+            raise HTTPException(status_code=404, detail="Piece comptable introuvable.")
+        lignes = piece.lignes_journal or []
+        if lignes:
+            total_d = sum((PieceComptableService._d(l.debit) for l in lignes), Decimal("0"))
+            total_c = sum((PieceComptableService._d(l.credit) for l in lignes), Decimal("0"))
+            if total_d != total_c:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Validation refusee : piece desequilibree (ecart {total_d - total_c}).",
+                )
+        else:
+            raise HTTPException(
+                status_code=422,
+                detail="Validation refusee : cette ecriture n'a pas de lignes de piece (chemin plat obsolete).",
+            )
+        piece.statut = "comptabilise"
+        piece.valider = True
+        piece.valide_par = valide_par
+        piece.date_validation = date.today()
+        db.commit()
+        db.refresh(piece)
+        return PieceComptableService.serializer(piece)
 
 
 class ExerciceComptableService:
