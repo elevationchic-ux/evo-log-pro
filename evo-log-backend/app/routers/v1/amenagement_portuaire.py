@@ -289,7 +289,7 @@ def approuver_schema(
 
     Le departement ne peut pas approuver un schema directeur a la place du
     MINMIVT. Cette route saisit la reference et la date de l'arrete reel ; la
-    valeur« approuve » n'est pas supposee, elle derive du document cite.
+    valeur « approuve » n'est pas supposee, elle derive du document cite.
     """
     obj = _get_or_404(db, SchemaDirecteur, ident, "Schema directeur")
     obj.reference_approbatrice = reference_approbatrice
@@ -513,7 +513,7 @@ def notifier_minepf(ident: int, user: User = Depends(require_perm("amenagement.d
     """Aucune interconnexion avec le MINEPF/CELIBER n'est deployee ici (501)."""
     not_implemented(
         "Notification teletransmise d'un engagement au MINEPF",
-        "un canal officiel de teletransmission des DTO vers la tresor public / "
+        "un canal officiel de teletransmission des DTO vers le Tresor public / "
         "MINEPF (le depot reste papier ou email adresse au greffe)",
     )
 
