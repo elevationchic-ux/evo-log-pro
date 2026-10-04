@@ -21,7 +21,7 @@ from sqlalchemy.orm import configure_mappers  # noqa: E402
 configure_mappers()
 
 TABLES = [
-    ap.SchemaDirecteur, ap.ProjetAmenagement, ap.RegistreDTO, ap.MarcheAmenagement,
+    ap.SchemaDirecteur, ap.ProjetAmenagement, ap.DocumentProgrammation, ap.MarcheAmenagement,
     ap.AutorisationDomaniale, ap.ConcessionPortuaire, ap.InfrastructurePortuaire,
     ap.Dragage, ap.AutorisationTravaux,
 ]
@@ -33,7 +33,7 @@ aligne sur le circuit camerounais reel :
 
     schemas_directeurs_amgt      schemas / plans directeurs (APN, autorite portuaire)
     projets_amenagement          operations d\'investissement programmees
-    registres_dto_amgt           Documents Techniques Outil et visas du controle financier
+    documents_programmation_amgt           Documents Techniques Outil et visas du controle financier
     marches_amenagement          marches publics (COLIFE/CIP) et contrats PPP (loi 2023/008)
     autorisations_domaniales_amgt titres d\'occupation du domaine portuaire
     concessions_amenagement      affermage, concession, BOT/CET, AOT
@@ -151,7 +151,7 @@ def _indexes(table):
 CONSTS = {
     "SchemaDirecteur": "SCHEMA_DIRECTEUR",
     "ProjetAmenagement": "PROJET",
-    "RegistreDTO": "DTO",
+    "DocumentProgrammation": "PROGRAMMATION",
     "MarcheAmenagement": "MARCHE",
     "AutorisationDomaniale": "TITRE",
     "ConcessionPortuaire": "CONCESSION",

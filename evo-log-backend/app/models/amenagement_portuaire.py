@@ -115,8 +115,8 @@ class TypeProjet(str, enum.Enum):
 class StatutProjet(str, enum.Enum):
     IDENTIFIE = "identifie"
     ETUDIE = "etudie"                              # faisabilité bouclée
-    INSCRIT_DTO = "inscrit_dto"                    # porté au Document Technique Outil
-    NOTIFIE_MINEPF = "notifie_minepf"              # notification de l'engagement (Art. 57)
+    INSCRIT_PIP = "inscrit_pip"                    # porté au PIP / CDMT après le visa de maturité
+    NOTIFIE_MINFI = "notifie_minfi"                # credits inscrits au budget, engagement vise
     EN_ATTRIBUTION = "en_attribution"              # DAO en cours (COLIFE / CIP)
     ATTRIBUE = "attribue"
     EN_CONSTRUCTION = "en_construction"

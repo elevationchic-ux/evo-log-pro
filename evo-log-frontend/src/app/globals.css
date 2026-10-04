@@ -607,6 +607,29 @@
   .light .text-orange-300:not([class*="bg-"]),
   .light .text-orange-400:not([class*="bg-"]) { color: rgb(194 65 12) !important; }
 
+  /* Variante OPACITÉ des accents (ex. text-amber-300/80, /70, /60) : Tailwind
+     émet un token distinct pour les paliers avec slash, que la règle exacte ne
+     matche PAS. Couvert ici par sous-chaîne (ambre = accent signature de l'ERP,
+     jamais utilisé comme libellé de bouton plein -> garde-fou non nécessaire). */
+  .light [class*="text-amber-100"], .light [class*="text-amber-200"],
+  .light [class*="text-amber-300"], .light [class*="text-amber-400"] { color: rgb(180 83 9) !important; }
+  .light [class*="text-yellow-200"], .light [class*="text-yellow-300"],
+  .light [class*="text-yellow-400"] { color: rgb(161 98 7) !important; }
+
+  /* Surface neutre foncée + libellé blanc sur le MÊME élément (ex. écrans de
+     chargement 'bg-slate-950 text-white') : le fond est inversé en clair, donc
+     le texte blanc doit suivre, sinon il devient invisible. */
+  .light [class*="bg-slate-9"][class*="text-white"],
+  .light [class*="bg-slate-8"][class*="text-white"],
+  .light [class*="bg-gray-9"][class*="text-white"] { color: hsl(var(--on-surface)) !important; }
+
+  /* Titres en dégradé doré (bg-clip-text + text-transparent, écrits pour le
+     sombre avec des arrêts presque blancs) -> ambre solide lisible sur clair. */
+  .light [class*="bg-clip-text"][class*="text-transparent"][class*="amber"] {
+    -webkit-text-fill-color: rgb(180 83 9) !important;
+    color: rgb(180 83 9) !important;
+  }
+
   /* Badges module : sobre et neutre en clair (remplace la teinte saturée) */
   .light [class*="module-badge-"] {
     background-color: hsl(220 20% 96%) !important;

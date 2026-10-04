@@ -5,7 +5,7 @@ portuaire — schemas directeurs, programmation (DTO), marches/PPP, titres
 domaniaux, concessions, ouvrages, dragages, autorisations environnementales.
 
 Ce qu'elle ne fait PAS (conscience du projet, see docs/RBAC_ACCREDITATIONS.md) :
-  * elle ne teletransmet rien au MINMIVT, au MINEPF, a la COLIFE, au MINEPPT ni
+  * elle ne teletransmet rien au MINMIVT, au MINFI, a la COLIFE, au MINEPPT ni
     a l'APN : ces actes appartiennent a des systemes externes qui n'existent
     pas ici. Les routes correspondantes repondent 501 (jamais un faux succes) ;
   * elle n'invente aucune valeur : montant, date ou reference non saisi reste
@@ -32,7 +32,7 @@ from app.core.permissions import require_perm
 from app.models.user import User
 from app.models.port_cameroun import PortCameroun
 from app.models.amenagement_portuaire import (
-    SchemaDirecteur, ProjetAmenagement, RegistreDTO, MarcheAmenagement,
+    SchemaDirecteur, ProjetAmenagement, DocumentProgrammation, MarcheAmenagement,
     AutorisationDomaniale, ConcessionPortuaire, InfrastructurePortuaire,
     Dragage, AutorisationTravaux,
     TypeSchema, StatutSchema, TypeProjet, StatutProjet, OrigineFinancement,
@@ -43,7 +43,7 @@ from app.models.amenagement_portuaire import (
 from app.schemas.amenagement_portuaire import (
     SchemaDirecteurCreate, SchemaDirecteurUpdate, SchemaDirecteurOut,
     ProjetAmenagementCreate, ProjetAmenagementUpdate, ProjetAmenagementOut,
-    RegistreDTOCreate, RegistreDTOUpdate, RegistreDTOOut,
+    DocumentProgrammationCreate, DocumentProgrammationUpdate, DocumentProgrammationOut,
     MarcheAmenagementCreate, MarcheAmenagementUpdate, MarcheAmenagementOut,
     AutorisationDomanialeCreate, AutorisationDomanialeUpdate, AutorisationDomanialeOut,
     ConcessionPortuaireCreate, ConcessionPortuaireUpdate, ConcessionPortuaireOut,
@@ -429,30 +429,30 @@ def saisir_avancement(
 
 # ─── 3. Programmation budgétaire (DTO) ───────────────────────────────────────
 
-@router.get("/dto", response_model=List[RegistreDTOOut], summary="Registre des DTO")
-def lister_dto(
+@router.get("/programmation", response_model=List[DocumentProgrammationOut], summary="Registre des DTO")
+def lister_programmation(
     exercice: Optional[int] = Query(None),
     statut: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("amenagement.dto.read")),
+    user: User = Depends(require_perm("amenagement.programmation.read")),
 ):
-    q = db.query(RegistreDTO)
+    q = db.query(DocumentProgrammation)
     if exercice:
-        q = q.filter(RegistreDTO.exercice == exercice)
+        q = q.filter(DocumentProgrammation.exercice == exercice)
     if statut:
-        q = q.filter(RegistreDTO.statut == statut.upper())
-    return [_to_out(d) for d in q.order_by(RegistreDTO.exercice.desc(), RegistreDTO.reference_dto).all()]
+        q = q.filter(DocumentProgrammation.statut == statut.upper())
+    return [_to_out(d) for d in q.order_by(DocumentProgrammation.exercice.desc(), DocumentProgrammation.reference_fiche_technique).all()]
 
 
-@router.post("/dto", response_model=RegistreDTOOut, status_code=status.HTTP_201_CREATED,
+@router.post("/programmation", response_model=DocumentProgrammationOut, status_code=status.HTTP_201_CREATED,
              summary="Inscrire une ligne DTO")
-def creer_dto(
-    payload: RegistreDTOCreate,
+def creer_programmation(
+    payload: DocumentProgrammationCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("amenagement.dto.create")),
+    user: User = Depends(require_perm("amenagement.programmation.create")),
 ):
-    _check_unique(db, RegistreDTO, "reference_dto", payload.reference_dto, "Reference DTO")
-    obj = RegistreDTO()
+    _check_unique(db, DocumentProgrammation, "reference_fiche_technique", payload.reference_fiche_technique, "Reference DTO")
+    obj = DocumentProgrammation()
     _apply(payload.model_dump(exclude_unset=True), obj, create=True)
     obj.auteur_saisie = obj.auteur_saisie or getattr(user, "username", None) or getattr(user, "email", None)
     db.add(obj)
@@ -461,41 +461,41 @@ def creer_dto(
     return _to_out(obj)
 
 
-@router.get("/dto/{ident}", response_model=RegistreDTOOut, summary="Detail d'une ligne DTO")
-def detail_dto(
+@router.get("/programmation/{ident}", response_model=DocumentProgrammationOut, summary="Detail d'une ligne DTO")
+def detail_programmation(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("amenagement.dto.read")),
+    user: User = Depends(require_perm("amenagement.programmation.read")),
 ):
-    return _to_out(_get_or_404(db, RegistreDTO, ident, "Ligne DTO"))
+    return _to_out(_get_or_404(db, DocumentProgrammation, ident, "Ligne DTO"))
 
 
-@router.put("/dto/{ident}", response_model=RegistreDTOOut, summary="Corriger une ligne DTO")
-def modifier_dto(
+@router.put("/programmation/{ident}", response_model=DocumentProgrammationOut, summary="Corriger une ligne DTO")
+def modifier_programmation(
     ident: int,
-    payload: RegistreDTOUpdate,
+    payload: DocumentProgrammationUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("amenagement.dto.modify")),
+    user: User = Depends(require_perm("amenagement.programmation.modify")),
 ):
-    obj = _get_or_404(db, RegistreDTO, ident, "Ligne DTO")
+    obj = _get_or_404(db, DocumentProgrammation, ident, "Ligne DTO")
     _apply(payload.model_dump(exclude_unset=True), obj, create=False)
     db.commit()
     db.refresh(obj)
     return _to_out(obj)
 
 
-@router.post("/dto/{ident}/visa-controle-financier", response_model=RegistreDTOOut,
+@router.post("/programmation/{ident}/visa-controle-financier", response_model=DocumentProgrammationOut,
              summary="Attester le visa du controle financier")
-def viser_dto(
+def viser_programmation(
     ident: int,
     date_visa: date = Query(..., description="Date reellement apposee sur le DTO"),
     autorite_visa: str = Query(..., min_length=2, description="Controleur financier / direction emisrice"),
     numero_engagement: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("amenagement.dto.approve")),
+    user: User = Depends(require_perm("amenagement.programmation.approve")),
 ):
     """Enregistre le visa appose par le controle financier, ne le simule pas."""
-    obj = _get_or_404(db, RegistreDTO, ident, "Ligne DTO")
+    obj = _get_or_404(db, DocumentProgrammation, ident, "Ligne DTO")
     obj.date_visa_controle_financier = date_visa
     obj.autorite_visa = autorite_visa
     if numero_engagement:
@@ -508,13 +508,13 @@ def viser_dto(
     return _to_out(obj)
 
 
-@router.post("/dto/{ident}/notification-minepf", summary="Notification MINEPF (501)")
-def notifier_minepf(ident: int, user: User = Depends(require_perm("amenagement.dto.approve"))):
-    """Aucune interconnexion avec le MINEPF/CELIBER n'est deployee ici (501)."""
+@router.post("/programmation/{ident}/notification-minepf", summary="Notification MINFI (501)")
+def notifier_minfi(ident: int, user: User = Depends(require_perm("amenagement.programmation.approve"))):
+    """Aucune interconnexion avec le MINFI/CELIBER n'est deployee ici (501)."""
     not_implemented(
-        "Notification teletransmise d'un engagement au MINEPF",
+        "Notification teletransmise d'un engagement au MINFI",
         "un canal officiel de teletransmission des DTO vers le Tresor public / "
-        "MINEPF (le depot reste papier ou email adresse au greffe)",
+        "MINFI (le depot reste papier ou email adresse au greffe)",
     )
 
 
@@ -1156,7 +1156,7 @@ def synthese(
         db, ProjetAmenagement, *pf,
         ProjetAmenagement.statut.in_([
             StatutProjet.EN_CONSTRUCTION, StatutProjet.EN_ATTRIBUTION,
-            StatutProjet.ATTRIBUE, StatutProjet.INSCRIT_DTO,
+            StatutProjet.ATTRIBUE, StatutProjet.INSCRIT_PROGRAMMATION,
         ]),
     )
     dto_manquants = _count(db, ProjetAmenagement, *pf, ProjetAmenagement.dto_reference.is_(None))
