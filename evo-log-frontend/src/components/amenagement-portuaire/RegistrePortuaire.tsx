@@ -44,7 +44,6 @@ import type {
 } from './typesRegistre';
 import {
   aideChamp,
-  estAbsent,
   labelChamp,
   labelColonne,
   rendreCellule,
@@ -407,12 +406,19 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
   };
 
   /** Sonde une téléprocédure non câblée : le 501 et son motif viennent du
-   *  serveur, on n'écrit pas ici ce que le backend refuse de promettre. */
-  const sonderCircuit = async (index: string, ident: number, interroger: (id: number) => Promise<unknown>) => {
+   *  serveur, on n'écrit pas ici ce que le backend refuse de promettre.
+   *  `interroger` est appelé avec l'identifiant d'une ligne réellement listée
+   *  quand le registre en contient une : la route 501 refuse la demande avant
+   *  toute écriture, elle ne peut donc abîmer aucune pièce. */
+  const sonderCircuit = async (
+    index: string,
+    interroger: (id: number) => Promise<unknown>,
+  ) => {
+    const identifie = (lignes.data || [])[0]?.id ?? 0;
     setSondeCircuit(true);
     setReponseCircuit(null);
     try {
-      await interroger(ident);
+      await interroger(identifie);
       setReponseCircuit(t(
         'Le serveur a répondu sans erreur : cette écriture est en réalité disponible, l\u2019écran doit être mis à jour.',
         'The server answered without error: this write is actually available and the screen should be updated.',
@@ -426,7 +432,12 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
   };
 
   /* ------------------------------- colonnes ------------------------------- */
-  const colonnesEssentielles = config.colonnes.filter((c) => c.essence);
+  // Les cartes mobiles n'affichent que les colonnes marquées « essence » ; à
+  // défaut on prend les trois premières plutôt que de n'afficher qu'un id.
+  const marqueesEssentielles = config.colonnes.filter((c) => c.essence);
+  const colonnesEssentielles = marqueesEssentielles.length
+    ? marqueesEssentielles
+    : config.colonnes.slice(0, 3);
   const colonnesTable = config.colonnes;
 
   const renduLigne = (ligne: LigneRegistre) => {
@@ -456,7 +467,7 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-cyan-900/40 border border-cyan-700/50 text-[11px] font-semibold text-cyan-200 hover:bg-cyan-800/50"
             title={a.avertissement || t('Enregistrer cet acte', 'Record this act')}
           >
-            <FileQuestion className="w-3.5 h-3.5" />
+            <PenLine className="w-3.5 h-3.5" />
             {a.libelleEn && lang === 'en' ? a.libelleEn : a.libelle}
           </button>,
         );
