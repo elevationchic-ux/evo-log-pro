@@ -48,6 +48,20 @@ import enum
 from app.core.database import Base
 
 
+def _enum(cls):
+    """Nomenclature Python stockee en VARCHAR, sans type natif ni CHECK.
+
+    Double raison :
+      * le DDL devient identique sur SQLite (dev/tests) et PostgreSQL
+        (production) — une migration ``sa.String(...)`` et le modele restent
+        strictement en parite, convention des migrations 014/028 ;
+      * la nomenclature est deja garantie a l'entree par les schemas Pydantic
+        (un code hors enum est refuse en 422) : un CHECK de plus n'apporte
+        rien et rendrait toute evolution de vocabulaire cooperative.
+    """
+    return Enum(cls, native_enum=False, create_constraint=False)
+
+
 # ─── Nomenclatures ───────────────────────────────────────────────────────────
 
 class TypeSchema(str, enum.Enum):
@@ -243,11 +257,11 @@ class SchemaDirecteur(Base):
     code = Column(String(40), unique=True, nullable=False, index=True)
     libelle = Column(String(200), nullable=False)
     port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=True, index=True)
-    type_schema = Column(Enum(TypeSchema), nullable=False, default=TypeSchema.SCHEMA_DIRECTEUR)
+    type_schema = Column(_enum(TypeSchema), nullable=False, default=TypeSchema.SCHEMA_DIRECTEUR)
     perimetre = Column(Text)                       # description textuelle du périmètre couvert
     horizon_debut = Column(Integer)                # année, jamais déduite
     horizon_fin = Column(Integer)
-    statut = Column(Enum(StatutSchema), nullable=False, default=StatutSchema.ELABORATION, index=True)
+    statut = Column(_enum(StatutSchema), nullable=False, default=StatutSchema.ELABORATION, index=True)
     autorite_elaboratrice = Column(String(160))    # APN, PAD, PAK, PAL...
     reference_approbatrice = Column(String(120))   # numéro de décret / arrêté réel
     date_approbation = Column(Date)
@@ -291,8 +305,8 @@ class ProjetAmenagement(Base):
     port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=True, index=True)
     terminal_id = Column(Integer, ForeignKey("terminaux_portuaires.id"), nullable=True)
     schema_id = Column(Integer, ForeignKey("schemas_directeurs_amgt.id"), nullable=True, index=True)
-    type_ouvrage = Column(Enum(TypeProjet), nullable=False, default=TypeProjet.AUTRE, index=True)
-    statut = Column(Enum(StatutProjet), nullable=False, default=StatutProjet.IDENTIFIE, index=True)
+    type_ouvrage = Column(_enum(TypeProjet), nullable=False, default=TypeProjet.AUTRE, index=True)
+    statut = Column(_enum(StatutProjet), nullable=False, default=StatutProjet.IDENTIFIE, index=True)
     priorite = Column(String(20))                  # P1/P2/P3 : gradation saisie, pas calculée
     origines_financement = Column(Text)            # JSON [str] (plusieurs sources possibles)
     cout_previsionnel_xaf = Column(Numeric(18, 2))
@@ -356,7 +370,7 @@ class RegistreDTO(Base):
     objet = Column(String(300), nullable=False)
     montant_inscrit_xaf = Column(Numeric(18, 2))
     montant_paye_xaf = Column(Numeric(18, 2))
-    source_financement = Column(Enum(OrigineFinancement), nullable=True)
+    source_financement = Column(_enum(OrigineFinancement), nullable=True)
     chapitre = Column(String(120))                 # chapitre budgétaire déclaré
     statut = Column(String(30), default="PREPARATION", index=True)
     date_presentation = Column(Date)
@@ -392,9 +406,9 @@ class MarcheAmenagement(Base):
     designations = Column(String(300), nullable=False)
     projet_id = Column(Integer, ForeignKey("projets_amenagement.id"), nullable=True, index=True)
     port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=True)
-    type_marche = Column(Enum(TypeMarche), nullable=False, default=TypeMarche.TRAVAUX)
-    code_marche = Column(Enum(CodeMarche), nullable=True)
-    statut = Column(Enum(StatutMarche), nullable=False, default=StatutMarche.PREVU, index=True)
+    type_marche = Column(_enum(TypeMarche), nullable=False, default=TypeMarche.TRAVAUX)
+    code_marche = Column(_enum(CodeMarche), nullable=True)
+    statut = Column(_enum(StatutMarche), nullable=False, default=StatutMarche.PREVU, index=True)
     procedure_controle = Column(String(60))        # COLIFE, CIP, marché propre à l'autorité
     dossier_appel_offre = Column(String(120))      # référence DAO déposée
     date_publication_dao = Column(Date)
@@ -443,7 +457,7 @@ class AutorisationDomaniale(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     numero_piece = Column(String(80), unique=True, nullable=False, index=True)
-    type_titre = Column(Enum(TypeTitreDomanial), nullable=False, index=True)
+    type_titre = Column(_enum(TypeTitreDomanial), nullable=False, index=True)
     port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=True, index=True)
     terminal_id = Column(Integer, ForeignKey("terminaux_portuaires.id"), nullable=True)
     zone_id = Column(Integer, ForeignKey("zones_portuaires.id"), nullable=True)
@@ -494,8 +508,8 @@ class ConcessionPortuaire(Base):
     nom_contrat = Column(String(200), nullable=False)
     port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=False, index=True)
     terminal_id = Column(Integer, ForeignKey("terminaux_portuaires.id"), nullable=True)
-    type_contrat = Column(Enum(TypeContratExploitation), nullable=False, index=True)
-    statut = Column(Enum(StatutContrat), nullable=False, default=StatutContrat.NEGOCIATION, index=True)
+    type_contrat = Column(_enum(TypeContratExploitation), nullable=False, index=True)
+    statut = Column(_enum(StatutContrat), nullable=False, default=StatutContrat.NEGOCIATION, index=True)
     autorite_concedante = Column(String(160), nullable=False)
     concessionnaire = Column(String(200), nullable=False)
     groupe_final = Column(String(160))             # actionnariat / maison mère, si connu
@@ -545,13 +559,13 @@ class InfrastructurePortuaire(Base):
     id = Column(Integer, primary_key=True, index=True)
     code = Column(String(60), unique=True, nullable=False, index=True)
     designation = Column(String(200), nullable=False)
-    type_infrastructure = Column(Enum(TypeInfrastructure), nullable=False, index=True)
+    type_infrastructure = Column(_enum(TypeInfrastructure), nullable=False, index=True)
     port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=False, index=True)
     terminal_id = Column(Integer, ForeignKey("terminaux_portuaires.id"), nullable=True)
     projet_id = Column(Integer, ForeignKey("projets_amenagement.id"), nullable=True, index=True)
     zone_id = Column(Integer, ForeignKey("zones_portuaires.id"), nullable=True)
     emplacement = Column(String(200))
-    statut = Column(Enum(EtatInfrastructure), nullable=False, default=EtatInfrastructure.PROJETEE, index=True)
+    statut = Column(_enum(EtatInfrastructure), nullable=False, default=EtatInfrastructure.PROJETEE, index=True)
     longueur_ml = Column(Numeric(12, 2))
     largeur_m = Column(Numeric(10, 2))
     superficie_m2 = Column(Numeric(14, 3))
@@ -604,7 +618,7 @@ class Dragage(Base):
     libelle = Column(String(200), nullable=False)
     port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=False, index=True)
     projet_id = Column(Integer, ForeignKey("projets_amenagement.id"), nullable=True, index=True)
-    type_dragage = Column(Enum(TypeDragage), nullable=False, default=TypeDragage.ENTRETIEN, index=True)
+    type_dragage = Column(_enum(TypeDragage), nullable=False, default=TypeDragage.ENTRETIEN, index=True)
     zone_traitee = Column(String(200))             # chenal, avant-quai, bassin, tourne à quai
     superficie_draguee_m2 = Column(Numeric(14, 3))
     volume_mesure_m3 = Column(Numeric(18, 2))      # cubage relevé (levé bathymétrique)
@@ -652,13 +666,13 @@ class AutorisationTravaux(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     reference = Column(String(80), unique=True, nullable=False, index=True)
-    type_autorisation = Column(Enum(TypeAutorisationTravaux), nullable=False, index=True)
+    type_autorisation = Column(_enum(TypeAutorisationTravaux), nullable=False, index=True)
     projet_id = Column(Integer, ForeignKey("projets_amenagement.id"), nullable=True, index=True)
     port_id = Column(Integer, ForeignKey("ports_cameroun.id"), nullable=True)
     administration = Column(String(160))           # MINEPPT, MINMIVT, PAD, PAK, délégation régionale
     categorie_projet = Column(String(40))          # classification loi 96/012 (1re/2e/3e catégorie)
     objet = Column(String(300))
-    statut = Column(Enum(StatutAutorisation), nullable=False, default=StatutAutorisation.EN_PREPARATION, index=True)
+    statut = Column(_enum(StatutAutorisation), nullable=False, default=StatutAutorisation.EN_PREPARATION, index=True)
     date_depot = Column(Date)
     date_accord = Column(Date)
     date_expiration = Column(Date)
