@@ -6,7 +6,7 @@
  * Garde-fous communs à toutes les pages :
  *  - jamais d'écran blanc : tout échec produit un état classifié et actionnable ;
  *  - distinction explicite des cas : 404 (ressource inexistante), 401/403 (accès),
- *    501 (fonction volontairement non implémentée  le message du serveur est
+ *    501 (fonction volontairement non implémentée — le message du serveur est
  *    remonté tel quel), 5xx (panne backend), réseau (backend injoignable),
  *    succès vide (0 enregistrement) ;
  *  - refetch manuel, annulation des courses, et messages en français simple.

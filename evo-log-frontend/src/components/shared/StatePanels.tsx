@@ -69,6 +69,7 @@ export function DataEmptyState({
 /* -------------------------------- Erreur ---------------------------------- */
 const ERROR_ICONS = {
   not_found: FileQuestion,
+  not_implemented: FileQuestion,
   unauthorized: ShieldAlert,
   server: ServerCrash,
   network: WifiOff,
@@ -80,7 +81,11 @@ const ERROR_ICONS = {
 export function DataErrorState({ error, onRetry }: { error: ApiErrorInfo; onRetry?: () => void }) {
   const t = useI18n();
   const Icon = ERROR_ICONS[error.kind] ?? ServerCrash;
-  const isUnavailable = error.kind === 'not_found';
+  // not_found (adresse inconnue) et not_implemented (501 : la route existe mais
+  // assume son absence) sont deux états LÉGITIMES, pas des incidents : panneau
+  // neutre, titre « fonctionnalité indisponible », aucun bouton Réessayer qui
+  // ferait croire qu'une nouvelle tentative pourrait changer la réponse.
+  const isUnavailable = error.kind === 'not_found' || error.kind === 'not_implemented';
   return (
     <div className="text-center py-12 px-4">
       <div className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl border ${
