@@ -897,6 +897,126 @@ export const qhseAPI = {
   getBilanCSSTCNPS: (annee = 2026) => apiClient.get(`/api/v1/qhse/csst-cnps/bilan?annee=${annee}`)
 };
 
+
+// ─── Service Aménagement Portuaire & Domaine Public ──────────────────────────
+// Département autonome (router /api/v1/amenagement-portuaire, 58 routes, chaque
+// lecture/écriture derrière require_perm('amenagement.*')). Ce service n'invente
+// AUCUNE valeur :
+//  * les vocabulaires (type de schéma, statut de marché, type de titre…) sont
+//    servis par getNomenclatures(), jamais recopiés dans le frontend ;
+//  * les places portuaires (Douala, Kribi, Limbé…) viennent de getPlaces(),
+//    colonne ports_cameroun côté serveur ;
+//  * les téléprocédures institutionnelles (MINMIVT, MINFI, COLIFE, MINEPPT,
+//    reversaison) répondent 501 : classifyApiError les rend en
+//    kind='not_implemented', jamais en « problème technique ».
+// Corps obligatoires à la création (le serveur renvoie 422 sinon) :
+//  schema     : code, libelle
+//  projet     : code_projet, libelle
+//  programme  : reference_fiche_technique, exercice, objet
+//  marche     : reference, designations
+//  titre      : numero_piece, type_titre, beneficiaire
+//  concession : code_contrat, nom_contrat, port_id, type_contrat,
+//               autorite_concedante, concessionnaire
+//  infra      : code, designation, type_infrastructure, port_id
+//  dragage    : code_campagne, libelle, port_id
+//  autoris.   : reference, type_autorisation
+const AMGT = '/api/v1/amenagement-portuaire';
+
+export const amenagementAPI = {
+  // Référentiels pilotés par le serveur
+  getNomenclatures: () => apiClient.get(`${AMGT}/nomenclatures`),
+  getPlaces: () => apiClient.get(`${AMGT}/places`),
+  getSynthese: (portId?: number) =>
+    apiClient.get(`${AMGT}/synthese`, { params: portId ? { port_id: portId } : {} }),
+
+  // 1. Schémas directeurs & périmètres
+  listSchemas: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/schemas-directeurs`, { params }),
+  getSchema: (id: number) => apiClient.get(`${AMGT}/schemas-directeurs/${id}`),
+  createSchema: (data: unknown) => apiClient.post(`${AMGT}/schemas-directeurs`, data),
+  updateSchema: (id: number, data: unknown) => apiClient.put(`${AMGT}/schemas-directeurs/${id}`, data),
+  // Atteste l'acte pris par le gouvernement (n° réel d'arrêté + date), ne
+  // l'approuve pas à la place du MINMIVT.
+  approverSchema: (id: number, params: { reference_approbatrice: string; date_approbation: string }) =>
+    apiClient.post(`${AMGT}/schemas-directeurs/${id}/approbation`, null, { params }),
+  // 501 assumé : aucun connecteur MINMIVT/APN n'existe au Cameroun.
+  requestVisaMinmivt: (id: number) => apiClient.post(`${AMGT}/schemas-directeurs/${id}/demande-visa-minmivt`),
+
+  // 2. Projets d'aménagement
+  listProjets: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/projets`, { params }),
+  getProjet: (id: number) => apiClient.get(`${AMGT}/projets/${id}`),
+  createProjet: (data: unknown) => apiClient.post(`${AMGT}/projets`, data),
+  updateProjet: (id: number, data: unknown) => apiClient.put(`${AMGT}/projets/${id}`, data),
+  deleteProjet: (id: number) => apiClient.delete(`${AMGT}/projets/${id}`),
+  // Un relevé absent reste NULL : l'avancement n'est jamais calculé ici.
+  saisirAvancement: (id: number, params: Record<string, unknown>) =>
+    apiClient.post(`${AMGT}/projets/${id}/avancement`, null, { params }),
+
+  // 3. Programmation & maturité (PIP / CDMT)
+  listProgrammation: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/programmation`, { params }),
+  getProgrammation: (id: number) => apiClient.get(`${AMGT}/programmation/${id}`),
+  createProgrammation: (data: unknown) => apiClient.post(`${AMGT}/programmation`, data),
+  updateProgrammation: (id: number, data: unknown) => apiClient.put(`${AMGT}/programmation/${id}`, data),
+  viserControleFinancier: (id: number, params: { date_visa: string; autorite_visa: string; numero_engagement?: string }) =>
+    apiClient.post(`${AMGT}/programmation/${id}/visa-controle-financier`, null, { params }),
+  viserMaturite: (id: number, params: { numero_visa: string; date_visa: string; autorite_visa: string }) =>
+    apiClient.post(`${AMGT}/programmation/${id}/visa-maturite`, null, { params }),
+  inscrirePip: (id: number, params: { reference_pip_cdmt: string; exercice: number }) =>
+    apiClient.post(`${AMGT}/programmation/${id}/inscription-pip`, null, { params }),
+  notificationMinfi: (id: number) => apiClient.post(`${AMGT}/programmation/${id}/notification-minfi`),
+
+  // 4. Marchés publics & PPP
+  listMarches: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/marches`, { params }),
+  getMarche: (id: number) => apiClient.get(`${AMGT}/marches/${id}`),
+  createMarche: (data: unknown) => apiClient.post(`${AMGT}/marches`, data),
+  updateMarche: (id: number, data: unknown) => apiClient.put(`${AMGT}/marches/${id}`, data),
+  attribuerMarche: (id: number, params: { attributaire: string; date_attribution: string; montant_attribue_xaf?: number; reference_deliberation?: string }) =>
+    apiClient.post(`${AMGT}/marches/${id}/attribution`, null, { params }),
+  receptionnerMarche: (id: number, params: { date_reception: string; provisoire?: boolean }) =>
+    apiClient.post(`${AMGT}/marches/${id}/reception`, null, { params }),
+  soumissionColife: (id: number) => apiClient.post(`${AMGT}/marches/${id}/soumission-colife`),
+
+  // 5. Titres domaniaux & occupations
+  listTitres: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/titres-domaniaux`, { params }),
+  getTitre: (id: number) => apiClient.get(`${AMGT}/titres-domaniaux/${id}`),
+  createTitre: (data: unknown) => apiClient.post(`${AMGT}/titres-domaniaux`, data),
+  updateTitre: (id: number, data: unknown) => apiClient.put(`${AMGT}/titres-domaniaux/${id}`, data),
+  deciderTitre: (id: number, params: { accord: boolean; date_decision: string; autorite_emettrice?: string; reference_deliberation?: string; motif_refus?: string }) =>
+    apiClient.post(`${AMGT}/titres-domaniaux/${id}/decision`, null, { params }),
+
+  // 6. Concessions & contrats d'exploitation
+  listConcessions: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/concessions`, { params }),
+  getConcession: (id: number) => apiClient.get(`${AMGT}/concessions/${id}`),
+  createConcession: (data: unknown) => apiClient.post(`${AMGT}/concessions`, data),
+  updateConcession: (id: number, data: unknown) => apiClient.put(`${AMGT}/concessions/${id}`, data),
+  getObligationsConcession: (id: number) => apiClient.get(`${AMGT}/concessions/${id}/obligations`),
+  prononcerReversaison: (id: number) => apiClient.post(`${AMGT}/concessions/${id}/reversaison`),
+
+  // 7. Inventaire des infrastructures
+  listInfrastructures: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/infrastructures`, { params }),
+  getInfrastructure: (id: number) => apiClient.get(`${AMGT}/infrastructures/${id}`),
+  createInfrastructure: (data: unknown) => apiClient.post(`${AMGT}/infrastructures`, data),
+  updateInfrastructure: (id: number, data: unknown) => apiClient.put(`${AMGT}/infrastructures/${id}`, data),
+  deleteInfrastructure: (id: number) => apiClient.delete(`${AMGT}/infrastructures/${id}`),
+  consignerInspection: (id: number, params: { date_inspection: string; etat_structural?: string; note_genie_civil?: number; prochaine_inspection?: string }) =>
+    apiClient.post(`${AMGT}/infrastructures/${id}/inspection`, null, { params }),
+
+  // 8. Dragage & profondeurs disponibles
+  listDragages: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/dragage`, { params }),
+  getDragage: (id: number) => apiClient.get(`${AMGT}/dragage/${id}`),
+  createDragage: (data: unknown) => apiClient.post(`${AMGT}/dragage`, data),
+  updateDragage: (id: number, data: unknown) => apiClient.put(`${AMGT}/dragage/${id}`, data),
+  consignerBathymetrie: (id: number, params: { profondeur_obtenue_m: number; date_releve: string; volume_mesure_m3?: number }) =>
+    apiClient.post(`${AMGT}/dragage/${id}/bathymetrie`, null, { params }),
+  demandeExutoire: (id: number) => apiClient.post(`${AMGT}/dragage/${id}/autorisation-rejet`),
+
+  // 9. Autorisations administratives (EIES, permis)
+  listAutorisations: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/autorisations`, { params }),
+  getAutorisation: (id: number) => apiClient.get(`${AMGT}/autorisations/${id}`),
+  createAutorisation: (data: unknown) => apiClient.post(`${AMGT}/autorisations`, data),
+  updateAutorisation: (id: number, data: unknown) => apiClient.put(`${AMGT}/autorisations/${id}`, data),
+  depotAutorisation: (id: number) => apiClient.post(`${AMGT}/autorisations/${id}/depot`),
+};
+
 // ─── Service Cotations & Devis (tarification fret) ──────────────────────────
 // Registre reel : table cotations_devis (reference, client_nom, origine,
 // destination, nature_fret, montant_estime_xaf, marge_nette_pct, statut
