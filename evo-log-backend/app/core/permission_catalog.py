@@ -115,6 +115,12 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ("DIRECTEUR_FINANCIER", 2, "Direction financiere : pilotage et validation de tous les modules finance", [
         "comptabilite.*.*", "tresorerie.*.*", "facturation.*.*", "fiscalite.*.*",
         "immobilisations.*.*", "achats.commande.approve",
+        # L'engagement des credits d'investissement passe par le DTO vise par
+        # le controle financier : le DAF instruit la ligne et l'approuve, il
+        # ne gere ni les travaux ni le domaine.
+        "amenagement.projet.read", "amenagement.marche.read",
+        "amenagement.concession.read", "amenagement.dto.read",
+        "amenagement.dto.approve", "amenagement.dto.export",
     ]),
     ("CHEF_COMPTABLE", 2, "Chef comptable : voir et valider tout le departement comptable", [
         "comptabilite.*.*", "tresorerie.*.read", "tresorerie.mouvement.approve",
@@ -146,6 +152,9 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         # Batch 24 : meme lecture transversale sur le QHSE (rapports annuels
         # includes), sans jamais d'ecriture.
         "qhse.*.read",
+        # L'auditeur verifie le domaine : lire les pieces a valeur (DTO,
+        # marches, titres, concessions) sans pouvoir y toucher.
+        "amenagement.*.read",
     ]),
     ("TRANSIT_PRINCIPAL", 2, "Transitaire principal : gestion et validation des dossiers", [
         "transit.*.*", "acconage.*.read", "magasin.stock.read", "fiscalite.declarations.read",
@@ -206,6 +215,11 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         # consulte la segregation IMDG avant co-stivage et signale un risque.
         "qhse.accident.read", "qhse.accident.create", "qhse.accident.modify",
         "qhse.permis.create", "qhse.imdg.read", "qhse.risque.create",
+        # Un chantier d'amenagement ferme un poste ou change la portance d'une
+        # aire : le chef d'exploitation doit voir l'avancement et les arretes
+        # domaniaux, sans les rediger.
+        "amenagement.infrastructure.read", "amenagement.dragage.read",
+        "amenagement.projet.read", "amenagement.titre_domanial.read",
     ]),
     ("OPERATEUR_ACCONAGE", 3, "Operateur d'acconage : execution au quai, sans validation", [
         "acconage.navire.read", "acconage.escale.read", "acconage.escale.create",
