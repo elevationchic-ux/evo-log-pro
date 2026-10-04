@@ -486,6 +486,21 @@ except ImportError as e:
     logger.critical(f"Cameroon/CEMAC modules failed to load: {e}")
     raise
 
+# Departement autonome Amenagement portuaire (Douala, Kribi, Limbe) : maitrise
+# d'ouvrage du domaine portuaire — schemas directeurs, programmation DTO,
+# marches et contrats PPP, titres domaniaux, concessions, ouvrages, dragage,
+# autorisations environnementales. Ces tables portent le domaine public
+# national (aucune company_id, comme ports_cameroun) : l'acces est donc purgue
+# par le RBAC granulaire ``amenagement.<sous-module>.<action>`` et non par le
+# scope tenant. Les teleprocedures institutionnelles (APN, COLIFE/CIP, MINEPF,
+# MINEPPT) repondent 501 : rien n'est simule.
+try:
+    from app.routers.v1 import amenagement_portuaire
+    safe_include_router(amenagement_portuaire.router, prefix="/api/v1/amenagement-portuaire", tags=["Amenagement Portuaire"])
+except ImportError as e:
+    logger.critical(f"Departement Amenagement portuaire router failed to load: {e}")
+    raise
+
 # WebSocket and additional routers
 try:
     from app.routers import ws, collaboration, iot, webhook_whatsapp, telematics

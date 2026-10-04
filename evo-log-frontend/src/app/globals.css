@@ -313,17 +313,17 @@
     --error-container: 4 80% 92%;
     --on-error-container: 4 75% 28%;
 
-    --outline: 220 14% 72%;
-    --outline-variant: 220 16% 86%;
+    --outline: 220 12% 80%;
+    --outline-variant: 220 12% 90%;
 
     /* Surface containers (paliers clairs ascendants) */
-    --surface-container-lowest: 0 0% 100%;
-    --surface-container-low: 220 24% 98%;
-    --surface-container: 220 18% 96%;
-    --surface-container-high: 220 15% 92%;
+    --surface-container-lowest: 220 33% 99%;
+    --surface-container-low: 220 26% 97.5%;
+    --surface-container: 220 20% 95%;
+    --surface-container-high: 220 16% 92%;
     --surface-container-highest: 220 13% 88%;
 
-    --EVO-LOG-primary: 217 85% 48%;
+    --EVO-LOG-primary: 217 72% 52%;
 
     /* Badges module : version claire sobre (teinte pale + texte fonce).
        Le filet .light plus bas force [class*="module-badge-"] de facon
@@ -499,13 +499,13 @@
 
   /* Variantes opacité (bg-slate-800/60, bg-slate-900/90...) par sous-chaîne */
   .light [class*="bg-slate-950/"],
-  .light [class*="bg-gray-950/"] { background-color: hsl(var(--surface-container-lowest) / 0.9) !important; }
+  .light [class*="bg-gray-950/"] { background-color: hsl(var(--surface-container-lowest) / 0.7) !important; }
   .light [class*="bg-slate-900/"],
   .light [class*="bg-gray-900/"],
-  .light [class*="bg-zinc-900/"] { background-color: hsl(var(--surface) / 0.88) !important; }
+  .light [class*="bg-zinc-900/"] { background-color: hsl(var(--surface) / 0.72) !important; }
   .light [class*="bg-slate-800/"],
-  .light [class*="bg-gray-800/"] { background-color: hsl(var(--surface-container) / 0.7) !important; }
-  .light [class*="bg-slate-700/"] { background-color: hsl(var(--surface-container-high) / 0.7) !important; }
+  .light [class*="bg-gray-800/"] { background-color: hsl(var(--surface-container) / 0.5) !important; }
+  .light [class*="bg-slate-700/"] { background-color: hsl(var(--surface-container-high) / 0.55) !important; }
 
   /* Survol (hover) des surfaces neutres */
   .light .hover\:bg-slate-900:hover,
@@ -533,7 +533,7 @@
   /* Blanc : titre/blanc sur fond neutre -> fonce ; MAIS on preserve le
      blanc des controles pleins (l'element porte lui-meme un bg-*). */
   .light .text-white:not([class*="bg-"]):not([class*="text-on-"]) { color: hsl(var(--on-surface)) !important; }
-  .light [class*="text-white/"]:not([class*="bg-"]) { color: hsl(var(--on-surface) / 0.72) !important; }
+  .light [class*="text-white/"]:not([class*="bg-"]) { color: hsl(var(--on-surface) / 0.55) !important; }
 
   /* Bordures / separateurs neutres */
   .light .border-slate-800,
@@ -573,7 +573,7 @@
 
   /* Placeholder herite sombre -> gris fonce leger */
   .light input::placeholder,
-  .light textarea::placeholder { color: hsl(var(--on-surface-variant) / 0.7) !important; }
+  .light textarea::placeholder { color: hsl(var(--on-surface-variant) / 0.55) !important; }
 
   /* Texte d'accent trop clair (etapes 300/400/500, ecrit pour fond sombre)
      -> assombri pour rester lisible sur fond clair. Garde-fou : on ne touche
@@ -609,9 +609,9 @@
 
   /* Badges module : sobre et neutre en clair (remplace la teinte saturée) */
   .light [class*="module-badge-"] {
-    background-color: hsl(220 16% 95%) !important;
-    color: hsl(220 20% 28%) !important;
-    border-color: hsl(220 14% 88%) !important;
+    background-color: hsl(220 20% 96%) !important;
+    color: hsl(220 12% 38%) !important;
+    border-color: hsl(220 14% 90%) !important;
   }
 }
 
