@@ -33,7 +33,8 @@ aligne sur le circuit camerounais reel :
 
     schemas_directeurs_amgt      schemas / plans directeurs (APN, autorite portuaire)
     projets_amenagement          operations d\'investissement programmees
-    documents_programmation_amgt           Documents Techniques Outil et visas du controle financier
+    documents_programmation_amgt fiche technique, visa de maturite (decret
+                                 2018/0492), PIP/CDMT, visas d\'engagement
     marches_amenagement          marches publics (COLIFE/CIP) et contrats PPP (loi 2023/008)
     autorisations_domaniales_amgt titres d\'occupation du domaine portuaire
     concessions_amenagement      affermage, concession, BOT/CET, AOT

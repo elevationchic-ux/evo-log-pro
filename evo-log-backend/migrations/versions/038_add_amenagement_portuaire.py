@@ -5,7 +5,7 @@ aligne sur le circuit camerounais reel :
 
     schemas_directeurs_amgt      schemas / plans directeurs (APN, autorite portuaire)
     projets_amenagement          operations d'investissement programmees
-    registres_dto_amgt           Documents Techniques Outil et visas du controle financier
+    documents_programmation_amgt           Documents Techniques Outil et visas du controle financier
     marches_amenagement          marches publics (COLIFE/CIP) et contrats PPP (loi 2023/008)
     autorisations_domaniales_amgt titres d'occupation du domaine portuaire
     concessions_amenagement      affermage, concession, BOT/CET, AOT
@@ -49,7 +49,7 @@ NEW_PORT_COLS = ("autorite_portuaire", "tirant_eau_max")
 
 T_SCHEMA_DIRECTEUR = "schemas_directeurs_amgt"
 T_PROJET = "projets_amenagement"
-T_DTO = "registres_dto_amgt"
+T_PROGRAMMATION = "documents_programmation_amgt"
 T_MARCHE = "marches_amenagement"
 T_TITRE = "autorisations_domaniales_amgt"
 T_CONCESSION = "concessions_amenagement"
@@ -130,8 +130,8 @@ def upgrade():
             sa.Column("maitre_doeuvre", sa.String(160), nullable=True),
             sa.Column("bureau_controle", sa.String(160), nullable=True),
             sa.Column("entreprise_attributaire", sa.String(200), nullable=True),
-            sa.Column("dto_reference", sa.String(120), nullable=True),
-            sa.Column("date_notification_minepf", sa.Date(), nullable=True),
+            sa.Column("reference_fiche_technique", sa.String(120), nullable=True),
+            sa.Column("date_notification_minfi", sa.Date(), nullable=True),
             sa.Column("eies_obligatoire", sa.Boolean(), nullable=True),
             sa.Column("superficie_impactee_ha", sa.Numeric(14, 3), nullable=True),
             sa.Column("capacite_additionnelle", sa.String(120), nullable=True),
@@ -155,11 +155,11 @@ def upgrade():
         op.create_index("ix_projets_amenagement_type_ouvrage", "projets_amenagement", ["type_ouvrage"])
         op.create_index("ix_projets_amenagement_statut", "projets_amenagement", ["statut"])
 
-    if T_DTO not in tables:
+    if T_PROGRAMMATION not in tables:
         op.create_table(
-            T_DTO,
+            T_PROGRAMMATION,
             sa.Column("id", sa.Integer(), primary_key=True),
-            sa.Column("reference_dto", sa.String(80), nullable=False),
+            sa.Column("reference_fiche_technique", sa.String(80), nullable=False),
             sa.Column("exercice", sa.Integer(), nullable=False),
             sa.Column("projet_id", sa.Integer(), nullable=True),
             sa.Column("port_id", sa.Integer(), nullable=True),
@@ -170,24 +170,28 @@ def upgrade():
             sa.Column("chapitre", sa.String(120), nullable=True),
             sa.Column("statut", sa.String(30), nullable=True),
             sa.Column("date_presentation", sa.Date(), nullable=True),
+            sa.Column("numero_visa_maturite", sa.String(80), nullable=True),
+            sa.Column("date_visa_maturite", sa.Date(), nullable=True),
+            sa.Column("autorite_visa_maturite", sa.String(160), nullable=True),
+            sa.Column("reference_pip_cdmt", sa.String(120), nullable=True),
             sa.Column("date_visa_controle_financier", sa.Date(), nullable=True),
             sa.Column("autorite_visa", sa.String(160), nullable=True),
             sa.Column("numero_engagement", sa.String(80), nullable=True),
-            sa.Column("date_notification_minepf", sa.Date(), nullable=True),
+            sa.Column("date_notification_minfi", sa.Date(), nullable=True),
             sa.Column("source_reference", sa.String(200), nullable=True),
             sa.Column("date_verification", sa.Date(), nullable=True),
             sa.Column("auteur_saisie", sa.String(120), nullable=True),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=True, server_default=sa.func.now()),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
-            sa.ForeignKeyConstraint(["projet_id"], ["projets_amenagement.id"], name="fk_registres_dto_amgt_projet_id_projets_amenagement"),
-            sa.ForeignKeyConstraint(["port_id"], ["ports_cameroun.id"], name="fk_registres_dto_amgt_port_id_ports_cameroun"),
+            sa.ForeignKeyConstraint(["projet_id"], ["projets_amenagement.id"], name="fk_documents_programmation_amgt_projet_id_projets_amenagement"),
+            sa.ForeignKeyConstraint(["port_id"], ["ports_cameroun.id"], name="fk_documents_programmation_amgt_port_id_ports_cameroun"),
         )
-        op.create_index("ix_registres_dto_amgt_id", "registres_dto_amgt", ["id"])
-        op.create_index("ix_registres_dto_amgt_reference_dto", "registres_dto_amgt", ["reference_dto"], unique=True)
-        op.create_index("ix_registres_dto_amgt_exercice", "registres_dto_amgt", ["exercice"])
-        op.create_index("ix_registres_dto_amgt_projet_id", "registres_dto_amgt", ["projet_id"])
-        op.create_index("ix_registres_dto_amgt_statut", "registres_dto_amgt", ["statut"])
+        op.create_index("ix_documents_programmation_amgt_id", "documents_programmation_amgt", ["id"])
+        op.create_index("ix_documents_programmation_amgt_reference_fiche_technique", "documents_programmation_amgt", ["reference_fiche_technique"], unique=True)
+        op.create_index("ix_documents_programmation_amgt_exercice", "documents_programmation_amgt", ["exercice"])
+        op.create_index("ix_documents_programmation_amgt_projet_id", "documents_programmation_amgt", ["projet_id"])
+        op.create_index("ix_documents_programmation_amgt_statut", "documents_programmation_amgt", ["statut"])
 
     if T_MARCHE not in tables:
         op.create_table(
@@ -496,8 +500,8 @@ def downgrade():
         op.drop_table(T_TITRE)
     if T_MARCHE in tables:
         op.drop_table(T_MARCHE)
-    if T_DTO in tables:
-        op.drop_table(T_DTO)
+    if T_PROGRAMMATION in tables:
+        op.drop_table(T_PROGRAMMATION)
     if T_PROJET in tables:
         op.drop_table(T_PROJET)
     if T_SCHEMA_DIRECTEUR in tables:
