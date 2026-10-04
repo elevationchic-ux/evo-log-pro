@@ -1,6 +1,6 @@
 """039 : droits RBAC du departement Amenagement portuaire.
 
-Contexte : /api/v1/amenagement-portuaire (56 routes, 9 sous-modules) etait
+Contexte : /api/v1/amenagement-portuaire (58 routes, 9 sous-modules) etait
 sans grants. Le catalogue declare desormais 50 codes `amenagement.*` (domaine
 `amenagement_portuaire`) et deux roles metiers qui n'existaient nulle part :
 CHEF_AMENAGEMENT_PORTUAIRE (niveau 2, porte les actes d'engagement) et

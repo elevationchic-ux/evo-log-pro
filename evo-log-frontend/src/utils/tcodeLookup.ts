@@ -59,6 +59,18 @@ export const TCODE_MAP: Record<string, string> = {
   'EVO-AC01': '/acconage',
   'EVO-AC02': '/acconage/operations',
 
+  // 📐 Aménagement Portuaire & Domaine Public (département autonome, KAMT_*)
+  'KAMT_DSH': '/amenagement-portuaire/dashboard',
+  'KAMT_SCH': '/amenagement-portuaire/schemas-directeurs',
+  'KAMT_PRJ': '/amenagement-portuaire/projets',
+  'KAMT_PIP': '/amenagement-portuaire/programmation',
+  'KAMT_MCH': '/amenagement-portuaire/marches',
+  'KAMT_DOM': '/amenagement-portuaire/titres-domaniaux',
+  'KAMT_CCS': '/amenagement-portuaire/concessions',
+  'KAMT_INF': '/amenagement-portuaire/infrastructures',
+  'KAMT_DRG': '/amenagement-portuaire/dragage',
+  'KAMT_AUT': '/amenagement-portuaire/autorisations',
+
   // 🛃 Transit & Douane CEMAC
   'KDOU_DSH': '/transit-douane/dashboard',
   'KDOU_DUM': '/transit-douane/declarations',
