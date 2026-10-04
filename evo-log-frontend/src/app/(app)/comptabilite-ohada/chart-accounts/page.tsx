@@ -261,6 +261,16 @@ export default function ComptabiliteOhadaChartAccounts() {
             </tbody>
           </table>
         </div>
+        {!loading && filtered.length === 0 && (
+          <div className="p-8 text-center">
+            <p className="text-sm text-slate-300 font-semibold">
+              {error ? 'Aucun compte récupérable depuis l\'API.' : 'Le plan comptable en base est vide pour ce filtre.'}
+            </p>
+            <p className="text-xs text-slate-500 mt-2 font-mono">
+              {error ?? 'Le plan SYSCOHADA est seedé par la migration backend `041_seed_syscohada_referentiels` (alembic upgrade head).'}
+            </p>
+          </div>
+        )}
       </div>
       {showCreateModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
