@@ -575,6 +575,38 @@
   .light input::placeholder,
   .light textarea::placeholder { color: hsl(var(--on-surface-variant) / 0.7) !important; }
 
+  /* Texte d'accent trop clair (etapes 300/400/500, ecrit pour fond sombre)
+     -> assombri pour rester lisible sur fond clair. Garde-fou : on ne touche
+     pas aux libelles porteurs d'un bg-* (boutons pleins) qui gardent leur blanc. */
+  .light .text-amber-200:not([class*="bg-"]),
+  .light .text-amber-300:not([class*="bg-"]),
+  .light .text-amber-400:not([class*="bg-"]) { color: rgb(180 83 9) !important; }
+  .light .text-yellow-300:not([class*="bg-"]),
+  .light .text-yellow-400:not([class*="bg-"]) { color: rgb(161 98 7) !important; }
+  .light .text-emerald-300:not([class*="bg-"]),
+  .light .text-emerald-400:not([class*="bg-"]) { color: rgb(4 120 87) !important; }
+  .light .text-green-300:not([class*="bg-"]),
+  .light .text-green-400:not([class*="bg-"]) { color: rgb(21 128 61) !important; }
+  .light .text-red-300:not([class*="bg-"]),
+  .light .text-red-400:not([class*="bg-"]) { color: rgb(185 28 28) !important; }
+  .light .text-rose-300:not([class*="bg-"]),
+  .light .text-rose-400:not([class*="bg-"]) { color: rgb(190 18 60) !important; }
+  .light .text-blue-300:not([class*="bg-"]),
+  .light .text-blue-400:not([class*="bg-"]) { color: rgb(29 78 216) !important; }
+  .light .text-sky-300:not([class*="bg-"]),
+  .light .text-sky-400:not([class*="bg-"]) { color: rgb(3 105 161) !important; }
+  .light .text-indigo-300:not([class*="bg-"]),
+  .light .text-indigo-400:not([class*="bg-"]) { color: rgb(67 56 202) !important; }
+  .light .text-violet-300:not([class*="bg-"]),
+  .light .text-purple-300:not([class*="bg-"]),
+  .light .text-purple-400:not([class*="bg-"]) { color: rgb(109 40 217) !important; }
+  .light .text-cyan-300:not([class*="bg-"]),
+  .light .text-cyan-400:not([class*="bg-"]) { color: rgb(14 116 144) !important; }
+  .light .text-teal-300:not([class*="bg-"]),
+  .light .text-teal-400:not([class*="bg-"]) { color: rgb(15 118 110) !important; }
+  .light .text-orange-300:not([class*="bg-"]),
+  .light .text-orange-400:not([class*="bg-"]) { color: rgb(194 65 12) !important; }
+
   /* Badges module : sobre et neutre en clair (remplace la teinte saturée) */
   .light [class*="module-badge-"] {
     background-color: hsl(220 16% 95%) !important;
