@@ -1,5 +1,5 @@
 // src/config/domainLoadingConfig.ts
-// SOURCE DE VÉRITÉ OFFICIELLE DES 28 DÉPARTEMENTS ET GRANDS MODULES EVO-LOG ERP
+// SOURCE DE VÉRITÉ OFFICIELLE DES 29 DÉPARTEMENTS ET GRANDS MODULES EVO-LOG ERP
 // Chaque département possède son identité visuelle, sa palette chromatique,
 // sa localisation institutionnelle, ses messages de diagnostic et son animation parlante.
 //
@@ -1118,7 +1118,7 @@ export const DOMAIN_LOADING_CONFIGS: Record<string, DomainLoadingConfig> = {
     departmentNumber: 0,
     domainName: 'COCKPIT GLOBAL EVO-LOG',
     subTitle: 'SYNTHÈSE INTÉGRÉE NAVIRE → CLIENT & SUPERVISION OPÉRATIONNELLE',
-    badgeCode: 'CADC ERP • 28 DÉPARTEMENTS INTÉGRÉS',
+    badgeCode: 'CADC ERP • 29 DÉPARTEMENTS INTÉGRÉS',
     locationTag: 'DIRECTION GÉNÉRALE & SALLE DES OPÉRATIONS',
     primaryColor: '#6366F1',
     accentColor: '#F59E0B',
@@ -1126,7 +1126,7 @@ export const DOMAIN_LOADING_CONFIGS: Record<string, DomainLoadingConfig> = {
     glowClass: 'shadow-indigo-500/50 border-indigo-500/60 text-indigo-400',
     animationType: 'strategic-compass',
     steps: [
-      '▶ Agrégation des flux opérationnels des 28 départements métiers...',
+      '▶ Agrégation des flux opérationnels des 29 départements métiers...',
       '▶ Synchronisation des alertes en direct et indicateurs clés de performance...',
       '▶ Déploiement de la vue transversale consolidée de l\'entreprise...',
       '✓ Cockpit Global déployé. Bienvenue sur EVO-LOG SaaS.',
