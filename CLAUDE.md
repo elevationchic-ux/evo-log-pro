@@ -43,7 +43,7 @@ Ce document contient les instructions et commandes de référence pour l'utilisa
 
 ### Organisation Backend (`EVO-LOG-backend`)
 - `app/main.py` : Point d'entrée FastAPI, middleware d'audit, SlowAPI rate limiting, `safe_include_router()` pour l'enregistrement résilient des 22+ routeurs.
-- `app/routers/v1/` : Routeurs v1 (auth, tiers, transport, finance, parc, magasin, qhse, acconage, maintenance, fuelguard, shift_planning, port_pricing, gps_tracking, port_incidents, container_lifecycle, notification_system, auto_invoicing, port_performance, real_customs, partner_api, etc.).
+- `app/routers/v1/` : Routeurs v1 (auth, tiers, transport, finance, parc, magasin, qhse, acconage, maintenance, fuelguard, shift_planning, port_pricing, gps_tracking, port_incidents, container_lifecycle, notification_system, auto_invoicing, port_performance, real_customs, partner_api, **amenagement_portuaire** — département autonome d'aménagement portuaire Douala / Kribi / Limbé, etc.).
 - `app/models/` : Modèles SQLAlchemy (User, RoleModel, PermissionModel, Agency, Tiers, Mission, Stock, etc.) + 10 nouveaux modules + 18 sous-modules.
 - `app/schemas/` : Contrats de validation Pydantic v2.
 - `app/services/` : Orchestration de la logique métier + 10 nouveaux services.
