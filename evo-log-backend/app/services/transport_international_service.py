@@ -115,7 +115,16 @@ class OrdreTransportService:
         """
         q = db.query(OrdreTransport)
         if statut:
-            q = q.filter(OrdreTransport.statut == statut)
+            # `statut` est une colonne Enum(StatutTransport) sans values_callable :
+            # la DB stocke le NOM ('LIVRE'), pas la valeur ('livre'). Comparer la
+            # colonne à la chaîne valeur renvoyait donc TOUJOURS vide. On convertit
+            # d'abord la valeur reçue en membre d'enum ; une valeur inconnue ne
+            # correspond à aucun enregistrement (liste vide honnête, pas d'erreur).
+            try:
+                membre = StatutTransport(statut)
+            except ValueError:
+                return []
+            q = q.filter(OrdreTransport.statut == membre)
         return (
             q.order_by(OrdreTransport.id.desc())
             .offset(max(offset, 0))
@@ -242,6 +251,30 @@ class CMRService:
         db.commit()
         db.refresh(cmr)
         return cmr
+
+    @staticmethod
+    def lister(
+        db: Session,
+        statut: Optional[str] = None,
+        offset: int = 0,
+        limit: int = 100,
+    ) -> List[CMR]:
+        """Liste des lettres de voiture CMR.
+
+        Le module publie `POST /cmr` depuis l'origine mais AUCUN chemin de
+        lecture : une CMR émise était donc irrécupérable (donnée write-only,
+        écran mort). Cette route rend la liste réellement consultable. `statut`
+        est une simple chaîne ('emis', 'signe', 'livre', 'annule') : pas de
+        conversion d'enum nécessaire."""
+        q = db.query(CMR)
+        if statut:
+            q = q.filter(CMR.statut == statut)
+        return (
+            q.order_by(CMR.id.desc())
+            .offset(max(offset, 0))
+            .limit(min(max(limit, 1), 500))
+            .all()
+        )
 
 
 class ScelleRoutierService:
@@ -578,6 +611,26 @@ class CorridorCEMACService:
         db.commit()
         db.refresh(corridor)
         return corridor
+
+    @staticmethod
+    def lister(
+        db: Session,
+        statut: Optional[str] = None,
+        offset: int = 0,
+        limit: int = 100,
+    ) -> List[CorridorCEMAC]:
+        """Liste des corridors CEMAC. `POST /corridors-cemac` existait sans
+        aucun GET : corridor créé = corridor invisible. Rend la référence
+        réellement consultable."""
+        q = db.query(CorridorCEMAC)
+        if statut:
+            q = q.filter(CorridorCEMAC.statut == statut)
+        return (
+            q.order_by(CorridorCEMAC.id.desc())
+            .offset(max(offset, 0))
+            .limit(min(max(limit, 1), 500))
+            .all()
+        )
 
 
 class TransportInternationalReportingService:
