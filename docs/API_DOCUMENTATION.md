@@ -119,3 +119,48 @@ plusieurs rôles.
 - **Rendu adaptatif** : `AdaptiveModuleGrid` affiche une grille au-delà de 6 modules
   accessibles, sinon un **anneau orbital** (les modules gravitent autour du noyau),
   **sans jamais modifier les `href`**.
+
+---
+
+## 🏗️ Département Aménagement Portuaire & Domaine Public
+
+`/api/v1/amenagement-portuaire` — 60 endpoints, dont **54 branchés en base** et
+**6 téléprocédures institutionnelles honnêtement annoncées `501`**.
+
+**Ce que le département gère réellement** (données saisies par les agents, aucune
+ligne seedée) : places portuaires du référentiel national `ports_cameroun`,
+schémas directeurs et périmètres, projets d'aménagement, programmation et maturité
+(PIP/CDMT, visa de maturité décret n°2018/0492), marchés publics et PPP
+(loi n°2023/008), titres domaniaux et permissions d'occuper, concessions et
+contrats d'exploitation, inventaire des infrastructures, dragage et profondeurs
+disponibles, autorisations administratives (EIES loi n°96/012).
+
+**Ce qui reste `501`** : les échanges avec les administrations elles-mêmes. Un
+dépôt au MINPI/MINFI, une transmission pour visa ministériel, un passage en
+COLIFE, une demande d'exutoire de rejet, un dépôt d'étude d'impact ou une
+réversion de concession supposent un guichet tiers que le projet n'a pas branché.
+L'API enregistre la **preuve** de la démarche (date, destinataire, référence du
+document) côté agent, et refuse d'inventer la réponse de l'administration :
+
+| Endpoint `501` | Démarche réellement concernée |
+| --- | --- |
+| `POST /schemas-directeurs/{id}/demande-visa-minmivt` | Visa ministériel du schéma |
+| `POST /programmation/{id}/notification-minfi` | Notification de la programmation au MINFI |
+| `POST /marches/{id}/soumission-colife` | Passage en COLIFE / CIP |
+| `POST /concessions/{id}/reversaison` | Réversion des biens et remise du site |
+| `POST /dragage/{id}/autorisation-rejet` | Autorisation d'exutoire de rejet en mer |
+| `POST /autorisations/{id}/depot` | Dépôt du dossier auprès de l'administration |
+
+**Permissions** : `amenagement.<sous_module>.<action>` (`require_perm`), cataloguées
+et grantées par les migrations `038`/`039`/`042`. Rôles propres au département :
+`CHEF_AMENAGEMENT_PORTUAIRE`, `INGENIEUR_AMENAGEMENT`. Voir
+[`RBAC_ACCREDITATIONS.md`](./RBAC_ACCREDITATIONS.md).
+
+**Re-mesurer ces chiffres** (au lieu de recopier ce tableau) :
+
+```bash
+cd evo-log-backend
+python scripts/cartographie_routeur.py amenagement_portuaire   # endpoints, permissions, 501
+python scripts/cartographie_routeur.py --total                 # bilan de tous les routeurs v1
+python scripts/audit_rbac_volume.py                            # permissions / rôles / grants sur base vierge
+```
