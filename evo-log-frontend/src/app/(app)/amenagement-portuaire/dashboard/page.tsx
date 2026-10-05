@@ -142,7 +142,7 @@ export default function AmenagementPortuaireDashboardPage() {
           <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <p className="text-sm text-slate-300 leading-relaxed">
             {t(
-              'Votre rôle ne dispose pas de la permission amenagement.projet.read, celle qu'exige la route /synthese. Les registres du département restent accessibles selon vos propres habilitations : demandez cette extension à l\u2019administrateur de votre tenant.',
+              'Votre rôle ne dispose pas de la permission amenagement.projet.read, celle qu\u2019exige la route /synthese. Les registres du département restent accessibles selon vos propres habilitations : demandez cette extension à l\u2019administrateur de votre tenant.',
               'Your role does not hold the amenagement.projet.read permission required by the /synthese route. The department registers remain reachable under your own accreditations: request this extension from your tenant administrator.',
             )}
           </p>

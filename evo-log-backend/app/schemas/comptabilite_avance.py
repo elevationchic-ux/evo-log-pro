@@ -460,3 +460,23 @@ class AffectationResultatResponse(BaseModel):
     montant_dividende: Decimal
     montant_reporte: Decimal
     statut: str
+
+
+# ============ ETATS DE CLOTURE PAR PERIODE ============
+
+class PeriodeClosingItem(BaseModel):
+    """Etat reel d'une periode comptable, derive du grand livre et des balances
+    de verification persistees (pas de donnee inventee)."""
+    periode: str
+    label: str
+    entries_count: int
+    closed: bool
+    balance_statut: Optional[str] = None
+    balance_date: Optional[date] = None
+
+
+class EtatsPeriodesResponse(BaseModel):
+    exercice_id: int
+    annee: int
+    exercice_statut: str
+    periodes: List[PeriodeClosingItem]

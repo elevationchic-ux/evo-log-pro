@@ -808,7 +808,79 @@ class EtatsFinanciersOHADAService:
 
 class ClotureService:
     """Service de clôture mensuelle et annuelle"""
-    
+
+    _MOIS = [
+        "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+    ]
+
+    @staticmethod
+    def etats_periodes(
+        db: Session,
+        exercice_id: int,
+        annee: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Etat reel de chaque periode de l'exercice, pour piloter la cloture.
+
+        Aucune donnee inventee : le nombre de pieces est compte sur les ecritures
+        reellement validees, et une periode n'est dite « cloturee » que si une
+        balance de verification equilibree a ete generee et persistee pour elle.
+        L'ancienne page frontend fabriquait la liste depuis `new Date()` ; cet
+        endpoint expose l'etat veritable.
+        """
+        exercice = db.query(ExerciceComptable).filter(
+            ExerciceComptable.id == exercice_id
+        ).first()
+        if not exercice:
+            raise ValueError("Exercice non trouvé")
+
+        annee_cible = annee or exercice.annee
+
+        # Pieces validees par periode (agregation SQL, une seule requete).
+        compteurs = dict(
+            db.query(
+                EcritureComptableNew.periode,
+                func.count(EcritureComptableNew.id),
+            ).filter(
+                and_(
+                    EcritureComptableNew.exercice_id == exercice_id,
+                    EcritureComptableNew.valider == True,  # noqa: E712
+                )
+            ).group_by(EcritureComptableNew.periode).all()
+        )
+
+        # Derniere balance de verification par periode (une seule requete).
+        balances = {}
+        for b in (
+            db.query(BalanceVerification)
+            .filter(BalanceVerification.exercice_id == exercice_id)
+            .order_by(BalanceVerification.id.asc())
+            .all()
+        ):
+            balances[b.periode] = b  # le dernier gagne = la plus recente
+
+        periodes = []
+        for idx in range(12):
+            code = f"{annee_cible}-{idx + 1:02d}"
+            balance = balances.get(code)
+            entries = int(compteurs.get(code, 0))
+            closed = bool(balance is not None and balance.statut == "equilibre")
+            periodes.append({
+                "periode": code,
+                "label": f"{ClotureService._MOIS[idx]} {annee_cible}",
+                "entries_count": entries,
+                "closed": closed,
+                "balance_statut": balance.statut if balance else None,
+                "balance_date": balance.date_balance if balance else None,
+            })
+
+        return {
+            "exercice_id": exercice_id,
+            "annee": annee_cible,
+            "exercice_statut": exercice.statut,
+            "periodes": periodes,
+        }
+
     @staticmethod
     def cloture_mensuelle(
         db: Session,
@@ -817,6 +889,17 @@ class ClotureService:
         cloture_par: str
     ) -> Dict[str, Any]:
         """Clôture mensuelle des comptes de gestion"""
+        # Refuser de cloturer deux fois la meme periode (regle serveur honnete).
+        deja = db.query(BalanceVerification).filter(
+            and_(
+                BalanceVerification.exercice_id == exercice_id,
+                BalanceVerification.periode == periode,
+                BalanceVerification.statut == "equilibre",
+            )
+        ).first()
+        if deja:
+            raise ValueError(f"La période {periode} est déjà clôturée")
+
         # Récupérer toutes les écritures de la période
         ecritures = db.query(EcritureComptableNew).filter(
             and_(
@@ -842,9 +925,6 @@ class ClotureService:
         if balance.statut != "equilibre":
             raise ValueError(f"Balance déséquilibrée: écart de {balance.ecart}")
         
-        # Marquer la période comme clôturée
-        # (implémentation future avec modèle PeriodeComptable)
-        
         return {
             "exercice_id": exercice_id,
             "periode": periode,
@@ -853,7 +933,7 @@ class ClotureService:
             "cloture_par": cloture_par,
             "date_cloture": date.today()
         }
-    
+
     @staticmethod
     def cloture_annuelle(
         db: Session,
