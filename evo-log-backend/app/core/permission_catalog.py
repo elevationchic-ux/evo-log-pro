@@ -77,7 +77,10 @@ DOMAINS: Dict[str, Dict] = {
     # et PPP loi 2023/008, titres domaniaux, concessions, ouvrages, dragage,
     # autorisations EIES). Pas de « delete » sur les pieces a valeur
     # documentaire : un schema directeur est abroge, une fiche technique annulee,
-    # une concession resilie  jamais efface.
+    # une concession resilie  jamais efface. Le sous-module « place » ne porte
+    # pas de delete pour la meme raison : ports_cameroun est le referentiel
+    # national partage (tarification, perimetres, terminaux), une place qui sort
+    # du perimetre est desactivee (est_actif), pas detruite.
     "amenagement_portuaire": {
         "label": "Amenagement portuaire & domaine public",
         "modules": {
@@ -123,6 +126,9 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "amenagement.projet.read", "amenagement.marche.read",
         "amenagement.concession.read", "amenagement.programmation.read",
         "amenagement.programmation.approve", "amenagement.programmation.export",
+        # La synthese et les formulaires lisent le referentiel des places : sans
+        # ce code, un DAF qui ouvre le departement verrait des listes vides.
+        "amenagement.place.read",
     ]),
     ("CHEF_COMPTABLE", 2, "Chef comptable : voir et valider tout le departement comptable", [
         "comptabilite.*.*", "tresorerie.*.read", "tresorerie.mouvement.approve",
@@ -222,6 +228,9 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         # domaniaux, sans les rediger.
         "amenagement.infrastructure.read", "amenagement.dragage.read",
         "amenagement.projet.read", "amenagement.titre_domanial.read",
+        # Un poste ferme ou une aire changeee se refere a la place portuaire :
+        # lecture du referentiel, jamais declaration d'une place.
+        "amenagement.place.read",
     ]),
     ("OPERATEUR_ACCONAGE", 3, "Operateur d'acconage : execution au quai, sans validation", [
         "acconage.navire.read", "acconage.escale.read", "acconage.escale.create",
@@ -265,6 +274,11 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "amenagement.infrastructure.create", "amenagement.infrastructure.modify",
         "amenagement.dragage.create", "amenagement.dragage.modify",
         "amenagement.autorisation.create", "amenagement.autorisation.modify",
+        # Le referentiel des places n'est alimente par aucune autre route de
+        # l'application : c'est l'ingenieur qui releve code, denomination,
+        # autorite concessionnaire et tirant d'eau sur les documents officiels.
+        # Il ne supprime jamais une place (table partagee) : il la desactive.
+        "amenagement.place.create", "amenagement.place.modify",
         # Un quai mis hors service pour travaux se coordonne avec l'exploitation :
         # lecture utile, pas decision.
         "port.quai.read",
