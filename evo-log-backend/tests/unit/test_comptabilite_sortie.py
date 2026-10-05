@@ -228,13 +228,15 @@ def test_creer_balance_verification_persiste_lignes_par_compte(db, referentiel):
     assert float(balance.total_debit) == float(balance.total_credit) == 10_000_000
     assert balance.statut == "equilibre"
     assert float(balance.ecart) == 0
-    lignes = sorted(balance.lignes, key=lambda l: l.compte_numero)
+    db.refresh(balance)
+    lignes = sorted(balance.lignes_balance, key=lambda l: l.compte_numero)
     # Deux comptes mouves seulement (capital et banque), pas d'en-tete plat.
     assert [l.compte_numero for l in lignes] == ["1011", "5121"]
+    # Les deux pieces se neutralisent : solde final nul par compte, mais les
+    # totaux cumules (6 M debit / 6 M credit par compte) sont bien reels.
     for l in lignes:
-        assert float(l.solde_debit) == float(l.solde_credit) == 0.0 or True
-    assert float(lignes[0].solde_debit) == 0.0
-    assert float(lignes[0].solde_credit) == 0.0
+        assert float(l.total_debit) == float(l.total_credit) == 5_000_000
+        assert float(l.solde_debit) == float(l.solde_credit) == 0.0
 
 
 def test_balance_par_journal_retrouve_les_totaux(db, referentiel):
@@ -330,9 +332,9 @@ def test_compte_resultat_en_perte(db, referentiel):
     bilan = EtatsFinanciersOHADAService.generer_bilan_ohada_detaille(
         db, r["exercice"].id, date(2026, 12, 31)
     )
-    # Actif = Passif meme en perte (resultat negatif diminue les capitaux).
-    assert float(bilan.total_actif) == float(bilan.total_passif) == 0.0 or bilan is not None
-    assert float(bilan.total_actif) == float(bilan.total_passif)
+    # Actif = Passif meme en perte (resultat negatif diminue les capitaux) :
+    # banque -9M, clients +2M -> actif -7M ; capitaux 0 + resultat -7M.
+    assert float(bilan.total_actif) == float(bilan.total_passif) == -7_000_000
 
 
 # --------------------------------------------------------------------------- #
@@ -340,15 +342,8 @@ def test_compte_resultat_en_perte(db, referentiel):
 # --------------------------------------------------------------------------- #
 def test_api_balance_verification_existe_et_renvoie_lignes(client, referentiel):
     r = referentiel
-    _creer_piece(client, r, [
-        {"compte_id": r["clients"].id, "debit": 123_456},
-        {"compte_id": r["ventes"].id, "credit": 123_456},
-    ], date(2026, 5, 10), r["j_ventes"]) if False else _creer_piece(
-        # La fixture `client` partage la MEME session `db` que la fixture
-        # `referentiel` (override get_db) : le service vu par l'API est le
-        # meme objet ; on passe par client.db ? Non : on cree via l'API.
-        None, r, [], None, None,
-    ) if False else None
+    # La fixture `client` partage la MEME session `db` que `referentiel`
+    # (override get_db) : la piece creee via l'API est visible de l'API.
     payload = {
         "date_ecriture": "2026-05-10",
         "libelle": "Vente au client",

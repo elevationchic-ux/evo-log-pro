@@ -237,23 +237,26 @@ class BalanceParJournalResponse(BaseModel):
 # ============ ÉTATS FINANCIERS OHADA ============
 
 class BilanOHADADetailleBase(BaseModel):
+    # Pas de borne ge=0 : un solde de bilan peut etre negatif (decouvert de
+    # tresorerie, resultat deficitaire replie dans les capitaux). Imposer 0
+    # ferait echouer la serialization d'un bilan reellement equilibre.
     exercice_id: int
     date_bilan: date
-    actif_immobilise_brut: Decimal = Field(default=0, ge=0)
-    actif_immobilise_amortissements: Decimal = Field(default=0, ge=0)
-    actif_immobilise_net: Decimal = Field(default=0, ge=0)
-    actif_circulant_stocks: Decimal = Field(default=0, ge=0)
-    actif_circulant_creances: Decimal = Field(default=0, ge=0)
-    actif_circulant_total: Decimal = Field(default=0, ge=0)
-    tresorerie_actif: Decimal = Field(default=0, ge=0)
-    total_actif: Decimal = Field(default=0, ge=0)
-    capitaux_propres_capital: Decimal = Field(default=0, ge=0)
-    capitaux_propres_reserves: Decimal = Field(default=0, ge=0)
-    capitaux_propres_resultat: Decimal = Field(default=0, ge=0)
-    capitaux_propres_total: Decimal = Field(default=0, ge=0)
-    dettes_long_terme: Decimal = Field(default=0, ge=0)
-    dettes_courtes: Decimal = Field(default=0, ge=0)
-    total_passif: Decimal = Field(default=0, ge=0)
+    actif_immobilise_brut: Decimal = Field(default=0)
+    actif_immobilise_amortissements: Decimal = Field(default=0)
+    actif_immobilise_net: Decimal = Field(default=0)
+    actif_circulant_stocks: Decimal = Field(default=0)
+    actif_circulant_creances: Decimal = Field(default=0)
+    actif_circulant_total: Decimal = Field(default=0)
+    tresorerie_actif: Decimal = Field(default=0)
+    total_actif: Decimal = Field(default=0)
+    capitaux_propres_capital: Decimal = Field(default=0)
+    capitaux_propres_reserves: Decimal = Field(default=0)
+    capitaux_propres_resultat: Decimal = Field(default=0)
+    capitaux_propres_total: Decimal = Field(default=0)
+    dettes_long_terme: Decimal = Field(default=0)
+    dettes_courtes: Decimal = Field(default=0)
+    total_passif: Decimal = Field(default=0)
 
 
 class BilanOHADADetailleCreate(BilanOHADADetailleBase):
