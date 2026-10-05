@@ -29,6 +29,7 @@ import type { AxiosError } from 'axios';
 
 import { DataEmptyState, DataErrorState, DataLoadingState } from '@/components/shared/StatePanels';
 import { useApi, classifyApiError } from '@/hooks/useApi';
+import type { UseApiResult } from '@/hooks/useApi';
 import { useCan } from '@/hooks/useCan';
 import { useSettings } from '@/components/layout/SettingsProvider';
 import { amenagementAPI } from '@/lib/api-client';
@@ -150,7 +151,17 @@ function cellulePlace(
   }
 }
 
-export default function ReferentielPlaces() {
+export default function ReferentielPlaces({
+  places,
+  onMutation,
+}: {
+  /** Lecture partagée avec le centre de pilotage : une seule requête /places
+   *  par écran, pour qu'une déclaration fraîche rafraîchisse à la fois le
+   *  sélecteur de place, le bloc périmètre et ce tableau. */
+  places: UseApiResult<PlacePortuaire[]>;
+  /** Le dashboard en profite pour relire /synthese. */
+  onMutation?: () => void;
+}) {
   const { language } = useSettings();
   const lang: 'fr' | 'en' = language === 'en' ? 'en' : 'fr';
   const t = (fr: string, en: string) => (lang === 'en' ? en : fr);
@@ -171,12 +182,10 @@ export default function ReferentielPlaces() {
     { isEmpty: (d) => !d || Object.keys(d).length === 0 },
   );
 
-  const places = useApi<PlacePortuaire[]>(async () => {
-    const brut = (await amenagementAPI.getPlaces()).data as { data?: PlacePortuaire[] };
-    return Array.isArray(brut?.data) ? brut.data : [];
-  });
-
-  const rafraichir = useCallback(() => places.refetch(), [places]);
+  const rafraichir = useCallback(() => {
+    places.refetch();
+    onMutation?.();
+  }, [places, onMutation]);
 
   const ouvrir = useCallback((ligne: PlacePortuaire | null) => {
     const init: Record<string, string> = {};
