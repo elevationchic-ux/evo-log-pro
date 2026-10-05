@@ -135,12 +135,15 @@ schémas directeurs et périmètres, projets d'aménagement, programmation et ma
 contrats d'exploitation, inventaire des infrastructures, dragage et profondeurs
 disponibles, autorisations administratives (EIES loi n°96/012).
 
-**Ce qui reste `501`** : les échanges avec les administrations elles-mêmes. Un
-dépôt au MINPI/MINFI, une transmission pour visa ministériel, un passage en
-COLIFE, une demande d'exutoire de rejet, un dépôt d'étude d'impact ou une
-réversion de concession supposent un guichet tiers que le projet n'a pas branché.
+**Ce qui reste `501`** : les échanges avec les administrations elles-mêmes. Une
+transmission au MINMIVT ou au MINFI, un passage en COLIFE, une demande d'exutoire
+de rejet, un dépôt d'étude d'impact ou une réversion de concession supposent un
+guichet tiers que le projet n'a pas branché.
 L'API enregistre la **preuve** de la démarche (date, destinataire, référence du
-document) côté agent, et refuse d'inventer la réponse de l'administration :
+document) côté agent — les colonnes existent sur l'entité (`date_depot`,
+`numero_arrete`, `date_colife`, `date_notification_minfi`,
+`autorisation_rejet_reference`, `reference_approbatrice` …) — et refuse d'inventer
+la réponse de l'administration :
 
 | Endpoint `501` | Démarche réellement concernée |
 | --- | --- |
