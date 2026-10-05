@@ -100,7 +100,7 @@ Les espaces les plus visibles du frontend sont deja presents:
 - `API_DOCUMENTATION.md`: cartographie des prefixes API exposes
 - `RBAC_ACCREDITATIONS.md`: permissions granulaires, visibilite hierarchique, accreditations et espaces communs
 - `DEPLOYMENT.md`: execution locale et deploiement VPS
-- `RAILWAY_DEPLOYMENT.md`: configuration Railway/Vercel
+- `../GUIDE_DEPLOYMENT_VERCEL_RAILWAY.md` et `../GUIDE_DOCKER.md`: deploiement herberge et stack conteneurisee (il n'existe pas de `RAILWAY_DEPLOYMENT.md` dans `docs/`)
 - `STATUT_GLOBAL_PROJET.md`: synthese de l'etat reel et des manques
 - `TESTING_CHECKLIST.md`: checklist de verification et commandes de test
 - `TODO.md`: backlog restant
@@ -111,7 +111,8 @@ Les espaces les plus visibles du frontend sont deja presents:
 Le projet est avance, mais plusieurs sujets restent a consolider:
 
 - couverture de tests backend encore inegale selon les modules;
-- documentation endpoint par endpoint non maintenue manuellement;
+- documentation endpoint par endpoint non maintenue a la main : elle se relit dans
+  Swagger (`/api/docs`) et s'audite avec `scripts/cartographie_routeur.py` ;
 - absence de worker d'arriere-plan effectivement cable dans la stack locale;
 - absence de documentation produit ou parcours utilisateurs par module;
 - besoin de clarifier ce qui est pret pour production et ce qui reste placeholder cote frontend.
