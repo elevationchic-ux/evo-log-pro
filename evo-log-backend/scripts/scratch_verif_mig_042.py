@@ -28,9 +28,9 @@ try:
     version = [r[0] for r in conn.execute("SELECT version_num FROM alembic_version")]
     print(f"alembic : {version}")
 
-    lignes = dict(conn.execute(
+    lignes = {r[0]: r[1:] for r in conn.execute(
         "SELECT code, domaine, module, sub_module, action FROM permissions "
-        "WHERE code LIKE 'amenagement.place.%'"))
+        "WHERE code LIKE 'amenagement.place.%'")}
     for code in PLACE:
         print(f"{code:26} -> {lignes.get(code, 'ABSENT')}")
 
