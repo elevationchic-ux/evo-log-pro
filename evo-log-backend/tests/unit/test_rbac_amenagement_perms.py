@@ -373,8 +373,12 @@ def test_places_ne_sort_que_des_lignes_de_ports_cameroun(client_chef, db):
 
     body = client_chef.get(f"{BASE}/places").json()
     codes = [p["code"] for p in body["data"]]
-    assert "DOU" in codes
-    assert "TIK" not in codes, "hors perimetre et sans autorite saisie : pas invente"
+    # Le referentiel national est rendu INTEGRAL. Le perimetre d'etude du
+    # departement (DOU/KRI/LIM) filtre les agregats de /synthese, pas cette
+    # lecture : cacher « TIK » ferait croire a l'agent que sa declaration n'a
+    # pas ete enregistree, et la ligne deviendrait incorrigible.
+    assert codes == ["DOU", "TIK"], codes
+    assert body["total"] == 2
     douala = next(p for p in body["data"] if p["code"] == "DOU")
     assert douala["autorite_portuaire"] is None
     assert douala["tirant_eau_max"] is None
