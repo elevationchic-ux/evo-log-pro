@@ -593,70 +593,78 @@ class EtatsFinanciersOHADAService:
     """Service des états financiers OHADA complets"""
     
     @staticmethod
+    def _cumul_par_compte(db: Session, date_fin: date) -> Dict[int, Decimal]:
+        """Solde net (debit - credit) cumule de chaque compte au plus tard a
+        `date_fin`, calcule sur les lignes reels du grand livre."""
+        mouv = GrandLivreService.mouvements_par_compte(db, None, date_fin)
+        return {cid: (m["debit"] - m["credit"]) for cid, m in mouv.items()}
+
+    @staticmethod
     def generer_bilan_ohada_detaille(
         db: Session,
         exercice_id: int,
         date_bilan: date
     ) -> BilanOHADADetaille:
-        """Générer le bilan OHADA détaillé"""
-        # Récupérer les soldes des comptes de l'exercice
-        # Actif immobilisé (classe 2)
-        actif_immobilise = db.query(func.sum(PlanComptableOHADA.solde_debit)).filter(
-            and_(
-                PlanComptableOHADA.classe == 2,
-                PlanComptableOHADA.type_compte.in_(["actif_fixe", "actif"])
-            )
-        ).scalar() or 0
-        
-        # Actif circulant (classe 3)
-        actif_circulant_stocks = db.query(func.sum(PlanComptableOHADA.solde_debit)).filter(
-            and_(
-                PlanComptableOHADA.classe == 3,
-                PlanComptableOHADA.type_compte == "actif_circulant"
-            )
-        ).scalar() or 0
-        
-        actif_circulant_creances = db.query(func.sum(PlanComptableOHADA.solde_debit)).filter(
-            and_(
-                PlanComptableOHADA.classe == 4,
-                PlanComptableOHADA.type_compte == "actif_circulant"
-            )
-        ).scalar() or 0
-        
-        # Trésorerie (classe 5)
-        tresorerie_actif = db.query(func.sum(PlanComptableOHADA.solde_debit)).filter(
-            and_(
-                PlanComptableOHADA.classe == 5,
-                PlanComptableOHADA.type_compte == "actif_circulant"
-            )
-        ).scalar() or 0
-        
-        # Capitaux propres (classe 1)
-        capitaux_propres = db.query(func.sum(PlanComptableOHADA.solde_credit)).filter(
-            and_(
-                PlanComptableOHADA.classe == 1,
-                PlanComptableOHADA.type_compte.in_(["passif_fixe", "passif"])
-            )
-        ).scalar() or 0
-        
-        # Dettes
-        dettes_long_terme = db.query(func.sum(PlanComptableOHADA.solde_credit)).filter(
-            and_(
-                PlanComptableOHADA.classe == 1,
-                PlanComptableOHADA.type_compte == "passif_fixe"
-            )
-        ).scalar() or 0
-        
-        dettes_courtes = db.query(func.sum(PlanComptableOHADA.solde_credit)).filter(
-            and_(
-                PlanComptableOHADA.classe == 4,
-                PlanComptableOHADA.type_compte == "passif_circulant"
-            )
-        ).scalar() or 0
-        
-        total_actif = actif_immobilise + actif_circulant_stocks + actif_circulant_creances + tresorerie_actif
-        total_passif = capitaux_propres + dettes_long_terme + dettes_courtes
-        
+        """Bilan OHADA detaille, calcule sur le grand livre reel.
+
+        L'ancienne version lisait `plan_comptable.solde_debit/credit` (jamais
+        majustes par la saisie de piece) et filtrait `type_compte` en minuscules
+        ('actif', 'produit'...) qui ne correspondent pas aux NOMS d'enum
+        stocks ('ACTIF', 'PRODUIT'...) : le bilan etait donc systematiquement
+        a zero. On agrege desormais les soldes par compte, classes selon la
+        nature reelle (nom d'enum + classe SYSCOHADA), et le resultat de
+        l'exercice est replie dans les capitaux propres : Actif = Passif est
+        garanti par la partie double."""
+        comptes = BalanceService._comptes_map(db)
+        soldes = EtatsFinanciersOHADAService._cumul_par_compte(db, date_bilan)
+
+        def nom_nature(compte):
+            tc = compte.type_compte
+            return getattr(tc, "name", str(tc)).upper()
+
+        actif_immobilise = Decimal("0")
+        actif_circulant_stocks = Decimal("0")
+        actif_circulant_creances = Decimal("0")
+        tresorerie_actif = Decimal("0")
+        capitaux_propres = Decimal("0")
+        dettes_courtes = Decimal("0")
+        produits = Decimal("0")
+        charges = Decimal("0")
+
+        for compte_id, net in soldes.items():
+            compte = comptes.get(compte_id)
+            if not compte:
+                continue
+            nature = nom_nature(compte)
+            classe = compte.classe
+            if nature.startswith("ACTIF"):
+                if classe == 2:
+                    actif_immobilise += net
+                elif classe == 3:
+                    actif_circulant_stocks += net
+                elif classe == 4:
+                    actif_circulant_creances += net
+                elif classe == 5:
+                    tresorerie_actif += net
+            elif nature.startswith("PASSIF"):
+                if classe == 1:
+                    capitaux_propres += -net
+                elif classe == 4:
+                    dettes_courtes += -net
+                else:
+                    capitaux_propres += -net
+            elif nature == "PRODUIT":
+                produits += -net
+            elif nature == "CHARGE":
+                charges += net
+
+        resultat_net = produits - charges
+        total_actif = (actif_immobilise + actif_circulant_stocks
+                       + actif_circulant_creances + tresorerie_actif)
+        # Le resultat est replie dans les capitaux pour que le bilan s'equilibre.
+        capitaux_propres_total = capitaux_propres + resultat_net
+        total_passif = capitaux_propres_total + dettes_courtes
+
         bilan = BilanOHADADetaille(
             exercice_id=exercice_id,
             date_bilan=date_bilan,
@@ -668,8 +676,8 @@ class EtatsFinanciersOHADAService:
             tresorerie_actif=tresorerie_actif,
             total_actif=total_actif,
             capitaux_propres_capital=capitaux_propres,
-            capitaux_propres_total=capitaux_propres,
-            dettes_long_terme=dettes_long_terme,
+            capitaux_propres_total=capitaux_propres_total,
+            dettes_long_terme=Decimal("0"),
             dettes_courtes=dettes_courtes,
             total_passif=total_passif
         )
@@ -685,35 +693,40 @@ class EtatsFinanciersOHADAService:
         periode: str,
         date_arrete: date
     ) -> CompteResultatOHADADetaille:
-        """Générer le compte de résultat OHADA détaillé"""
-        # Produits d'exploitation (classe 7)
-        ventes_marchandises = db.query(func.sum(PlanComptableOHADA.solde_credit)).filter(
-            and_(
-                PlanComptableOHADA.classe == 7,
-                PlanComptableOHADA.type_compte == "produit"
-            )
-        ).scalar() or 0
-        
-        # Charges d'exploitation (classe 6)
-        achats_marchandises = db.query(func.sum(PlanComptableOHADA.solde_debit)).filter(
-            and_(
-                PlanComptableOHADA.classe == 6,
-                PlanComptableOHADA.type_compte == "charge"
-            )
-        ).scalar() or 0
-        
-        total_produits_exploitation = ventes_marchandises
-        total_charges_exploitation = achats_marchandises
+        """Compte de resultat OHADA, calcule sur le grand livre reel.
+
+        Meme cause que le bilan : l'ancienne version lisait les soldes de
+        `plan_comptable` (jamais majustes) filtres par `type_compte` en minuscules
+        -> resultat systematiquement a zero. On agrege desormais les comptes de
+        produits (7) et de charges (6) depuis les lignes reelles du grand livre."""
+        comptes = BalanceService._comptes_map(db)
+        soldes = EtatsFinanciersOHADAService._cumul_par_compte(db, date_arrete)
+
+        produits = Decimal("0")
+        charges = Decimal("0")
+        for compte_id, net in soldes.items():
+            compte = comptes.get(compte_id)
+            if not compte:
+                continue
+            nature = getattr(compte.type_compte, "name", str(compte.type_compte)).upper()
+            if nature == "PRODUIT":
+                produits += -net
+            elif nature == "CHARGE":
+                charges += net
+
+        ventes_marchandises = produits
+        achats_marchandises = charges
+        total_produits_exploitation = produits
+        total_charges_exploitation = charges
         resultat_exploitation = total_produits_exploitation - total_charges_exploitation
-        
-        # Produits/Charges financiers
-        produits_financiers = 0
-        charges_financieres = 0
-        resultat_financier = produits_financiers - charges_financieres
-        
-        # Résultat exceptionnel
-        resultat_exceptionnel = 0
-        
+
+        # Produits/Charges financiers et exceptionnel : non detailles ici,
+        # integrés dans l'exploitation (aucune valeur inventee).
+        produits_financiers = Decimal("0")
+        charges_financieres = Decimal("0")
+        resultat_financier = Decimal("0")
+        resultat_exceptionnel = Decimal("0")
+
         # Résultat net
         resultat_net = resultat_exploitation + resultat_financier + resultat_exceptionnel
         
