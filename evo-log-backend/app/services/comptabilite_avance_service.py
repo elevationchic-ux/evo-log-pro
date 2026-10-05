@@ -1003,20 +1003,22 @@ class ClotureService:
         exercice_source_id: int,
         exercice_cible_id: int
     ) -> Dict[str, Any]:
-        """Report à nouveau des soldes de bilan"""
-        # Récupérer les soldes des comptes de bilan de l'exercice source
+        """Apercu du report a nouveau des soldes de bilan.
+
+        La function contenait un bug (variable `exercice_cible` jamais definie ->
+        NameError/500) et une sur-claim « reporte » alors que rien n'etait ecrit.
+        Elle expose desormais un APERCU honnete : le nombre reel de comptes de
+        bilan concernes, sans pretendre avoir persiste un report (l'ecriture des
+        reports a nouveau n'est pas implementee cote serveur)."""
         comptes_bilan = db.query(PlanComptableOHADA).filter(
             PlanComptableOHADA.classe.in_([1, 2, 3, 4, 5])
-        ).all()
-        
-        # Reporter les soldes vers l'exercice cible
-        # (implémentation future)
-        
+        ).count()
+
         return {
             "exercice_source_id": exercice_source_id,
-            "exercice_cible_id": exercice_cible,
-            "statut": "reporte",
-            "nombre_comptes": len(comptes_bilan)
+            "exercice_cible_id": exercice_cible_id,
+            "statut": "apercu_non_persiste",
+            "nombre_comptes": comptes_bilan,
         }
     
     @staticmethod

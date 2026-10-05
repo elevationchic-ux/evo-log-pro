@@ -22,7 +22,8 @@ from app.schemas.comptabilite_avance import (
     ClotureMensuelleRequest, ClotureMensuelleResponse,
     ClotureAnnuelleRequest, ClotureAnnuelleResponse,
     ReportANouveauRequest, ReportANouveauResponse,
-    AffectationResultatRequest, AffectationResultatResponse
+    AffectationResultatRequest, AffectationResultatResponse,
+    PeriodeClosingItem, EtatsPeriodesResponse
 )
 from app.services.comptabilite_avance_service import (
     JournalAuxiliaireService, LettrageService, GrandLivreService, BalanceService, EtatsFinanciersOHADAService, ClotureService
