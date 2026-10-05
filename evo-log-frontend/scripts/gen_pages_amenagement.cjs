@@ -86,13 +86,13 @@ const pages = [
   },
 ];
 
-const entete = (doc) => doc.join('\n');
+const entete = (doc) => doc.map((l) => ` * ${l}`).join('\n');
 
 for (const p of pages) {
   const contenu = `'use client';
 
 /**
- * ${entete(p.doc)}
+${entete(p.doc)}
  *
  * Page fine : toute la mécanique (permissions granulaires, référentiels serveurs,
  * champs vides non envoyés, erreurs 409/422/501 remontées telles quelles) est
