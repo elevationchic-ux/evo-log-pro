@@ -460,6 +460,42 @@ def test_une_place_se_desactive_et_ne_se_detruit_pas(client_ingenieur, db):
     assert set(verbes) == {"put"}, sorted(verbes)
 
 
+def test_une_place_hors_des_trois_codes_du_perimetre_reste_declaree(client_ingenieur):
+    """Le périmètre d'étude filtre les agrégats, pas le référentiel.
+
+    Un agent qui déclare une quatrième place (Tiko, Bonabéri…) doit la voir
+    revenir : une ligne enregistrée puis absente de la liste ferait croire à
+    l'échec de la saisie, et le formulaire ne pourrait plus jamais la corriger.
+    """
+    r = client_ingenieur.post(f"{BASE}/places", json={
+        "code": "tik", "nom": "Port de Tiko", "type_port": "marchandises",
+    })
+    assert r.status_code == 201, r.text
+
+    liste = client_ingenieur.get(f"{BASE}/places")
+    assert liste.status_code == 200, liste.text
+    codes = [p["code"] for p in liste.json()["data"]]
+    assert "TIK" in codes, codes
+
+
+def test_le_garde_place_refuse_une_donnee_que_la_table_ne_porte_pas():
+    """`ports_cameroun` n'a ni source_reference ni notes : refuser plutot que
+    laisser SQLAlchemy jeter silencieusement une donnee saisie par l'agent."""
+    import pytest
+
+    from fastapi import HTTPException
+
+    from app.routers.v1.amenagement_portuaire import _colonnes_place
+
+    with pytest.raises(HTTPException) as exc:
+        _colonnes_place({"nom": "Port de Kribi", "source_reference": "Arrete n° 12"})
+    assert exc.value.status_code == 400
+    assert "source_reference" in exc.value.detail
+
+    # Une donnee portee par la table passe, sans rien ajouter ni deviner.
+    assert _colonnes_place({"nom": "Port de Kribi"}) == {"nom": "Port de Kribi"}
+
+
 def test_le_vocabulaire_publie_par_nomenclatures_est_reel(client_chef):
     r = client_chef.get(f"{BASE}/nomenclatures")
     assert r.status_code == 200, r.text
