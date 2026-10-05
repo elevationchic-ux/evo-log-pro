@@ -46,13 +46,13 @@ try:
         }
         codes_role = [c for n, _l, _d, cs in ROLE_GRANTS if n == nom for c in cs]
         attendu = {c for c in PLACE if has_perm(codes_role, c)}
-        # Un lien wildcard (amenagement.*.*) compte comme porteur des trois codes.
-        if any(w in liens for w in ("amenagement.*.*", "amenagement.*.read")):
-            attendu_porte = set(PLACE)
-        else:
-            attendu_porte = {c for c in PLACE if c in liens}
-        etat = "OK" if attendu_porte == attendu else "DIVERGENCE"
-        print(f"{nom:28} porteurs={sorted(attendu_porte)} catalogue={sorted(attendu)} {etat}")
+        # Les liens reels de la base sont rejoues par le VRAI moteur : un lien
+        # wildcard (amenagement.*.* ou amenagement.*.read) ne porte que ce qu'il
+        # dit, et c'est has_perm qui le decide, pas une regle approximative ici.
+        porte = {c for c in PLACE if has_perm(sorted(liens), c)}
+        etat = "OK" if porte == attendu else "DIVERGENCE"
+        print(f"{nom:28} base={sorted(porte)} catalogue={sorted(attendu)} {etat}"
+              + ("" if etat == "OK" else f"  ecart={sorted(porte ^ attendu)}"))
 
     n_ports = conn.execute("SELECT COUNT(*) FROM ports_cameroun").fetchone()[0]
     print(f"ports_cameroun : {n_ports} ligne(s) — doit rester 0 tant que rien n'est saisi")
