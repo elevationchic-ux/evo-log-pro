@@ -119,6 +119,7 @@ function ChampSaisie({
     <label className={`block ${champ.large ? 'sm:col-span-2' : ''}`}>
       <span className="block text-xs font-semibold text-slate-300 mb-1.5">
         {labelChamp(champ, lang)}
+        {champ.unite ? <span className="text-slate-500"> ({champ.unite})</span> : null}
         {champ.requisCreation && <span className="text-amber-400"> *</span>}
       </span>
 
@@ -608,6 +609,11 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
                           onChange={(e) => setFiltres((prev) => ({ ...prev, [f.name]: e.target.value }))}
                           className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-600/60"
                         />
+                      )}
+                      {f.aide && (
+                        <span className="mt-1 block text-[10px] leading-relaxed text-slate-500">
+                          {lang === 'en' && f.aideEn ? f.aideEn : f.aide}
+                        </span>
                       )}
                     </label>
                   );

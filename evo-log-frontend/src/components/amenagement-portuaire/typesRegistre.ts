@@ -62,6 +62,9 @@ export interface ChampRegistre {
   min?: number;
   max?: number;
   pas?: number;
+  /** Unité rappelée dans le libellé (m, m², m³, EVP, mois…). Purement
+   *  typographique : elle ne convertit ni n'arrondit la saisie. */
+  unite?: string;
   /** Prend toute la largeur du formulaire. */
   large?: boolean;
   aide?: string;
@@ -105,6 +108,10 @@ export interface FiltreRegistre {
   depuisPlaces?: boolean;
   /** Filtre booleéen : le serveur attend true/false, pas une chaîne libre. */
   booleen?: boolean;
+  /** Ce que le serveur fait vraiment de ce paramètre — utile quand un filtre
+   *  change le sens d'une liste (ex. « titres échus »). */
+  aide?: string;
+  aideEn?: string;
 }
 
 /** Action métier en un ligne (POST …/{id}/… avec des paramètres de query). */
