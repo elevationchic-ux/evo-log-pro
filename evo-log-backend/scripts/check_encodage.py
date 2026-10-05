@@ -1,13 +1,14 @@
 """Garde d'encodage : BOM, caractere de remplacement et sur-encodage (mojibake).
 
 Pourquoi ce script existe : sous Windows PowerShell 5, `Set-Content -Encoding
-UTF8` ecrit un BOM, et une relecture de fichier UTF-8 en cp1252 produit du
-texte sur-encode (« DÃ©clarer », « â”€ »). Ce texte EST du UTF-8 valide : un
-simple « decode-t-il ? » ne le voit pas, et il se retrouve alors dans les
+UTF8` ecrit un BOM, et une relecture de fichier UTF-8 en cp1252 produit du texte
+sur-encode — un « e » accentue devient deux caracteres (Ã puis ©), un tiret de
+separator de section devient trois (â, ” et €). Ce texte EST du UTF-8 valide :
+un simple « decode-t-il ? » ne le voit pas, et il se retrouve alors dans les
 summary OpenAPI et les messages `detail` servis aux agents.
 
 Detection par aller-retour auto-validant : une ligne n'est declaree suspecte
-que si son encoding cp1252 est du UTF-8 VALIDIE et donne un texte DIFFERENT.
+que si son encoding cp1252 est du UTF-8 valide et donne un texte DIFFERENT.
 Un vrai texte francais (« chateau », « enregistre ») echoue au round-trip et
 n'est jamais signale. Le script ne reecrit rien : il dit ou est le probleme.
 
