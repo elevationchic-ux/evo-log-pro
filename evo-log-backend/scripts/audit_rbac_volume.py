@@ -1,8 +1,13 @@
 """Migre une base VIERGE jusqu'a head et compte le RBAC reellement seme.
 
-Sert a ecrire dans docs/RBAC_ACCREDITATIONS.md des chiffres verifies plutot
-qu'herites, et a prouver que la chaine complete (001 -> 042) s'applique encore
-sur une base neuve.
+Deux usages :
+  1. prouver que la chaine complete (001 -> head) s'applique encore sur une base
+     neuve, ce que les tests unitaires ne verifient que partiellement ;
+  2. rendre les chiffres cites dans docs/RBAC_ACCREDITATIONS.md (permissions,
+     roles, grants, lignes par domaine) au lieu d'un herite jamais revu.
+
+Le script ne ecrit rien dans la base de developpement : il cree une base
+temporaire, c'est tout l'interet du titre « vierge ».
 """
 import os
 import pathlib
