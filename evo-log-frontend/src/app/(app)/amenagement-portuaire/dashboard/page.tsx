@@ -111,14 +111,20 @@ export default function AmenagementPortuaireDashboardPage() {
     places.refetch();
   }, [synthese, places]);
 
-  /** Rend un indicateur : un compteur à 0 reste un chiffre, un montant non saisi
-   *  reste un manquant explicite. */
+  /** Rend un indicateur : un compteur à 0 reste un chiffre, une mesure ou un
+   *  montant non saisi reste un manquant explicite. */
   const rendreValeur = (ind: ValeurIndicateur): { texte: string; absent: boolean } => {
     if (ind.genre === 'montant') {
       if (estAbsent(ind.valeur ?? null)) {
         return { texte: t('aucune saisie', 'no entry'), absent: true };
       }
       return { texte: formaterMontant(ind.valeur ?? null, lang), absent: false };
+    }
+    if (ind.genre === 'mesure') {
+      if (estAbsent(ind.valeur ?? null)) {
+        return { texte: t('aucune saisie', 'no entry'), absent: true };
+      }
+      return { texte: formaterMesure(ind.valeur ?? null, ind.unite, lang), absent: false };
     }
     return { texte: String(ind.valeur ?? 0), absent: false };
   };
@@ -314,7 +320,7 @@ export default function AmenagementPortuaireDashboardPage() {
             lien="/amenagement-portuaire/dragage"
             indicateurs={[
               { libelle: t('Campagnes', 'Campaigns'), ind: { genre: 'compteur', valeur: s.dragage?.campagnes } },
-              { libelle: t('Volume relevé', 'Surveyed volume'), ind: { genre: 'montant', valeur: s.dragage?.volume_total_releve_m3 } },
+              { libelle: t('Volume relevé', 'Surveyed volume'), ind: { genre: 'mesure', valeur: s.dragage?.volume_total_releve_m3, unite: 'm³' } },
               { libelle: t('Sans levé après travaux', 'Without post-work survey'), ind: { genre: 'compteur', valeur: s.dragage?.sans_leve_apres } },
             ]}
             t={t}
