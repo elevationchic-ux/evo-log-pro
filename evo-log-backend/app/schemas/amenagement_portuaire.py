@@ -894,13 +894,20 @@ class AutorisationTravauxOut(_Conf):
 
 # ─── 10. Référentiel des places portuaires (table nationale ports_cameroun) ──
 
-class PlacePortuaireCreate(_Provenance):
+class PlacePortuaireCreate(BaseModel):
     """Declaration d'une place portuaire dans le referentiel national.
 
     `code`, `nom` et `type_port` sont OBLIGATOIRES et sans defaut : le logiciel
     ne devine ni l'appellation d'un port ni sa nature. Tout le reste reste NULL
     tant que l'agent n'a pas le document officiel sous les yeux (arrete de
     concession, plan d'exploitation, bail de terminal).
+
+    HERITE DE ``BaseModel`` et non de ``_Provenance`` : ``ports_cameroun`` ne
+    porte ni source_reference, ni date_verification, ni auteur_saisie, ni notes
+    (c'est la table nationale partagee des ports, pas un registre du
+    departement). Proposer ces champs ici revient a les accepter pour les jeter
+    en route ; la tracabilite d'une place se lit dans ``description`` et, pour
+    les actes, dans les registres qui referencent cette place.
     """
     code: str = Field(min_length=2, max_length=10)
     nom: str = Field(min_length=3, max_length=100)
@@ -916,10 +923,25 @@ class PlacePortuaireCreate(_Provenance):
     website: Optional[str] = Field(default=None, max_length=255)
     date_ouverture: Optional[date] = None
     description: Optional[str] = None
+    # Les mesurables sont admis des la declaration : un agent qui a l'arrete
+    # d'exploitation sous les yeux ne doit pas creer une ligne puis la corriger
+    # deux secondes apres. Laissee vide, la colonne reste NULL.
+    capacite_annuelle_tonnes: Optional[float] = None
+    profondeur_m: Optional[float] = None
+    nombre_postes_quai: Optional[int] = None
+    tirant_eau_max: Optional[float] = None
+    zone_franche: Optional[bool] = None
 
 
-class PlacePortuaireUpdate(_Provenance):
-    """Correction partielle : `exclude_unset` seul decide, rien n'est complete."""
+class PlacePortuaireUpdate(BaseModel):
+    """Correction partielle : `exclude_unset` seul decide, rien n'est complete.
+
+    Meme base que la creation (aucun champ de provenance que la table ne peut
+    ranger). Le `code` est corrigeable ici parce que la route verifie son
+    unicite avant d'ecrire : une faute de frappe dans une reference nationale ne
+    doit pas obliger a creer une seconde place.
+    """
+    code: Optional[str] = Field(default=None, min_length=2, max_length=10)
     nom: Optional[str] = Field(default=None, min_length=3, max_length=100)
     type_port: Optional[TypePort] = None
     autorite_portuaire: Optional[str] = Field(default=None, max_length=160)
