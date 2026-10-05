@@ -7,7 +7,7 @@ commentaire pour que le geste reste relisable.
 """
 import pathlib
 
-CHEMIN = pathlib.Path(__file__).resolve().parents[2] / "evo-log-frontend" / "src" / "config" / "moduleColors.ts"
+CHEMIN = pathlib.Path(__file__).resolve().parents[1] / "evo-log-frontend" / "src" / "config" / "moduleColors.ts"
 REPLACED = "\ufffd"
 ICONE_DOUE = "🛃"  # signe deja employe pour la douane dans ce fichier
 
