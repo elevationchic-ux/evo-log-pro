@@ -152,6 +152,37 @@ def _dans_un_an(ref: date) -> date:
     return ref + timedelta(days=365)
 
 
+# Colonnes reellement portees par ports_cameroun. Les schemas du departement ne
+# declarent que celles-ci ; ce garde evite qu'un futur champ de provenance (les
+# registres en ont) soit accepte ici puis jete silencieusement par SQLAlchemy.
+_COLUMNS_PLACE = {c.name for c in PortCameroun.__table__.columns} - {"id", "created_at", "updated_at"}
+
+
+def _colonnes_place(donnees: Dict[str, Any]) -> Dict[str, Any]:
+    return {k: v for k, v in donnees.items() if k in _COLUMNS_PLACE}
+
+
+def _place_bref(p: PortCameroun) -> Dict[str, Any]:
+    """Une place, telle qu'en base : un NULL reste NULL (jamais remplace)."""
+    return {
+        "id": p.id,
+        "code": p.code,
+        "nom": p.nom,
+        "type_port": p.type_port.value if p.type_port is not None else None,
+        "ville": p.ville,
+        "region": p.region,
+        "autorite_portuaire": p.autorite_portuaire,
+        "operateur": p.operateur,
+        "tirant_eau_max": float(p.tirant_eau_max) if p.tirant_eau_max is not None else None,
+        "profondeur_m": float(p.profondeur_m) if p.profondeur_m is not None else None,
+        "capacite_annuelle_tonnes": float(p.capacite_annuelle_tonnes) if p.capacite_annuelle_tonnes is not None else None,
+        "nombre_postes_quai": p.nombre_postes_quai,
+        "zone_franche": bool(p.zone_franche) if p.zone_franche is not None else None,
+        "date_ouverture": p.date_ouverture,
+        "est_actif": bool(p.est_actif),
+    }
+
+
 # ─── 0. Nomenclatures & perimetre ────────────────────────────────────────────
 
 @router.get("/nomenclatures", summary="Vocabulaire metier du departement")
@@ -189,7 +220,7 @@ def nomenclatures(user: User = Depends(require_perm("amenagement.projet.read")))
 @router.get("/places", summary="Places portuaires couvertes, telles qu'en base")
 def lister_places(
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("amenagement.projet.read")),
+    user: User = Depends(require_perm("amenagement.place.read")),
 ):
     """Douala / Kribi / Limbe depuis ``ports_cameroun`` (aucun nom code en dur).
 
@@ -209,11 +240,14 @@ def lister_places(
                 "id": p.id,
                 "code": p.code,
                 "nom": p.nom,
+                "type_port": p.type_port.value if p.type_port is not None else None,
                 "ville": p.ville,
                 "region": p.region,
                 "autorite_portuaire": p.autorite_portuaire,
+                "operateur": p.operateur,
                 "tirant_eau_max": float(p.tirant_eau_max) if p.tirant_eau_max is not None else None,
                 "profondeur_m": float(p.profondeur_m) if p.profondeur_m is not None else None,
+                "date_ouverture": p.date_ouverture,
                 "est_actif": bool(p.est_actif),
             }
             for p in rows
@@ -225,6 +259,56 @@ def lister_places(
             "document officiel."
         ),
     }
+
+
+@router.post("/places", status_code=status.HTTP_201_CREATED,
+             summary="Déclarer une place portuaire dans le référentiel national")
+def creer_place(
+    payload: PlacePortuaireCreate,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_perm("amenagement.place.create")),
+):
+    """Alimente ``ports_cameroun`` : la doc du module promet un referentiel « alimente
+    par les agents », et aucune autre route de l'application n'y ecrit.
+
+    Aucun champ n'est rempli d'office. `code`, `nom` et `type_port` sont exiges
+    parce qu'ils definissent l'objet lui-meme ; capacite, profondeur ou tirant
+    d'eau restent NULL tant que l'arrete d'exploitation n'est pas sous les yeux.
+    """
+    code = payload.code.strip().upper()
+    _check_unique(db, PortCameroun, "code", code, "Code de place portuaire")
+    obj = PortCameroun()
+    _apply(_colonnes_place(payload.model_dump(exclude_unset=True)), obj, create=True)
+    obj.code = code
+    db.add(obj)
+    db.commit()
+    db.refresh(obj)
+    return _place_bref(obj)
+
+
+@router.put("/places/{ident}", summary="Corriger une place du référentiel")
+def modifier_place(
+    ident: int,
+    payload: PlacePortuaireUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_perm("amenagement.place.modify")),
+):
+    """Place retiree du perimetre = ``est_actif`` faux, jamais suppression.
+
+    ``ports_cameroun`` est un referentiel partage (terminaux, perimetres,
+    tarification) : detruire une ligne casserait les liens existants. On
+    desactive, la reference reste consultable dans les pieces du domaine.
+    """
+    obj = _get_or_404(db, PortCameroun, ident, "Place portuaire")
+    donnees = _colonnes_place(payload.model_dump(exclude_unset=True))
+    if "code" in donnees:
+        donnees["code"] = donnees["code"].strip().upper()
+        _check_unique(db, PortCameroun, "code", donnees["code"],
+                      "Code de place portuaire", exclude_id=ident)
+    _apply(donnees, obj, create=False)
+    db.commit()
+    db.refresh(obj)
+    return _place_bref(obj)
 
 
 # ─── 1. Schémas directeurs ───────────────────────────────────────────────────
