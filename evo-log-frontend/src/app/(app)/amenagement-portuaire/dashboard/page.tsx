@@ -28,7 +28,7 @@ import { amenagementAPI } from '@/lib/api-client';
 
 import type { PlacePortuaire } from '@/components/amenagement-portuaire/typesRegistre';
 import { REGISTRES_AMENAGEMENT } from '@/components/amenagement-portuaire/registres';
-import { estAbsent, formaterMontant } from '@/components/amenagement-portuaire/formatRegistre';
+import { estAbsent, formaterMesure, formaterMontant } from '@/components/amenagement-portuaire/formatRegistre';
 
 /** Réponse exacte de GET /synthese (voir app/routers/v1/amenagement_portuaire.py).
  *  Déclarée ici pour être lue, pas pour être complétée : toute clé absente

@@ -56,6 +56,13 @@ export function formaterMontant(v: ValeurCellule, lang: 'fr' | 'en'): string {
   return `${FORMAT_MONTANT.format(v)} FCFA`;
 }
 
+/** Une mesure (m³, ha, m…) avec son unité, ou le libellé de manquant. Aucune
+ *  conversion n'est appliquée : l'unité est celle que la base déclare. */
+export function formaterMesure(v: ValeurCellule, unite: string, lang: 'fr' | 'en'): string {
+  if (estAbsent(v) || typeof v !== 'number') return tManquant(lang);
+  return `${FORMAT_NOMBRE.format(v)} ${unite}`;
+}
+
 /** Traduit une valeur d'enum avec la nomenclature SERVEUR (clé `valeur`), et
  *  retombe sur la valeur brute humanisée si le serveur ne la connaît pas —
  *  le cas échéant c'est une donnée saisie hors cadre, on l'affiche telle quelle. */
