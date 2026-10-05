@@ -122,7 +122,7 @@ export const registreSchemas: ConfigRegistre = {
       libelleEn: 'Record approval',
       action: 'approve',
       avertissement:
-        'Le département ne approuve pas un schéma à la place du MINMIVT : il enregistre le numéro et la date de l\u2019arrêté réellement pris.',
+        'Le département n’approuve pas un schéma à la place du MINMIVT : il enregistre le numéro et la date de l’arrêté réellement pris.',
       avertissementEn:
         'The department does not approve a plan on behalf of the MINMIVT: it records the number and date of the act actually taken.',
       champs: [
