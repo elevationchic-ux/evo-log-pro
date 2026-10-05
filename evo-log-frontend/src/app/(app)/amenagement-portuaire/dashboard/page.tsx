@@ -28,6 +28,7 @@ import { amenagementAPI } from '@/lib/api-client';
 import { getRouteFromTCode } from '@/utils/tcodeLookup';
 
 import type { PlacePortuaire } from '@/components/amenagement-portuaire/typesRegistre';
+import ReferentielPlaces from '@/components/amenagement-portuaire/ReferentielPlaces';
 import { REGISTRES_AMENAGEMENT } from '@/components/amenagement-portuaire/registres';
 import { estAbsent, formaterMesure, formaterMontant } from '@/components/amenagement-portuaire/formatRegistre';
 
@@ -219,18 +220,32 @@ export default function AmenagementPortuaireDashboardPage() {
                   {(s.perimetre?.places || [])
                     .map((code) => {
                       const p = (places.data || []).find((place) => place.code === code);
-                      return p ? p.nom || p.code : code;
+                      // Un code du périmètre non encore déclaré reste un code :
+                      // la page ne lui prête pas de nom qu'aucune base ne porte.
+                      return p ? p.nom || p.code : `${code} (${t('non déclaré', 'not declared')})`;
                     })
-                    .join(' · ') || t('Aucune place déclarée par le serveur.', 'No place declared by the server.')}
+                    .join(' · ') || t('Aucune place déclarée dans le référentiel national.', 'No place declared in the national registry.')}
                 </p>
                 {s.perimetre?.explication && (
                   <p className="mt-1 text-[11px] text-cyan-200/70 leading-relaxed italic">
                     {s.perimetre.explication}
                   </p>
                 )}
+                {(places.data || []).length === 0 && (
+                  <p className="mt-1 text-[11px] leading-relaxed text-amber-300/90">
+                    {t(
+                      'Le référentiel national est vide : aucun registre ne peut encore rattacher une ligne à une place. Déclarez-la ci-dessous à partir du texte officiel.',
+                      'The national registry is empty: no register can yet attach a line to a place. Declare it below from the official text.',
+                    )}
+                  </p>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Le référentiel se déclare ici, sur place : c'est le premier acte du
+              département, sans lui les neuf registres n'ont aucune port_id. */}
+          <ReferentielPlaces places={places} onMutation={synthese.refetch} />
 
           {synthese.isEmpty && (
             <DataEmptyState
