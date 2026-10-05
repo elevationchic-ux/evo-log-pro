@@ -536,3 +536,106 @@ export const registreMarches: ConfigRegistre = {
     },
   ],
 };
+
+/* ════════════════════ 5. Titres domaniaux & occupations ════════════════════ */
+
+export const registreTitres: ConfigRegistre = {
+  permSousModule: 'titre_domanial',
+  tcode: 'KAMT_DOM',
+  icon: Stamp,
+  titre: 'Titres domaniaux & occupations du domaine portuaire',
+  titreEn: 'State domain titles & occupations',
+  description:
+    'Autorisations d’occuper, permissions d’exploiter, conventions d’occupation : bénéficiaire, assiette, redevance domaniale et échéances réelles.',
+  descriptionEn:
+    'Occupation permits, operating permissions and agreements: beneficiary, parcel, domain due and actual deadlines.',
+  aide:
+    'Accorder ou refuser un titre relève de l’autorité portuaire (et, pour le domaine national, de l’arrêté ministériel). Le module n’octroie rien : il enregistre le numéro de pièce, la décision écrite et ses dates.',
+  aideEn:
+    'Granting or refusing a title belongs to the port authority (and, for national domain, to the ministerial order). The module grants nothing: it records the document number, the written decision and its dates.',
+  lister: (params) => amenagementAPI.listTitres(params),
+  creer: (data) => amenagementAPI.createTitre(data),
+  modifier: (id, data) => amenagementAPI.updateTitre(id, data),
+  // Pas de retrait : un titre ne disparaît pas du registre, il arrive à
+  // échéance ou est abrogé par un acte que l’on consigne.
+  unicite: 'numero_piece',
+  colonnes: [
+    { name: 'numero_piece', label: 'N° de pièce', labelEn: 'Document no.', type: 'code', essence: true },
+    { name: 'beneficiaire', label: 'Bénéficiaire', labelEn: 'Beneficiary', type: 'texte', essence: true },
+    { name: 'type_titre', label: 'Nature du titre', labelEn: 'Title type', type: 'enum', nomenclature: 'type_titre_domanial' },
+    { name: 'port_id', label: 'Place', labelEn: 'Port place', type: 'place' },
+    { name: 'statut', label: 'Statut', labelEn: 'Status', type: 'enum', nomenclature: 'statut_titre_domanial', essence: true },
+    { name: 'superficie_m2', label: 'Assiette', labelEn: 'Parcel area', type: 'nombre', unite: 'm²' },
+    { name: 'redevance_annuelle_xaf', label: 'Redevance annuelle', labelEn: 'Annual due', type: 'montant' },
+    { name: 'date_effet', label: 'Effet', labelEn: 'Effective', type: 'date' },
+    { name: 'date_expiration', label: 'Expiration', labelEn: 'Expiry', type: 'date', essence: true },
+    { name: 'renouvelable', label: 'Renouvelable', labelEn: 'Renewable', type: 'booleen' },
+    { name: 'autorite_emettrice', label: 'Autorité émettrice', labelEn: 'Issuing authority', type: 'texte' },
+  ],
+  champs: [
+    { name: 'numero_piece', label: 'Numéro de la pièce', labelEn: 'Document number', type: 'texte', requisCreation: true, lectureSeuleEdition: true, aide: 'Numéro porté sur le titre lui-même ; le serveur refuse un doublon.' },
+    { name: 'type_titre', label: 'Nature du titre', labelEn: 'Title type', type: 'select', nomenclature: 'type_titre_domanial', requisCreation: true },
+    { name: 'beneficiaire', label: 'Bénéficiaire', labelEn: 'Beneficiary', type: 'texte', requisCreation: true, large: true },
+    { name: 'port_id', label: 'Place portuaire', labelEn: 'Port place', type: 'select', depuisPlaces: true },
+    { name: 'objet', label: 'Objet de l’occupation', labelEn: 'Purpose of occupation', type: 'zone', large: true },
+    { name: 'assiette', label: 'Assiette désignée', labelEn: 'Parcel description', type: 'texte', large: true, aide: 'Bornes, parcelle, poste : la désignation du titre, pas un calcul de surface.' },
+    { name: 'superficie_m2', label: 'Superficie', labelEn: 'Area', type: 'nombre', unite: 'm²', min: 0 },
+    { name: 'destination', label: 'Destination prévue', labelEn: 'Intended use', type: 'texte' },
+    { name: 'redevance_annuelle_xaf', label: 'Redevance domaniale annuelle', labelEn: 'Annual domain due', type: 'montant', aide: 'Montant fixé par le barème applicable, recopié du titre.' },
+    { name: 'taux_redevance', label: 'Taux ou base de calcul', labelEn: 'Rate or basis', type: 'texte' },
+    { name: 'date_demande', label: 'Date de la demande', labelEn: 'Application date', type: 'date' },
+    { name: 'date_signature', label: 'Date de signature', labelEn: 'Signature date', type: 'date' },
+    { name: 'date_effet', label: 'Date d’effet', labelEn: 'Effective date', type: 'date' },
+    { name: 'date_expiration', label: 'Date d’expiration', labelEn: 'Expiry date', type: 'date' },
+    { name: 'renouvelable', label: 'Renouvelable', labelEn: 'Renewable', type: 'booleen' },
+    { name: 'delai_renouvellement_mois', label: 'Préavis de renouvellement', labelEn: 'Renewal notice', type: 'nombre', unite: 'mois', min: 0 },
+    { name: 'autorite_emettrice', label: 'Autorité émettrice', labelEn: 'Issuing authority', type: 'texte' },
+    { name: 'reference_deliberation', label: 'Référence de la délibération', labelEn: 'Board reference', type: 'texte' },
+    { name: 'piece_jointe', label: 'Référence de la pièce jointe', labelEn: 'Attached document ref.', type: 'texte' },
+    { name: 'statut', label: 'Statut', labelEn: 'Status', type: 'select', nomenclature: 'statut_titre_domanial' },
+    { name: 'motif_refus', label: 'Motif du refus', labelEn: 'Refusal grounds', type: 'zone', large: true },
+    { name: 'source_reference', label: 'Source de la saisie', labelEn: 'Entry source', type: 'texte' },
+    { name: 'date_verification', label: 'Date de vérification', labelEn: 'Verification date', type: 'date' },
+    { name: 'notes', label: 'Notes', labelEn: 'Notes', type: 'zone', large: true },
+  ],
+  filtres: [
+    { name: 'port_id', label: 'Place', labelEn: 'Port place', type: 'select', depuisPlaces: true },
+    { name: 'beneficiaire', label: 'Bénéficiaire', labelEn: 'Beneficiary', type: 'texte' },
+    {
+      name: 'expire',
+      label: 'Titres échus',
+      labelEn: 'Expired titles',
+      type: 'select',
+      booleen: true,
+      aide: 'Le serveur compare la date d’expiration au jour courant ; une date non enregistrée reste dans les titres valables.',
+    },
+  ],
+  actions: [
+    {
+      id: 'decision',
+      libelle: 'Consigner la décision',
+      libelleEn: 'Record the decision',
+      action: 'approve',
+      avertissement:
+        'Un refus doit être motivé : la route serveur le refuse sinon, parce que la décision de l’autorité portuaire doit être écrite et justifiée.',
+      avertissementEn:
+        'A refusal must be reasoned: the server route rejects it otherwise, because the port authority’s decision must be written and justified.',
+      champs: [
+        { name: 'accord', label: 'Décision', labelEn: 'Decision', type: 'booleen', requisCreation: true, aide: 'Oui = titre délivré, Non = demande rejetée.' },
+        { name: 'date_decision', label: 'Date de la décision', labelEn: 'Decision date', type: 'date', requisCreation: true },
+        { name: 'autorite_emettrice', label: 'Autorité qui statue', labelEn: 'Deciding authority', type: 'texte' },
+        { name: 'reference_deliberation', label: 'Référence de la délibération', labelEn: 'Board reference', type: 'texte' },
+        { name: 'motif_refus', label: 'Motif du refus', labelEn: 'Refusal grounds', type: 'zone', large: true },
+      ],
+      executer: (id, v) => amenagementAPI.deciderTitre(id, {
+        accord: v.accord === 'oui',
+        date_decision: req(v, 'date_decision'),
+        autorite_emettrice: optStr(v, 'autorite_emettrice'),
+        reference_deliberation: optStr(v, 'reference_deliberation'),
+        motif_refus: optStr(v, 'motif_refus'),
+      }),
+      succes: 'Décision consignée ; le statut du titre en découle.',
+      succesEn: 'Decision recorded; the title status follows it.',
+    },
+  ],
+};
