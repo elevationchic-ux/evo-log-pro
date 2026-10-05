@@ -191,6 +191,11 @@ def _place_en_bref(p: PortCameroun) -> Dict[str, Any]:
         "nombre_postes_quai": p.nombre_postes_quai,
         "zone_franche": bool(p.zone_franche) if p.zone_franche is not None else None,
         "date_ouverture": p.date_ouverture,
+        # `description` est la seule colonne ou l'agent peut citer le document
+        # officiel (ports_cameroun ne porte ni source_reference ni notes) : la
+        # taire a l'ecran reviendrait a faire croire la donnee perdue.
+        "localisation": p.localisation,
+        "description": p.description,
         "est_actif": bool(p.est_actif),
     }
 
@@ -233,23 +238,24 @@ def nomenclatures(user: User = Depends(require_perm("amenagement.projet.read")))
     }
 
 
-@router.get("/places", summary="Places portuaires couvertes, telles qu'en base")
+@router.get("/places", summary="Places portuaires du referentiel national, telles qu'en base")
 def lister_places(
     db: Session = Depends(get_db),
     user: User = Depends(require_perm("amenagement.place.read")),
 ):
-    """Douala / Kribi / Limbe depuis ``ports_cameroun`` (aucun nom code en dur).
+    """``ports_cameroun`` integral (aucun nom code en dur).
 
-    Si une place n'est pas encore enregistree dans le referentiel national,
-    elle n'est pas inventee : la reponse la simplement omet.
+    Tout ce qui a ete declare est rendu, y compris une place sortie du
+    perimetre (``est_actif`` faux) : une ligne enregistree puis disparue de la
+    liste ferait croire a l'agent que sa declaration a echoue. Les places non
+    encore enregistrees ne sont pas inventees : la reponse les omet.
+
+    Le perimetre d'etude du departement (PLACES_DU_DEPARTEMENT) ne filtre pas
+    cette lecture — il ne filtre que les agregats de ``/synthese``. Une place
+    partagee avec les terminaux, la tarification ou les perimetres reste donc
+    visible ici, comme elle l'est ailleurs dans l'application.
     """
-    rows = (
-        db.query(PortCameroun)
-        .filter(or_(PortCameroun.code.in_(PLACES_DU_DEPARTEMENT),
-                    PortCameroun.autorite_portuaire.isnot(None)))
-        .order_by(PortCameroun.code)
-        .all()
-    )
+    rows = db.query(PortCameroun).order_by(PortCameroun.code).all()
     return {
         "data": [_place_en_bref(p) for p in rows],
         "total": len(rows),

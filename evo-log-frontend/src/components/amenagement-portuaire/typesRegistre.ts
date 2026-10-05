@@ -225,5 +225,10 @@ export interface PlacePortuaire {
   nombre_postes_quai: number | null;
   zone_franche: boolean | null;
   date_ouverture: string | null;
+  /** Seule colonne du référentiel où l'agent peut citer son document officiel :
+   *  ports_cameroun ne porte ni source_reference ni notes. */
+  localisation: string | null;
+  description: string | null;
+  /** false = place sortie du périmètre (jamais supprimée : référentiel partagé). */
   est_actif: boolean;
 }
