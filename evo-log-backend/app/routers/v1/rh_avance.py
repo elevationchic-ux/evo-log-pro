@@ -3,6 +3,8 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
+from app.core.auth import get_current_user
+from app.models.user import User
 from app.services.rh_avance_service import PaieOHADAService, RecrutementService, FormationService
 from app.schemas.rh_avance import (
     BulletinPaieRequest,
@@ -45,22 +47,49 @@ def get_charges_sociales(employe_id: int, periode: str = Query(..., description=
 
 
 @router.get("/dipe-mensuel", summary="Générer l'état DIPE mensuel pour l'administration fiscale camerounaise")
-def generer_dipe_mensuel(periode: str = Query(..., description="YYYY-MM"), db: Session = Depends(get_db)):
-    """Génère le document d'information sur le personnel employé (DIPE) conforme aux impôts du Cameroun."""
+def generer_dipe_mensuel(
+    periode: str = Query(..., description="YYYY-MM"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Agrège la masse salariale réelle depuis la table salaires pour la période.
+
+    Si aucune fiche de paie n'est enregistrée, le compteur retourne 0 honnête.
+    """
+    from app.models.rh import Salaire
+    from sqlalchemy import func as sqlfunc
+
+    annee_str, mois_str = periode.split("-")
+    annee_int, mois_int = int(annee_str), int(mois_str)
+
+    rows = (
+        db.query(
+            sqlfunc.count(Salaire.id).label("nb"),
+            sqlfunc.coalesce(sqlfunc.sum(Salaire.salaire_brut), 0).label("masse"),
+            sqlfunc.coalesce(sqlfunc.sum(Salaire.deductions_cnps), 0).label("cnps_salarial"),
+            sqlfunc.coalesce(sqlfunc.sum(Salaire.deductions_impot), 0).label("ircm"),
+        )
+        .filter(Salaire.annee == annee_int, Salaire.mois == mois_int)
+        .first()
+    )
+    nb = int(rows.nb or 0)
+    masse = float(rows.masse or 0)
+    cnps_salarial = float(rows.cnps_salarial or 0)
+    ircm = float(rows.ircm or 0)
+
+    # cotisations patronales (taux standard CNPS 13.2% + 4.2% vieillesse = 17.4%)
+    cnps_patron = round(masse * 0.174, 2)
+    fne = round(masse * 0.01, 2)  # Fonds National de l'Emploi 1%
+
     return {
         "periode": periode,
-        "norme": "DIPE Cameroun - Direction Générale des Impôts",
-        "date_generation": "2026-08-27T17:30:00Z",
-        "taux_application": {
-            "cnps_vieillesse_salarial": "4.2%",
-            "cnps_vieillesse_patronal": "4.2%",
-            "cnps_prestations_familiales": "7.0%",
-            "cnps_accidents_travail": "1.75% à 5%",
-            "credit_foncier_salarial": "1.0%",
-            "credit_foncier_patronal": "1.5%",
-            "fne_patronal": "1.0%"
-        },
-        "statut": "CONFORME_OHADA"
+        "nb_employes": nb,
+        "masse_salariale_brute": round(masse, 2),
+        "ircm_verse": round(ircm, 2),
+        "cnps_patron": cnps_patron,
+        "cnps_employe": round(cnps_salarial, 2),
+        "fne_verse": fne,
+        "statut": "CONFORME" if nb > 0 else "AUCUNE_DONNEE",
     }
 
 
