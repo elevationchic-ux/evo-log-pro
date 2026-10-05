@@ -30,6 +30,7 @@ EVO-LOG SaaS est une solution ERP logistique professionnelle adaptée au context
 - ✅ **Port Operations & Stevedoring** - Complètement fonctionnel
 - ✅ **Reception MAG3** - Complètement fonctionnel
 - ✅ **Vessel Call Management** - Complètement fonctionnel
+- 🟡 **Aménagement Portuaire & Domaine Public** (département autonome, batch 29 - Douala / Kribi / Limbé) - Saisie métier complète et testée (60 endpoints : 54 branchés en base, 46 tests unitaires verts, RBAC `amenagement.*` catalogué et granté par `038`/`039`/`042`) ; **aucune donnée seedée** par conception : les registres restent vides jusqu'à la première saisie d'un agent, et le référentiel national `ports_cameroun` est alimenté par l'écran « places ». Les 6 téléprocédures institutionnelles (visa MINMIVT, notification MINFI, COLIFE, réversion, exutoire de rejet, dépôt administratif) répondent `501` faute d'interconnexion réelle - à brancher, non simulées.
 
 #### Transport & Logistique
 - ✅ **Transport** - Complètement fonctionnel
