@@ -1139,7 +1139,10 @@ class TVAService:
         # statut depuis TVADeclarable existante ou BROUILLON
         existante = db.query(TVADeclarable).filter(TVADeclarable.periode == periode).first()
         if existante:
-            statut_val = existante.statut.value if hasattr(existante.statut, 'value') else str(existante.statut)
+            raw = existante.statut.value if hasattr(existante.statut, 'value') else str(existante.statut)
+            # map to frontend-friendly
+            statut_map = {"due": "VALIDE", "payee": "TELEDEPOSE", "partiel": "VALIDE", "report": "BROUILLON"}
+            statut_val = statut_map.get(raw, raw.upper())
         else:
             statut_val = "BROUILLON"
 
