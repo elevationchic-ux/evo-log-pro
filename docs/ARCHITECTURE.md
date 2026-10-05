@@ -1,4 +1,4 @@
-﻿# Architecture Technique EVO-LOG SaaS
+# Architecture Technique EVO-LOG SaaS
 
 ## Résumé Executif
 

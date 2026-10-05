@@ -1,4 +1,4 @@
-﻿# Testing Checklist
+# Testing Checklist
 
 ## Objectif
 

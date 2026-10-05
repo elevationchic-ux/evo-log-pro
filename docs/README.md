@@ -1,4 +1,4 @@
-﻿# Documentation EVO-LOG SaaS
+# Documentation EVO-LOG SaaS
 
 ## Vue d'ensemble
 
