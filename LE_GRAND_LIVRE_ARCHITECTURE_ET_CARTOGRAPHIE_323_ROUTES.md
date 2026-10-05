@@ -220,6 +220,7 @@ Pour assurer la sécurité industrielle et la confidentialité des données, l'a
 | **COMPTABLE / DAF** | Finance OHADA, Rapprochement, Trésorerie | `/portail-frais` (Validation), `/portail-employe` | Accès complet aux écritures, TVA, bilans et banques |
 | **RESPONSABLE RH** | RH Personnel, Paie IRPP/CNPS, Chef Personnel | Tous portails salariés | Gestion globale des dossiers salariés et contrats |
 | **DIRECTEUR TRANSPORT** | Tour de Contrôle, LiveMap, TCO Flotte | Tous portails transport | Supervision globale de la flotte et dispatching |
+| **AMÉNAGEMENT PORTUAIRE** (`CHEF_AMENAGEMENT_PORTUAIRE`, `INGENIEUR_AMENAGEMENT`) | Schémas directeurs, projets, programmation PIP/CDMT, marchés & PPP, titres domaniaux, concessions, infrastructures, dragage, autorisations EIES | `/amenagement-portuaire/dashboard` | Département autonome (Douala / Kribi / Limbé) : permissions propres `amenagement.<sous_module>.<action>`, point d'entrée de saisie du référentiel national des places, aucune donnée pré-remplie |
 | **SUPER ADMIN / ADMIN** | **Accès Total aux 323 Routes & 117 APIs** | L'ensemble des 8 portails + Admin SaaS | Gouvernance globale, gestion des licences et audits |
 
 > **Affinage par permissions granulaires (aligné code au 25/09/2026).** La matrice
@@ -228,7 +229,8 @@ Pour assurer la sécurité industrielle et la confidentialité des données, l'a
 > permissions `module.sous_module.action` (`require_perm`), une **visibilité
 > hiérarchique** (`visible_user_ids`), des **accréditations** nominatives datées et des
 > **espaces communs** par entreprise. `require_perm` est appliqué aux domaines cœur
-> (comptabilité avancée, magasin) ; les niveaux 0/1 bypassent la granularité et tout le
+> (comptabilité avancée, magasin) et au département d'aménagement portuaire, dont les
+> 60 endpoints exigent chacun un code `amenagement.*` explicite ; les niveaux 0/1 bypassent la granularité et tout le
 > reste retombe sur `modules_allowed` (non-régression). Détail : [`docs/RBAC_ACCREDITATIONS.md`](docs/RBAC_ACCREDITATIONS.md).
 
 ---
