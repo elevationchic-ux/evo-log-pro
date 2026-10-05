@@ -235,23 +235,7 @@ def lister_places(
         .all()
     )
     return {
-        "data": [
-            {
-                "id": p.id,
-                "code": p.code,
-                "nom": p.nom,
-                "type_port": p.type_port.value if p.type_port is not None else None,
-                "ville": p.ville,
-                "region": p.region,
-                "autorite_portuaire": p.autorite_portuaire,
-                "operateur": p.operateur,
-                "tirant_eau_max": float(p.tirant_eau_max) if p.tirant_eau_max is not None else None,
-                "profondeur_m": float(p.profondeur_m) if p.profondeur_m is not None else None,
-                "date_ouverture": p.date_ouverture,
-                "est_actif": bool(p.est_actif),
-            }
-            for p in rows
-        ],
+        "data": [_place_en_bref(p) for p in rows],
         "total": len(rows),
         "note": (
             "Donnees issues du referentiel national des ports. Un champ NULL "
