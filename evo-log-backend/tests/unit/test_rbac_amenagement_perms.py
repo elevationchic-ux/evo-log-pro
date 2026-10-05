@@ -1,7 +1,7 @@
-"""Departement Amenagement portuaire : RBAC granulaire (58 routes, 36 codes) + honnetete.
+"""Departement Amenagement portuaire : RBAC granulaire (60 routes, 39 codes) + honnetete.
 
 Meme discipline que les batches 21 a 24, trois volets :
-  1. DROITS : parite catalogue (50 codes `amenagement.*`, dont 36 utilises par le
+  1. DROITS : parite catalogue (53 codes `amenagement.*`, dont 39 utilises par le
      routeur), MATRICE complete role x code calculee par le VRAI moteur
      has_perm(), puis 403 HTTP reels sur les routes ;
   2. HONNETETE : aucune route publique (501/401 verifies), aucun numero ni
@@ -50,18 +50,20 @@ def _codes_catalogue_amenagement():
 # ── 1. Parite catalogue ──────────────────────────────────────────────────────
 def test_tous_les_codes_du_routeur_existent_au_catalogue():
     codes = _codes_utilises()
-    assert len(codes) == 36, f"attendu 36 codes distincts, trouve {len(codes)}"
+    assert len(codes) == 39, f"attendu 39 codes distincts, trouve {len(codes)}"
     catalogue = {row[0] for row in iter_permission_rows()}
     fantomes = [c for c in codes if c not in catalogue]
     assert not fantomes, f"codes require_perm inconnus du catalogue: {fantomes}"
 
 
-def test_le_catalogue_decrit_neuf_sous_modules_d_amenagement():
+def test_le_catalogue_decrit_dix_sous_modules_d_amenagement():
     codes = _codes_catalogue_amenagement()
-    # 50 codes : 5 sous-modules complets (6 actions) + 4 sans delete (5 actions).
-    assert len(codes) == 50, f"attendu 50 codes amenagement, trouve {len(codes)}"
+    # 53 codes : 5 sous-modules complets (6 actions) + 4 sans delete (5 actions)
+    # + le referentiel des places (read/create/modify, jamais delete).
+    assert len(codes) == 53, f"attendu 53 codes amenagement, trouve {len(codes)}"
     sous_modules = {c.split(".")[1] for c in codes}
     assert sous_modules == {
+        "place",
         "schema_directeur", "projet", "programmation", "marche", "titre_domanial",
         "concession", "infrastructure", "dragage", "autorisation",
     }, sous_modules
@@ -94,6 +96,7 @@ _INGENIEUR_REFUSES = (
 # AUDITEUR : lecture transversale du domaine (wildcard amenagement.*.read).
 _AUDITEUR_AUTORISES = tuple(
     f"amenagement.{s}.read" for s in (
+        "place",
         "schema_directeur", "projet", "programmation", "marche", "titre_domanial",
         "concession", "infrastructure", "dragage", "autorisation",
     )
@@ -102,12 +105,14 @@ _AUDITEUR_AUTORISES = tuple(
 _CHEF_EXP_AUTORISES = (
     "amenagement.infrastructure.read", "amenagement.dragage.read",
     "amenagement.projet.read", "amenagement.titre_domanial.read",
+    "amenagement.place.read",
 )
 # DIRECTEUR_FINANCIER : la ligne de programmation, ses visas et ses marches.
 _DAF_AUTORISES = (
     "amenagement.projet.read", "amenagement.marche.read",
     "amenagement.concession.read", "amenagement.programmation.read",
     "amenagement.programmation.approve",
+    "amenagement.place.read",
 )
 
 
