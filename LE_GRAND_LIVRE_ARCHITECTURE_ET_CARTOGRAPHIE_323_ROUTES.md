@@ -15,7 +15,7 @@
 5. [Le Pipeline Métier de Bout en Bout : Navire ➔ Quai ➔ Douane ➔ Entrepôt ➔ Route ➔ Client](#5-le-pipeline-métier-de-bout-en-bout-navire--quai--douane--entrepôt--route--client)
 6. [Guide d'Aiguillage des 8 Portails Collaborateurs Métier](#6-guide-daiguillage-des-8-portails-collaborateurs-métier)
 7. [Matrice des Rôles RBAC : « Qui accède à quoi ? »](#7-matrice-des-rôles-rbac--qui-accède-à-quoi-)
-8. [Cartographie Exhaustive des 18 Modules & Répertoire des Routes](#8-cartographie-exhaustive-des-18-modules--répertoire-des-routes)
+8. [Cartographie Exhaustive des 19 Modules & Répertoire des Routes](#8-cartographie-exhaustive-des-19-modules--répertoire-des-routes)
 9. [Foire Aux Questions & Résolution des Difficultés Courantes](#9-foire-aux-questions--résolution-des-difficultés-courantes)
 
 ---
