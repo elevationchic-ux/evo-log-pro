@@ -240,8 +240,9 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
   const peutLire = can(perm('read'));
   const peutCreer = can(perm('create'));
   const peutModifier = can(perm('modify'));
-  const peutApprouver = can(perm('approve'));
-  const peutSupprimer = can(perm('delete'));
+  // Pas de `peutApprouver` ni de `peutSupprimer` ici : chaque acte (approve,
+  // delete) est filtré individuellement sur la permission qu'il consomme, afin
+  // qu'un rôle partiellement habilité voie exactement les boutons autorisés.
 
   /* Référentiels servis par le serveur (aucune liste figée ici). */
   const nomenclatures = useApi<Nomenclatures | null>(
@@ -897,9 +898,13 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
               <button
                 type="submit"
                 disabled={enCours}
-                className="px-5 py-2 min-h-11 rounded-xl bg-cyan-600 text-slate-950 text-xs font-bold hover:bg-cyan-500 disabled:opacity-60"
+                className={`px-5 py-2 min-h-11 rounded-xl text-xs font-bold disabled:opacity-60 ${actionOuverte.action === 'delete'
+                  ? 'bg-red-600 text-slate-50 hover:bg-red-500'
+                  : 'bg-cyan-600 text-slate-950 hover:bg-cyan-500'}`}
               >
-                {enCours ? t('Consignation…', 'Recording…') : t('Consigner', 'Record')}
+                {actionOuverte.action === 'delete'
+                  ? (enCours ? t('Retrait…', 'Removing…') : t('Retirer du registre', 'Remove from register'))
+                  : (enCours ? t('Consignation…', 'Recording…') : t('Consigner', 'Record'))}
               </button>
             </div>
           </form>
