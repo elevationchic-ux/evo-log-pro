@@ -57,14 +57,14 @@ routeurs `app/routers/v1/`).
 20. `/api/v1/rbac` (RBAC multi-tenant : catalogue de permissions, rôles, permissions granulaires d'un rôle, vérification)
 21. `/api/v1/accreditations` (Accréditations nominatives datées + espaces communs `/api/v1/shared-access`)
 22. `/api/v1/comptabilite-avance`, `/api/v1/magasin` (domaines cœur sécurisés par `require_perm`)
-23. `/api/v1/amenagement-portuaire` (département autonome d'aménagement portuaire — voir § dédié)
+23. `/api/v1/amenagement-portuaire` (département autonome d'aménagement portuaire  voir § dédié)
 
 ### Département autonome : Aménagement Portuaire & Domaine Public
 
 Un **département** (batch 29), pas une extension du module d'exploitation du quai :
 il gère l'aménagement et le domaine public des ports de **Douala, Kribi et Limbe**
 (autorité portuaire loi n°2012/021, PPP loi n°2023/008, visa de maturité décret
-n°2018/0492, EIES loi n°96/012 — vocabulaire juridique identique à celui du
+n°2018/0492, EIES loi n°96/012  vocabulaire juridique identique à celui du
 modèle `app/models/amenagement_portuaire.py`).
 
 - **Backend** : `app/models/amenagement_portuaire.py` (9 entites),

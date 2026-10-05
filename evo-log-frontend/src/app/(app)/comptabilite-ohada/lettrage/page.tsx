@@ -28,7 +28,7 @@ const num = (v: unknown): number => {
 };
 const fmt = (n: number) => Math.round(n).toLocaleString('fr-FR');
 const fmtDate = (iso: string | null) => {
-  if (!iso) return '—';
+  if (!iso) return '';
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('fr-FR');
 };
@@ -276,7 +276,7 @@ export default function ComptabiliteOhadaLettrage() {
       );
       const b = await res.json().catch(() => ({}));
       if (!res.ok) { toast.error(b.detail || `Annulation impossible (${res.status})`); return; }
-      toast.success('Lettrage annulé — les écritures sont de nouveau ouvertes');
+      toast.success('Lettrage annulé  les écritures sont de nouveau ouvertes');
       await rechargerCompte();
     } catch {
       toast.error('Serveur comptable injoignable.');
@@ -368,7 +368,7 @@ export default function ComptabiliteOhadaLettrage() {
             <>
               <div className="px-5 py-4 border-b border-slate-800">
                 <div className="text-sm font-black text-white font-mono">
-                  {actif?.numero} — {actif?.intitule}
+                  {actif?.numero}  {actif?.intitule}
                 </div>
                 <div className="text-[11px] text-slate-400 mt-0.5">
                   {suggestions ? `${suggestions.lignes.length} item(s) ouvert(s) · solde ${fmt(suggestions.solde_ouvert)} XAF` : 'Chargement…'}
@@ -433,9 +433,9 @@ export default function ComptabiliteOhadaLettrage() {
                               </td>
                               <td className="py-2 px-3 text-slate-400 whitespace-nowrap">{fmtDate(l.date_ecriture)}</td>
                               <td className="py-2 px-3">
-                                <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px]">{l.journal ?? '—'}</span>
+                                <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px]">{l.journal ?? ''}</span>
                               </td>
-                              <td className="py-2 px-3 font-sans max-w-[240px] truncate" title={l.libelle ?? ''}>{l.libelle ?? '—'}</td>
+                              <td className="py-2 px-3 font-sans max-w-[240px] truncate" title={l.libelle ?? ''}>{l.libelle ?? ''}</td>
                               <td className="py-2 px-3 text-right text-emerald-400">{l.debit > 0 ? fmt(l.debit) : '-'}</td>
                               <td className="py-2 px-3 text-right text-blue-400">{l.credit > 0 ? fmt(l.credit) : '-'}</td>
                             </tr>
@@ -452,8 +452,8 @@ export default function ComptabiliteOhadaLettrage() {
                         <span className="text-blue-400">Crédit {fmt(selCredit)}</span>
                         <span className={selectionSoldee ? 'text-emerald-400 font-black' : 'text-amber-400 font-black'}>
                           {selection.size === 0 ? 'Sélectionnez un ensemble à solder'
-                            : selectionSoldee ? '✓ Solde nul — lettrage possible'
-                            : `⚠ Écart ${fmt(Math.abs(selEcart))} XAF — lettrage refusé`}
+                            : selectionSoldee ? '✓ Solde nul  lettrage possible'
+                              : `⚠ Écart ${fmt(Math.abs(selEcart))} XAF  lettrage refusé`}
                         </span>
                       </div>
 
@@ -514,8 +514,8 @@ export default function ComptabiliteOhadaLettrage() {
                               </td>
                               <td className="py-2 px-3 text-slate-400 whitespace-nowrap">{fmtDate(l.date_lettrage)}</td>
                               <td className="py-2 px-3 text-right text-slate-200">{fmt(num(l.montant_lettre))}</td>
-                              <td className="py-2 px-3 text-slate-400">{l.reference_lettrage || '—'}</td>
-                              <td className="py-2 px-3 text-slate-400">{l.effectue_par || '—'}</td>
+                              <td className="py-2 px-3 text-slate-400">{l.reference_lettrage || ''}</td>
+                              <td className="py-2 px-3 text-slate-400">{l.effectue_par || ''}</td>
                               <td className="py-2 px-3 text-right">
                                 {annule ? (
                                   <span className="text-[10px] text-red-400" title={l.motif_annulation || ''}>annulé</span>

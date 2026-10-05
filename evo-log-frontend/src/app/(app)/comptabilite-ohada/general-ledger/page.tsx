@@ -161,7 +161,7 @@ export default function ComptabiliteOhadaGeneralLedger() {
       {/* Official Header for Print */}
       <div className="hidden print:block">
         <CompanyDocumentHeader
-          documentTitle={viewMode === 'BALANCE' ? "BALANCE GÉNÉRALE DES COMPTES À 6 COLONNES" : `GRAND LIVRE — ${selectedAccount?.compte || ''} ${selectedAccount?.intitule || ''}`}
+          documentTitle={viewMode === 'BALANCE' ? "BALANCE GÉNÉRALE DES COMPTES À 6 COLONNES" : `GRAND LIVRE  ${selectedAccount?.compte || ''} ${selectedAccount?.intitule || ''}`}
           documentNumber={`ETAT-OHADA-${new Date().getFullYear()}-${viewMode}`}
           documentDate={new Date().toLocaleDateString('fr-FR')}
           documentReference="ETATS-SYSCOHADA-OFFICIEL"
@@ -341,7 +341,7 @@ export default function ComptabiliteOhadaGeneralLedger() {
                 <div className="px-5 py-4 border-b border-slate-800 flex items-center gap-3 print:border-slate-300">
                   <button onClick={() => setViewMode('BALANCE')} className="text-slate-500 hover:text-white print:hidden"><ChevronLeft className="w-4 h-4" /></button>
                   <div>
-                    <div className="text-sm font-black text-white font-mono">{selectedAccount?.compte} — {selectedAccount?.intitule}</div>
+                    <div className="text-sm font-black text-white font-mono">{selectedAccount?.compte}  {selectedAccount?.intitule}</div>
                     <div className="text-[11px] text-slate-400">Grand livre auxiliaire {ledger.length} écriture(s)</div>
                   </div>
                 </div>
@@ -372,7 +372,7 @@ export default function ComptabiliteOhadaGeneralLedger() {
                         {ledger.map(l => (
                           <tr key={l.id} className="hover:bg-slate-800/40">
                             <td className="py-2 px-3 text-slate-400 whitespace-nowrap">{fmtDate(l.date_ecriture)}</td>
-                            <td className="py-2 px-3"><span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px]">{l.journal ?? '—'}</span></td>
+                            <td className="py-2 px-3"><span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px]">{l.journal ?? ''}</span></td>
                             <td className="py-2 px-3 font-sans max-w-[260px] truncate" title={l.libelle ?? ''}>{l.libelle ?? ''}</td>
                             <td className="py-2 px-3 text-right text-emerald-400">{num(l.debit) > 0 ? fmt(num(l.debit)) : '-'}</td>
                             <td className="py-2 px-3 text-right text-blue-400">{num(l.credit) > 0 ? fmt(num(l.credit)) : '-'}</td>

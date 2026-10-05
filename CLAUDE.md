@@ -16,7 +16,7 @@ Ce document contient les instructions et commandes de référence pour l'utilisa
 - **Démarrage serveur dev** : `cd EVO-LOG-backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`
 - **Exécution tests Pytest** : `cd EVO-LOG-backend && pytest`
 - **Test unitaire ciblé** : `cd EVO-LOG-backend && pytest tests/unit/test_magasin_service.py`
-- **Cartographie d'un routeur** (endpoints, permissions exigées, 501) : `cd EVO-LOG-backend && python scripts/cartographie_routeur.py amenagement_portuaire` — ou `--total` pour le bilan de tous les routeurs v1
+- **Cartographie d'un routeur** (endpoints, permissions exigées, 501) : `cd EVO-LOG-backend && python scripts/cartographie_routeur.py amenagement_portuaire`  ou `--total` pour le bilan de tous les routeurs v1
 - **Volumes RBAC sur base vierge** (permissions / rôles / grants après rejou 001→head) : `cd EVO-LOG-backend && python scripts/audit_rbac_volume.py`
 - **Garde d'encodage** (BOM, U+FFFD, sur-encodage backend + frontend) : `cd EVO-LOG-backend && python scripts/check_encodage.py` (ajouter `--corriger` pour réécrire ce qui est réparable)
 

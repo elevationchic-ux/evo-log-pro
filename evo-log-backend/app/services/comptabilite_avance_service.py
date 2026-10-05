@@ -195,7 +195,7 @@ class LettrageService:
         """Items réellement ouverts d'un compte tiers, prêts à lettrer.
 
         Retourne la liste des lignes non soldées, leurs totaux débit/crédit et
-        le solde ouvert — aucune donnée inventée, uniquement l'état du grand
+        le solde ouvert  aucune donnée inventée, uniquement l'état du grand
         livre. Le frontend affiche ces lignes et laisse l'utilisateur cocher un
         ensemble dont le solde s'équilibre (règle du lettrage)."""
         compte = LettrageService._compte(db, compte_id)

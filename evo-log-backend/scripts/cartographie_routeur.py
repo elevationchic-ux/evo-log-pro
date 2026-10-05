@@ -102,7 +102,7 @@ def main():
         return 1
 
     prefix, lignes = decrire(args.module)
-    print(f"Routeur {args.module} — prefixe {prefix or '(aucun)'}\n")
+    print(f"Routeur {args.module}  prefixe {prefix or '(aucun)'}\n")
     for ligne in lignes:
         drapeau = "  [501 teleprocedure]" if ligne["501"] else ""
         perms = ", ".join(ligne["permissions"]) or "aucune permission declaree"

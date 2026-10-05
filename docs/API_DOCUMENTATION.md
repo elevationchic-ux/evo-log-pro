@@ -124,7 +124,7 @@ plusieurs rôles.
 
 ## 🏗️ Département Aménagement Portuaire & Domaine Public
 
-`/api/v1/amenagement-portuaire` — 60 endpoints, dont **54 branchés en base** et
+`/api/v1/amenagement-portuaire`  60 endpoints, dont **54 branchés en base** et
 **6 téléprocédures institutionnelles honnêtement annoncées `501`**.
 
 **Ce que le département gère réellement** (données saisies par les agents, aucune
@@ -140,9 +140,9 @@ transmission au MINMIVT ou au MINFI, un passage en COLIFE, une demande d'exutoir
 de rejet, un dépôt d'étude d'impact ou une réversion de concession supposent un
 guichet tiers que le projet n'a pas branché.
 L'API enregistre la **preuve** de la démarche (date, destinataire, référence du
-document) côté agent — les colonnes existent sur l'entité (`date_depot`,
+document) côté agent  les colonnes existent sur l'entité (`date_depot`,
 `numero_arrete`, `date_colife`, `date_notification_minfi`,
-`autorisation_rejet_reference`, `reference_approbatrice` …) — et refuse d'inventer
+`autorisation_rejet_reference`, `reference_approbatrice` …)  et refuse d'inventer
 la réponse de l'administration :
 
 | Endpoint `501` | Démarche réellement concernée |
