@@ -899,17 +899,20 @@ export const qhseAPI = {
 
 
 // ─── Service Aménagement Portuaire & Domaine Public ──────────────────────────
-// Département autonome (router /api/v1/amenagement-portuaire, 58 routes, chaque
+// Département autonome (router /api/v1/amenagement-portuaire, 60 routes, chaque
 // lecture/écriture derrière require_perm('amenagement.*')). Ce service n'invente
 // AUCUNE valeur :
 //  * les vocabulaires (type de schéma, statut de marché, type de titre…) sont
 //    servis par getNomenclatures(), jamais recopiés dans le frontend ;
 //  * les places portuaires (Douala, Kribi, Limbé…) viennent de getPlaces(),
-//    colonne ports_cameroun côté serveur ;
+//    colonne ports_cameroun côté serveur. Le référentiel est VIDE tant qu'un
+//    agent ne l'a pas déclaré : createPlace/updatePlace existent pour que la
+//    saisie soit possible, aucun port n'est pré-peuplé ici ni côté API ;
 //  * les téléprocédures institutionnelles (MINMIVT, MINFI, COLIFE, MINEPPT,
 //    reversaison) répondent 501 : classifyApiError les rend en
 //    kind='not_implemented', jamais en « problème technique ».
 // Corps obligatoires à la création (le serveur renvoie 422 sinon) :
+//  place      : code, nom, type_port (une nature de port ne se devine pas)
 //  schema     : code, libelle
 //  projet     : code_projet, libelle
 //  programme  : reference_fiche_technique, exercice, objet
