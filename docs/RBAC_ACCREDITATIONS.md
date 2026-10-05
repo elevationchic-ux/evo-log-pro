@@ -158,6 +158,23 @@ Source : `app/core/permission_catalog.py`. Actions de référence :
 | **Transport & Flotte** | `transport` (mission, dispatch, epod, carburant) · `parc` (flotte, maintenance, documents) · `gps` (tracking, alertes) |
 | **Ressources Humaines** | `rh` (employes, contrat, monitoring) · `paie` (bulletin, declarations_sociales) · `conges` (demande, pointage) |
 | **Achats & Commerce** | `achats` (commande, reception) · `fournisseurs` (referentiel) · `cotations` (cotation) |
+| **Aménagement portuaire & Domaine public** (département autonome, batch 29) | `place` (référentiel national des places) · `schema_directeur` · `projet` · `programmation` · `marche` · `titre_domanial` · `concession` · `infrastructure` · `dragage` · `autorisation` |
+
+### Le sous-module `place` : une exception volontaire
+
+`amenagement.place.read/create/modify` **ne déclare pas de `delete` ni d'`approve`** :
+la table `ports_cameroun` est un référentiel **national partagé** (terminaux,
+tarification, périmètres d'autres modules). Supprimer une place casserait les
+liens existants ; la sortie de périmètre se fait par `est_actif = false`, sous
+`amenagement.place.modify`. La déclaration exige `code`, `nom` et `type_port` :
+aucune place n'est préremplie par un seed, un champ non recopié du document
+officiel reste `NULL`.
+
+Les deux rôles du département stockent en base des **jokers littéraux**
+(`amenagement.*.*` pour le chef, `amenagement.*.read` pour l'ingénieur et
+l'auditeur) : ce sont des lignes de la table `permissions`, développées par
+`has_perm()`, non des codes du catalogue. C'est pourquoi le domaine compte 55
+lignes en base pour 53 codes catalogués.
 
 Endpoint UI : `GET /api/v1/permissions/catalog` (arborescence domains > modules >
 subModules > actions).
@@ -182,12 +199,22 @@ Niveau **2** = chef de département, **3** = opérateur.
 | `DISPATCHER` | 3 | `transport.mission.read/create`, `transport.dispatch.read/create/modify`, `parc.flotte.read` |
 | `ADMIN_RH` | 2 | `rh.*.*`, `paie.*.read`, `paie.bulletin.create`, `conges.*.*` |
 | `QHSE` | 3 | `gouvernance.*.read`, `transport.*.read`, `parc.documents.read` |
+| `CHEF_AMENAGEMENT_PORTUAIRE` | 2 | `amenagement.*.*` ( joker unique en base) — instruit, approuve et supprime au sein du département |
+| `INGENIEUR_AMENAGEMENT` | 3 | `amenagement.*.read` + `create`/`modify` sur les dix sous-modules, `place.create/modify` ; **aucun** `approve`, aucune suppression |
+
+Trois rôles extérieurs au département reçoivent des droits `amenagement.*`
+ciblés (décorés par les migrations 039 et 042, sans jamais leur donner la main
+sur l'aménagement) : `AUDITEUR` (`amenagement.*.read`), `CHEF_EXPLOITATION` et
+`DIRECTEUR_FINANCIER` (lecture du domaine + `amenagement.place.read`, pour
+rattacher une exploitation ou un budget à une place déclarée).
 
 Les rôles de niveau 0/1 (SuperAdmin, Admin entreprise) ne reçoivent **aucune**
 permission granulaire semée : ils bypassent la granularité dans le moteur.
 
-> Volume (base vierge vérifiée) : **256 permissions**, **11 rôles**, **68 grants** de
-> rôle à permission.
+> Volume (base **vierge migrée jusqu'à `head`**, vérifié par
+> `scripts/scratch_taille_rbac_vierge.py`) : **388 permissions**, **18 rôles**,
+> **174 grants** de rôle à permission. Dont 55 lignes du domaine
+> `amenagement` (53 codes du catalogue + 2 jokers littéraux).
 
 ---
 
