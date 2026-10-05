@@ -352,7 +352,7 @@ Département distinct de l'exploitation du quai : il tient la **maîtrise d'ouvr
 dragage, autorisations) pour Douala, Kribi et Limbé. Thème propre `#0E7490`, icône 📐,
 permissions `amenagement.<sous_module>.<action>`, **aucune donnée seedée**.
 
-- `/amenagement-portuaire/dashboard` : Centre de pilotage — périmètre, places portuaires déclarées dans le référentiel national, agrégats calculés sur les seules saisies des agents.
+- `/amenagement-portuaire/dashboard` : Centre de pilotage  périmètre, places portuaires déclarées dans le référentiel national, agrégats calculés sur les seules saisies des agents.
 - `/amenagement-portuaire/schemas-directeurs` : Schémas directeurs, périmètres, arrêté d'approbation et visa MINMIVT (la transmission elle-même répond `501`).
 - `/amenagement-portuaire/projets` : Portefeuille de projets d'aménagement, fiches techniques, maîtres d'ouvrage.
 - `/amenagement-portuaire/programmation` : Circuit PIP / CDMT, visa de maturité (décret n°2018/0492), engagement, notification MINFI.

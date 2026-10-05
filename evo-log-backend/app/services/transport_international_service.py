@@ -676,7 +676,7 @@ class TransportInternationalReportingService:
 
         L'écran affichait des KPI obtenus par `Array.length` sur une tranche de
         50 lignes : « 50 » pouvait s'afficher alors que 500 ordres existent. Ici on
-        compte et somme côté SQL — les totaux sont exacts quelle que soit la
+        compte et somme côté SQL  les totaux sont exacts quelle que soit la
         volumétrie. Aucune valeur inventée : tout vient des tables."""
         def _count(model):
             return db.query(func.count(model.id)).scalar() or 0

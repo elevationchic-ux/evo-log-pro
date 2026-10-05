@@ -93,7 +93,7 @@ def corriger_fichier(chemin, texte):
 
 
 def racines_auditees():
-    """(dossier, extensions, recursif) — les surfaces du depot a surveiller.
+    """(dossier, extensions, recursif)  les surfaces du depot a surveiller.
 
     Les documents sont audits (`.md`) : ils sont lus par des humains, et un BOM en
     tete de fichier s'affiche en glyphe casse dans certains visualiseurs. La racine

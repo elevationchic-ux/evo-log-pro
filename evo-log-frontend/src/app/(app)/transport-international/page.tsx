@@ -84,10 +84,10 @@ const messageErreur = (e: unknown, defaut: string): string => {
 
 const fmtNum = (v: number | string | null | undefined): string => {
   const n = typeof v === 'string' ? parseFloat(v) : (v as number);
-  return Number.isFinite(n) ? n.toLocaleString('fr-FR') : '—';
+  return Number.isFinite(n) ? n.toLocaleString('fr-FR') : '';
 };
 const fmtDate = (iso: string | null): string => {
-  if (!iso) return '—';
+  if (!iso) return '';
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('fr-FR');
 };
@@ -199,7 +199,7 @@ export default function TransportInternationalPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Globe className="w-3.5 h-3.5" /> Transport International — TIR, CMR, Corridors CEMAC
+            <Globe className="w-3.5 h-3.5" /> Transport International  TIR, CMR, Corridors CEMAC
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">Transport International &amp; TIR Routier</h1>
           <p className="text-xs text-slate-400 mt-1">
@@ -253,17 +253,17 @@ export default function TransportInternationalPage() {
               {ordres.map((o) => (
                 <tr key={o.id} className="hover:bg-slate-800/40 transition-colors">
                   <td className="px-5 py-4 font-mono text-xs text-indigo-400">{o.numero_ot}</td>
-                  <td className="px-5 py-4 text-slate-300 uppercase">{String(o.type_transit || '—')}</td>
+                  <td className="px-5 py-4 text-slate-300 uppercase">{String(o.type_transit || '')}</td>
                   <td className="px-5 py-4 text-slate-300 flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-slate-500" />{o.lieu_chargement || '—'}
+                    <MapPin className="w-3 h-3 text-slate-500" />{o.lieu_chargement || ''}
                     <ArrowRight className="w-3 h-3 text-slate-500 mx-1" />
-                    <MapPin className="w-3 h-3 text-cyan-500" />{o.lieu_livraison || '—'}
+                    <MapPin className="w-3 h-3 text-cyan-500" />{o.lieu_livraison || ''}
                   </td>
                   <td className="px-5 py-4 text-slate-300">
-                    {o.pays_destination || '—'}
+                    {o.pays_destination || ''}
                     {o.code_pays_destination ? ` (${o.code_pays_destination})` : ''}
                   </td>
-                  <td className="px-5 py-4 text-slate-300">{o.poids_net != null ? Number(o.poids_net).toLocaleString('fr-FR') : '—'}</td>
+                  <td className="px-5 py-4 text-slate-300">{o.poids_net != null ? Number(o.poids_net).toLocaleString('fr-FR') : ''}</td>
                   <td className="px-5 py-4">
                     <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border ${statutBadge(String(o.statut))}`}>
                       {STATUT_LABELS[String(o.statut)] || (o.statut ? String(o.statut) : 'inconnu')}
@@ -307,13 +307,13 @@ export default function TransportInternationalPage() {
                 <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
                   <td className="px-5 py-4 font-mono text-xs text-amber-400">{c.numero_carnet}</td>
                   <td className="px-5 py-4 text-slate-400 font-mono text-xs">#{c.ordre_transport_id}</td>
-                  <td className="px-5 py-4 text-slate-300">{c.pays_emission || '—'}{c.code_pays_emission ? ` (${c.code_pays_emission})` : ''}</td>
+                  <td className="px-5 py-4 text-slate-300">{c.pays_emission || ''}{c.code_pays_emission ? ` (${c.code_pays_emission})` : ''}</td>
                   <td className="px-5 py-4 text-slate-300 flex items-center gap-1">
-                    {c.bureau_depart || '—'} <ArrowRight className="w-3 h-3 text-slate-500 mx-1" /> {c.bureau_arrivee || '—'}
+                    {c.bureau_depart || ''} <ArrowRight className="w-3 h-3 text-slate-500 mx-1" /> {c.bureau_arrivee || ''}
                   </td>
                   <td className="px-5 py-4 text-slate-300">{fmtDate(c.date_validite)}</td>
                   <td className="px-5 py-4 text-slate-300">{fmtNum(c.montant_garantie)} {c.devise || ''}</td>
-                  <td className="px-5 py-4"><span className="px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border bg-slate-500/20 text-slate-300 border-slate-500/30">{c.statut || '—'}</span></td>
+                  <td className="px-5 py-4"><span className="px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border bg-slate-500/20 text-slate-300 border-slate-500/30">{c.statut || ''}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -344,14 +344,14 @@ export default function TransportInternationalPage() {
                 return (
                   <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-5 py-4 font-mono text-xs text-violet-400">{c.numero_cmr}</td>
-                    <td className="px-5 py-4 text-slate-300">{c.expediteur || '—'}</td>
-                    <td className="px-5 py-4 text-slate-300">{c.destinataire || '—'}</td>
+                    <td className="px-5 py-4 text-slate-300">{c.expediteur || ''}</td>
+                    <td className="px-5 py-4 text-slate-300">{c.destinataire || ''}</td>
                     <td className="px-5 py-4 text-slate-300 flex items-center gap-1">
-                      {c.lieu_chargement || '—'} <ArrowRight className="w-3 h-3 text-slate-500 mx-1" /> {c.lieu_livraison || '—'}
+                      {c.lieu_chargement || ''} <ArrowRight className="w-3 h-3 text-slate-500 mx-1" /> {c.lieu_livraison || ''}
                     </td>
-                    <td className="px-5 py-4 text-slate-300">{c.poids_net != null ? Number(c.poids_net).toLocaleString('fr-FR') : '—'}</td>
+                    <td className="px-5 py-4 text-slate-300">{c.poids_net != null ? Number(c.poids_net).toLocaleString('fr-FR') : ''}</td>
                     <td className="px-5 py-4 text-xs text-slate-400">{sigs.length ? sigs.join(', ') : 'aucune'}</td>
-                    <td className="px-5 py-4"><span className="px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border bg-slate-500/20 text-slate-300 border-slate-500/30">{c.statut || '—'}</span></td>
+                    <td className="px-5 py-4"><span className="px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border bg-slate-500/20 text-slate-300 border-slate-500/30">{c.statut || ''}</span></td>
                   </tr>
                 );
               })}
@@ -382,11 +382,11 @@ export default function TransportInternationalPage() {
                 <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
                   <td className="px-5 py-4 font-bold text-emerald-400">{c.nom}</td>
                   <td className="px-5 py-4 text-slate-300 flex items-center gap-1">
-                    {c.pays_depart || '—'} <ArrowRight className="w-3 h-3 text-slate-500 mx-1" /> {c.pays_arrivee || '—'}
+                    {c.pays_depart || ''} <ArrowRight className="w-3 h-3 text-slate-500 mx-1" /> {c.pays_arrivee || ''}
                   </td>
                   <td className="px-5 py-4 text-slate-300">{fmtNum(c.distance_km)}</td>
                   <td className="px-5 py-4 text-slate-300">{fmtNum(c.duree_estimee_heures)}</td>
-                  <td className="px-5 py-4"><span className="px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border bg-slate-500/20 text-slate-300 border-slate-500/30">{c.statut || '—'}</span></td>
+                  <td className="px-5 py-4"><span className="px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border bg-slate-500/20 text-slate-300 border-slate-500/30">{c.statut || ''}</span></td>
                 </tr>
               ))}
             </tbody>

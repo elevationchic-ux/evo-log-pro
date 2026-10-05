@@ -153,7 +153,7 @@ export interface CorridorCEMACResponse {
 }
 
 /**
- * GET /api/v1/transport-international/statistiques — agrégats RÉELS calculés
+ * GET /api/v1/transport-international/statistiques  agrégats RÉELS calculés
  * en base (comptes/sommes SQL), et non `Array.length` tronqué à la taille de
  * la page. Utilisé pour des KPI exacts quelle que soit la volumétrie.
  */
