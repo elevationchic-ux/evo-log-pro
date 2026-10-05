@@ -203,15 +203,27 @@ export interface ConfigRegistre {
 /** Réponse de /nomenclatures : { cle: [{ code, valeur }] }. */
 export type Nomenclatures = Record<string, { code: string; valeur: string }[]>;
 
-/** Éléments de /places (référentiel national ports_cameroun). */
+/** Éléments de /places (référentiel national ports_cameroun).
+ *
+ *  Copie conforme de ce que la route sert : un champ NOT NULL en base n'est pas
+ *  nullable ici, mais tout le reste peut être null — « non enregistré » veut
+ *  dire que l'agent n'a pas encore recopié le document officiel, pas que la
+ *  valeur est nulle. La déclaration d'une place (code, nom, type_port) se fait
+ *  depuis le centre de pilotage, jamais par un seed applicatif. */
 export interface PlacePortuaire {
   id: number;
   code: string;
   nom: string | null;
+  type_port: string | null;
   ville: string | null;
   region: string | null;
   autorite_portuaire: string | null;
+  operateur: string | null;
   tirant_eau_max: number | null;
   profondeur_m: number | null;
+  capacite_annuelle_tonnes: number | null;
+  nombre_postes_quai: number | null;
+  zone_franche: boolean | null;
+  date_ouverture: string | null;
   est_actif: boolean;
 }
