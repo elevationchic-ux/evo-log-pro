@@ -34,7 +34,7 @@ import { useSettings } from '@/components/layout/SettingsProvider';
 import { amenagementAPI } from '@/lib/api-client';
 
 import type { Nomenclatures, PlacePortuaire } from './typesRegistre';
-import { estAbsent, formaterDate, humaniser, rendreCellule, saisieVide, tManquant, valeurSaisie } from './formatRegistre';
+import { estAbsent, formaterDate, formaterMesure, humaniser, libelleEnum, saisieVide, tManquant, valeurSaisie } from './formatRegistre';
 
 /** Message du serveur, tel quel (FastAPI rend ses refus dans `detail`). */
 function messageServeur(err: unknown, fallback: string): string {
@@ -110,6 +110,44 @@ function champTriplet(v: unknown): Tri {
   if (v === true) return 'oui';
   if (v === false) return 'non';
   return '';
+}
+
+/** Formate une colonne du référentiel. Une place n'est pas une ligne de
+ *  registre (pas de ColonneRegistre côté schéma) : le formatage est donc dit
+ *  ici, champ par champ, avec les mêmes règles d'absence que le châssis. */
+function cellulePlace(
+  colonne: (typeof COLONNES_PLACE)[number],
+  ligne: PlacePortuaire,
+  lang: 'fr' | 'en',
+  nomenclatures: Nomenclatures | null,
+): { texte: string; manquant: boolean } {
+  const v = ligne[colonne.name];
+  switch (colonne.type) {
+    case 'date':
+      return estAbsent(v)
+        ? { texte: tManquant(lang), manquant: true }
+        : { texte: formaterDate(String(v), lang), manquant: false };
+    case 'nombre':
+      return colonne.unite
+        ? { texte: formaterMesure(typeof v === 'number' ? v : null, colonne.unite, lang), manquant: estAbsent(v) }
+        : estAbsent(v)
+          ? { texte: tManquant(lang), manquant: true }
+          : { texte: String(v), manquant: false };
+    case 'booleen':
+      if (v === true) return { texte: lang === 'en' ? 'Yes' : 'Oui', manquant: false };
+      if (v === false) return { texte: lang === 'en' ? 'No' : 'Non', manquant: false };
+      return { texte: tManquant(lang), manquant: true };
+    case 'enum': {
+      // `type_port` est traduit par la nomenclature serveur, jamais par une
+      // table de libellés recopiée dans le composant.
+      const lib = libelleEnum(typeof v === 'string' ? v : null, 'type_port', nomenclatures);
+      return lib === null ? { texte: tManquant(lang), manquant: true } : { texte: lib, manquant: false };
+    }
+    default:
+      return estAbsent(v)
+        ? { texte: tManquant(lang), manquant: true }
+        : { texte: String(v), manquant: false };
+  }
 }
 
 export default function ReferentielPlaces() {
@@ -320,11 +358,8 @@ export default function ReferentielPlaces() {
               'Aucune place portuaire n’est encore déclarée dans ports_cameroun. Tant que ce n’est pas fait, les neufs registres du département ne peuvent rattacher aucune ligne à une place : c’est le premier acte du service, et il se fait à partir des textes officiels, pas d’une liste proposée par le logiciel.',
               'No port place is declared yet in ports_cameroun. Until this is done, the department’s nine registers cannot attach any line to a place: this is the service’s first act, and it is done from official texts, not from a list suggested by the software.',
             )}
-            action={
-              peutDeclarer
-                ? { label: t('Déclarer la première place', 'Declare the first place'), onClick: () => ouvrir(null) }
-                : undefined
-            }
+            actionLabel={peutDeclarer ? t('Déclarer la première place', 'Declare the first place') : undefined}
+            onAction={peutDeclarer ? () => ouvrir(null) : undefined}
           />
         </div>
       ) : (
@@ -356,12 +391,7 @@ export default function ReferentielPlaces() {
                     )}
                   </td>
                   {COLONNES_PLACE.map((c) => {
-                    const rendu = rendreCellule(
-                      { name: String(c.name), label: c.label, type: c.type as never, nomenclature: c.type === 'enum' ? 'type_port' : undefined, unite: c.unite },
-                      { id: ligne.id, ...ligne } as never,
-                      lang,
-                      nomenclatures.data,
-                    );
+                    const rendu = cellulePlace(c, ligne, lang, nomenclatures.data);
                     return (
                       <td
                         key={String(c.name)}
