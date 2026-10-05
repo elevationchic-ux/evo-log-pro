@@ -1,8 +1,8 @@
-"""Routeur du departement Amenagement portuaire (Douala, Kribi, Limbe).
+﻿"""Routeur du departement Amenagement portuaire (Douala, Kribi, Limbe).
 
 Ce que fait cette API : tenir le registre des actes d'amenagement du domaine
-portuaire — schemas directeurs, programmation (fiche technique, visa de
-maturité, PIP/CDMT, engagement), marches/PPP, titres
+portuaire â€” schemas directeurs, programmation (fiche technique, visa de
+maturitÃ©, PIP/CDMT, engagement), marches/PPP, titres
 domaniaux, concessions, ouvrages, dragages, autorisations environnementales.
 
 Ce qu'elle ne fait PAS (conscience du projet, see docs/RBAC_ACCREDITATIONS.md) :
@@ -10,7 +10,7 @@ Ce qu'elle ne fait PAS (conscience du projet, see docs/RBAC_ACCREDITATIONS.md) :
     a l'APN : ces actes appartiennent a des systemes externes qui n'existent
     pas ici. Les routes correspondantes repondent 501 (jamais un faux succes) ;
   * elle n'invente aucune valeur : montant, date ou reference non saisi reste
-    NULL et s'affiche « non enregistre » cote frontend ;
+    NULL et s'affiche Â« non enregistre Â» cote frontend ;
   * elle ne durcit aucun tarif, aucune capacite ni aucun nom d'operateur : les
     referentiels viennent des tables ports_cameroun / terminaux_portuaires /
     zones_portuaires, alimentees par les agents.
@@ -60,7 +60,7 @@ from app.schemas.amenagement_portuaire import (
 router = APIRouter(tags=["Amenagement portuaire"])
 
 # Perimetre d'etude du departement : les trois places a grand gabarit dont la
-# tutelle d'amenagement est concernee. Ce n'est PAS une donnee metier — c'est
+# tutelle d'amenagement est concernee. Ce n'est PAS une donnee metier â€” c'est
 # un filtre applique aux lignes reellement presentes dans ports_cameroun. Une
 # place absente de la table (ou inactive) n'apparait simplement pas.
 PLACES_DU_DEPARTEMENT = ("DOU", "KRI", "LIM")
@@ -73,7 +73,7 @@ _JSON_FIELDS = {
 }
 
 
-# ─── Utilitaires ─────────────────────────────────────────────────────────────
+# â”€â”€â”€ Utilitaires â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def _load_json(value: Any) -> Any:
     if value is None:
@@ -108,10 +108,10 @@ def _to_out(obj: Any):
 
 
 def _apply(payload: Dict[str, Any], obj: Any, *, create: bool) -> None:
-    """Affecte uniquement les champs fournis : rien n'est completé d'office.
+    """Affecte uniquement les champs fournis : rien n'est completÃ© d'office.
 
     ``create`` n'autorise aucune valeur par defaut metier : il sert seulement a
-    garder l'appel explicite (les listes JSON sont sérialisées à l'identique
+    garder l'appel explicite (les listes JSON sont sÃ©rialisÃ©es Ã  l'identique
     dans les deux cas).
     """
     for key, value in payload.items():
@@ -139,7 +139,7 @@ def _check_unique(db: Session, model, field: str, value: Any, label: str,
     if q.first():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"{label} « {value} » existe deja — corrigez la reference au lieu d'en creer une seconde.",
+            detail=f"{label} Â« {value} Â» existe deja â€” corrigez la reference au lieu d'en creer une seconde.",
         )
 
 
@@ -148,7 +148,7 @@ def _enum_catalog(model) -> List[Dict[str, str]]:
 
 
 def _dans_un_an(ref: date) -> date:
-    """Horizon glissant 12 mois (365 jours) — borne de veille, pas une duree contractuelle."""
+    """Horizon glissant 12 mois (365 jours) â€” borne de veille, pas une duree contractuelle."""
     return ref + timedelta(days=365)
 
 
@@ -162,7 +162,7 @@ def _colonnes_place(donnees: Dict[str, Any]) -> Dict[str, Any]:
     return {k: v for k, v in donnees.items() if k in _COLUMNS_PLACE}
 
 
-def _place_bref(p: PortCameroun) -> Dict[str, Any]:
+def _place_en_bref(p: PortCameroun) -> Dict[str, Any]:
     """Une place, telle qu'en base : un NULL reste NULL (jamais remplace)."""
     return {
         "id": p.id,
@@ -183,7 +183,7 @@ def _place_bref(p: PortCameroun) -> Dict[str, Any]:
     }
 
 
-# ─── 0. Nomenclatures & perimetre ────────────────────────────────────────────
+# â”€â”€â”€ 0. Nomenclatures & perimetre â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/nomenclatures", summary="Vocabulaire metier du departement")
 def nomenclatures(user: User = Depends(require_perm("amenagement.projet.read"))):
@@ -262,14 +262,14 @@ def lister_places(
 
 
 @router.post("/places", status_code=status.HTTP_201_CREATED,
-             summary="Déclarer une place portuaire dans le référentiel national")
+             summary="DÃ©clarer une place portuaire dans le rÃ©fÃ©rentiel national")
 def creer_place(
     payload: PlacePortuaireCreate,
     db: Session = Depends(get_db),
     user: User = Depends(require_perm("amenagement.place.create")),
 ):
-    """Alimente ``ports_cameroun`` : la doc du module promet un referentiel « alimente
-    par les agents », et aucune autre route de l'application n'y ecrit.
+    """Alimente ``ports_cameroun`` : la doc du module promet un referentiel Â« alimente
+    par les agents Â», et aucune autre route de l'application n'y ecrit.
 
     Aucun champ n'est rempli d'office. `code`, `nom` et `type_port` sont exiges
     parce qu'ils definissent l'objet lui-meme ; capacite, profondeur ou tirant
@@ -283,10 +283,10 @@ def creer_place(
     db.add(obj)
     db.commit()
     db.refresh(obj)
-    return _place_bref(obj)
+    return _place_en_bref(obj)
 
 
-@router.put("/places/{ident}", summary="Corriger une place du référentiel")
+@router.put("/places/{ident}", summary="Corriger une place du rÃ©fÃ©rentiel")
 def modifier_place(
     ident: int,
     payload: PlacePortuaireUpdate,
@@ -308,10 +308,10 @@ def modifier_place(
     _apply(donnees, obj, create=False)
     db.commit()
     db.refresh(obj)
-    return _place_bref(obj)
+    return _place_en_bref(obj)
 
 
-# ─── 1. Schémas directeurs ───────────────────────────────────────────────────
+# â”€â”€â”€ 1. SchÃ©mas directeurs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/schemas-directeurs", response_model=List[SchemaDirecteurOut],
             summary="Consulter les schemas directeurs d'amenagement")
@@ -387,7 +387,7 @@ def approuver_schema(
 
     Le departement ne peut pas approuver un schema directeur a la place du
     MINMIVT. Cette route saisit la reference et la date de l'arrete reel ; la
-    valeur « approuve » n'est pas supposee, elle derive du document cite.
+    valeur Â« approuve Â» n'est pas supposee, elle derive du document cite.
     """
     obj = _get_or_404(db, SchemaDirecteur, ident, "Schema directeur")
     obj.reference_approbatrice = reference_approbatrice
@@ -412,7 +412,7 @@ def demande_visa_schema(ident: int, user: User = Depends(require_perm("amenageme
     )
 
 
-# ─── 2. Projets d'aménagement ────────────────────────────────────────────────
+# â”€â”€â”€ 2. Projets d'amÃ©nagement â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/projets", response_model=List[ProjetAmenagementOut],
             summary="Portefeuille de projets d'amenagement")
@@ -508,7 +508,7 @@ def saisir_avancement(
     """Enregistre un releve ; un pourcentage absent reste NULL, pas 0 %.
 
     L'avancement n'est jamais calcule par le logiciel : il provient d'un
-    decompte ou d'un PV signe. Sans releve, l'affichage dit « non mesure ».
+    decompte ou d'un PV signe. Sans releve, l'affichage dit Â« non mesure Â».
     """
     obj = _get_or_404(db, ProjetAmenagement, ident, "Projet d'amenagement")
     if avancement_physique_pct is not None:
@@ -525,10 +525,10 @@ def saisir_avancement(
     return _to_out(obj)
 
 
-# ─── 3. Programmation : fiche technique, maturité, engagement ────────────────
+# â”€â”€â”€ 3. Programmation : fiche technique, maturitÃ©, engagement â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/programmation", response_model=List[DocumentProgrammationOut],
-            summary="Chaîne de programmation des projets")
+            summary="ChaÃ®ne de programmation des projets")
 def lister_programmation(
     exercice: Optional[int] = Query(None),
     statut: Optional[str] = Query(None),
@@ -544,7 +544,7 @@ def lister_programmation(
 
 
 @router.post("/programmation", response_model=DocumentProgrammationOut, status_code=status.HTTP_201_CREATED,
-             summary="Inscrire une fiche technique à la programmation")
+             summary="Inscrire une fiche technique Ã  la programmation")
 def creer_programmation(
     payload: DocumentProgrammationCreate,
     db: Session = Depends(get_db),
@@ -623,7 +623,7 @@ def viser_maturite(
 ):
     """Enregistre l'acte pris par la commission, ne le delivre pas.
 
-    Le visa de maturite (decret n° 2018/0492) sanctionne l'achevement de la
+    Le visa de maturite (decret nÂ° 2018/0492) sanctionne l'achevement de la
     preparation d'un projet d'investissement public. Ce point d'application ne
     peut pas l'emettre a la place de la commission : il saisit la reference, la
     date et l'autorite telles qu'elles figurent sur la piece.
@@ -674,7 +674,7 @@ def notifier_minfi(ident: int, user: User = Depends(require_perm("amenagement.pr
     )
 
 
-# ─── 4. Marchés publics & PPP ────────────────────────────────────────────────
+# â”€â”€â”€ 4. MarchÃ©s publics & PPP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/marches", response_model=List[MarcheAmenagementOut],
             summary="Marches et contrats d'amenagement")
@@ -800,7 +800,7 @@ def soumettre_colife(ident: int, user: User = Depends(require_perm("amenagement.
     )
 
 
-# ─── 5. Titres domaniaux ─────────────────────────────────────────────────────
+# â”€â”€â”€ 5. Titres domaniaux â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/titres-domaniaux", response_model=List[AutorisationDomanialeOut],
             summary="Registre des occupations du domaine portuaire")
@@ -905,7 +905,7 @@ def decider_titre(
     return _to_out(obj)
 
 
-# ─── 6. Concessions & contrats d'exploitation ────────────────────────────────
+# â”€â”€â”€ 6. Concessions & contrats d'exploitation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/concessions", response_model=List[ConcessionPortuaireOut],
             summary="Contrats de concession, affermage, BOT/AOT")
@@ -1010,7 +1010,7 @@ def reverser_concession(ident: int, user: User = Depends(require_perm("amenageme
     )
 
 
-# ─── 7. Inventaire des infrastructures ───────────────────────────────────────
+# â”€â”€â”€ 7. Inventaire des infrastructures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/infrastructures", response_model=List[InfrastructurePortuaireOut],
             summary="Inventaire technique du domaine amenage")
@@ -1115,7 +1115,7 @@ def desactiver_infrastructure(
     return {"id": obj.id, "code": obj.code, "message": "Ouvrage sorti de l'inventaire actif."}
 
 
-# ─── 8. Dragage & chenal ─────────────────────────────────────────────────────
+# â”€â”€â”€ 8. Dragage & chenal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/dragage", response_model=List[DragageOut], summary="Campagnes de dragage")
 def lister_dragages(
@@ -1207,7 +1207,7 @@ def demande_exutoire(ident: int, user: User = Depends(require_perm("amenagement.
     )
 
 
-# ─── 9. Autorisations administratives ────────────────────────────────────────
+# â”€â”€â”€ 9. Autorisations administratives â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/autorisations", response_model=List[AutorisationTravauxOut],
             summary="Registre des autorisations et visas administratifs")
@@ -1277,7 +1277,7 @@ def depot_autorisation(ident: int, user: User = Depends(require_perm("amenagemen
     )
 
 
-# ─── 10. Tableau de bord : agrégats calculés à partir des saisies ────────────
+# â”€â”€â”€ 10. Tableau de bord : agrÃ©gats calculÃ©s Ã  partir des saisies â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def _count(db: Session, model, *crit) -> int:
     return db.query(func.count(model.id)).filter(*crit).scalar() or 0
@@ -1294,7 +1294,7 @@ def synthese(
     db: Session = Depends(get_db),
     user: User = Depends(require_perm("amenagement.projet.read")),
 ):
-    """Aucun chiffre n'est estime : un agrégat NULL veut dire « rien de saisi ».
+    """Aucun chiffre n'est estime : un agrÃ©gat NULL veut dire Â« rien de saisi Â».
 
     Les totaux financiers n'additionnent que les montants reellement enregistres
     et signalent les lignes encore vides, pour qu'un solde partiel ne passe pas
