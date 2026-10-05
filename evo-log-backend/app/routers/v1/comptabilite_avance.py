@@ -376,11 +376,11 @@ def obtenir_compte_resultat(
 
 @router.post("/etats-financiers/tafire", response_model=TAFIREResponse)
 def generer_tafire(
-    request: TAFIRECreate,
+    request: TAFIREGenererRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
-    """Générer le TAFIRE (Tableau Financier des Ressources et Emplois)"""
+    """Générer le TAFIRE (Tableau Financier des Ressources et Emplois) depuis le GL"""
     tafire = EtatsFinanciersOHADAService.generer_tafire(
         db,
         request.exercice_id,
