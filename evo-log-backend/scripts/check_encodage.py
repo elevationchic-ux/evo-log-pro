@@ -92,6 +92,47 @@ def corriger_fichier(chemin, texte):
     return touchees
 
 
+def racines_auditees():
+    """(dossier, extensions, recursif) — les surfaceillpees du depot.
+
+    Les documents sont audits (`.md`) : ils sont lus par des humains, et un BOM en
+    tete de fichier s'affiche en glyphe casse dans certains visualiseurs. La racine
+    du depot n'est pas balayee recursivement, sinon chaque `.md` de `docs/`, des
+    paquets npm et des archives serait compte deux fois.
+    """
+    depot = RACINE.parent
+    racines = [(RACINE / d, (".py",), True) for d in DOSSIERS]
+    if FRONT.exists():
+        racines.append((FRONT, (".ts", ".tsx"), True))
+    if DOCS.exists():
+        racines.append((DOCS, (".md",), True))
+    racines.append((depot, (".md",), False))  # CLAUDE.md, README.md, guides du depot
+    return racines
+
+
+def _a_ignore(chemin, base):
+    """Tout ce qui n'est pas du code ou du document du projet.
+
+    `archive/` est laisse de hors volontairement : ces rapports sont des instantanes
+    dates, les reencoder serait reecrire l'histoire.
+    """
+    parts = chemin.relative_to(base).parts[:-1]
+    return any(p.startswith((".", "_")) or p in {"node_modules", "archive", "venv"} for p in parts)
+
+
+def fichiers_audites():
+    for base, extensions, recursif in racines_auditees():
+        if not base.exists():
+            continue
+        parcours = base.rglob("*") if recursif else base.glob("*")
+        for chemin in sorted(parcours):
+            if chemin.suffix not in extensions or not chemin.is_file():
+                continue
+            if _a_ignore(chemin, base):
+                continue
+            yield chemin
+
+
 def main():
     # La console Windows est en cp1252 : un extrait signalé contient justement le
     # texte pourri que l'on traque (emoji, accents doubles). Sans réencodage, le
@@ -102,28 +143,28 @@ def main():
     for p in fichiers_audites():
         raw = p.read_bytes()
         rel = p.relative_to(RACINE.parent)
-                if raw.startswith(BOM):
-                if mode_corriger:
-                    p.write_bytes(raw[len(BOM):])
-                    print(f"{rel}: BOM UTF-8 retire")
-                    continue
-                print(f"{rel}: BOM UTF-8 (corriger l'outil qui a ecrit le fichier)")
-                problems += 1
-                continue
-            try:
-                texte = raw.decode("utf-8")
-            except UnicodeDecodeError as exc:
-                print(f"{rel}: n'est pas du UTF-8 strict ({exc})")
-                problems += 1
-                continue
+        if raw.startswith(BOM):
             if mode_corriger:
-                nb = corriger_fichier(p, texte)
-                if nb:
-                    print(f"{rel}: {nb} ligne(s) reencodee(s)")
-                texte = p.read_text(encoding="utf-8")
-            for ligne, motif, extrait in suspects(texte):
-                print(f"{rel}:{ligne}: {motif}  {extrait!r}")
-                problems += 1
+                p.write_bytes(raw[len(BOM):])
+                print(f"{rel}: BOM UTF-8 retire")
+                continue
+            print(f"{rel}: BOM UTF-8 (corriger l'outil qui a ecrit le fichier)")
+            problems += 1
+            continue
+        try:
+            texte = raw.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            print(f"{rel}: n'est pas du UTF-8 strict ({exc})")
+            problems += 1
+            continue
+        if mode_corriger:
+            nb = corriger_fichier(p, texte)
+            if nb:
+                print(f"{rel}: {nb} ligne(s) reencodee(s)")
+            texte = p.read_bytes().decode("utf-8")
+        for ligne, motif, extrait in suspects(texte):
+            print(f"{rel}:{ligne}: {motif}  {extrait!r}")
+            problems += 1
     if problems:
         print(f"\n{problems} signalement(s). Reencoder proprement avant de pousser.")
         return 1
