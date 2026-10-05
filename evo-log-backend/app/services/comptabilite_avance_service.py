@@ -155,147 +155,250 @@ class LettrageService:
     """Service de lettrage automatique et manuel"""
     
     @staticmethod
+    def _compte(db: Session, compte_id: int) -> PlanComptableOHADA:
+        compte = db.query(PlanComptableOHADA).filter(
+            PlanComptableOHADA.id == compte_id
+        ).first()
+        if not compte:
+            raise ValueError("Compte introuvable")
+        return compte
+
+    @staticmethod
+    def _lignes_ouvertes(db: Session, compte_id: int) -> List[GrandLivreLigne]:
+        """Lignes du grand livre REELLEMENT ouvertes pour ce compte.
+
+        Source de vérité : `grand_livre_lignes` (une ligne = un mouvement sur UN
+        compte), et non l'en-tête plat `ecritures_comptables_ohada` dont
+        `compte_id` est désormais NULL (il porte les totaux de la pièce).
+        L'ancienne version filtrait donc sur une colonne toujours nulle : le
+        lettrage ne voyait jamais aucune écriture réelle.
+
+        Une ligne est « ouverte » (= à lettrer) si elle n'est pas déjà soldée
+        (statut != LETTRE) et n'est rattachée à aucun lettrage. Cela rend aussi
+        le lettrage idempotent : relancer ne re-lettre pas ce qui l'est déjà."""
+        return (
+            db.query(GrandLivreLigne)
+            .filter(
+                GrandLivreLigne.compte_id == compte_id,
+                GrandLivreLigne.lettrage_id.is_(None),
+                (
+                    GrandLivreLigne.statut_lettrage.is_(None)
+                    | (GrandLivreLigne.statut_lettrage != StatutLettrage.LETTRE)
+                ),
+            )
+            .order_by(GrandLivreLigne.date_ecriture.asc(), GrandLivreLigne.id.asc())
+            .all()
+        )
+
+    @staticmethod
+    def suggestion_lettrage(db: Session, compte_id: int) -> Dict[str, Any]:
+        """Items réellement ouverts d'un compte tiers, prêts à lettrer.
+
+        Retourne la liste des lignes non soldées, leurs totaux débit/crédit et
+        le solde ouvert — aucune donnée inventée, uniquement l'état du grand
+        livre. Le frontend affiche ces lignes et laisse l'utilisateur cocher un
+        ensemble dont le solde s'équilibre (règle du lettrage)."""
+        compte = LettrageService._compte(db, compte_id)
+        lignes = LettrageService._lignes_ouvertes(db, compte_id)
+
+        items = []
+        total_debit = Decimal("0")
+        total_credit = Decimal("0")
+        for l in lignes:
+            d = Decimal(str(l.debit or 0))
+            c = Decimal(str(l.credit or 0))
+            total_debit += d
+            total_credit += c
+            items.append({
+                "ligne_id": l.id,
+                "ecriture_id": l.ecriture_id,
+                "date_ecriture": l.date_ecriture,
+                "libelle": l.libelle,
+                "journal": l.journal,
+                "periode": l.periode,
+                "debit": d,
+                "credit": c,
+            })
+
+        return {
+            "compte_id": compte_id,
+            "compte_numero": compte.numero_compte,
+            "compte_intitule": compte.intitule,
+            "lignes": items,
+            "total_debit": total_debit,
+            "total_credit": total_credit,
+            "solde_ouvert": total_debit - total_credit,
+        }
+
+    @staticmethod
     def lettrage_automatique(
         db: Session,
         compte_id: int,
-        date_reference: date
+        date_reference: date,
+        effectue_par: str = "SYSTEME",
     ) -> Lettrage:
-        """Lettrage automatique des écritures d'un compte"""
-        # Récupérer les écritures non lettrées du compte
-        ecritures = db.query(EcritureComptableNew).filter(
-            and_(
-                EcritureComptableNew.compte_id == compte_id,
-                EcritureComptableNew.valider == True
+        """Lettrage automatique FIFO par rapprochement d'un compte.
+
+        Algorithme honnête : on apparie les lignes ouvertes débit et crédit de
+        MÊME montant (arrondi 2), en ordre chronologique (FIFO). Chaque paire
+        soldée est rattachée à une campagne de lettrage. Si aucune paire exacte
+        n'existe, on refuse (rien n'est forcé) plutôt que de tout lumpser dans
+        un faux lettrage comme l'ancienne version, qui créait un lettrage unique
+        englobant TOUTES les écritures du compte sans vérifier l'équilibre."""
+        LettrageService._compte(db, compte_id)
+        lignes = LettrageService._lignes_ouvertes(db, compte_id)
+        if not lignes:
+            raise ValueError("Aucune écriture ouverte à lettrer pour ce compte")
+
+        def _amt(l, col):
+            return Decimal(str(getattr(l, col) or 0)).quantize(Decimal("0.01"))
+
+        debits = [l for l in lignes if _amt(l, "debit") > 0]
+        credits = [l for l in lignes if _amt(l, "credit") > 0]
+
+        used_credit_ids = set()
+        matched: List[GrandLivreLigne] = []
+        for d in debits:  # déjà triées par date (FIFO)
+            montant = _amt(d, "debit")
+            for c in credits:
+                if c.id in used_credit_ids:
+                    continue
+                if _amt(c, "credit") == montant:
+                    matched.extend([d, c])
+                    used_credit_ids.add(c.id)
+                    break
+
+        if not matched:
+            raise ValueError(
+                "Aucun lettrage automatique possible : aucune écriture débit/crédit "
+                "de même montant à solder sur ce compte"
             )
-        ).all()
-        
-        if not ecritures:
-            raise ValueError("Aucune écriture à lettrer pour ce compte")
-        
-        # Grouper par montants pour correspondance
-        from collections import defaultdict
-        groupes = defaultdict(list)
-        for ecriture in ecritures:
-            groupes[ecriture.debit].append(ecriture)
-            groupes[ecriture.credit].append(ecriture)
-        
-        # Créer le lettrage
-        numero_lettrage = f"LET-{date_reference.strftime('%Y%m%d')}-{compte_id}"
+
+        montant_total = sum(_amt(l, "debit") for l in matched if _amt(l, "debit") > 0)
+        numero = f"LET-AUTO-{compte_id}-{date_reference.strftime('%Y%m%d')}-{datetime.now().strftime('%H%M%S')}"
         lettrage = Lettrage(
             compte_id=compte_id,
-            numero_lettrage=numero_lettrage,
+            numero_lettrage=numero,
             type_lettrage=TypeLettrage.AUTOMATIQUE,
             date_lettrage=date_reference,
-            montant_lettre=sum(e.debit for e in ecritures if e.debit > 0) or sum(e.credit for e in ecritures if e.credit > 0),
-            effectue_par="SYSTEME"
+            montant_lettre=montant_total,
+            effectue_par=effectue_par,
+            notes=f"Lettrage automatique FIFO : {len(matched)} ligne(s) soldée(s)",
         )
         db.add(lettrage)
         db.commit()
         db.refresh(lettrage)
-        
-        # Lier les écritures au lettrage
-        for ecriture in ecritures:
-            ecriture_lettree = EcritureLettree(
+
+        for l in matched:
+            l.statut_lettrage = StatutLettrage.LETTRE
+            l.lettrage_id = lettrage.id
+            db.add(EcritureLettree(
                 lettrage_id=lettrage.id,
-                ecriture_id=ecriture.id,
-                montant_lettre=ecriture.debit if ecriture.debit > 0 else ecriture.credit
-            )
-            db.add(ecriture_lettree)
-        
+                ecriture_id=l.ecriture_id,
+                montant_lettre=(_amt(l, "debit") or _amt(l, "credit")),
+            ))
         db.commit()
+        db.refresh(lettrage)
         return lettrage
-    
+
     @staticmethod
     def lettrage_manuel(
         db: Session,
         compte_id: int,
-        ecritures_ids: List[int],
+        ligne_ids: List[int],
         date_lettrage: date,
         effectue_par: str,
-        reference: Optional[str] = None
+        reference: Optional[str] = None,
     ) -> Lettrage:
-        """Lettrage manuel d'écritures sélectionnées"""
-        # Vérifier que les écritures existent et appartiennent au compte
-        ecritures = db.query(EcritureComptableNew).filter(
-            and_(
-                EcritureComptableNew.id.in_(ecritures_ids),
-                EcritureComptableNew.compte_id == compte_id,
-                EcritureComptableNew.valider == True
+        """Lettrage manuel d'un ensemble de lignes DU COMPTE qui doit S'ÉQUILIBRER.
+
+        Règle de rapprochement : la somme des débits doit égaler la somme des
+        crédits (solde nul), sinon le lettrage est refusé avec l'écart exact.
+        L'ancienne version ne vérifiait nulle part cet équilibre et lettrait
+        n'importe quoi. On opère sur les lignes du grand livre (ids), en
+        excluant celles déjà soldées (idempotence)."""
+        LettrageService._compte(db, compte_id)
+        if not ligne_ids:
+            raise ValueError("Aucune ligne sélectionnée pour le lettrage")
+
+        lignes = (
+            db.query(GrandLivreLigne)
+            .filter(GrandLivreLigne.id.in_(ligne_ids))
+            .all()
+        )
+        if len(lignes) != len(set(ligne_ids)):
+            raise ValueError("Certaines lignes n'existent pas")
+        for l in lignes:
+            if l.compte_id != compte_id:
+                raise ValueError("Une ligne sélectionnée n'appartient pas à ce compte")
+            if l.lettrage_id is not None or l.statut_lettrage == StatutLettrage.LETTRE:
+                raise ValueError(f"Ligne {l.id} déjà lettrée")
+
+        def _amt(l, col):
+            return Decimal(str(getattr(l, col) or 0)).quantize(Decimal("0.01"))
+
+        total_debit = sum(_amt(l, "debit") for l in lignes)
+        total_credit = sum(_amt(l, "credit") for l in lignes)
+        ecart = total_debit - total_credit
+        if ecart != 0:
+            raise ValueError(
+                f"Sélection non soldée : débit {total_debit} / crédit {total_credit} "
+                f"(écart {ecart}). Le lettrage exige un solde nul."
             )
-        ).all()
-        
-        if len(ecritures) != len(ecritures_ids):
-            raise ValueError("Certaines écritures n'existent pas ou n'appartiennent pas à ce compte")
-        
-        # Calculer le montant total
-        montant_total = sum(e.debit for e in ecritures if e.debit > 0) or sum(e.credit for e in ecritures if e.credit > 0)
-        
-        # Créer le lettrage
-        numero_lettrage = f"LET-{date_lettrage.strftime('%Y%m%d')}-{compte_id}"
+
+        numero = f"LET-MAN-{compte_id}-{date_lettrage.strftime('%Y%m%d')}-{datetime.now().strftime('%H%M%S')}"
         lettrage = Lettrage(
             compte_id=compte_id,
-            numero_lettrage=numero_lettrage,
+            numero_lettrage=numero,
             type_lettrage=TypeLettrage.MANUEL,
             date_lettrage=date_lettrage,
-            montant_lettre=montant_total,
+            montant_lettre=total_debit,
             reference_lettrage=reference,
-            effectue_par=effectue_par
+            effectue_par=effectue_par,
         )
         db.add(lettrage)
         db.commit()
         db.refresh(lettrage)
-        
-        # Lier les écritures au lettrage
-        for ecriture in ecritures:
-            ecriture_lettree = EcritureLettree(
+
+        for l in lignes:
+            l.statut_lettrage = StatutLettrage.LETTRE
+            l.lettrage_id = lettrage.id
+            db.add(EcritureLettree(
                 lettrage_id=lettrage.id,
-                ecriture_id=ecriture.id,
-                montant_lettre=ecriture.debit if ecriture.debit > 0 else ecriture.credit
-            )
-            db.add(ecriture_lettree)
-        
-        db.commit()
-        return lettrage
-    
-    @staticmethod
-    def annuler_lettrage(db: Session, lettrage_id: int, motif: str) -> Lettrage:
-        """Annuler un lettrage"""
-        lettrage = db.query(Lettrage).filter(Lettrage.id == lettrage_id).first()
-        if not lettrage:
-            raise ValueError("Lettrage non trouvé")
-        
-        # Supprimer les liens
-        db.query(EcritureLettree).filter(EcritureLettree.lettrage_id == lettrage_id).delete()
-        
-        # Marquer comme annulé
-        lettrage.date_annulation = date.today()
-        lettrage.motif_annulation = motif
-        
+                ecriture_id=l.ecriture_id,
+                montant_lettre=(_amt(l, "debit") or _amt(l, "credit")),
+            ))
         db.commit()
         db.refresh(lettrage)
         return lettrage
-    
+
     @staticmethod
-    def suggestion_lettrage(db: Session, compte_id: int) -> List[Dict[str, Any]]:
-        """Suggérer des écritures à lettrer"""
-        ecritures = db.query(EcritureComptableNew).filter(
-            and_(
-                EcritureComptableNew.compte_id == compte_id,
-                EcritureComptableNew.valider == True
-            )
-        ).all()
-        
-        suggestions = []
-        for ecriture in ecritures:
-            suggestions.append({
-                "ecriture_id": ecriture.id,
-                "date": ecriture.date_ecriture,
-                "libelle": ecriture.libelle,
-                "debit": ecriture.debit,
-                "credit": ecriture.credit
-            })
-        
-        return suggestions
+    def annuler_lettrage(db: Session, lettrage_id: int, motif: str) -> Lettrage:
+        """Annuler un lettrage : libère réellement les lignes réconciliées.
+
+        Rétablit le statut des lignes du grand livre à NON_LETRE (et décroche
+        leur lettrage_id) pour qu'elles redeviennent ouvertes ; sinon l'annulation
+        était cosmétique et les écritures restaient marquées soldées."""
+        lettrage = db.query(Lettrage).filter(Lettrage.id == lettrage_id).first()
+        if not lettrage:
+            raise ValueError("Lettrage non trouvé")
+        if lettrage.date_annulation is not None:
+            raise ValueError("Lettrage déjà annulé")
+
+        # Libérer les lignes du grand livre rattachées
+        db.query(GrandLivreLigne).filter(
+            GrandLivreLigne.lettrage_id == lettrage_id
+        ).update({"statut_lettrage": StatutLettrage.NON_LETRE, "lettrage_id": None},
+                 synchronize_session=False)
+
+        # Supprimer les liens écritures
+        db.query(EcritureLettree).filter(EcritureLettree.lettrage_id == lettrage_id).delete()
+
+        lettrage.date_annulation = date.today()
+        lettrage.motif_annulation = motif
+        db.commit()
+        db.refresh(lettrage)
+        return lettrage
 
 
 class GrandLivreService:
