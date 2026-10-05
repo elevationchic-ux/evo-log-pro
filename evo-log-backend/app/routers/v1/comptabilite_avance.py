@@ -23,13 +23,18 @@ from app.schemas.comptabilite_avance import (
     ClotureAnnuelleRequest, ClotureAnnuelleResponse,
     ReportANouveauRequest, ReportANouveauResponse,
     AffectationResultatRequest, AffectationResultatResponse,
-    PeriodeClosingItem, EtatsPeriodesResponse
+    PeriodeClosingItem, EtatsPeriodesResponse,
+    DerniersEtatsFinanciersResponse
 )
 from app.services.comptabilite_avance_service import (
     JournalAuxiliaireService, LettrageService, GrandLivreService, BalanceService,
     EtatsFinanciersOHADAService, ClotureService, TVAService, ISService,
 )
-from app.models.finance_ohada import JournalAuxiliaire, Lettrage, GrandLivreLigne, BalanceVerification, BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, AnnexesOHADA
+from app.models.finance_ohada import (
+    JournalAuxiliaire, Lettrage, GrandLivreLigne, BalanceVerification,
+    BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, AnnexesOHADA,
+    ExerciceComptable,
+)
 
 router = APIRouter(tags=["Comptabilité Avancée"])  # monte sur /api/v1/comptabilite-avance par main.py
 
@@ -655,3 +660,67 @@ def get_declaration_is(
         return ISService.deriver_is(db, annee)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+# ============ ÉTATS FINANCIERS : LECTURE GLOBALE ============
+
+@router.get("/etats-financiers/dernier", response_model=DerniersEtatsFinanciersResponse)
+def derniers_etats_financiers(
+    exercice_id: int = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.bilan.read")),
+):
+    """Retourne les derniers états financiers persistés (Bilan, CR, TAFIRE, Annexes)
+    pour l'exercice ouvert (ou specified by ID).
+
+    Chaque document est null s'il n'a pas encore été généré. Le frontend affiche
+    alors un bouton « Générer » qui appelle le POST correspondant."""
+    if exercice_id is not None:
+        exercice = db.query(ExerciceComptable).filter(ExerciceComptable.id == exercice_id).first()
+    else:
+        exercice = (
+            db.query(ExerciceComptable)
+            .filter(ExerciceComptable.statut == "ouvert")
+            .order_by(ExerciceComptable.annee.desc())
+            .first()
+        )
+        if not exercice:
+            exercice = db.query(ExerciceComptable).order_by(ExerciceComptable.annee.desc()).first()
+    if not exercice:
+        raise HTTPException(status_code=404, detail="Aucun exercice comptable trouvé")
+
+    ex_id = exercice.id
+
+    bilan = (
+        db.query(BilanOHADADetaille)
+        .filter(BilanOHADADetaille.exercice_id == ex_id)
+        .order_by(BilanOHADADetaille.id.desc())
+        .first()
+    )
+    cr = (
+        db.query(CompteResultatOHADADetaille)
+        .filter(CompteResultatOHADADetaille.exercice_id == ex_id)
+        .order_by(CompteResultatOHADADetaille.id.desc())
+        .first()
+    )
+    tafire = (
+        db.query(TAFIRE)
+        .filter(TAFIRE.exercice_id == ex_id)
+        .order_by(TAFIRE.id.desc())
+        .first()
+    )
+    annexes = (
+        db.query(AnnexesOHADA)
+        .filter(AnnexesOHADA.exercice_id == ex_id)
+        .order_by(AnnexesOHADA.id.desc())
+        .first()
+    )
+
+    return {
+        "exercice_id": ex_id,
+        "annee": exercice.annee,
+        "bilan": bilan,
+        "compte_resultat": cr,
+        "tafire": tafire,
+        "annexes": annexes,
+    }
