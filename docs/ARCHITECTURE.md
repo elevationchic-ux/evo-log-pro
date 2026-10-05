@@ -29,7 +29,11 @@ Stack complète démarrant avec `docker-compose up -d --build` :
 
 ## 🔌 Cartographie des Routeurs Backend (`EVO-LOG-backend/app/main.py`)
 
-Les 19 routeurs enregistrés avec vérification de sécurité `safe_include_router()` :
+`app/main.py` enregistre **121 routeurs** via `safe_include_router()` (un routeur
+qui s'importe mal n'enterre pas l'application). La liste ci-dessous donne les
+préfixes structurants, pas l'inventaire exhaustif ; pour le recompter :
+`python scripts/cartographie_routeur.py --total` (déclare 1333 endpoints pour les
+routeurs `app/routers/v1/`).
 
 1. `/api/auth` (Authentification, JWT, MFA, me)
 2. `/api/tiers` (Gestion des clients et fournisseurs)
@@ -53,6 +57,32 @@ Les 19 routeurs enregistrés avec vérification de sécurité `safe_include_rout
 20. `/api/v1/rbac` (RBAC multi-tenant : catalogue de permissions, rôles, permissions granulaires d'un rôle, vérification)
 21. `/api/v1/accreditations` (Accréditations nominatives datées + espaces communs `/api/v1/shared-access`)
 22. `/api/v1/comptabilite-avance`, `/api/v1/magasin` (domaines cœur sécurisés par `require_perm`)
+23. `/api/v1/amenagement-portuaire` (département autonome d'aménagement portuaire — voir § dédié)
+
+### Département autonome : Aménagement Portuaire & Domaine Public
+
+Un **département** (batch 29), pas une extension du module d'exploitation du quai :
+il gère l'aménagement et le domaine public des ports de **Douala, Kribi et Limbe**
+(autorite portuaire loi n°2012/021, regime domanial loi n°2012/022, PPP
+loi n°2023/008, EIES loi n°96/012).
+
+- **Backend** : `app/models/amenagement_portuaire.py` (9 entites),
+  `app/schemas/amenagement_portuaire.py`, `app/routers/v1/amenagement_portuaire.py`
+  (60 endpoints : 54 ecritures/lectures reelles, 6 teleprocedures annoncees `501`),
+  migrations `038` (tables), `039` et `042` (grants RBAC), `041` (colonnes
+  `ports_cameroun`). Autorisation par `require_perm("amenagement.<sous_module>.<action>")`.
+- **Frontend** : `src/app/(app)/amenagement-portuaire/*` (10 ecrans + tableau de
+  bord), composants dedies dans `src/components/amenagement-portuaire/` dont
+  `ReferentielPlaces` (declaration des places dans le referentiel national).
+- **Theme propre** : `#0E7490` (`modulePalette.ts`, `moduleColors.ts`, `navI18n.ts`,
+  icone 📐), isole des teintes des autres departements.
+- **Independance** : `navigationRegistry.ts` le declare comme famille autonome
+  (`domainLoadingConfig.ts` = dpt 29) ; ses codes de permission ne recoupent aucun
+  autre module, a l'exception lue du referentiel `ports_cameroun` que quatre
+  routeurs consultent et que seul `place` alimente.
+- **Zero donnee inventee** : aucune ligne seedee, `NULL` reste `NULL`, les
+  libelles des listes deriveant de `/nomenclatures` et les valeurs de
+  `/synthese` des seules saisies des agents.
 
 ---
 
