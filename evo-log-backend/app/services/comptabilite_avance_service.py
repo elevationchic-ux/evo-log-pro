@@ -415,8 +415,87 @@ class GrandLivreService:
 
 
 class BalanceService:
-    """Service de balance de vérification"""
-    
+    """Service de balance de vérification.
+
+    Toutes les aggregations partent des LIGNES reels du grand livre
+    (`grand_livre_lignes`), materialisees par la saisie de piece en partie
+    double. L'en-tete plat des ecritures (`compte_id` nul, `debit/credit` =
+    totaux de piece) n'est plus jamais agrege : c'est ce qui produisait une
+    balance vide ou faux depuis la refonte partie double."""
+
+    @staticmethod
+    def _comptes_map(db: Session) -> Dict[int, PlanComptableOHADA]:
+        return {c.id: c for c in db.query(PlanComptableOHADA).all()}
+
+    @staticmethod
+    def calculer_balances_verification(
+        db: Session,
+        date_debut: Optional[date] = None,
+        date_fin: Optional[date] = None,
+    ) -> Dict[str, Any]:
+        """Balance de verification a 6 colonnes, entierement calculee sur le
+        grand livre reel : soldes d'ouverture (mouvements anterieurs a
+        `date_debut`), mouvements de la periode, soldes de cloture.
+
+        Retourne {"lignes": [...], "total_debit", "total_credit", "equilibree"}
+        avec les cles exactement consommees par la page grand livre/balance."""
+        comptes = BalanceService._comptes_map(db)
+
+        # Mouvements de la periode (gross debit/crédit par compte).
+        periode = GrandLivreService.mouvements_par_compte(db, date_debut, date_fin)
+
+        # Soldes d'ouverture = cumul strictement anterieur a date_debut.
+        ouverture: Dict[int, Decimal] = {}
+        if date_debut is not None:
+            avant = GrandLivreService.mouvements_par_compte(db, None, None)
+            cumul_avant = db.query(
+                GrandLivreLigne.compte_id,
+                func.coalesce(func.sum(GrandLivreLigne.debit), 0),
+                func.coalesce(func.sum(GrandLivreLigne.credit), 0),
+            ).filter(
+                GrandLivreLigne.date_ecriture < date_debut
+            ).group_by(GrandLivreLigne.compte_id).all()
+            for compte_id, d, c in cumul_avant:
+                ouverture[compte_id] = Decimal(str(d or 0)) - Decimal(str(c or 0))
+
+        lignes = []
+        total_debit = Decimal("0")
+        total_credit = Decimal("0")
+        compte_ids = set(periode) | {cid for cid, net in ouverture.items() if net != 0}
+        for compte_id in sorted(compte_ids):
+            compte = comptes.get(compte_id)
+            if not compte:
+                continue
+            mouv = periode.get(compte_id, {"debit": Decimal("0"), "credit": Decimal("0")})
+            net_ouv = ouverture.get(compte_id, Decimal("0"))
+            net_clot = net_ouv + mouv["debit"] - mouv["credit"]
+            # Rien a montrer si le compte est totalement neutre sur la periode.
+            if net_ouv == 0 and mouv["debit"] == 0 and mouv["credit"] == 0:
+                continue
+            lignes.append({
+                "compte_id": compte_id,
+                "compte_numero": compte.numero_compte,
+                "compte_intitule": compte.intitule,
+                "classe": compte.classe,
+                "solde_initial_debit": float(net_ouv) if net_ouv > 0 else 0.0,
+                "solde_initial_credit": float(-net_ouv) if net_ouv < 0 else 0.0,
+                "debit": float(mouv["debit"]),
+                "credit": float(mouv["credit"]),
+                "solde_final_debit": float(net_clot) if net_clot > 0 else 0.0,
+                "solde_final_credit": float(-net_clot) if net_clot < 0 else 0.0,
+            })
+            total_debit += mouv["debit"]
+            total_credit += mouv["credit"]
+
+        return {
+            "date_debut": date_debut.isoformat() if date_debut else None,
+            "date_fin": date_fin.isoformat() if date_fin else None,
+            "lignes": lignes,
+            "total_debit": float(total_debit),
+            "total_credit": float(total_credit),
+            "equilibree": total_debit == total_credit,
+        }
+
     @staticmethod
     def creer_balance_verification(
         db: Session,
@@ -424,28 +503,29 @@ class BalanceService:
         periode: str,
         date_balance: date
     ) -> BalanceVerification:
-        """Créer une balance de vérification"""
-        # Récupérer toutes les écritures de la période
-        ecritures = db.query(EcritureComptableNew).filter(
-            and_(
-                EcritureComptableNew.exercice_id == exercice_id,
-                EcritureComptableNew.periode == periode,
-                EcritureComptableNew.valider == True
-            )
-        ).all()
-        
-        # Calculer les totaux par compte
-        from collections import defaultdict
-        totaux = defaultdict(lambda: {"debit": 0, "credit": 0})
-        for ecriture in ecritures:
-            totaux[ecriture.compte_id]["debit"] += ecriture.debit
-            totaux[ecriture.compte_id]["credit"] += ecriture.credit
-        
-        # Créer la balance
-        total_debit = sum(t["debit"] for t in totaux.values())
-        total_credit = sum(t["credit"] for t in totaux.values())
+        """Persiste une balance de verification calculee sur les lignes reels
+        du grand livre (cumul <= date_balance), par compte."""
+        comptes = BalanceService._comptes_map(db)
+        cumul = db.query(
+            GrandLivreLigne.compte_id,
+            func.coalesce(func.sum(GrandLivreLigne.debit), 0),
+            func.coalesce(func.sum(GrandLivreLigne.credit), 0),
+        ).filter(
+            GrandLivreLigne.date_ecriture <= date_balance
+        ).group_by(GrandLivreLigne.compte_id).all()
+
+        totaux = {
+            compte_id: {
+                "debit": Decimal(str(d or 0)),
+                "credit": Decimal(str(c or 0)),
+            }
+            for compte_id, d, c in cumul
+        }
+
+        total_debit = sum((t["debit"] for t in totaux.values()), Decimal("0"))
+        total_credit = sum((t["credit"] for t in totaux.values()), Decimal("0"))
         ecart = total_debit - total_credit
-        
+
         balance = BalanceVerification(
             exercice_id=exercice_id,
             periode=periode,
@@ -453,62 +533,59 @@ class BalanceService:
             total_debit=total_debit,
             total_credit=total_credit,
             ecart=ecart,
-            statut="equilibre" if abs(ecart) < 0.01 else "desequilibre"
+            statut="equilibre" if abs(ecart) < Decimal("0.01") else "desequilibre",
         )
         db.add(balance)
         db.commit()
         db.refresh(balance)
-        
-        # Créer les lignes de balance
-        for compte_id, totaux_compte in totaux.items():
-            compte = db.query(PlanComptableOHADA).filter(PlanComptableOHADA.id == compte_id).first()
-            ligne = LigneBalance(
+
+        for compte_id, tot in totaux.items():
+            compte = comptes.get(compte_id)
+            net = tot["debit"] - tot["credit"]
+            db.add(LigneBalance(
                 balance_id=balance.id,
                 compte_id=compte_id,
                 compte_numero=compte.numero_compte if compte else "",
                 compte_intitule=compte.intitule if compte else "",
-                total_debit=totaux_compte["debit"],
-                total_credit=totaux_compte["credit"],
-                solde_debit=totaux_compte["debit"] - totaux_compte["credit"] if totaux_compte["debit"] > totaux_compte["credit"] else 0,
-                solde_credit=totaux_compte["credit"] - totaux_compte["debit"] if totaux_compte["credit"] > totaux_compte["debit"] else 0
-            )
-            db.add(ligne)
-        
+                total_debit=tot["debit"],
+                total_credit=tot["credit"],
+                solde_debit=net if net > 0 else Decimal("0"),
+                solde_credit=-net if net < 0 else Decimal("0"),
+            ))
         db.commit()
         return balance
-    
+
     @staticmethod
     def balance_par_journal(
         db: Session,
         journal_code: str,
         periode: str
     ) -> Dict[str, Any]:
-        """Balance par journal"""
+        """Balance par journal, agregee sur les lignes reels du grand livre."""
         journal = db.query(JournalAuxiliaire).filter(
             JournalAuxiliaire.code_journal == journal_code
         ).first()
-        
         if not journal:
-            raise ValueError("Journal non trouvé")
-        
-        lignes = db.query(EcritureComptableNew).filter(
+            raise HTTPException(status_code=404, detail="Journal non trouvé")
+
+        lignes_gl = db.query(GrandLivreLigne).filter(
             and_(
-                EcritureComptableNew.journal == journal_code,
-                EcritureComptableNew.periode == periode,
-                EcritureComptableNew.valider == True
+                GrandLivreLigne.journal == journal_code,
+                GrandLivreLigne.periode == periode,
             )
         ).all()
-        
-        total_debit = sum(l.debit for l in lignes)
-        total_credit = sum(l.credit for l in lignes)
-        
+
+        total_debit = sum((Decimal(str(l.debit or 0)) for l in lignes_gl), Decimal("0"))
+        total_credit = sum((Decimal(str(l.credit or 0)) for l in lignes_gl), Decimal("0"))
+        nb_ecritures = len({l.ecriture_id for l in lignes_gl})
+
         return {
             "journal": journal_code,
             "periode": periode,
-            "total_debit": total_debit,
-            "total_credit": total_credit,
-            "ecart": total_debit - total_credit,
-            "nombre_ecritures": len(lignes)
+            "total_debit": float(total_debit),
+            "total_credit": float(total_credit),
+            "ecart": float(total_debit - total_credit),
+            "nombre_ecritures": nb_ecritures,
         }
 
 
