@@ -35,6 +35,18 @@ from app.models.transport_international import OrdreTransport, CarnetTIR, CMR, C
 router = APIRouter(tags=["Transport International"])
 
 
+# ============ STATISTIQUES (agrégats réels) ============
+@router.get("/statistiques")
+def statistiques(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("transport.mission.read")),
+):
+    """Totaux réels (comptes SQL) : l'écran ne doit plus déduire ses KPI d'un
+    `Array.length` tronqué à 50 lignes. Compte les OT, les répartit par statut,
+    somme le tonnage net, compte carnets / CMR / corridors."""
+    return TransportInternationalReportingService.statistiques(db)
+
+
 # ============ ORDRES TRANSPORT ============
 @router.get("/ordres-transport", response_model=List[OrdreTransportResponse])
 def lister_ordres_transport(
@@ -499,6 +511,19 @@ def enregistrer_taxe(
 
 
 # ============ CORRIDORS CEMAC ============
+@router.get("/corridors-cemac", response_model=List[CorridorCEMACResponse])
+def lister_corridors(
+    statut: Optional[str] = None,
+    offset: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("transport.mission.read")),
+):
+    """Liste des corridors CEMAC (référence consultable). POST existait sans
+    GET : corridor créé = corridor invisible pour l'exploitant."""
+    return CorridorCEMACService.lister(db, statut=statut, offset=offset, limit=limit)
+
+
 @router.post("/corridors-cemac", response_model=CorridorCEMACResponse, status_code=status.HTTP_201_CREATED)
 def creer_corridor(
     corridor: CorridorCEMACCreate,
