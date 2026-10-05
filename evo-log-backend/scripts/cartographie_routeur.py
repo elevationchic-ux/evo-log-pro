@@ -39,20 +39,35 @@ def _details(endpoint):
 
 
 def decrire(module_nom):
+    """(prefixe, endpoints) du routeur declare dans app/routers/v1/<module_nom>.py.
+
+    Le nom de la variable n'est pas le meme d'un fichier a l'autre (`router`,
+    `api_router`, ...) et certains fichiers n'exposent aucun routeur : on cherche
+    les objets APIRouter dont les endpoints sont bien nes dans le module, sinon
+    un `import` croise ferait croire a un routeur la ou il n'y en a pas.
+    """
+    from fastapi import APIRouter
+
     module = importlib.import_module(f"app.routers.v1.{module_nom}")
-    routeur = getattr(module, "router")
+    routeurs = [v for v in vars(module).values() if isinstance(v, APIRouter)]
+    prefixe = ""
     lignes = []
-    for route in routeur.routes:
-        for methode in sorted(m for m in route.methods if m != "HEAD"):
-            codes, pour_501 = _details(route.endpoint)
-            lignes.append({
-                "methode": methode,
-                "chemin": route.path,
-                "permissions": sorted(codes),
-                "501": pour_501,
-                "resume": (route.summary or "").strip(),
-            })
-    return getattr(routeur, "prefix", ""), lignes
+    for routeur in routeurs:
+        for route in routeur.routes:
+            if getattr(route.endpoint, "__module__", "") != module.__name__:
+                continue
+            for methode in sorted(m for m in route.methods if m != "HEAD"):
+                codes, pour_501 = _details(route.endpoint)
+                lignes.append({
+                    "methode": methode,
+                    "chemin": route.path,
+                    "permissions": sorted(codes),
+                    "501": pour_501,
+                    "resume": (route.summary or "").strip(),
+                })
+        if not prefixe:
+            prefixe = getattr(routeur, "prefix", "")
+    return prefixe, lignes
 
 
 def main():
@@ -64,13 +79,22 @@ def main():
     dossier_v1 = RACINE / "app" / "routers" / "v1"
     if args.total:
         total_routes = 0
+        silencieux = []
         for fichier in sorted(dossier_v1.glob("*.py")):
             if fichier.name == "__init__.py":
                 continue
-            prefix, lignes = decrire(fichier.stem)
+            try:
+                prefix, lignes = decrire(fichier.stem)
+            except Exception as exc:  # un fichier qui ne s'importe pas ne doit pas figer le bilan
+                print(f"{fichier.name:<38} INIMPORTABLE ({type(exc).__name__}: {exc})")
+                silencieux.append(fichier.name)
+                continue
             total_routes += len(lignes)
-            print(f"{fichier.name:<38} prefix={prefix or '-':<34} endpoints={len(lignes)}")
+            marque = "" if lignes else "  <- aucun endpoint declare"
+            print(f"{fichier.name:<38} prefix={prefix or '-':<34} endpoints={len(lignes)}{marque}")
         print(f"\n{total_routes} endpoints declares par les routeurs v1.")
+        if silencieux:
+            print(f"{len(silencieux)} fichier(s) non importables : {', '.join(silencieux)}")
         return 0
 
     if not args.module:
