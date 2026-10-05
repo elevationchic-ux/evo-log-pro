@@ -362,6 +362,7 @@ def test_api_balance_verification_existe_et_renvoie_lignes(client, referentiel):
     assert r2.status_code == 200, r2.text
     corps = r2.json()
     assert isinstance(corps, dict), f"corps inattendu: {corps}"
+    assert "equilibree" in corps, f"touches recues: {sorted(corps.keys())}"
     assert corps["equilibree"] is True, f"reponse: {corps}"
     numeros = {l["compte_numero"] for l in corps["lignes"]}
     assert numeros == {"4111", "7061"}
