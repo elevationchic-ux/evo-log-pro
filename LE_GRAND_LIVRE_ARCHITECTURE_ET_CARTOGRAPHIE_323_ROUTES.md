@@ -233,9 +233,12 @@ Pour assurer la sécurité industrielle et la confidentialité des données, l'a
 
 ---
 
-## 8. CARTOGRAPHIE EXHAUSTIVE DES 18 MODULES & RÉPERTOIRE DES ROUTES
+## 8. CARTOGRAPHIE EXHAUSTIVE DES 19 MODULES & RÉPERTOIRE DES ROUTES
 
-Voici l'inventaire structuré des 18 grands domaines applicatifs composant les **323 routes Next.js** de l'application :
+Voici l'inventaire structuré des 19 grands domaines applicatifs composant les routes
+Next.js de l'application. Le chiffre « 323 routes / 117 endpoints » du bandeau est un
+**instantané** : on le re-mesure (`python evo-log-backend/scripts/cartographie_routeur.py --total`
+côté API, `next build` côté routes) plutôt que de le recopier.
 
 ### 1. 🎯 Supervision & Dashboards Globaux
 - `/dashboard/global` : Tableau de bord exécutif de synthèse avec métriques clés live.
@@ -339,6 +342,24 @@ Voici l'inventaire structuré des 18 grands domaines applicatifs composant les *
 
 ### 18. ☁️ Administration SaaS & Multi-Sociétés (SuperAdmin)
 - `/admin-saas` : Supervision globale de l'infrastructure, métriques d'utilisation des tenants et abonnements Stripe.
+
+### 19. 📐 Aménagement Portuaire & Domaine Public (département autonome)
+
+Département distinct de l'exploitation du quai : il tient la **maîtrise d'ouvrage**
+(schéma directeur, programmation, marchés, domanialité, concessions, infrastructures,
+dragage, autorisations) pour Douala, Kribi et Limbé. Thème propre `#0E7490`, icône 📐,
+permissions `amenagement.<sous_module>.<action>`, **aucune donnée seedée**.
+
+- `/amenagement-portuaire/dashboard` : Centre de pilotage — périmètre, places portuaires déclarées dans le référentiel national, agrégats calculés sur les seules saisies des agents.
+- `/amenagement-portuaire/schemas-directeurs` : Schémas directeurs, périmètres, arrêté d'approbation et visa MINMIVT (la transmission elle-même répond `501`).
+- `/amenagement-portuaire/projets` : Portefeuille de projets d'aménagement, fiches techniques, maîtres d'ouvrage.
+- `/amenagement-portuaire/programmation` : Circuit PIP / CDMT, visa de maturité (décret n°2018/0492), engagement, notification MINFI.
+- `/amenagement-portuaire/marches` : Marchés publics & PPP (loi n°2023/008), DAO, COLIFE/CIP, réceptions provisoire et définitive.
+- `/amenagement-portuaire/titres-domaniaux` : AOT, conventions d'occupation, attributions, arrêtés de délimitation, redevance domaniale.
+- `/amenagement-portuaire/concessions` : Concessions et contrats d'exploitation, biens reversibles, échéances.
+- `/amenagement-portuaire/infrastructures` : Inventaire du patrimoine bâti et génie civil, mise en service, inspections, entrée au patrimoine.
+- `/amenagement-portuaire/dragage` : Dragage, relevés bathymétriques et profondeurs disponibles (le relevé est une donnée saisie, jamais une moyenne).
+- `/amenagement-portuaire/autorisations` : Autorisations administratives et EIES (loi n°96/012), dépôt de dossier, audit IEMU.
 
 ---
 
