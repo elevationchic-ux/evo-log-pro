@@ -1191,8 +1191,8 @@ class TVAService:
             "id": declaration.id,
             "numero_declaration": num,
             "periode": periode,
-            "statut": "DECLAREE",
-            "message": "Déclaration TVA enregistrée. Le dépôt sur le portail e-bulletin DGI est à effectuer manuellement.",
+            "statut": "VALIDEE",
+            "message": "Déclaration TVA enregistrée localement. Le dépôt sur le portail e-bulletin DGI reste à effectuer manuellement.",
         }
 
 
