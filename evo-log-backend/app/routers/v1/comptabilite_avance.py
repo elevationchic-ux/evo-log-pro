@@ -291,6 +291,22 @@ def lister_balances(
     return query.all()
 
 
+@router.get("/balances/verification")
+def balances_verification(
+    date_debut: date = None,
+    date_fin: date = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.balance.read"))
+):
+    """Balance de verification a 6 colonnes, calculee en direct sur le grand
+    livre reel (materialise par les pieces en partie double).
+
+    C'est le chemin consomme par la page Grand Livre / Balance. Les colonnes
+    retournees (par compte) : soldes d'ouverture, mouvements de la periode,
+    soldes de cloture. Sans date : tout l'historique, ouverture a zero."""
+    return BalanceService.calculer_balances_verification(db, date_debut, date_fin)
+
+
 # ============ ÉTATS FINANCIERS OHADA ============
 
 @router.post("/etats-financiers/bilan", response_model=BilanOHADADetailleResponse)
