@@ -1,30 +1,17 @@
-"""Controle d'encodage des fichiers touches par le batch « referentiel places ».
-
-Verifie que chaque fichier se decode bien en UTF-8 strict (pas de BOM, pas de
-mojibake) et affiche les lignes non ASCII ajoutees, pour que les accents restent
-lisibles la ou le projet en met deja.
-"""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-
 CIBLES = [
     ROOT / "app" / "core" / "permission_catalog.py",
     ROOT / "app" / "routers" / "v1" / "amenagement_portuaire.py",
     ROOT / "app" / "schemas" / "amenagement_portuaire.py",
 ]
-
+out = []
 for chemin in CIBLES:
-    brut = chemin.read_bytes()
-    bom = brut.startswith(b"\xef\xbb\xbf")
-    try:
-        texte = brut.decode("utf-8", errors="strict")
-        ok = True
-    except UnicodeDecodeError as exc:
-        texte, ok = "", f"ERREUR {exc}"
-    lignes = texte.splitlines()
-    excent = [(i, l.strip()[:90]) for i, l in enumerate(lignes, 1)
-              if any(ord(c) > 127 for c in l)][:4]
-    print(f"--- {chemin.name}: bom={bom} utf8={ok} lignes={len(lignes)}")
-    for i, l in excent:
-        print(f"    {i}: {l}")
+    texte = chemin.read_bytes().decode("utf-8")
+    uffd = texte.count("\ufffd")
+    ete = texte.count("\u00eatre") + texte.count("d'\u00eatre")
+    lignes = [f"{i}:{l.strip()[:60]}" for i, l in enumerate(texte.splitlines(), 1) if "\ufffd" in l][:3]
+    out.append(f"{chemin.name}: U+FFFD={uffd} e_accent_aigu_lignes={ete} {lignes}")
+Path("_encodage_check.txt").write_text("\n".join(out), encoding="utf-8")
+print("\n".join(out).encode("ascii", errors="backslashreplace").decode())

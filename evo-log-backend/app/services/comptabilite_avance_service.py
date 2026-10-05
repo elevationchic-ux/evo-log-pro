@@ -9,7 +9,8 @@ from app.models.finance_ohada import (
     JournalAuxiliaire, LigneJournal, Lettrage, EcritureLettree,
     GrandLivreLigne, BalanceVerification, LigneBalance,
     BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, AnnexesOHADA,
-    TypeJournal, TypeLettrage, StatutLettrage
+    TVADeclarable, ISDeclarable, TypeJournal, TypeLettrage, StatutLettrage,
+    StatutTaxe, RegimeTVA,
 )
 
 
@@ -1074,3 +1075,174 @@ class ClotureService:
             "montant_reporte": resultat_net - total_affecte,
             "statut": "affecte"
         }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FISCALITÉ CEMAC – TVA, IS, DIPE
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TVAService:
+    """Agrégation TVA depuis le Grand Livre réel (comptes 443x TVA collectée, 445x TVA déductible)."""
+
+    @staticmethod
+    def calculer_tva_periode(db: Session, periode: str) -> dict:
+        """Calcule la déclaration TVA mensuelle depuis les écritures réelles.
+
+        Agrège le Grand Livre par préfixe de compte SYSCOHADA :
+          - 443x → TVA collectée (somme crédit)
+          - 445x → TVA déductible (somme débit)
+          - 70x  → CA imposable HT (crédit – débit)
+        Retourne 0 honnête si aucune écriture n'existe.
+        """
+        annee, mois = periode.split("-")
+        # date limite paiement = 15 du mois suivant
+        m_suiv = int(mois) + 1
+        if m_suiv > 12:
+            date_limite = f"{int(annee) + 1}-01-15"
+        else:
+            date_limite = f"{annee}-{m_suiv:02d}-15"
+
+        def _sum(prefix: str, col) -> float:
+            return float(
+                db.query(func.coalesce(func.sum(col), 0))
+                .join(PlanComptableOHADA, GrandLivreLigne.compte_id == PlanComptableOHADA.id)
+                .filter(
+                    GrandLivreLigne.periode == periode,
+                    PlanComptableOHADA.numero_compte.like(f"{prefix}%"),
+                )
+                .scalar()
+            )
+
+        tva_collectee = _sum("443", GrandLivreLigne.credit)
+        tva_deductible_total = _sum("445", GrandLivreLigne.debit)
+
+        # ventilation immo vs charges (4452x = immobilisations, reste = charges)
+        tva_deductible_immo = _sum("4452", GrandLivreLigne.debit)
+        tva_deductible_charges = tva_deductible_total - tva_deductible_immo
+
+        # CA imposable HT : sum(credit) - sum(debit) sur classe 7 (70%)
+        ca_credit = _sum("70", GrandLivreLigne.credit)
+        ca_debit = _sum("70", GrandLivreLigne.debit)
+        base_imposable = ca_credit - ca_debit
+
+        # report de crédit antérieur : dernière TVADeclarable avant cette période
+        anterieures = (
+            db.query(TVADeclarable)
+            .filter(TVADeclarable.periode < periode)
+            .order_by(TVADeclarable.periode.desc())
+            .first()
+        )
+        credit_anterieur = float(anterieures.tva_a_payer) if anterieures and float(anterieures.tva_a_payer or 0) < 0 else 0.0
+
+        net_tva_payer = tva_collectee - tva_deductible_immo - tva_deductible_charges - credit_anterieur
+
+        # statut depuis TVADeclarable existante ou BROUILLON
+        existante = db.query(TVADeclarable).filter(TVADeclarable.periode == periode).first()
+        if existante:
+            statut_val = existante.statut.value if hasattr(existante.statut, 'value') else str(existante.statut)
+        else:
+            statut_val = "BROUILLON"
+
+        return {
+            "periode": periode,
+            "ca_taxable": round(base_imposable, 2),
+            "operations_exonerees": 0.0,
+            "tva_collectee": round(tva_collectee, 2),
+            "tva_deductible_immo": round(tva_deductible_immo, 2),
+            "tva_deductible_charges": round(tva_deductible_charges, 2),
+            "credit_tva_anterieur": round(credit_anterieur, 2),
+            "net_tva_payer": round(net_tva_payer, 2),
+            "date_limite_paiement": date_limite,
+            "statut": statut_val,
+        }
+
+    @staticmethod
+    def valider_declaration(db: Session, periode: str, valide_par: str) -> dict:
+        """Enregistre la TVADeclarable en base (POST /declarations-tva/valider).
+
+        NOTE HONNÊTE : aucune API e-bulletin DGI n'est intégrée ; la déclaration
+        est stockée localement pour impression ultérieure sur formulaire officiel.
+        """
+        calc = TVAService.calculer_tva_periode(db, periode)
+        existante = db.query(TVADeclarable).filter(TVADeclarable.periode == periode).first()
+        if existante:
+            raise ValueError(f"La période {periode} a déjà été déclarée (statut {existante.statut}).")
+        if calc["ca_taxable"] == 0 and calc["tva_collectee"] == 0:
+            raise ValueError(f"Aucune écriture TVA sur la période {periode} : rien à déclarer.")
+
+        num = f"TVA-{periode}"
+        declaration = TVADeclarable(
+            numero_declaration=num,
+            periode=periode,
+            date_declaration=date.today(),
+            regime_tva=RegimeTVA.NORMAL,
+            base_imposable=calc["ca_taxable"],
+            tva_collectee=calc["tva_collectee"],
+            tva_deductible=calc["tva_deductible_immo"] + calc["tva_deductible_charges"],
+            tva_a_payer=calc["net_tva_payer"],
+            devise="XAF",
+            statut=StatutTaxe.DECLAREE,
+            notes=f"Valide par {valide_par}. Transmission DGI a effectuer manuellement (e-bulletin non integre).",
+        )
+        db.add(declaration)
+        db.commit()
+        db.refresh(declaration)
+        return {
+            "id": declaration.id,
+            "numero_declaration": num,
+            "periode": periode,
+            "statut": "DECLAREE",
+            "message": "Déclaration TVA enregistrée. Le dépôt sur le portail e-bulletin DGI est à effectuer manuellement.",
+        }
+
+
+class ISService:
+    """Dérivation de l'IS depuis le Compte de Résultat réel SYSCOHADA."""
+
+    @staticmethod
+    def deriver_is(db: Session, annee: int) -> dict:
+        """Calcule la déclaration IS depuis le résultat net de l'exercice."""
+        exercice = db.query(ExerciceComptable).filter(ExerciceComptable.annee == annee).first()
+        if not exercice:
+            raise ValueError(f"Aucun exercice comptable pour l'année {annee}")
+
+        cr = (
+            db.query(CompteResultatOHADADetaille)
+            .filter(CompteResultatOHADADetaille.exercice_id == exercice.id)
+            .order_by(CompteResultatOHADADetaille.id.desc())
+            .first()
+        )
+        if not cr:
+            raise ValueError(f"Aucun compte de résultat établi pour l'exercice {annee}. Générez-le d'abord.")
+
+        benefice_fiscal = float(cr.resultat_net or 0)
+        taux = 30.0
+        is_brut = max(0.0, benefice_fiscal * (taux / 100.0))
+        minimum_perception = 1_000_000.0
+        is_exigible = max(is_brut, minimum_perception)
+
+        # acomptes versés : chercher les ISDeclarables payés pour cet exercice
+        is_declarations = db.query(ISDeclarable).filter(ISDeclarable.annee == annee).all()
+        acomptes = sum(float(d.montant_paye or 0) for d in is_declarations)
+
+        solde = is_exigible - acomptes
+
+        # statut depuis ISDeclarable existante
+        if is_declarations:
+            statut_val = is_declarations[-1].statut.value if hasattr(is_declarations[-1].statut, 'value') else str(is_declarations[-1].statut)
+        else:
+            statut_val = "BROUILLON"
+
+        return {
+            "exercice": annee,
+            "base_imposable": round(benefice_fiscal, 2),
+            "is_brut": round(is_brut, 2),
+            "taux_is": taux,
+            "minimum_perception": minimum_perception,
+            "is_exigible": round(is_exigible, 2),
+            "acomptes_verses": round(acomptes, 2),
+            "solde_is": round(solde, 2),
+            "prochaine_echeance": f"{annee + 1}-03-31",
+            "statut": statut_val,
+        }
+
