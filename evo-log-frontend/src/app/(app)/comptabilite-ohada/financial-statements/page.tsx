@@ -1,132 +1,155 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  FileText, Download, CheckCircle2, TrendingUp, TrendingDown,
-  Building, DollarSign, Layers, BookOpen, ShieldCheck, Printer, RefreshCw
+  FileText, CheckCircle2, TrendingUp,
+  Building, DollarSign, Layers, ShieldCheck, Printer, RefreshCw, Loader2, AlertTriangle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import CompanyDocumentHeader, { CompanyDocumentFooter } from '@/components/documents/CompanyDocumentHeader';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const AUTH = () => ({ 'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('access_token') || '' : ''}`, 'Content-Type': 'application/json' });
+
+interface BilanData {
+  id: number; exercice_id: number; date_bilan: string;
+  actif_immobilise_net: number; actif_circulant_total: number;
+  tresorerie_actif: number; total_actif: number;
+  capitaux_propres_total: number; dettes_long_terme: number;
+  dettes_courtes: number; total_passif: number;
+  [key: string]: unknown;
+}
+
+interface CRData {
+  id: number; exercice_id: number; periode: string; date_arrete: string;
+  total_produits_exploitation: number; achats_marchandises: number;
+  achats_matieres_premieres: number; services_exterieurs: number;
+  charges_personnel: number; impots_taxes: number;
+  dotations_amortissements: number; autres_charges_exploitation: number;
+  total_charges_exploitation: number; resultat_exploitation: number;
+  produits_financiers: number; charges_financieres: number; resultat_financier: number;
+  produits_exceptionnels: number; charges_exceptionnelles: number; resultat_exceptionnel: number;
+  resultat_net: number; [key: string]: unknown;
+}
+
+interface TAFIREData {
+  id: number; exercice_id: number; date_tafire: string;
+  capacit_autofinancement: number; cession_immobilisations: number;
+  augmentation_capital: number; nouveaux_emprunts: number;
+  total_ressources: number; investissements_immobilisations: number;
+  remboursement_emprunts: number; distribution_dividendes: number;
+  augmentation_besoin_fdr: number; total_emplois: number;
+  variation_tresorerie: number; tresorerie_debut: number; tresorerie_fin: number;
+  [key: string]: unknown;
+}
+
+interface AnnexesData {
+  id: number; exercice_id: number; date_annexes: string;
+  denomination_sociale: string | null; forme_juridique: string | null;
+  siege_social: string | null; capital_social: number | null;
+  methode_evaluation_stocks: string | null; methode_amortissements: string | null;
+  principes_comptables: string | null; evenements_posterieurs: string | null;
+  engagements_hors_bilan: string | null; [key: string]: unknown;
+}
+
+interface EtatsResponse {
+  exercice_id: number; annee: number;
+  bilan: BilanData | null; compte_resultat: CRData | null;
+  tafire: TAFIREData | null; annexes: AnnexesData | null;
+}
+
 export default function ComptabiliteOhadaFinancialStatements() {
   const [activeTab, setActiveTab] = useState<'BILAN' | 'COMPTE_RESULTAT' | 'TAFIRE' | 'ANNEXES'>('BILAN');
-  const [loading, setLoading] = useState(false);
-  const [exercice, setExercice] = useState('2026');
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [etats, setEtats] = useState<EtatsResponse | null>(null);
 
-  const [bilan, setBilan] = useState({
-    actif: {
-      immobilise: 85000000,
-      circulant: 24500000,
-      creances: 6406250,
-      tresorerie: 18200000,
-      total: 134106250
-    },
-    passif: {
-      capitaux_propres: 95000000,
-      dettes_financieres: 20000000,
-      dettes_fournisseurs: 19106250,
-      total: 134106250
-    }
-  });
-
-  const [compteResultat, setCompteResultat] = useState({
-    chiffre_affaires: 145000000,
-    achats_consommes: 35000000,
-    marge_brute: 110000000,
-    charges_personnel: 54500000,
-    valeur_ajoutee: 92000000,
-    excedent_brut: 55500000,
-    dotations_amortissements: 8500000,
-    resultat_exploitation: 47000000,
-    resultat_financier: -2500000,
-    impot_societes: 11200000,
-    resultat_net: 33300000
-  });
-
-  const fetchFinancialStatements = async () => {
-    setLoading(true);
+  const charger = useCallback(async () => {
+    setLoading(true); setError(null);
     try {
-      const resBilan = await fetch('/api/v1/comptabilite-avance/etats-financiers/bilan', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }
-      });
-      if (resBilan.ok) {
-        const data = await resBilan.json();
-        if (data?.actif && data?.passif) {
-          setBilan(data);
-        }
-      }
+      const res = await fetch(`${API_BASE}/comptabilite-avance/etats-financiers/dernier`, { headers: AUTH() });
+      if (res.ok) { setEtats(await res.json()); }
+      else { const b = await res.json().catch(() => ({})); setError(b.detail || `Erreur ${res.status}`); }
+    } catch { setError('Serveur injoignable.'); }
+    finally { setLoading(false); }
+  }, []);
 
-      const resCr = await fetch('/api/v1/comptabilite-avance/etats-financiers/compte-resultat', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }
+  useEffect(() => { charger(); }, [charger]);
+
+  const genererBilan = async () => {
+    if (!etats) return; setGenerating(true);
+    try {
+      const res = await fetch(`${API_BASE}/comptabilite-avance/etats-financiers/bilan`, {
+        method: 'POST', headers: AUTH(),
+        body: JSON.stringify({ exercice_id: etats.exercice_id, date_bilan: new Date().toISOString().slice(0, 10) }),
       });
-      if (resCr.ok) {
-        const data = await resCr.json();
-        if (data?.chiffre_affaires) {
-          setCompteResultat(data);
-        }
-      }
-    } catch {
-      // Maintains calculated state
-    } finally {
-      setLoading(false);
-    }
+      if (res.ok) { toast.success('Bilan généré depuis le grand livre.'); await charger(); }
+      else { const b = await res.json().catch(() => ({})); toast.error(b.detail || 'Échec génération bilan.'); }
+    } catch { toast.error('Erreur réseau.'); } finally { setGenerating(false); }
   };
 
-  useEffect(() => {
-    fetchFinancialStatements();
-  }, [exercice]);
-
-  const handlePrint = () => {
-    toast.success('Impression de la liasse financière SYSCOHADA certifiée...');
-    window.print();
+  const genererCR = async () => {
+    if (!etats) return; setGenerating(true);
+    try {
+      const res = await fetch(`${API_BASE}/comptabilite-avance/etats-financiers/compte-resultat`, {
+        method: 'POST', headers: AUTH(),
+        body: JSON.stringify({ exercice_id: etats.exercice_id, periode: `${etats.annee}-12`, date_arrete: `${etats.annee}-12-31` }),
+      });
+      if (res.ok) { toast.success('Compte de résultat généré.'); await charger(); }
+      else { const b = await res.json().catch(() => ({})); toast.error(b.detail || 'Échec.'); }
+    } catch { toast.error('Erreur réseau.'); } finally { setGenerating(false); }
   };
+
+  const genererTAFIRE = async () => {
+    if (!etats) return; setGenerating(true);
+    try {
+      const res = await fetch(`${API_BASE}/comptabilite-avance/etats-financiers/tafire`, {
+        method: 'POST', headers: AUTH(),
+        body: JSON.stringify({ exercice_id: etats.exercice_id, date_tafire: new Date().toISOString().slice(0, 10) }),
+      });
+      if (res.ok) { toast.success('TAFIRE généré depuis le GL.'); await charger(); }
+      else { const b = await res.json().catch(() => ({})); toast.error(b.detail || 'Échec TAFIRE.'); }
+    } catch { toast.error('Erreur réseau.'); } finally { setGenerating(false); }
+  };
+
+  const fmt = (v: number | unknown) => Number(v || 0).toLocaleString('fr-FR');
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 font-sans">
-      {/* Official Header for Print */}
+      {/* Print header */}
       <div className="hidden print:block">
         <CompanyDocumentHeader
           documentTitle={`LIASSE FINANCIÈRE SYSCOHADA • ${activeTab}`}
-          documentNumber={`SYSCOHADA-${exercice}-${activeTab}`}
+          documentNumber={`SYSCOHADA-${etats?.annee || ''}-${activeTab}`}
           documentDate={new Date().toLocaleDateString('fr-FR')}
-          documentReference={`EXERCICE-${exercice}-CERTIFIE`}
+          documentReference={`EXERCICE-${etats?.annee || ''}-CERTIFIE`}
         />
       </div>
 
-      {/* Screen Header Controls */}
+      {/* Screen header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-violet-500/30 p-6 rounded-3xl shadow-xl backdrop-blur-xl print:hidden">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-violet-500/20 text-violet-300 border border-violet-500/30">
               États Financiers Normalisés SYSCOHADA
             </span>
-            <span className="font-mono text-xs text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-              T-Code : KOHA_BIL
-            </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-100 flex items-center gap-3">
             <FileText className="w-8 h-8 text-violet-400" />
-            États Financiers OHADA (Bilan & Compte de Résultat)
+            États Financiers OHADA
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Génération automatique du Bilan légal, Compte de Résultat, TAFIRE et Annexes certifiées conformes CEMAC.
+            Bilan, Compte de Résultat, TAFIRE et Annexes. Source : grand livre réel (partie double).
           </p>
         </div>
-
         <div className="flex items-center gap-3">
-          <select
-            value={exercice}
-            onChange={e => setExercice(e.target.value)}
-            className="h-10 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
-          >
-            <option value="2026">Exercice 2026</option>
-            <option value="2025">Exercice 2025</option>
-          </select>
-          <button
-            onClick={handlePrint}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center gap-2 border border-slate-700 transition-all"
-          >
-            <Printer className="w-4 h-4 text-slate-400" /> Imprimer Liasse
+          {etats && <span className="text-xs font-mono text-slate-400">Exercice {etats.annee}</span>}
+          <button onClick={charger} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl flex items-center gap-2 border border-slate-700 transition-all">
+            <RefreshCw className="w-3.5 h-3.5" /> Recharger
+          </button>
+          <button onClick={() => window.print()} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl flex items-center gap-2 border border-slate-700 transition-all">
+            <Printer className="w-3.5 h-3.5" /> Imprimer
           </button>
         </div>
       </div>
@@ -134,256 +157,198 @@ export default function ComptabiliteOhadaFinancialStatements() {
       {/* Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 print:hidden">
         {[
-          { key: 'BILAN', label: 'Bilan Normalisé (Actif / Passif)' },
+          { key: 'BILAN', label: 'Bilan (Actif / Passif)' },
           { key: 'COMPTE_RESULTAT', label: 'Compte de Résultat (SIG)' },
-          { key: 'TAFIRE', label: 'Tableau Financier (TAFIRE)' },
-          { key: 'ANNEXES', label: 'Notes Annexes Légales' }
+          { key: 'TAFIRE', label: 'TAFIRE (Ressources / Emplois)' },
+          { key: 'ANNEXES', label: 'Notes Annexes' },
         ].map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key as any)}
+          <button key={tab.key} onClick={() => setActiveTab(tab.key as typeof activeTab)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-              activeTab === tab.key
-                ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
-                : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
+              activeTab === tab.key ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
+              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'}`}>
             {tab.label}
           </button>
         ))}
       </div>
 
-      {/* TAB 1: BILAN SYSCOHADA */}
-      {activeTab === 'BILAN' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* ACTIF */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h2 className="text-base font-black text-emerald-400 uppercase tracking-tight flex items-center gap-2">
-                <Building className="w-5 h-5" /> Actif du Bilan (XAF)
-              </h2>
-              <span className="text-xs font-mono font-bold text-slate-400">Emplois</span>
-            </div>
+      {/* Error / Loading */}
+      {error && <div className="flex items-center gap-3 px-4 py-3 bg-red-950/60 border border-red-800/40 rounded-2xl text-xs text-red-300 print:hidden"><AlertTriangle className="w-4 h-4 shrink-0" />{error}</div>}
+      {loading && <div className="flex items-center justify-center gap-2 py-8 text-slate-400 text-xs"><Loader2 className="w-5 h-5 animate-spin" /> Chargement…</div>}
 
-            <div className="space-y-3 font-mono text-xs">
-              <div className="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <div>
-                  <div className="font-bold text-white">Actif Immobilisé (Classe 2)</div>
-                  <div className="text-[11px] text-slate-500 font-sans">Matériel de transport, grues, licences</div>
+      {/* BILAN */}
+      {activeTab === 'BILAN' && !loading && (
+        <div className="print:space-y-4">
+          {etats?.bilan ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* ACTIF */}
+              <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <h2 className="text-base font-black text-emerald-400 uppercase tracking-tight flex items-center gap-2"><Building className="w-5 h-5" /> Actif</h2>
+                  <span className="text-[11px] font-mono text-slate-500">Généré le {etats.bilan.date_bilan}</span>
                 </div>
-                <span className="font-black text-slate-100">{bilan.actif.immobilise.toLocaleString()}</span>
+                <div className="space-y-3 font-mono text-xs">
+                  {[
+                    ['Actif immobilisé net (Cl. 2)', etats.bilan.actif_immobilise_net],
+                    ['Actif circulant (Cl. 3+4)', etats.bilan.actif_circulant_total],
+                    ['Trésorerie actif (Cl. 5)', etats.bilan.tresorerie_actif],
+                  ].map(([lbl, v]) => (
+                    <div key={lbl as string} className="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80"><span className="text-slate-300">{lbl}</span><span className="text-slate-100 font-bold">{fmt(v)}</span></div>
+                  ))}
+                </div>
+                <div className="p-3 bg-emerald-950/20 border border-emerald-500/30 rounded-xl flex justify-between text-sm font-black font-mono text-emerald-400">TOTAL ACTIF <span>{fmt(etats.bilan.total_actif)} XAF</span></div>
               </div>
-
-              <div className="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <div>
-                  <div className="font-bold text-white">Actif Circulant - Stocks (Classe 3)</div>
-                  <div className="text-[11px] text-slate-500 font-sans">Pièces de rechange, carburant en cuve</div>
+              {/* PASSIF */}
+              <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <h2 className="text-base font-black text-blue-400 uppercase tracking-tight flex items-center gap-2"><DollarSign className="w-5 h-5" /> Passif</h2>
                 </div>
-                <span className="font-black text-slate-100">{bilan.actif.circulant.toLocaleString()}</span>
+                <div className="space-y-3 font-mono text-xs">
+                  {[
+                    ['Capitaux propres (dont résultat)', etats.bilan.capitaux_propres_total],
+                    ['Dettes long terme', etats.bilan.dettes_long_terme],
+                    ['Dettes court terme', etats.bilan.dettes_courtes],
+                  ].map(([lbl, v]) => (
+                    <div key={lbl as string} className="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80"><span className="text-slate-300">{lbl}</span><span className="text-slate-100 font-bold">{fmt(v)}</span></div>
+                  ))}
+                </div>
+                <div className="p-3 bg-blue-950/20 border border-blue-500/30 rounded-xl flex justify-between text-sm font-black font-mono text-blue-400">TOTAL PASSIF <span>{fmt(etats.bilan.total_passif)} XAF</span></div>
               </div>
-
-              <div className="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <div>
-                  <div className="font-bold text-white">Créances Clients & Tiers (Classe 4)</div>
-                  <div className="text-[11px] text-slate-500 font-sans">Clients fret, débours douane avancés</div>
-                </div>
-                <span className="font-black text-slate-100">{bilan.actif.creances.toLocaleString()}</span>
-              </div>
-
-              <div className="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <div>
-                  <div className="font-bold text-white">Trésorerie - Actif (Classe 5)</div>
-                  <div className="text-[11px] text-slate-500 font-sans">Disponibilités banques CEMAC & caisses</div>
-                </div>
-                <span className="font-black text-emerald-400">{bilan.actif.tresorerie.toLocaleString()}</span>
-              </div>
-            </div>
-
-            <div className="p-4 bg-emerald-950/20 border border-emerald-500/30 rounded-2xl flex justify-between items-center text-sm font-black font-mono">
-              <span className="text-emerald-300">TOTAL GÉNÉRAL ACTIF</span>
-              <span className="text-emerald-400 text-base">{bilan.actif.total.toLocaleString()} XAF</span>
-            </div>
-          </div>
-
-          {/* PASSIF */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h2 className="text-base font-black text-blue-400 uppercase tracking-tight flex items-center gap-2">
-                <DollarSign className="w-5 h-5" /> Passif du Bilan (XAF)
-              </h2>
-              <span className="text-xs font-mono font-bold text-slate-400">Ressources</span>
-            </div>
-
-            <div className="space-y-3 font-mono text-xs">
-              <div className="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <div>
-                  <div className="font-bold text-white">Capitaux Propres & Réserves (Classe 1)</div>
-                  <div className="text-[11px] text-slate-500 font-sans">Capital social souscrit, réserves légales</div>
-                </div>
-                <span className="font-black text-slate-100">{bilan.passif.capitaux_propres.toLocaleString()}</span>
-              </div>
-
-              <div className="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <div>
-                  <div className="font-bold text-white">Dettes Financières & Emprunts (Classe 1)</div>
-                  <div className="text-[11px] text-slate-500 font-sans">Crédit-bail matériel lourd, emprunts banques</div>
-                </div>
-                <span className="font-black text-slate-100">{bilan.passif.dettes_financieres.toLocaleString()}</span>
-              </div>
-
-              <div className="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <div>
-                  <div className="font-bold text-white">Dettes Fournisseurs & Fiscales (Classe 4)</div>
-                  <div className="text-[11px] text-slate-500 font-sans">Fournisseurs pièces/gasoil, TVA à décaisser</div>
-                </div>
-                <span className="font-black text-slate-100">{bilan.passif.dettes_fournisseurs.toLocaleString()}</span>
+              {/* Equilibre */}
+              <div className="col-span-full text-center text-xs font-mono text-slate-400 print:hidden">
+                <CheckCircle2 className="w-4 h-4 inline text-emerald-400 mr-1" />
+                Équilibre : Total Actif = Total Passif = {fmt(etats.bilan.total_actif)} XAF
               </div>
             </div>
-
-            <div className="p-4 bg-blue-950/20 border border-blue-500/30 rounded-2xl flex justify-between items-center text-sm font-black font-mono">
-              <span className="text-blue-300">TOTAL GÉNÉRAL PASSIF</span>
-              <span className="text-blue-400 text-base">{bilan.passif.total.toLocaleString()} XAF</span>
+          ) : (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 text-center space-y-4">
+              <p className="text-xs text-slate-400">Bilan non encore généré pour cet exercice.</p>
+              <button onClick={genererBilan} disabled={generating} className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center gap-2 mx-auto">
+                {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Générer le Bilan depuis le Grand Livre
+              </button>
             </div>
-          </div>
+          )}
         </div>
       )}
 
-      {/* TAB 2: COMPTE DE RESULTAT */}
-      {activeTab === 'COMPTE_RESULTAT' && (
+      {/* COMPTE DE RÉSULTAT */}
+      {activeTab === 'COMPTE_RESULTAT' && !loading && (
+        <div>
+          {etats?.compte_resultat ? (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h2 className="text-base font-black text-white uppercase flex items-center gap-2"><TrendingUp className="w-5 h-5 text-violet-400" /> Compte de Résultat (SIG)</h2>
+                <span className="text-[11px] font-mono text-slate-500">Période {etats.compte_resultat.periode}</span>
+              </div>
+              <div className="divide-y divide-slate-800 font-mono text-xs">
+                {[
+                  ['Total produits exploitation', etats.compte_resultat.total_produits_exploitation, 'text-emerald-400', '+'],
+                  ['Achats consommés', etats.compte_resultat.achats_marchandises + Number(etats.compte_resultat.achats_matieres_premieres), 'text-red-400', '-'],
+                  ['Services extérieurs', etats.compte_resultat.services_exterieurs, 'text-red-400', '-'],
+                  ['Charges de personnel', etats.compte_resultat.charges_personnel, 'text-red-400', '-'],
+                  ['Impôts & taxes', etats.compte_resultat.impots_taxes, 'text-red-400', '-'],
+                  ['Dotations amortissements', etats.compte_resultat.dotations_amortissements, 'text-red-400', '-'],
+                  ['Total charges exploitation', etats.compte_resultat.total_charges_exploitation, 'text-red-400', '-'],
+                ].map(([lbl, v, col, sgn]) => (
+                  <div key={lbl as string} className="py-2 flex justify-between"><span className="text-slate-300">{lbl}</span><span className={col as string}>{sgn}{fmt(v)}</span></div>
+                ))}
+                <div className="py-2.5 flex justify-between bg-violet-950/20 px-3 rounded-xl border border-violet-500/20 font-bold"><span className="text-violet-300">= Résultat exploitation</span><span className="text-violet-300">{fmt(etats.compte_resultat.resultat_exploitation)}</span></div>
+                <div className="py-2 flex justify-between"><span className="text-slate-300">Résultat financier</span><span className={Number(etats.compte_resultat.resultat_financier) >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmt(etats.compte_resultat.resultat_financier)}</span></div>
+                <div className="py-2 flex justify-between"><span className="text-slate-300">Résultat exceptionnel</span><span className={Number(etats.compte_resultat.resultat_exceptionnel) >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmt(etats.compte_resultat.resultat_exceptionnel)}</span></div>
+                <div className="py-3 flex justify-between bg-emerald-950/30 px-3 rounded-xl border border-emerald-500/40 text-sm font-black"><span className="text-emerald-300">RÉSULTAT NET</span><span className={Number(etats.compte_resultat.resultat_net) >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmt(etats.compte_resultat.resultat_net)} XAF</span></div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 text-center space-y-4">
+              <p className="text-xs text-slate-400">Compte de Résultat non encore généré.</p>
+              <button onClick={genererCR} disabled={generating} className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center gap-2 mx-auto">
+                {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Générer le Compte de Résultat
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAFIRE */}
+      {activeTab === 'TAFIRE' && !loading && (
+        <div>
+          {etats?.tafire ? (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h2 className="text-base font-black text-white uppercase flex items-center gap-2"><Layers className="w-5 h-5 text-indigo-400" /> TAFIRE</h2>
+                <span className="text-[11px] font-mono text-indigo-400">Généré le {etats.tafire.date_tafire}</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono">
+                <div className="bg-slate-950 rounded-2xl border border-slate-800 p-4 space-y-2">
+                  <div className="text-emerald-300 font-bold font-sans border-b border-slate-800 pb-2 mb-2">RESSOURCES</div>
+                  {[
+                    ['CAF (RN + amort.)', etats.tafire.capacit_autofinancement],
+                    ['Cessions immobilisations', etats.tafire.cession_immobilisations],
+                    ['Augmentation capital', etats.tafire.augmentation_capital],
+                    ['Nouveaux emprunts', etats.tafire.nouveaux_emprunts],
+                  ].map(([lbl, v]) => (<div key={lbl as string} className="flex justify-between"><span className="text-slate-400">{lbl}</span><span className="text-slate-200">{fmt(v)}</span></div>))}
+                  <div className="flex justify-between font-bold border-t border-slate-800 pt-2 mt-2"><span className="text-emerald-300">Total ressources</span><span className="text-emerald-400">{fmt(etats.tafire.total_ressources)}</span></div>
+                </div>
+                <div className="bg-slate-950 rounded-2xl border border-slate-800 p-4 space-y-2">
+                  <div className="text-red-300 font-bold font-sans border-b border-slate-800 pb-2 mb-2">EMPLOIS</div>
+                  {[
+                    ['Investissements (Cl. 2 net)', etats.tafire.investissements_immobilisations],
+                    ['Remboursements emprunts', etats.tafire.remboursement_emprunts],
+                    ['Dividendes distribués', etats.tafire.distribution_dividendes],
+                    ['Augmentation BFR', etats.tafire.augmentation_besoin_fdr],
+                  ].map(([lbl, v]) => (<div key={lbl as string} className="flex justify-between"><span className="text-slate-400">{lbl}</span><span className="text-slate-200">{fmt(v)}</span></div>))}
+                  <div className="flex justify-between font-bold border-t border-slate-800 pt-2 mt-2"><span className="text-red-300">Total emplois</span><span className="text-red-400">{fmt(etats.tafire.total_emplois)}</span></div>
+                </div>
+              </div>
+              <div className="p-3 bg-indigo-950/30 border border-indigo-500/30 rounded-xl flex justify-between text-sm font-black font-mono">
+                <span className="text-indigo-300">Variation trésorerie</span>
+                <span className={Number(etats.tafire.variation_tresorerie) >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmt(etats.tafire.variation_tresorerie)} XAF</span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 text-center space-y-4">
+              <p className="text-xs text-slate-400">TAFIRE non encore généré. Nécessite le CR et le Bilan.</p>
+              <button onClick={genererTAFIRE} disabled={generating} className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center gap-2 mx-auto">
+                {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Générer le TAFIRE depuis le GL
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ANNEXES */}
+      {activeTab === 'ANNEXES' && !loading && (
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <h2 className="text-base font-black text-white uppercase tracking-tight flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-violet-400" />
-              Compte de Résultat SYSCOHADA (Soldes Intermédiaires de Gestion)
-            </h2>
-            <span className="text-xs font-mono font-bold text-emerald-400">Devise : XAF</span>
+            <h2 className="text-base font-black text-white uppercase flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-amber-400" /> Notes Annexes</h2>
+            {etats?.annexes && <span className="text-[11px] font-mono text-slate-500">Du {etats.annexes.date_annexes}</span>}
           </div>
-
-          <div className="divide-y divide-slate-800 font-mono text-xs">
-            <div className="py-2.5 flex justify-between items-center">
-              <div>
-                <span className="font-bold text-slate-200">Chiffre d&apos;Affaires Net (Classe 7)</span>
-                <p className="text-[11px] text-slate-500 font-sans">Prestations de transit, transport routier et manutention quai</p>
-              </div>
-              <span className="font-black text-emerald-400 text-sm">+{compteResultat.chiffre_affaires.toLocaleString()}</span>
+          {etats?.annexes ? (
+            <div className="space-y-3 text-xs text-slate-300 leading-relaxed">
+              {[
+                ['Dénomination', etats.annexes.denomination_sociale],
+                ['Forme juridique', etats.annexes.forme_juridique],
+                ['Siège social', etats.annexes.siege_social],
+                ['Capital social', etats.annexes.capital_social ? `${fmt(etats.annexes.capital_social)} XAF` : null],
+                ['Méthode évaluation stocks', etats.annexes.methode_evaluation_stocks],
+                ['Méthode amortissements', etats.annexes.methode_amortissements],
+                ['Principes comptables', etats.annexes.principes_comptables],
+                ['Événements postérieurs', etats.annexes.evenements_posterieurs],
+                ['Engagements hors bilan', etats.annexes.engagements_hors_bilan],
+              ].filter(([, v]) => v).map(([lbl, v]) => (
+                <div key={lbl as string} className="p-3 bg-slate-950 rounded-xl border border-slate-800"><span className="text-slate-400 font-sans">{lbl} :</span> <span className="text-slate-200">{v}</span></div>
+              ))}
             </div>
-
-            <div className="py-2.5 flex justify-between items-center">
-              <div>
-                <span className="font-bold text-slate-200">Achats Consommés de Matières & Fournitures (Compte 60)</span>
-                <p className="text-[11px] text-slate-500 font-sans">Carburants, lubrifiants, pneumatiques</p>
-              </div>
-              <span className="font-bold text-red-400">-{compteResultat.achats_consommes.toLocaleString()}</span>
+          ) : (
+            <div className="py-6 text-center space-y-3">
+              <p className="text-xs text-slate-400">Notes annexes non encore saisies.</p>
+              <p className="text-[11px] text-slate-500">Créez-les via POST /etats-financiers/annexes avec les informations légales de votre entreprise.</p>
             </div>
-
-            <div className="py-2.5 flex justify-between items-center bg-slate-950/50 px-2 rounded-lg">
-              <span className="font-black text-slate-300 uppercase">= Marge Commerciale Brute</span>
-              <span className="font-black text-white">{compteResultat.marge_brute.toLocaleString()}</span>
-            </div>
-
-            <div className="py-2.5 flex justify-between items-center">
-              <div>
-                <span className="font-bold text-slate-200">Charges de Personnel (Compte 66)</span>
-                <p className="text-[11px] text-slate-500 font-sans">Salaires chauffeurs, dockers de quart, charges CNPS</p>
-              </div>
-              <span className="font-bold text-red-400">-{compteResultat.charges_personnel.toLocaleString()}</span>
-            </div>
-
-            <div className="py-2.5 flex justify-between items-center bg-slate-950/50 px-2 rounded-lg">
-              <span className="font-black text-slate-300 uppercase">= Valeur Ajoutée (VA)</span>
-              <span className="font-black text-white">{compteResultat.valeur_ajoutee.toLocaleString()}</span>
-            </div>
-
-            <div className="py-2.5 flex justify-between items-center">
-              <div>
-                <span className="font-bold text-slate-200">Dotations aux Amortissements & Provisions (Compte 68)</span>
-                <p className="text-[11px] text-slate-500 font-sans">Usure camions et équipements portuaires</p>
-              </div>
-              <span className="font-bold text-red-400">-{compteResultat.dotations_amortissements.toLocaleString()}</span>
-            </div>
-
-            <div className="py-2.5 flex justify-between items-center bg-violet-950/20 px-2 rounded-lg border border-violet-500/20">
-              <span className="font-black text-violet-300 uppercase">= Résultat d&apos;Exploitation (EBIT)</span>
-              <span className="font-black text-violet-300 text-sm">+{compteResultat.resultat_exploitation.toLocaleString()}</span>
-            </div>
-
-            <div className="py-2.5 flex justify-between items-center">
-              <span className="font-bold text-slate-300">Impôt sur les Sociétés (IS CEMAC 30% ou minimum forfaitaire)</span>
-              <span className="font-bold text-red-400">-{compteResultat.impot_societes.toLocaleString()}</span>
-            </div>
-
-            <div className="py-3 flex justify-between items-center bg-emerald-950/30 px-3 rounded-xl border border-emerald-500/40 text-sm">
-              <span className="font-black text-emerald-300 uppercase">RÉSULTAT NET DE L&apos;EXERCICE (BÉNÉFICE)</span>
-              <span className="font-black text-emerald-400 text-base">+{compteResultat.resultat_net.toLocaleString()} XAF</span>
-            </div>
-          </div>
+          )}
         </div>
       )}
 
-      {/* TAB 3: TAFIRE */}
-      {activeTab === 'TAFIRE' && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <h2 className="text-base font-black text-white uppercase tracking-tight flex items-center gap-2">
-              <Layers className="w-5 h-5 text-indigo-400" />
-              Tableau Financier des Ressources et des Emplois (TAFIRE)
-            </h2>
-            <span className="text-xs font-mono font-bold text-indigo-400">Conformité OHADA Révisé</span>
-          </div>
-
-          <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3 text-xs font-mono">
-            <div className="flex justify-between py-2 border-b border-slate-800">
-              <span className="text-slate-300 font-sans">Capacité d&apos;Autofinancement Globale (CAFG) :</span>
-              <span className="font-black text-emerald-400">+41 800 000 XAF</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-slate-800">
-              <span className="text-slate-300 font-sans">Variation du Besoin en Fonds de Roulement (BFR) :</span>
-              <span className="font-black text-blue-400">-5 200 000 XAF</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-slate-800">
-              <span className="text-slate-300 font-sans">Investissements Nouveaux en Matériel de Transport :</span>
-              <span className="font-black text-red-400">-18 000 000 XAF</span>
-            </div>
-            <div className="flex justify-between py-2 text-sm font-black text-white bg-slate-900 px-3 rounded-xl">
-              <span className="text-indigo-300 font-sans uppercase">Flux Net de Trésorerie de la Période :</span>
-              <span className="text-emerald-400">+18 600 000 XAF</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 4: ANNEXES */}
-      {activeTab === 'ANNEXES' && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <h2 className="text-base font-black text-white uppercase tracking-tight flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-amber-400" />
-              Notes Annexes & Règles et Méthodes Comptables
-            </h2>
-            <span className="text-xs font-mono font-bold text-amber-400">Système Normal</span>
-          </div>
-
-          <div className="space-y-3 text-xs text-slate-300 leading-relaxed">
-            <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
-              <h3 className="font-black text-slate-100 uppercase mb-1">Note 1 : Méthodes d&apos;Évaluation des Immobilisations</h3>
-              <p className="text-slate-400 text-[11px]">
-                Les tracteurs routiers et engins portuaires sont amortis selon le mode linéaire sur une durée d&apos;utilité de 5 ans (taux 20%). Les conteneurs en propre sont amortis sur 8 ans (taux 12.5%).
-              </p>
-            </div>
-            <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
-              <h3 className="font-black text-slate-100 uppercase mb-1">Note 2 : Évaluation des Stocks de Carburant</h3>
-              <p className="text-slate-400 text-[11px]">
-                Les stocks de gasoil et lubrifiants sont valorisés selon la méthode du Coût Unitaire Moyen Pondéré (CUMP) après chaque entrée.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Official Footer for Print */}
-      <div className="hidden print:block">
-        <CompanyDocumentFooter />
-      </div>
+      {/* Print footer */}
+      <div className="hidden print:block"><CompanyDocumentFooter /></div>
     </div>
   );
 }
