@@ -31,7 +31,7 @@ from app.core.database import get_db
 from app.core.not_implemented import not_implemented
 from app.core.permissions import require_perm
 from app.models.user import User
-from app.models.port_cameroun import PortCameroun
+from app.models.port_cameroun import PortCameroun, TypePort
 from app.models.amenagement_portuaire import (
     SchemaDirecteur, ProjetAmenagement, DocumentProgrammation, MarcheAmenagement,
     AutorisationDomaniale, ConcessionPortuaire, InfrastructurePortuaire,
@@ -46,6 +46,7 @@ from app.models.amenagement_portuaire import (
     EtatInfrastructure, TypeDragage, TypeAutorisationTravaux, StatutAutorisation,
 )
 from app.schemas.amenagement_portuaire import (
+    PlacePortuaireCreate, PlacePortuaireUpdate,
     SchemaDirecteurCreate, SchemaDirecteurUpdate, SchemaDirecteurOut,
     ProjetAmenagementCreate, ProjetAmenagementUpdate, ProjetAmenagementOut,
     DocumentProgrammationCreate, DocumentProgrammationUpdate, DocumentProgrammationOut,
