@@ -75,9 +75,12 @@ interface Synthese {
   };
 }
 
-/** Une ligne d'indicateur : un compteur (fait brut) ou un montant (peut être
- *  non saisi). `brut` vient du serveur, jamais d'un calcul local. */
-type ValeurIndicateur = { genre: 'compteur'; valeur?: number } | { genre: 'montant'; valeur?: number | null };
+/** Une ligne d'indicateur : un compteur (fait brut), une mesure ou un montant
+ *  (peut être non saisi). `valeur` vient du serveur, jamais d'un calcul local. */
+type ValeurIndicateur =
+  | { genre: 'compteur'; valeur?: number }
+  | { genre: 'mesure'; valeur?: number | null; unite: string }
+  | { genre: 'montant'; valeur?: number | null };
 
 export default function AmenagementPortuaireDashboardPage() {
   const { language } = useSettings();
