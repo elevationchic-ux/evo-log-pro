@@ -232,7 +232,6 @@ export default function ReferentielPlaces() {
       return;
     }
     const payload = construire();
-    if (!edition && saisieVide(payload.code as string | undefined)) return;
     setEnCours(true);
     try {
       if (edition) {
@@ -575,11 +574,4 @@ export default function ReferentielPlaces() {
       )}
     </section>
   );
-}
-
-/** Reprise locale de l'affichage d'une date, pour le cas où la colonne serait
- *  absente du format registre (une place n'est pas une ligne de registre). */
-export function datePlace(iso: string | null, lang: 'fr' | 'en'): string {
-  if (estAbsent(iso) || !iso) return tManquant(lang);
-  return formaterDate(iso, lang);
 }
