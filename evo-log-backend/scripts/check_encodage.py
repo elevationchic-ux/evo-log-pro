@@ -18,6 +18,9 @@ import pathlib
 import sys
 
 RACINE = pathlib.Path(__file__).resolve().parents[1]
+# Le frontend porte aussi des libelles francais : un fichier .tsx sur-encode
+# afficherait des accents doubles a l'agent, pas seulement dans une reponse d'API.
+FRONT = RACINE.parent / "evo-log-frontend" / "src"
 DOSSIERS = ("app", "migrations", "tests", "scripts")
 BOM = b"\xef\xbb\xbf"
 
