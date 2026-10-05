@@ -63,8 +63,9 @@ routeurs `app/routers/v1/`).
 
 Un **département** (batch 29), pas une extension du module d'exploitation du quai :
 il gère l'aménagement et le domaine public des ports de **Douala, Kribi et Limbe**
-(autorite portuaire loi n°2012/021, regime domanial loi n°2012/022, PPP
-loi n°2023/008, EIES loi n°96/012).
+(autorité portuaire loi n°2012/021, PPP loi n°2023/008, visa de maturité décret
+n°2018/0492, EIES loi n°96/012 — vocabulaire juridique identique à celui du
+modèle `app/models/amenagement_portuaire.py`).
 
 - **Backend** : `app/models/amenagement_portuaire.py` (9 entites),
   `app/schemas/amenagement_portuaire.py`, `app/routers/v1/amenagement_portuaire.py`
