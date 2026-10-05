@@ -80,7 +80,11 @@ export const MODULE_COLORS: Record<string, ModuleColorConfig> = {
 
 export const MODULE_ICONS: Record<string, string> = {
   auth: '🔐', dashboard: '🧭', transport: '🚛', 'transport-avance': '🚚', 'transport-international': '🌍',
-  magasin: '📦', 'magasin-avance': '🏭', 'magasin-douane': '�',
+  // 'magasin-douane' portait un caractere de remplacement (emoji tronque a
+  // l'ecriture). Un glyphe casse n'est pas une icone, et comme la chaine est
+  // non vide le repli '|| 📋' ne jouait pas : on remet le signe deja employe
+  // pour la douane dans ce fichier ('transit-douane').
+  magasin: '📦', 'magasin-avance': '🏭', 'magasin-douane': '🛃',
   finance: '💰', acconage: '⚓', 'acconage-avance': '🏗️',
   transit: '🌐', 'transit-avance': '📋',
   qhse: '🛡️', maintenance: '🔧', 'maintenance-gmao': '⚙️',
