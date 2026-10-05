@@ -15,6 +15,7 @@ from app.models.transport_international import (
 from app.services.transport_international_service import (
     OrdreTransportService, CarnetTIRService, CMRService,
     ScelleRoutierService, PositionTransportService,
+    CorridorCEMACService, TransportInternationalReportingService,
 )
 
 
@@ -74,7 +75,6 @@ class TestOrdreTransportService:
     def test_lister_filtre_par_statut(self, db: Session, ordre_transport):
         """Batch 12 : le filtre `statut=` est exploitable côté écran (onglet
         'En transit' / 'Livrés')."""
-        OrdreTransportService.lister(db, statut=StatutTransport.LIVRE.value) == []
         OrdreTransportService.marquer_livre(db=db, ot_id=ordre_transport.id)
         livres = OrdreTransportService.lister(db, statut=StatutTransport.LIVRE.value)
         planifies = OrdreTransportService.lister(db, statut=StatutTransport.PLANIFIE.value)
@@ -284,3 +284,126 @@ class TestConducteurResponseFields:
         assert minimal.expiration_visite_medicale is None
         assert minimal.date_naissance is None
         assert minimal.numero_cnps is None
+
+
+class TestStatutEnumCoercion:
+    """Le filtre `?statut=` comparait la colonne Enum au NOM stocké ('LIVRE')
+    alors que l'API fournit la valeur ('livre') : il ne renvoyait jamais rien.
+    Apres coercion valeur->membre, la valeur valide filtre reellement et une
+    valeur inconnue renvoie une liste vide honnete (pas d'erreur 500)."""
+
+    def test_valeur_retrouve_lebon_enregistrement(self, db: Session, ordre_transport):
+        planifies = OrdreTransportService.lister(db, statut=StatutTransport.PLANIFIE.value)
+        assert any(r.id == ordre_transport.id for r in planifies)
+
+    def test_valeur_inconnue_renvoie_liste_vide(self, db: Session, ordre_transport):
+        assert OrdreTransportService.lister(db, statut="statut_fantome") == []
+
+    def test_nom_enum_nest_pas_une_valeur_valide(self, db: Session, ordre_transport):
+        # 'PLANIFIE' (NOM stocké) n'est pas une valeur d'enum -> vide honnete.
+        assert OrdreTransportService.lister(db, statut="PLANIFIE") == []
+
+
+class TestCMRLister:
+    """CMR etait write-only (POST sans GET) : CMRService.lister rend la
+    liste reellement consultable."""
+
+    def _emmet(self, db, ordre_transport, numero):
+        return CMRService.emettre_cmr(
+            db=db, numero_cmr=numero, ordre_transport_id=ordre_transport.id,
+            expediteur="Expediteur", destinataire="Destinataire", transporteur="Trans",
+            lieu_chargement="Douala", lieu_livraison="Yaounde", marchandise="Fer",
+            poids_net=10.0, poids_brut=11.0, nombre_colis=5,
+            type_emballage="Sacs", valeur_marchandise=1000000.0,
+        )
+
+    def test_lister_retourne_les_cmr_emises(self, db: Session, ordre_transport):
+        self._emmet(db, ordre_transport, "CMR-LIST-01")
+        rows = CMRService.lister(db)
+        assert any(r.numero_cmr == "CMR-LIST-01" for r in rows)
+
+    def test_lister_filtre_par_statut_chaine(self, db: Session, ordre_transport):
+        self._emmet(db, ordre_transport, "CMR-LIST-02")
+        emis = CMRService.lister(db, statut="emis")
+        assert any(r.numero_cmr == "CMR-LIST-02" for r in emis)
+        assert CMRService.lister(db, statut="livre") == []
+
+
+class TestCorridorCEMACService:
+    def test_creer_puis_lister_corridor(self, db: Session):
+        CorridorCEMACService.creer_corridor(
+            db=db, nom="Douala-Yaounde", pays_depart="Cameroun", code_pays_depart="CM",
+            pays_arrivee="Cameroun", code_pays_arrivee="CM",
+            distance_km=250.0, duree_estimee_heures=4.0,
+        )
+        rows = CorridorCEMACService.lister(db)
+        assert any(r.nom == "Douala-Yaounde" for r in rows)
+
+    def test_lister_filtre_par_statut(self, db: Session):
+        CorridorCEMACService.creer_corridor(
+            db=db, nom="Douala-Bangui", pays_depart="Cameroun", code_pays_depart="CM",
+            pays_arrivee="RCA", code_pays_arrivee="CF",
+            distance_km=780.0, duree_estimee_heures=12.0,
+        )
+        assert any(r.nom == "Douala-Bangui" for r in CorridorCEMACService.lister(db, statut="actif"))
+        assert CorridorCEMACService.lister(db, statut="ferme") == []
+
+
+class TestStatistiques:
+    """Les KPI venaient d'un `Array.length` tronque a 50 lignes. statistiques()
+    doit renvoyer des comptes/sommes SQL exacts, quelles que soient la
+    volumetrie et la tranche affichee."""
+
+    def test_vide_tous_compteurs_a_zero(self, db: Session):
+        stats = TransportInternationalReportingService.statistiques(db)
+        assert stats["ordres_transport"]["total"] == 0
+        assert stats["ordres_transport"]["par_statut"] == {}
+        assert stats["ordres_transport"]["tonnage_net"] == 0.0
+        assert stats["carnets_tir"] == 0
+        assert stats["cmr"] == 0
+        assert stats["corridors_cemac"] == 0
+
+    def test_compte_par_statut_et_tonnage(self, db: Session, ordre_transport):
+        # ordre_transport fixture : poids_net=24.0, statut planifie.
+        second = OrdreTransportService.creer_ordre_transport(
+            db=db, numero_ot="OT-2026-002", client_id=1, transporteur_id=2,
+            camion_id=3, conducteur_id=4, type_transit=TypeTransitRoutier.TIR,
+            lieu_chargement="Douala", lieu_livraison="Bafoussam",
+            pays_destination="Cameroun", code_pays_destination="CM",
+            marchandise="Riz", poids_net=10.0, poids_brut=11.0, nombre_colis=100,
+            valeur_marchandise=500000.0, montant_freight=100000.0,
+        )
+        OrdreTransportService.marquer_livre(db=db, ot_id=second.id)
+        stats = TransportInternationalReportingService.statistiques(db)
+        assert stats["ordres_transport"]["total"] == 2
+        assert stats["ordres_transport"]["par_statut"]["planifie"] == 1
+        assert stats["ordres_transport"]["par_statut"]["livre"] == 1
+        assert stats["ordres_transport"]["tonnage_net"] == pytest.approx(34.0)
+
+
+class TestNouveauxEndpointsLecture:
+    """GET /statistiques, /cmr, /corridors-cemac : routes ajoutees pour sortir
+    les donnees write-only et fournir des KPI exacts a l'ecran."""
+
+    def test_statistiques_200_structure(self, client):
+        r = client.get("/api/v1/transport-international/statistiques")
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert "ordres_transport" in body
+        assert body["ordres_transport"]["total"] == 0
+        for key in ("carnets_tir", "cmr", "corridors_cemac"):
+            assert key in body
+
+    def test_cmr_liste_vide(self, client):
+        r = client.get("/api/v1/transport-international/cmr")
+        assert r.status_code == 200, r.text
+        assert r.json() == []
+
+    def test_corridors_liste_vide(self, client):
+        r = client.get("/api/v1/transport-international/corridors-cemac")
+        assert r.status_code == 200, r.text
+        assert r.json() == []
+
+    def test_statistiques_exige_auth(self, unauthenticated):
+        r = unauthenticated.get("/api/v1/transport-international/statistiques")
+        assert r.status_code in (401, 403)
