@@ -757,24 +757,78 @@ class EtatsFinanciersOHADAService:
         exercice_id: int,
         date_tafire: date
     ) -> TAFIRE:
-        """Générer le TAFIRE (Tableau Financier des Ressources et Emplois)"""
-        # Capacité d'autofinancement = Résultat net + Dotations aux amortissements
-        resultat_net = db.query(CompteResultatOHADADetaille).filter(
-            CompteResultatOHADADetaille.exercice_id == exercice_id
-        ).first()
-        
-        caf = resultat_net.resultat_net if resultat_net else 0
-        
+        """Générer le TAFIRE depuis les données réelles du grand livre.
+
+        CAF = Résultat net + Dotations amortissements (non cash).
+        Ressources/Emplois agrégés par classe de comptes dans le GL.
+        """
+        exercice = db.query(ExerciceComptable).filter(ExerciceComptable.id == exercice_id).first()
+        if not exercice:
+            raise ValueError("Exercice introuvable")
+
+        # Compte de résultat (dernier pour cet exercice)
+        cr = (
+            db.query(CompteResultatOHADADetaille)
+            .filter(CompteResultatOHADADetaille.exercice_id == exercice_id)
+            .order_by(CompteResultatOHADADetaille.id.desc())
+            .first()
+        )
+        resultat_net = float(cr.resultat_net or 0) if cr else 0.0
+        dotations = float(cr.dotations_amortissements or 0) if cr else 0.0
+        caf = resultat_net + dotations
+
+        # Helper GL aggregation: sum(debit|credit) for compte prefix in exercice periods
+        def _gl_sum(prefix: str, col) -> float:
+            return float(
+                db.query(func.coalesce(func.sum(col), 0))
+                .join(PlanComptableOHADA, GrandLivreLigne.compte_id == PlanComptableOHADA.id)
+                .filter(
+                    GrandLivreLigne.periode.like(f"{exercice.annee}-%"),
+                    PlanComptableOHADA.numero_compte.like(f"{prefix}%"),
+                )
+                .scalar()
+            )
+
+        # Ressources
+        cession_immobilisations = _gl_sum("775", GrandLivreLigne.credit)  # produits cessions
+        augmentation_capital = _gl_sum("101", GrandLivreLigne.credit)     # capital
+        nouveaux_emprunts = _gl_sum("165", GrandLivreLigne.credit)        # emprunts nouveaux
+        total_ressources = caf + cession_immobilisations + augmentation_capital + nouveaux_emprunts
+
+        # Emplois
+        investissements = _gl_sum("2", GrandLivreLigne.debit) - _gl_sum("2", GrandLivreLigne.credit)
+        investissements = max(0, investissements)  # acquisitions nettes
+        remboursement_emprunts = _gl_sum("165", GrandLivreLigne.debit)
+        distribution_dividendes = 0.0  # pas de compte dédié → honnêtement 0
+        variation_bfr = (
+            (_gl_sum("4", GrandLivreLigne.debit) - _gl_sum("4", GrandLivreLigne.credit))
+            - (_gl_sum("3", GrandLivreLigne.debit) - _gl_sum("3", GrandLivreLigne.credit))
+        )
+        augmentation_bfr = max(0, variation_bfr)  # positive = emploi
+        total_emplois = investissements + remboursement_emprunts + distribution_dividendes + augmentation_bfr
+
+        # Variation trésorerie = ressources - emplois
+        variation_tresorerie = total_ressources - total_emplois
+        treso_debut = _gl_sum("5", GrandLivreLigne.credit) - _gl_sum("5", GrandLivreLigne.debit)
+        # approx: solde class 5 avant la période
+        treso_fin = treso_debut + variation_tresorerie
+
         tafire = TAFIRE(
             exercice_id=exercice_id,
             date_tafire=date_tafire,
-            capacit_autofinancement=caf,
-            total_ressources=caf,
-            investissements_immobilisations=0,
-            total_emplois=0,
-            variation_tresorerie=caf,
-            tresorerie_debut=0,
-            tresorerie_fin=caf
+            capacit_autofinancement=round(caf, 2),
+            cession_immobilisations=round(cession_immobilisations, 2),
+            augmentation_capital=round(augmentation_capital, 2),
+            nouveaux_emprunts=round(nouveaux_emprunts, 2),
+            total_ressources=round(total_ressources, 2),
+            investissements_immobilisations=round(investissements, 2),
+            remboursement_emprunts=round(remboursement_emprunts, 2),
+            distribution_dividendes=round(distribution_dividendes, 2),
+            augmentation_besoin_fdr=round(augmentation_bfr, 2),
+            total_emplois=round(total_emplois, 2),
+            variation_tresorerie=round(variation_tresorerie, 2),
+            tresorerie_debut=round(treso_debut, 2),
+            tresorerie_fin=round(treso_fin, 2),
         )
         db.add(tafire)
         db.commit()

@@ -480,3 +480,16 @@ class EtatsPeriodesResponse(BaseModel):
     annee: int
     exercice_statut: str
     periodes: List[PeriodeClosingItem]
+
+
+# ============ ÉTATS FINANCIERS : LECTURE GLOBALE ============
+
+class DerniersEtatsFinanciersResponse(BaseModel):
+    """Retourne les derniers états financiers persistés pour un exercice.
+    Chaque champ est null si le document n'a pas encore été généré."""
+    exercice_id: int
+    annee: int
+    bilan: Optional[BilanOHADADetailleResponse] = None
+    compte_resultat: Optional[CompteResultatOHADADetailleResponse] = None
+    tafire: Optional[TAFIREResponse] = None
+    annexes: Optional[AnnexesOHDAResponse] = None

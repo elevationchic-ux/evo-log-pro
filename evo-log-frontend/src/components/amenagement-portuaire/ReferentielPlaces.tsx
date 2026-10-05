@@ -39,7 +39,8 @@ import { estAbsent, formaterDate, formaterMesure, humaniser, libelleEnum, saisie
 
 /** Message du serveur, tel quel (FastAPI rend ses refus dans `detail`). */
 function messageServeur(err: unknown, fallback: string): string {
-  const detail = (err as AxiosError)?.response?.data?.detail as unknown;
+  const ax = err as AxiosError;
+  const detail = (ax?.response?.data as { detail?: unknown } | undefined)?.detail;
   if (typeof detail === 'string' && detail.trim()) return detail.trim();
   if (Array.isArray(detail) && detail.length) {
     const premier = detail[0] as { msg?: string; loc?: (string | number)[] };
@@ -50,10 +51,12 @@ function messageServeur(err: unknown, fallback: string): string {
 }
 
 /** Champs du formulaire de place : la description de ce que la route accepte
- *  (PlacePortuaireCreate / PlacePortuaireUpdate). `requis` reproduit la
+ *  (PlacePortuaireCreate / PlacePortuaireUpdate). `name` est typé `keyof
+ *  PlacePortuaire` : un champ qui ne serait pas une colonne réelle de
+ *  ports_cameroun ne peut même pas s'écrire ici. `requis` reproduit la
  *  contrainte Pydantic pour désactiver l'envoi, pas pour la remplacer. */
 type ChampPlace = {
-  name: string;
+  name: keyof PlacePortuaire;
   label: string;
   labelEn: string;
   type: 'texte' | 'nombre' | 'date' | 'zone' | 'select' | 'booleen';
@@ -190,7 +193,7 @@ export default function ReferentielPlaces({
   const ouvrir = useCallback((ligne: PlacePortuaire | null) => {
     const init: Record<string, string> = {};
     CHAMPS_PLACE.forEach((c) => {
-      const v = ligne ? (ligne[c.name] as string | number | boolean | null) : null;
+      const v = ligne ? ligne[c.name] : null;
       init[c.name] = c.type === 'booleen' ? champTriplet(v) : valeurSaisie(v);
     });
     setSaisie(init);
