@@ -1,8 +1,8 @@
 """Migre une base VIERGE jusqu'a head et compte le RBAC reellement seme.
 
 Sert a ecrire dans docs/RBAC_ACCREDITATIONS.md des chiffres verifies plutot
-qu'herites : volume de permissions, roles, grants, et le sous-module `place`
-du departement amenagement.
+qu'herites, et a prouver que la chaine complete (001 -> 042) s'applique encore
+sur une base neuve.
 """
 import os
 import pathlib
@@ -10,7 +10,7 @@ import tempfile
 
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 RACINE = pathlib.Path(__file__).resolve().parents[1]
@@ -22,38 +22,47 @@ cfg = Config(str(RACINE / "alembic.ini"))
 cfg.set_main_option("script_location", str(RACINE / "migrations"))
 command.upgrade(cfg, "head")
 
-engine = create_engine(url)
-Session = sessionmaker(bind=engine)
-db = Session()
+db = sessionmaker(bind=create_engine(url))()
 
-scal = lambda q: db.execute(type("X", (), {}) is None or __import__("sqlalchemy").text(q)).scalar()  # noqa: E731
-from sqlalchemy import text  # noqa: E402
+
+def scal(q):
+    return db.execute(text(q)).scalar()
+
+
+colonnes = [r[0] for r in db.execute(text("PRAGMA table_info(permissions)")).all()]
+print("colonnes permissions :", colonnes)
 
 total_perms = scal("SELECT COUNT(*) FROM permissions")
 total_roles = scal("SELECT COUNT(*) FROM roles")
 total_grants = scal("SELECT COUNT(*) FROM role_permissions")
-domaines = db.execute(text("SELECT domain, COUNT(*) FROM permissions GROUP BY domain ORDER BY domain")).all()
-amen = [r[0] for r in db.execute(text("SELECT code FROM permissions WHERE domain='amenagement' ORDER BY code")).all()]
 print(f"permissions = {total_perms}, roles = {total_roles}, grants = {total_grants}")
+
+# Le domaine se déduit du préfixe du code (aucune colonne `domain` n'est garantie).
+domaines = db.execute(text(
+    "SELECT substr(code, 1, instr(code, '.') - 1) AS d, COUNT(*) FROM permissions "
+    "GROUP BY d ORDER BY COUNT(*) DESC")).all()
 print("domaines :", ", ".join(f"{d}={n}" for d, n in domaines))
+
+amen = [r[0] for r in db.execute(text(
+    "SELECT code FROM permissions WHERE code LIKE 'amenagement.%' ORDER BY code")).all()]
 print(f"codes amenagement = {len(amen)}")
+places = [c for c in amen if c.split(".")[1] == "place"]
+print("place :", places)
 
 from app.core.permissions import has_perm  # noqa: E402
 
 for nom in ("CHEF_AMENAGEMENT_PORTUAIRE", "INGENIEUR_AMENAGEMENT", "AUDITEUR",
             "CHEF_EXPLOITATION", "DIRECTEUR_FINANCIER"):
-    rid = db.execute(text(f"SELECT id FROM roles WHERE name='{nom}'")).scalar()
+    rid = scal(f"SELECT id FROM roles WHERE name='{nom}'")
     codes = [r[0] for r in db.execute(text(
         "SELECT p.code FROM role_permissions rp JOIN permissions p ON p.id=rp.permission_id "
         f"WHERE rp.role_id={rid}")).all()]
     user = type("U", (), {"id": 1, "company_id": None, "role": nom, "level": 2,
                           "permissions": codes})()
-    tests = {
-        "place.read": has_perm(user, "amenagement.place.read"),
-        "place.create": has_perm(user, "amenagement.place.create"),
-        "place.modify": has_perm(user, "amenagement.place.modify"),
+    rendu = {
+        a: bool(has_perm(user, f"amenagement.place.{a}")) for a in ("read", "create", "modify")
     }
-    print(f"{nom:28} liens_amenagement={len([c for c in codes if c.startswith('amenagement.')]):3} {tests}")
+    liens = len([c for c in codes if c.startswith("amenagement.")])
+    print(f"{nom:28} liens_amenagement={liens:3} place={rendu}")
 
 db.close()
-print(f"\nbase vierge : {db_file}")
