@@ -169,6 +169,22 @@ def mettre_a_jour_carnet(
 
 
 # ============ CMR ============
+@router.get("/cmr", response_model=List[CMRResponse])
+def lister_cmr(
+    statut: Optional[str] = None,
+    offset: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("transport.mission.read")),
+):
+    """Liste des lettres de voiture CMR.
+
+    La route POST /cmr existait mais aucune lecture : les CMR émises étaient
+    irrécupérables, et l'écran affichait une bannière « CMR » sans jamais
+    pouvoir la renseigner. Ce GET rend la section réellement sourcée."""
+    return CMRService.lister(db, statut=statut, offset=offset, limit=limit)
+
+
 @router.post("/cmr", response_model=CMRResponse, status_code=status.HTTP_201_CREATED)
 def emettre_cmr(
     cmr: CMRCreate,

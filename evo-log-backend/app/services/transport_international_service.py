@@ -670,6 +670,42 @@ class TransportInternationalReportingService:
             }
         }
 
+    @staticmethod
+    def statistiques(db: Session) -> Dict[str, Any]:
+        """Agrégats RÉELS du transport international, calculés en base.
+
+        L'écran affichait des KPI obtenus par `Array.length` sur une tranche de
+        50 lignes : « 50 » pouvait s'afficher alors que 500 ordres existent. Ici on
+        compte et somme côté SQL — les totaux sont exacts quelle que soit la
+        volumétrie. Aucune valeur inventée : tout vient des tables."""
+        def _count(model):
+            return db.query(func.count(model.id)).scalar() or 0
+
+        par_statut_rows = (
+            db.query(OrdreTransport.statut, func.count(OrdreTransport.id))
+            .group_by(OrdreTransport.statut)
+            .all()
+        )
+        par_statut = {
+            (s.value if hasattr(s, "value") else str(s)): int(n)
+            for s, n in par_statut_rows
+        }
+        total_ot = _count(OrdreTransport)
+        tonnage_net = float(
+            db.query(func.coalesce(func.sum(OrdreTransport.poids_net), 0)).scalar() or 0
+        )
+
+        return {
+            "ordres_transport": {
+                "total": total_ot,
+                "par_statut": par_statut,
+                "tonnage_net": tonnage_net,
+            },
+            "carnets_tir": _count(CarnetTIR),
+            "cmr": _count(CMR),
+            "corridors_cemac": _count(CorridorCEMAC),
+        }
+
 
 class TMSAdvancedOptimizerService:
     """Advanced TMS algorithms: VRP Tour Optimization, CEMAC Corridors, and TCO Fleet analytics"""
