@@ -44,6 +44,10 @@ def suspects(texte):
 
 
 def main():
+    # La console Windows est en cp1252 : un extrait signalé contient justement le
+    # texte pourri que l'on traque (emoji, accents doubles). Sans réencodage, le
+    # garde meurt d'un UnicodeEncodeError au milieu de son rapport.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     problems = 0
     racines = [(RACINE / d, (".py",)) for d in DOSSIERS]
     if FRONT.exists():
