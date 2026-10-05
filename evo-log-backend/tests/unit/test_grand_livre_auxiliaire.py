@@ -109,7 +109,7 @@ def test_auxiliaire_plage_totale(client, db, plan):
     assert res.status_code == 200
     lignes = res.json()
     assert len(lignes) == 2
-    total_debit = sum(l["debit"] for l in lignes)
+    total_debit = sum(float(l["debit"]) for l in lignes)
     assert total_debit == 400_000.0
 
 
@@ -139,4 +139,4 @@ def test_auxiliaire_ne_melange_pas_les_comptes(client, db, plan):
     lignes = res.json()
     assert len(lignes) == 1
     assert lignes[0]["compte_id"] == c["7061"].id
-    assert lignes[0]["credit"] == 120_000.0
+    assert float(lignes[0]["credit"]) == 120_000.0
