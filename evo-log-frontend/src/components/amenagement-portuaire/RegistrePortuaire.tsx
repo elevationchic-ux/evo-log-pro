@@ -216,8 +216,8 @@ function ChampSaisie({
       {champ.depuisPlaces && places.length === 0 && (
         <span className="mt-1 block text-[11px] text-amber-300/80">
           {lang === 'en'
-            ? 'Port places come from the national registry: nothing is proposed until they are recorded there.'
-            : 'Les places viennent du référentiel national : rien n\u2019est proposé tant qu\u2019elles n\u2019y sont pas enregistrées.'}
+            ? 'This place comes from the national registry (ports_cameroun), which this screen does not feed. Until a port is declared there, no value can be proposed: record it under “Port place registry” in the control center.'
+            : 'Les places viennent du référentiel national (ports_cameroun), que cet écran ne remplit pas : rien n\u2019est proposé tant qu\u2019une place n\u2019y est pas déclarée. Enregistrez-la depuis le « Référentiel des places portuaires » du centre de pilotage.'}
         </span>
       )}
     </label>

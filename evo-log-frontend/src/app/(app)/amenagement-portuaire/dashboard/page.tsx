@@ -149,6 +149,10 @@ export default function AmenagementPortuaireDashboardPage() {
             )}
           </p>
         </div>
+        {/* Sans amenagement.projet.read la synthèse est fermée, mais le
+            référentiel des places reste un droit propre (place.read) : un
+            exploitant peut le consulter et le corriger sans voir les agrégats. */}
+        <ReferentielPlaces places={places} />
         <GrilleRegistres can={can} t={t} lang={lang} />
       </ModuleLayout>
     );
