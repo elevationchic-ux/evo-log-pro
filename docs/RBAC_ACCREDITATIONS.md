@@ -212,9 +212,11 @@ Les rôles de niveau 0/1 (SuperAdmin, Admin entreprise) ne reçoivent **aucune**
 permission granulaire semée : ils bypassent la granularité dans le moteur.
 
 > Volume (base **vierge migrée jusqu'à `head`**, vérifié par
-> `scripts/scratch_taille_rbac_vierge.py`) : **388 permissions**, **18 rôles**,
-> **174 grants** de rôle à permission. Dont 55 lignes du domaine
-> `amenagement` (53 codes du catalogue + 2 jokers littéraux).
+> `evo-log-backend/scripts/audit_rbac_volume.py`) : **388 permissions**,
+> **18 rôles**, **174 grants** de rôle à permission. Dont 55 lignes du domaine
+> `amenagement` (53 codes du catalogue + 2 jokers littéraux). Les fichiers
+> sources sont contrôlés par `evo-log-backend/scripts/check_encodage.py`
+> (BOM, U+FFFD, sur-encodage), qui sinon laisserait des `detail` d'API illisibles.
 
 ---
 
