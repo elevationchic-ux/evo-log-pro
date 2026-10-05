@@ -190,6 +190,10 @@ def _place_en_bref(p: PortCameroun) -> Dict[str, Any]:
 def nomenclatures(user: User = Depends(require_perm("amenagement.projet.read"))):
     """Vocabulaire reel du circuit camerounais, tel que declare (aucune valeur inventee)."""
     return {
+        # Le referentiel des places est une table nationale, pas un enum du
+        # departement : sa nomenclature vient de TypePort (modele partage), pour
+        # que le formulaire de declaration n'ait jamais un type de port en dur.
+        "type_port": _enum_catalog(TypePort),
         "type_schema": _enum_catalog(TypeSchema),
         "statut_schema": _enum_catalog(StatutSchema),
         "type_projet": _enum_catalog(TypeProjet),
