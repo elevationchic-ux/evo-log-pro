@@ -64,6 +64,9 @@ Ce document contient les instructions et commandes de référence pour l'utilisa
 1. **Jamais de données factices en dur** : Tous les seeders créent de réelles entités métiers en base de données.
 2. **Mots de passe par défaut** : Le mot de passe initial des utilisateurs de test est `admin123`. La politique `must_change_password` impose un renouvellement sous 90 jours.
 3. **Résilience Docker Railway** : Le `Dockerfile` intègre la règle d'auto-aplatissement `cp -rn /app/EVO-LOG-backend/* /app/` pour fonctionner aussi bien depuis la racine `/` que depuis le sous-dossier `/EVO-LOG-backend`.
+4. **Un service tiers non branché répond `501`, jamais un simulacre** : quand l'étape dépend d'un organisme extérieur (visa ministériel, COLIFE, guichet douanier, exutoire de rejet), l'endpoint enregistre la *preuve* saisie par l'agent (date, référence, autorité) dans des colonnes dédiées et répond `HTTP 501` sur l'acte de télétransmission. Modèle de référence : `app/routers/v1/amenagement_portuaire.py`.
+5. **Encodage avant poussée** : `python scripts/check_encodage.py` (backend *et* frontend). Un texte sur-encodé reste du UTF-8 valide et passe donc inaperçu : il double les accents à l'écran et dans les résumés OpenAPI.
+6. **Chiffres des documentation** : les comptages annoncés (« 323 routes », « 117 endpoints », « 153 pages ») sont des instantanés. On les re-mesure (`scripts/cartographie_routeur.py --total`, `next build`) au lieu de les recopier.
 
 ---
 
