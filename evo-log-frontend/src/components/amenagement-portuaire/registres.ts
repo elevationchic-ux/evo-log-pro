@@ -169,7 +169,9 @@ export const registreProjets: ConfigRegistre = {
   lister: (params) => amenagementAPI.listProjets(params),
   creer: (data) => amenagementAPI.createProjet(data),
   modifier: (id, data) => amenagementAPI.updateProjet(id, data),
-  supprimer: (id) => amenagementAPI.deleteProjet(id),
+  // Aucun bouton de suppression sèche : la route DELETE du serveur exige un
+  // MOTIF (abandon, repositionnement…) et déclare le retrait sans effacer.
+  // Voir l'action « Sortir du portefeuille » ci-dessous.
   unicite: 'code_projet',
   colonnes: [
     { name: 'code_projet', label: 'Code', labelEn: 'Code', type: 'code', essence: true },
@@ -237,7 +239,7 @@ export const registreProjets: ConfigRegistre = {
       champs: [
         { name: 'avancement_physique_pct', label: 'Avancement physique (%)', labelEn: 'Physical progress (%)', type: 'nombre', min: 0, max: 100 },
         { name: 'avancement_financier_pct', label: 'Avancement financier (%)', labelEn: 'Financial progress (%)', type: 'nombre', min: 0, max: 100 },
-        { name: 'date_releve', label: 'Date du relevé', labelEn: 'Survey date', type: 'date', aide: 'Date du PV, jamais la date de today\u2019s screen.' },
+        { name: 'date_releve', label: 'Date du relevé', labelEn: 'Survey date', type: 'date', aide: 'Date du PV de chantier, jamais la date de l’écran.' },
         { name: 'source_reference', label: 'Pièce source', labelEn: 'Source document', type: 'texte', aide: 'PV de chantier, décompte…' },
       ],
       executer: (id, v) => amenagementAPI.saisirAvancement(id, {
@@ -248,6 +250,22 @@ export const registreProjets: ConfigRegistre = {
       }),
       succes: 'Relevé d\u2019avancement enregistré.',
       succesEn: 'Progress survey recorded.',
+    },
+    {
+      id: 'retrait',
+      libelle: 'Sortir du portefeuille',
+      libelleEn: 'Withdraw from portfolio',
+      action: 'delete',
+      avertissement:
+        'Le serveur marque le projet « abandonné » et conserve la ligne avec votre motif : aucune opération n’est effacée de l’historique.',
+      avertissementEn:
+        'The server marks the project “abandoned” and keeps the line with your reason: no operation is erased from history.',
+      champs: [
+        { name: 'motif', label: 'Motif du retrait', labelEn: 'Withdrawal reason', type: 'texte', requisCreation: true, large: true, aide: 'Abandon, repositionnement, double emploi… Trois caractères au minimum, exigés par la route.' },
+      ],
+      executer: (id, v) => amenagementAPI.deleteProjet(id, { motif: req(v, 'motif') }),
+      succes: 'Projet retiré de la programmation, motif enregistré.',
+      succesEn: 'Project withdrawn from the programme, reason recorded.',
     },
   ],
 };
