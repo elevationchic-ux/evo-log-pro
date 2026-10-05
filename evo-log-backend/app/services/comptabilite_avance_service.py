@@ -817,7 +817,7 @@ class ClotureService:
     @staticmethod
     def etats_periodes(
         db: Session,
-        exercice_id: int,
+        exercice_id: Optional[int] = None,
         annee: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Etat reel de chaque periode de l'exercice, pour piloter la cloture.
@@ -827,12 +827,28 @@ class ClotureService:
         balance de verification equilibree a ete generee et persistee pour elle.
         L'ancienne page frontend fabriquait la liste depuis `new Date()` ; cet
         endpoint expose l'etat veritable.
-        """
-        exercice = db.query(ExerciceComptable).filter(
-            ExerciceComptable.id == exercice_id
-        ).first()
+
+        Si `exercice_id` est absent, l'exercice OUVERT le plus recent est resolu
+        cote serveur (la page n'a plus a coder un identifiant en dur)."""
+        if exercice_id is not None:
+            exercice = db.query(ExerciceComptable).filter(
+                ExerciceComptable.id == exercice_id
+            ).first()
+        else:
+            exercice = (
+                db.query(ExerciceComptable)
+                .filter(ExerciceComptable.statut == "ouvert")
+                .order_by(ExerciceComptable.annee.desc())
+                .first()
+            )
+            if not exercice:
+                exercice = (
+                    db.query(ExerciceComptable)
+                    .order_by(ExerciceComptable.annee.desc())
+                    .first()
+                )
         if not exercice:
-            raise ValueError("Exercice non trouvé")
+            raise ValueError("Aucun exercice comptable trouvé")
 
         annee_cible = annee or exercice.annee
 

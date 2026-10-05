@@ -292,7 +292,7 @@ export default function AmenagementPortuaireDashboardPage() {
 
           <Bloc
             titre={t('Domaine public', 'Public domain')}
-            lien="/amenagement-portuaire/titres-domaniaux"
+            tcode="KAMT_DOM"
             indicateurs={[
               { libelle: t('Titres en vigueur', 'Valid titles'), ind: { genre: 'compteur', valeur: s.domaine?.titres_actifs } },
               { libelle: t('Titres échus', 'Expired titles'), ind: { genre: 'compteur', valeur: s.domaine?.titres_expire } },
