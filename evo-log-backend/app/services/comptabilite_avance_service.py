@@ -1181,7 +1181,7 @@ class TVAService:
             tva_deductible=calc["tva_deductible_immo"] + calc["tva_deductible_charges"],
             tva_a_payer=calc["net_tva_payer"],
             devise="XAF",
-            statut=StatutTaxe.DECLAREE,
+            statut=StatutTaxe.DUE,
             notes=f"Valide par {valide_par}. Transmission DGI a effectuer manuellement (e-bulletin non integre).",
         )
         db.add(declaration)
