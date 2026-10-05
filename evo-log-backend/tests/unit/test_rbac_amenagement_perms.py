@@ -323,7 +323,7 @@ def _routes_openapi():
 
 def test_toutes_les_routes_exigent_une_identite(unauthenticated):
     routes = _routes_openapi()
-    assert len(routes) == 58, f"attendu 58 operations, trouve {len(routes)}"
+    assert len(routes) == 60, f"attendu 60 operations, trouve {len(routes)}"
     for method, path in routes:
         url = path.replace("{ident}", "1")
         r = unauthenticated.request(method, url)
@@ -385,7 +385,9 @@ def test_le_vocabulaire_publie_par_nomenclatures_est_reel(client_chef):
     r = client_chef.get(f"{BASE}/nomenclatures")
     assert r.status_code == 200, r.text
     body = r.json()
-    assert len(body) == 18, sorted(body)
+    # 19 vocabulaires : les 18 du circuit + type_port, publie parce que la
+    # declaration d'une place ne doit jamais proposer un type en dur.
+    assert len(body) == 19, sorted(body)
     for cle, items in body.items():
         assert items, f"vocabulaire {cle} vide"
         for it in items:
