@@ -81,7 +81,7 @@ DOMAINS: Dict[str, Dict] = {
     "amenagement_portuaire": {
         "label": "Amenagement portuaire & domaine public",
         "modules": {
-            "amenagement": {"label": "Amenagement portuaire (Douala, Kribi, Limbe)", "sub_modules": {"schema_directeur": ["read", "create", "modify", "approve", "export"], "projet": ACTIONS, "programmation": ["read", "create", "modify", "approve", "export"], "marche": ACTIONS, "titre_domanial": ACTIONS, "concession": ["read", "create", "modify", "approve", "export"], "infrastructure": ACTIONS, "dragage": ACTIONS, "autorisation": ["read", "create", "modify", "approve", "export"]}},
+            "amenagement": {"label": "Amenagement portuaire (Douala, Kribi, Limbe)", "sub_modules": {"place": ["read", "create", "modify"], "schema_directeur": ["read", "create", "modify", "approve", "export"], "projet": ACTIONS, "programmation": ["read", "create", "modify", "approve", "export"], "marche": ACTIONS, "titre_domanial": ACTIONS, "concession": ["read", "create", "modify", "approve", "export"], "infrastructure": ACTIONS, "dragage": ACTIONS, "autorisation": ["read", "create", "modify", "approve", "export"]}},
         },
     },
     "transport": {
