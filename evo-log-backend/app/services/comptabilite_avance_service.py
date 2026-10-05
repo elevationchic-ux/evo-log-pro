@@ -1,5 +1,6 @@
 """Comptabilité avancée service - Journaux auxiliaires, lettrage, grand livre, balance"""
 from datetime import datetime, date
+from decimal import Decimal
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func, case
@@ -298,7 +299,45 @@ class LettrageService:
 
 class GrandLivreService:
     """Service du grand livre général et auxiliaires"""
-    
+
+    @staticmethod
+    def mouvements_par_compte(
+        db: Session,
+        date_debut: Optional[date] = None,
+        date_fin: Optional[date] = None,
+        journal: Optional[str] = None,
+    ) -> Dict[int, Dict[str, Decimal]]:
+        """Soldes reels par compte agreges depuis les lignes du grand livre.
+
+        Source de verite : `grand_livre_lignes`, materialisees ligne par ligne
+        par PieceComptableService au moment de la saisie de la piece en partie
+        double. On n'aggregate JAMAIS l'en-tete plat (`compte_id` est nul et
+        `debit/credit` y portent les TOTAUX de la piece, pas un compte).
+
+        Retourne {compte_id: {"debit": ..., "credit": ...}} pour la periode
+        facultative (et un eventuel code journal).
+        """
+        colonnes = [
+            GrandLivreLigne.compte_id,
+            func.coalesce(func.sum(GrandLivreLigne.debit), 0),
+            func.coalesce(func.sum(GrandLivreLigne.credit), 0),
+        ]
+        requete = db.query(*colonnes)
+        if date_debut is not None:
+            requete = requete.filter(GrandLivreLigne.date_ecriture >= date_debut)
+        if date_fin is not None:
+            requete = requete.filter(GrandLivreLigne.date_ecriture <= date_fin)
+        if journal:
+            requete = requete.filter(GrandLivreLigne.journal == journal)
+        requete = requete.group_by(GrandLivreLigne.compte_id)
+        resultats = {}
+        for compte_id, debit, credit in requete.all():
+            resultats[compte_id] = {
+                "debit": Decimal(str(debit or 0)),
+                "credit": Decimal(str(credit or 0)),
+            }
+        return resultats
+
     @staticmethod
     def generer_grand_livre_general(
         db: Session,
@@ -306,35 +345,25 @@ class GrandLivreService:
         date_debut: date,
         date_fin: date
     ) -> List[GrandLivreLigne]:
-        """Générer le grand livre général pour une période"""
-        # Récupérer toutes les écritures validées de la période
-        ecritures = db.query(EcritureComptableNew).filter(
-            and_(
-                EcritureComptableNew.exercice_id == exercice_id,
-                EcritureComptableNew.date_ecriture >= date_debut,
-                EcritureComptableNew.date_ecriture <= date_fin,
-                EcritureComptableNew.valider == True
+        """Grand livre general pour la periode : LECTURE des lignes reellement
+        comptabilisees (materialisees par les pieces en partie double).
+
+        L'ancienne version RE-CREAIT des `GrandLivreLigne` depuis l'en-tete plat
+        des ecritures ; or cet en-tete porte desormais `compte_id = None` et des
+        totaux de piece : ces inserations violaient la contrainte NOT NULL et
+        doublaient le grand livre. La piece est la seule source d'ecriture du
+        grand livre ; cette methode ne fait plus qu'exposer l'existant."""
+        return (
+            db.query(GrandLivreLigne)
+            .filter(
+                and_(
+                    GrandLivreLigne.date_ecriture >= date_debut,
+                    GrandLivreLigne.date_ecriture <= date_fin,
+                )
             )
-        ).all()
-        
-        lignes = []
-        for ecriture in ecritures:
-            ligne = GrandLivreLigne(
-                compte_id=ecriture.compte_id,
-                ecriture_id=ecriture.id,
-                date_ecriture=ecriture.date_ecriture,
-                libelle=ecriture.libelle,
-                debit=ecriture.debit,
-                credit=ecriture.credit,
-                devise=ecriture.devise,
-                journal=ecriture.journal,
-                periode=ecriture.periode
-            )
-            lignes.append(ligne)
-        
-        db.add_all(lignes)
-        db.commit()
-        return lignes
+            .order_by(GrandLivreLigne.date_ecriture.asc(), GrandLivreLigne.id.asc())
+            .all()
+        )
     
     @staticmethod
     def grand_livre_auxiliaire(
