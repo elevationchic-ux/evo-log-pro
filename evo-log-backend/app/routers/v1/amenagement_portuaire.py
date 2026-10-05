@@ -1,4 +1,4 @@
-﻿"""Routeur du departement Amenagement portuaire (Douala, Kribi, Limbe).
+"""Routeur du departement Amenagement portuaire (Douala, Kribi, Limbe).
 
 Ce que fait cette API : tenir le registre des actes d'amenagement du domaine
 portuaire â€” schemas directeurs, programmation (fiche technique, visa de
