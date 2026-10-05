@@ -929,6 +929,12 @@ export const amenagementAPI = {
   // Référentiels pilotés par le serveur
   getNomenclatures: () => apiClient.get(`${AMGT}/nomenclatures`),
   getPlaces: () => apiClient.get(`${AMGT}/places`),
+  // Déclaration dans le référentiel national : code, nom et type_port sont exigés
+  // (422 sinon), tout le reste reste NULL jusqu'au document officiel.
+  createPlace: (data: unknown) => apiClient.post(`${AMGT}/places`, data),
+  // Une place ne se supprime pas : ports_cameroun est partagé (terminaux,
+  // tarification, périmètres). On sort du périmètre via est_actif = false.
+  updatePlace: (id: number, data: unknown) => apiClient.put(`${AMGT}/places/${id}`, data),
   getSynthese: (portId?: number) =>
     apiClient.get(`${AMGT}/synthese`, { params: portId ? { port_id: portId } : {} }),
 
