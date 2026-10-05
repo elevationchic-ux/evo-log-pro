@@ -45,10 +45,13 @@ def suspects(texte):
 
 def main():
     problems = 0
-    for dossier in DOSSIERS:
-        for p in sorted((RACINE / dossier).rglob("*.py")):
+    racines = [(RACINE / d, (".py",)) for d in DOSSIERS]
+    if FRONT.exists():
+        racines.append((FRONT, (".ts", ".tsx")))
+    for base, extensions in racines:
+        for p in sorted(x for x in base.rglob("*") if x.suffix in extensions and x.is_file()):
             raw = p.read_bytes()
-            rel = p.relative_to(RACINE)
+            rel = p.relative_to(RACINE.parent)
             if raw.startswith(BOM):
                 print(f"{rel}: BOM UTF-8 (corriger l'outil qui a ecrit le fichier)")
                 problems += 1
