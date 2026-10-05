@@ -74,7 +74,7 @@ _JSON_FIELDS = {
 }
 
 
-# â”€â”€â”€ Utilitaires â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── Utilitaires ─────────────────────────────────────────────────────────────
 
 def _load_json(value: Any) -> Any:
     if value is None:
@@ -184,7 +184,7 @@ def _place_en_bref(p: PortCameroun) -> Dict[str, Any]:
     }
 
 
-# â”€â”€â”€ 0. Nomenclatures & perimetre â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── 0. Nomenclatures & perimetre ────────────────────────────────────────────
 
 @router.get("/nomenclatures", summary="Vocabulaire metier du departement")
 def nomenclatures(user: User = Depends(require_perm("amenagement.projet.read"))):
@@ -789,7 +789,7 @@ def soumettre_colife(ident: int, user: User = Depends(require_perm("amenagement.
     )
 
 
-# â”€â”€â”€ 5. Titres domaniaux â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── 5. Titres domaniaux ─────────────────────────────────────────────────────
 
 @router.get("/titres-domaniaux", response_model=List[AutorisationDomanialeOut],
             summary="Registre des occupations du domaine portuaire")
@@ -894,7 +894,7 @@ def decider_titre(
     return _to_out(obj)
 
 
-# â”€â”€â”€ 6. Concessions & contrats d'exploitation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── 6. Concessions & contrats d'exploitation ────────────────────────────────
 
 @router.get("/concessions", response_model=List[ConcessionPortuaireOut],
             summary="Contrats de concession, affermage, BOT/AOT")
@@ -999,7 +999,7 @@ def reverser_concession(ident: int, user: User = Depends(require_perm("amenageme
     )
 
 
-# â”€â”€â”€ 7. Inventaire des infrastructures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── 7. Inventaire des infrastructures ───────────────────────────────────────
 
 @router.get("/infrastructures", response_model=List[InfrastructurePortuaireOut],
             summary="Inventaire technique du domaine amenage")
@@ -1104,7 +1104,7 @@ def desactiver_infrastructure(
     return {"id": obj.id, "code": obj.code, "message": "Ouvrage sorti de l'inventaire actif."}
 
 
-# â”€â”€â”€ 8. Dragage & chenal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── 8. Dragage & chenal ─────────────────────────────────────────────────────
 
 @router.get("/dragage", response_model=List[DragageOut], summary="Campagnes de dragage")
 def lister_dragages(
@@ -1196,7 +1196,7 @@ def demande_exutoire(ident: int, user: User = Depends(require_perm("amenagement.
     )
 
 
-# â”€â”€â”€ 9. Autorisations administratives â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── 9. Autorisations administratives ────────────────────────────────────────
 
 @router.get("/autorisations", response_model=List[AutorisationTravauxOut],
             summary="Registre des autorisations et visas administratifs")
