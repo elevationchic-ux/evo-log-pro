@@ -30,6 +30,7 @@ RACINE = pathlib.Path(__file__).resolve().parents[1]
 # Le frontend porte aussi des libelles francais : un fichier .tsx sur-encode
 # afficherait des accents doubles a l'agent, pas seulement dans une reponse d'API.
 FRONT = RACINE.parent / "evo-log-frontend" / "src"
+DOCS = RACINE.parent / "docs"
 DOSSIERS = ("app", "migrations", "tests", "scripts")
 BOM = b"\xef\xbb\xbf"
 
@@ -98,14 +99,10 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     mode_corriger = "--corriger" in sys.argv
     problems = 0
-    racines = [(RACINE / d, (".py",)) for d in DOSSIERS]
-    if FRONT.exists():
-        racines.append((FRONT, (".ts", ".tsx")))
-    for base, extensions in racines:
-        for p in sorted(x for x in base.rglob("*") if x.suffix in extensions and x.is_file()):
-            raw = p.read_bytes()
-            rel = p.relative_to(RACINE.parent)
-            if raw.startswith(BOM):
+    for p in fichiers_audites():
+        raw = p.read_bytes()
+        rel = p.relative_to(RACINE.parent)
+                if raw.startswith(BOM):
                 if mode_corriger:
                     p.write_bytes(raw[len(BOM):])
                     print(f"{rel}: BOM UTF-8 retire")
