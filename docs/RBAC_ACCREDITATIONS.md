@@ -199,7 +199,7 @@ Niveau **2** = chef de département, **3** = opérateur.
 | `DISPATCHER` | 3 | `transport.mission.read/create`, `transport.dispatch.read/create/modify`, `parc.flotte.read` |
 | `ADMIN_RH` | 2 | `rh.*.*`, `paie.*.read`, `paie.bulletin.create`, `conges.*.*` |
 | `QHSE` | 3 | `gouvernance.*.read`, `transport.*.read`, `parc.documents.read` |
-| `CHEF_AMENAGEMENT_PORTUAIRE` | 2 | `amenagement.*.*` ( joker unique en base) — instruit, approuve et supprime au sein du département |
+| `CHEF_AMENAGEMENT_PORTUAIRE` | 2 | `amenagement.*.*` ( joker unique en base)  instruit, approuve et supprime au sein du département |
 | `INGENIEUR_AMENAGEMENT` | 3 | `amenagement.*.read` + `create`/`modify` sur les dix sous-modules, `place.create/modify` ; **aucun** `approve`, aucune suppression |
 
 Trois rôles extérieurs au département reçoivent des droits `amenagement.*`

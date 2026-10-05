@@ -487,7 +487,7 @@ except ImportError as e:
     raise
 
 # Departement autonome Amenagement portuaire (Douala, Kribi, Limbe) : maitrise
-# d'ouvrage du domaine portuaire — schemas directeurs, programmation DTO,
+# d'ouvrage du domaine portuaire  schemas directeurs, programmation DTO,
 # marches et contrats PPP, titres domaniaux, concessions, ouvrages, dragage,
 # autorisations environnementales. Ces tables portent le domaine public
 # national (aucune company_id, comme ports_cameroun) : l'acces est donc purgue

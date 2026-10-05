@@ -401,7 +401,7 @@ class AnnexesGenererRequest(BaseModel):
 
 # Requêtes de GÉNÉRATION : le client ne fournit que les clés de contexte
 # (exercice / date). Les montants sont recalculés côté serveur depuis le
-# grand livre — le frontend ne peut pas (et ne doit pas) les connaître ni
+# grand livre  le frontend ne peut pas (et ne doit pas) les connaître ni
 # les inventer. Réutiliser le schéma « Create » complet (avec resultat_net,
 # variation_tresorerie obligatoires) faisait échouer le bouton « Générer »
 # en 422.

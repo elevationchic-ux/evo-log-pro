@@ -2,7 +2,7 @@
 
 Contexte : le module promet (docstring de son routeur, lignes 14-16) que les
 referentiels nationaux sont « alimentes par les agents ». Or ``ports_cameroun``
-n'etait ecrit par AUCUNE route de l'application — public_api ne fait que la
+n'etait ecrit par AUCUNE route de l'application  public_api ne fait que la
 lire. Resultat : les neuf registres du departement ne pouvaient rattacher
 aucune ligne a une place portuaire, et le menu « Place » restait vide.
 

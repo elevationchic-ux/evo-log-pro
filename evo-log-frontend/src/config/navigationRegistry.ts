@@ -297,7 +297,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         icon: Building2,
         badge: 'Patrimoine',
         tcode: 'KAMT_INF',
-        description: 'Ouvrages bâtis : quais, terre-pleins, digues — cotes, portance, inspections et état structural',
+        description: 'Ouvrages bâtis : quais, terre-pleins, digues  cotes, portance, inspections et état structural',
         businessProcess: 'Inventaire du patrimoine',
         requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'AUDITEUR', 'CHEF_EXPLOITATION']
       },

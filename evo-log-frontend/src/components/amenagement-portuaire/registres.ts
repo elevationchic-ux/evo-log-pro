@@ -875,7 +875,7 @@ export const registreDragage: ConfigRegistre = {
   aide:
     'Le volume facturé peut différer du volume mesuré : les deux colonnes restent séparées et le logiciel ne les réconcilie pas, c’est au décompte de l’ingénieur de le faire. Une profondeur « obtenue » sans relevé bathymétrique consigné reste non enregistrée.',
   aideEn:
-    'Billed volume may differ from measured volume: the two columns stay separate and the software does not reconcile them — that is the engineer’s payment certificate job. An “achieved” depth without a recorded bathymetric survey stays “not recorded”.',
+    'Billed volume may differ from measured volume: the two columns stay separate and the software does not reconcile them  that is the engineer’s payment certificate job. An “achieved” depth without a recorded bathymetric survey stays “not recorded”.',
   lister: (params) => amenagementAPI.listDragages(params),
   creer: (data) => amenagementAPI.createDragage(data),
   modifier: (id, data) => amenagementAPI.updateDragage(id, data),

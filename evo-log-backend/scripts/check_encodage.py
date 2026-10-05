@@ -2,7 +2,7 @@
 
 Pourquoi ce script existe : sous Windows PowerShell 5, `Set-Content -Encoding
 UTF8` ecrit un BOM, et une relecture de fichier UTF-8 en cp1252 produit du texte
-sur-encode — un « e » accentue devient deux caracteres (Ã puis ©), un tiret de
+sur-encode  un « e » accentue devient deux caracteres (Ã puis ©), un tiret de
 separator de section devient trois (â, ” et €). Ce texte EST du UTF-8 valide :
 un simple « decode-t-il ? » ne le voit pas, et il se retrouve alors dans les
 summary OpenAPI et les messages `detail` servis aux agents, a l'ecran de l'agent
@@ -20,7 +20,7 @@ Usage :
 
 Ce qui n'est PAS reparable automatiquement : un caractere de remplacement U+FFFD
 signale que l'information etait deja perdue a l'ecriture (un emoji tronque). Il
-faut revenir au document source, pas le deviner — le script le laisse donc sur
+faut revenir au document source, pas le deviner  le script le laisse donc sur
 sa faim et le compte.
 """
 import pathlib
@@ -125,7 +125,7 @@ def main():
                     print(f"{rel}: {nb} ligne(s) reencodee(s)")
                 texte = p.read_text(encoding="utf-8")
             for ligne, motif, extrait in suspects(texte):
-                print(f"{rel}:{ligne}: {motif} — {extrait!r}")
+                print(f"{rel}:{ligne}: {motif}  {extrait!r}")
                 problems += 1
     if problems:
         print(f"\n{problems} signalement(s). Reencoder proprement avant de pousser.")

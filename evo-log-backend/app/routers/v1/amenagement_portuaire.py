@@ -1,7 +1,7 @@
 """Routeur du departement Amenagement portuaire (Douala, Kribi, Limbe).
 
 Ce que fait cette API : tenir le registre des actes d'amenagement du domaine
-portuaire — schemas directeurs, programmation (fiche technique, visa de
+portuaire  schemas directeurs, programmation (fiche technique, visa de
 maturité, PIP/CDMT, engagement), marches/PPP, titres
 domaniaux, concessions, ouvrages, dragages, autorisations environnementales.
 
@@ -61,7 +61,7 @@ from app.schemas.amenagement_portuaire import (
 router = APIRouter(tags=["Amenagement portuaire"])
 
 # Perimetre d'etude du departement : les trois places a grand gabarit dont la
-# tutelle d'amenagement est concernee. Ce n'est PAS une donnee metier — c'est
+# tutelle d'amenagement est concernee. Ce n'est PAS une donnee metier  c'est
 # un filtre applique aux lignes reellement presentes dans ports_cameroun. Une
 # place absente de la table (ou inactive) n'apparait simplement pas.
 PLACES_DU_DEPARTEMENT = ("DOU", "KRI", "LIM")
@@ -140,7 +140,7 @@ def _check_unique(db: Session, model, field: str, value: Any, label: str,
     if q.first():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"{label} « {value} » existe deja — corrigez la reference au lieu d'en creer une seconde.",
+            detail=f"{label} « {value} » existe deja  corrigez la reference au lieu d'en creer une seconde.",
         )
 
 
@@ -149,7 +149,7 @@ def _enum_catalog(model) -> List[Dict[str, str]]:
 
 
 def _dans_un_an(ref: date) -> date:
-    """Horizon glissant 12 mois (365 jours) — borne de veille, pas une duree contractuelle."""
+    """Horizon glissant 12 mois (365 jours)  borne de veille, pas une duree contractuelle."""
     return ref + timedelta(days=365)
 
 
@@ -251,7 +251,7 @@ def lister_places(
     encore enregistrees ne sont pas inventees : la reponse les omet.
 
     Le perimetre d'etude du departement (PLACES_DU_DEPARTEMENT) ne filtre pas
-    cette lecture — il ne filtre que les agregats de ``/synthese``. Une place
+    cette lecture  il ne filtre que les agregats de ``/synthese``. Une place
     partagee avec les terminaux, la tarification ou les perimetres reste donc
     visible ici, comme elle l'est ailleurs dans l'application.
     """

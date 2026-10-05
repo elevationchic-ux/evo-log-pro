@@ -130,7 +130,7 @@ class RapportResponse(RapportBase):
     statut: str
     # Colonnes NULLables en base : imposer un int faisait planter la
     # validation de reponse (ResponseValidationError) des qu'un champ
-    # etait vide — c'etait le cas de tout POST /rapports (cree_par,
+    # etait vide  c'etait le cas de tout POST /rapports (cree_par,
     # nombre_lignes et duree_generation non renseignes).
     cree_par: Optional[int] = None
     date_creation: datetime

@@ -55,6 +55,6 @@ try:
               + ("" if etat == "OK" else f"  ecart={sorted(porte ^ attendu)}"))
 
     n_ports = conn.execute("SELECT COUNT(*) FROM ports_cameroun").fetchone()[0]
-    print(f"ports_cameroun : {n_ports} ligne(s) — doit rester 0 tant que rien n'est saisi")
+    print(f"ports_cameroun : {n_ports} ligne(s)  doit rester 0 tant que rien n'est saisi")
 finally:
     conn.close()

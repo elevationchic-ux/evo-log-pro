@@ -159,7 +159,7 @@ export default function ComptabiliteOhadaMonthlyClosing() {
           </p>
           {etats && (
             <div className="text-[11px] text-slate-500 font-mono mt-1">
-              Exercice {etats.annee} (id {etats.exercice_id}) — statut : {etats.exercice_statut}
+              Exercice {etats.annee} (id {etats.exercice_id})  statut : {etats.exercice_statut}
             </div>
           )}
         </div>
@@ -207,11 +207,10 @@ export default function ComptabiliteOhadaMonthlyClosing() {
                   <button
                     key={p.periode}
                     onClick={() => setSelected(p)}
-                    className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between ${
-                      isSel
+                    className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between ${isSel
                         ? 'bg-violet-600/20 border-violet-500 text-white shadow-md'
                         : 'bg-slate-950 border-slate-800/80 text-slate-400 hover:text-white'
-                    }`}
+                      }`}
                   >
                     <div>
                       <div className="font-black text-xs">{p.label}</div>
@@ -219,11 +218,10 @@ export default function ComptabiliteOhadaMonthlyClosing() {
                         {p.closed ? `Clôturé le ${p.balance_date}` : `${p.entries_count} écriture(s)`}
                       </div>
                     </div>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase ${
-                      p.closed
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase ${p.closed
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         : 'bg-slate-800 text-slate-400 border border-slate-700'
-                    }`}>
+                      }`}>
                       {p.closed ? 'CLOTURE' : 'OUVERT'}
                     </span>
                   </button>
@@ -271,13 +269,12 @@ export default function ComptabiliteOhadaMonthlyClosing() {
                       {controls.map((item, idx) => (
                         <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80">
                           <span className="text-slate-300">{item.label}</span>
-                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1 ${
-                            item.done
+                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1 ${item.done
                               ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                               : item.auto
-                              ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
-                              : 'bg-slate-800 text-slate-400 border border-slate-700'
-                          }`}>
+                                ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
+                                : 'bg-slate-800 text-slate-400 border border-slate-700'
+                            }`}>
                             {item.done ? <Check className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                             {item.value}
                           </span>

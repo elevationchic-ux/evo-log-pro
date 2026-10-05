@@ -65,7 +65,7 @@ interface Caution {
   statut: string;
 }
 
-const NAS = '—';
+const NAS = '';
 
 export default function RealCustomsPage() {
   const { language } = useSettings();

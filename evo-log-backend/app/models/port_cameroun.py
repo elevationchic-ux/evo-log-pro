@@ -37,7 +37,7 @@ class PortCameroun(Base):
     profondeur_m = Column(Numeric)
     nombre_postes_quai = Column(Integer)
     operateur = Column(String(100))  # PAD, PAK
-    # Autorité portuaire concessionnaire du domaine (loi 2012/021) — distincte
+    # Autorité portuaire concessionnaire du domaine (loi 2012/021)  distincte
     # de l'exploitant: le PAD/PAK/PAL est l'autorité, l'opérateur de terminal
     # est un tiers. NULL = non renseigné officiellement, jamais déduit.
     autorite_portuaire = Column(String(160))

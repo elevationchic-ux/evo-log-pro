@@ -186,11 +186,10 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
           <button
             key={t.key}
             onClick={() => setTab(t.key as typeof tab)}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
-              tab === t.key
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${tab === t.key
                 ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
                 : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
-            }`}
+              }`}
           >
             {t.label}
           </button>
@@ -217,12 +216,11 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
-              <h3 className="text-base font-black text-slate-100">Déclaration Mensuelle de TVA — {currentPeriode}</h3>
+              <h3 className="text-base font-black text-slate-100">Déclaration Mensuelle de TVA  {currentPeriode}</h3>
               <p className="text-xs text-slate-400 font-mono">Taux normal : 17.5% + CAC 10% = 19.25% | Source : Grand Livre</p>
             </div>
-            <span className={`font-mono text-xs font-bold px-3 py-1 rounded-xl border ${
-              netTVA > 0 ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-blue-400 bg-blue-500/10 border-blue-500/20'
-            }`}>
+            <span className={`font-mono text-xs font-bold px-3 py-1 rounded-xl border ${netTVA > 0 ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+              }`}>
               {netTVA > 0 ? 'Net à Payer' : netTVA < 0 ? 'Crédit' : 'NULL'} : {Math.abs(netTVA).toLocaleString('fr-FR')} XAF
             </span>
           </div>
@@ -267,9 +265,8 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${
-                    tvaData.statut === 'BROUILLON' ? 'bg-slate-800 text-slate-400' : 'bg-emerald-500/10 text-emerald-400'
-                  }`}>{tvaData.statut}</span>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${tvaData.statut === 'BROUILLON' ? 'bg-slate-800 text-slate-400' : 'bg-emerald-500/10 text-emerald-400'
+                    }`}>{tvaData.statut}</span>
                   <button
                     onClick={validerTVA}
                     disabled={submitting || tvaData.statut !== 'BROUILLON'}
@@ -297,7 +294,7 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
-              <h3 className="text-base font-black text-slate-100">Impôt sur les Sociétés (IS) — Exercice {currentExercice}</h3>
+              <h3 className="text-base font-black text-slate-100">Impôt sur les Sociétés (IS)  Exercice {currentExercice}</h3>
               <p className="text-xs text-slate-400 font-mono">Taux : 30% | Minimum de perception : 1 000 000 XAF | Source : Compte de résultat</p>
             </div>
           </div>
@@ -341,7 +338,7 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
-              <h3 className="text-base font-black text-slate-100">DIPE — {currentPeriode}</h3>
+              <h3 className="text-base font-black text-slate-100">DIPE  {currentPeriode}</h3>
               <p className="text-xs text-slate-400 font-mono">Document d&apos;Information sur le Personnel Employé (DGI / CNPS Cameroun)</p>
             </div>
           </div>
@@ -373,7 +370,7 @@ export default function ComptabiliteOhadaTaxPackageCemac() {
       {tab === 'LIASSE' && !loading && (
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
           <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-base font-black text-slate-100">Liasse Fiscale &amp; Statistique SYSCOHADA — Exercice {currentExercice}</h3>
+            <h3 className="text-base font-black text-slate-100">Liasse Fiscale &amp; Statistique SYSCOHADA  Exercice {currentExercice}</h3>
             <p className="text-xs text-slate-400 font-mono">Tableaux officiels DGI (formats 1 à 36)</p>
           </div>
           <div className="flex items-start gap-3 px-4 py-5 bg-slate-950 border border-slate-800 rounded-2xl">

@@ -142,7 +142,7 @@
        « Encre de plan » : cyan assourdi. Il partage le spectre de
        transport-flotte (189) mais s'en distingue par la luminance du fond
        (14% contre 18%) et surtout par un texte moins clair et moins saturé
-       (62% / 75% contre 74% / 92%) — le badge n'est jamais jumelable à l'œil. */
+       (62% / 75% contre 74% / 92%)  le badge n'est jamais jumelable à l'œil. */
     --module-amenagement-portuaire-bg: 187 85% 14%;
     --module-amenagement-portuaire-text: 187 75% 62%;
 
@@ -278,7 +278,7 @@
     --module-dashboard-text: 239 84% 74%;
     --module-integration-bg: 217 91% 18%;
     --module-integration-text: 217 91% 74%;
-    /* Département autonome: Aménagement Portuaire & Domaine Public (dpt 29) —
+    /* Département autonome: Aménagement Portuaire & Domaine Public (dpt 29) 
        même signature que la racine (voir commentaire du bloc :root). */
     --module-amenagement-portuaire-bg: 187 85% 14%;
     --module-amenagement-portuaire-text: 187 75% 62%;
@@ -367,7 +367,7 @@
     --module-reports-bi-text: 271 70% 36%;
     /* Aménagement portuaire: version claire = papier calque légèrement bleuté,
        texte « encre de plan » foncé (contraste ~5,5:1 sur ce fond, soit AA sur
-       texte normal — un texte cyan clair serait illisible en jour). */
+       texte normal  un texte cyan clair serait illisible en jour). */
     --module-amenagement-portuaire-bg: 187 45% 91%;
     --module-amenagement-portuaire-text: 187 80% 25%;
   }

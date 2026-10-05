@@ -1094,7 +1094,7 @@ export const DOMAIN_LOADING_CONFIGS: Record<string, DomainLoadingConfig> = {
     key: 'amenagement-portuaire',
     departmentNumber: 29,
     domainName: 'DÉPARTEMENT AMÉNAGEMENT PORTUAIRE & DOMAINE PUBLIC',
-    subTitle: 'SCHÉMAS DIRECTEURS, DOMAINE PUBLIC, GROS ŒUVRE & CONCESSIONS — DOUALA, KRIBI, LIMBÉ',
+    subTitle: 'SCHÉMAS DIRECTEURS, DOMAINE PUBLIC, GROS ŒUVRE & CONCESSIONS  DOUALA, KRIBI, LIMBÉ',
     badgeCode: 'REGISTRE DES ACTES D\'AMÉNAGEMENT • AUTORITÉ PORTUAIRE',
     locationTag: 'PLAN DE MASSE DU PORT • ARRÊTÉ D\'AFFECTATION',
     primaryColor: '#0E7490',

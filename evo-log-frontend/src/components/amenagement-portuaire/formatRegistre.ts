@@ -64,7 +64,7 @@ export function formaterMesure(v: ValeurCellule, unite: string, lang: 'fr' | 'en
 }
 
 /** Traduit une valeur d'enum avec la nomenclature SERVEUR (clé `valeur`), et
- *  retombe sur la valeur brute humanisée si le serveur ne la connaît pas —
+ *  retombe sur la valeur brute humanisée si le serveur ne la connaît pas 
  *  le cas échéant c'est une donnée saisie hors cadre, on l'affiche telle quelle. */
 export function libelleEnum(
   valeur: ValeurCellule,

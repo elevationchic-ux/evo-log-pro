@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * RegistrePortuaire — châssis commun des neuf registres du département
+ * RegistrePortuaire  châssis commun des neuf registres du département
  * Aménagement portuaire & Domaine public.
  *
  * Pourquoi un châssis et pas neuf pages dupliquées : les objets diffèrent par
@@ -60,7 +60,7 @@ import {
 
 /** Le backend FastAPI renvoie ses refus métier dans `detail` (string) ; les
  *  erreurs de validation Pydantic en liste (422). On affiche le texte du
- *  serveur, et seulement lui — jamais un message générique qui effacerait la
+ *  serveur, et seulement lui  jamais un message générique qui effacerait la
  *  raison réelle (doublon de référence, dépendance absente…). */
 function messageServeur(err: unknown, fallback: string): string {
   const ax = err as AxiosError;

@@ -1,4 +1,4 @@
-"""Aménagement portuaire — département autonome (Douala, Kribi, Limbé).
+"""Aménagement portuaire  département autonome (Douala, Kribi, Limbé).
 
 Ce module ne décrit PAS l'exploitation du quai (acconage, escales, tarifs) : il
 décrit la maîtrise d'ouvrage, c'est-à-dire tout ce qui précède et accompagne
@@ -7,11 +7,11 @@ réellement en vigueur au Cameroun :
 
   1. la politique portuaire est conduite par le ministère en charge des Ports
      (MINMIVT), avec l'Autorité Portuaire Nationale (APN) comme organe
-     technique — c'est elle qui élabore le schéma directeur portuaire national
+     technique  c'est elle qui élabore le schéma directeur portuaire national
      et les schémas directeurs d'aménagement des places portuaires ;
   2. le domaine portuaire est délimité, concédé et géré par l'autorité
      portuaire de la place (Port Autonome de Douala, Port Autonome de Kribi,
-     Port Autonome de Limbé) — loi n° 2012/021 portant sûreté et sécurité
+     Port Autonome de Limbé)  loi n° 2012/021 portant sûreté et sécurité
      dans le domaine maritime, portuaire et des pêches maritimes ;
   3. les travaux et extensions sont financés sur budget de l'autorité
      portuaire, sur subventions, ou en partenariat public-privé (loi
@@ -25,7 +25,7 @@ réellement en vigueur au Cameroun :
      CIP pour la place de Douala) et la conformité environnementale à la loi
      n° 96/012 du 5 août 1996 (EIES, audit IEMU).
 
-PHILOSOPHIE DES DONNÉES — aucune donnée n'est inventée ici.
+PHILOSOPHIE DES DONNÉES  aucune donnée n'est inventée ici.
   * Les tables portent des COLONNES de provenance (source_reference,
     date_verification, autorite_emettrice) : une valeur n'existe que si un
     agent l'a saisie depuis un document réel (schéma directeur approuvé, visa
@@ -36,7 +36,7 @@ PHILOSOPHIE DES DONNÉES — aucune donnée n'est inventée ici.
     routeur.
 
 Modèle domanial : comme ``ports_cameroun`` et ``terminaux_portuaires`` (données
-de référence nationales), ces tables ne portent PAS de ``company_id`` — elles
+de référence nationales), ces tables ne portent PAS de ``company_id``  elles
 décrivent l'infrastructure publique du pays, pas le fonds de commerce d'un
 tenant. ``app/core/tenant_enforcement.py`` ne les filtre donc pas, ce qui est
 le comportement voulu (même raisonnement que pour les incoterms et le plan
@@ -58,7 +58,7 @@ def _enum(cls):
 
     Double raison :
       * le DDL devient identique sur SQLite (dev/tests) et PostgreSQL
-        (production) — une migration ``sa.String(...)`` et le modele restent
+        (production)  une migration ``sa.String(...)`` et le modele restent
         strictement en parite, convention des migrations 014/028 ;
       * la nomenclature est deja garantie a l'entree par les schemas Pydantic
         (un code hors enum est refuse en 422) : un CHECK de plus n'apporte
@@ -297,7 +297,7 @@ class ProjetAmenagement(Base):
     """Opération d'aménagement inscrite à la programmation d'une place.
 
     Le pilotage camerounais est documenté : un projet d'investissement n'existe
-    juridiquement qu'après les étapes suivies par le MINEPAT (DGPIP) — fiche /
+    juridiquement qu'après les étapes suivies par le MINEPAT (DGPIP)  fiche /
     dossier technique, visa de maturité (décret n° 2018/0492 du Premier
     Ministre), inscription au PIP-CDMT puis à la loi de finances, et engagement
     des crédits visé par le contrôle financier du MINFI. Ces références et ces
@@ -680,7 +680,7 @@ class Dragage(Base):
     vase du Wouri et le banc du chenal de Kribi imposent des campagnes
     répétées, chacune encadrée par une autorisation, un volume mesuré et un
     exutoire de rejet. Tous ces éléments proviennent de rapports de l'entreprise
-    et de l'administration — ils sont saisis, jamais devinés.
+    et de l'administration  ils sont saisis, jamais devinés.
     """
     __tablename__ = "campagnes_dragage"
 

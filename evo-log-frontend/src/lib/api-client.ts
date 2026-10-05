@@ -956,7 +956,7 @@ export const amenagementAPI = {
   createProjet: (data: unknown) => apiClient.post(`${AMGT}/projets`, data),
   updateProjet: (id: number, data: unknown) => apiClient.put(`${AMGT}/projets/${id}`, data),
   // Retrait declaratif : le backend exige un motif (>= 3 caracteres), jamais un
-  // effacement sec — la ligne reste, l'objet sort du portefeuille.
+  // effacement sec  la ligne reste, l'objet sort du portefeuille.
   deleteProjet: (id: number, params: { motif: string }) =>
     apiClient.delete(`${AMGT}/projets/${id}`, { params }),
   // Un relevé absent reste NULL : l'avancement n'est jamais calculé ici.

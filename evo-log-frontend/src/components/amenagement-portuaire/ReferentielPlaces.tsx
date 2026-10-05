@@ -1,11 +1,11 @@
 'use client';
 
 /**
- * ReferentielPlaces — écran de déclaration du référentiel national des places.
+ * ReferentielPlaces  écran de déclaration du référentiel national des places.
  *
  * Pourquoi ce panneau existe : les neuf registres du département rattachent
  * leurs lignes à une `port_id` lue dans `ports_cameroun`, et cette table
- * nationale n'était écrite par AUCUNE route de l'application — le département
+ * nationale n'était écrite par AUCUNE route de l'application  le département
  * ne pouvait donc jamais être démarré, et chaque formulaire restait vide.
  *
  * Ce que ce composant refuse de faire :
@@ -202,7 +202,7 @@ export default function ReferentielPlaces({
   }, []);
 
   /** Payload : un champ vide est ABSENT de l'envoi (le backend `exclude_unset`
-   *  laisse alors la colonne à NULL — c'est ce qui évite le zéro inventé). */
+   *  laisse alors la colonne à NULL  c'est ce qui évite le zéro inventé). */
   const construire = useCallback((): Record<string, string | number | boolean> => {
     const payload: Record<string, string | number | boolean> = {};
     CHAMPS_PLACE.forEach((c) => {

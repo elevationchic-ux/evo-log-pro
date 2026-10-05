@@ -19,7 +19,7 @@ contenu appartient aux documents officiels. Un champ NULL veut dire « non
 renseigne », et la migration 039 ne seed que des droits RBAC.
 
 Colonnes nomenclature : l'ORM declare des enums Python en VARCHAR (sans type
-natif ni CHECK, voir app/models/amenagement_portuaire._enum) — le DDL est donc
+natif ni CHECK, voir app/models/amenagement_portuaire._enum)  le DDL est donc
 identique sur SQLite et PostgreSQL, et cette migration reproduit exactement les
 memes types.
 

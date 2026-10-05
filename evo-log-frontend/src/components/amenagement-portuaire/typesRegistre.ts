@@ -6,7 +6,7 @@
  *  - aucune donnée métier n'est codée en dur ici : les vocabulaires d'écrans
  *    viennent de `/nomenclatures`, les places portuaires de `/places`, les
  *    agrégats de `/synthese` ;
- *  - une valeur absente reste `null` et s'affiche « non enregistré » — jamais
+ *  - une valeur absente reste `null` et s'affiche « non enregistré »  jamais
  *    0, jamais une date du jour, jamais une estimation ;
  *  - les champs ci-dessous ne sont que la DESCRIPTION de ce que le serveur
  *    accepte (schemas Pydantic de app/schemas/amenagement_portuaire.py) : ils
@@ -108,7 +108,7 @@ export interface FiltreRegistre {
   depuisPlaces?: boolean;
   /** Filtre booleéen : le serveur attend true/false, pas une chaîne libre. */
   booleen?: boolean;
-  /** Ce que le serveur fait vraiment de ce paramètre — utile quand un filtre
+  /** Ce que le serveur fait vraiment de ce paramètre  utile quand un filtre
    *  change le sens d'une liste (ex. « titres échus »). */
   aide?: string;
   aideEn?: string;
@@ -188,7 +188,7 @@ export interface ConfigRegistre {
    *  du département (projets, infrastructures) exigent un MOTIF écrit, donc
    *  passent par `actions` avec `action: 'delete'`. Une pièce à valeur
    *  documentaire n'est quant à elle jamais effacée : elle est abrogée,
-   *  annulée ou résiliée — d'où l'absence de retrait sur la plupart. */
+   *  annulée ou résiliée  d'où l'absence de retrait sur la plupart. */
   colonnes: ColonneRegistre[];
   champs: ChampRegistre[];
   filtres?: FiltreRegistre[];
@@ -206,7 +206,7 @@ export type Nomenclatures = Record<string, { code: string; valeur: string }[]>;
 /** Éléments de /places (référentiel national ports_cameroun).
  *
  *  Copie conforme de ce que la route sert : un champ NOT NULL en base n'est pas
- *  nullable ici, mais tout le reste peut être null — « non enregistré » veut
+ *  nullable ici, mais tout le reste peut être null  « non enregistré » veut
  *  dire que l'agent n'a pas encore recopié le document officiel, pas que la
  *  valeur est nulle. La déclaration d'une place (code, nom, type_port) se fait
  *  depuis le centre de pilotage, jamais par un seed applicatif. */

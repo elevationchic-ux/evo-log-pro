@@ -164,8 +164,8 @@ export default function AmenagementPortuaireDashboardPage() {
     <ModuleLayout
       title={t('Centre de pilotage aménagement', 'Development control centre')}
       description={t(
-        'Domaine public, schémas directeurs, programmation budgétaire, marchés, titres, concessions, ouvrages, dragage et autorisations — agrégé uniquement à partir des lignes saisies.',
-        'Public domain, master plans, budget programming, contracts, titles, concessions, structures, dredging and permits — aggregated only from recorded lines.',
+        'Domaine public, schémas directeurs, programmation budgétaire, marchés, titres, concessions, ouvrages, dragage et autorisations  agrégé uniquement à partir des lignes saisies.',
+        'Public domain, master plans, budget programming, contracts, titles, concessions, structures, dredging and permits  aggregated only from recorded lines.',
       )}
       help={t(
         'Un chiffre affiché « aucune saisie » signifie que la colonne est vide en base, pas que le montant est nul. La synthèse n\u2019additionne que les montants réellement enregistrés.',
@@ -289,9 +289,9 @@ export default function AmenagementPortuaireDashboardPage() {
             note={
               s.projets?.suivi_financier_complet === false
                 ? t(
-                    'Le suivi financier n’est complet que si les deux colonnes (prévisionnel et réel) sont saisies : ici l’une des deux reste vide.',
-                    'Financial tracking is complete only when both columns (planned and actual) are recorded: one of them is still blank.',
-                  )
+                  'Le suivi financier n’est complet que si les deux colonnes (prévisionnel et réel) sont saisies : ici l’une des deux reste vide.',
+                  'Financial tracking is complete only when both columns (planned and actual) are recorded: one of them is still blank.',
+                )
                 : undefined
             }
             t={t}
@@ -407,9 +407,8 @@ function Bloc({
             <div key={it.libelle} className="rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2.5">
               <p className="text-[10px] uppercase tracking-wide text-slate-400 leading-tight">{it.libelle}</p>
               <p
-                className={`mt-1 text-base font-bold ${
-                  rendu.absent ? 'text-slate-500 text-xs font-semibold' : 'text-cyan-200'
-                }`}
+                className={`mt-1 text-base font-bold ${rendu.absent ? 'text-slate-500 text-xs font-semibold' : 'text-cyan-200'
+                  }`}
               >
                 {rendu.texte}
               </p>
@@ -453,11 +452,10 @@ function GrilleRegistres({
             <Link
               key={segment}
               href={getRouteFromTCode(config.tcode)}
-              className={`group rounded-2xl border p-4 transition ${
-                autorise
+              className={`group rounded-2xl border p-4 transition ${autorise
                   ? 'border-slate-800 bg-slate-900/60 hover:border-cyan-700/70 hover:bg-slate-900'
                   : 'border-slate-800/60 bg-slate-950/40'
-              }`}
+                }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className={`p-2 rounded-xl ${autorise ? 'bg-cyan-700 text-cyan-50' : 'bg-slate-800 text-slate-400'}`}>

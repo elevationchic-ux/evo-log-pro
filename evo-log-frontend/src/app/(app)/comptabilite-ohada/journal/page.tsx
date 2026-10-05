@@ -361,8 +361,8 @@ export default function ComptabiliteOhadaJournal() {
           key="ALL"
           onClick={() => setSelectedJournal('ALL')}
           className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${selectedJournal === 'ALL'
-              ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
-              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
+            ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
+            : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
             }`}
         >
           Tous les Journaux
@@ -374,8 +374,8 @@ export default function ComptabiliteOhadaJournal() {
               key={type}
               onClick={() => setSelectedJournal(type)}
               className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${selectedJournal === type
-                  ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
-                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
+                ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30'
+                : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
                 }`}
             >
               {j ? `${j.nom_journal} (${j.code_journal})` : `Journal ${type}`}
@@ -589,7 +589,7 @@ export default function ComptabiliteOhadaJournal() {
                       className="h-9 px-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
                       required
                     >
-                      <option value="">— choisir un compte —</option>
+                      <option value=""> choisir un compte </option>
                       {comptes.map(c => (
                         <option key={c.id} value={c.id}>{c.numero_compte} · {c.intitule}</option>
                       ))}
@@ -646,7 +646,7 @@ export default function ComptabiliteOhadaJournal() {
               )}
               {comptes.length === 0 && (
                 <p className="text-[11px] text-red-400 font-semibold">
-                  Aucun compte chargé depuis /finance/plan-comptable — appliquez la migration de seed du plan SYSCOHADA côté backend.
+                  Aucun compte chargé depuis /finance/plan-comptable  appliquez la migration de seed du plan SYSCOHADA côté backend.
                 </p>
               )}
 
