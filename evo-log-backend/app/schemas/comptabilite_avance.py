@@ -120,7 +120,10 @@ class EcritureLettreeResponse(EcritureLettreeBase):
 
 class LettrageManuelRequest(BaseModel):
     compte_id: int
-    ecritures_ids: List[int]
+    # ids des LIGNES du grand livre à solder (et non ids d'en-têtes plats,
+    # dont compte_id est nul) — cohérent avec /lettrage/suggestions qui
+    # expose « ligne_id » pour chaque item ouvert.
+    lignes_ids: List[int]
     date_lettrage: date
     effectue_par: str
     reference: Optional[str] = None
