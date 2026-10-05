@@ -26,7 +26,8 @@ from app.schemas.comptabilite_avance import (
     PeriodeClosingItem, EtatsPeriodesResponse
 )
 from app.services.comptabilite_avance_service import (
-    JournalAuxiliaireService, LettrageService, GrandLivreService, BalanceService, EtatsFinanciersOHADAService, ClotureService
+    JournalAuxiliaireService, LettrageService, GrandLivreService, BalanceService,
+    EtatsFinanciersOHADAService, ClotureService, TVAService, ISService,
 )
 from app.models.finance_ohada import JournalAuxiliaire, Lettrage, GrandLivreLigne, BalanceVerification, BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, AnnexesOHADA
 
@@ -599,3 +600,57 @@ def creer_ecriture(
         ),
     )
 
+
+# ============ FISCALITÉ CEMAC : TVA & IS ============
+
+@router.get("/declarations-tva")
+def get_declaration_tva(
+    periode: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("fiscalite.declarations.read")),
+):
+    """Agrège la TVA depuis le Grand Livre réel pour la période YYYY-MM.
+
+    Retourne les montants réels (TVA collectée 443x, déductible 445x, CA 70x).
+    Aucune donnée n'est inventée : si aucune écriture TVA n'existe, tout vaut 0.
+    """
+    try:
+        return TVAService.calculer_tva_periode(db, periode)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/declarations-tva/valider")
+def post_valider_tva(
+    body: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("fiscalite.declarations.create")),
+):
+    """Enregistre la déclaration TVA en base (increate -> TVADeclarable).
+
+    La transmission réelle vers le portail e-bulletin DGI n'est PAS intégrée :
+    le message de retour l'indique honnêtement.
+    """
+    periode = body.get("periode")
+    if not periode or len(periode) != 7:
+        raise HTTPException(status_code=422, detail="Champ 'periode' requis (format YYYY-MM)")
+    try:
+        return TVAService.valider_declaration(db, periode, current_user.full_name or current_user.email)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/declarations-is")
+def get_declaration_is(
+    annee: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("fiscalite.declarations.read")),
+):
+    """Dérive l'IS depuis le compte de résultat réel de l'exercice.
+
+    Base imposable = résultat net SYSCOHADA ; IS = max(30% × résultat, minimum 1M).
+    """
+    try:
+        return ISService.deriver_is(db, annee)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
