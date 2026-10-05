@@ -381,6 +381,79 @@ def test_places_ne_sort_que_des_lignes_de_ports_cameroun(client_chef, db):
     assert "non saisi" in body["note"].lower() or "NULL" in body["note"]
 
 
+# ── 5bis. Le référentiel des places s'alimente, il ne se devine pas ──────────
+# ports_cameroun etait lit par quatre routeurs et ecrit par aucun : sans ces
+# routes, aucun registre du departement ne pouvait rattacher une ligne a une
+# place portuaire. La declaration reste une saisie sous document officiel.
+
+def test_un_auditeur_ne_declare_pas_de_place(client_auditeur):
+    r = client_auditeur.post(f"{BASE}/places", json={
+        "code": "DOU", "nom": "Port de Douala", "type_port": "marchandises"})
+    assert r.status_code == 403, r.text
+    assert "amenagement.place.create" in r.text
+
+
+def test_une_place_se_declaire_sans_qu_rien_ne_soit_invente(client_ingenieur):
+    r = client_ingenieur.post(f"{BASE}/places", json={
+        "code": "kri", "nom": "Port en eau profonde de Kribi",
+        "type_port": "marchandises"})
+    assert r.status_code == 201, r.text
+    place = r.json()
+    # Le code est normalise en majuscules (c'est la cle du referentiel national),
+    # pas remplace par un code invente.
+    assert place["code"] == "KRI"
+    # Rien au-dela de la saisie : ni autorite, ni tirant d'eau, ni capacite.
+    assert place["autorite_portuaire"] is None
+    assert place["tirant_eau_max"] is None
+    assert place["profondeur_m"] is None
+    assert place["capacite_annuelle_tonnes"] is None
+    assert place["ville"] is None
+    # est_actif vient du defaut de colonne (une place declaree est en service),
+    # pas d'une decision du logiciel.
+    assert place["est_actif"] is True
+    # Et la liste la renvoie desormais, rattachee au perimetre par son code.
+    codes = [p["code"] for p in client_ingenieur.get(f"{BASE}/places").json()["data"]]
+    assert "KRI" in codes
+
+
+def test_le_type_de_port_n_est_jamais_devine(client_ingenieur):
+    # `type_port` est NOT NULL en base : sans lui, la route refuse plutot que de
+    # poser « marchandises » par defaut sur un port petrolier.
+    r = client_ingenieur.post(f"{BASE}/places", json={
+        "code": "LIM", "nom": "Port de Limbe"})
+    assert r.status_code == 422, r.text
+
+
+def test_deuxieme_douala_refusee_plutot_que_doublon_de_referentiel(client_chef, db):
+    from app.models.port_cameroun import PortCameroun, TypePort
+
+    db.add(PortCameroun(code="DOU", nom="Port de Douala", type_port=TypePort.MARCHANDISES))
+    db.commit()
+    r = client_chef.post(f"{BASE}/places", json={
+        "code": "DOU", "nom": "Port autonome de Douala", "type_port": "marchandises"})
+    assert r.status_code == 409, r.text
+
+
+def test_une_place_se_desactive_et_ne_se_detruit_pas(client_ingenieur, db):
+    from app.models.port_cameroun import PortCameroun, TypePort
+
+    place = PortCameroun(code="LIM", nom="Port de Limbe", type_port=TypePort.MARCHANDISES)
+    db.add(place)
+    db.commit()
+    db.refresh(place)
+
+    r = client_ingenieur.put(f"{BASE}/places/{place.id}", json={"est_actif": False})
+    assert r.status_code == 200, r.text
+    assert r.json()["est_actif"] is False
+    # Referentiel partage : la ligne reste en base, l'historique des pieces du
+    # domaine conserve sa reference.
+    assert db.query(PortCameroun).filter(PortCameroun.code == "LIM").count() == 1
+
+    # Et aucune route de suppression n'est exposee sur ce referentiel.
+    d = client_ingenieur.request("DELETE", f"{BASE}/places/{place.id}")
+    assert d.status_code in (405, 404), d.text
+
+
 def test_le_vocabulaire_publie_par_nomenclatures_est_reel(client_chef):
     r = client_chef.get(f"{BASE}/nomenclatures")
     assert r.status_code == 200, r.text
