@@ -399,6 +399,30 @@ class AnnexesGenererRequest(BaseModel):
     siege: str
 
 
+# Requêtes de GÉNÉRATION : le client ne fournit que les clés de contexte
+# (exercice / date). Les montants sont recalculés côté serveur depuis le
+# grand livre — le frontend ne peut pas (et ne doit pas) les connaître ni
+# les inventer. Réutiliser le schéma « Create » complet (avec resultat_net,
+# variation_tresorerie obligatoires) faisait échouer le bouton « Générer »
+# en 422.
+
+
+class BilanGenererRequest(BaseModel):
+    exercice_id: int
+    date_bilan: date
+
+
+class CompteResultatGenererRequest(BaseModel):
+    exercice_id: int
+    periode: str
+    date_arrete: date
+
+
+class TAFIREGenererRequest(BaseModel):
+    exercice_id: int
+    date_tafire: date
+
+
 # ============ CLÔTURE ============
 
 class ClotureMensuelleRequest(BaseModel):
