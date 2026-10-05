@@ -428,6 +428,24 @@ def obtenir_annexes(
 
 # ============ CLÔTURE ============
 
+@router.get("/cloture/etats", response_model=EtatsPeriodesResponse)
+def cloture_etats(
+    exercice_id: int,
+    annee: int = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.balance.read"))
+):
+    """Etat reel de chaque periode de l'exercice (nombre de pieces validees,
+    cloture effectivite par presence d'une balance de verification equilibree).
+
+    C'est la source d'affichage de la page Clotures ; elle remplace la liste
+    precedemment fabriquee cote client depuis la date du jour."""
+    try:
+        return ClotureService.etats_periodes(db, exercice_id, annee)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @router.post("/cloture/mensuelle", response_model=ClotureMensuelleResponse)
 def cloture_mensuelle(
     request: ClotureMensuelleRequest,

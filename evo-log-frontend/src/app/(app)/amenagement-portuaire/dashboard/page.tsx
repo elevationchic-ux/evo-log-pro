@@ -25,6 +25,7 @@ import { useApi } from '@/hooks/useApi';
 import { useCan } from '@/hooks/useCan';
 import { useSettings } from '@/components/layout/SettingsProvider';
 import { amenagementAPI } from '@/lib/api-client';
+import { getRouteFromTCode } from '@/utils/tcodeLookup';
 
 import type { PlacePortuaire } from '@/components/amenagement-portuaire/typesRegistre';
 import { REGISTRES_AMENAGEMENT } from '@/components/amenagement-portuaire/registres';
