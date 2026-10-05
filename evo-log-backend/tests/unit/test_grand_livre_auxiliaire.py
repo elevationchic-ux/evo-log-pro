@@ -91,7 +91,8 @@ def test_auxiliaire_filtre_par_compte_et_dates(client, db, plan):
     assert dates == sorted(dates)
     # uniquement le compte demandé
     assert all(l["compte_id"] == c["4111"].id for l in lignes)
-    debits = sorted(l["debit"] for l in lignes)
+    # débit/crédit serialisés en chaîne (Decimal) → coercition explicite
+    debits = sorted(float(l["debit"]) for l in lignes)
     assert debits == [100_000.0, 200_000.0]
 
 
