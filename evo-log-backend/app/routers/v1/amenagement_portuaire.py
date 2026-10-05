@@ -154,13 +154,24 @@ def _dans_un_an(ref: date) -> date:
 
 
 # Colonnes reellement portees par ports_cameroun. Les schemas du departement ne
-# declarent que celles-ci ; ce garde evite qu'un futur champ de provenance (les
-# registres en ont) soit accepte ici puis jete silencieusement par SQLAlchemy.
+# declarent que celles-ci ; ce garde refuse bruyamment toute autre cle plutot
+# que de laisser SQLAlchemy jeter silencieusement une donnee saisie par l'agent.
 _COLUMNS_PLACE = {c.name for c in PortCameroun.__table__.columns} - {"id", "created_at", "updated_at"}
 
 
 def _colonnes_place(donnees: Dict[str, Any]) -> Dict[str, Any]:
-    return {k: v for k, v in donnees.items() if k in _COLUMNS_PLACE}
+    inconnues = [k for k in donnees if k not in _COLUMNS_PLACE]
+    if inconnues:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Le referentiel national des ports ne porte pas ces champs : "
+                + ", ".join(sorted(inconnues))
+                + ". Un document officiel cite une place ; il ne s'invente pas "
+                  "une colonne dans ports_cameroun."
+            ),
+        )
+    return dict(donnees)
 
 
 def _place_en_bref(p: PortCameroun) -> Dict[str, Any]:
