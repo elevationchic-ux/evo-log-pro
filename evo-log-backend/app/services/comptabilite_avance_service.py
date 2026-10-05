@@ -891,7 +891,7 @@ class ClotureService:
             })
 
         return {
-            "exercice_id": exercice_id,
+            "exercice_id": exercice.id,
             "annee": annee_cible,
             "exercice_statut": exercice.statut,
             "periodes": periodes,

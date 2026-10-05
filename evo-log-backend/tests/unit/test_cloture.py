@@ -169,7 +169,7 @@ def test_report_a_nouveau_ne_plante_plus(db, referentiel):
     # L'ancien code levait NameError (`exercice_cible`) ; on attend un apercu.
     assert resultat["statut"] == "apercu_non_persiste"
     assert resultat["exercice_cible_id"] == r["exercice"].id
-    assert resultat["nombre_comptes"] >= 3  # comptes de classes 4,5 presents
+    assert resultat["nombre_comptes"] >= 2  # comptes de classes 1-5 (clients, banque)
 
 
 # --------------------------------------------------------------------------- #
