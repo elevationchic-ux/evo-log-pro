@@ -431,7 +431,7 @@ function GrilleRegistres({
           return (
             <Link
               key={segment}
-              href={`/amenagement-portuaire/${segment}`}
+              href={getRouteFromTCode(config.tcode)}
               className={`group rounded-2xl border p-4 transition ${
                 autorise
                   ? 'border-slate-800 bg-slate-900/60 hover:border-cyan-700/70 hover:bg-slate-900'

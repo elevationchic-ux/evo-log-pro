@@ -224,7 +224,7 @@ def test_api_cloture_mensuelle_puis_verrou(client, referentiel):
     assert again.status_code == 400, again.text
     assert "déjà clôturée" in again.json()["detail"]
 
-    # L'etat暴露 le verrouillage reel.
+    # L'etat expose le verrouillage reel.
     etats = client.get(URL_ETATS).json()
     mai = next(p for p in etats["periodes"] if p["periode"] == "2026-05")
     assert mai["closed"] is True
