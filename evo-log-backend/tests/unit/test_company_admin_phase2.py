@@ -1,4 +1,4 @@
-﻿"""Tests Phase 2  Admin Entreprise (niveau 1).
+"""Tests Phase 2  Admin Entreprise (niveau 1).
 
 Couvre :
   * designation d'un admin entreprise PAR le CADC (role_level=1, rattaché,

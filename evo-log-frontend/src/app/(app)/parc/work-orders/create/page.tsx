@@ -39,7 +39,7 @@ export default function CreateWorkOrderPage() {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-xs font-semibold mb-1 border border-purple-500/20">
               <Wrench className="w-3.5 h-3.5" />
-              EVO-Parc & Maintenance â€¢ CrÃ©ation d'Ordre de Travail (Work Order)
+              EVO-Parc & Maintenance • Création d'Ordre de Travail (Work Order)
             </div>
             <h1 className="text-2xl font-black tracking-tight">Nouveau Work Order Workshop</h1>
           </div>
@@ -51,7 +51,7 @@ export default function CreateWorkOrderPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Ã‰quipement / Engin de Parc</label>
+              <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Équipement / Engin de Parc</label>
               <select
                 value={equipment}
                 onChange={(e) => setEquipment(e.target.value)}
@@ -65,21 +65,21 @@ export default function CreateWorkOrderPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Niveau de PrioritÃ©</label>
+              <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Niveau de Priorité</label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-purple-500"
               >
-                <option value="URGENTE">ðŸš¨ URGENTE (Immobilisation)</option>
-                <option value="HAUTE">âš ï¸ HAUTE (Sous 24h)</option>
-                <option value="NORMALE">â„¹ï¸ NORMALE (Entretien PÃ©riodique)</option>
+                <option value="URGENTE">🚨 URGENTE (Immobilisation)</option>
+                <option value="HAUTE">⚠️ HAUTE (Sous 24h)</option>
+                <option value="NORMALE">ℹ️ NORMALE (Entretien Périodique)</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Technicien / Chef d'Atelier AssignÃ©</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Technicien / Chef d'Atelier Assigné</label>
             <input
               type="text"
               value={technician}
@@ -89,13 +89,13 @@ export default function CreateWorkOrderPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Description des RÃ©parations / Diagnostics</label>
+            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Description des Réparations / Diagnostics</label>
             <textarea
               required
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Saisissez les dÃ©tails de la panne ou de l'entretien Ã  effectuer..."
+              placeholder="Saisissez les détails de la panne ou de l'entretien à effectuer..."
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-purple-500"
             />
           </div>
@@ -112,7 +112,7 @@ export default function CreateWorkOrderPage() {
               type="submit"
               className="px-6 py-3 rounded-xl text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
             >
-              CrÃ©er le Work Order
+              Créer le Work Order
             </button>
           </div>
         </form>

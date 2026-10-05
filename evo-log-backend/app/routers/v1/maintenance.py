@@ -1,4 +1,4 @@
-﻿"""
+"""
 Maintenance router - manages equipment, vehicle maintenance, spare parts, and telematics
 
 CRD réel sur le modele Maintenance (table `maintenances`) : aucun ordre de
