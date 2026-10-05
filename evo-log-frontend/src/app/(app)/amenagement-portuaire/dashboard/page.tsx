@@ -244,7 +244,7 @@ export default function AmenagementPortuaireDashboardPage() {
 
           <Bloc
             titre={t('Schémas directeurs', 'Master plans')}
-            lien="/amenagement-portuaire/schemas-directeurs"
+            tcode="KAMT_SCH"
             indicateurs={[
               { libelle: t('Actifs', 'Active'), ind: { genre: 'compteur', valeur: s.schemas_directeurs?.actifs } },
               { libelle: t('Approuvés', 'Approved'), ind: { genre: 'compteur', valeur: s.schemas_directeurs?.approuves } },
@@ -257,7 +257,7 @@ export default function AmenagementPortuaireDashboardPage() {
 
           <Bloc
             titre={t('Projets d’aménagement', 'Development projects')}
-            lien="/amenagement-portuaire/projets"
+            tcode="KAMT_PRJ"
             indicateurs={[
               { libelle: t('Au portefeuille', 'In portfolio'), ind: { genre: 'compteur', valeur: s.projets?.total } },
               { libelle: t('En cours', 'Ongoing'), ind: { genre: 'compteur', valeur: s.projets?.en_cours } },
@@ -279,7 +279,7 @@ export default function AmenagementPortuaireDashboardPage() {
 
           <Bloc
             titre={t('Passation des marchés', 'Contract award')}
-            lien="/amenagement-portuaire/marches"
+            tcode="KAMT_MCH"
             indicateurs={[
               { libelle: t('Marchés inscrits', 'Registered contracts'), ind: { genre: 'compteur', valeur: s.passation?.marches_total } },
               { libelle: t('En exécution', 'In execution'), ind: { genre: 'compteur', valeur: s.passation?.marches_en_execution } },
@@ -352,14 +352,16 @@ export default function AmenagementPortuaireDashboardPage() {
 
 function Bloc({
   titre,
-  lien,
+  tcode,
   indicateurs,
   note,
   t,
   rendreValeur,
 }: {
   titre: string;
-  lien: string;
+  /** Le registre cible est désigné par son T-Code, résolu dans le registre
+   *  canonique des routes (utils/tcodeLookup) : aucun chemin n'est retapé ici. */
+  tcode: string;
   indicateurs: { libelle: string; ind: ValeurIndicateur }[];
   note?: string;
   t: (fr: string, en: string) => string;
@@ -370,7 +372,7 @@ function Bloc({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-bold text-slate-100">{titre}</h2>
         <Link
-          href={lien}
+          href={getRouteFromTCode(tcode)}
           className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-300 hover:text-cyan-200"
         >
           {t('Ouvrir le registre', 'Open register')}
