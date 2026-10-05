@@ -403,7 +403,9 @@ function Bloc({
   );
 }
 
-/** Les neuf registres, déclarés dans registres.ts (aucun chemin dupliqué ici).
+/** Les neuf registres, déclarés dans registres.ts. L'adresse de chacun est
+ *  résolue par son T-Code dans le registre canonique des routes : ni ce
+ *  composant ni le registre de navigation ne portent deux fois le même chemin.
  *  Une carte sans habilitation de lecture reste visible mais dit précisément
  *  ce qui manque, plutôt que d'ouvrir un écran qui refusera la donnée. */
 function GrilleRegistres({
