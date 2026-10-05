@@ -430,7 +430,7 @@ def obtenir_annexes(
 
 @router.get("/cloture/etats", response_model=EtatsPeriodesResponse)
 def cloture_etats(
-    exercice_id: int,
+    exercice_id: int = None,
     annee: int = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("comptabilite.balance.read"))

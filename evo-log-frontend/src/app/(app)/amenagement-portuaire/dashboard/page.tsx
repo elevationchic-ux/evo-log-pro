@@ -305,7 +305,7 @@ export default function AmenagementPortuaireDashboardPage() {
 
           <Bloc
             titre={t('Patrimoine bâti', 'Built assets')}
-            lien="/amenagement-portuaire/infrastructures"
+            tcode="KAMT_INF"
             indicateurs={[
               { libelle: t('Ouvrages inventoriés', 'Inventoried structures'), ind: { genre: 'compteur', valeur: s.patrimoine?.ouvrages_inventories } },
               { libelle: t('Opérationnels', 'Operational'), ind: { genre: 'compteur', valeur: s.patrimoine?.operationnels } },
@@ -318,7 +318,7 @@ export default function AmenagementPortuaireDashboardPage() {
 
           <Bloc
             titre={t('Dragage & profondeurs', 'Dredging & depths')}
-            lien="/amenagement-portuaire/dragage"
+            tcode="KAMT_DRG"
             indicateurs={[
               { libelle: t('Campagnes', 'Campaigns'), ind: { genre: 'compteur', valeur: s.dragage?.campagnes } },
               { libelle: t('Volume relevé', 'Surveyed volume'), ind: { genre: 'mesure', valeur: s.dragage?.volume_total_releve_m3, unite: 'm³' } },
@@ -330,7 +330,7 @@ export default function AmenagementPortuaireDashboardPage() {
 
           <Bloc
             titre={t('Conformité administrative', 'Administrative compliance')}
-            lien="/amenagement-portuaire/autorisations"
+            tcode="KAMT_AUT"
             indicateurs={[
               { libelle: t('Dossiers', 'Files'), ind: { genre: 'compteur', valeur: s.conformite?.dossiers_total } },
               { libelle: t('En attente de décision', 'Awaiting decision'), ind: { genre: 'compteur', valeur: s.conformite?.en_attente_de_decision } },
