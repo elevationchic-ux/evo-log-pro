@@ -11,6 +11,7 @@ from typing import Optional, List, Dict, Any
 
 from pydantic import BaseModel, Field
 
+from app.models.port_cameroun import TypePort
 from app.models.amenagement_portuaire import (
     TypeSchema, StatutSchema,
     TypeProjet, StatutProjet, OrigineFinancement,
@@ -889,3 +890,76 @@ class AutorisationTravauxOut(_Conf):
     auteur_saisie: Optional[str] = None
     notes: Optional[str] = None
     created_at: Optional[datetime] = None
+
+
+# ─── 10. Référentiel des places portuaires (table nationale ports_cameroun) ──
+
+class PlacePortuaireCreate(_Provenance):
+    """Declaration d'une place portuaire dans le referentiel national.
+
+    `code`, `nom` et `type_port` sont OBLIGATOIRES et sans defaut : le logiciel
+    ne devine ni l'appellation d'un port ni sa nature. Tout le reste reste NULL
+    tant que l'agent n'a pas le document officiel sous les yeux (arrete de
+    concession, plan d'exploitation, bail de terminal).
+    """
+    code: str = Field(min_length=2, max_length=10)
+    nom: str = Field(min_length=3, max_length=100)
+    type_port: TypePort
+    autorite_portuaire: Optional[str] = Field(default=None, max_length=160)
+    operateur: Optional[str] = Field(default=None, max_length=100)
+    ville: Optional[str] = Field(default=None, max_length=50)
+    region: Optional[str] = Field(default=None, max_length=50)
+    localisation: Optional[str] = Field(default=None, max_length=100)
+    adresse: Optional[str] = Field(default=None, max_length=200)
+    telephone: Optional[str] = Field(default=None, max_length=20)
+    email: Optional[str] = Field(default=None, max_length=100)
+    website: Optional[str] = Field(default=None, max_length=255)
+    date_ouverture: Optional[date] = None
+    description: Optional[str] = None
+
+
+class PlacePortuaireUpdate(_Provenance):
+    """Correction partielle : `exclude_unset` seul decide, rien n'est complete."""
+    nom: Optional[str] = Field(default=None, min_length=3, max_length=100)
+    type_port: Optional[TypePort] = None
+    autorite_portuaire: Optional[str] = Field(default=None, max_length=160)
+    operateur: Optional[str] = Field(default=None, max_length=100)
+    ville: Optional[str] = Field(default=None, max_length=50)
+    region: Optional[str] = Field(default=None, max_length=50)
+    localisation: Optional[str] = Field(default=None, max_length=100)
+    adresse: Optional[str] = Field(default=None, max_length=200)
+    telephone: Optional[str] = Field(default=None, max_length=20)
+    email: Optional[str] = Field(default=None, max_length=100)
+    website: Optional[str] = Field(default=None, max_length=255)
+    date_ouverture: Optional[date] = None
+    description: Optional[str] = None
+    capacite_annuelle_tonnes: Optional[float] = None
+    profondeur_m: Optional[float] = None
+    nombre_postes_quai: Optional[int] = None
+    tirant_eau_max: Optional[float] = None
+    zone_franche: Optional[bool] = None
+    est_actif: Optional[bool] = None
+
+
+class PlacePortuaireOut(_Conf):
+    id: int
+    code: str
+    nom: str
+    type_port: Optional[TypePort] = None
+    autorite_portuaire: Optional[str] = None
+    operateur: Optional[str] = None
+    ville: Optional[str] = None
+    region: Optional[str] = None
+    localisation: Optional[str] = None
+    adresse: Optional[str] = None
+    telephone: Optional[str] = None
+    email: Optional[str] = None
+    website: Optional[str] = None
+    date_ouverture: Optional[date] = None
+    description: Optional[str] = None
+    capacite_annuelle_tonnes: Optional[float] = None
+    profondeur_m: Optional[float] = None
+    nombre_postes_quai: Optional[int] = None
+    tirant_eau_max: Optional[float] = None
+    zone_franche: Optional[bool] = None
+    est_actif: Optional[bool] = None
