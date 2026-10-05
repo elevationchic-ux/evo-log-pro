@@ -566,7 +566,7 @@ class BalanceService:
             JournalAuxiliaire.code_journal == journal_code
         ).first()
         if not journal:
-            raise HTTPException(status_code=404, detail="Journal non trouvé")
+            raise ValueError("Journal non trouvé")
 
         lignes_gl = db.query(GrandLivreLigne).filter(
             and_(
