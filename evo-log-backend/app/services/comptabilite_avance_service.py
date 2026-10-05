@@ -851,6 +851,7 @@ class ClotureService:
             raise ValueError("Aucun exercice comptable trouvé")
 
         annee_cible = annee or exercice.annee
+        ex_id = exercice.id  # identifiant RESOLU (peut différer du paramètre)
 
         # Pieces validees par periode (agregation SQL, une seule requete).
         compteurs = dict(
@@ -859,7 +860,7 @@ class ClotureService:
                 func.count(EcritureComptableNew.id),
             ).filter(
                 and_(
-                    EcritureComptableNew.exercice_id == exercice_id,
+                    EcritureComptableNew.exercice_id == ex_id,
                     EcritureComptableNew.valider == True,  # noqa: E712
                 )
             ).group_by(EcritureComptableNew.periode).all()
@@ -869,7 +870,7 @@ class ClotureService:
         balances = {}
         for b in (
             db.query(BalanceVerification)
-            .filter(BalanceVerification.exercice_id == exercice_id)
+            .filter(BalanceVerification.exercice_id == ex_id)
             .order_by(BalanceVerification.id.asc())
             .all()
         ):
