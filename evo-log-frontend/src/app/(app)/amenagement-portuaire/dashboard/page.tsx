@@ -186,7 +186,9 @@ export default function AmenagementPortuaireDashboardPage() {
               className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-600/60"
             >
               <option value="">{t('Tout le département', 'Whole department')}</option>
-              {(places.data || []).map((p) => (
+              {/* Une place sortie du périmètre reste au référentiel (les pièces
+                  du domaine la citent encore) mais ne filtre plus une synthèse. */}
+              {(places.data || []).filter((p) => p.est_actif).map((p) => (
                 <option key={p.id} value={String(p.id)}>
                   {p.nom || p.code}
                   {p.code ? ` (${p.code})` : ''}

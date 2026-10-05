@@ -10,7 +10,9 @@
  * métier, et ce composant porte uniquement la mécanique honnête :
  *
  *  1. les options des listes déroulantes viennent de `/nomenclatures` et les
- *     places de `/places` : aucun choix n'est figé dans le composant ;
+ *     places de `/places` : aucun choix n'est figé dans le composant, et
+ *     seules les places encore dans le périmètre (`est_actif`) sont proposées
+ *     au rattachement d'une nouvelle ligne ;
  *  2. un champ laissé vide n'est PAS envoyé : le backend (`exclude_unset`)
  *     laisse NULL, et l'écran affiche « non enregistré » ;
  *  3. écrire est conditionné par la permission granulaire réelle
@@ -157,7 +159,9 @@ function ChampSaisie({
           ))}
           {places.length === 0 && (
             <option value="" disabled>
-              {lang === 'en' ? 'No port place in the national registry' : 'Aucune place dans le référentiel national'}
+              {lang === 'en'
+                ? 'No active port place in the national registry'
+                : 'Aucune place active dans le référentiel national'}
             </option>
           )}
         </select>
@@ -602,7 +606,7 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
                               <option value="non">{t('Non', 'No')}</option>
                             </>
                           ) : f.depuisPlaces ? (
-                            places.data?.map((p) => (
+                            placesActives.map((p) => (
                               <option key={p.id} value={String(p.id)}>{p.nom || p.code}</option>
                             ))
                           ) : (
@@ -841,7 +845,7 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
                   valeur={saisie[c.name] ?? ''}
                   onChange={(v) => setSaisie((prev) => ({ ...prev, [c.name]: v }))}
                   nomenclatures={nomenclatures.data || null}
-                  places={places.data || []}
+                  places={placesActives}
                   lang={lang}
                   lectureSeule={mode === 'edition' && !!c.lectureSeuleEdition}
                 />
@@ -895,7 +899,7 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
                   valeur={saisieAction[c.name] ?? ''}
                   onChange={(v) => setSaisieAction((prev) => ({ ...prev, [c.name]: v }))}
                   nomenclatures={nomenclatures.data || null}
-                  places={places.data || []}
+                  places={placesActives}
                   lang={lang}
                   lectureSeule={false}
                 />
