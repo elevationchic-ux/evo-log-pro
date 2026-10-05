@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   BookOpen, Calculator, FileText, Layers, ShieldCheck, Lock, ArrowRight,
-  Plus, AlertTriangle, RefreshCw, Database, Calendar,
+  Plus, AlertTriangle, RefreshCw, Database, Calendar, CheckCheck,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 
@@ -74,8 +74,9 @@ export default function ComptabiliteOhadaDashboard() {
   const enAttente = filtrees.filter(e => e.valider !== true).length;
 
   const shortcuts = [
-    { href: '/comptabilite-ohada/journal', icon: BookOpen, code: 'KOHA_JRN', title: 'Journaux Auxiliaires & Saisie', desc: 'Achats, Ventes, Banque, Caisse, Salaires, OD et lettrage.' },
+    { href: '/comptabilite-ohada/journal', icon: BookOpen, code: 'KOHA_JRN', title: 'Journaux Auxiliaires & Saisie', desc: 'Achats, Ventes, Banque, Caisse, Salaires et OD.' },
     { href: '/comptabilite-ohada/general-ledger', icon: Layers, code: 'KOHA_GL', title: 'Grand Livre & Balance', desc: 'Consultation par compte SYSCOHADA et balances de vérification.' },
+    { href: '/comptabilite-ohada/lettrage', icon: CheckCheck, code: 'KOHA_LET', title: 'Lettrage des comptes de tiers', desc: 'Rapprochement FIFO automatique ou manuel, annulation motivée.' },
     { href: '/comptabilite-ohada/financial-statements', icon: FileText, code: 'KOHA_BIL', title: 'États Financiers OHADA', desc: 'Bilan, Compte de Résultat, TAFIRE et Annexes.' },
     { href: '/comptabilite-ohada/chart-accounts', icon: Calculator, code: 'KOHA_COA', title: 'Plan Comptable SYSCOHADA', desc: 'Nomenclature officielle Classes 1 à 8.' },
     { href: '/comptabilite-ohada/monthly-closing', icon: Lock, code: 'KOHA_CLO', title: 'Clôtures & Arrêtés', desc: 'Verrouillage de période et dotations aux amortissements.' },
