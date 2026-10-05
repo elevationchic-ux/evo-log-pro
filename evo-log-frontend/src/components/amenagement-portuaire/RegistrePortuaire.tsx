@@ -256,6 +256,15 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
     },
   );
 
+  /* Places proposées à la saisie : le référentiel national en rend certaines
+     hors périmètre (`est_actif` faux, jamais supprimées). Une nouvelle ligne ne
+     peut pas s'y adosser, mais les lignes anciennes restent résolues grâce à la
+     liste complète (voir `places.data` passé au rendu des cellules). */
+  const placesActives = useMemo(
+    () => (places.data || []).filter((p) => p.est_actif),
+    [places.data],
+  );
+
   /* Filtres : l'état n'est pas un objet figé, chaque registre déclare ses
      propres paramètres de query côté serveur. */
   const [filtres, setFiltres] = useState<Record<string, string>>({});
