@@ -910,6 +910,71 @@ export default function RegistrePortuaire({ config }: { config: ConfigRegistre }
           </form>
         </div>
       )}
+      {/* Modale de sonde : agrégats relus sur la ligne, tels que le serveur
+          les calcule (null = non calculable faute de saisie, jamais 0). */}
+      {sondeOuverte && ligneSonde && (
+        <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/70 p-4 overflow-y-auto">
+          <div className="w-full max-w-xl my-8 bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6">
+            <h2 className="text-lg font-bold text-slate-100">
+              {sondeOuverte.libelleEn && lang === 'en' ? sondeOuverte.libelleEn : sondeOuverte.libelle}
+            </h2>
+            <p className="mt-2 text-[11px] text-slate-400 font-mono">
+              {t('Ligne concernée', 'Affected line')} : {String(ligneSonde[config.colonnes[0]?.name] ?? ligneSonde.id)}
+            </p>
+            {sondeOuverte.note && (
+              <p className="mt-2 rounded-xl border border-cyan-800/50 bg-cyan-950/40 px-3 py-2 text-[11px] leading-relaxed text-cyan-200">
+                {sondeOuverte.noteEn && lang === 'en' ? sondeOuverte.noteEn : sondeOuverte.note}
+              </p>
+            )}
+
+            {chargementSonde ? (
+              <div className="mt-4">
+                <DataLoadingState rows={3} label={t('Lecture du serveur…', 'Reading the server…')} />
+              </div>
+            ) : erreurSonde ? (
+              <p className="mt-3 rounded-xl border border-amber-600/40 bg-amber-600/10 px-3 py-2 text-[11px] leading-relaxed text-amber-200">
+                {erreurSonde}
+              </p>
+            ) : brutSonde ? (
+              <>
+                <dl className="mt-4 divide-y divide-slate-800">
+                  {sondeOuverte.cles.map((cle) => {
+                    const rendu = rendreCleSonde(cle, brutSonde[cle.name], lang);
+                    // Une clé que la route ne renvoie pas n'est pas remplacée
+                    // par un manquant générique : c'est l'API qu'il faut corriger.
+                    const nonServie = !(cle.name in brutSonde);
+                    return (
+                      <div key={cle.name} className="flex items-baseline justify-between gap-4 py-2">
+                        <dt className="text-[11px] uppercase tracking-wide text-slate-500">
+                          {lang === 'en' && cle.labelEn ? cle.labelEn : cle.label}
+                        </dt>
+                        <dd className={`text-sm text-right ${rendu.manquant ? 'text-slate-500 italic' : 'text-slate-100 font-semibold'}`}>
+                          {nonServie ? t('clé non servie par l\u2019API', 'key not served by the API') : rendu.texte}
+                        </dd>
+                      </div>
+                    );
+                  })}
+                </dl>
+                {typeof brutSonde.note === 'string' && brutSonde.note.trim() && (
+                  <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
+                    {t('Serveur : ', 'Server: ')}{brutSonde.note}
+                  </p>
+                )}
+              </>
+            ) : null}
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => { setSondeOuverte(null); setLigneSonde(null); }}
+                className="px-4 py-2 min-h-11 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-200 hover:bg-slate-700"
+              >
+                {t('Fermer', 'Close')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ModuleLayout>
   );
 }
