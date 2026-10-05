@@ -72,9 +72,12 @@ modèle `app/models/amenagement_portuaire.py`).
   (60 endpoints : 54 ecritures/lectures reelles, 6 teleprocedures annoncees `501`),
   migrations `038` (tables), `039` et `042` (grants RBAC), `041` (colonnes
   `ports_cameroun`). Autorisation par `require_perm("amenagement.<sous_module>.<action>")`.
-- **Frontend** : `src/app/(app)/amenagement-portuaire/*` (10 ecrans + tableau de
-  bord), composants dedies dans `src/components/amenagement-portuaire/` dont
-  `ReferentielPlaces` (declaration des places dans le referentiel national).
+- **Frontend** : `src/app/(app)/amenagement-portuaire/*` (10 ecrans : tableau de
+  bord + 9 registres), composants dedies dans `src/components/amenagement-portuaire/`
+  dont `ReferentielPlaces` (declaration des places dans le referentiel national,
+  montee sur le tableau de bord  le sous-module `place` n'a pas de registre propre
+  parce qu'il n'enregistre rien d'annuel : il alimente la liste que tous les autres
+  proposent).
 - **Theme propre** : `#0E7490` (`modulePalette.ts`, `moduleColors.ts`, `navI18n.ts`,
   icone 📐), isole des teintes des autres departements.
 - **Independance** : `navigationRegistry.ts` le declare comme famille autonome
