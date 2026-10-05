@@ -21,7 +21,7 @@ from app.models.user import User
 from app.models.tenant import Company
 from app.models.finance import Facture, Paiement, FactureStatus, PaiementStatus
 from app.models.finance_ohada import (
-    Lettrage, BalanceVerification, LigneBalance, PlanComptableOHADA, TypeLettrage,
+    Lettrage, PlanComptableOHADA, TypeLettrage,
 )
 from app.models.parc import Equipement, Maintenance
 from app.models.magasin import Article
@@ -430,29 +430,12 @@ async def reception_timing_prediction(
             "based_on": len(durations)}
 
 
-# ─── Comptabilite : balance verifiee (lit. path, gagne sur /balances/{id}) ──
-@router.get("/api/v1/comptabilite-avance/balances/verification")
-async def balances_verification(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
-):
-    balance = db.query(BalanceVerification).order_by(desc(BalanceVerification.id)).first()
-    if not balance:
-        return {"lignes": [], "total": 0, "periode": None, "statut": None}
-    lignes = db.query(LigneBalance).filter(LigneBalance.balance_id == balance.id).all()
-    data = [
-        {
-            "compte_numero": l.compte_numero, "compte_intitule": l.compte_intitule,
-            "debit": _f(l.total_debit), "credit": _f(l.total_credit),
-            "total_debit": _f(l.total_debit), "total_credit": _f(l.total_credit),
-            "solde_initial_debit": 0, "solde_initial_credit": 0,
-            "solde_final_debit": _f(l.solde_debit), "solde_final_credit": _f(l.solde_credit),
-        } for l in lignes
-    ]
-    return {
-        "lignes": data, "total": len(data),
-        "periode": balance.periode, "statut": str(balance.statut),
-        "date_balance": balance.date_balance.isoformat() if balance.date_balance else None,
-    }
+# ─── Comptabilite : balance de verification ────────────────────────────────
+# Le pont de compatibilite qui renvoyait la derniere BalanceVerification
+# persistee (solde_initial fige a 0) a ete SUPPRIME : le vrai endpoint
+# GET /comptabilite-avance/balances/verification (6 colonnes, agrégé en
+# direct sur les lignes du grand livre) est desormais porte par le router
+# comptabilite_avance et gagne la course d'ordre de routage.
 
 
 # ─── Transit & Douane : documents GUCE ─────────────────────────────────────

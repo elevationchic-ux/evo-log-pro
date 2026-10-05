@@ -329,7 +329,7 @@ from app.routers.v1 import auth, tiers, transport, transport_exploitation, finan
 safe_include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 
 # Pont de compatibilite : endpoints reels (chemins absolus) enregistres tot
-# pour gagner les courses d'ordre de routage (ex. balances/verification).
+# pour gagner les courses d'ordre de routage (chemins absolus /a/b/c).
 try:
     from app.routers.v1 import gap_bridges
     safe_include_router(gap_bridges.router, tags=["Compatibilite Frontend"])
