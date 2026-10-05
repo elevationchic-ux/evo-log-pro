@@ -141,7 +141,7 @@ def lettrage_manuel(
         lettrage = LettrageService.lettrage_manuel(
             db,
             request.compte_id,
-            request.ecritures_ids,
+            request.lignes_ids,
             request.date_lettrage,
             request.effectue_par,
             request.reference
