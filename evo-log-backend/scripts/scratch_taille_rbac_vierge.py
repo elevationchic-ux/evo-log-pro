@@ -57,10 +57,8 @@ for nom in ("CHEF_AMENAGEMENT_PORTUAIRE", "INGENIEUR_AMENAGEMENT", "AUDITEUR",
     codes = [r[0] for r in db.execute(text(
         "SELECT p.code FROM role_permissions rp JOIN permissions p ON p.id=rp.permission_id "
         f"WHERE rp.role_id={rid}")).all()]
-    user = type("U", (), {"id": 1, "company_id": None, "role": nom, "level": 2,
-                          "permissions": codes})()
     rendu = {
-        a: bool(has_perm(user, f"amenagement.place.{a}")) for a in ("read", "create", "modify")
+        a: bool(has_perm(codes, f"amenagement.place.{a}")) for a in ("read", "create", "modify")
     }
     liens = len([c for c in codes if c.startswith("amenagement.")])
     print(f"{nom:28} liens_amenagement={liens:3} place={rendu}")

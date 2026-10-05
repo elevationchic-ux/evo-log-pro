@@ -19,6 +19,7 @@ from app.schemas.comptabilite_avance import (
     CompteResultatOHADADetailleCreate, CompteResultatOHADADetailleResponse,
     TAFIRECreate, TAFIREResponse,
     AnnexesOHDACreate, AnnexesOHDAResponse, AnnexesGenererRequest,
+    BilanGenererRequest, CompteResultatGenererRequest, TAFIREGenererRequest,
     ClotureMensuelleRequest, ClotureMensuelleResponse,
     ClotureAnnuelleRequest, ClotureAnnuelleResponse,
     ReportANouveauRequest, ReportANouveauResponse,
@@ -318,11 +319,11 @@ def balances_verification(
 
 @router.post("/etats-financiers/bilan", response_model=BilanOHADADetailleResponse)
 def generer_bilan_ohada(
-    request: BilanOHADADetailleCreate,
+    request: BilanGenererRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
-    """Générer le bilan OHADA détaillé"""
+    """Générer le bilan OHADA détaillé depuis le grand livre réel"""
     bilan = EtatsFinanciersOHADAService.generer_bilan_ohada_detaille(
         db,
         request.exercice_id,
@@ -346,11 +347,11 @@ def obtenir_bilan(
 
 @router.post("/etats-financiers/compte-resultat", response_model=CompteResultatOHADADetailleResponse)
 def generer_compte_resultat_ohada(
-    request: CompteResultatOHADADetailleCreate,
+    request: CompteResultatGenererRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("comptabilite.bilan.read"))
 ):
-    """Générer le compte de résultat OHADA détaillé"""
+    """Générer le compte de résultat OHADA détaillé depuis le grand livre réel"""
     compte_resultat = EtatsFinanciersOHADAService.generer_compte_resultat_ohada_detaille(
         db,
         request.exercice_id,
