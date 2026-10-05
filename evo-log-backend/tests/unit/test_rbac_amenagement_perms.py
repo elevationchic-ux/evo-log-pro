@@ -449,9 +449,15 @@ def test_une_place_se_desactive_et_ne_se_detruit_pas(client_ingenieur, db):
     # domaine conserve sa reference.
     assert db.query(PortCameroun).filter(PortCameroun.code == "LIM").count() == 1
 
-    # Et aucune route de suppression n'est exposee sur ce referentiel.
-    d = client_ingenieur.request("DELETE", f"{BASE}/places/{place.id}")
-    assert d.status_code in (405, 404), d.text
+    # Aucune route DELETE n'est declaree sur ce referentiel : ce qui n'existe
+    # pas au contrat ne doit pas exister non plus dans le schéma OpenAPI (le
+    # fallback « pending » global repondrait a la place, ce ne serait pas une
+    # suppression, mais ce ne serait pas non plus un contrat).
+    from app.main import app
+
+    verbes = app.openapi()["paths"].get(f"{BASE}/places/{{ident}}", {})
+    assert "delete" not in verbes, sorted(verbes)
+    assert set(verbes) == {"put"}, sorted(verbes)
 
 
 def test_le_vocabulaire_publie_par_nomenclatures_est_reel(client_chef):

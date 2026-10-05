@@ -635,7 +635,8 @@ def post_valider_tva(
     if not periode or len(periode) != 7:
         raise HTTPException(status_code=422, detail="Champ 'periode' requis (format YYYY-MM)")
     try:
-        return TVAService.valider_declaration(db, periode, current_user.full_name or current_user.email)
+        who = getattr(current_user, "full_name", None) or getattr(current_user, "email", "inconnu")
+        return TVAService.valider_declaration(db, periode, who)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

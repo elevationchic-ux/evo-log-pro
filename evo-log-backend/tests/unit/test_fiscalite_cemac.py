@@ -242,8 +242,8 @@ def test_is_pas_exercice_rejette(db):
 def salaires(db):
     """Deux salariés avec fiches de paie pour mars 2026."""
     from app.models.user import User
-    emp1 = User(email="emp1@test.com", full_name="Emp One", is_active=True)
-    emp2 = User(email="emp2@test.com", full_name="Emp Two", is_active=True)
+    emp1 = User(username="emp1", email="emp1@test.com", full_name="Emp One", is_active=True, hashed_password="x")
+    emp2 = User(username="emp2", email="emp2@test.com", full_name="Emp Two", is_active=True, hashed_password="x")
     db.add_all([emp1, emp2])
     db.flush()
 
