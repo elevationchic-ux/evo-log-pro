@@ -1,3 +1,0 @@
-permission_catalog.py: U+FFFD=0 e_accent_aigu_lignes=2 []
-amenagement_portuaire.py: U+FFFD=0 e_accent_aigu_lignes=0 []
-amenagement_portuaire.py: U+FFFD=0 e_accent_aigu_lignes=0 []
