@@ -529,7 +529,7 @@ export const registreMarches: ConfigRegistre = {
       libelle: 'Soumission du dossier à la COLIFE',
       libelleEn: 'Submission of the file to the COLIFE',
       motif:
-        'La COLIFE fonctionne par convocation et séance physiques : aucune interface de dépôt n\u2019existe, le module attend l\u2019avis Consigné après séance.',
+        'La COLIFE fonctionne par convocation et séance physiques : aucune interface de dépôt n’existe, le module attend l’avis consigné après séance.',
       motifEn:
         'The COLIFE works through physical convocations and sessions: no filing interface exists, the module awaits the advice recorded after the session.',
       interroger: (id) => amenagementAPI.soumissionColife(id),
@@ -859,3 +859,206 @@ export const registreInfrastructures: ConfigRegistre = {
     },
   ],
 };
+
+/* ═══════════════════ 8. Campagnes de dragage & chenal ══════════════════════ */
+
+export const registreDragage: ConfigRegistre = {
+  permSousModule: 'dragage',
+  tcode: 'KAMT_DRG',
+  icon: Waves,
+  titre: 'Campagnes de dragage & profondeurs du chenal',
+  titreEn: 'Dredging campaigns & channel depths',
+  description:
+    'Dragage d’entretien, de construction ou de curage : cubages mesurés et facturés, profondeurs avant / visée / obtenue, exutoire et autorisation de rejet.',
+  descriptionEn:
+    'Maintenance, construction or cleaning dredging: measured and billed volumes, before / target / achieved depths, disposal site and discharge permit.',
+  aide:
+    'Le volume facturé peut différer du volume mesuré : les deux colonnes restent séparées et le logiciel ne les réconcilie pas, c’est au décompte de l’ingénieur de le faire. Une profondeur « obtenue » sans relevé bathymétrique consigné reste non enregistrée.',
+  aideEn:
+    'Billed volume may differ from measured volume: the two columns stay separate and the software does not reconcile them — that is the engineer’s payment certificate job. An “achieved” depth without a recorded bathymetric survey stays “not recorded”.',
+  lister: (params) => amenagementAPI.listDragages(params),
+  creer: (data) => amenagementAPI.createDragage(data),
+  modifier: (id, data) => amenagementAPI.updateDragage(id, data),
+  unicite: 'code_campagne',
+  colonnes: [
+    { name: 'code_campagne', label: 'Code', labelEn: 'Code', type: 'code', essence: true },
+    { name: 'libelle', label: 'Campagne', labelEn: 'Campaign', type: 'texte', essence: true },
+    { name: 'port_id', label: 'Place', labelEn: 'Port place', type: 'place' },
+    { name: 'type_dragage', label: 'Nature', labelEn: 'Type', type: 'enum', nomenclature: 'type_dragage' },
+    { name: 'profondeur_avant_m', label: 'Avant', labelEn: 'Before', type: 'nombre', unite: 'm' },
+    { name: 'profondeur_visee_m', label: 'Visée', labelEn: 'Target', type: 'nombre', unite: 'm' },
+    { name: 'profondeur_obtenue_m', label: 'Obtenue', labelEn: 'Achieved', type: 'nombre', unite: 'm', essence: true },
+    { name: 'volume_mesure_m3', label: 'Cubage mesuré', labelEn: 'Measured volume', type: 'nombre', unite: 'm³' },
+    { name: 'volume_facture_m3', label: 'Cubage facturé', labelEn: 'Billed volume', type: 'nombre', unite: 'm³' },
+    { name: 'exutoire_rejet', label: 'Exutoire', labelEn: 'Disposal site', type: 'texte' },
+    { name: 'date_debut', label: 'Début', labelEn: 'Start', type: 'date' },
+    { name: 'date_fin', label: 'Fin', labelEn: 'End', type: 'date' },
+    { name: 'cout_xaf', label: 'Coût', labelEn: 'Cost', type: 'montant' },
+    { name: 'leve_bathymetrique_apres', label: 'Relevé après', labelEn: 'Post-survey', type: 'booleen' },
+  ],
+  champs: [
+    { name: 'code_campagne', label: 'Code de la campagne', labelEn: 'Campaign code', type: 'texte', requisCreation: true, lectureSeuleEdition: true },
+    { name: 'libelle', label: 'Libellé', labelEn: 'Title', type: 'texte', requisCreation: true, large: true },
+    { name: 'port_id', label: 'Place portuaire', labelEn: 'Port place', type: 'select', depuisPlaces: true, requisCreation: true },
+    { name: 'projet_id', label: 'Projet lié (id serveur)', labelEn: 'Linked project (server id)', type: 'nombre', min: 1 },
+    { name: 'type_dragage', label: 'Nature du dragage', labelEn: 'Dredging type', type: 'select', nomenclature: 'type_dragage' },
+    { name: 'zone_traitee', label: 'Zone traitée', labelEn: 'Treated area', type: 'texte', large: true, aide: 'Chenal, bassin de virement, avant-qual, appontement : dénomination reprise du dossier.' },
+    { name: 'superficie_draguee_m2', label: 'Superficie draguée', labelEn: 'Dredged area', type: 'nombre', unite: 'm²', min: 0 },
+    { name: 'volume_mesure_m3', label: 'Volume mesuré', labelEn: 'Measured volume', type: 'nombre', unite: 'm³', min: 0 },
+    { name: 'volume_facture_m3', label: 'Volume facturé', labelEn: 'Billed volume', type: 'nombre', unite: 'm³', min: 0 },
+    { name: 'profondeur_avant_m', label: 'Profondeur avant', labelEn: 'Depth before', type: 'nombre', unite: 'm', min: 0 },
+    { name: 'profondeur_visee_m', label: 'Profondeur visée', labelEn: 'Target depth', type: 'nombre', unite: 'm', min: 0 },
+    { name: 'profondeur_obtenue_m', label: 'Profondeur obtenue', labelEn: 'Achieved depth', type: 'nombre', unite: 'm', min: 0, aide: 'Valeur du relevé bathymétrique après travaux ; à consigner via l’action « Consigner un relevé ».' },
+    { name: 'nature_sediment', label: 'Nature des sédiments', labelEn: 'Sediment nature', type: 'texte', aide: 'Vase, sable, argile… tel que carotté ou analysé.' },
+    { name: 'exutoire_rejet', label: 'Exutoire de rejet', labelEn: 'Disposal site', type: 'texte' },
+    { name: 'autorisation_rejet_reference', label: 'Référence de l’autorisation de rejet', labelEn: 'Discharge permit reference', type: 'texte' },
+    { name: 'entreprise', label: 'Entreprise de dragage', labelEn: 'Dredging contractor', type: 'texte' },
+    { name: 'type_drague', label: 'Type de drague', labelEn: 'Dredger type', type: 'texte', aide: 'Drague à pointe, à câble, aspiratrice… cité au contrat.' },
+    { name: 'cout_xaf', label: 'Coût de la campagne', labelEn: 'Campaign cost', type: 'montant' },
+    { name: 'devise', label: 'Devise', labelEn: 'Currency', type: 'texte', aide: 'Laisser vide : le serveur applique XAF.' },
+    { name: 'date_debut', label: 'Date de début', labelEn: 'Start date', type: 'date' },
+    { name: 'date_fin', label: 'Date de fin', labelEn: 'End date', type: 'date' },
+    { name: 'jours_arret', label: 'Jours d’arrêt', labelEn: 'Downtime days', type: 'nombre', min: 0 },
+    { name: 'statut', label: 'Statut de la campagne', labelEn: 'Campaign status', type: 'texte', aide: 'Le serveur ne publie pas de vocabulaire de statut pour le dragage : reprendre le terme de l’ordre de service (préparation, en cours, close…).' },
+    { name: 'leve_bathymetrique_apres', label: 'Relevé bathymétrique après travaux', labelEn: 'Post-work survey', type: 'booleen' },
+    { name: 'date_releve', label: 'Date du relevé', labelEn: 'Survey date', type: 'date' },
+    { name: 'autorisation_administrative', label: 'Autorisation administrative', labelEn: 'Administrative authorisation', type: 'texte' },
+    { name: 'impact_environnemental', label: 'Impact environnemental constaté', labelEn: 'Environmental impact', type: 'zone', large: true },
+    { name: 'source_reference', label: 'Source de la saisie', labelEn: 'Entry source', type: 'texte' },
+    { name: 'date_verification', label: 'Date de vérification', labelEn: 'Verification date', type: 'date' },
+    { name: 'notes', label: 'Notes', labelEn: 'Notes', type: 'zone', large: true },
+  ],
+  // La route GET /dragage n’accepte que ces deux paramètres ; un filtre sur le
+  // statut ou la place non servie serait ignoré en silence, donc il n’est pas
+  // proposé.
+  filtres: [
+    { name: 'port_id', label: 'Place', labelEn: 'Port place', type: 'select', depuisPlaces: true },
+    { name: 'type_dragage', label: 'Nature', labelEn: 'Type', type: 'select', nomenclature: 'type_dragage' },
+  ],
+  actions: [
+    {
+      id: 'bathymetrie',
+      libelle: 'Consigner un relevé bathymétrique',
+      libelleEn: 'Record a bathymetric survey',
+      action: 'modify',
+      avertissement:
+        'La profondeur obtenue et la date du relevé viennent du bathymétrique contractuel : le serveur ne les déduit jamais du volume dragué.',
+      avertissementEn:
+        'The achieved depth and survey date come from the contractual bathymetric survey: the server never derives them from the dredged volume.',
+      champs: [
+        { name: 'profondeur_obtenue_m', label: 'Profondeur relevée (m)', labelEn: 'Surveyed depth (m)', type: 'nombre', min: 0, requisCreation: true },
+        { name: 'date_releve', label: 'Date du relevé', labelEn: 'Survey date', type: 'date', requisCreation: true },
+        { name: 'volume_mesure_m3', label: 'Cubage relevé (m³)', labelEn: 'Measured volume (m³)', type: 'nombre', min: 0, aide: 'Facultatif : ne remplit pas cette colonne si le relevé ne la donne pas.' },
+      ],
+      executer: (id, v) => amenagementAPI.consignerBathymetrie(id, {
+        profondeur_obtenue_m: Number(req(v, 'profondeur_obtenue_m')),
+        date_releve: req(v, 'date_releve'),
+        volume_mesure_m3: optNum(v, 'volume_mesure_m3'),
+      }),
+      succes: 'Relevé bathymétrique consigné, la campagne est marquée « levé après dragage ».',
+      succesEn: 'Bathymetric survey recorded; the campaign is flagged as post-dredge surveyed.',
+    },
+  ],
+  circuits: [
+    {
+      libelle: 'Demande d’agrément d’un exutoire (MINEPPT)',
+      libelleEn: 'Disposal site permit request (MINEPPT)',
+      motif:
+        'Aucun guichet dématérialisé d’agrément des sites d’immersion n’existe : la route le refuse et le module se borne à enregistrer la référence de l’autorisation quand elle est notifiée.',
+      motifEn:
+        'No electronic filing window exists for immersion site permits: the route refuses it, the module only records the permit reference once notified.',
+      interroger: (id) => amenagementAPI.demandeExutoire(id),
+    },
+  ],
+};
+
+/* ═══════════ 9. Autorisations administratives (EIES, permis) ═══════════════ */
+
+export const registreAutorisations: ConfigRegistre = {
+  permSousModule: 'autorisation',
+  tcode: 'KAMT_AUT',
+  icon: FileBadge,
+  titre: 'Autorisations administratives & études d’impact',
+  titreEn: 'Administrative authorisations & impact studies',
+  description:
+    'Dossiers de conformité des travaux : EIES (loi n° 96/012), permis et autorisations, dates de dépôt, arrêté d’accord, expiration et charges environnementales.',
+  descriptionEn:
+    'Compliance files for works: EIAs (law no. 96/012), permits and authorisations, filing dates, granting order, expiry and environmental charges.',
+  aide:
+    'Une autorisation ne se délivre pas dans ce logiciel : on y consigne le numéro de l’arrêté, ses dates et ses conditions particulières, tels que reçus de l’administration. Un dossier sans date d’accord reste explicitement « en préparation » ou « déposé ».',
+  aideEn:
+    'No permit is issued inside this software: it records the order number, dates and special conditions as received from the administration. A file without a granting date honestly stays “preparing” or “filed”.',
+  lister: (params) => amenagementAPI.listAutorisations(params),
+  creer: (data) => amenagementAPI.createAutorisation(data),
+  modifier: (id, data) => amenagementAPI.updateAutorisation(id, data),
+  unicite: 'reference',
+  colonnes: [
+    { name: 'reference', label: 'Référence', labelEn: 'Reference', type: 'code', essence: true },
+    { name: 'type_autorisation', label: 'Nature', labelEn: 'Type', type: 'enum', nomenclature: 'type_autorisation_travaux', essence: true },
+    { name: 'objet', label: 'Objet', labelEn: 'Purpose', type: 'texte', essence: true },
+    { name: 'administration', label: 'Administration', labelEn: 'Authority', type: 'texte' },
+    { name: 'statut', label: 'Statut', labelEn: 'Status', type: 'enum', nomenclature: 'statut_autorisation', essence: true },
+    { name: 'date_depot', label: 'Déposé le', labelEn: 'Filed on', type: 'date' },
+    { name: 'date_accord', label: 'Accordé le', labelEn: 'Granted on', type: 'date' },
+    { name: 'numero_arrete', label: 'N° de l’arrêté', labelEn: 'Order no.', type: 'code' },
+    { name: 'date_expiration', label: 'Expire le', labelEn: 'Expires', type: 'date' },
+    { name: 'charges_enviro_xaf', label: 'Charges environnementales', labelEn: 'Environmental charges', type: 'montant' },
+    { name: 'audit_date_prochaine', label: 'Prochain audit', labelEn: 'Next audit', type: 'date' },
+  ],
+  champs: [
+    { name: 'reference', label: 'Référence du dossier', labelEn: 'File reference', type: 'texte', requisCreation: true, lectureSeuleEdition: true },
+    { name: 'type_autorisation', label: 'Nature de l’autorisation', labelEn: 'Authorisation type', type: 'select', nomenclature: 'type_autorisation_travaux', requisCreation: true },
+    { name: 'projet_id', label: 'Projet lié (id serveur)', labelEn: 'Linked project (server id)', type: 'nombre', min: 1 },
+    { name: 'port_id', label: 'Place portuaire', labelEn: 'Port place', type: 'select', depuisPlaces: true },
+    { name: 'administration', label: 'Administration compétente', labelEn: 'Competent authority', type: 'texte', aide: 'MINEPPT, ANAQ, région, commune… tel que nommé dans la correspondance.' },
+    { name: 'categorie_projet', label: 'Catégorie de l’étude', labelEn: 'Study category', type: 'texte', aide: 'Catégorie EIES attribuée par l’administration (1, 2 ou 3) ; laissée vide si non notifiée.' },
+    { name: 'objet', label: 'Objet de la demande', labelEn: 'Purpose', type: 'zone', large: true },
+    { name: 'statut', label: 'Statut du dossier', labelEn: 'File status', type: 'select', nomenclature: 'statut_autorisation' },
+    { name: 'date_depot', label: 'Date de dépôt', labelEn: 'Filing date', type: 'date' },
+    { name: 'date_accord', label: 'Date d’accord', labelEn: 'Granting date', type: 'date' },
+    { name: 'date_expiration', label: 'Date d’expiration', labelEn: 'Expiry date', type: 'date' },
+    { name: 'numero_arrete', label: 'Numéro de l’arrêté', labelEn: 'Order number', type: 'texte' },
+    { name: 'conditions_particulieres', label: 'Conditions particulières', labelEn: 'Special conditions', type: 'zone', large: true, aide: 'Prescriptions recopiées de l’arrêté : le logiciel n’en ajoute aucune.' },
+    { name: 'charges_enviro_xaf', label: 'Charges environnementales', labelEn: 'Environmental charges', type: 'montant' },
+    { name: 'audit_date_prochaine', label: 'Date du prochain audit', labelEn: 'Next audit date', type: 'date' },
+    { name: 'piece_jointe', label: 'Référence de la pièce archivée', labelEn: 'Archived document reference', type: 'texte' },
+    { name: 'source_reference', label: 'Source de la saisie', labelEn: 'Entry source', type: 'texte' },
+    { name: 'date_verification', label: 'Date de vérification', labelEn: 'Verification date', type: 'date' },
+    { name: 'notes', label: 'Notes', labelEn: 'Notes', type: 'zone', large: true },
+  ],
+  // GET /autorisations ne filtre que sur le statut et la nature : aucun filtre
+  // « place » n’est proposé, la route l’ignorerait.
+  filtres: [
+    { name: 'statut', label: 'Statut', labelEn: 'Status', type: 'select', nomenclature: 'statut_autorisation' },
+    { name: 'type_autorisation', label: 'Nature', labelEn: 'Type', type: 'select', nomenclature: 'type_autorisation_travaux' },
+  ],
+  circuits: [
+    {
+      libelle: 'Dépôt du dossier auprès du MINEPPT',
+      libelleEn: 'Electronic filing of the file to the MINEPPT',
+      motif:
+        'Le dépôt d’une EIES ou d’un permis se fait au guichet environnemental officiel, hors système : la route le dit et le module attend l’accusé de dépôt.',
+      motifEn:
+        'EIAs and permits are filed at the official environmental window, outside this system: the route says so, the module awaits the filing receipt.',
+      interroger: (id) => amenagementAPI.depotAutorisation(id),
+    },
+  ],
+};
+
+/* ══════════════════════ Table de routage des registres ══════════════════════ */
+
+/** Une entrée par page du département ; la clé correspond au segment d’URL
+ *  déclaré dans navigationRegistry (aucun chemin codé ailleurs). */
+export const REGISTRES_AMENAGEMENT = {
+  'schemas-directeurs': registreSchemas,
+  projets: registreProjets,
+  programmation: registreProgrammation,
+  marches: registreMarches,
+  'titres-domaniaux': registreTitres,
+  concessions: registreConcessions,
+  infrastructures: registreInfrastructures,
+  dragage: registreDragage,
+  autorisations: registreAutorisations,
+} as const;
+
+export type CleRegistreAmenagement = keyof typeof REGISTRES_AMENAGEMENT;
