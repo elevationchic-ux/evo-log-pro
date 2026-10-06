@@ -168,8 +168,21 @@ class MissionResponse(MissionBase):
     date_fin_prevue: Optional[datetime] = None
     date_debut_reelle: Optional[datetime] = None
     date_fin_reelle: Optional[datetime] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    # Champs servis par _mission_payload (transport_exploitation) : preuves
+    # reelles uniquement, nuls quand l'information n'existe pas en base.
+    nom_receptionnaire: Optional[str] = None
+    signature_receptionnaire: Optional[str] = None
+    date_creation: Optional[datetime] = None
+    origine: Optional[str] = None
+    destination: Optional[str] = None
+    montant_fret: Optional[float] = None
+    frais_route_prevus: Optional[float] = None
+    prix_carburant_prevu: Optional[float] = None
+    camion: Optional[dict] = None
+    chauffeur: Optional[dict] = None
+    client: Optional[dict] = None
     
     class Config:
         from_attributes = True
