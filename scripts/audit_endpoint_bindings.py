@@ -51,16 +51,21 @@ sys.path.insert(0, str(BACKEND))
 DECLARATION_PREFIXE = re.compile(
     r"(?:export\s+)?const\s+([A-Za-z_$][\w$]*)\s*=\s*[`'\"](/api/[^`'\"]*)[`'\"]"
 )
-# Appel client : `fooAPI.get(`/`, apiClient.post('/x', data)`, y compris generiques
-# `<Response>` et instance axios locale. Le 2e groupe est le delimiter, retrouve en
-# 3e pour borner exactement le litteral.
+# Appel client : `amenagementAPI.get(...)`, `apiClient.post('/x', data)`, y compris
+# generiques `<Response>` et instance axios locale. Le 2e groupe est le delimiter,
+# retrouve en 3e pour borner exactement le litteral.
+#
+# Deux contraintes qui ne sont pas esthetiques :
+#   - l'identificateur doit finir par API/api/Client/client : sans cela, chaque
+#     `.get(` du depot (y compris `Map.get`, `ctx.get`) declenchait une recherche
+#     de quote fermante et l'audit ne terminait plus ;
+#   - pas de re.S et longueur bornee : une URL d'API ne franchit jamais une ligne.
 APPEL = re.compile(
-    r"\b([A-Za-z_$][\w$]*(?:API|api|Client|client)?)\.(get|post|put|patch|delete)\s*"
-    r"(?:<[^<>()]*>)?\(\s*([`'\"])((?:\\.|[^\\`'\"])*)\3",
-    re.S,
+    r"\b([A-Za-z_$][\w$]*(?:API|api|Client|client))\.(get|post|put|patch|delete)\s*"
+    r"(?:<[^<>()]*>)?\(\s*([`'\"])((?:\\.|[^\\`'\n]){0,220})\3"
 )
 # `fetch(...)` avec un chemin en dur, hors instance cliente.
-FETCH = re.compile(r"\bfetch\(\s*([`'\"])((?:\\.|[^\\`'\"])*)\1")
+FETCH = re.compile(r"\bfetch\(\s*([`'\"])((?:\\.|[^\\`'\n]){0,220})\1")
 INTERPOLATION = re.compile(r"\$\{[^}]*\}")
 
 
