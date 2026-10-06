@@ -11,9 +11,12 @@ export default function ClientPortalHome() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [declarations, setDeclarations] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  // Form quote state : clés réelles de POST /api/v1/b2b-portal/quotes
+  // (service_type + container_count > 0 + client_nom ou client_id requis).
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
-
-  // Form quote request state
+  const [quoteService, setQuoteService] = useState('');
+  const [quoteConteneurs, setQuoteConteneurs] = useState('');
+  const [quoteClient, setQuoteClient] = useState('');
   const [quoteOrigin, setQuoteOrigin] = useState('');
   const [quoteDestination, setQuoteDestination] = useState('');
   const [quoteCargo, setQuoteCargo] = useState('');
@@ -49,35 +52,42 @@ export default function ClientPortalHome() {
 
   const handleCreateQuote = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!quoteOrigin || !quoteDestination) {
-      toast.error('Veuillez remplir l\'origine et la destination');
+    if (!quoteService || !quoteClient || !quoteOrigin || !quoteDestination) {
+      toast.error('Service, client, origine et destination sont requis');
+      return;
+    }
+    const conteneurs = parseInt(quoteConteneurs, 10);
+    if (!conteneurs || conteneurs <= 0) {
+      toast.error('Nombre de conteneurs requis (entier > 0)');
       return;
     }
     try {
-      await b2bPortalAPI.createQuote({
-        type_fret: 'TERRESTRE',
+      // Charge le message du serveur (grille tarifaire manquante => 400 explicite).
+      const res = await b2bPortalAPI.createQuote({
+        service_type: quoteService,
+        client_nom: quoteClient,
+        container_count: conteneurs,
         origine: quoteOrigin,
         destination: quoteDestination,
-        nature_marchandise: quoteCargo || 'Cargaison Marchandises Diverses',
-        poids_estime_kg: 1000.0,
-        volume_cbm: 5.0,
-        incoterm: 'CIF',
-        notes: 'Demande soumise en direct via le portail B2B client'
+        cargo_nature: quoteCargo || undefined,
       });
-      toast.success('Demande de cotation transmise avec succès aux équipes EVO-LOG !');
+      toast.success(res.data?.message || 'Demande de cotation transmise avec succès !');
       setIsQuoteModalOpen(false);
+      setQuoteService('');
+      setQuoteConteneurs('');
+      setQuoteClient('');
       setQuoteOrigin('');
       setQuoteDestination('');
       setQuoteCargo('');
       loadData();
-    } catch (err) {
-      toast.error('Erreur lors de la création de la cotation.');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Erreur lors de la création de la cotation.');
     }
   };
 
   // Filter items
   const filteredMissions = missions.filter((m) =>
-    (m.reference + ' ' + (m.origine || '') + ' ' + (m.destination || '') + ' ' + (m.nature_fret || ''))
+    (m.reference + ' ' + (m.origine || '') + ' ' + (m.destination || '') + ' ' + (m.type_mission || ''))
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
@@ -87,7 +97,7 @@ export default function ClientPortalHome() {
   );
 
   const filteredDeclarations = declarations.filter((d) =>
-    (String(d.numero_declaration || d.id || '') + ' ' + (d.marchandise || '')).toLowerCase().includes(searchQuery.toLowerCase())
+    (String(d.numero_declaration || d.id || '') + ' ' + (d.numero_bl || '')).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

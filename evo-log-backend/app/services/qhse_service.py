@@ -3,7 +3,6 @@ from datetime import datetime, date, timedelta
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
-from app.core.not_implemented import not_implemented
 from app.models.qhse import (
     AnalyseRisque, ActionPrevention, PlanPrevention, EPIRequis,
     AccidentTravail, InvestigationAccident, NormeCertification, AuditQualite,
@@ -620,23 +619,149 @@ class WorkPermitsIMDGService:
         }
 
     @staticmethod
-    def bilan_annuel_csst_cnps(annee: int = 2026) -> Dict[str, Any]:
-        """Batch 24 : DEBRANCHE (501). L'ancienne version renvoyait un « bilan
-        officiel CNPS/CSST » avec heures d'exposition (2 850 000), accidents,
-        jours d'arret et certifications ISO fabriques en dur, pour n'importe
-        quel tenant. Une declaration annuelle a valeur declarative aupres de
-        la CNPS : des chiffres inventes exposent l'entreprise. La stat basee
-        en DB (accidents declares, risques) reste disponible via
-        QHSEReportingService.rapport_securite.
-        """
-        not_implemented(
-            f"Bilan annuel officiel CSST/CNPS {annee}",
-            "la saisie réelle des heures d'exposition au risque par le tenant "
-            "(les accidentés et jours d'arrêt proviennent déjà des AccidentTravail "
-            "en base ; il manque la dénominateur heures travaillées). Aucun taux "
-            "TF/TG n'est calculé avant saisie  voir /api/v1/qhse/rapports/securite/"
-            f"{annee} pour les chiffres réellement déclarés dans la base"
+    def signer_permis(db: Session, permis_id: int, current_user) -> Dict[str, Any]:
+        """Appose la signature REELLE de l'utilisateur authentifie sur un permis.
+
+        Seuls les signataires designes peuvent signer ; l'horodatage est celui
+        de l'apposition. Quand tous les designes ont signe, le permis devient
+        ACTIF (aucune approbation automatique anterieure)."""
+        from fastapi import HTTPException
+        from app.models.qhse import PermisTravail, SignaturePermis
+
+        permis = db.query(PermisTravail).filter(PermisTravail.id == permis_id).first()
+        if permis is None:
+            raise HTTPException(status_code=404, detail="Permis de travail introuvable.")
+        cid = getattr(current_user, "company_id", None)
+        if cid is not None and permis.company_id is not None and permis.company_id != cid:
+            raise HTTPException(status_code=403, detail="Permis d'une autre entreprise.")
+
+        roles = {
+            "demandeur": permis.demandeur_id,
+            "executeur": permis.executeur_id,
+            "officier_isps": permis.officier_isps_id,
+        }
+        role = next((r for r, uid in roles.items() if uid == current_user.id), None)
+        if role is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Vous n'etes pas signataire designe de ce permis.",
+            )
+        deja = (
+            db.query(SignaturePermis)
+            .filter(
+                SignaturePermis.permis_id == permis.id,
+                SignaturePermis.signataire_id == current_user.id,
+            )
+            .first()
         )
+        if deja is not None:
+            raise HTTPException(status_code=409, detail="Vous avez deja signe ce permis.")
+
+        db.add(
+            SignaturePermis(
+                permis_id=permis.id,
+                role_signataire=role,
+                signataire_id=current_user.id,
+                signataire_nom=current_user.full_name or current_user.username,
+            )
+        )
+        db.flush()
+        nb_signes = (
+            db.query(func.count(SignaturePermis.id))
+            .filter(SignaturePermis.permis_id == permis.id)
+            .scalar()
+            or 0
+        )
+        nb_designes = sum(1 for uid in roles.values() if uid is not None)
+        if nb_signes >= nb_designes and permis.statut == "EN_ATTENTE_SIGN":
+            permis.statut = "ACTIF"
+        db.commit()
+        db.refresh(permis)
+        return WorkPermitsIMDGService._permis_dict(db, permis)
+
+    @staticmethod
+    def saisir_heures_exposition(db: Session, annee: int, heures: float, current_user,
+                                 nb_employes: Optional[int] = None,
+                                 source_piece: Optional[str] = None) -> Dict[str, Any]:
+        """Persiste (upsert) le denominateur d'heures travailles du tenant."""
+        from fastapi import HTTPException
+        from app.models.qhse import HeuresExposition
+
+        if heures is None or float(heures) < 0:
+            raise HTTPException(status_code=400, detail="heures_travaillees doit etre >= 0.")
+        cid = getattr(current_user, "company_id", None)
+        row = (
+            db.query(HeuresExposition)
+            .filter(HeuresExposition.annee == annee, HeuresExposition.company_id == cid)
+            .first()
+        )
+        if row is None:
+            row = HeuresExposition(annee=annee, company_id=cid)
+            db.add(row)
+        row.heures_travaillees = float(heures)
+        row.nb_employes = nb_employes
+        row.source_piece = source_piece
+        row.saisi_par = current_user.id
+        db.commit()
+        db.refresh(row)
+        return {
+            "annee": row.annee,
+            "heures_travaillees": float(row.heures_travaillees),
+            "nb_employes": row.nb_employes,
+            "source_piece": row.source_piece,
+            "message": "Denominateur d'heures enregistre (base de calcul du bilan CNPS/CSST).",
+        }
+
+    @staticmethod
+    def bilan_annuel_csst_cnps(db: Session, annee: int) -> Dict[str, Any]:
+        """Bilan CNPS/CSST calcule UNIQUEMENT a partir de donnees reels en base.
+
+        - accidents, jours d'arret : table AccidentTravail (saisies reelles) ;
+        - heures travaillees (denominateur) : table HeuresExposition ;
+          tant qu'il n'est pas saisi, AUCUN taux TF/TG n'est publie.
+        L'ancienne version renvoyait un « bilan officiel » aux chiffres inventes
+        en dur (2 850 000 h, certifications ISO falsifies)."""
+        from app.models.qhse import HeuresExposition
+
+        accidents = db.query(AccidentTravail).filter(
+            func.extract('year', AccidentTravail.date_accident) == annee
+        ).all()
+        nb_accidents = len(accidents)
+        jours_arret = sum(a.arret_travail or 0 for a in accidents)
+        hospitalisations = sum(1 for a in accidents if a.hospitalisation)
+        mortels = sum(1 for a in accidents if a.gravite == "mortel")
+
+        heures_row = db.query(HeuresExposition).filter(
+            HeuresExposition.annee == annee
+        ).first()
+        heures = float(heures_row.heures_travaillees) if heures_row and heures_row.heures_travaillees else None
+
+        tf = round((nb_accidents * 1_000_000) / heures, 2) if heures else None
+        tg = round((jours_arret * 1_000_000) / heures, 2) if heures else None
+
+        return {
+            "annee": annee,
+            "source": "calcul_reel_base_de_donnees",
+            "accidents_declares": nb_accidents,
+            "accidents_hospitalises": hospitalisations,
+            "accidents_mortels": mortels,
+            "jours_arret_total": jours_arret,
+            "heures_travaillees_saisies": heures,
+            "taux_frequence_TF_par_million_h": tf,
+            "taux_gravite_TG_par_million_h": tg,
+            "heures_non_saisies": heures is None,
+            "avertissement": (
+                None if heures
+                else "Taux TF/TG non calculables : le denominateur (heures travaillees) "
+                     "n'a pas ete saisi via POST /api/v1/qhse/csst-cnps/heures. "
+                     "Aucun chiffre n'est invente en attendant."
+            ),
+            "note_reglementaire": (
+                "Ce bilan est un etat interne calcule sur les declarations du tenant. "
+                "Il ne remplace pas la declaration officielle CNPS/CSST, qui se depose "
+                "aupres de ces organismes sur leur propre circuit."
+            ),
+        }
 
 
 # Facade service for backward compatibility
