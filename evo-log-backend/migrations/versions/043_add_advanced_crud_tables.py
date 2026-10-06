@@ -35,6 +35,8 @@ TABLES = [
     "tenant_api_keys",
     "scheduled_reports",
     "e_invoice_signatures",
+    "ai_chat_messages",
+    "ai_feedback",
 ]
 
 
@@ -158,6 +160,32 @@ def upgrade():
             sa.Column("provider", sa.String(30), nullable=True, server_default="local"),
             sa.Column("statut", sa.String(20), nullable=True, server_default="scelle"),
             sa.Column("signed_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        )
+
+    if not _has_table("ai_chat_messages"):
+        op.create_table(
+            "ai_chat_messages",
+            sa.Column("id", sa.Integer, primary_key=True, index=True),
+            sa.Column("organization_id", sa.Integer, sa.ForeignKey("organizations.id"), nullable=True, index=True),
+            sa.Column("session_id", sa.String(64), nullable=True, index=True),
+            sa.Column("user_id", sa.Integer, sa.ForeignKey("users.id"), nullable=True, index=True),
+            sa.Column("module", sa.String(30), nullable=True),
+            sa.Column("question", sa.Text, nullable=False),
+            sa.Column("reponse_generee", sa.Text, nullable=True),
+            sa.Column("provider", sa.String(30), nullable=True),
+            sa.Column("cree_le", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        )
+
+    if not _has_table("ai_feedback"):
+        op.create_table(
+            "ai_feedback",
+            sa.Column("id", sa.Integer, primary_key=True, index=True),
+            sa.Column("organization_id", sa.Integer, sa.ForeignKey("organizations.id"), nullable=True, index=True),
+            sa.Column("message_id", sa.Integer, sa.ForeignKey("ai_chat_messages.id"), nullable=True, index=True),
+            sa.Column("note", sa.Integer, nullable=False),
+            sa.Column("commentaire", sa.Text, nullable=True),
+            sa.Column("utilisateur_id", sa.Integer, sa.ForeignKey("users.id"), nullable=True),
+            sa.Column("cree_le", sa.DateTime(timezone=True), server_default=sa.func.now()),
         )
 
 
