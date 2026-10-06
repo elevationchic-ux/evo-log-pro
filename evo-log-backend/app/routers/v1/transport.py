@@ -10,6 +10,11 @@ from app.core.permissions import require_perm
 from app.models.user import User
 from app.schemas.transport import CamionCreate, CamionUpdate, CamionResponse, ConducteurCreate, ConducteurResponse, MissionCreate, MissionUpdate, MissionResponse
 from app.models.transport import Camion, Conducteur, Mission
+# Sequenceur unique des missions : memes champs reels + alias de presentation
+# (origine/destination/montant_fret/camion/chauffeur/client). transport_exploitation
+# n'importe pas ce module : pas de cycle. Les routes riches (demarrer, livrer,
+# gps, fuel...) restent dans transport_exploitation, monte APRES ce router.
+from app.routers.v1.transport_exploitation import _mission_payload
 
 router = APIRouter()
 
@@ -101,7 +106,7 @@ async def create_conducteur(conducteur_data: ConducteurCreate, db: Session = Dep
 async def get_all_missions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.read"))):
     """Get all missions"""
     missions = db.query(Mission).offset(skip).limit(limit).all()
-    return missions
+    return [_mission_payload(m) for m in missions]
 
 
 @router.get("/missions/{mission_id}", response_model=MissionResponse)
@@ -109,7 +114,7 @@ async def get_mission(mission_id: int, db: Session = Depends(get_db), current_us
     mission = db.query(Mission).filter(Mission.id == mission_id).first()
     if not mission:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mission not found")
-    return mission
+    return _mission_payload(mission)
 
 
 @router.patch("/missions/{mission_id}/statut", response_model=MissionResponse)
@@ -124,7 +129,7 @@ async def create_mission(mission_data: MissionCreate, db: Session = Depends(get_
     db.add(db_mission)
     db.commit()
     db.refresh(db_mission)
-    return db_mission
+    return _mission_payload(db_mission)
 
 
 @router.put("/missions/{mission_id}", response_model=MissionResponse)
@@ -139,14 +144,14 @@ async def update_mission(mission_id: int, mission_data: MissionUpdate, db: Sessi
     
     db.commit()
     db.refresh(mission)
-    return mission
+    return _mission_payload(mission)
 
 
 @router.get("", response_model=List[MissionResponse])
 @router.get("/", response_model=List[MissionResponse])
 async def list_missions_root(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transport.mission.read"))):
     """List all transport missions from root endpoint"""
-    return db.query(Mission).offset(skip).limit(limit).all()
+    return [_mission_payload(m) for m in db.query(Mission).offset(skip).limit(limit).all()]
 
 
 # ============ TMS VRP ROUTE OPTIMIZER ============
