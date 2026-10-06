@@ -407,14 +407,23 @@ def approuver_schema(
 
 
 @router.post("/schemas-directeurs/{ident}/demande-visa-minmivt",
-             summary="Transmission du schema pour visa ministeriel (501)")
-def demande_visa_schema(ident: int, user: User = Depends(require_perm("amenagement.schema_directeur.approve"))):
-    """Teleprocedures MINMIVT/APN inexistantes cote serveur (501 explicite)."""
-    not_implemented(
+             summary="Transmission du schema pour visa ministeriel (connecteur GOV)")
+def demande_visa_schema(
+    ident: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_perm("amenagement.schema_directeur.approve")),
+):
+    """Remise officielle au MINMIVT/APN via la gateway de teleprocedures
+    configuree (GOV_TELEPROC_*). 503 si non configuree, 502 si l'envoi echoue.
+    Le module verifie d'abord que le schema existe reellement en base."""
+    from app.utils.external import call_provider
+
+    _get_or_404(db, SchemaDirecteur, ident, "Schema directeur")
+    return call_provider(
+        "GOV_TELEPROC",
         "Transmission dematerialisee d'un schema directeur au MINMIVT / APN",
-        "un connecteur officiel avec l'Autorite Portuaire Nationale et le "
-        "ministere en charge des Ports (aucun depot automatique n'existe au "
-        "Cameroun pour ces pieces)",
+        path="/amenagement/schemas-directeurs",
+        payload={"schema_id": ident, "acte": "DEMANDE_VISA_MINMIVT"},
     )
 
 

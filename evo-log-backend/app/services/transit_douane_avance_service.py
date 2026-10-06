@@ -3,8 +3,6 @@ from datetime import datetime, date
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 
-from app.core.not_implemented import not_implemented
-
 
 class DUMService:
     """Service de gestion des Déclarations Uniques de Marchandises (DUM)"""
@@ -43,16 +41,24 @@ class GuichetUniqueService:
     @staticmethod
     def teletransmettre_guce(numero_dum: str, donnees_declaration: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Télétransmission GUCE e-GUCE.
+        Télétransmission GUCE e-GUCE via le connecteur officiel configure.
 
-        Renvoie désormais un 501 explicite : l'ancien code fabriquait une
-        référence « GUCE-DLA-... » et un statut « ACQUITTE_ELECTRONIQUE »
-        sans aucun échange avec le Guichet Unique  un acte réglementaire.
+        - CUSTOMS_EDI_* configure  -> VERITABLE remise au guichet ; l'acquit
+          retourne est celui du fournisseur, repondu par lui.
+        - Non configure            -> 503 explicite. L'ancien code fabriquait
+          une reference « GUCE-DLA-... » et un statut « ACQUITTE_ELECTRONIQUE »
+          sans aucun echange : acte reglementaire, jamais simule desormais.
         """
-        not_implemented(
-            "Télétransmission GUCE e-GUCE",
-            "connecteur officiel GUCE (compte opérateur, schéma de message "
-            "e-Cameroun, accusés signés). Aucun acquit n'est émis sans dépôt réel.",
+        from app.utils.external import call_provider
+
+        return call_provider(
+            "CUSTOMS_EDI",
+            "Teletransmission GUCE e-GUCE",
+            path="/guce/teletransmission",
+            payload={
+                "numero_dum": numero_dum,
+                "declaration": donnees_declaration,
+            },
         )
 
 
