@@ -51,6 +51,14 @@ sys.path.insert(0, str(BACKEND))
 DECLARATION_PREFIXE = re.compile(
     r"(?:export\s+)?const\s+([A-Za-z_$][\w$]*)\s*=\s*[`'\"](/api/[^`'\"]*)[`'\"]"
 )
+# Idem, mais avec origine en dur dans la valeur par defaut :
+# `const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'`.
+# Ces pages appellent `fetch` directement, hors de l'intercepteur axios qui porte
+# le token, la base et le refresh : elles sont signalees comme une classe de defaut
+# propre (origine codee, authentification a recomposer a la main).
+DECLARATION_URL = re.compile(
+    r"(?:export\s+)?const\s+([A-Za-z_$][\w$]*)\s*=[^;\n]*?[`'\"]((?:https?://|/api/)[^`'\"]*)[`'\"]"
+)
 # Appel client : `amenagementAPI.get(...)`, `apiClient.post('/x', data)`, y compris
 # generiques `<Response>` et instance axios locale. Le 2e groupe est le delimiter,
 # retrouve en 3e pour borner exactement le litteral.
@@ -212,14 +220,27 @@ def scanner_front(module):
     `opaques` compte les appels dont l'URL est une variable (`apiClient.get(path)`).
     Ils ne sont pas auditables statiquement : les compter empeche de prendre
     un silence pour une sante.
+
+    Deux passes. La premiere recense TOUTES les declarations de prefix du frontend,
+    la seconde resout les appels. Sans la carte globale, un page qui fait
+    ``fetch(`${API_BASE}/rh-avance/dipe-mensuel`)`` avec `API_BASE` declare dans un
+    autre fichier restait aveugle : 14 sites echappaient encore au contrat.
     """
-    sites, non_resolution, opaques = [], [], []
-    for fichier in sorted(FRONTEND_SRC.rglob("*.ts*")):
-        if module and module not in str(fichier):
-            continue
+    fichiers = [f for f in sorted(FRONTEND_SRC.rglob("*.ts*"))
+                if not module or module in str(f)]
+    carte_globale = {}
+    contenus = {}
+    for fichier in fichiers:
         brut = fichier.read_text(encoding="utf-8", errors="ignore")
-        prefixes = dict(DECLARATION_PREFIXE.findall(brut))
-        texte = retirer_commentaires(brut)
+        contenus[fichier] = brut
+        for nom, valeur in DECLARATION_PREFIXE.findall(brut):
+            carte_globale.setdefault(nom, valeur)
+
+    sites, non_resolution, opaques = [], [], []
+    for fichier in fichiers:
+        prefixes = dict(DECLARATION_PREFIXE.findall(contenus[fichier]))
+        prefixes = {**carte_globale, **prefixes}   # la declaration locale gagne
+        texte = retirer_commentaires(contenus[fichier])
         for m in APPEL.finditer(texte):
             methode, corps = m.group(2).upper(), m.group(4)
             line = texte[:m.start()].count("\n") + 1
