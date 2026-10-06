@@ -60,7 +60,7 @@ def list_ged_documents(
             "taille_octets": d.taille_octets,
             "checksum": d.checksum,
             "version": d.version,
-            "confidentiel": d.confidentiel,
+            "confidential": d.confidential,
             "date_creation": d.date_creation.isoformat() if d.date_creation else None,
         }
         for d in rows
