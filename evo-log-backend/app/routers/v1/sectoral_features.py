@@ -279,7 +279,7 @@ def get_export_certificates(dossier_id: str):
     externe (Chambre de Commerce / MINADER). Connecteur pilote par configuration :
     appel reel a la gateway si fournie, 503 sinon. Aucun certificat invente."""
     result = call_provider(
-        "GOV",
+        "GOV_TELEPROC",
         "Certificats d'export (origine CEMAC, phytosanitaire)",
         path=f"/certificates/{dossier_id}",
         method="GET",

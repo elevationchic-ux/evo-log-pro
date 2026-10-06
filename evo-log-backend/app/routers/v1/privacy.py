@@ -92,14 +92,52 @@ class BreachNotificationSchema(BaseModel):
     description: str = Field(..., example="Tentative d'accès suspect détectée")
     affected_count: int = Field(0, example=1)
 
-@router.post("/notify-breach", status_code=status.HTTP_202_ACCEPTED)
+@router.post("/notify-breach", status_code=status.HTTP_201_CREATED)
 def notify_security_breach(
     payload: BreachNotificationSchema,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    """Declaration de violation APDP : 501 (ne persistait/declarait rien reellement)."""
-    not_implemented(
-        "Declaration d'une violation de donnees personnelles (APDP)",
-        "une table d'incidents de violation + une teleprocedure/notifications "
-        "vers l'autorite (le statut 'logged' etait retourne sans aucune ecriture)",
+    """Enregistre REELLEMENT l'incident de violation (table privacy_breaches).
+    La declaration a l'autorite ANT/APDP est un acte distinct : elle n'est tentee
+    que si le connecteur gouvernemental est configure (sinon l'incident reste
+    simplement enregistre localement, sans declaration simulée)."""
+    incident = PrivacyBreach(
+        incident_type=payload.incident_type,
+        description=payload.description,
+        affected_count=payload.affected_count,
+        statut="ENREGISTRE",
+        enregistre_par=getattr(current_user, "id", None),
     )
+    db.add(incident)
+    db.commit()
+    db.refresh(incident)
+
+    autorite_declaree = False
+    if provider_configured("GOV_TELEPROC"):
+        call_provider(
+            "GOV_TELEPROC",
+            "Declaration d'une violation de donnees personnelles (APDP)",
+            path="/apdp/breach",
+            payload={
+                "incident_id": incident.id,
+                "incident_type": incident.incident_type,
+                "affected_count": incident.affected_count,
+            },
+        )
+        incident.statut = "DECLARE_ANT"
+        db.commit()
+        autorite_declaree = True
+
+    return {
+        "incident_id": incident.id,
+        "statut": incident.statut,
+        "persiste": True,
+        "autorite_declaree": autorite_declaree,
+        "note": (
+            "Incident enregistre. Declaration ANT non effectuee (connecteur "
+            "gouvernemental non configure)."
+            if not autorite_declaree else
+            "Incident enregistre et transmis a l'autorite via le connecteur configure."
+        ),
+    }
