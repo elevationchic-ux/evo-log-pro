@@ -33,6 +33,7 @@ TABLES = [
     "freight_offers",
     "tenant_api_keys",
     "scheduled_reports",
+    "e_invoice_signatures",
 ]
 
 

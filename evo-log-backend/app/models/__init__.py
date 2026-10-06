@@ -108,8 +108,12 @@ except Exception:
 
 try:
     from app.models.advanced_crud import (
-        CRMOpportunity, Project, FixedAsset, FreightOffer, TenantAPIKey, ScheduledReport
+        CRMOpportunity, Project, FixedAsset, FreightOffer, TenantAPIKey,
+        ScheduledReport, EInvoiceSignature,
     )
-    __all__.extend(["CRMOpportunity", "Project", "FixedAsset", "FreightOffer", "TenantAPIKey", "ScheduledReport"])
+    __all__.extend([
+        "CRMOpportunity", "Project", "FixedAsset", "FreightOffer", "TenantAPIKey",
+        "ScheduledReport", "EInvoiceSignature",
+    ])
 except Exception:
     pass

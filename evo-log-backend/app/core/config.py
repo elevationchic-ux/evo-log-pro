@@ -67,6 +67,27 @@ class Settings(BaseSettings):
     WHATSAPP_ENABLED: bool = False
     WHATSAPP_API_URL: str = ""
     WHATSAPP_API_KEY: str = ""
+
+    # SMS (gateway tierce type Twilio/SMS Pool). Desactive => la route renvoie
+    # un 503 explicite « fournisseur non configure » au lieu d'un faux succes.
+    SMS_ENABLED: bool = False
+    SMS_API_URL: str = ""
+    SMS_API_KEY: str = ""
+    SMS_SENDER: str = ""
+
+    # Assistant IA / LLM. Sans fournisseur configure, les routes basees sur un
+    # LLM repondent 503 (aucune reponse inventee) ; les routes purement
+    # analytiques (KPI, suggestions, scoring) fonctionnent sur les donnees reel.
+    AI_ENABLED: bool = False
+    AI_PROVIDER: str = ""      # ex. anthropic, openai
+    AI_API_KEY: str = ""
+    AI_MODEL: str = ""
+
+    # Facture electronique - connecteur DGI (valeur fiscale opposable). Desactive
+    # => sceau d'integrite local SHA-256 (verifiable), sans pretendre a l'opposabilite DGI.
+    E_INVOICING_DGI_ENABLED: bool = False
+    E_INVOICING_DGI_API_URL: str = ""
+    E_INVOICING_DGI_API_KEY: str = ""
     
     # Webhooks Mobile Money (MTN MoMo / Orange Money)
     # Secret partagé utilisé pour vérifier la signature HMAC-SHA256 des
