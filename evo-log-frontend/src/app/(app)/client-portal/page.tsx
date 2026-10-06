@@ -344,10 +344,13 @@ export default function ClientPortalHome() {
                   filteredDeclarations.map((dec: any) => (
                     <tr key={dec.id} className="hover:bg-slate-800/40 transition-colors">
                       <td className="px-6 py-4 font-bold text-slate-100">{dec.numero_declaration || `DEC-${dec.id}`}</td>
-                      <td className="px-6 py-4 text-slate-300">{dec.marchandise || 'Importation Fret'}</td>
+                      <td className="px-6 py-4 text-slate-300">
+                        <div>{dec.numero_bl || 'B/L non enregistré'}</div>
+                        <div className="text-xs text-slate-400">{dec.regime || 'Régime non enregistré'}</div>
+                      </td>
                       <td className="px-6 py-4 text-right">
                         <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                          <ShieldCheck className="w-3 h-3" /> CONFORME
+                          <ShieldCheck className="w-3 h-3" /> {dec.statut || 'Statut non enregistré'}
                         </span>
                       </td>
                     </tr>
@@ -371,6 +374,43 @@ export default function ClientPortalHome() {
             </div>
 
             <form onSubmit={handleCreateQuote} className="space-y-4 pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Service demandé *</label>
+                  <input
+                    type="text"
+                    required
+                    value={quoteService}
+                    onChange={(e) => setQuoteService(e.target.value)}
+                    placeholder="ex: ACCONAGE, TRANSIT, TERRESTRE (code catégorie tarif)"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Nombre de conteneurs / unités *</label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={quoteConteneurs}
+                    onChange={(e) => setQuoteConteneurs(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Client bénéficiaire *</label>
+                <input
+                  type="text"
+                  required
+                  value={quoteClient}
+                  onChange={(e) => setQuoteClient(e.target.value)}
+                  placeholder="Raison sociale du client"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Lieu de Chargement (Origine)</label>
                 <input
