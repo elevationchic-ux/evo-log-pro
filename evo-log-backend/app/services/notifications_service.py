@@ -287,15 +287,27 @@ class NotificationsReportingService:
     
     @staticmethod
     def rapport_notifications(db: Session, utilisateur_id: int) -> Dict[str, Any]:
-        """Generate notifications report"""
+        """Generate notifications report.
+
+        `par_canal`/`par_statut` étaient écrits `{cle: 1 ...}` (un par valeur,
+        factice). On compte désormais les vraies occurrences groupées."""
         notifications = db.query(Notification).filter(
             Notification.destinataire_id == utilisateur_id
         ).all()
-        
+
+        par_canal: Dict[str, int] = {}
+        par_statut: Dict[str, int] = {}
+        for n in notifications:
+            c = n.type_canal or "unknown"
+            par_canal[c] = par_canal.get(c, 0) + 1
+            s = n.statut or "unknown"
+            s = s.value if hasattr(s, "value") else str(s)
+            par_statut[s] = par_statut.get(s, 0) + 1
+
         return {
             "utilisateur_id": utilisateur_id,
             "total_notifications": len(notifications),
-            "par_canal": {n.type_canal: 1 for n in notifications},
-            "par_statut": {n.statut: 1 for n in notifications},
+            "par_canal": par_canal,
+            "par_statut": par_statut,
             "non_lues": sum(1 for n in notifications if n.date_lecture is None)
         }

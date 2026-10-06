@@ -408,16 +408,27 @@ class DocumentsReportingService:
     
     @staticmethod
     def rapport_documents(db: Session, dossier_id: int) -> Dict[str, Any]:
-        """Generate documents report"""
+        """Generate documents report.
+
+        `par_type`/`par_statut` étaient écrits `{cle: 1 ...}` (un par valeur,
+        factice). On compte désormais les vraies occurrences groupées."""
         documents = db.query(Document).filter(
             Document.dossier_id == dossier_id
         ).all()
-        
+
+        par_type: Dict[str, int] = {}
+        par_statut: Dict[str, int] = {}
+        for doc in documents:
+            t = doc.type_document.value if doc.type_document else "unknown"
+            par_type[t] = par_type.get(t, 0) + 1
+            s = doc.statut.value if doc.statut else "unknown"
+            par_statut[s] = par_statut.get(s, 0) + 1
+
         return {
             "dossier_id": dossier_id,
             "total_documents": len(documents),
-            "par_type": {doc.type_document.value: 1 for doc in documents},
-            "par_statut": {doc.statut.value: 1 for doc in documents},
+            "par_type": par_type,
+            "par_statut": par_statut,
             "taille_totale": sum(doc.taille_octets or 0 for doc in documents)
         }
 
