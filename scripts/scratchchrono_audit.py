@@ -15,7 +15,9 @@ spec = importlib.util.spec_from_file_location("aeb", pathlib.Path("scripts/audit
 aeb = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(aeb)
 
-for f in sorted(aeb.FRONTEND_SRC.rglob("*.ts*")):
+for n, f in enumerate(sorted(aeb.FRONTEND_SRC.rglob("*.ts*")), 1):
+    if n % 25 == 0:
+        print(f"... {n} fichiers traites (dernier : {f.name})", flush=True)
     brut = f.read_text(encoding="utf-8", errors="ignore")
     t0 = time.time()
     sans = aeb.retirer_commentaires(brut)
