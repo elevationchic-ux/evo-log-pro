@@ -256,20 +256,83 @@ class B2BPortalService:
         }
 
     @staticmethod
-    def process_checkout_payment(payload: Dict[str, Any]) -> Dict[str, Any]:
+    def process_checkout_payment(payload: Dict[str, Any], db=None, company_id: Optional[int] = None) -> Dict[str, Any]:
         """
-        Paiement en ligne (MTN/Orange MoMo, CB, Virement).
+        Paiement en ligne (MTN/Orange MoMo, CB, Virement) via connecteur configure.
 
-        501 (2026-09 correction) : l'ancien code renvoyait « SUCCES_VALIDE »,
-        émettait une quittance et débloquait le Bon de Sortie sans aucun
-        appel fournisseur ni persistance  marchandise libérée sans
-        encaissement réel. Réactiver uniquement avec le connecteur MoMo.
+        Zero-Mock (Batch 3) : la demande est persistee (PaymentTransaction) et
+        reellement remise a la gateway PAYMENT_ORANGE / PAYMENT_MTN /
+        PAYMENT_BANK si elle est declaree. Sans gateway : 503 explicite (501
+        nu supprime). L'ancien code renvoyait « SUCCES_VALIDE », emettait une
+        quittance et debloquait le Bon de Sortie sans aucun appel fournisseur :
+        la liberation de marchandise ne peut suivre qu'un acquit REEL du
+        fournisseur, retourne ici tel que recu.
         """
-        not_implemented(
+        from app.utils.external import call_provider
+
+        mode = (payload.get("mode_paiement") or payload.get("method") or payload.get("methode") or "").strip().upper()
+        prefix_by_mode = {
+            "ORANGE_MONEY": "PAYMENT_ORANGE",
+            "MTN_MOMO": "PAYMENT_MTN",
+            "MTN_MOBILE_MONEY": "PAYMENT_MTN",
+            "VIREMENT": "PAYMENT_BANK",
+            "CB": "PAYMENT_BANK",
+            "CARTE": "PAYMENT_BANK",
+        }
+        prefix = prefix_by_mode.get(mode)
+        if prefix is None:
+            from fastapi import HTTPException
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Mode de paiement inconnu : {mode}. Modes supportes : "
+                    f"{sorted(prefix_by_mode)}."
+                ),
+            )
+
+        facture_id = payload.get("facture_id") or payload.get("invoice_id")
+        reference = str(payload.get("reference") or f"B2B-{facture_id or 'SANSFACT'}")[:80]
+        montant = float(payload.get("montant") or payload.get("montant_xaf") or 0)
+
+        result = call_provider(
+            prefix,
             "Paiement en ligne B2B (checkout)",
-            "connecteur MTN MoMo / Orange Money / CB avec callback signé, "
-            "vérification du montant dû en base et règlement persisté",
+            path="/checkout",
+            payload={
+                "facture_id": facture_id,
+                "reference": reference,
+                "amount": montant,
+                "currency": "XAF",
+                "mode": mode,
+            },
         )
+
+        if db is not None:
+            from app.services.paiement_local import _persist
+
+            resp = result.get("response") or {}
+            provider_ref = None
+            if isinstance(resp, dict):
+                provider_ref = str(resp.get("transaction_id") or resp.get("id") or "") or None
+            row = _persist(
+                db, mode, reference, montant,
+                f"Checkout B2B facture {facture_id}", company_id,
+                "SOUMIS_FOURNISSEUR", True, provider_ref,
+            )
+            return {
+                "reference": reference,
+                "statut": row.statut,
+                "provider_contacte": True,
+                "persiste_en_base": True,
+                "fournisseur": result,
+            }
+        return {
+            "reference": reference,
+            "provider_contacte": True,
+            "persiste_en_base": False,
+            "fournisseur": result,
+        }
 
     @staticmethod
     def get_notification_preferences(client_id: int) -> Dict[str, Any]:
