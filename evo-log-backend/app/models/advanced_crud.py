@@ -150,3 +150,23 @@ class TenantAPIKey(Base):
     last_used_at = Column(DateTime(timezone=True), nullable=True)
     created_by = Column(Integer, ForeignKey('users.id'), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class ScheduledReport(Base):
+    """Export BI reellement planifie et persiste (ordonnanceur applicatif).
+
+    La ligne est en base : nom, format, frequence, destinataires. La generation
+    effective du fichier depend du moteur d'exports (PDF/Excel) branche au
+    moment de l'execution ; ici on persiste la planification reelle."""
+    __tablename__ = "scheduled_reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    report_name = Column(String(200), nullable=False)
+    format = Column(String(10), default="PDF")            # PDF, EXCEL, CSV
+    frequency = Column(String(10), default="MONTHLY")     # DAILY, WEEKLY, MONTHLY
+    recipients = Column(JSON, nullable=True)              # liste d'emails saisis
+    actif = Column(Boolean, default=True)
+    prochaine_execution = Column(DateTime(timezone=True), nullable=True)
+    cree_par = Column(Integer, ForeignKey('users.id'), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

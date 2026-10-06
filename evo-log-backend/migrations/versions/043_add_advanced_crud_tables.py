@@ -32,6 +32,7 @@ TABLES = [
     "fixed_assets",
     "freight_offers",
     "tenant_api_keys",
+    "scheduled_reports",
 ]
 
 
@@ -122,6 +123,21 @@ def upgrade():
             sa.Column("active", sa.Boolean, nullable=True, server_default=sa.true()),
             sa.Column("last_used_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("created_by", sa.Integer, sa.ForeignKey("users.id"), nullable=True),
+            sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        )
+
+    if not _has_table("scheduled_reports"):
+        op.create_table(
+            "scheduled_reports",
+            sa.Column("id", sa.Integer, primary_key=True, index=True),
+            sa.Column("organization_id", sa.Integer, sa.ForeignKey("organizations.id"), nullable=True, index=True),
+            sa.Column("report_name", sa.String(200), nullable=False),
+            sa.Column("format", sa.String(10), nullable=True, server_default="PDF"),
+            sa.Column("frequency", sa.String(10), nullable=True, server_default="MONTHLY"),
+            sa.Column("recipients", sa.JSON, nullable=True),
+            sa.Column("actif", sa.Boolean, nullable=True, server_default=sa.true()),
+            sa.Column("prochaine_execution", sa.DateTime(timezone=True), nullable=True),
+            sa.Column("cree_par", sa.Integer, sa.ForeignKey("users.id"), nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
         )
 
