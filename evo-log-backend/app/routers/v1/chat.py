@@ -885,30 +885,115 @@ def get_call_status(
 @router.post("/contextual-pin")
 def epingler_discussion_dossier(
     payload: dict,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_chat_user),
 ):
-    """Pinning requires a persisted business-entity integration."""
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Contextual dossier pinning is not configured.",
+    """Epingle un dossier metier (reference saisie) sur un salon : persiste en
+    base, reellement reconsultable. Aucune donnee metier n'est inventee, seule
+    la reference est stockee."""
+    from app.models.chat import ChatContextualPin
+
+    room_identifier = payload.get("room_uuid") or payload.get("room_id")
+    entity_type = (payload.get("dossier_type") or payload.get("entity_type") or "").strip().lower()
+    entity_ref = str(payload.get("dossier_ref") or payload.get("entity_ref") or "").strip()
+    if not room_identifier or not entity_type or not entity_ref:
+        raise HTTPException(
+            status_code=400,
+            detail="Champs requis : room_uuid (ou room_id), dossier_type, dossier_ref.",
+        )
+    room = _get_accessible_room(db, str(room_identifier), current_user)
+    pin = ChatContextualPin(
+        company_id=current_user.company_id,
+        room_id=room.id,
+        entity_type=entity_type[:40],
+        entity_ref=entity_ref[:120],
+        label=(payload.get("label") or "")[:200] or None,
+        pinned_by_id=current_user.id,
     )
+    db.add(pin)
+    db.commit()
+    db.refresh(pin)
+    return {
+        "id": pin.id,
+        "room_uuid": room.room_uuid,
+        "dossier_type": pin.entity_type,
+        "dossier_ref": pin.entity_ref,
+        "label": pin.label,
+        "epingle_par": current_user.username,
+        "created_at": pin.created_at.isoformat() if pin.created_at else None,
+    }
+
+
+@router.get("/contextual-pin/{room_uuid}")
+def lister_pins_du_salon(
+    room_uuid: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_chat_user),
+):
+    """Liste les dossiers reellement epingles sur un salon."""
+    from app.models.chat import ChatContextualPin
+
+    room = _get_accessible_room(db, room_uuid, current_user)
+    pins = (
+        db.query(ChatContextualPin)
+        .filter(ChatContextualPin.room_id == room.id)
+        .order_by(desc(ChatContextualPin.id))
+        .all()
+    )
+    return [
+        {
+            "id": p.id,
+            "dossier_type": p.entity_type,
+            "dossier_ref": p.entity_ref,
+            "label": p.label,
+            "created_at": p.created_at.isoformat() if p.created_at else None,
+        }
+        for p in pins
+    ]
 
 
 # ============ PUSH-TO-TALK WEBRTC TALKIE-WALKIE VIRTUEL ============
 @router.post("/webrtc/push-to-talk")
-def session_push_to_talk():
-    """Push-to-talk requires a configured signaling provider."""
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Push-to-talk signaling provider is not configured.",
+def session_push_to_talk(
+    payload: dict = None,
+    current_user: User = Depends(get_current_chat_user),
+):
+    """Demande une session push-to-talk au fournisseur de signalisation
+    configure (WEBRTC_*). 503 explicite si aucune gateway n'est declaree :
+    aucun canal audio fictif n'est retourne."""
+    from app.utils.external import call_provider
+
+    body = {
+        "user_id": current_user.id,
+        "company_id": current_user.company_id,
+        "room_uuid": (payload or {}).get("room_uuid"),
+        "mode": "push_to_talk",
+    }
+    return call_provider(
+        "WEBRTC",
+        "Ouverture d'une session push-to-talk (talkie-walkie)",
+        path="/sessions",
+        payload=body,
     )
 
 
 # ============ PASSERELLE SMS D'URGENCE CHAUFFEURS HORS-DATA ============
 @router.post("/sms-gateway/send-urgent")
-def envoyer_sms_urgent_chauffeur():
-    """SMS delivery requires a configured telecom provider."""
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Urgent SMS provider is not configured.",
+def envoyer_sms_urgent_chauffeur(
+    payload: dict,
+    current_user: User = Depends(get_current_chat_user),
+):
+    """Remet un SMS d'urgence a la passerelle telecom configuree (SMS_*).
+    503 si aucune gateway : aucun faux « remis » n'est retourne."""
+    from app.utils.external import call_provider
+    from app.core.config import settings as _settings
+
+    numero = str(payload.get("numero") or payload.get("to") or "").strip()
+    message = str(payload.get("message") or payload.get("text") or "").strip()
+    if not numero or not message:
+        raise HTTPException(status_code=400, detail="Champs requis : numero, message.")
+    return call_provider(
+        "SMS",
+        "Envoi d'un SMS d'urgence chauffeur",
+        payload={"to": numero, "from": getattr(_settings, "SMS_SENDER", "") or "", "text": message},
     )

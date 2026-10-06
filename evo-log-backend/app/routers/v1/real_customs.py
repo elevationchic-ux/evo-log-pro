@@ -330,21 +330,37 @@ def apurer_caution(payload: Dict[str, Any] = Body(...),
     return {"data": _dum_dict(row), "message": f"Caution apuree pour {numero}."}
 
 
-# ─── 3. CE QUI RESTE EXTERNE (aucun bouton de l'UI ne les appelle) ───────────────
+# ─── 3. CE QUI RESTE EXTERNE (connecteur pilote par la configuration) ─────────
 
 @router.get("/camcis/export-edi/{numero_dum}", summary="Générer le flux EDI XML officiel CAMCIS / Sydonia")
 def export_edi_camcis_xml(numero_dum: str):
-    not_implemented(
+    """Demande reelle au connecteur EDI douanier (CUSTOMS_EDI_*).
+
+    503 si aucune gateway ASYCUDA/CAMCIS n'est declaree : aucun flux XML
+    « conforme » n'est invente localement.
+    """
+    from app.utils.external import call_provider
+
+    return call_provider(
+        "CUSTOMS_EDI",
         "Export EDI XML normé CAMCIS/ASYCUDA",
-        "schéma XML officiel ASYCUDA World (CCNET) et agrément déclarant "
-        "vérifiables ; aucun gabarit local ne peut produire un flux conforme.",
+        path=f"/camcis/export-edi/{numero_dum}",
+        method="GET",
     )
 
 
 @router.get("/guce/formalites/{dossier_id}", summary="Suivi des formalités pré-dédouanement e-GUCE")
 def get_guce_formalites(dossier_id: str):
-    not_implemented(
-        "Suivi des formalités e-GUCE",
-        "API GUCE (numéros DI/AVP/phyto réellement émis par MINCOMMERCE, "
-        "SGS et MINADER) ; ces numéros ne peuvent être enregistrés que saisis.",
+    """Interrogation reelle du connecteur e-GUCE (CUSTOMS_EDI_*).
+
+    503 si non configure : les numeros DI/AVP/phyto ne peuvent venir que du
+    guichet officiel, jamais d'une simulation locale.
+    """
+    from app.utils.external import call_provider
+
+    return call_provider(
+        "CUSTOMS_EDI",
+        "Suivi des formalites e-GUCE",
+        path=f"/guce/formalites/{dossier_id}",
+        method="GET",
     )

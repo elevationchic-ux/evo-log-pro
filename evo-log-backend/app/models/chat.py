@@ -77,3 +77,23 @@ class EnterpriseChatMessage(Base):
     sender = relationship("User", foreign_keys=[sender_id])
     recipient = relationship("User", foreign_keys=[recipient_id])
     room = relationship("ChatMeetingRoom", back_populates="messages")
+
+
+class ChatContextualPin(Base):
+    """Epingle un dossier metier reel (mission, transit, navire, magasin...) a
+    un salon de discussion. Persistance honnete : la liaison est ecrite en base
+    et reconsultable, aucune donnee metier n'est inventee (seule la reference de
+    l'entite est stockee ; le contenu reste cote metier)."""
+    __tablename__ = "chat_contextual_pins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
+    room_id = Column(Integer, ForeignKey("chat_meeting_rooms.id", ondelete="CASCADE"), nullable=False, index=True)
+    entity_type = Column(String(40), nullable=False)   # "mission", "transit", "navire", "magasin", ...
+    entity_ref = Column(String(120), nullable=False)   # reference metier saisie (ex. OT-2026-089)
+    label = Column(String(200), nullable=True)
+    pinned_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    room = relationship("ChatMeetingRoom")
+    pinned_by = relationship("User", foreign_keys=[pinned_by_id])
