@@ -21,11 +21,11 @@ export default function ChauffeurPage() {
 
   const fetchMissions = async () => {
     try {
-      // In a real app, we'd fetch only the missions assigned to the current driver
       const data = await transportAPI.getMissions();
-      // Filter for missions that can be delivered (EN_ROUTE, EN_COURS, etc)
-      // Assuming for demo we show EN_ROUTE and EN_CHARGEMENT
-      const activeMissions = (data as any).data.filter((m: any) => m.statut === 'EN_ROUTE' || m.statut === 'VALIDE' || m.status === 'in_progress');
+      // Une mission livrable est une mission reellement en route : le serveur
+      // sert le statut en minuscules (enum planifiee/en_cours/terminee/…),
+      // les comparaisons en MAJUSCULES ne pouvaient jamais matcher.
+      const activeMissions = (data as any).data.filter((m: any) => m.statut === 'en_cours');
       setMissions(activeMissions);
     } catch (err: any) {
       setError(err.message || 'Erreur lors du chargement des missions');
@@ -115,7 +115,7 @@ export default function ChauffeurPage() {
                     </span>
                     <div>
                       <p className="text-xs text-slate-400 font-medium">{mission.reference || `Mission #${mission.id}`}</p>
-                      <p className="text-sm font-bold text-slate-100">{mission.merchandise || 'Fret Divers'}</p>
+                      <p className="text-sm font-bold text-slate-100">{mission.type_mission || 'Type non enregistre'}</p>
                     </div>
                   </div>
                   <span className="bg-yellow-500/15 text-yellow-300 text-xs font-semibold px-2 py-1 rounded-md">
@@ -130,7 +130,7 @@ export default function ChauffeurPage() {
                     </div>
                     <div className="flex-1">
                       <p className="text-xs text-slate-400 uppercase">Origine</p>
-                      <p className="text-sm font-medium text-slate-100">{mission.origin || 'Dépôt Douala'}</p>
+                      <p className="text-sm font-medium text-slate-100">{mission.point_depart || 'Non enregistre'}</p>
                     </div>
                   </div>
                   <div className="relative flex items-center gap-3">
