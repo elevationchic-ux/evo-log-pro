@@ -188,13 +188,14 @@ def test_digital_twin_vide(db):
 # ---------------------------------------------------------------------------
 
 def test_gamification_score_ponctualite_reel(db):
-    c = Conducteur(nom="Mbarga", prenom="Alain")
+    c = Conducteur(nom="Mbarga", prenom="Alain", numero_permis="PERM-001", telephone="690000000")
     db.add(c); db.commit(); db.refresh(c)
     now = datetime.utcnow()
     # 2 missions terminees et ponctuelles -> score 100
     for i in range(2):
         prev = now - timedelta(days=9 + i)
         m = Mission(
+            reference=f"MRN-{i}",
             conducteur_id=c.id, statut=MissionStatus.TERMINEE, distance_km=120.0,
             date_debut_prevue=now - timedelta(days=10 + i),
             date_fin_prevue=prev,
