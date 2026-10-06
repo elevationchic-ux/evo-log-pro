@@ -383,29 +383,27 @@ export default function PortailChauffeurPage() {
               <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-700 gap-3">
                   <div>
-                    <span className="text-xs font-mono text-amber-300 font-bold">Mission Active</span>
+                    <span className="text-xs font-mono text-amber-300 font-bold">
+                      {STATUT_LABELS[selectedMission.statut] || selectedMission.statut}
+                    </span>
                     <h2 className="text-xl font-black text-slate-200">
-                      #{selectedMission.numero_ordre || selectedMission.reference || `MIS-${selectedMission.id}`}
+                      {selectedMission.reference || `Mission #${selectedMission.id}`}
                     </h2>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => handleUpdateMissionStatus(selectedMission.id, 'EN_ROUTE')}
-                      className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors"
+                      onClick={() => handleDemarrerMission(selectedMission.id)}
+                      disabled={selectedMission.statut !== 'planifiee' && selectedMission.statut !== 'en_retard'}
+                      className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold transition-colors"
                     >
                       Démarrer trajet
-                    </button>
-                    <button
-                      onClick={() => handleUpdateMissionStatus(selectedMission.id, 'ARRIVE_QUAI')}
-                      className="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-colors"
-                    >
-                      Arrivé quai
                     </button>
                     <button
                       onClick={() => {
                         setActiveTab('epod');
                       }}
-                      className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
+                      disabled={selectedMission.statut === 'terminee' || selectedMission.statut === 'annulee'}
+                      className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold transition-colors"
                     >
                       Signer ePOD
                     </button>
@@ -415,33 +413,45 @@ export default function PortailChauffeurPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-2">
                     <span className="text-xs font-bold text-slate-500 uppercase">Itinéraire & Client</span>
-                    <p className="text-sm font-bold text-slate-200">{selectedMission.client_nom || 'Client Partenaire'}</p>
-                    <p className="text-xs text-slate-400 flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Origine : {selectedMission.origine || 'Port Autonome de Douala'}
+                    <p className="text-sm font-bold text-slate-200">
+                      {selectedMission.client?.nom || 'Client non enregistré'}
                     </p>
                     <p className="text-xs text-slate-400 flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-rose-600" /> Destination : {selectedMission.destination || 'Terminal Yaoundé'}
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                      Origine : {selectedMission.origine || selectedMission.point_depart || 'Non enregistré'}
                     </p>
-                    {selectedMission.telephone_client && (
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-rose-600" />
+                      Destination : {selectedMission.destination || selectedMission.point_arrivee || 'Non enregistré'}
+                    </p>
+                    {selectedMission.client?.telephone && (
                       <a
-                        href={`tel:${selectedMission.telephone_client}`}
+                        href={`tel:${selectedMission.client.telephone}`}
                         className="inline-flex items-center gap-2 text-xs font-bold text-indigo-600 mt-2 hover:underline"
                       >
-                        <Phone className="w-3.5 h-3.5" /> Appeler le client : {selectedMission.telephone_client}
+                        <Phone className="w-3.5 h-3.5" /> Appeler le client : {selectedMission.client.telephone}
                       </a>
                     )}
                   </div>
 
                   <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-2">
-                    <span className="text-xs font-bold text-slate-500 uppercase">Véhicule & Marchandise</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase">Véhicule & Cargaison</span>
                     <p className="text-sm font-bold text-slate-200">
-                      Immatriculation : {selectedMission.immatriculation || 'LT-TRUCK-889'}
+                      Immatriculation : {selectedMission.camion?.immatriculation || 'Camion non affecté'}
                     </p>
                     <p className="text-xs text-slate-400 flex items-center gap-1.5">
-                      <Package className="w-3.5 h-3.5 text-indigo-600" /> Colis : {selectedMission.marchandise || 'Conteneur Dry 40ft'}
+                      <Package className="w-3.5 h-3.5 text-indigo-600" />
+                      Type de mission : {selectedMission.type_mission || 'Non enregistré'}
                     </p>
                     <p className="text-xs text-slate-400 flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-slate-400" /> Poids : {selectedMission.poids_kg ? `${selectedMission.poids_kg} kg` : '24 500 kg'}
+                      <Layers className="w-3.5 h-3.5 text-slate-400" />
+                      B/L : {selectedMission.numero_bl || 'Non rattaché'}
+                    </p>
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                      <Navigation className="w-3.5 h-3.5 text-slate-400" />
+                      Fret : {selectedMission.montant_fret != null
+                        ? `${selectedMission.montant_fret.toLocaleString()} FCFA`
+                        : 'Non enregistré'}
                     </p>
                   </div>
                 </div>
@@ -468,11 +478,20 @@ export default function PortailChauffeurPage() {
                 Vérifiez chaque organe de sécurité avant de prendre le volant.
               </p>
             </div>
-            {inspectionSubmitted && (
-              <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-bold flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Inspection validée
-              </span>
-            )}
+          </div>
+
+          {/* Honnêteté zéro mock : aucun endpoint d'inspection n'existe côté
+              serveur. Cette coche reste un aide-mémoire local, rien n'est
+              transmis ni archivé — la page ne prétend pas le contraire. */}
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/40 flex items-start gap-3 text-xs">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <span className="text-amber-200">
+              Service d'enregistrement d'inspection non déployé côté serveur :
+              cette checklist est un aide-mémoire local uniquement. Aucune
+              validation n'est transmise ni archivée. Signalez toute anomalie
+              via l'onglet SOS Incident, qui alimente le registre réel des
+              incidents.
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -507,13 +526,14 @@ export default function PortailChauffeurPage() {
 
           <div className="pt-4 flex justify-end">
             <button
-              onClick={() => {
-                setInspectionSubmitted(true);
-                toast.success('Inspection prise de poste enregistrée et archivée');
-              }}
-              className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-sm"
+              onClick={() => setChecklist({
+                pneus: true, freins: true, feux: true, extincteur: true,
+                niveaux_huile_eau: true, carte_grise: true,
+                assurance_cemac: true, visite_technique: true,
+              })}
+              className="px-6 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold transition-colors shadow-sm"
             >
-              Valider la prise de poste
+              Réinitialiser l'aide-mémoire (local, non archivé)
             </button>
           </div>
         </div>
@@ -723,10 +743,21 @@ export default function PortailChauffeurPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-300 block mb-1">Précisions sur la localisation et la situation</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Lieu de l'incident (obligatoire)</label>
+              <input
+                type="text"
+                value={sosLieu}
+                onChange={(e) => setSosLieu(e.target.value)}
+                placeholder="Ex: PK 145 axe Douala–Edéa"
+                className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Précisions sur la situation (obligatoire)</label>
               <textarea
                 rows={3}
-                placeholder="Ex: Arrêté au PK 145 entre Douala et Edéa. Fumée blanche au moteur. Besoin d'une dépanneuse."
+                placeholder="Ex: Fumée blanche au moteur. Besoin d'une dépanneuse."
                 value={sosComment}
                 onChange={(e) => setSosComment(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl border border-slate-600 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
