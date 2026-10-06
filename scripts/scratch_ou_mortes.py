@@ -1,35 +1,21 @@
-"""Ou viennent les 3 « liaisons mortes » remontees par audit_endpoint_bindings.py ?
+"""Pourquoi audit_endpoint_bindings.py cite-t-il /api/v1/parc/ocr-extract ?
 
-L'audit extrait toute chaine citee commencant par /api. Une URL citee dans un
-commentaire ou un JSDoc n'est pas un appel : c'est du bruit. Ce scratch montre le
-contexte exact de chaque occurrence pour trancher (faux positif de l'outil ou
-vraie liaison morte).
+Le litteral n'existe nulle part dans le frontend (only comments). Ce scratch
+reproduit la mechine d'extraction de l'audit, ligne par ligne, et montre
+l'occurrence exacte qui produit l'orphelin. But : decider si l'audit doit ignorer
+les commentaires (et donc devenir un garde fiable pour la grosse extension a
+venir) ou si une liaison morte reelle est cachee.
 """
 import pathlib
 import re
 
 SRC = pathlib.Path("evo-log-frontend/src")
 LIT = re.compile(r"['\"`]((?:/api/v1|/api)/[^'\"`\s]+)['\"`]")
-CIBLES = {
-    "/api/v1/docs",
-    "/api/v1/parc/ocr-extract",
-    "/api/v1/purchase/requisitions/{p}/{p}",
-}
 
 for fichier in sorted(SRC.rglob("*.ts*")):
     txt = fichier.read_text(encoding="utf-8", errors="ignore")
     for i, ligne in enumerate(txt.split("\n"), 1):
         for m in LIT.finditer(ligne):
-            u = m.group(1).split("?")[0]
-            u = re.sub(r"\$\{[^}]*\}", "{p}", u).rstrip("/")
-            if not u.startswith("/api/v1/"):
-                u = "/api/v1" + u[len("/api"):]
-            if u in CIBLES:
-                stripped = ligne.strip()
-                estimation = (
-                    "COMMENTAIRE"
-                    if stripped.startswith(("//", "*", "/*"))
-                    else "CODE"
-                )
-                print(f"{fichier.relative_to(SRC)}:{i} [{estimation}] {u}")
-                print(f"      {ligne.strip()[:150]}")
+            u = m.group(1)
+            if "ocr" in u or u.endswith("/docs") or "requisitions/" in u:
+                print(f"{fichier.relative_to(SRC)}:{i}  extrait={u!r}")
