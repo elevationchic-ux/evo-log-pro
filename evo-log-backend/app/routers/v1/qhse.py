@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from datetime import datetime, date
 import random
 import string
@@ -756,18 +756,69 @@ def supprimer_enregistrement_qhse(
 
 
 # ============ PERMIS DE TRAVAIL DÉMATÉRIALISÉS ============
-# Batch 24 : cette route etait PUBLIQUE (aucune auth) et renvoyait un permis
-# « APPROUVE_ACTIF » avec trois signatures tripartites datees inventees. Un
-# permis de travail est un acte de securite au sens du code du travail ; la
-# validation ne peut pas etre simulee. 501 explicite, voir le service.
+# Batch 24 -> Batch 3 : le permis est desormais REELLEMENT persiste. Aucune
+# signature n'est simulee : chaque signataire (donneur d'ordre, executant,
+# officier ISPS) est un utilisateur authentifie qui appose sa propre signature
+# via /permis-travail/{id}/signer ; le permis ne devient ACTIF qu'apres la
+# derniere signature reellement posee.
 @router.post("/permis-travail")
 def creer_permis_travail_api(
     payload: dict,
+    db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("qhse.permis.create")),
 ):
-    """Permis de travail debranche cote serveur (501) : aucune signature simulee."""
+    """Cree et persiste un permis de travail en attente de signatures."""
     from app.services.qhse_service import WorkPermitsIMDGService
-    return WorkPermitsIMDGService.creer_permis_travail(payload)
+    return WorkPermitsIMDGService.creer_permis_travail(db, payload, current_user)
+
+
+@router.post("/permis-travail/{permis_id}/signer")
+def signer_permis_travail_api(
+    permis_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("qhse.permis.create")),
+):
+    """Appose la signature reelle de l'utilisateur authentifie (horodatee)."""
+    from app.services.qhse_service import WorkPermitsIMDGService
+    return WorkPermitsIMDGService.signer_permis(db, permis_id, current_user)
+
+
+@router.get("/permis-travail")
+def lister_permis_travail_api(
+    statut: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("qhse.permis.read")),
+):
+    """Registre des permis reellement enregistres pour le tenant."""
+    from app.models.qhse import PermisTravail
+    from app.services.qhse_service import WorkPermitsIMDGService
+
+    q = db.query(PermisTravail)
+    cid = getattr(current_user, "company_id", None)
+    if cid is not None:
+        q = q.filter(PermisTravail.company_id == cid)
+    if statut:
+        q = q.filter(PermisTravail.statut == statut.upper())
+    rows = q.order_by(PermisTravail.id.desc()).limit(300).all()
+    return [WorkPermitsIMDGService._permis_dict(db, p) for p in rows]
+
+
+@router.get("/permis-travail/{permis_id}")
+def obtenir_permis_travail_api(
+    permis_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("qhse.permis.read")),
+):
+    from app.models.qhse import PermisTravail
+    from app.services.qhse_service import WorkPermitsIMDGService
+
+    permis = db.query(PermisTravail).filter(PermisTravail.id == permis_id).first()
+    if permis is None:
+        raise HTTPException(status_code=404, detail="Permis de travail introuvable.")
+    cid = getattr(current_user, "company_id", None)
+    if cid is not None and permis.company_id is not None and permis.company_id != cid:
+        raise HTTPException(status_code=404, detail="Permis de travail introuvable.")
+    return WorkPermitsIMDGService._permis_dict(db, permis)
 
 
 # ============ MATRICE SÉGRÉGATION PRODUITS CHIMIQUES IMDG ============
@@ -785,17 +836,44 @@ def verifier_compatibilite_imdg_api(
 
 
 # ============ BILAN ANNUEL OFFICIEL CSST & CNPS CAMEROUN ============
-# Batch 24 : la route etait publique et renvoyait un « bilan officiel » avec
-# heures d'exposition, accidents et certifications fabriques en dur. Une
-# declaration CNPS/CSST a valeur declarative : 501 tant que les heures
-# reelles ne sont pas saisies. Les chiffres bases en DB restent consultables
-# via /rapports/securite/{annee}.
+# Batch 3 : le bilan est calcule sur les donnees reels en base (accidents
+# declares + heures travaillees saisies). Tant que le denominateur d'heures
+# n'est pas saisi, aucun taux n'est publie (l'ancienne version inventait
+# 2 850 000 h et des certifications ISO).
 @router.get("/csst-cnps/bilan")
 def obtenir_bilan_csst_cnps(
     annee: int = 2026,
+    db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("qhse.rapport.read")),
 ):
-    """Bilan officiel CNPS/CSST : 501 (aucune donnee saisie, rien d'invente)."""
+    """Bilan interne CNPS/CSST : chiffres reels, aucun taux sans denominateur saisi."""
     from app.services.qhse_service import WorkPermitsIMDGService
-    return WorkPermitsIMDGService.bilan_annuel_csst_cnps(annee)
+    return WorkPermitsIMDGService.bilan_annuel_csst_cnps(db, annee)
+
+
+@router.post("/csst-cnps/heures")
+def saisir_heures_exposition_api(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("qhse.rapport.read")),
+):
+    """Enregistre le denominateur d'heures travaillees d'un exercice (upsert).
+
+    Sans cette saisie reelle, le bilan ne publie ni TF ni TG. Champs :
+    annee, heures_travaillees (>= 0), nb_employes?, source_piece?."""
+    from fastapi import HTTPException as _HTTP
+    from app.services.qhse_service import WorkPermitsIMDGService
+
+    annee = payload.get("annee")
+    heures = payload.get("heures_travaillees")
+    if annee is None or heures is None:
+        raise _HTTP(status_code=400, detail="Champs requis : annee, heures_travaillees.")
+    return WorkPermitsIMDGService.saisir_heures_exposition(
+        db,
+        annee=int(annee),
+        heures=float(heures),
+        current_user=current_user,
+        nb_employes=payload.get("nb_employes"),
+        source_piece=payload.get("source_piece"),
+    )
 

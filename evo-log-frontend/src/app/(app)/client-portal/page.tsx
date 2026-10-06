@@ -130,7 +130,7 @@ export default function ClientPortalHome() {
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Missions En Route</p>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-100">
-            {missions.filter((m) => m.statut === 'EN_ROUTE' || m.statut === 'EN_CHARGEMENT').length}
+            {missions.filter((m) => m.statut === 'en_cours' || m.statut === 'en_retard').length}
           </h2>
         </div>
 
@@ -140,7 +140,7 @@ export default function ClientPortalHome() {
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Expéditions Livrées</p>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-100">
-            {missions.filter((m) => m.statut === 'LIVRE' || m.statut === 'LIVREE' || m.statut === 'TERMINEE').length}
+            {missions.filter((m) => m.statut === 'terminee').length}
           </h2>
         </div>
 
@@ -150,7 +150,7 @@ export default function ClientPortalHome() {
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Factures En Attente</p>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-100">
-            {invoices.filter((i) => i.statut === 'VALIDEE_NON_PAYEE' || i.statut === 'EN_ATTENTE').length}
+            {invoices.filter((i) => i.statut === 'emise' || i.statut === 'retard' || i.statut === 'payee_partiellement').length}
           </h2>
         </div>
       </div>
@@ -236,7 +236,7 @@ export default function ClientPortalHome() {
               {activeTab === 'douane' && (
                 <tr>
                   <th className="px-6 py-4">N° Déclaration</th>
-                  <th className="px-6 py-4">Marchandise</th>
+                  <th className="px-6 py-4">B/L & Régime</th>
                   <th className="px-6 py-4 text-right">Statut</th>
                 </tr>
               )}
@@ -263,32 +263,32 @@ export default function ClientPortalHome() {
                         {m.reference}
                         <div className="text-xs font-normal text-slate-400 flex items-center gap-1 mt-0.5">
                           <Calendar className="w-3 h-3 text-slate-500" />
-                          {m.date_chargement_prevue ? new Date(m.date_chargement_prevue).toLocaleDateString() : 'Aujourd\'hui'}
+                          {m.date_debut_prevue ? new Date(m.date_debut_prevue).toLocaleDateString() : 'Date non enregistrée'}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-200">{m.origine || m.lieu_depart || 'Douala Port'}</div>
+                        <div className="font-semibold text-slate-200">{m.origine || m.point_depart || 'Origine non enregistrée'}</div>
                         <div className="text-xs text-slate-400 flex items-center gap-1">
-                          <ArrowRight className="w-3 h-3 text-indigo-400" /> {m.destination || m.lieu_arrivee || 'Bassa'}
+                          <ArrowRight className="w-3 h-3 text-indigo-400" /> {m.destination || m.point_arrivee || 'Destination non enregistrée'}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-slate-300 font-medium">{m.nature_fret || 'Marchandises diverses'}</td>
+                      <td className="px-6 py-4 text-slate-300 font-medium">{m.type_mission || 'Nature non enregistrée'}</td>
                       <td className="px-6 py-4 text-right">
-                        {(m.statut === 'EN_ROUTE' || m.statut === 'EN_CHARGEMENT') && (
-                          <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                            EN ROUTE
-                          </span>
-                        )}
-                        {(m.statut === 'LIVRE' || m.statut === 'LIVREE' || m.statut === 'TERMINEE') && (
-                          <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            LIVRÉ
-                          </span>
-                        )}
-                        {(m.statut === 'BROUILLON' || m.statut === 'PLANIFIE') && (
-                          <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                            PROGRAMMÉ
-                          </span>
-                        )}
+                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold border ${
+                          m.statut === 'en_cours' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                          m.statut === 'terminee' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                          m.statut === 'en_retard' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
+                          m.statut === 'annulee' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20' :
+                          'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                        }`}>
+                          {{
+                            en_cours: 'EN ROUTE',
+                            terminee: 'LIVRÉE',
+                            planifiee: 'PROGRAMMÉE',
+                            en_retard: 'EN RETARD',
+                            annulee: 'ANNULÉE',
+                          }[m.statut as string] || m.statut || '—'}
+                        </span>
                       </td>
                     </tr>
                   ))
@@ -305,22 +305,30 @@ export default function ClientPortalHome() {
                     <tr key={inv.id} className="hover:bg-slate-800/40 transition-colors">
                       <td className="px-6 py-4 font-bold text-slate-100">{inv.numero_facture || `FAC-${inv.id}`}</td>
                       <td className="px-6 py-4 text-slate-300">
-                        {inv.date_echeance ? new Date(inv.date_echeance).toLocaleDateString() : '30 jours'}
+                        {inv.date_echeance ? new Date(inv.date_echeance).toLocaleDateString() : 'Échéance non enregistrée'}
                       </td>
                       <td className="px-6 py-4 text-right font-mono font-bold text-emerald-400">
                         {Number(inv.montant_ttc_xaf || inv.montant_ttc || 0).toLocaleString()} XAF
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {(inv.statut === 'PAYEE' || inv.statut === 'PAYE_TOTAL') && (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            <CheckCircle className="w-3 h-3" /> PAYÉE
-                          </span>
-                        )}
-                        {(inv.statut === 'VALIDEE_NON_PAYEE' || inv.statut === 'EMISE') && (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                            <Clock className="w-3 h-3" /> EN ATTENTE
-                          </span>
-                        )}
+                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${
+                          inv.statut === 'payee' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                          inv.statut === 'retard' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
+                          inv.statut === 'annulee' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20' :
+                          inv.statut === 'brouillon' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20' :
+                          'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                        }`}>
+                          {(inv.statut === 'payee' || inv.statut === 'payee_partiellement' || inv.statut === 'emise' || inv.statut === 'retard' || inv.statut === 'annulee' || inv.statut === 'brouillon')
+                            ? <CheckCircle className="w-3 h-3" /> : null}
+                          {{
+                            payee: 'PAYÉE',
+                            payee_partiellement: 'PARTIELLE',
+                            emise: 'EN ATTENTE',
+                            retard: 'EN RETARD',
+                            annulee: 'ANNULÉE',
+                            brouillon: 'BROUILLON',
+                          }[inv.statut as string] || inv.statut || '—'}
+                        </span>
                       </td>
                     </tr>
                   ))
