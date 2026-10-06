@@ -2,11 +2,9 @@
 
 WeasyPrint a besoin des bibliothèques système Pango/Cairo (installées dans
 l'image Docker de production). Si elles sont indisponibles (poste de dev
-Windows sans ces DLL, dépendance non installée), le service lève un HTTP 501
-explicite  on ne renvoie JAMAIS un faux PDF ni un HTML déguisé en PDF.
-
-Convention alignée sur app/core/not_implemented.py : l'échec est honnête et
-dit de quoi l'utilisateur a besoin.
+Windows sans ces DLL, dépendance non installée), le service lève un HTTP 503
+(Service Unavailable) — on ne renvoie JAMAIS un faux PDF ni un HTML déguisé
+en PDF, et le code 501 n'est plus utilisé.
 """
 from pathlib import Path
 from typing import Any, Dict
@@ -20,15 +18,15 @@ _env = None
 
 def _get_env():
     """Environment Jinja2, créé à la demande (import paresseux : le module
-    doit rester importable même si jinja2 manque, pour un 501 honnête)."""
+    doit rester importable même si jinja2 manque, pour un 503 honnête)."""
     global _env
     if _env is None:
         try:
             from jinja2 import Environment, FileSystemLoader
         except ImportError as e:
             raise HTTPException(
-                status_code=501,
-                detail=f"Génération PDF indisponible : jinja2 n'est pas installé ({e}).",
+                status_code=503,
+                detail=f"Génération PDF indisponible dans cet environnement : jinja2 n'est pas installé ({e}).",
             )
         _env = Environment(
             loader=FileSystemLoader(str(TEMPLATE_DIR)),
@@ -42,13 +40,13 @@ def _get_env():
 def generer_pdf(nom_template: str, contexte: Dict[str, Any]) -> bytes:
     """Rend le template Jinja2 puis le convertit en PDF via WeasyPrint.
 
-    Lève HTTPException(501) si WeasyPrint ou ses librairies natives ne sont
+    Lève HTTPException(503) si WeasyPrint ou ses librairies natives ne sont
     pas disponibles dans l'environnement courant.
     """
     if not (TEMPLATE_DIR / nom_template).exists():
         raise HTTPException(
-            status_code=501,
-            detail=f"Modèle PDF '{nom_template}' introuvable côté serveur.",
+            status_code=503,
+            detail=f"Modèle PDF '{nom_template}' absent du déploiement serveur (génération indisponible).",
         )
     html = _get_env().get_template(nom_template).render(**contexte)
 
@@ -56,7 +54,7 @@ def generer_pdf(nom_template: str, contexte: Dict[str, Any]) -> bytes:
         from weasyprint import HTML
     except (ImportError, OSError) as e:
         raise HTTPException(
-            status_code=501,
+            status_code=503,
             detail=(
                 "Génération PDF indisponible dans cet environnement : WeasyPrint "
                 "ou ses bibliothèques natives (Pango/Cairo) manquent. "
@@ -67,7 +65,7 @@ def generer_pdf(nom_template: str, contexte: Dict[str, Any]) -> bytes:
         return HTML(string=html).write_pdf()
     except OSError as e:
         raise HTTPException(
-            status_code=501,
+            status_code=503,
             detail=f"Échec de rendu PDF (bibliothèques natives indisponibles) : {e}",
         )
 

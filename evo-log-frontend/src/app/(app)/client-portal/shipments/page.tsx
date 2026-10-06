@@ -170,12 +170,11 @@ export default function ClientShipmentsPage() {
                 className="select select-bordered w-full"
               >
                 <option value="">Tous les statuts</option>
-                <option value="BROUILLON">Brouillon</option>
-                <option value="EN_ATTENTE_AFFECTATION">Programmé</option>
-                <option value="EN_CHARGEMENT">En Chargement</option>
-                <option value="EN_ROUTE">En Route</option>
-                <option value="LIVREE">Livré</option>
-                <option value="ANNULEE">Annulé</option>
+                <option value="planifiee">Programmée</option>
+                <option value="en_cours">En cours</option>
+                <option value="en_retard">En retard</option>
+                <option value="terminee">Terminée</option>
+                <option value="annulee">Annulée</option>
               </select>
             </div>
             <div>
@@ -230,9 +229,9 @@ export default function ClientShipmentsPage() {
             <div className="flex items-center justify-center mb-3">
               <CheckCircle2 className="w-8 h-8 text-success" />
             </div>
-            <p className="text-sm font-medium text-slate-500">Livrées</p>
+            <p className="text-sm font-medium text-slate-500">Terminées</p>
             <p className="text-2xl font-bold text-slate-200">
-              {missions.filter(m => m.statut === 'LIVREE').length}
+              {missions.filter(m => m.statut === 'terminee').length}
             </p>
           </div>
           <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6 text-center">
@@ -241,7 +240,7 @@ export default function ClientShipmentsPage() {
             </div>
             <p className="text-sm font-medium text-slate-500">En Cours</p>
             <p className="text-2xl font-bold text-slate-200">
-              {missions.filter(m => ['EN_ROUTE', 'EN_CHARGEMENT'].includes(m.statut)).length}
+              {missions.filter(m => ['en_cours', 'en_retard'].includes(m.statut)).length}
             </p>
           </div>
           <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6 text-center">
@@ -250,7 +249,7 @@ export default function ClientShipmentsPage() {
             </div>
             <p className="text-sm font-medium text-slate-500">À Venir</p>
             <p className="text-2xl font-bold text-slate-200">
-              {missions.filter(m => m.statut === 'EN_ATTENTE_AFFECTATION').length}
+              {missions.filter(m => m.statut === 'planifiee').length}
             </p>
           </div>
         </div>
@@ -269,11 +268,11 @@ export default function ClientShipmentsPage() {
               onChange={(e) => setSortBy(prev => ({ ...prev, field: e.target.value }))}
               className="select select-sm select-bordered"
             >
-              <option value="dateCreation">Date (récent)</option>
+              <option value="date_creation">Date (récent)</option>
               <option value="dateCreation:asc">Date (ancien)</option>
               <option value="reference">Référence</option>
               <option value="statut">Statut</option>
-              <option value="lieu_depart">Départ</option>
+              <option value="origine">Départ</option>
             </select>
           </div>
         </div>
@@ -304,29 +303,26 @@ export default function ClientShipmentsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full">
-                        {mission.statut === 'LIVREE' && (
+                        {mission.statut === 'terminee' && (
                           <CheckCircle2 className="w-4 h-4 text-success" />
                         )}
-                        {mission.statut === 'EN_ROUTE' && (
+                        {mission.statut === 'en_cours' && (
                           <div className="w-3 h-3 border-2 border-primary" />
                         )}
-                        {mission.statut === 'EN_CHARGEMENT' && (
+                        {mission.statut === 'en_retard' && (
                           <div className="w-3 h-3 border-2 border-warning" />
                         )}
-                        {mission.statut === 'EN_ATTENTE_AFFECTATION' && (
+                        {mission.statut === 'planifiee' && (
                           <div className="w-3 h-3 border-2 border-info" />
                         )}
-                        {mission.statut === 'BROUILLON' && (
-                          <div className="w-3 h-3 border-2 border-slate-400" />
-                        )}
-                        {mission.statut === 'ANNULEE' && (
+                        {mission.statut === 'annulee' && (
                           <div className="w-3 h-3 border-2 border-destructive" />
                         )}
                       </div>
                       <div>
                         <p className="font-medium text-slate-200">{mission.reference}</p>
                         <p className="text-sm text-slate-500 truncate">
-                          {mission.lieu_depart} → {mission.lieu_arrivee}
+                          {mission.origine || '—'} → {mission.destination || '—'}
                         </p>
                       </div>
                     </div>
