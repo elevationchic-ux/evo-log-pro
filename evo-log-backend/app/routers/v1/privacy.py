@@ -7,9 +7,10 @@ from datetime import datetime
 from app.database import get_db
 from app.models.user import User
 from app.models.organization import Organization
+from app.models.advanced_crud import PrivacyBreach
 from app.utils.tenant import get_current_tenant_context, TenantContext
 from app.utils.rbac import get_current_user
-from app.core.not_implemented import not_implemented
+from app.utils.external import call_provider, provider_configured
 
 router = APIRouter()
 
