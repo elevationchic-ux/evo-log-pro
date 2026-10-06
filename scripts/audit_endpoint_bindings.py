@@ -92,18 +92,25 @@ def retirer_commentaires(texte):
 
 
 def backend_operations():
-    """`{(path, methode)}` et `{path}` reels, generes a chaud depuis l'app."""
+    """`({chemins}, {gabarit_norm: methodes})`, generes a chaud depuis l'app.
+
+    Les methodes sont indexees par GABARIT normalise : sans ce cache, chaque site
+    d'appel balayait toutes les operations de toutes les routes (1 195 x 1 400),
+    ce qui fit tourner l'audit quinze minutes sans le finir.
+    """
     import app.main as m
     spec = m.app.openapi()
-    paths = spec.get("paths", {})
-    ops = set()
-    for path, item in paths.items():
+    methodes_par_gabarit = {}
+    chemins = set()
+    for path, item in spec.get("paths", {}).items():
+        chemins.add(path)
+        decl = methodes_par_gabarit.setdefault(norm_backend(path), set())
         for verb in ("get", "post", "put", "patch", "delete"):
             if verb in item:
-                ops.add((path, verb.upper()))
-        if not any(verb in item for verb in ("get", "post", "put", "patch", "delete")):
-            ops.add((path, "ANY"))
-    return {p for p, _ in ops}, ops
+                decl.add(verb.upper())
+        if not decl:
+            decl.add("ANY")
+    return chemins, methodes_par_gabarit
 
 
 def norm_backend(chemin):
