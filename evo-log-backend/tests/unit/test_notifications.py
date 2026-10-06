@@ -155,3 +155,42 @@ class TestSMSNotificationService:
         assert sms.expediteur == "EVOLOG"
         assert sms.destinataire == "+237699123456"
         assert sms.nombre_segments == 1
+
+
+class TestNotificationsReportingHonnetete:
+    """Regroupements REELS du rapport notifications (zero-mock).
+
+    Regression : `par_canal`/`par_statut` etaient ecrits `{cle: 1 for ...}`
+    (chaque cle forcee a 1 quelle que soit la volumetrie)."""
+
+    def test_rapport_compte_reellement_par_canal_et_statut(self, db: Session):
+        from app.services.notifications_service import (
+            NotificationService, NotificationsReportingService,
+        )
+
+        for i in range(2):
+            n = NotificationService.creer_notification(
+                db=db, numero_notification=f"NOT-R-{i}", destinataire_id=42,
+                type_canal="email", titre="t", corps="c", priorite="normale",
+            )
+            NotificationService.envoyer_notification(db=db, notification_id=n.id)
+        NotificationService.creer_notification(
+            db=db, numero_notification="NOT-R-2", destinataire_id=42,
+            type_canal="sms", titre="t", corps="c", priorite="normale",
+        )
+
+        r = NotificationsReportingService.rapport_notifications(db, 42)
+        assert r["total_notifications"] == 3
+        assert r["par_canal"] == {"email": 2, "sms": 1}
+        assert r["par_statut"] == {"envoye": 2, "en_attente": 1}
+        # Jamais lues => non_lues = total (calcule, pas fabrique).
+        assert r["non_lues"] == 3
+
+    def test_rapport_vide_sans_lignes_inventees(self, db: Session):
+        from app.services.notifications_service import NotificationsReportingService
+
+        r = NotificationsReportingService.rapport_notifications(db, 999)
+        assert r["total_notifications"] == 0
+        assert r["par_canal"] == {}
+        assert r["par_statut"] == {}
+        assert r["non_lues"] == 0

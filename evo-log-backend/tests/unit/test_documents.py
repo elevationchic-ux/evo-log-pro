@@ -133,3 +133,48 @@ class TestWorkflowDocumentService:
         assert workflow.nom_workflow == "Validation Facture"
         assert workflow.document_id == document.id
         assert workflow.statut.value == "en_attente"
+
+
+class TestDocumentsReportingHonnetete:
+    """Regroupements REELS du rapport GED (zero-mock).
+
+    Regression : `par_type`/`par_statut` etaient ecrits `{cle: 1 for ...}`
+    (chaque cle forcee a 1 quelle que soit la volumetrie du dossier)."""
+
+    def test_rapport_compte_reellement_par_type_et_statut(self, db: Session):
+        from app.services.documents_service import DocumentsReportingService
+
+        d = DossierService.creer_dossier(
+            db=db, nom="Dossier honnetete", proprietaire_id=None,
+            description="test",
+        )
+        DocumentsService.creer_document(
+            db=db, numero_document="DOC-H-1", type_document=TypeDocument.FACTURE,
+            titre="f1", dossier_id=d.id, taille_octets=100,
+        )
+        DocumentsService.creer_document(
+            db=db, numero_document="DOC-H-2", type_document=TypeDocument.FACTURE,
+            titre="f2", dossier_id=d.id, taille_octets=250,
+        )
+        DocumentsService.creer_document(
+            db=db, numero_document="DOC-H-3", type_document=TypeDocument.CONTRAT,
+            titre="c1", dossier_id=d.id, taille_octets=50,
+        )
+        docs = db.query(Document).filter(Document.dossier_id == d.id).all()
+        docs[0].statut = StatutDocument.VALIDE
+        db.commit()
+
+        r = DocumentsReportingService.rapport_documents(db, d.id)
+        assert r["total_documents"] == 3
+        assert r["par_type"] == {"facture": 2, "contrat": 1}
+        assert r["par_statut"] == {"valide": 1, "brouillon": 2}
+        assert r["taille_totale"] == 400
+
+    def test_rapport_vide_sans_lignes_inventees(self, db: Session):
+        from app.services.documents_service import DocumentsReportingService
+
+        r = DocumentsReportingService.rapport_documents(db, 999999)
+        assert r["total_documents"] == 0
+        assert r["par_type"] == {}
+        assert r["par_statut"] == {}
+        assert r["taille_totale"] == 0
