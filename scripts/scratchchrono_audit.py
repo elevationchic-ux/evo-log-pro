@@ -1,49 +1,28 @@
-"""Ou passe le temps audit_endpoint_bindings.py ?
+"""Chronometre fichier par fichier de l'audit de liaisons.
 
-L'audit complet ne termine plus depuis que la resolution des prefixes a ete
-ajoutee. Deux suspects : l'import de app.main (OpenAPI a chaud) et le balayage
-des 360+ fichiers du frontend. Ce scratch minute chaque phase, fichier par
-fichier au-dela d'un seuil, pour ne pas corriger au jug.
+Le scan frontend ne termine plus depuis l'ajout de la resolution des prefixes.
+Ce scratch affiche CHAQUE fichier avant de le traiter : le dernier nom affiche
+est le fichier qui coince, et la separation des deux cotes (nettoyage des
+commentaires vs regex d'appel) dit quelle partie corriger.
 """
 import importlib.util
-import pathlib
 import sys
 import time
+import pathlib
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-CHEMIN = pathlib.Path("scripts/audit_endpoint_bindings.py")
-spec = importlib.util.spec_from_file_location("aeb", CHEMIN)
+spec = importlib.util.spec_from_file_location("aeb", pathlib.Path("scripts/audit_endpoint_bindings.py"))
 aeb = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(aeb)
 
-t0 = time.time()
-fichiers = sorted(aeb.FRONTEND_SRC.rglob("*.ts*"))
-print(f"{len(fichiers)} fichiers ts/tsx, listing {time.time() - t0:.2f}s")
-
-lent = []
-t0 = time.time()
-for f in fichiers:
-    d = time.time()
+for f in sorted(aeb.FRONTEND_SRC.rglob("*.ts*")):
     brut = f.read_text(encoding="utf-8", errors="ignore")
+    t0 = time.time()
     sans = aeb.retirer_commentaires(brut)
+    t1 = time.time()
     sites = list(aeb.APPEL.finditer(sans))
-    aeb.FETCH.finditer(sans)
-    coute = time.time() - d
-    if coute > 0.4:
-        lent.append((coute, f, len(sites)))
-print(f"scan frontend total {time.time() - t0:.2f}s")
-for coute, f, n in sorted(lent, reverse=True)[:15]:
-    print(f"   {coute:6.2f}s  {n:>4} appels  {f.relative_to(aeb.root)}")
-
-t0 = time.time()
-chemins, meth = aeb.backend_operations()
-print(f"OpenAPI a chaud {time.time() - t0:.2f}s  ({len(chemins)} chemins)")
-
-t0 = time.time()
-index = aeb.IndexRoutes(meth)
-sites, non_res, opaques = aeb.scanner_front(None)
-print(f"scanner_front complet {time.time() - t0:.2f}s  ({len(sites)} sites)")
-
-t0 = time.time()
-orph = sum(1 for _f, _l, _m, u in sites if not index.existe(u))
-print(f"resolution des sites {time.time() - t0:.2f}s  ({orph} orphelins)")
+    t2 = time.time()
+    if (t1 - t0) > 0.3 or (t2 - t1) > 0.3:
+        print(f"COMITE {f.relative_to(aeb.root)}  com={t1 - t0:.2f}s regex={t2 - t1:.2f}s "
+              f"taille={len(brut)} appels={len(sites)}", flush=True)
+print("TERMINE", flush=True)
