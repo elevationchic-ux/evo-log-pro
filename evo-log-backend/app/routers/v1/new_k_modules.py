@@ -1,20 +1,80 @@
-from fastapi import APIRouter, Depends
+"""K-Modules : surface catalogue ramassee sur les VRAIES tables en base.
+
+Ce module etait une DEMO en memoire volatile (listes pre-remplies de donnees
+inventees). Il delegue desormais vers les modeles persistants reels :
+
+- Cotations      -> CotationDevis (table cotations_devis, scope company)
+- e-POD          -> ElectronicPOD (table electronic_pods)
+- FuelGuard      -> FuelTankSensor (table fuel_tank_sensors) : lecture Manuel
+  saisie ; variation calculee depuis la VRAIE lecture precedente (pas de vol
+  invente).
+- Bons de commande -> PurchaseOrder (table procurement_purchase_orders)
+- Conformite     -> ComplianceAudit (auto-declare, persiste)
+- Acconage/Transit/Magasin/Articles -> modeles metiers reels (lecture seule
+  filtree par company).
+- BI executif    -> aggregations SQL reelles.
+
+Aucune donnee n'est inventee : sur base vide les listes renvoient un vrai
+ensemble vide ; sur base peuplee elles renvoient les enregistrements reels.
+"""
+import uuid
 from datetime import datetime
-from pydantic import BaseModel
 from typing import Optional
 
-from app.core.not_implemented import not_implemented
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
+from sqlalchemy import func
+from sqlalchemy import inspect as sa_inspect
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.utils.tenant import get_current_tenant_context, TenantContext
+from app.models.new_k_modules import (
+    CotationDevis, ElectronicPOD, FuelTankSensor, PurchaseOrder, ComplianceAudit,
+)
+from app.models.magasin import Article, OrdreTransfert, BandeLivraison
+from app.models.magasin_avance import BonSortie
+from app.models.transit import DossierTransit
+from app.models.acconage import Navire, Escale, OperationAcconage
+from app.models.transport import Mission, Camion, MissionStatus, CamionStatus
+from app.models.finance import Facture, FactureStatus
 
 router = APIRouter(tags=["New K-Modules"])  # monte sur /api/v1/k-modules par main.py
 
-# Ce module etait une DEMO en memoire volatile : listes pre-remplies de donnees
-# inventees (cotations, ePOD, senseurs carburant, acconage, transit, maitrise
-# d'articles, bons...) et "persistances" qui disparaissaient au redemarrage.
-# Toutes ces routes retournent desormais un 501 explicite au lieu d'un faux
-# succes. Les vraies fonctionnalites correspondent vivent dans les routers
-# metiers (acconage, transit, magasin, finance) alimentes par la base.
-# Seule exception conservee : le calculateur tarifaire douanier CEMAC, qui est
-# un calcul deterministe a partir de l'entree (aucune donnee inventee).
+
+# --- Helpers de serialisation / scope ---
+
+def _serialize(obj) -> dict:
+    out = {}
+    for attr in sa_inspect(obj).mapper.column_attrs:
+        v = getattr(obj, attr.key)
+        if v is None or isinstance(v, (int, float, str, bool)):
+            out[attr.key] = v
+        elif hasattr(v, "isoformat"):
+            out[attr.key] = v.isoformat()
+        elif hasattr(v, "value"):  # Enum SQLAlchemy
+            out[attr.key] = v.value
+        else:
+            out[attr.key] = str(v)
+    return out
+
+
+def _company_id(context: TenantContext):
+    return getattr(context.user, "company_id", None)
+
+
+def _scoped(context: TenantContext, query, model):
+    cid = _company_id(context)
+    if cid is not None and hasattr(model, "company_id"):
+        return query.filter(model.company_id == cid)
+    return query
+
+
+def _listed(context, db, model, limit: int = 200):
+    q = _scoped(context, db.query(model), model)
+    if hasattr(model, "created_at"):
+        q = q.order_by(model.created_at.desc())
+    return [_serialize(r) for r in q.limit(limit).all()]
 
 
 # --- Schemas ---
@@ -51,84 +111,121 @@ class PurchaseOrderCreate(BaseModel):
 class ComplianceAuditCreate(BaseModel):
     dossier_reference: str
     type_reglementation: Optional[str] = "ZLECAF / CEMAC"
-    score_conformite_pct: Optional[float] = 98.5
+    score_conformite_pct: Optional[float] = None
 
 
-# --- Endpoints K-Cotations (demo -> 501) ---
+# --- K-Cotations : CRUD reel sur cotations_devis ---
 @router.get("/cotations")
-def get_cotations():
-    """K-Cotations (demo) : 501. Voir le vrai routeur cotations base en base."""
-    not_implemented(
-        "Cotations (module demo en memoire)",
-        "le routeur cotations reel alimente par la table cotations_devis "
-        "(les donnees de cette demo etaient inventees)",
+def get_cotations(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    """Cotations REELLES lues en base (scope company)."""
+    return _listed(context, db, CotationDevis)
+
+
+@router.post("/cotations", status_code=status.HTTP_201_CREATED)
+def create_cotation(
+    payload: CotationCreate,
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    cid = _company_id(context)
+    if cid is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cotation rattachable a une entreprise (company_id requis)",
+        )
+    ref = f"COT-{datetime.utcnow():%Y%m%d}-{uuid.uuid4().hex[:6].upper()}"
+    row = CotationDevis(
+        company_id=cid, reference=ref, statut="SOUMIS", **payload.model_dump()
     )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _serialize(row)
 
 
-@router.post("/cotations")
-def create_cotation(payload: CotationCreate):
-    """Creation cotation (demo) : 501 (memoire volatile, faux succes)."""
-    not_implemented(
-        "Creation de cotation (module demo en memoire)",
-        "une ecriture reelle en base via le routeur cotations metier",
-    )
-
-
-# --- Endpoints K-Tracking & e-POD (demo -> 501) ---
+# --- K-Tracking & e-POD : preuves de livraison reelles ---
 @router.get("/tracking/epod")
-def get_epods():
-    """e-POD (demo) : 501. Voir preuves_livraison reels en base."""
-    not_implemented(
-        "e-POD (module demo en memoire)",
-        "la table preuves_livraison portee par le tenant (donnees inventees ici)",
-    )
+def get_epods(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, ElectronicPOD)
 
 
-@router.post("/tracking/epod")
-def create_epod(payload: EPodCreate):
-    """Creation e-POD (demo) : 501 (generait une facture inventee, rien en base)."""
-    not_implemented(
-        "Creation d'e-POD + facture automatique (module demo)",
-        "l'ecriture reelle de la preuve de livraison et l'emission facturation "
-        "depuis les modeles persistants (montants codes en dur ici)",
-    )
+@router.post("/tracking/epod", status_code=status.HTTP_201_CREATED)
+def create_epod(
+    payload: EPodCreate,
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    """Enregistre la preuve de livraison REELLE. N'emet AUCUNE facture inventee :
+    la facturation se fait via le module finance reel."""
+    data = payload.model_dump()
+    if data.get("signature_url"):
+        statut = "LIVRE_AVEC_SIGNATURE"
+    elif data.get("photo_livraison_url"):
+        statut = "LIVRE_AVEC_PHOTO"
+    else:
+        statut = "LIVRE_SANS_PREUVE"
+    row = ElectronicPOD(statut=statut, timestamp=datetime.utcnow(), **data)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    out = _serialize(row)
+    out["facture_emisee"] = False  # honnete : aucune facture auto-inventee
+    return out
 
 
-# --- Endpoints K-FuelGuard (demo -> 501) ---
+# --- K-FuelGuard : lectures Manuel reelles, variation factuelle ---
 @router.get("/fuel-guard/sensors")
-def get_fuel_sensors():
-    """Capteurs carburant (demo) : 501 (telemetrie inventee)."""
-    not_implemented(
-        "Capteurs carburant / FuelGuard (module demo)",
-        "un flux telematique reel par vehicule (donnees inventees ici)",
+def get_fuel_sensors(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, FuelTankSensor)
+
+
+@router.post("/fuel-guard/sensors", status_code=status.HTTP_201_CREATED)
+def create_fuel_sensor(
+    payload: FuelSensorCreate,
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    """Persiste la lecture MANUELLE du capteur et calcule la variation reelle vs
+    la derniere lecture ENREGISTREE du meme camion. Aucun vol n'est invente : la
+    simple baisse peut provenir d'une consommation normale."""
+    data = payload.model_dump()
+    prev = db.query(FuelTankSensor).filter(
+        FuelTankSensor.immatriculation_camion == data["immatriculation_camion"]
+    ).order_by(FuelTankSensor.updated_at.desc()).first()
+    variation = None
+    if prev is not None:
+        variation = round(float(prev.niveau_actuel_litres) - float(data["niveau_actuel_litres"]), 2)
+    row = FuelTankSensor(
+        alerte_vol_detectee=False, updated_at=datetime.utcnow(), **data
     )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    out = _serialize(row)
+    out["variation_litres_vs_derniere_lecture"] = variation
+    out["alerte_vol"] = "non determinee (telemetrie nonbranche ; baisse != vol certain)"
+    return out
 
 
-@router.post("/fuel-guard/sensors")
-def create_fuel_sensor(payload: FuelSensorCreate):
-    """Lecture capteur carburant (demo) : 501 (memoire volatile)."""
-    not_implemented(
-        "Enregistrement de niveau carburant (module demo)",
-        "une ingestion telematique persistante (la detection de vol etait simulee)",
-    )
-
-
-# --- Calculateur Tarifaire Douane Natif CEMAC / ZLECAF (CALCUL LEGITIME - conserve) ---
+# --- Calculateur Tarifaire Douane CEMAC / ZLECAF (calcul legitime) ---
 class RequeteCalculDouane(BaseModel):
     valeur_caf_xaf: float
-    origine_produit: Optional[str] = "CEMAC"  # CEMAC, ZLECAF, HORS_ZONE
-    categorie_tarifaire_tec: Optional[int] = 2  # 0:0% 1:5% 2:10% 3:20% (TEC CEMAC)
+    origine_produit: Optional[str] = "CEMAC"
+    categorie_tarifaire_tec: Optional[int] = 2
 
 
 @router.post("/transit/calculateur-taxe-cemac")
 def calculer_taxes_douanieres(payload: RequeteCalculDouane):
-    """Calcul deterministe des droits/taxes CEMAC a partir de la valeur CAF.
-
-    Délégué au moteur UNIQUE ``app.services.taxation_douaniere`` (partagé avec
-    transit, transit-avance et integration-cameroun). Simulation tarifaire (ne
-    persiste rien) : a confirmer avec les taux SYDONIA en vigueur avant usage
-    officiel.
-    """
+    """Calcul deterministe des droits/taxes CEMAC a partir de la valeur CAF."""
     from app.services.taxation_douaniere import calculer_liquidation
 
     liq = calculer_liquidation(
@@ -156,113 +253,174 @@ def calculer_taxes_douanieres(payload: RequeteCalculDouane):
     }
 
 
-# --- Endpoints K-Procurement (demo -> 501) ---
+# --- K-Procurement : bons de commande reels ---
 @router.get("/procurement/orders")
-def get_procurement_orders():
-    """Bons de commande (demo) : 501 (donnees inventees)."""
-    not_implemented(
-        "Bons de commande (module demo)",
-        "le routeur procurement/achats reel base en base",
+def get_procurement_orders(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, PurchaseOrder)
+
+
+@router.post("/procurement/orders", status_code=status.HTTP_201_CREATED)
+def create_procurement_order(
+    payload: PurchaseOrderCreate,
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    """BC persiste reellement. Le rapprochement 3 voies n'est PAS declare conforme
+    sans controle reel : statut EN_ATTENTE jusqu'a reception/lettrage verifiable."""
+    ref = f"PO-{datetime.utcnow():%Y%m%d}-{uuid.uuid4().hex[:6].upper()}"
+    row = PurchaseOrder(
+        numero_po=ref, match_3_voies=False, statut="EN_ATTENTE",
+        created_at=datetime.utcnow(), **payload.model_dump(),
     )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    out = _serialize(row)
+    out["note"] = "Rapprochement 3 voies a confirmer a la reception (non simule)."
+    return out
 
 
-@router.post("/procurement/orders")
-def create_procurement_order(payload: PurchaseOrderCreate):
-    """Creation BC (demo) : 501 (memoire volatile, match 3 voies simule)."""
-    not_implemented(
-        "Creation de bon de commande (module demo)",
-        "une ecriture reelle + un rapprochement 3 voies veritable",
-    )
-
-
-# --- Endpoints K-Compliance (demo -> 501) ---
+# --- K-Compliance : audits auto-declares persistes ---
 @router.get("/compliance/audits")
-def get_compliance_audits():
-    """Audits conformite (demo) : 501 (scores inventes)."""
-    not_implemented(
-        "Audits de conformite ZLECAF/CEMAC (module demo)",
-        "des controles reels base sur les dossiers en base",
+def get_compliance_audits(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, ComplianceAudit)
+
+
+@router.post("/compliance/audits", status_code=status.HTTP_201_CREATED)
+def create_compliance_audit(
+    payload: ComplianceAuditCreate,
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    data = payload.model_dump()
+    score = data.pop("score_conformite_pct", None)
+    row = ComplianceAudit(
+        score_conformite_pct=score, statut="A_VERIFIER", exemption_valide=False,
+        created_at=datetime.utcnow(), **data,
     )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    out = _serialize(row)
+    out["note"] = "Score auto-declare par l'utilisateur ; non calcule depuis les dossiers."
+    return out
 
 
-@router.post("/compliance/audits")
-def create_compliance_audit(payload: ComplianceAuditCreate):
-    """Creation audit (demo) : 501 (memoire volatile)."""
-    not_implemented(
-        "Enregistrement d'un audit de conformite (module demo)",
-        "une ecriture reelle en base",
-    )
-
-
-# --- Endpoints K-Analytics BI (demo -> 501) ---
-@router.get("/bi-analytics/executive-summary")
-def get_bi_summary():
-    """Resume BI (demo) : 501 (KPI codes en dur, non agreges depuis la DB)."""
-    not_implemented(
-        "Resume analytique executif (module demo)",
-        "des aggregations SQL reelles (CA, marge, volume EVP, ponctualite)",
-    )
-
-
-# --- Endpoints Acconage & Handling Portuaire (demo -> 501) ---
+# --- Acconage & Handling Portuaire :lecture des tables reelles ---
 @router.get("/acconage")
 @router.get("/acconage/operations")
-def get_acconage_operations():
-    """Operations d'acconage (demo) : 501. Voir le vrai routeur acconage en base."""
-    not_implemented(
-        "Operations d'acconage/escales (module demo)",
-        "le routeur acconage reel base sur les tables navires/escales "
-        "(les 2 operations retournees etaient inventees)",
-    )
+def get_acconage_operations(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, OperationAcconage)
 
 
-# --- Endpoints Transit & Douane (demo -> 501) ---
+@router.get("/acconage/navires")
+def get_acconage_navires(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, Navire)
+
+
+@router.get("/acconage/escales")
+def get_acconage_escales(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, Escale)
+
+
+# --- Transit & Douane : dossiers reels ---
 @router.get("/transit")
 @router.get("/transit/dossiers")
-def get_transit_dossiers():
-    """Dossiers transit (demo) : 501. Voir le vrai routeur transit en base."""
-    not_implemented(
-        "Dossiers de transit/acconage (module demo)",
-        "le routeur transit reel base sur dossiers_transit "
-        "(les 2 dossiers retournes etaient inventes)",
-    )
+def get_transit_dossiers(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, DossierTransit)
 
 
-# --- Endpoints Removal Slips (Bons d'Enlevement) (demo -> 501) ---
+# --- Magasin : removal slips, transferts, bandes, articles (reels) ---
 @router.get("/magasin/removal-slips")
-def get_removal_slips():
-    """Bons d'enlevement (demo) : 501 (donnees inventees)."""
-    not_implemented(
-        "Bons d'enlevement (module demo)",
-        "le module magasin reel base en base",
-    )
+def get_removal_slips(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, BonSortie)
 
 
-# --- Endpoints Master Data Articles (demo -> 501) ---
-@router.get("/master-data/articles")
-def get_master_data_articles():
-    """Articles (demo) : 501. Voir le vrai stock/articles en base."""
-    not_implemented(
-        "Maitre d'articles (module demo)",
-        "la table articles/stocks reelle portee par le tenant",
-    )
-
-
-# --- Endpoints Ordres de Transfert (demo -> 501) ---
 @router.get("/magasin/ordres-transfert")
-def get_ordres_transfert():
-    """Ordres de transfert (demo) : 501 (donnees inventees)."""
-    not_implemented(
-        "Ordres de transfert inter-magasins (module demo)",
-        "la table transferts_stock reelle portee par le tenant",
-    )
+def get_ordres_transfert(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, OrdreTransfert)
 
 
-# --- Endpoints Bandes de Livraison (demo -> 501) ---
 @router.get("/magasin/bandes-livraison")
-def get_bandes_livraison():
-    """Bandes de livraison (demo) : 501 (donnees inventees)."""
-    not_implemented(
-        "Bandes de livraison (module demo)",
-        "les documents de livraison reels base en base",
+def get_bandes_livraison(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, BandeLivraison)
+
+
+@router.get("/master-data/articles")
+def get_master_data_articles(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    return _listed(context, db, Article)
+
+
+# --- BI executif : aggregations SQL REELLES ---
+@router.get("/bi-analytics/executive-summary")
+def get_bi_summary(
+    context: TenantContext = Depends(get_current_tenant_context),
+    db: Session = Depends(get_db),
+):
+    cid = _company_id(context)
+
+    def scoped_count(model):
+        q = db.query(func.count(model.id))
+        if cid is not None and hasattr(model, "company_id"):
+            q = q.filter(model.company_id == cid)
+        return q.scalar() or 0
+
+    missions_total = scoped_count(Mission)
+    missions_terminees = (
+        (_scoped(context, db.query(func.count(Mission.id)), Mission)
+         .filter(Mission.statut == MissionStatus.TERMINEE).scalar() or 0)
     )
+    flotte_total = scoped_count(Camion)
+    flotte_active = (
+        (_scoped(context, db.query(func.count(Camion.id)), Camion)
+         .filter(Camion.status == CamionStatus.ACTIVE).scalar() or 0)
+    )
+    ca_encaisse = (
+        (_scoped(context, db.query(func.sum(Facture.montant_ttc)), Facture)
+         .filter(Facture.statut == FactureStatus.PAYEE).scalar() or 0)
+    )
+    creances = (
+        (_scoped(context, db.query(func.sum(Facture.montant_ttc)), Facture)
+         .filter(Facture.statut.in_([
+             FactureStatus.EMISE, FactureStatus.RETARD, FactureStatus.PAYEE_PARTIELLEMENT
+         ])).scalar() or 0)
+    )
+    return {
+        "missions": {"total": missions_total, "terminees": missions_terminees},
+        "flotte": {"total": flotte_total, "active": flotte_active},
+        "finance": {
+            "ca_encaisse_xaf": float(ca_encaisse),
+            "creances_en_cours_xaf": float(creances),
+        },
+        "agrege_depuis_la_base": True,
+    }
