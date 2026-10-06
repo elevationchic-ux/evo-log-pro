@@ -48,13 +48,24 @@ def norm_backend(p: str) -> str:
 def matches(url_norm, backend_norm):
     if url_norm in backend_norm:
         return True
+    # Sémantique REST réelle : un segment backend '{param}' accepte N'IMPORTE
+    # QUEL littéral frontend ('articles', 'mensuel', '42'). Comparaison segment
+    # à segment, sinon on crée de faux orphelins sur toute route paramétrée.
+    f_segs = [s for s in url_norm.split("/") if s]
     for bp in backend_norm:
-        if bp == url_norm:
+        b_segs = [s for s in bp.split("/") if s]
+        if len(b_segs) != len(f_segs):
+            continue
+        ok = True
+        for bs, fs in zip(b_segs, f_segs):
+            if bs.startswith("{") and bs.endswith("}"):
+                continue  # wildcard
+            if bs != fs:
+                ok = False
+                break
+        if ok:
             return True
-    # Un frontend qui ne construit QUE des URLs prefixees (constante de base
-    # ex. '/api/v1/company-admin', puis on ajoute '/users' plus tard) n'est pas
-    # une liaison morte : si une route backend commence par url + '/', c'est un
-    # prefixe, pas une feuille visée directement.
+    # Constante de base préfixe d'autres routes (ex. '/api/v1/company-admin').
     for bp in backend_norm:
         if bp.startswith(url_norm + "/"):
             return True
