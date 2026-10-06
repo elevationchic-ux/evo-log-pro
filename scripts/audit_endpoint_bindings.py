@@ -228,8 +228,8 @@ class IndexRoutes:
         return decl
 
 
-def scanner_front(module):
-    """(sites, non_resolution, opaques) : sites = [(fichier, ligne, methode, url_norm)].
+def scanner_front():
+    """(sites, non_resolution, opaques, origines_dures).
 
     `opaques` compte les appels dont l'URL est une variable (`apiClient.get(path)`).
     Ils ne sont pas auditables statiquement : les compter empeche de prendre
@@ -240,8 +240,7 @@ def scanner_front(module):
     ``fetch(`${API_BASE}/rh-avance/dipe-mensuel`)`` avec `API_BASE` declare dans un
     autre fichier restait aveugle : 14 sites echappaient encore au contrat.
     """
-    fichiers = [f for f in sorted(FRONTEND_SRC.rglob("*.ts*"))
-                if not module or module in str(f)]
+    fichiers = sorted(FRONTEND_SRC.rglob("*.ts*"))
     carte_globale = {}
     contenus = {}
     pour_fichier = {}
@@ -304,7 +303,7 @@ def main():
     except AttributeError:
         pass
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--module", help="filtre sur un sous-chemin du frontend (ex: amenagement)")
+    ap.add_argument("--module", help="filtre sur les URL resolues contenant ce mot (ex: amenagement)")
     ap.add_argument("--details", action="store_true", help="affiche fichier:ligne de chaque defaut")
     ap.add_argument("--json", action="store_true", help="sortie machine-lisible")
     args = ap.parse_args()
@@ -312,7 +311,15 @@ def main():
     chemins_bruts, methodes_par_gabarit = backend_operations()
     index = IndexRoutes(methodes_par_gabarit)
     nb_operations = sum(len(verbs) for verbs in methodes_par_gabarit.values())
-    sites, non_resolution, opaques, origines_dures = scanner_front(args.module)
+    sites, non_resolution, opaques, origines_dures = scanner_front()
+    if args.module:
+        # Le filtre porte sur l'URL resolue, pas sur le fichier : un departement
+        # est appele depuis api-client.ts par une methode nommee, pas depuis ses
+        # pages. Filtrer sur les fichiers masquait la totalite du domaine.
+        mot = args.module.lower()
+        sites = [s for s in sites if mot in s[3].lower()]
+        non_resolution = [x for x in non_resolution if mot in x[3].lower()]
+        origines_dures = [x for x in origines_dures if mot in x[3].lower()]
 
     orphelins, methodes = [], []
     for fichier, ligne, methode, url in sites:
