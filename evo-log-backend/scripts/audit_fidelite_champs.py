@@ -110,9 +110,35 @@ disabled placeholder title width height target rel type role tabIndex autoFocus 
 """.split())
 
 
+# Carte des constantes de prefix du client (`AMGT`, `CA_BASE`, `CADC_BASE`...).
+# Alimentee par charger_prefixes(), lue par normaliser() : tous les chemins
+# comparables au contrat passent par ce seul point, donc un litteral compose
+# `${AMGT}/places` devient `/api/v1/amenagement-portuaire/places` au meme moment
+# qu'un litteral complet.
+PREFIXES = {}
+
+
+def charger_prefixes(front_src):
+    for fichier in sorted(front_src.rglob("*.ts")):
+        texte = fichier.read_text(encoding="utf-8", errors="replace")
+        for nom, valeur in DECLARATION_PREFIXE.findall(retirer_commentaires(texte)):
+            PREFIXES.setdefault(nom, valeur)
+    return PREFIXES
+
+
 def normaliser(chemin):
-    """`/api/x` -> `/api/v1/x`, comme le middleware du backend. Query retirlee."""
+    """Chemin materialise, sans query, en `/api/v1/...`, interpolations en `{p}`.
+
+    `/api/x` -> `/api/v1/x`, comme le middleware du backend.
+    """
     chemin = chemin.split("?", 1)[0]
+    m = re.match(r"^\$\{([A-Za-z_$][\w$]*)\}", chemin)
+    if m:
+        prefixe = PREFIXES.get(m.group(1))
+        if prefixe is None:
+            return chemin  # non materialisable : restera inconnu du contrat
+        chemin = prefixe + chemin[m.end():]
+    chemin = INTERPOLATION.sub("{p}", chemin)
     if chemin.startswith("/api/") and not chemin.startswith("/api/v1/"):
         chemin = "/api/v1/" + chemin[len("/api/"):]
     return chemin
