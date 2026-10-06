@@ -315,7 +315,7 @@ def main():
     chemins_bruts, methodes_par_gabarit = backend_operations()
     index = IndexRoutes(methodes_par_gabarit)
     nb_operations = sum(len(verbs) for verbs in methodes_par_gabarit.values())
-    sites, non_resolution, opaques = scanner_front(args.module)
+    sites, non_resolution, opaques, origines_dures = scanner_front(args.module)
 
     orphelins, methodes = [], []
     for fichier, ligne, methode, url in sites:
@@ -333,6 +333,10 @@ def main():
             "sites_controles": len(sites),
             "sites_prefixe_inconnu": len(non_resolution),
             "sites_opaques": len(opaques),
+            "origines_codees_en_dur": [
+                {"fichier": str(f), "ligne": l, "methode": m, "variable": v}
+                for f, l, m, v in origines_dures
+            ],
             "liaisons_mortes": [
                 {"fichier": str(f), "ligne": l, "methode": m, "url": u}
                 for f, l, m, u in orphelins
@@ -351,6 +355,7 @@ def main():
     print(f"Sites opaques (URL en variable)         : {len(opaques)}")
     print(f"LIAISONS MORTES (aucune route)         : {len(orphelins)}")
     print(f"MAUVAISE METHODE (route en 405)        : {len(methodes)}")
+    print(f"ORIGINES CODEES EN DUR (hors client)   : {len(origines_dures)}")
     print("=" * 74)
 
     for fichier, ligne, methode, url in sorted(orphelins, key=lambda s: (s[3], str(s[0]))):
@@ -361,6 +366,16 @@ def main():
         for fichier, ligne, methode, url, decl in sorted(methodes, key=lambda s: (s[3], str(s[0]))):
             marque = f"{fichier}:{ligne}" if args.details else str(fichier)
             print(f"{methode:<6} {url:<58} declare: {','.join(decl):<16} {marque}")
+    if origines_dures:
+        print("-" * 74)
+        print("Appels partis d'une constante d'URL absolue (origine codee en dur, "
+              "hors intercepteur qui porte token/base/refresh) :")
+        par_fichier_tri = {}
+        for fichier, ligne, methode, nom in origines_dures:
+            par_fichier_tri.setdefault(str(fichier), []).append(f"{methode} L{ligne} ${{{nom}}}")
+        for nom_fichier, details in sorted(par_fichier_tri.items()):
+            print(f"   {nom_fichier}  ({len(details)} appel(s)) : {', '.join(details[:6])}")
+
     if non_resolution:
         print("-" * 74)
         print("Sites dont l'URL n'a pas pu etre materialisee (verifier la main) :")
@@ -372,10 +387,11 @@ def main():
         for fichier, ligne, methode, corps in opaques[:30]:
             print(f"{methode:<6} {corps:<58} {fichier}:{ligne}")
 
-    defauts = len(orphelins) + len(methodes)
+    defauts = len(orphelins) + len(methodes) + len(origines_dures)
     if defauts:
         print(f"\n{defauts} defaut(s) de liaison. Une page qui appelle une route absente "
-              "affiche un etat vide sans erreur visible.")
+              "affiche un etat vide sans erreur visible ; une page qui colle son "
+              "URL absolue court-circuite l'intercepteur (token, base, refresh).")
         return 1
     print("\nLiaisons OK : tout appel resolutionne touche une route reelle, bonne methode.")
     return 0
