@@ -329,10 +329,25 @@ def creer_sms(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """SMS delivery is unavailable without a configured provider."""
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="SMS delivery provider is not configured",
+    """Livraison SMS via la passerelle configurée (503 si non configuree).
+
+    L'enregistrement n'est ecrit qu'APRES un acquité réel du fournisseur :
+    sans gateway SMS_CONFIGUREE, aucun faux « SMS envoyé » n'est persiste.
+    """
+    from app.utils.external import call_provider
+    from app.core.config import settings
+
+    call_provider(
+        "SMS",
+        "Envoi d'un SMS de notification",
+        payload={
+            "to": sms.destinataire,
+            "from": getattr(settings, "SMS_SENDER", "") or sms.expediteur,
+            "text": sms.message,
+        },
+    )
+    return SMSNotificationService.creer_sms(
+        db, sms.notification_id, sms.expediteur, sms.destinataire, sms.message
     )
 
 

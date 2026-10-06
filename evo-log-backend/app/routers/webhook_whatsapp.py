@@ -79,11 +79,11 @@ def send_whatsapp_template_message(payload: SendWhatsAppMessageSchema):
     """
     if not WHATSAPP_CLOUD_API_TOKEN or not WHATSAPP_PHONE_NUMBER_ID:
         raise HTTPException(
-            status_code=501,
+            status_code=503,
             detail=(
-                "WhatsApp Business Cloud API non configure : definir les variables "
+                "WhatsApp Business Cloud API non configuree : definir les variables "
                 "d'environnement WHATSAPP_CLOUD_API_TOKEN et WHATSAPP_PHONE_NUMBER_ID "
-                "pour activer l'envoi reel de notifications."
+                "pour activer l'envoi reel de notifications. Aucun message n'a ete emis."
             ),
         )
 

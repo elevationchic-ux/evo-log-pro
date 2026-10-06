@@ -6,7 +6,7 @@ Supports:
 3. Thematic Operational Channels: dedicated channels (#acconage-quai, #transport-corridors, #douane-transit, #atelier-gmao, #general-annonces).
 4. Dynamic Meeting Rooms: custom conference rooms between specific colleagues with WebRTC video call capabilities.
 """
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
