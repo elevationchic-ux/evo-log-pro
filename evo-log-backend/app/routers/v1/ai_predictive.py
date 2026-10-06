@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import func
+from sqlalchemy import func, extract
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -27,14 +27,20 @@ def forecast_transport_demand(
     entraine ; si l'historique est insuffisant, la prevision est prudemment nulle."""
     cid = _company_id(context)
     depuis = datetime.utcnow() - timedelta(days=365)
+    # extract() est portatif (SQLite -> strftime, Postgres -> date_part) contrairement a func.strftime
     q = db.query(
-        func.strftime("%Y-%m", Mission.date_debut_prevue).label("mois"),
+        extract("year", Mission.date_debut_prevue).label("an"),
+        extract("month", Mission.date_debut_prevue).label("mois"),
         func.count(Mission.id).label("n"),
     ).filter(Mission.date_debut_prevue >= depuis)
     if cid is not None:
         q = q.filter(Mission.company_id == cid)
-    rows = q.group_by("mois").order_by("mois").all()
-    series = [{"mois": m, "missions": int(n)} for m, n in rows if m]
+    rows = q.group_by("an", "mois").order_by("an", "mois").all()
+    series = [
+        {"mois": f"{int(an):04d}-{int(mois):02d}", "missions": int(n)}
+        for an, mois, n in rows
+        if an is not None and mois is not None
+    ]
     valeurs = [s["missions"] for s in series]
 
     moyenne = (sum(valeurs) / len(valeurs)) if valeurs else 0.0
