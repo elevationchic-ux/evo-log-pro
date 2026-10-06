@@ -105,3 +105,11 @@ try:
     __all__.extend(["SystemSetting", "Tarif"])
 except Exception:
     pass
+
+try:
+    from app.models.advanced_crud import (
+        CRMOpportunity, Project, FixedAsset, FreightOffer, TenantAPIKey
+    )
+    __all__.extend(["CRMOpportunity", "Project", "FixedAsset", "FreightOffer", "TenantAPIKey"])
+except Exception:
+    pass
