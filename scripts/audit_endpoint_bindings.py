@@ -77,6 +77,21 @@ FETCH = re.compile(r"\bfetch\(\s*([`'\"])((?:\\.|[^\\`'\n]){0,220})\1")
 INTERPOLATION = re.compile(r"\$\{[^}]*\}")
 
 
+def chemin_de_valeur(valeur):
+    """Partie `/api/...` d'une constante de prefix, y compris sur URL absolue.
+
+    `http://localhost:8000/api/v1/x` et `/api/v1/x` designent la meme route : le
+    contrat porte sur le chemin, pas sur l'hote.
+    """
+    if valeur.startswith("/api/"):
+        return valeur
+    if "://" in valeur:
+        sans_hote = re.sub(r"^[a-z][a-z0-9+.-]*://[^/]+", "", valeur)
+        idx = sans_hote.find("/api/")
+        return sans_hote[idx:] if idx >= 0 else None
+    return None
+
+
 def retirer_commentaires(texte):
     """Remplace le contenu des commentaires par des espaces, en preservant les chaines."""
     out = list(texte)
@@ -146,22 +161,24 @@ def norme_frontend(url):
 
 
 def resoudre_litteral(corps, prefixes):
-    """Retourne le chemin /api/... complet, ou None si le site n'est pas resolutionnable.
+    """(chemin, nom_de_variable) ou (None, None) si le site n'est pas materialisable.
 
     Un `${X}` en tete est remplace par son prefix declare ; les autres `${...}`
     deviennent des jokers {p} (semantique REST : un parametre accepte n'importe
-    quel litteral).
+    quel litteral). Le nom de variable est rendu pour que l'on puisse signaler les
+    appels partis d'une origine codee en dur.
     """
     m = re.match(r"^\$\{([A-Za-z_$][\w$]*)\}", corps)
     if m:
-        prefixe = prefixes.get(m.group(1))
+        nom = m.group(1)
+        prefixe = prefixes.get(nom)
         if prefixe is None:
-            return None
+            return None, None
         corps = prefixe + corps[m.end():]
-    elif not corps.startswith("/"):
-        # Concatenation ou variable opaque : hors perimetre, mais signale.
-        return None
-    return INTERPOLATION.sub("{p}", corps)
+        return (corps, nom) if corps.startswith("/") else (None, nom)
+    if corps.startswith("/"):
+        return INTERPOLATION.sub("{p}", corps), None
+    return None, None
 
 
 def segment_equal(gabarit, chemin):
@@ -230,41 +247,58 @@ def scanner_front(module):
                 if not module or module in str(f)]
     carte_globale = {}
     contenus = {}
+    pour_fichier = {}
     for fichier in fichiers:
         brut = fichier.read_text(encoding="utf-8", errors="ignore")
         contenus[fichier] = brut
-        for nom, valeur in DECLARATION_PREFIXE.findall(brut):
-            carte_globale.setdefault(nom, valeur)
+        locals_ = {}
+        for nom, valeur in DECLARATION_URL.findall(brut):
+            chemin = chemin_de_valeur(valeur)
+            if chemin is None:
+                continue
+            locals_[nom] = (chemin, "://" in valeur)
+            carte_globale.setdefault(nom, locals_[nom])
+        pour_fichier[fichier] = locals_
 
-    sites, non_resolution, opaques = [], [], []
+    sites, non_resolution, opaques, origines_dures = [], [], [], []
+
+    def enregistrer(fichier, ligne, methode, corps):
+        chemin, nom = resoudre_litteral(corps, prefixes)
+        if chemin is None:
+            if corps[:1] in "/$":
+                non_resolution.append((fichier, ligne, methode, corps[:70]))
+            else:
+                opaques.append((fichier, ligne, methode, corps[:70]))
+            return
+        if not chemin.startswith("/api/") or chemin.startswith("/api/auth"):
+            return  # /api/auth = NextAuth, pas le backend FastAPI
+        if nom in absolues:
+            origines_dures.append((fichier, ligne, methode, nom))
+        sites.append((fichier, ligne, methode, norme_frontend(chemin)))
+
     for fichier in fichiers:
-        prefixes = dict(DECLARATION_PREFIXE.findall(contenus[fichier]))
-        prefixes = {**carte_globale, **prefixes}   # la declaration locale gagne
+        prefixes = {nom: chemin for nom, (chemin, _dure) in pour_fichier[fichier].items()}
+        absolues = {nom for nom, (_c, dure) in pour_fichier[fichier].items() if dure}
+        for nom, (chemin, dure) in carte_globale.items():
+            prefixes.setdefault(nom, chemin)   # la declaration locale gagne
+            if dure:
+                absolues.add(nom)
         texte = retirer_commentaires(contenus[fichier])
         for m in APPEL.finditer(texte):
-            methode, corps = m.group(2).upper(), m.group(4)
-            line = texte[:m.start()].count("\n") + 1
-            chemin = resoudre_litteral(corps, prefixes)
-            if chemin is None:
-                if corps[:1] in "/$":
-                    non_resolution.append((fichier, line, methode, corps[:70]))
-                else:
-                    opaques.append((fichier, line, methode, corps[:70]))
-                continue
-            if not chemin.startswith("/api/"):
-                continue
-            if chemin.startswith("/api/auth"):
-                continue  # NextAuth, pas le backend FastAPI
-            sites.append((fichier, line, methode, norme_frontend(chemin)))
+            enregistrer(
+                fichier,
+                texte[:m.start()].count("\n") + 1,
+                m.group(2).upper(),
+                m.group(4),
+            )
         for m in FETCH.finditer(texte):
-            corps = m.group(2)
-            line = texte[:m.start()].count("\n") + 1
-            chemin = resoudre_litteral(corps, prefixes)
-            if chemin and chemin.startswith("/api/") and not chemin.startswith("/api/auth"):
-                sites.append((fichier, line, "ANY", norme_frontend(chemin)))
-            elif chemin is None and corps[:1] in "/$":
-                non_resolution.append((fichier, line, "ANY", corps[:70]))
-    return sites, non_resolution, opaques
+            enregistrer(
+                fichier,
+                texte[:m.start()].count("\n") + 1,
+                "ANY",
+                m.group(2),
+            )
+    return sites, non_resolution, opaques, origines_dures
 
 
 def main():
