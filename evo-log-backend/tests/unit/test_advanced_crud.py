@@ -126,8 +126,9 @@ def test_marketplace_api_key_hash_only(db):
     assert created.cle_secrete not in (rec.key_hash, rec.key_prefix)
     # le prefix expose correspond au debut de la cle
     assert created.key_prefix == created.cle_secrete[:16]
-    # la liste ne divulgue ni cle ni hash
+    # le modele de reponse (liste) ne divulgue NI cle claire NI hash
+    fields = set(marketplace_router.APIKeyMeta.model_fields.keys())
+    assert "key_hash" not in fields and "cle_secrete" not in fields
     listed = marketplace_router.list_tenant_api_keys(context=_ctx(), db=db)
-    dumped = [i.model_dump() for i in listed]
-    assert all("cle_secrete" not in d and "key_hash" not in d for d in dumped)
-    assert any(d["id"] == created.id for d in dumped)
+    assert any(i.id == created.id for i in listed)
+    assert all(getattr(i, "key_prefix", None) for i in listed)
