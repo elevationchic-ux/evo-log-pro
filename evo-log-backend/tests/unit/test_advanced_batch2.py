@@ -193,11 +193,12 @@ def test_gamification_score_ponctualite_reel(db):
     now = datetime.utcnow()
     # 2 missions terminees et ponctuelles -> score 100
     for i in range(2):
+        prev = now - timedelta(days=9 + i)
         m = Mission(
             conducteur_id=c.id, statut=MissionStatus.TERMINEE, distance_km=120.0,
             date_debut_prevue=now - timedelta(days=10 + i),
-            date_fin_prevue=now - timedelta(days=9 + i),
-            date_fin_reelle=now - timedelta(days=9 + i),  <= now - timedelta(days=9 + i),
+            date_fin_prevue=prev,
+            date_fin_reelle=prev,  # rendue a l'heure -> <= date_fin_prevue
         )
         db.add(m)
     db.commit()
