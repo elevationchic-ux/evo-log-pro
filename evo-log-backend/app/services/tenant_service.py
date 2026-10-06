@@ -277,24 +277,57 @@ class TenantReportingService:
     
     @staticmethod
     def rapport_companies(db: Session) -> Dict[str, Any]:
-        """Generate companies report"""
-        companies = db.query(Company).all()
-        
+        """Rapport entreprises : comptes SQL réels, aucune valeur inventée.
+
+        Correction : l'ancienne version écrivait
+        `{c.subscription_plan.code: 1 for c in companies}` — une répartition
+        factice où chaque plan affichait « 1 » quelle que soit la volumétrie
+        (5 entreprises sur un plan n'étaient comptées qu'une fois, la dernière
+        écrasant les autres). Ici on compte réellement par plan (jointure +
+        GROUP BY), et les totaux viennent de COUNT SQL, pas de la liste en
+        mémoire."""
+        total = db.query(func.count(Company.id)).scalar() or 0
+        actives = db.query(func.count(Company.id)).filter(Company.is_active == True).scalar() or 0
+        trial = db.query(func.count(Company.id)).filter(Company.is_verified == False).scalar() or 0
+        par_plan_rows = (
+            db.query(SubscriptionPlan.code, func.count(Company.id))
+            .join(Company, Company.subscription_plan_id == SubscriptionPlan.id)
+            .group_by(SubscriptionPlan.code)
+            .all()
+        )
+        par_plan = {code: int(n) for code, n in par_plan_rows}
+
         return {
-            "total_companies": len(companies),
-            "actives": sum(1 for c in companies if c.is_active),
-            "trial": sum(1 for c in companies if not c.is_verified),
-            "par_plan": {c.subscription_plan.code: 1 for c in companies if c.subscription_plan}
+            "total_companies": total,
+            "actives": actives,
+            "trial": trial,
+            "par_plan": par_plan,
         }
-    
+
     @staticmethod
     def rapport_revenus(db: Session, periode: str) -> Dict[str, Any]:
-        """Generate revenue report"""
-        subscriptions = db.query(Subscription).all()
-        
+        """Rapport revenus : somme et répartitions calculées en base.
+
+        `par_statut` était écrit `{s.status: 1 ...}` (un par statut, factice).
+        On compte maintenant les abonnements réellement groupés par statut, et
+        le revenu total est une somme SQL (coalesce à 0 si aucune ligne)."""
+        total = db.query(func.count(Subscription.id)).scalar() or 0
+        revenu_total = float(db.query(func.coalesce(func.sum(Subscription.amount), 0)).scalar() or 0)
+        par_statut_rows = (
+            db.query(Subscription.status, func.count(Subscription.id))
+            .group_by(Subscription.status)
+            .all()
+        )
+        # `status` est une colonne Enum sans values_callable : la base stocke le
+        # NOM ; on restitue la valeur (ex. 'active') telle que sérialisée par l'API.
+        par_statut = {
+            (s.value if hasattr(s, "value") else str(s)): int(n)
+            for s, n in par_statut_rows
+        }
+
         return {
             "periode": periode,
-            "total_subscriptions": len(subscriptions),
-            "revenu_total": sum(s.amount for s in subscriptions if s.amount),
-            "par_statut": {s.status: 1 for s in subscriptions}
+            "total_subscriptions": total,
+            "revenu_total": revenu_total,
+            "par_statut": par_statut,
         }
