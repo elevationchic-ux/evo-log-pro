@@ -7,8 +7,10 @@ domaniaux, concessions, ouvrages, dragages, autorisations environnementales.
 
 Ce qu'elle ne fait PAS (conscience du projet, see docs/RBAC_ACCREDITATIONS.md) :
   * elle ne teletransmet rien au MINMIVT, au MINFI, a la COLIFE, au MINEPPT ni
-    a l'APN : ces actes appartiennent a des systemes externes qui n'existent
-    pas ici. Les routes correspondantes repondent 501 (jamais un faux succes) ;
+    a l'APN par elle-meme : ces actes appartiennent a des systemes externes.
+    Les routes correspondantes sont des connecteurs pilotes par la configuration
+    (GOV_TELEPROC_*) : 503 tant que la gateway officielle n'est pas declaree,
+    veritable remise quand elle l'est (jamais un faux succes) ;
   * elle n'invente aucune valeur : montant, date ou reference non saisi reste
     NULL et s'affiche « non enregistre » cote frontend ;
   * elle ne durcit aucun tarif, aucune capacite ni aucun nom d'operateur : les
@@ -28,7 +30,6 @@ import json
 from datetime import date, timedelta
 
 from app.core.database import get_db
-from app.core.not_implemented import not_implemented
 from app.core.permissions import require_perm
 from app.models.user import User
 from app.models.port_cameroun import PortCameroun, TypePort
@@ -1326,13 +1327,23 @@ def modifier_autorisation(
     return _to_out(obj)
 
 
-@router.post("/autorisations/{ident}/depot", summary="Depot aupres de l'administration (501)")
-def depot_autorisation(ident: int, user: User = Depends(require_perm("amenagement.autorisation.approve"))):
-    """Le depot d'une EIES/d'un permis se fait aupres du MINEPPT (501)."""
-    not_implemented(
+@router.post("/autorisations/{ident}/depot", summary="Depot aupres de l'administration (connecteur GOV)")
+def depot_autorisation(
+    ident: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_perm("amenagement.autorisation.approve")),
+):
+    """Depot teleprogramme d'un dossier EIES / permis aupres du MINEPPT via la
+    gateway de teleprocedures configuree (GOV_TELEPROC_*). 503 si non
+    configuree : le module enregistre la date de depot quand il est notifie."""
+    from app.utils.external import call_provider
+
+    _get_or_404(db, AutorisationTravaux, ident, "Autorisation de travaux")
+    return call_provider(
+        "GOV_TELEPROC",
         "Depot teleprogramme d'un dossier EIES / permis aupres du MINEPPT",
-        "une interconnexion avec le guichet environnemental officiel ; le "
-        "module enregistre la date de depot et l'arrete quand ils sont notifies"
+        path="/amenagement/autorisations",
+        payload={"autorisation_id": ident, "acte": "DEPOT_MINEPPT"},
     )
 
 
