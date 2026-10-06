@@ -9,19 +9,43 @@ import {
 import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
 
+// Contrat réel de GET /api/v1/transport/missions (payload _mission_payload) :
+// enum statut minuscule (planifiee|en_cours|terminee|annulee|en_retard),
+// relations camion/chauffeur/client sérialisées en objets ou null.
 interface MissionItem {
   id: number;
-  numero_ordre?: string;
-  reference?: string;
-  client_nom?: string;
-  telephone_client?: string;
-  origine?: string;
-  destination?: string;
-  immatriculation?: string;
+  reference?: string | null;
+  type_mission?: string | null;
   statut: string;
-  date_depart_prevue?: string;
-  marchandise?: string;
-  poids_kg?: number;
+  origine?: string | null;
+  destination?: string | null;
+  point_depart?: string | null;
+  point_arrivee?: string | null;
+  date_debut_prevue?: string | null;
+  date_fin_prevue?: string | null;
+  camion?: { id: number; immatriculation: string } | null;
+  chauffeur?: { id: number; nom: string; prenom: string } | null;
+  client?: { id: number; nom: string; telephone: string | null } | null;
+  montant_fret?: number | null;
+  numero_bl?: string | null;
+}
+
+const STATUT_LABELS: Record<string, string> = {
+  planifiee: 'Planifiée',
+  en_cours: 'En cours',
+  terminee: 'Terminée',
+  annulee: 'Annulée',
+  en_retard: 'En retard',
+};
+
+function statutBadgeClasses(statut: string): string {
+  switch (statut) {
+    case 'en_cours': return 'bg-blue-500/15 text-blue-300';
+    case 'terminee': return 'bg-emerald-500/15 text-emerald-300';
+    case 'annulee': return 'bg-slate-500/15 text-slate-400';
+    case 'en_retard': return 'bg-rose-500/15 text-rose-300';
+    default: return 'bg-amber-500/15 text-amber-300';
+  }
 }
 
 export default function PortailChauffeurPage() {
@@ -30,7 +54,9 @@ export default function PortailChauffeurPage() {
   const [loading, setLoading] = useState(true);
   const [selectedMission, setSelectedMission] = useState<MissionItem | null>(null);
 
-  // Inspection state
+  // Inspection state : aide-mémoire local uniquement. Aucun endpoint
+  // d'inspection n'existe côté backend ; le formulaire n'affirme jamais
+  // archiver quoi que ce soit (politique zéro mock).
   const [checklist, setChecklist] = useState({
     pneus: true,
     freins: true,
@@ -41,15 +67,14 @@ export default function PortailChauffeurPage() {
     assurance_cemac: true,
     visite_technique: true,
   });
-  const [inspectionSubmitted, setInspectionSubmitted] = useState(false);
 
-  // Carburant state
+  // Carburant state : champs vides, aucune valeur d'exemple pré-remplie.
   const [fuelForm, setFuelForm] = useState({
-    station: 'TotalEnergies Douala',
-    litrage: '250',
-    prix_litre: '828',
-    kilometrage: '145200',
-    numero_ticket: 'TKT-2026-09-88',
+    station: '',
+    litrage: '',
+    prix_litre: '',
+    kilometrage: '',
+    numero_ticket: '',
   });
   const [submittingFuel, setSubmittingFuel] = useState(false);
 
@@ -61,8 +86,9 @@ export default function PortailChauffeurPage() {
   const [reserves, setReserves] = useState('');
   const [epodSubmitted, setEpodSubmitted] = useState(false);
 
-  // SOS state
+  // SOS state : gravite + lieu saisis par le conducteur (champs requis côté API).
   const [sosType, setSosType] = useState('PANNE_MECANIQUE');
+  const [sosLieu, setSosLieu] = useState('');
   const [sosComment, setSosComment] = useState('');
   const [sosSent, setSosSent] = useState(false);
 
@@ -132,13 +158,16 @@ export default function PortailChauffeurPage() {
     }
   };
 
-  const handleUpdateMissionStatus = async (missionId: number, nouveauStatut: string) => {
+  // Transition réelle : POST /missions/{id}/demarrer (le PUT {statut:'EN_ROUTE'}
+  // n'existait pas — enum minuscule côté API, et le démarrage horodate aussi
+  // le kilomètre de départ côté serveur).
+  const handleDemarrerMission = async (missionId: number) => {
     try {
-      await apiClient.put(`/api/v1/transport/missions/${missionId}`, { statut: nouveauStatut });
-      toast.success(`Statut mis à jour : ${nouveauStatut}`);
+      await apiClient.post(`/api/v1/transport/missions/${missionId}/demarrer`, {});
+      toast.success('Mission démarrée : passage en cours');
       fetchMissions();
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Erreur mise à jour statut');
+      toast.error(err?.response?.data?.detail || 'Erreur démarrage de la mission');
     }
   };
 
@@ -150,20 +179,20 @@ export default function PortailChauffeurPage() {
         station: fuelForm.station,
         litrage: parseFloat(fuelForm.litrage),
         prix_litre: parseFloat(fuelForm.prix_litre),
-        kilometrage: parseInt(fuelForm.kilometrage),
+        kilometrage: parseInt(fuelForm.kilometrage, 10),
         numero_ticket: fuelForm.numero_ticket,
         mission_id: selectedMission?.id,
       });
       toast.success('Plein de carburant enregistré avec succès');
       setFuelForm({
-        station: 'TotalEnergies Douala',
+        station: '',
         litrage: '',
-        prix_litre: '828',
+        prix_litre: '',
         kilometrage: '',
         numero_ticket: '',
       });
     } catch (err: any) {
-      toast.error('Erreur enregistrement carburant');
+      toast.error(err?.response?.data?.detail || 'Erreur enregistrement carburant');
     } finally {
       setSubmittingFuel(false);
     }
@@ -181,32 +210,42 @@ export default function PortailChauffeurPage() {
     try {
       const canvas = canvasRef.current;
       const signatureData = canvas ? canvas.toDataURL('image/png') : '';
+      // Clés réelles de LivraisonRequest : signature, nom_receptionnaire, note.
       await apiClient.post(`/api/v1/transport/missions/${selectedMission.id}/livrer`, {
-        signature_base64: signatureData,
+        signature: signatureData,
         nom_receptionnaire: receptionnaireNom,
-        reserves: reserves || 'Sans réserves',
+        note: reserves,
       });
       toast.success('Émargement ePOD validé avec succès');
       setEpodSubmitted(true);
       fetchMissions();
     } catch (err: any) {
-      toast.error('Erreur validation ePOD');
+      toast.error(err?.response?.data?.detail || 'Erreur validation ePOD');
     }
   };
 
+  // Contrat réel POST /api/v1/incidents/ : lieu + description requis,
+  // type_accident et gravite (chaîne libre, minuscule par convention QHSE).
   const handleSendSos = async () => {
+    if (!sosLieu.trim()) {
+      toast.error('Lieu de l\'incident requis');
+      return;
+    }
+    if (!sosComment.trim()) {
+      toast.error('Description de la situation requise');
+      return;
+    }
     try {
-      await apiClient.post('/api/v1/incidents', {
-        titre: `[SOS CONDUCTEUR] ${sosType} - Camion ${selectedMission?.immatriculation || 'En route'}`,
-        type_incident: sosType,
-        severite: 'CRITIQUE',
-        description: sosComment || `Alerte déclenchée par le conducteur sur le corridor. Mission ID: ${selectedMission?.id}`,
-        lieu: selectedMission?.destination || 'Corridor CEMAC',
+      await apiClient.post('/api/v1/incidents/', {
+        lieu: sosLieu.trim(),
+        description: sosComment.trim(),
+        type_accident: sosType,
+        gravite: 'critique',
       });
       setSosSent(true);
       toast.success('Alerte SOS transmise à la tour de contrôle avec succès !');
     } catch (err: any) {
-      toast.error('Impossible d’envoyer le SOS');
+      toast.error(err?.response?.data?.detail || 'Impossible d\'envoyer le SOS');
     }
   };
 
@@ -298,8 +337,8 @@ export default function PortailChauffeurPage() {
             ) : missions.length === 0 ? (
               <div className="p-8 text-center bg-slate-900 rounded-2xl border border-slate-700">
                 <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-                <p className="text-sm font-bold text-slate-200">Aucune mission en attente</p>
-                <p className="text-xs text-slate-500">Toutes vos livraisons sont à jour.</p>
+                <p className="text-sm font-bold text-slate-200">Aucune mission enregistrée</p>
+                <p className="text-xs text-slate-500">Le serveur ne renvoie aucune mission pour ce compte.</p>
               </div>
             ) : (
               missions.map((m) => (
@@ -314,23 +353,24 @@ export default function PortailChauffeurPage() {
                 >
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <span className="text-xs font-mono font-black text-slate-200">
-                      #{m.numero_ordre || m.reference || `MIS-${m.id}`}
+                      {m.reference || `Mission #${m.id}`}
                     </span>
-                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                      m.statut === 'EN_ROUTE' ? 'bg-blue-500/15 text-blue-300' :
-                      m.statut === 'LIVRE' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
-                    }`}>
-                      {m.statut}
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${statutBadgeClasses(m.statut)}`}>
+                      {STATUT_LABELS[m.statut] || m.statut}
                     </span>
                   </div>
 
                   <div className="text-xs font-semibold text-slate-200 mb-1">
-                    {m.client_nom || 'Client Destinataire'}
+                    {m.client?.nom || 'Client non enregistré'}
                   </div>
 
                   <div className="flex items-center gap-1.5 text-xs text-slate-500">
                     <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                    <span className="truncate">{m.origine || 'Douala'} → {m.destination || 'Corridor'}</span>
+                    <span className="truncate">
+                      {(m.origine || m.point_depart) && (m.destination || m.point_arrivee)
+                        ? `${m.origine || m.point_depart} → ${m.destination || m.point_arrivee}`
+                        : 'Itinéraire non enregistré'}
+                    </span>
                   </div>
                 </div>
               ))
