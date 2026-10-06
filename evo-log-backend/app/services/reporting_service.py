@@ -10,6 +10,15 @@ from app.models.reporting import (
 )
 
 
+def _count_by(values) -> Dict[str, int]:
+    """Compte de vraies occurrences par cle (None -> 'unknown')."""
+    out: Dict[str, int] = {}
+    for v in values:
+        key = v.value if hasattr(v, "value") else (str(v) if v is not None else "unknown")
+        out[key] = out.get(key, 0) + 1
+    return out
+
+
 class DashboardExecutifService:
     """Executive dashboard service"""
     
@@ -277,7 +286,8 @@ class ReportingReportingService:
                 for k in kpis
             ],
             "nombre_kpis": len(kpis),
-            "k_par_type": {k.type_rapport: 1 for k in kpis},
+            # Vraie répartition comptée (avant : {cle: 1}, un par type, factice).
+            "k_par_type": _count_by(k.type_rapport for k in kpis),
             "poles": poles
         }
     
