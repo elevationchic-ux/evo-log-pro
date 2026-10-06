@@ -170,3 +170,27 @@ class ScheduledReport(Base):
     prochaine_execution = Column(DateTime(timezone=True), nullable=True)
     cree_par = Column(Integer, ForeignKey('users.id'), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class EInvoiceSignature(Base):
+    """Registre verifiable des factures electroniques scellees.
+
+    La vérification publique s'appuie sur cette table : une empreinte n'est
+    declaree valide que si elle a reellement ete emise et persiste ici (plus de
+    « toujours VALID » mensonger). L'empreinte est un SHA-256 calcule sur le
+    contenu normalise de la facture ; la valeur fiscale opposable (DGI) depend
+    d'un connecteur externe configure, sinon le sceau est d'integrite local."""
+    __tablename__ = "e_invoice_signatures"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    invoice_number = Column(String(80), nullable=False, index=True)
+    client_niu = Column(String(80))
+    total_ht = Column(Numeric, default=0)
+    total_tva = Column(Numeric, default=0)
+    total_ttc = Column(Numeric, default=0)
+    fiscal_hash = Column(String(64), nullable=False, unique=True, index=True)  # sha256 hex
+    algorithm = Column(String(20), default="SHA-256")
+    provider = Column(String(30), default="local")        # local | dgi (si connecteur configure)
+    statut = Column(String(20), default="scelle")          # scelle | transmis
+    signed_at = Column(DateTime(timezone=True), server_default=func.now())

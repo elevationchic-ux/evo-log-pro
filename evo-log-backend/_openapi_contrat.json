@@ -7,6 +7,27 @@
    ],
    "enums": {}
   },
+  "APIKeyCreated": {
+   "champs": [
+    "active",
+    "allowed_ips",
+    "cle_secrete",
+    "id",
+    "key_name",
+    "key_prefix"
+   ],
+   "enums": {}
+  },
+  "APIKeyMeta": {
+   "champs": [
+    "active",
+    "allowed_ips",
+    "id",
+    "key_name",
+    "key_prefix"
+   ],
+   "enums": {}
+  },
   "AbsenceCreate": {
    "champs": [
     "date_debut",
@@ -5327,6 +5348,21 @@
    ],
    "enums": {}
   },
+  "FixedAssetOut": {
+   "champs": [
+    "acquisition_date",
+    "acquisition_value",
+    "amortization",
+    "amortization_method",
+    "amortization_years",
+    "asset_code",
+    "category",
+    "id",
+    "name",
+    "residual_value"
+   ],
+   "enums": {}
+  },
   "FixedAssetSchema": {
    "champs": [
     "acquisition_date",
@@ -5335,7 +5371,8 @@
     "amortization_years",
     "asset_code",
     "category",
-    "name"
+    "name",
+    "residual_value"
    ],
    "enums": {}
   },
@@ -5625,6 +5662,18 @@
     "mission_id",
     "montant",
     "taux_km"
+   ],
+   "enums": {}
+  },
+  "FreightOfferOut": {
+   "champs": [
+    "cargo_type",
+    "destination",
+    "id",
+    "offered_price_xaf",
+    "origin",
+    "status",
+    "weight_tons"
    ],
    "enums": {}
   },
@@ -8346,12 +8395,28 @@
    ],
    "enums": {}
   },
+  "OpportunityOut": {
+   "champs": [
+    "client_name",
+    "contact_email",
+    "contact_person",
+    "currency",
+    "estimated_value",
+    "id",
+    "notes",
+    "probability",
+    "stage",
+    "title"
+   ],
+   "enums": {}
+  },
   "OpportunitySchema": {
    "champs": [
     "client_name",
     "contact_email",
     "contact_person",
     "estimated_value",
+    "notes",
     "probability",
     "stage",
     "title"
@@ -9839,6 +9904,20 @@
    ],
    "enums": {}
   },
+  "ProjectOut": {
+   "champs": [
+    "budget_xaf",
+    "code",
+    "end_date",
+    "id",
+    "manager_name",
+    "spent_xaf",
+    "start_date",
+    "status",
+    "title"
+   ],
+   "enums": {}
+  },
   "ProjectSchema": {
    "champs": [
     "budget_xaf",
@@ -9846,6 +9925,7 @@
     "end_date",
     "manager_name",
     "start_date",
+    "status",
     "title"
    ],
    "enums": {}
@@ -17867,16 +17947,28 @@
    "get": []
   },
   "/api/v1/crm/opportunities": {
-   "get": [],
-   "post": []
+   "get": [
+    "OpportunityOut"
+   ],
+   "post": [
+    "OpportunityOut"
+   ]
   },
   "/api/v1/projects/": {
-   "get": [],
-   "post": []
+   "get": [
+    "ProjectOut"
+   ],
+   "post": [
+    "ProjectOut"
+   ]
   },
   "/api/v1/assets/": {
-   "get": [],
-   "post": []
+   "get": [
+    "FixedAssetOut"
+   ],
+   "post": [
+    "FixedAssetOut"
+   ]
   },
   "/api/v1/ged/documents": {
    "get": []
@@ -17937,12 +18029,20 @@
    "get": []
   },
   "/api/v1/marketplace/api-keys": {
-   "get": [],
-   "post": []
+   "get": [
+    "APIKeyMeta"
+   ],
+   "post": [
+    "APIKeyCreated"
+   ]
   },
   "/api/v1/freight-exchange/offers": {
-   "get": [],
-   "post": []
+   "get": [
+    "FreightOfferOut"
+   ],
+   "post": [
+    "FreightOfferOut"
+   ]
   },
   "/api/v1/digital-twin/yard-state": {
    "get": []
