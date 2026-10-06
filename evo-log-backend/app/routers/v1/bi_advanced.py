@@ -2,7 +2,8 @@ from datetime import date, datetime, timedelta
 from typing import List, Optional, Dict, Any
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy import func, and_, or_, extract
+from pydantic import BaseModel, Field
+from sqlalchemy import func, and_, extract
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -98,14 +99,7 @@ def get_custom_bi_dashboard(
     }
 
 
-class ScheduledExportSchema(_ := object):  # placeholder replaced below
-    pass
-
-
-from pydantic import BaseModel, Field
-
-
-class ScheduledExportSchema(BaseModel):  # type: ignore[no-redef]
+class ScheduledExportSchema(BaseModel):
     report_name: str = Field(..., example="Rapport Mensuel d'Exploitation Transport & Magasin")
     format: str = Field("PDF", example="PDF")  # PDF, EXCEL, CSV
     frequency: str = Field("MONTHLY", example="MONTHLY")  # DAILY, WEEKLY, MONTHLY
