@@ -509,15 +509,9 @@ export const parcAPI = {
     apiClient.get('/api/parc/stock', { params }),
   gateIn: (data: unknown) => apiClient.post('/api/parc/gate-in', data),
   gateOut: (data: unknown) => apiClient.post('/api/parc/gate-out', data),
-  extractOCR: async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return apiClient.post('/api/parc/ocr-extract', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  },
+  // extractOCR SUPPRIME : la route backend /parc/ocr-extract n'existe plus
+  // (aucun moteur OCR cote serveur). Laisser ce helper aurait entretenu un
+  // appel mort vers un 404. L'ecran du parc est passe en saisie manuelle.
   getWorkshopRepairs: () =>
     apiClient.get('/api/parc/workshop'),
   createZone: (data: unknown) => apiClient.post('/api/parc/zones', data),
