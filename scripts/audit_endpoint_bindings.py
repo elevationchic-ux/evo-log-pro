@@ -48,12 +48,22 @@ def norm_backend(p: str) -> str:
 def matches(url_norm, backend_norm):
     if url_norm in backend_norm:
         return True
-    # Un GET frontend vers /x peut viser soit /x soit /x/{p} (rare) ; on accepte
-    # aussi le cas ou le frontend omet un segment final vide.
     for bp in backend_norm:
         if bp == url_norm:
             return True
+    # Un frontend qui ne construit QUE des URLs prefixees (constante de base
+    # ex. '/api/v1/company-admin', puis on ajoute '/users' plus tard) n'est pas
+    # une liaison morte : si une route backend commence par url + '/', c'est un
+    # prefixe, pas une feuille visée directement.
+    for bp in backend_norm:
+        if bp.startswith(url_norm + "/"):
+            return True
     return False
+
+
+def looks_like_docstring_noise(url_norm: str) -> bool:
+    # Exemples de docstring (apiUrl) : '/api/v1/...', '/api/v1/x', '/api/v1/v1'.
+    return url_norm.endswith("/...") or url_norm in ("/api/v1/x", "/api/v1/v1")
 
 
 def scan_frontend():
@@ -88,6 +98,8 @@ def main():
             # /api/xxx -> l'intercepteur re-prefixe en /api/v1/xxx ; normalise
             un = "/api/v1" + un[len("/api"):]
         if un in ("/api/v1", "/api/v1/"):
+            continue
+        if looks_like_docstring_noise(un):
             continue
         if matches(un, bnorm):
             continue
