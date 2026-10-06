@@ -108,15 +108,21 @@ def test_rapport_executif_agrege_kpi_reels(client, db):
         db, code="MISSIONS", nom="Missions livrees", type_rapport="TRANSPORT",
         categorie="exploitation", formule="count(missions)", unite="nb", objectif=50,
     )
+    KPIService.creer_kpi(
+        db, code="CA_TOT", nom="CA cumule", type_rapport="FINANCE",
+        categorie="ventes", formule="sum(factures)", unite="XAF", objectif=1000000,
+    )
 
     r = client.get(f"{BASE}/rapports/executif")
     assert r.status_code == 200, r.text
     body = r.json()
-    assert body["nombre_kpis"] == 2
+    assert body["nombre_kpis"] == 3
     codes = {k["code"] for k in body["kpis"]}
-    assert codes == {"CA_MOIS", "MISSIONS"}
+    assert codes == {"CA_MOIS", "MISSIONS", "CA_TOT"}
     poles = {p["pole"]: p["nb_indicateurs"] for p in body["poles"]}
-    assert poles == {"FINANCE": 1, "TRANSPORT": 1}
+    assert poles == {"FINANCE": 2, "TRANSPORT": 1}
+    # Regression : k_par_type etait force a {cle: 1}. Doit compter reellement.
+    assert body["k_par_type"] == {"FINANCE": 2, "TRANSPORT": 1}
 
 
 # ── 4. 404 honnetes ──────────────────────────────────────────────────────────
