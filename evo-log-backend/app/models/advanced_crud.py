@@ -226,3 +226,128 @@ class AIFeedback(Base):
     commentaire = Column(Text, nullable=True)
     utilisateur_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     cree_le = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Batch 3 — tables de persistance reelles pour les modules sectoriels / securite
+# ---------------------------------------------------------------------------
+
+class LotSerial(Base):
+    """Tracabilite lot / numero de serie reellement persistee (secteur agro /
+    pieces). Aucune valeur inventee : les champs sont saisis, la date de peremption
+    est celle fournie."""
+    __tablename__ = "lot_serial_tracks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    batch_number = Column(String(80), nullable=False, index=True)
+    serial_number = Column(String(120), index=True)
+    article_code = Column(String(80), nullable=False, index=True)
+    expiry_date = Column(String(20), nullable=True)        # ISO saisi
+    humidity_rate_percentage = Column(Numeric, nullable=True)
+    enregistre_par = Column(Integer, ForeignKey('users.id'), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class TemperatureReading(Base):
+    """Lecture de sonde de temperature (chaine du froid) reellement saisie/
+    importee. Les alertes sont DERIVEES de ces valeurs vs seuils, rien n'est
+    genere sans mesure enregistree."""
+    __tablename__ = "temperature_readings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    container_ref = Column(String(80), nullable=False, index=True)
+    zone = Column(String(80), nullable=True)
+    temperature_c = Column(Numeric, nullable=False)        # mesure saisie
+    seuil_min_c = Column(Numeric, nullable=True)           # seuil parametre
+    seuil_max_c = Column(Numeric, nullable=True)
+    capteur_id = Column(String(80), nullable=True)
+    mesure_le = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class Consignation(Base):
+    """Palette / conteneur consigne reellement suivi (mouvement entree/sortie)."""
+    __tablename__ = "consignations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    support_type = Column(String(30), default="PALETTE")   # PALETTE, CONTENEUR, IBC
+    support_ref = Column(String(80), nullable=False, index=True)
+    client_id = Column(Integer, nullable=True, index=True)
+    quantite = Column(Numeric, default=0)                  # saisi
+    statut = Column(String(20), default="CONSIGNE")        # CONSIGNE, RESTITUE, PERDU
+    valeur_consignation_xaf = Column(Numeric, default=0)   # saisi
+    date_consignation = Column(DateTime(timezone=True), nullable=True)
+    date_restitution = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class Block(Base):
+    """Ledger append-only a chainage SHA-256 REEL (blockchain interne). Chaque
+    bloc reference l'empreinte du precedent ; la chaine est verifiable en base.
+    Ce n'est pas une chaine distributee : c'est un registre d'audit infalsifiable
+    local (aucune minage externe inventee)."""
+    __tablename__ = "blockchain_ledger"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    height = Column(Integer, nullable=False, index=True)
+    entity_type = Column(String(60), nullable=False)
+    entity_id = Column(String(80), nullable=False, index=True)
+    action = Column(String(80), nullable=False)
+    payload_hash = Column(String(64), nullable=False)      # empreinte fournee
+    prev_hash = Column(String(64), nullable=False)         # chainage bloc precedent
+    block_hash = Column(String(64), nullable=False, unique=True, index=True)
+    mined_by = Column(Integer, ForeignKey('users.id'), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class PrivacyBreach(Base):
+    """Incident de violation de donnees personnelles reellement enregistre (loi
+    2024/017 APDP). La declaration a l'autorite (ANT) est un acte distinct,
+    pilote par le connecteur GOV ; ici on persiste l'incident constatement."""
+    __tablename__ = "privacy_breaches"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    incident_type = Column(String(80), nullable=False)
+    description = Column(Text, nullable=False)
+    affected_count = Column(Integer, default=0)            # saisi
+    statut = Column(String(30), default="ENREGISTRE")      # ENREGISTRE, DECLARE_ANT
+    declare_le = Column(DateTime(timezone=True), server_default=func.now())
+    enregistre_par = Column(Integer, ForeignKey('users.id'), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class SecurityEscalationSetting(Base):
+    """Regles d'escalade de securite reellement persistees par tenant (au lieu
+    d'un dictionnaire volatile perdu au redemarrage)."""
+    __tablename__ = "security_escalation_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    config = Column(JSON, nullable=False, default=dict)    # blob de regles saisies
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class PaymentTransaction(Base):
+    """Transaction de paiement local reellement persistee (brouillon d'abord).
+    Le statut ne passe a CONFIRME que si le connecteur fournisseur (configure)
+    l'a reellement confirme ; sinon reste BROUILLON. Aucun faux encaissement."""
+    __tablename__ = "payment_transactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
+    provider = Column(String(30), nullable=False)          # ORANGE_MONEY, MTN_MOBILE_MONEY, VIREMENT_*
+    reference = Column(String(80), nullable=False, index=True)
+    montant_xaf = Column(Numeric, default=0)
+    statut = Column(String(20), default="BROUILLON")       # BROUILLON, INITIE, CONFIRME, ANNULE
+    provider_contacte = Column(Boolean, default=False)
+    provider_ref = Column(String(120), nullable=True)      # id retourne par la gateway
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
