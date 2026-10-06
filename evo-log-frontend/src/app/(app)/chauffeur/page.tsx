@@ -139,7 +139,7 @@ export default function ChauffeurPage() {
                     </div>
                     <div className="flex-1">
                       <p className="text-xs text-blue-500 uppercase">Destination</p>
-                      <p className="text-sm font-medium text-slate-100">{mission.destination || 'Client Final'}</p>
+                      <p className="text-sm font-medium text-slate-100">{mission.point_arrivee || 'Non enregistre'}</p>
                     </div>
                   </div>
                 </div>
