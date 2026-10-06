@@ -8,6 +8,14 @@
   "route": "/api/v1/purchase/requisitions/{req_id}/approve"
  },
  {
+  "appel": "/api/v1/comptabilite-avance",
+  "brut": "/api/v1/comptabilite-avance",
+  "fichier": "evo-log-frontend/src/app/(app)/comptabilite-ohada/lettrage/page.tsx",
+  "ligne": 10,
+  "genre": "pending_sans_donnee",
+  "route": null
+ },
+ {
   "appel": "/api/v1/rh/portail service unreachable for: {p}.",
   "brut": "/api/v1/rh/portail service unreachable for: {p}.",
   "fichier": "evo-log-frontend/src/app/(app)/portail-employe/page.tsx",
@@ -16,11 +24,11 @@
   "route": null
  },
  {
-  "appel": "/api/v1/parc/ocr-extract",
-  "brut": "/api/parc/ocr-extract",
+  "appel": "/api/v1/amenagement-portuaire",
+  "brut": "/api/v1/amenagement-portuaire",
   "fichier": "evo-log-frontend/src/lib/api-client.ts",
-  "ligne": 515,
-  "genre": "repond_501",
-  "route": "/api/v1/parc/ocr-extract"
+  "ligne": 920,
+  "genre": "pending_sans_donnee",
+  "route": null
  }
 ]
