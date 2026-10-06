@@ -134,6 +134,9 @@ class Mission(Base):
     # Relationships
     camion = relationship("Camion", back_populates="missions")
     conducteur = relationship("Conducteur", back_populates="missions")
+    # Client facture (FK clients.id, herite de tiers) : serialise nom/telephone
+    # reels dans _mission_payload ; null quand aucun client n'est rattache.
+    client = relationship("Client")
     trajets = relationship("Trajet", back_populates="mission")
 
 
