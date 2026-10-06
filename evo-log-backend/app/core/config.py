@@ -88,6 +88,46 @@ class Settings(BaseSettings):
     E_INVOICING_DGI_ENABLED: bool = False
     E_INVOICING_DGI_API_URL: str = ""
     E_INVOICING_DGI_API_KEY: str = ""
+
+    # --- Connecteurs externes (Zero-Mock : 503 si non configure, appel reel si
+    # configure). Voir app/utils/external.py. Chaque famille expose le triplet
+    # _ENABLED / _API_URL / _API_KEY. ---
+
+    # EDI douanier CAMCIS / ASYCUDA World / e-GUCE (CCNET)
+    CUSTOMS_EDI_ENABLED: bool = False
+    CUSTOMS_EDI_API_URL: str = ""
+    CUSTOMS_EDI_API_KEY: str = ""
+
+    # Teleprocedures gouvernementales (MINMIVT/APN/MINFI/MINEPAT/MINEPPT/COLIFE/
+    # CIP/CSST/CNPS/ANT-APDP) via une gateway d'interconnexion administree
+    GOV_TELEPROC_ENABLED: bool = False
+    GOV_TELEPROC_API_URL: str = ""
+    GOV_TELEPROC_API_KEY: str = ""
+
+    # Mobile Money Orange Cameroun
+    PAYMENT_ORANGE_ENABLED: bool = False
+    PAYMENT_ORANGE_API_URL: str = ""
+    PAYMENT_ORANGE_API_KEY: str = ""
+
+    # MTN Mobile Money Cameroun
+    PAYMENT_MTN_ENABLED: bool = False
+    PAYMENT_MTN_API_URL: str = ""
+    PAYMENT_MTN_API_KEY: str = ""
+
+    # Virement / relevé bancaire (GIMAC / host-to-host)
+    PAYMENT_BANK_ENABLED: bool = False
+    PAYMENT_BANK_API_URL: str = ""
+    PAYMENT_BANK_API_KEY: str = ""
+
+    # Signature electronique qualifiee / horodatage RFC3161 (PKI tierce)
+    QUALIFIED_SIGN_ENABLED: bool = False
+    QUALIFIED_SIGN_API_URL: str = ""
+    QUALIFIED_SIGN_API_KEY: str = ""
+
+    # Signalisation WebRTC (push-to-talk / appel voix sur le terrain)
+    WEBRTC_ENABLED: bool = False
+    WEBRTC_API_URL: str = ""
+    WEBRTC_API_KEY: str = ""
     
     # Webhooks Mobile Money (MTN MoMo / Orange Money)
     # Secret partagé utilisé pour vérifier la signature HMAC-SHA256 des
