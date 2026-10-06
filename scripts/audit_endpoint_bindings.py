@@ -160,8 +160,8 @@ class IndexRoutes:
 
     L'audit compare ~1 200 gabarits a ~700 sites d'appel : sans index, il ne
     finissait plus. Le cache rend aussi la regle « chemin de rattachement »
-    (ex. `/api/v1/departement` alors que seules des sous-routes existent) bon
-    marche, parce qu'elle ne s'applique que sur un echec de correspondence.
+    (ex. `/api/v1/departement` alors que seules des sous-routes existent) utile,
+    parce qu'elle ne s'applique que sur un echec de correspondence.
     """
 
     def __init__(self, methodes_par_gabarit):
@@ -280,7 +280,7 @@ def main():
         return 1 if (orphelins or methodes) else 0
 
     print(f"Routes backend (OpenAPI a chaud)     : {len(chemins_bruts)}")
-    print(f"Operations backend (path+methode)     : {len(operations)}")
+    print(f"Operations backend (path+methode)     : {nb_operations}")
     print(f"Sites d'appel resolves et controles   : {len(sites)}")
     print(f"Sites NON resolutionnes (prefix inconnu): {len(non_resolution)}")
     print(f"Sites opaques (URL en variable)         : {len(opaques)}")
