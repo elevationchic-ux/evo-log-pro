@@ -1,22 +1,22 @@
 """Audit des liaisons frontend -> backend, par module, avec methode HTTP.
 
-Pourquoi ce garde existe et ce qu'il corrige : les version precedentes extrayaient
+Pourquoi ce garde existe et ce qu'il corrige : les versions precedentes extrayaient
 les URL par une regex qui exigeait `/api...` juste apres le delimiter. Or ce
 frontend ecrit ses appels sur des constantes de prefix
 (`const AMGT = '/api/v1/amenagement-portuaire'` puis
 ``apiClient.get(`${AMGT}/places`)``). Ces appels ne commencent pas par `/` : ils
-n etaient JAMAIS controles. 106 sites de appel (5 namespaces) echappaient donc au
-contrat, ce qui est pire qu un liaison morte : une liaison morte se voit.
+n'etaient JAMAIS controles. 106 sites d'appel (5 namespaces) echappaient donc au
+contrat, ce qui est pire qu'une liaison morte : une liaison morte, elle, se voit.
 
 Trois ameliorements durables, chacun justifie :
 
   1. RESOLUTION DES PREFIXES. Deux passes : recensement des `const X = '/api/...'`
-     du fichier, puis remplacement de `${X}` en tete de littetal. Un site qui ne
+     du fichier, puis remplacement de `${X}` en tete de litteral. Un site qui ne
      se resout pas est COMPTE et AFFICHE : le silence doit rester suspect.
-  2. METHODE HTTP. `GET /api/v1/x` alors que seule `POST /api/v1/x` existe n est pas
-     une liaison morte, c est une liaison 405 : l ecran tourne a vide. L OpenAPI
+  2. METHODE HTTP. `GET /api/v1/x` alors que seule `POST /api/v1/x` existe n'est pas
+     une liaison morte, c'est une liaison 405 : l'ecran tourne a vide. L'OpenAPI
      regenere a chaud donne les methodes reellement declarees.
-  3. COMMENTAIRES RETIRES. Une URL citee dans un commentaire ou un JSDoc n est pas
+  3. COMMENTAIRES RETIRES. Une URL citee dans un commentaire ou un JSDoc n'est pas
      un appel (faux positifs constates). Le meme nettoyage que
      `evo-log-backend/scripts/audit_fidelite_champs.py` est applique.
 
@@ -26,7 +26,7 @@ Usage :
     python scripts/audit_endpoint_bindings.py --details            # ligne precise
     python scripts/audit_endpoint_bindings.py --json               # pour outiller la campagne
 
-Sortie : 0 si toutes les liaisons resolutionnees touchent une route reelle avec la
+Sortie : 0 si toutes les liaisons resolues touchent une route reelle avec la
 bonne methode, 1 sinon.
 """
 import os
@@ -169,7 +169,7 @@ def scanner_front(module):
     """(sites, non_resolution, opaques) : sites = [(fichier, ligne, methode, url_norm)].
 
     `opaques` compte les appels dont l'URL est une variable (`apiClient.get(path)`).
-    Ils ne sont pas resolutionnables statiquement : les compter empeche de prendre
+    Ils ne sont pas auditables statiquement : les compter empeche de prendre
     un silence pour une sante.
     """
     sites, non_resolution, opaques = [], [], []
@@ -271,7 +271,7 @@ def main():
             print(f"{methode:<6} {corps:<58} {fichier}:{ligne}")
     if opaques and args.details:
         print("-" * 74)
-        print(f"{len(opaques)} site(s) dont l'URL vient d'une variable (non auditables statiquement) :")
+        print(f"{len(opaques)} site(s) dont l'URL vient d'une variable (non auditables) :")
         for fichier, ligne, methode, corps in opaques[:30]:
             print(f"{methode:<6} {corps:<58} {fichier}:{ligne}")
 
