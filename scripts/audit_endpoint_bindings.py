@@ -47,15 +47,12 @@ FRONTEND_SRC = root / "evo-log-frontend" / "src"
 
 sys.path.insert(0, str(BACKEND))
 
-# Declaration d'un prefix d'API : `const AMGT = '/api/v1/amenagement-portuaire'`.
-DECLARATION_PREFIXE = re.compile(
-    r"(?:export\s+)?const\s+([A-Za-z_$][\w$]*)\s*=\s*[`'\"](/api/[^`'\"]*)[`'\"]"
-)
-# Idem, mais avec origine en dur dans la valeur par defaut :
-# `const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'`.
+# Declaration d'un prefix d'API, sous ses deux formes rencontrees au depot :
+#   `const AMGT = '/api/v1/amenagement-portuaire'`
+#   `const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'`
 # Ces pages appellent `fetch` directement, hors de l'intercepteur axios qui porte
-# le token, la base et le refresh : elles sont signalees comme une classe de defaut
-# propre (origine codee, authentification a recomposer a la main).
+# le token, la base et le refresh : la seconde forme est signalee comme une classe
+# de defaut propre (origine codee, authentification recomposee a la main).
 DECLARATION_URL = re.compile(
     r"(?:export\s+)?const\s+([A-Za-z_$][\w$]*)\s*=[^;\n]*?[`'\"]((?:https?://|/api/)[^`'\"]*)[`'\"]"
 )
@@ -239,7 +236,7 @@ def scanner_front(module):
     un silence pour une sante.
 
     Deux passes. La premiere recense TOUTES les declarations de prefix du frontend,
-    la seconde resout les appels. Sans la carte globale, un page qui fait
+    la seconde resout les appels. Sans la carte globale, une page qui fait
     ``fetch(`${API_BASE}/rh-avance/dipe-mensuel`)`` avec `API_BASE` declare dans un
     autre fichier restait aveugle : 14 sites echappaient encore au contrat.
     """
