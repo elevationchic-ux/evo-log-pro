@@ -37,6 +37,15 @@ for f in files:
         if url.startswith("/api/v1/{"):
             continue
         url = url.split("?")[0].split("#")[0]
+        # Meme normalisation que l'intercepteur axios api-client.ts :
+        # /api/x -> /api/v1/x (sauf /api/docs, /api/health servis tels quels)
+        if (not url.startswith("/api/v1")
+                and not url.startswith("/api/docs")
+                and not url.startswith("/api/health")):
+            if url.startswith("/api/"):
+                url = "/api/v1" + url[len("/api"):]
+            elif url.startswith("api/"):
+                url = "/api/v1/" + url[len("api/"):]
         clean = re.sub(r"\$\{[^}]*\}", "p", url)      # ${id} -> segment litt
         clean = re.sub(r"\{[^}]*\}", "{p}", clean)
         segs = [s for s in clean.split("/") if s]
