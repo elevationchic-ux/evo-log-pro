@@ -194,3 +194,35 @@ class EInvoiceSignature(Base):
     provider = Column(String(30), default="local")        # local | dgi (si connecteur configure)
     statut = Column(String(20), default="scelle")          # scelle | transmis
     signed_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class AIChatMessage(Base):
+    """Message reel des echanges avec l'assistant IA, persiste par tenant.
+
+    L'historique n'est plus en memoire volatile : chaque tourme (question, et
+    reponse quand un LLM a repondu) est enregistre. Aucune reponse n'est inventee
+    — quand aucun LLM n'est configure, reponse_generee reste NULL."""
+    __tablename__ = "ai_chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    session_id = Column(String(64), index=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True, index=True)
+    module = Column(String(30))                            # GENERAL, TRANSPORT, ...
+    question = Column(Text, nullable=False)
+    reponse_generee = Column(Text, nullable=True)         # NULL si aucun LLM
+    provider = Column(String(30), nullable=True)          # anthropic/openai/... ou NULL
+    cree_le = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class AIFeedback(Base):
+    """Note utilisateur enregistree sur une reponse IA (audit reel)."""
+    __tablename__ = "ai_feedback"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True, index=True)
+    message_id = Column(Integer, ForeignKey('ai_chat_messages.id'), nullable=True, index=True)
+    note = Column(Integer, nullable=False)                 # 1-5, saisi
+    commentaire = Column(Text, nullable=True)
+    utilisateur_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    cree_le = Column(DateTime(timezone=True), server_default=func.now())

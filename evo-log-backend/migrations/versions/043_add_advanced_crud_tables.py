@@ -1,9 +1,10 @@
 """043 : tables reelles des modules avances (CRM / projets / immobilisations /
-bourse de fret / cles API tenant).
+bourse de fret / cles API tenant / rapports BI planifies / registre e-factures).
 
-Contexte : ces cinq surfaces n'avaient AUCUNE table et renvoyaient des stubs 501
+Contexte : ces surfaces n'avaient AUCUNE table et renvoyaient des stubs 501
 (des lignes « fabriquees »). Cette migration cree de veritables tables portees
-par le tenant (organization_id) pour que les routers fassent du CRUD reel.
+par le tenant (organization_id) pour que les routers fassent du CRUD / des
+agregations reels.
 
 Proprietes :
     - IDEMPOTENT par introspection : table deja presente -> no-op (compatible
@@ -140,6 +141,23 @@ def upgrade():
             sa.Column("prochaine_execution", sa.DateTime(timezone=True), nullable=True),
             sa.Column("cree_par", sa.Integer, sa.ForeignKey("users.id"), nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        )
+
+    if not _has_table("e_invoice_signatures"):
+        op.create_table(
+            "e_invoice_signatures",
+            sa.Column("id", sa.Integer, primary_key=True, index=True),
+            sa.Column("organization_id", sa.Integer, sa.ForeignKey("organizations.id"), nullable=True, index=True),
+            sa.Column("invoice_number", sa.String(80), nullable=False, index=True),
+            sa.Column("client_niu", sa.String(80), nullable=True),
+            sa.Column("total_ht", sa.Numeric, nullable=True, server_default="0"),
+            sa.Column("total_tva", sa.Numeric, nullable=True, server_default="0"),
+            sa.Column("total_ttc", sa.Numeric, nullable=True, server_default="0"),
+            sa.Column("fiscal_hash", sa.String(64), nullable=False, unique=True, index=True),
+            sa.Column("algorithm", sa.String(20), nullable=True, server_default="SHA-256"),
+            sa.Column("provider", sa.String(30), nullable=True, server_default="local"),
+            sa.Column("statut", sa.String(20), nullable=True, server_default="scelle"),
+            sa.Column("signed_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
         )
 
 

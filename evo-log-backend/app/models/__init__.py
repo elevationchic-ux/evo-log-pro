@@ -109,11 +109,11 @@ except Exception:
 try:
     from app.models.advanced_crud import (
         CRMOpportunity, Project, FixedAsset, FreightOffer, TenantAPIKey,
-        ScheduledReport, EInvoiceSignature,
+        ScheduledReport, EInvoiceSignature, AIChatMessage, AIFeedback,
     )
     __all__.extend([
         "CRMOpportunity", "Project", "FixedAsset", "FreightOffer", "TenantAPIKey",
-        "ScheduledReport", "EInvoiceSignature",
+        "ScheduledReport", "EInvoiceSignature", "AIChatMessage", "AIFeedback",
     ])
 except Exception:
     pass
