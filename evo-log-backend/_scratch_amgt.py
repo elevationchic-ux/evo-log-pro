@@ -36,7 +36,15 @@ programmation/{p}/visa-controle-financier
 programmation/{p}/visa-maturite
 projets
 projets/{p}
-projets/{p}/avancement""".splitlines()
+projets/{p}/avancement
+schemas-directeurs
+schemas-directeurs/{p}
+schemas-directeurs/{p}/approbation
+schemas-directeurs/{p}/demande-visa-minmivt
+synthese
+titres-domaniaux
+titres-domaniaux/{p}
+titres-domaniaux/{p}/decision""".splitlines()
 
 base = "/api/v1/amenagement-portuaire"
 miss = []
