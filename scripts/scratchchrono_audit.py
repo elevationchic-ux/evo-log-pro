@@ -1,30 +1,42 @@
-"""Chronometre fichier par fichier de l'audit de liaisons.
+"""Quel exact appel regex ne termine plus sur acconage/create/page.tsx ?
 
-Le scan frontend ne termine plus depuis l'ajout de la resolution des prefixes.
-Ce scratch affiche CHAQUE fichier avant de le traiter : le dernier nom affiche
-est le fichier qui coince, et la separation des deux cotes (nettoyage des
-commentaires vs regex d'appel) dit quelle partie corriger.
+Le scan de l'audit marque le passe des le premier fichier. Ce scratch isole les
+deux suspects (nettoyage des commentaires, regex d'appel) et, si la regex est en
+cause, montre le fragment qui la declenche, pour corriger le motif plutot que le
+juger « lent ».
 """
 import importlib.util
+import pathlib
+import re
 import sys
 import time
-import pathlib
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 spec = importlib.util.spec_from_file_location("aeb", pathlib.Path("scripts/audit_endpoint_bindings.py"))
 aeb = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(aeb)
 
-for n, f in enumerate(sorted(aeb.FRONTEND_SRC.rglob("*.ts*")), 1):
-    if n % 25 == 0:
-        print(f"... {n} fichiers traites (dernier : {f.name})", flush=True)
-    brut = f.read_text(encoding="utf-8", errors="ignore")
-    t0 = time.time()
-    sans = aeb.retirer_commentaires(brut)
-    t1 = time.time()
-    sites = list(aeb.APPEL.finditer(sans))
-    t2 = time.time()
-    if (t1 - t0) > 0.3 or (t2 - t1) > 0.3:
-        print(f"COMITE {f.relative_to(aeb.root)}  com={t1 - t0:.2f}s regex={t2 - t1:.2f}s "
-              f"taille={len(brut)} appels={len(sites)}", flush=True)
-print("TERMINE", flush=True)
+CIBLE = aeb.FRONTEND_SRC / "app" / "(app)" / "acconage" / "create" / "page.tsx"
+brut = CIBLE.read_text(encoding="utf-8", errors="ignore")
+print(f"taille {len(brut)} caracteres")
+
+t0 = time.time()
+sans = aeb.retirer_commentaires(brut)
+print(f"retirer_commentaires : {time.time() - t0:.2f}s")
+
+# Ou sont les .get/.post/... qui font partir la recherche de quote fermante ?
+amorce = re.compile(r"\b[A-Za-z_$][\w$]*(?:API|api|Client|client)\.(?:get|post|put|patch|delete)\b")
+t0 = time.time()
+amorces = [m for m in amorce.finditer(sans)]
+print(f"{len(amorces)} amorces en {time.time() - t0:.2f}s")
+
+for m in amorces:
+    extrait = sans[m.start():m.start() + 160].replace("\n", "\\n")
+    debut = time.time()
+    try:
+        aeb.APPEL.match(sans, m.start())
+    except Exception as exc:  # pragma: no cover - diagnostic
+        print(f"  ECHEC {exc}")
+    coute = time.time() - debut
+    if coute > 0.05:
+        print(f"  LENT ({coute:.2f}s) : {extrait!r}")
