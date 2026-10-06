@@ -155,21 +155,45 @@ def segment_equal(gabarit, chemin):
     return all(bs == "{p}" or bs == fs for bs, fs in zip(b, f))
 
 
-def trouve_chemin(chemin_norm, gabarits):
-    if chemin_norm in gabarits:
-        return True
-    return any(segment_equal(g, chemin_norm) for g in gabarits)
+class IndexRoutes:
+    """Gabarits backend indexes par nombre de segments, avec cache de correspondance.
 
+    L'audit compare ~1 200 gabarits a ~700 sites d'appel : sans index, il ne
+    finissait plus. Le cache rend aussi la regle « chemin de rattachement »
+    (ex. `/api/v1/departement` alors que seules des sous-routes existent) bon
+    marche, parce qu'elle ne s'applique que sur un echec de correspondence.
+    """
 
-def methodes_declarees(chemin_norm, operations, gabarits):
-    """Methodes declarees pour ce chemin, en respectant la semantique des jokers."""
-    decl = set()
-    for g in gabarits:
-        if segment_equal(g, chemin_norm):
-            for (p, verb) in operations:
-                if norm_backend(p) == g:
-                    decl.add(verb)
-    return decl
+    def __init__(self, methodes_par_gabarit):
+        self.methodes = methodes_par_gabarit
+        self.par_segments = {}
+        for gabarit in methodes_par_gabarit:
+            n = len([s for s in gabarit.split("/") if s])
+            self.par_segments.setdefault(n, []).append(gabarit)
+        self._cache = {}
+
+    def gabarits_pour(self, chemin):
+        if chemin not in self._cache:
+            n = len([s for s in chemin.split("/") if s])
+            self._cache[chemin] = [
+                g for g in self.par_segments.get(n, []) if segment_equal(g, chemin)
+            ]
+        return self._cache[chemin]
+
+    def existe(self, chemin):
+        return bool(self.gabarits_pour(chemin)) or any(
+            g.startswith(chemin + "/") for g in self.methodes
+        )
+
+    def methodes_pour(self, chemin):
+        decl = set()
+        for gabarit in self.gabarits_pour(chemin):
+            decl |= self.methodes[gabarit]
+        if not decl:
+            for gabarit, verbs in self.methodes.items():
+                if gabarit.startswith(chemin + "/"):
+                    decl |= verbs
+        return decl
 
 
 def scanner_front(module):
@@ -223,23 +247,24 @@ def main():
     ap.add_argument("--json", action="store_true", help="sortie machine-lisible")
     args = ap.parse_args()
 
-    chemins_bruts, operations = backend_operations()
-    gabarits = {norm_backend(p) for p in chemins_bruts}
+    chemins_bruts, methodes_par_gabarit = backend_operations()
+    index = IndexRoutes(methodes_par_gabarit)
+    nb_operations = sum(len(verbs) for verbs in methodes_par_gabarit.values())
     sites, non_resolution, opaques = scanner_front(args.module)
 
     orphelins, methodes = [], []
     for fichier, ligne, methode, url in sites:
-        if not trouve_chemin(url, gabarits):
+        if not index.existe(url):
             orphelins.append((fichier, ligne, methode, url))
         elif methode != "ANY":
-            decl = methodes_declarees(url, operations, gabarits)
+            decl = index.methodes_pour(url)
             if decl and methode not in decl:
                 methodes.append((fichier, ligne, methode, url, sorted(decl)))
 
     if args.json:
         print(json.dumps({
             "routes_backend": len(chemins_bruts),
-            "operations_backend": len(operations),
+            "operations_backend": nb_operations,
             "sites_controles": len(sites),
             "sites_prefixe_inconnu": len(non_resolution),
             "sites_opaques": len(opaques),
