@@ -476,21 +476,99 @@ class QHSEReportingService:
 class WorkPermitsIMDGService:
     """Gestion des Permis de Travail Dématérialisés et Matrice Ségrégation IMDG / CSST-CNPS"""
 
+    TYPES_PERMIS = {"feu", "hauteur", "espace_confine", "eleve", "excavation", "autre"}
+
     @staticmethod
-    def creer_permis_travail(payload: Dict[str, Any]) -> Dict[str, Any]:
-        """Batch 24 : DEBRANCHE (501). L'ancienne version fabriquait un permis
-        « APPROUVE_ACTIF » avec trois signatures tripartites datees (donneur
-        d'ordre, executant, officier ISPS) : un permis de travail (feu,
-        hauteur, espace confine) est un acte de securite engageant la
-        responsabilite penale de ses signataires, il ne peut pas etre simule.
+    def creer_permis_travail(db: Session, payload: Dict[str, Any], current_user) -> Dict[str, Any]:
+        """Enregistre reellement un permis de travail BROUILLON/EN_ATTENTE_SIGN.
+
+        Aucune signature n'est apposee ici : chaque signataire (donneur d'ordre,
+        executant, officier ISPS) est un utilisateur authentifie qui signe via
+        /permis-travail/{id}/signer. L'ancienne version fabriquait un permis
+        « APPROUVE_ACTIF » tripartite : un acte de securite ne se simule pas.
         """
-        not_implemented(
-            "Emission d'un permis de travail (feu / hauteur / espace confiné)",
-            "des modèles persistants par permis (demandeur, exécutant, zone, "
-            "validité) et un circuit de signature tripartite où chaque signataire "
-            "est un utilisateur authentifié du tenant ; aucune signature ne peut "
-            "être horodatée pour un tiers qui ne l'a pas posée",
+        from fastapi import HTTPException
+        from app.models.qhse import PermisTravail, SignaturePermis
+        from app.models.user import User
+
+        type_permis = (payload.get("type_permis") or payload.get("type") or "").strip().lower()
+        zone = (payload.get("zone") or "").strip()
+        description = (payload.get("description") or "").strip()
+        if not type_permis or not zone or not description:
+            raise HTTPException(status_code=400, detail="Champs requis : type_permis, zone, description.")
+        if type_permis not in WorkPermitsIMDGService.TYPES_PERMIS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"type_permis inconnu : {type_permis}. Attendu : {sorted(WorkPermitsIMDGService.TYPES_PERMIS)}.",
+            )
+
+        def _resolve_user_id(cle: str):
+            uid = payload.get(cle)
+            if uid is None:
+                return None
+            u = db.query(User).filter(User.id == int(uid)).first()
+            if u is None:
+                raise HTTPException(status_code=404, detail=f"Utilisateur {uid} introuvable ({cle}).")
+            return u.id
+
+        cid = getattr(current_user, "company_id", None)
+        seq = (db.query(func.count(PermisTravail.id)).filter(PermisTravail.company_id == cid).scalar() or 0) + 1
+        numero = f"PT-{date.today().year}-{seq:04d}"
+        while db.query(PermisTravail.id).filter(PermisTravail.numero_permis == numero).first() is not None:
+            seq += 1
+            numero = f"PT-{date.today().year}-{seq:04d}"
+
+        permis = PermisTravail(
+            numero_permis=numero,
+            company_id=cid,
+            type_permis=type_permis,
+            zone=zone[:200],
+            description=description,
+            intervention=payload.get("intervention"),
+            mesures_preventives=payload.get("mesures_preventives"),
+            demandeur_id=_resolve_user_id("demandeur_user_id") or current_user.id,
+            executeur_id=_resolve_user_id("executeur_user_id"),
+            officier_isps_id=_resolve_user_id("officier_isps_user_id"),
+            statut="EN_ATTENTE_SIGN",
         )
+        db.add(permis)
+        db.commit()
+        db.refresh(permis)
+        return WorkPermitsIMDGService._permis_dict(db, permis)
+
+    @staticmethod
+    def _permis_dict(db: Session, permis) -> Dict[str, Any]:
+        from app.models.qhse import SignaturePermis
+
+        sigs = (
+            db.query(SignaturePermis)
+            .filter(SignaturePermis.permis_id == permis.id)
+            .order_by(SignaturePermis.date_signature)
+            .all()
+        )
+        return {
+            "id": permis.id,
+            "numero_permis": permis.numero_permis,
+            "type_permis": permis.type_permis,
+            "zone": permis.zone,
+            "description": permis.description,
+            "statut": permis.statut,
+            "signataires_designes": {
+                "demandeur": permis.demandeur_id,
+                "executeur": permis.executeur_id,
+                "officier_isps": permis.officier_isps_id,
+            },
+            "signatures": [
+                {
+                    "role": s.role_signataire,
+                    "signataire_id": s.signataire_id,
+                    "signataire_nom": s.signataire_nom,
+                    "date_signature": s.date_signature.isoformat() if s.date_signature else None,
+                }
+                for s in sigs
+            ],
+            "created_at": permis.created_at.isoformat() if permis.created_at else None,
+        }
 
     @staticmethod
     def verifier_segregation_imdg(classes_imdg: List[str]) -> Dict[str, Any]:

@@ -1,5 +1,5 @@
 """QHSE models - Quality, Health, Safety, Environment management for Cameroon/CEMAC"""
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Float, ForeignKey, Enum, Date, Numeric
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Float, ForeignKey, Enum, Date, Numeric, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -384,5 +384,70 @@ class IndicateurQHSE(Base):
 # Compatibility exports retained during the EVO-LOG Pro reconciliation.
 CertificationISO = NormeCertification
 Audit = AuditQualite
-EPI = EPIRequis
 Investigation = InvestigationAccident
+EPI = EPIRequis
+
+
+class PermisTravail(Base):
+    """Permis de travail debranche (feu / hauteur / espace confine).
+
+    Acte de securite engageant la responsabilite penale de ses signataires :
+    le module ne simule AUCUNE signature. Chaque signataire est un utilisateur
+    authentifie du tenant qui appose sa signature via /permis-travail/{id}/signer.
+    """
+    __tablename__ = "permis_travail"
+
+    id = Column(Integer, primary_key=True, index=True)
+    numero_permis = Column(String(50), unique=True, nullable=False, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
+    type_permis = Column(String(40), nullable=False)  # feu, hauteur, espace_confine, eleve, autre
+    zone = Column(String(200), nullable=False)
+    description = Column(Text, nullable=False)
+    intervention = Column(Text)
+    mesures_preventives = Column(Text)
+    valide_debut = Column(DateTime(timezone=True))
+    valide_fin = Column(DateTime(timezone=True))
+    statut = Column(String(30), default="BROUILLON")  # BROUILLON, EN_ATTENTE_SIGN, ACTIF, EXPIRE, REVOQUE
+    demandeur_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    executeur_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    officier_isps_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    signatures = relationship(
+        "SignaturePermis", back_populates="permis", cascade="all, delete-orphan"
+    )
+
+
+class SignaturePermis(Base):
+    """Signature reelle d'un utilisateur authentifie sur un permis de travail.
+    L'horodatage est celui de l'apposition, jamais antedate."""
+    __tablename__ = "signatures_permis_travail"
+
+    id = Column(Integer, primary_key=True, index=True)
+    permis_id = Column(Integer, ForeignKey("permis_travail.id", ondelete="CASCADE"), nullable=False, index=True)
+    role_signataire = Column(String(30), nullable=False)  # demandeur, executeur, officier_isps
+    signataire_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    signataire_nom = Column(String(150))
+    date_signature = Column(DateTime(timezone=True), server_default=func.now())
+
+    permis = relationship("PermisTravail", back_populates="signatures")
+    signataire = relationship("User", foreign_keys=[signataire_id])
+
+
+class HeuresExposition(Base):
+    """Denominateur CNPS/CSST saisi reellement par le tenant : heures
+    travailles sur l'exercice. Sans cette saisie, aucun taux de frequence /
+    gravite n'est calcule (l'ancien code inventait 2 850 000 h)."""
+    __tablename__ = "heures_exposition"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
+    annee = Column(Integer, nullable=False, index=True)
+    heures_travaillees = Column(Numeric, nullable=False)
+    nb_employes = Column(Integer)
+    jours_arret_total = Column(Integer)
+    saisi_par = Column(Integer, ForeignKey("users.id"), nullable=True)
+    source_piece = Column(String(200))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
