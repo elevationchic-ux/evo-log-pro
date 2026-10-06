@@ -30,7 +30,7 @@ export default function ClientShipmentsPage() {
     search: ''
   });
   const [sortBy, setSortBy] = useState<{ field: string; direction: 'asc' | 'desc' }>({
-    field: 'dateCreation',
+    field: 'date_creation',
     direction: 'desc'
   });
   const [expandedMissionId, setExpandedMissionId] = useState<string | null>(null);
@@ -93,9 +93,9 @@ export default function ClientShipmentsPage() {
       const searchTerm = filters.search.toLowerCase();
       return (
         mission.reference?.toLowerCase().includes(searchTerm) ||
-        mission.lieu_depart?.toLowerCase().includes(searchTerm) ||
-        mission.lieu_arrivee?.toLowerCase().includes(searchTerm) ||
-        mission.nature_fret?.toLowerCase().includes(searchTerm)
+        mission.origine?.toLowerCase().includes(searchTerm) ||
+        mission.destination?.toLowerCase().includes(searchTerm) ||
+        mission.type_mission?.toLowerCase().includes(searchTerm)
       );
     }
     return true;

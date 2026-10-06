@@ -863,9 +863,10 @@ class PortAdvancedTOSService:
 
         if tarifs_manquants:
             raise HTTPException(
-                status_code=501,
+                status_code=503,
                 detail=(
-                    "Tarifs portuaires OFFICIELS non importes pour : "
+                    "Facturation indisponible : tarifs portuaires OFFICIELS non "
+                    "importes pour : "
                     + ", ".join(tarifs_manquants)
                     + ". Saisissez-les via /api/v1/port-pricing (modele TarifPortuaire). "
                     "Aucun taux n'est invente."

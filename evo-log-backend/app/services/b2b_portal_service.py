@@ -18,8 +18,6 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 import random
 
-from app.core.not_implemented import not_implemented
-
 
 class B2BPortalService:
 
