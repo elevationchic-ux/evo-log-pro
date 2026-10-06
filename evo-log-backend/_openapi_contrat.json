@@ -837,6 +837,208 @@
    ],
    "enums": {}
   },
+  "AutorisationDomanialeCreate": {
+   "champs": [
+    "assiette",
+    "auteur_saisie",
+    "autorite_emettrice",
+    "beneficiaire",
+    "date_demande",
+    "date_effet",
+    "date_expiration",
+    "date_signature",
+    "date_verification",
+    "delai_renouvellement_mois",
+    "destination",
+    "motif_refus",
+    "notes",
+    "numero_piece",
+    "objet",
+    "piece_jointe",
+    "port_id",
+    "redevance_annuelle_xaf",
+    "reference_deliberation",
+    "renouvelable",
+    "source_reference",
+    "statut",
+    "superficie_m2",
+    "taux_redevance",
+    "terminal_id",
+    "type_titre",
+    "zone_id"
+   ],
+   "enums": {
+    "type_titre": [
+     "autorisation_temporaire",
+     "convention_occupation",
+     "attribution_domaine",
+     "permis_tranchee",
+     "police_portuaire",
+     "declaration_preable",
+     "arrete_delimitation",
+     "cession_redevance"
+    ]
+   }
+  },
+  "AutorisationDomanialeOut": {
+   "champs": [
+    "assiette",
+    "auteur_saisie",
+    "autorite_emettrice",
+    "beneficiaire",
+    "created_at",
+    "date_demande",
+    "date_effet",
+    "date_expiration",
+    "date_signature",
+    "date_verification",
+    "delai_renouvellement_mois",
+    "destination",
+    "id",
+    "motif_refus",
+    "notes",
+    "numero_piece",
+    "objet",
+    "piece_jointe",
+    "port_id",
+    "redevance_annuelle_xaf",
+    "reference_deliberation",
+    "renouvelable",
+    "source_reference",
+    "statut",
+    "superficie_m2",
+    "taux_redevance",
+    "terminal_id",
+    "type_titre",
+    "zone_id"
+   ],
+   "enums": {}
+  },
+  "AutorisationDomanialeUpdate": {
+   "champs": [
+    "assiette",
+    "autorite_emettrice",
+    "beneficiaire",
+    "date_demande",
+    "date_effet",
+    "date_expiration",
+    "date_signature",
+    "date_verification",
+    "delai_renouvellement_mois",
+    "destination",
+    "motif_refus",
+    "notes",
+    "objet",
+    "piece_jointe",
+    "port_id",
+    "redevance_annuelle_xaf",
+    "reference_deliberation",
+    "renouvelable",
+    "source_reference",
+    "statut",
+    "superficie_m2",
+    "taux_redevance",
+    "terminal_id",
+    "type_titre",
+    "zone_id"
+   ],
+   "enums": {}
+  },
+  "AutorisationTravauxCreate": {
+   "champs": [
+    "administration",
+    "audit_date_prochaine",
+    "auteur_saisie",
+    "categorie_projet",
+    "charges_enviro_xaf",
+    "conditions_particulieres",
+    "date_accord",
+    "date_depot",
+    "date_expiration",
+    "date_verification",
+    "notes",
+    "numero_arrete",
+    "objet",
+    "piece_jointe",
+    "port_id",
+    "projet_id",
+    "reference",
+    "source_reference",
+    "statut",
+    "type_autorisation"
+   ],
+   "enums": {
+    "type_autorisation": [
+     "eies",
+     "certificat_conformite_environnementale",
+     "iemu",
+     "autorisation_dragage",
+     "deversement",
+     "permis_batir",
+     "visite_conformite",
+     "autre"
+    ],
+    "statut": [
+     "en_preparation",
+     "deposee",
+     "complement_requis",
+     "accordee",
+     "refusee",
+     "expiree",
+     "renouvelee"
+    ]
+   }
+  },
+  "AutorisationTravauxOut": {
+   "champs": [
+    "administration",
+    "audit_date_prochaine",
+    "auteur_saisie",
+    "categorie_projet",
+    "charges_enviro_xaf",
+    "conditions_particulieres",
+    "created_at",
+    "date_accord",
+    "date_depot",
+    "date_expiration",
+    "date_verification",
+    "id",
+    "notes",
+    "numero_arrete",
+    "objet",
+    "piece_jointe",
+    "port_id",
+    "projet_id",
+    "reference",
+    "source_reference",
+    "statut",
+    "type_autorisation"
+   ],
+   "enums": {}
+  },
+  "AutorisationTravauxUpdate": {
+   "champs": [
+    "administration",
+    "audit_date_prochaine",
+    "categorie_projet",
+    "charges_enviro_xaf",
+    "conditions_particulieres",
+    "date_accord",
+    "date_depot",
+    "date_expiration",
+    "date_verification",
+    "notes",
+    "numero_arrete",
+    "objet",
+    "piece_jointe",
+    "port_id",
+    "projet_id",
+    "source_reference",
+    "statut",
+    "type_autorisation"
+   ],
+   "enums": {}
+  },
   "AvanceCreate": {
    "champs": [
     "corridor_destination",
@@ -1110,25 +1312,10 @@
    ],
    "enums": {}
   },
-  "BilanOHADADetailleCreate": {
+  "BilanGenererRequest": {
    "champs": [
-    "actif_circulant_creances",
-    "actif_circulant_stocks",
-    "actif_circulant_total",
-    "actif_immobilise_amortissements",
-    "actif_immobilise_brut",
-    "actif_immobilise_net",
-    "capitaux_propres_capital",
-    "capitaux_propres_reserves",
-    "capitaux_propres_resultat",
-    "capitaux_propres_total",
     "date_bilan",
-    "dettes_courtes",
-    "dettes_long_terme",
-    "exercice_id",
-    "total_actif",
-    "total_passif",
-    "tresorerie_actif"
+    "exercice_id"
    ],
    "enums": {}
   },
@@ -1212,12 +1399,6 @@
    "enums": {}
   },
   "Body_import_employes_excel_api_v1_rh_employes_import_excel_post": {
-   "champs": [
-    "file"
-   ],
-   "enums": {}
-  },
-  "Body_ocr_extract_api_v1_parc_ocr_extract_post": {
    "champs": [
     "file"
    ],
@@ -2081,6 +2262,10 @@
    ],
    "enums": {}
   },
+  "CodeMarche": {
+   "champs": [],
+   "enums": {}
+  },
   "ColisCreate": {
    "champs": [
     "bon_sortie_id",
@@ -2448,32 +2633,11 @@
    ],
    "enums": {}
   },
-  "CompteResultatOHADADetailleCreate": {
+  "CompteResultatGenererRequest": {
    "champs": [
-    "achats_marchandises",
-    "achats_matieres_premieres",
-    "autres_charges_exploitation",
-    "autres_produits_exploitation",
-    "charges_exceptionnelles",
-    "charges_financieres",
-    "charges_personnel",
     "date_arrete",
-    "dotations_amortissements",
     "exercice_id",
-    "impots_taxes",
-    "periode",
-    "produits_exceptionnels",
-    "produits_financiers",
-    "resultat_exceptionnel",
-    "resultat_exploitation",
-    "resultat_financier",
-    "resultat_net",
-    "services_exterieurs",
-    "subventions_exploitation",
-    "total_charges_exploitation",
-    "total_produits_exploitation",
-    "ventes_marchandises",
-    "ventes_produits_fabriques"
+    "periode"
    ],
    "enums": {}
   },
@@ -2549,6 +2713,139 @@
     "resultat_financier",
     "services_exterieurs",
     "valide_par"
+   ],
+   "enums": {}
+  },
+  "ConcessionPortuaireCreate": {
+   "champs": [
+    "arret_travail",
+    "auteur_saisie",
+    "autorite_concedante",
+    "biens_reversibles",
+    "capacite_contractuelle",
+    "clauses_revolution",
+    "code_contrat",
+    "concessionnaire",
+    "date_approbation",
+    "date_echeance",
+    "date_effet",
+    "date_verification",
+    "duree_mois",
+    "groupe_final",
+    "investissement_promis_xaf",
+    "investissement_realise_xaf",
+    "longueur_quai_ml",
+    "nom_contrat",
+    "notes",
+    "objet",
+    "perimetre",
+    "port_id",
+    "prolongations",
+    "redevance_concession_xaf",
+    "redevance_par_unite",
+    "reference_approbation",
+    "sanctions_contractuelles",
+    "source_reference",
+    "statut",
+    "superficie_concedee_ha",
+    "terminal_id",
+    "type_contrat",
+    "unite_redevance"
+   ],
+   "enums": {
+    "type_contrat": [
+     "affermage",
+     "concession_service",
+     "bot",
+     "cet",
+     "aot",
+     "lotissement",
+     "regie_directe"
+    ],
+    "statut": [
+     "negociation",
+     "approuve",
+     "en_vigueur",
+     "prolonge",
+     "resilie",
+     "echeu",
+     "transfere"
+    ]
+   }
+  },
+  "ConcessionPortuaireOut": {
+   "champs": [
+    "arret_travail",
+    "auteur_saisie",
+    "autorite_concedante",
+    "biens_reversibles",
+    "capacite_contractuelle",
+    "clauses_revolution",
+    "code_contrat",
+    "concessionnaire",
+    "created_at",
+    "date_approbation",
+    "date_echeance",
+    "date_effet",
+    "date_verification",
+    "duree_mois",
+    "groupe_final",
+    "id",
+    "investissement_promis_xaf",
+    "investissement_realise_xaf",
+    "longueur_quai_ml",
+    "nom_contrat",
+    "notes",
+    "objet",
+    "perimetre",
+    "port_id",
+    "prolongations",
+    "redevance_concession_xaf",
+    "redevance_par_unite",
+    "reference_approbation",
+    "sanctions_contractuelles",
+    "source_reference",
+    "statut",
+    "superficie_concedee_ha",
+    "terminal_id",
+    "type_contrat",
+    "unite_redevance"
+   ],
+   "enums": {}
+  },
+  "ConcessionPortuaireUpdate": {
+   "champs": [
+    "arret_travail",
+    "autorite_concedante",
+    "biens_reversibles",
+    "capacite_contractuelle",
+    "clauses_revolution",
+    "concessionnaire",
+    "date_approbation",
+    "date_echeance",
+    "date_effet",
+    "date_verification",
+    "duree_mois",
+    "groupe_final",
+    "investissement_promis_xaf",
+    "investissement_realise_xaf",
+    "longueur_quai_ml",
+    "nom_contrat",
+    "notes",
+    "objet",
+    "perimetre",
+    "port_id",
+    "prolongations",
+    "redevance_concession_xaf",
+    "redevance_par_unite",
+    "reference_approbation",
+    "sanctions_contractuelles",
+    "source_reference",
+    "statut",
+    "superficie_concedee_ha",
+    "terminal_id",
+    "type_contrat",
+    "unite_redevance"
    ],
    "enums": {}
   },
@@ -3408,6 +3705,17 @@
    ],
    "enums": {}
   },
+  "DerniersEtatsFinanciersResponse": {
+   "champs": [
+    "annee",
+    "annexes",
+    "bilan",
+    "compte_resultat",
+    "exercice_id",
+    "tafire"
+   ],
+   "enums": {}
+  },
   "DestructionCreate": {
    "champs": [
     "declaration_entrepot_id",
@@ -3588,6 +3896,90 @@
     "type_preuve",
     "upload_par",
     "url_fichier"
+   ],
+   "enums": {}
+  },
+  "DocumentProgrammationCreate": {
+   "champs": [
+    "auteur_saisie",
+    "autorite_visa",
+    "autorite_visa_maturite",
+    "chapitre",
+    "date_notification_minfi",
+    "date_presentation",
+    "date_verification",
+    "date_visa_controle_financier",
+    "date_visa_maturite",
+    "exercice",
+    "montant_inscrit_xaf",
+    "montant_paye_xaf",
+    "notes",
+    "numero_engagement",
+    "numero_visa_maturite",
+    "objet",
+    "port_id",
+    "projet_id",
+    "reference_fiche_technique",
+    "reference_pip_cdmt",
+    "source_financement",
+    "source_reference",
+    "statut"
+   ],
+   "enums": {}
+  },
+  "DocumentProgrammationOut": {
+   "champs": [
+    "auteur_saisie",
+    "autorite_visa",
+    "autorite_visa_maturite",
+    "chapitre",
+    "created_at",
+    "date_notification_minfi",
+    "date_presentation",
+    "date_verification",
+    "date_visa_controle_financier",
+    "date_visa_maturite",
+    "exercice",
+    "id",
+    "montant_inscrit_xaf",
+    "montant_paye_xaf",
+    "notes",
+    "numero_engagement",
+    "numero_visa_maturite",
+    "objet",
+    "port_id",
+    "projet_id",
+    "reference_fiche_technique",
+    "reference_pip_cdmt",
+    "source_financement",
+    "source_reference",
+    "statut"
+   ],
+   "enums": {}
+  },
+  "DocumentProgrammationUpdate": {
+   "champs": [
+    "autorite_visa",
+    "autorite_visa_maturite",
+    "chapitre",
+    "date_notification_minfi",
+    "date_presentation",
+    "date_verification",
+    "date_visa_controle_financier",
+    "date_visa_maturite",
+    "exercice",
+    "montant_inscrit_xaf",
+    "montant_paye_xaf",
+    "notes",
+    "numero_engagement",
+    "numero_visa_maturite",
+    "objet",
+    "port_id",
+    "projet_id",
+    "reference_pip_cdmt",
+    "source_financement",
+    "source_reference",
+    "statut"
    ],
    "enums": {}
   },
@@ -3840,6 +4232,122 @@
     "id",
     "numero_serie",
     "observations"
+   ],
+   "enums": {}
+  },
+  "DragageCreate": {
+   "champs": [
+    "auteur_saisie",
+    "autorisation_administrative",
+    "autorisation_rejet_reference",
+    "code_campagne",
+    "cout_xaf",
+    "date_debut",
+    "date_fin",
+    "date_releve",
+    "date_verification",
+    "devise",
+    "entreprise",
+    "exutoire_rejet",
+    "impact_environnemental",
+    "jours_arret",
+    "leve_bathymetrique_apres",
+    "libelle",
+    "nature_sediment",
+    "notes",
+    "port_id",
+    "profondeur_avant_m",
+    "profondeur_obtenue_m",
+    "profondeur_visee_m",
+    "projet_id",
+    "source_reference",
+    "statut",
+    "superficie_draguee_m2",
+    "type_dragage",
+    "type_drague",
+    "volume_facture_m3",
+    "volume_mesure_m3",
+    "zone_traitee"
+   ],
+   "enums": {
+    "type_dragage": [
+     "construction",
+     "entretien",
+     "appreciation",
+     "remblaiement",
+     "decommissionnement"
+    ]
+   }
+  },
+  "DragageOut": {
+   "champs": [
+    "auteur_saisie",
+    "autorisation_administrative",
+    "autorisation_rejet_reference",
+    "code_campagne",
+    "cout_xaf",
+    "created_at",
+    "date_debut",
+    "date_fin",
+    "date_releve",
+    "date_verification",
+    "devise",
+    "entreprise",
+    "exutoire_rejet",
+    "id",
+    "impact_environnemental",
+    "jours_arret",
+    "leve_bathymetrique_apres",
+    "libelle",
+    "nature_sediment",
+    "notes",
+    "port_id",
+    "profondeur_avant_m",
+    "profondeur_obtenue_m",
+    "profondeur_visee_m",
+    "projet_id",
+    "source_reference",
+    "statut",
+    "superficie_draguee_m2",
+    "type_dragage",
+    "type_drague",
+    "volume_facture_m3",
+    "volume_mesure_m3",
+    "zone_traitee"
+   ],
+   "enums": {}
+  },
+  "DragageUpdate": {
+   "champs": [
+    "autorisation_administrative",
+    "autorisation_rejet_reference",
+    "cout_xaf",
+    "date_debut",
+    "date_fin",
+    "date_releve",
+    "date_verification",
+    "devise",
+    "entreprise",
+    "exutoire_rejet",
+    "impact_environnemental",
+    "jours_arret",
+    "leve_bathymetrique_apres",
+    "libelle",
+    "nature_sediment",
+    "notes",
+    "port_id",
+    "profondeur_avant_m",
+    "profondeur_obtenue_m",
+    "profondeur_visee_m",
+    "projet_id",
+    "source_reference",
+    "statut",
+    "superficie_draguee_m2",
+    "type_dragage",
+    "type_drague",
+    "volume_facture_m3",
+    "volume_mesure_m3",
+    "zone_traitee"
    ],
    "enums": {}
   },
@@ -4475,6 +4983,19 @@
     "date_arrivee_reelle",
     "date_depart_reelle",
     "statut"
+   ],
+   "enums": {}
+  },
+  "EtatInfrastructure": {
+   "champs": [],
+   "enums": {}
+  },
+  "EtatsPeriodesResponse": {
+   "champs": [
+    "annee",
+    "exercice_id",
+    "exercice_statut",
+    "periodes"
    ],
    "enums": {}
   },
@@ -5757,6 +6278,144 @@
    ],
    "enums": {}
   },
+  "InfrastructurePortuaireCreate": {
+   "champs": [
+    "auteur_saisie",
+    "capacite_teus",
+    "code",
+    "date_derniere_inspection",
+    "date_entree_patrimoine",
+    "date_mise_service",
+    "date_verification",
+    "designation",
+    "emplacement",
+    "estimation_renovation_xaf",
+    "etat_structural",
+    "hauteur_parement_m",
+    "largeur_m",
+    "longueur_ml",
+    "note_genie_civil",
+    "notes",
+    "operateur_entretien",
+    "periodicite_inspection_mois",
+    "port_id",
+    "portance_tonnes_m2",
+    "prochaine_inspection",
+    "profondeur_utile_m",
+    "projet_id",
+    "regime_fiscal",
+    "reversable",
+    "source_reference",
+    "sources_documents",
+    "statut",
+    "superficie_m2",
+    "terminal_id",
+    "travaux_renovation_prevus",
+    "type_infrastructure",
+    "valeur_patrimoniale_xaf",
+    "zone_id"
+   ],
+   "enums": {
+    "type_infrastructure": [
+     "ouvrage",
+     "aire",
+     "batiment",
+     "reseau",
+     "equipement_quai",
+     "ferroviaire",
+     "zone"
+    ],
+    "statut": [
+     "projete",
+     "en_construction",
+     "operationnelle",
+     "sous_utilisee",
+     "degradee",
+     "hors_service",
+     "demolie"
+    ]
+   }
+  },
+  "InfrastructurePortuaireOut": {
+   "champs": [
+    "auteur_saisie",
+    "capacite_teus",
+    "code",
+    "created_at",
+    "date_derniere_inspection",
+    "date_entree_patrimoine",
+    "date_mise_service",
+    "date_verification",
+    "designation",
+    "emplacement",
+    "est_actif",
+    "estimation_renovation_xaf",
+    "etat_structural",
+    "hauteur_parement_m",
+    "id",
+    "largeur_m",
+    "longueur_ml",
+    "note_genie_civil",
+    "notes",
+    "operateur_entretien",
+    "periodicite_inspection_mois",
+    "port_id",
+    "portance_tonnes_m2",
+    "prochaine_inspection",
+    "profondeur_utile_m",
+    "projet_id",
+    "regime_fiscal",
+    "reversable",
+    "source_reference",
+    "sources_documents",
+    "statut",
+    "superficie_m2",
+    "terminal_id",
+    "travaux_renovation_prevus",
+    "type_infrastructure",
+    "valeur_patrimoniale_xaf",
+    "zone_id"
+   ],
+   "enums": {}
+  },
+  "InfrastructurePortuaireUpdate": {
+   "champs": [
+    "capacite_teus",
+    "date_derniere_inspection",
+    "date_entree_patrimoine",
+    "date_mise_service",
+    "date_verification",
+    "designation",
+    "emplacement",
+    "est_actif",
+    "estimation_renovation_xaf",
+    "etat_structural",
+    "hauteur_parement_m",
+    "largeur_m",
+    "longueur_ml",
+    "note_genie_civil",
+    "notes",
+    "operateur_entretien",
+    "periodicite_inspection_mois",
+    "port_id",
+    "portance_tonnes_m2",
+    "prochaine_inspection",
+    "profondeur_utile_m",
+    "projet_id",
+    "regime_fiscal",
+    "reversable",
+    "source_reference",
+    "sources_documents",
+    "statut",
+    "superficie_m2",
+    "terminal_id",
+    "travaux_renovation_prevus",
+    "type_infrastructure",
+    "valeur_patrimoniale_xaf",
+    "zone_id"
+   ],
+   "enums": {}
+  },
   "InscriptionFormationRequest": {
    "champs": [
     "employe_ids",
@@ -6192,8 +6851,8 @@
    "champs": [
     "compte_id",
     "date_lettrage",
-    "ecritures_ids",
     "effectue_par",
+    "lignes_ids",
     "reference"
    ],
    "enums": {}
@@ -6547,6 +7206,29 @@
     "quantite_theorique",
     "statut",
     "stock_id"
+   ],
+   "enums": {}
+  },
+  "LignePieceCreate": {
+   "champs": [
+    "compte_id",
+    "credit",
+    "debit",
+    "libelle_detail",
+    "reference_document"
+   ],
+   "enums": {}
+  },
+  "LignePieceResponse": {
+   "champs": [
+    "compte_id",
+    "compte_intitule",
+    "compte_numero",
+    "credit",
+    "debit",
+    "id",
+    "libelle_detail",
+    "order_line"
    ],
    "enums": {}
   },
@@ -6912,6 +7594,143 @@
     "numero_onu",
     "quantite",
     "unite"
+   ],
+   "enums": {}
+  },
+  "MarcheAmenagementCreate": {
+   "champs": [
+    "attributaire",
+    "auteur_saisie",
+    "avance_demarrage_xaf",
+    "avis_colife",
+    "caution_banque",
+    "code_marche",
+    "date_attribution",
+    "date_colife",
+    "date_notification",
+    "date_ouverture_chantier",
+    "date_publication_dao",
+    "date_reception_definitive",
+    "date_reception_provisoire",
+    "date_remise_offres",
+    "date_verification",
+    "delai_execution_mois",
+    "designations",
+    "devise",
+    "dossier_appel_offre",
+    "garant_result_annees",
+    "montant_attribue_xaf",
+    "montant_final_xaf",
+    "montant_initial_xaf",
+    "notes",
+    "nrd_max_jours",
+    "part_pmp_pct",
+    "port_id",
+    "procedure_controle",
+    "projet_id",
+    "reference",
+    "retenue_garantie_pct",
+    "source_reference",
+    "statut",
+    "type_marche"
+   ],
+   "enums": {
+    "type_marche": [
+     "travaux",
+     "fournitures",
+     "services",
+     "etudes",
+     "controle_surveillance",
+     "concession"
+    ],
+    "statut": [
+     "prevu",
+     "publie",
+     "en_cours_evaluation",
+     "attribue",
+     "notifie",
+     "en_execution",
+     "receptionne",
+     "resilie",
+     "annule"
+    ]
+   }
+  },
+  "MarcheAmenagementOut": {
+   "champs": [
+    "attributaire",
+    "auteur_saisie",
+    "avance_demarrage_xaf",
+    "avis_colife",
+    "caution_banque",
+    "code_marche",
+    "created_at",
+    "date_attribution",
+    "date_colife",
+    "date_notification",
+    "date_ouverture_chantier",
+    "date_publication_dao",
+    "date_reception_definitive",
+    "date_reception_provisoire",
+    "date_remise_offres",
+    "date_verification",
+    "delai_execution_mois",
+    "designations",
+    "devise",
+    "dossier_appel_offre",
+    "garant_result_annees",
+    "id",
+    "montant_attribue_xaf",
+    "montant_final_xaf",
+    "montant_initial_xaf",
+    "notes",
+    "nrd_max_jours",
+    "part_pmp_pct",
+    "port_id",
+    "procedure_controle",
+    "projet_id",
+    "reference",
+    "retenue_garantie_pct",
+    "source_reference",
+    "statut",
+    "type_marche"
+   ],
+   "enums": {}
+  },
+  "MarcheAmenagementUpdate": {
+   "champs": [
+    "attributaire",
+    "avance_demarrage_xaf",
+    "avis_colife",
+    "caution_banque",
+    "code_marche",
+    "date_attribution",
+    "date_colife",
+    "date_notification",
+    "date_ouverture_chantier",
+    "date_publication_dao",
+    "date_reception_definitive",
+    "date_reception_provisoire",
+    "date_remise_offres",
+    "date_verification",
+    "delai_execution_mois",
+    "designations",
+    "devise",
+    "dossier_appel_offre",
+    "garant_result_annees",
+    "montant_attribue_xaf",
+    "montant_final_xaf",
+    "montant_initial_xaf",
+    "notes",
+    "nrd_max_jours",
+    "part_pmp_pct",
+    "port_id",
+    "procedure_controle",
+    "projet_id",
+    "retenue_garantie_pct",
+    "source_reference",
+    "statut",
+    "type_marche"
    ],
    "enums": {}
   },
@@ -7776,6 +8595,10 @@
    ],
    "enums": {}
   },
+  "OrigineFinancement": {
+   "champs": [],
+   "enums": {}
+  },
   "PCSCreate": {
    "champs": [
     "date_operation",
@@ -8081,6 +8904,7 @@
     "date_peremption",
     "lot_numero",
     "numero_serie",
+    "quantite",
     "stock_id"
    ],
    "enums": {}
@@ -8151,6 +8975,17 @@
    ],
    "enums": {}
   },
+  "PeriodeClosingItem": {
+   "champs": [
+    "balance_date",
+    "balance_statut",
+    "closed",
+    "entries_count",
+    "label",
+    "periode"
+   ],
+   "enums": {}
+  },
   "PermissionCheckRequest": {
    "champs": [
     "permission_code",
@@ -8166,6 +9001,20 @@
     "permission_code",
     "raison",
     "user_id"
+   ],
+   "enums": {}
+  },
+  "PieceCreate": {
+   "champs": [
+    "date_ecriture",
+    "journal_id",
+    "libelle",
+    "lignes",
+    "numero_piece",
+    "reference_document",
+    "tiers_id",
+    "type_document",
+    "type_journal"
    ],
    "enums": {}
   },
@@ -8237,6 +9086,85 @@
     "stock_maximum",
     "stock_minimum",
     "unite"
+   ],
+   "enums": {}
+  },
+  "PieceResponse": {
+   "champs": [
+    "created_at",
+    "date_ecriture",
+    "devise",
+    "equilibree",
+    "exercice_id",
+    "id",
+    "journal",
+    "journal_id",
+    "libelle",
+    "lignes",
+    "numero_ecriture",
+    "numero_piece",
+    "periode",
+    "statut",
+    "total_credit",
+    "total_debit",
+    "valider"
+   ],
+   "enums": {}
+  },
+  "PlacePortuaireCreate": {
+   "champs": [
+    "adresse",
+    "autorite_portuaire",
+    "capacite_annuelle_tonnes",
+    "code",
+    "date_ouverture",
+    "description",
+    "email",
+    "localisation",
+    "nom",
+    "nombre_postes_quai",
+    "operateur",
+    "profondeur_m",
+    "region",
+    "telephone",
+    "tirant_eau_max",
+    "type_port",
+    "ville",
+    "website",
+    "zone_franche"
+   ],
+   "enums": {
+    "type_port": [
+     "marchandises",
+     "petrolier",
+     "mixte",
+     "peche",
+     "bananes"
+    ]
+   }
+  },
+  "PlacePortuaireUpdate": {
+   "champs": [
+    "adresse",
+    "autorite_portuaire",
+    "capacite_annuelle_tonnes",
+    "code",
+    "date_ouverture",
+    "description",
+    "email",
+    "est_actif",
+    "localisation",
+    "nom",
+    "nombre_postes_quai",
+    "operateur",
+    "profondeur_m",
+    "region",
+    "telephone",
+    "tirant_eau_max",
+    "type_port",
+    "ville",
+    "website",
+    "zone_franche"
    ],
    "enums": {}
   },
@@ -8919,6 +9847,165 @@
     "manager_name",
     "start_date",
     "title"
+   ],
+   "enums": {}
+  },
+  "ProjetAmenagementCreate": {
+   "champs": [
+    "auteur_saisie",
+    "avancement_financier_pct",
+    "avancement_physique_pct",
+    "bureau_controle",
+    "capacite_additionnelle",
+    "code_projet",
+    "cout_previsionnel_xaf",
+    "cout_reel_xaf",
+    "date_debut_prevue",
+    "date_fin_prevue",
+    "date_notification_minfi",
+    "date_reelle_achevement",
+    "date_reelle_demarrage",
+    "date_verification",
+    "description",
+    "devise",
+    "eies_obligatoire",
+    "entreprise_attributaire",
+    "financement_prive_xaf",
+    "financement_public_xaf",
+    "justificatif_utilite",
+    "libelle",
+    "maitre_doeuvre",
+    "maitre_ouvrage",
+    "notes",
+    "origines_financement",
+    "port_id",
+    "priorite",
+    "reference_fiche_technique",
+    "risques",
+    "schema_id",
+    "source_reference",
+    "statut",
+    "superficie_impactee_ha",
+    "terminal_id",
+    "type_ouvrage"
+   ],
+   "enums": {
+    "type_ouvrage": [
+     "quai",
+     "poste_quai",
+     "dragage",
+     "digue",
+     "hors_emission",
+     "cheneau",
+     "aire_depot",
+     "magasin",
+     "terminal",
+     "zone_franche",
+     "route_interne",
+     "voie_ferree",
+     "raccordement",
+     "energie",
+     "adduction",
+     "telecom",
+     "isps",
+     "batiment",
+     "autre"
+    ],
+    "statut": [
+     "identifie",
+     "etudie",
+     "inscrit_pip",
+     "notifie_minfi",
+     "en_attribution",
+     "attribue",
+     "en_construction",
+     "receptionne",
+     "en_service",
+     "abandonne"
+    ]
+   }
+  },
+  "ProjetAmenagementOut": {
+   "champs": [
+    "auteur_saisie",
+    "avancement_financier_pct",
+    "avancement_physique_pct",
+    "bureau_controle",
+    "capacite_additionnelle",
+    "code_projet",
+    "cout_previsionnel_xaf",
+    "cout_reel_xaf",
+    "created_at",
+    "date_debut_prevue",
+    "date_fin_prevue",
+    "date_notification_minfi",
+    "date_reelle_achevement",
+    "date_reelle_demarrage",
+    "date_verification",
+    "description",
+    "devise",
+    "eies_obligatoire",
+    "entreprise_attributaire",
+    "est_actif",
+    "financement_prive_xaf",
+    "financement_public_xaf",
+    "id",
+    "justificatif_utilite",
+    "libelle",
+    "maitre_doeuvre",
+    "maitre_ouvrage",
+    "notes",
+    "origines_financement",
+    "port_id",
+    "priorite",
+    "reference_fiche_technique",
+    "risques",
+    "schema_id",
+    "source_reference",
+    "statut",
+    "superficie_impactee_ha",
+    "terminal_id",
+    "type_ouvrage"
+   ],
+   "enums": {}
+  },
+  "ProjetAmenagementUpdate": {
+   "champs": [
+    "avancement_financier_pct",
+    "avancement_physique_pct",
+    "bureau_controle",
+    "capacite_additionnelle",
+    "cout_previsionnel_xaf",
+    "cout_reel_xaf",
+    "date_debut_prevue",
+    "date_fin_prevue",
+    "date_notification_minfi",
+    "date_reelle_achevement",
+    "date_reelle_demarrage",
+    "date_verification",
+    "description",
+    "devise",
+    "eies_obligatoire",
+    "entreprise_attributaire",
+    "est_actif",
+    "financement_prive_xaf",
+    "financement_public_xaf",
+    "justificatif_utilite",
+    "libelle",
+    "maitre_doeuvre",
+    "maitre_ouvrage",
+    "notes",
+    "origines_financement",
+    "port_id",
+    "priorite",
+    "reference_fiche_technique",
+    "risques",
+    "schema_id",
+    "source_reference",
+    "statut",
+    "superficie_impactee_ha",
+    "terminal_id",
+    "type_ouvrage"
    ],
    "enums": {}
   },
@@ -9938,6 +11025,110 @@
    ],
    "enums": {}
   },
+  "SchemaDirecteurCreate": {
+   "champs": [
+    "auteur_saisie",
+    "autorite_elaboratrice",
+    "budget_alloue_travaux_xaf",
+    "code",
+    "cout_elaboration_xaf",
+    "date_approbation",
+    "date_depot",
+    "date_echeance_revision",
+    "date_verification",
+    "documents_sources",
+    "horizon_debut",
+    "horizon_fin",
+    "libelle",
+    "lignes_directrices",
+    "notes",
+    "perimetre",
+    "port_id",
+    "reference_approbatrice",
+    "source_reference",
+    "statut",
+    "superficie_totale_ha",
+    "surface_eau_ha",
+    "type_schema"
+   ],
+   "enums": {
+    "type_schema": [
+     "schema_directeur",
+     "plan_directeur",
+     "etude_prospective",
+     "plan_masse",
+     "pda",
+     "revision"
+    ],
+    "statut": [
+     "elaboration",
+     "consultation",
+     "depose",
+     "approuve",
+     "en_cours",
+     "revise",
+     "abroge"
+    ]
+   }
+  },
+  "SchemaDirecteurOut": {
+   "champs": [
+    "auteur_saisie",
+    "autorite_elaboratrice",
+    "budget_alloue_travaux_xaf",
+    "code",
+    "cout_elaboration_xaf",
+    "created_at",
+    "date_approbation",
+    "date_depot",
+    "date_echeance_revision",
+    "date_verification",
+    "documents_sources",
+    "est_actif",
+    "horizon_debut",
+    "horizon_fin",
+    "id",
+    "libelle",
+    "lignes_directrices",
+    "notes",
+    "perimetre",
+    "port_id",
+    "reference_approbatrice",
+    "source_reference",
+    "statut",
+    "superficie_totale_ha",
+    "surface_eau_ha",
+    "type_schema"
+   ],
+   "enums": {}
+  },
+  "SchemaDirecteurUpdate": {
+   "champs": [
+    "autorite_elaboratrice",
+    "budget_alloue_travaux_xaf",
+    "cout_elaboration_xaf",
+    "date_approbation",
+    "date_depot",
+    "date_echeance_revision",
+    "date_verification",
+    "documents_sources",
+    "est_actif",
+    "horizon_debut",
+    "horizon_fin",
+    "libelle",
+    "lignes_directrices",
+    "notes",
+    "perimetre",
+    "port_id",
+    "reference_approbatrice",
+    "source_reference",
+    "statut",
+    "superficie_totale_ha",
+    "surface_eau_ha",
+    "type_schema"
+   ],
+   "enums": {}
+  },
   "ScoringClientResponse": {
    "champs": [
     "client_id",
@@ -10118,6 +11309,26 @@
     "par_gravite",
     "periode"
    ],
+   "enums": {}
+  },
+  "StatutAutorisation": {
+   "champs": [],
+   "enums": {}
+  },
+  "StatutContrat": {
+   "champs": [],
+   "enums": {}
+  },
+  "StatutMarche": {
+   "champs": [],
+   "enums": {}
+  },
+  "StatutProjet": {
+   "champs": [],
+   "enums": {}
+  },
+  "StatutSchema": {
+   "champs": [],
    "enums": {}
   },
   "StockCreate": {
@@ -10425,23 +11636,10 @@
    ],
    "enums": {}
   },
-  "TAFIRECreate": {
+  "TAFIREGenererRequest": {
    "champs": [
-    "augmentation_besoin_fdr",
-    "augmentation_capital",
-    "capacit_autofinancement",
-    "cession_immobilisations",
     "date_tafire",
-    "distribution_dividendes",
-    "exercice_id",
-    "investissements_immobilisations",
-    "nouveaux_emprunts",
-    "remboursement_emprunts",
-    "total_emplois",
-    "total_ressources",
-    "tresorerie_debut",
-    "tresorerie_fin",
-    "variation_tresorerie"
+    "exercice_id"
    ],
    "enums": {}
   },
@@ -11033,6 +12231,42 @@
     "statut",
     "stock_id"
    ],
+   "enums": {}
+  },
+  "TypeAutorisationTravaux": {
+   "champs": [],
+   "enums": {}
+  },
+  "TypeContratExploitation": {
+   "champs": [],
+   "enums": {}
+  },
+  "TypeDragage": {
+   "champs": [],
+   "enums": {}
+  },
+  "TypeInfrastructure": {
+   "champs": [],
+   "enums": {}
+  },
+  "TypeMarche": {
+   "champs": [],
+   "enums": {}
+  },
+  "TypePort": {
+   "champs": [],
+   "enums": {}
+  },
+  "TypeProjet": {
+   "champs": [],
+   "enums": {}
+  },
+  "TypeSchema": {
+   "champs": [],
+   "enums": {}
+  },
+  "TypeTitreDomanial": {
+   "champs": [],
    "enums": {}
   },
   "UpgradePlanSchema": {
@@ -11874,9 +13108,6 @@
    "get": [],
    "post": []
   },
-  "/api/v1/parc/ocr-extract": {
-   "post": []
-  },
   "/api/v1/magasin/declarations/{declaration_id}/receptions-summary": {
    "get": []
   },
@@ -11884,9 +13115,6 @@
    "get": []
   },
   "/api/v1/magasin/predictions/reception-timing/{declaration_id}": {
-   "get": []
-  },
-  "/api/v1/comptabilite-avance/balances/verification": {
    "get": []
   },
   "/api/v1/transit-douane/guce/documents": {
@@ -12308,10 +13536,29 @@
     "PlanComptableOHADAResponse"
    ]
   },
-  "/api/v1/finance/ecritures": {
+  "/api/v1/finance/pieces": {
    "post": [
-    "EcritureComptableResponse"
+    "LignePieceResponse",
+    "PieceResponse"
+   ],
+   "get": [
+    "PieceResponse"
    ]
+  },
+  "/api/v1/finance/pieces/{piece_id}": {
+   "get": [
+    "LignePieceResponse",
+    "PieceResponse"
+   ]
+  },
+  "/api/v1/finance/pieces/{piece_id}/valider": {
+   "put": [
+    "LignePieceResponse",
+    "PieceResponse"
+   ]
+  },
+  "/api/v1/finance/ecritures": {
+   "post": []
   },
   "/api/v1/finance/ecritures/{ecriture_id}/valider": {
    "put": [
@@ -14657,6 +15904,9 @@
     "CompteRenduManutentionResponse"
    ]
   },
+  "/api/v1/transport-international/statistiques": {
+   "get": []
+  },
   "/api/v1/transport-international/ordres-transport": {
    "get": [
     "OrdreTransportResponse"
@@ -14699,6 +15949,9 @@
    ]
   },
   "/api/v1/transport-international/cmr": {
+   "get": [
+    "CMRResponse"
+   ],
    "post": [
     "CMRResponse"
    ]
@@ -14790,6 +16043,9 @@
    ]
   },
   "/api/v1/transport-international/corridors-cemac": {
+   "get": [
+    "CorridorCEMACResponse"
+   ],
    "post": [
     "CorridorCEMACResponse"
    ]
@@ -15477,6 +16733,9 @@
     "BalanceVerificationResponse"
    ]
   },
+  "/api/v1/comptabilite-avance/balances/verification": {
+   "get": []
+  },
   "/api/v1/comptabilite-avance/etats-financiers/bilan": {
    "post": [
     "BilanOHADADetailleResponse"
@@ -15517,6 +16776,12 @@
     "AnnexesOHDAResponse"
    ]
   },
+  "/api/v1/comptabilite-avance/cloture/etats": {
+   "get": [
+    "EtatsPeriodesResponse",
+    "PeriodeClosingItem"
+   ]
+  },
   "/api/v1/comptabilite-avance/cloture/mensuelle": {
    "post": [
     "ClotureMensuelleResponse"
@@ -15540,6 +16805,24 @@
   "/api/v1/comptabilite-avance/ecritures": {
    "get": [],
    "post": []
+  },
+  "/api/v1/comptabilite-avance/declarations-tva": {
+   "get": []
+  },
+  "/api/v1/comptabilite-avance/declarations-tva/valider": {
+   "post": []
+  },
+  "/api/v1/comptabilite-avance/declarations-is": {
+   "get": []
+  },
+  "/api/v1/comptabilite-avance/etats-financiers/dernier": {
+   "get": [
+    "AnnexesOHDAResponse",
+    "BilanOHADADetailleResponse",
+    "CompteResultatOHADADetailleResponse",
+    "DerniersEtatsFinanciersResponse",
+    "TAFIREResponse"
+   ]
   },
   "/api/v1/transport-avance-complete/dispatch/optimisation": {
    "post": [
@@ -16195,6 +17478,301 @@
   "/api/v1/fiscalite-cameroun/ohada/compte-resultat/{company_id}/{exercice}": {
    "get": []
   },
+  "/api/v1/amenagement-portuaire/nomenclatures": {
+   "get": []
+  },
+  "/api/v1/amenagement-portuaire/places": {
+   "get": [],
+   "post": []
+  },
+  "/api/v1/amenagement-portuaire/places/{ident}": {
+   "put": []
+  },
+  "/api/v1/amenagement-portuaire/schemas-directeurs": {
+   "get": [
+    "SchemaDirecteurOut"
+   ],
+   "post": [
+    "SchemaDirecteurOut",
+    "StatutSchema",
+    "TypeSchema"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/schemas-directeurs/{ident}": {
+   "get": [
+    "SchemaDirecteurOut",
+    "StatutSchema",
+    "TypeSchema"
+   ],
+   "put": [
+    "SchemaDirecteurOut",
+    "StatutSchema",
+    "TypeSchema"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/schemas-directeurs/{ident}/approbation": {
+   "post": [
+    "SchemaDirecteurOut",
+    "StatutSchema",
+    "TypeSchema"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/schemas-directeurs/{ident}/demande-visa-minmivt": {
+   "post": []
+  },
+  "/api/v1/amenagement-portuaire/projets": {
+   "get": [
+    "ProjetAmenagementOut"
+   ],
+   "post": [
+    "ProjetAmenagementOut",
+    "StatutProjet",
+    "TypeProjet"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/projets/{ident}": {
+   "get": [
+    "ProjetAmenagementOut",
+    "StatutProjet",
+    "TypeProjet"
+   ],
+   "put": [
+    "ProjetAmenagementOut",
+    "StatutProjet",
+    "TypeProjet"
+   ],
+   "delete": []
+  },
+  "/api/v1/amenagement-portuaire/projets/{ident}/avancement": {
+   "post": [
+    "ProjetAmenagementOut",
+    "StatutProjet",
+    "TypeProjet"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/programmation": {
+   "get": [
+    "DocumentProgrammationOut"
+   ],
+   "post": [
+    "DocumentProgrammationOut",
+    "OrigineFinancement"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/programmation/{ident}": {
+   "get": [
+    "DocumentProgrammationOut",
+    "OrigineFinancement"
+   ],
+   "put": [
+    "DocumentProgrammationOut",
+    "OrigineFinancement"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/programmation/{ident}/visa-controle-financier": {
+   "post": [
+    "DocumentProgrammationOut",
+    "OrigineFinancement"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/programmation/{ident}/visa-maturite": {
+   "post": [
+    "DocumentProgrammationOut",
+    "OrigineFinancement"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/programmation/{ident}/inscription-pip": {
+   "post": [
+    "DocumentProgrammationOut",
+    "OrigineFinancement"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/programmation/{ident}/notification-minfi": {
+   "post": []
+  },
+  "/api/v1/amenagement-portuaire/marches": {
+   "get": [
+    "MarcheAmenagementOut"
+   ],
+   "post": [
+    "CodeMarche",
+    "MarcheAmenagementOut",
+    "StatutMarche",
+    "TypeMarche"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/marches/{ident}": {
+   "get": [
+    "CodeMarche",
+    "MarcheAmenagementOut",
+    "StatutMarche",
+    "TypeMarche"
+   ],
+   "put": [
+    "CodeMarche",
+    "MarcheAmenagementOut",
+    "StatutMarche",
+    "TypeMarche"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/marches/{ident}/attribution": {
+   "post": [
+    "CodeMarche",
+    "MarcheAmenagementOut",
+    "StatutMarche",
+    "TypeMarche"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/marches/{ident}/reception": {
+   "post": [
+    "CodeMarche",
+    "MarcheAmenagementOut",
+    "StatutMarche",
+    "TypeMarche"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/marches/{ident}/soumission-colife": {
+   "post": []
+  },
+  "/api/v1/amenagement-portuaire/titres-domaniaux": {
+   "get": [
+    "AutorisationDomanialeOut"
+   ],
+   "post": [
+    "AutorisationDomanialeOut",
+    "TypeTitreDomanial"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/titres-domaniaux/{ident}": {
+   "get": [
+    "AutorisationDomanialeOut",
+    "TypeTitreDomanial"
+   ],
+   "put": [
+    "AutorisationDomanialeOut",
+    "TypeTitreDomanial"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/titres-domaniaux/{ident}/decision": {
+   "post": [
+    "AutorisationDomanialeOut",
+    "TypeTitreDomanial"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/concessions": {
+   "get": [
+    "ConcessionPortuaireOut"
+   ],
+   "post": [
+    "ConcessionPortuaireOut",
+    "StatutContrat",
+    "TypeContratExploitation"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/concessions/{ident}": {
+   "get": [
+    "ConcessionPortuaireOut",
+    "StatutContrat",
+    "TypeContratExploitation"
+   ],
+   "put": [
+    "ConcessionPortuaireOut",
+    "StatutContrat",
+    "TypeContratExploitation"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/concessions/{ident}/obligations": {
+   "get": []
+  },
+  "/api/v1/amenagement-portuaire/concessions/{ident}/reversaison": {
+   "post": []
+  },
+  "/api/v1/amenagement-portuaire/infrastructures": {
+   "get": [
+    "InfrastructurePortuaireOut"
+   ],
+   "post": [
+    "EtatInfrastructure",
+    "InfrastructurePortuaireOut",
+    "TypeInfrastructure"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/infrastructures/{ident}": {
+   "get": [
+    "EtatInfrastructure",
+    "InfrastructurePortuaireOut",
+    "TypeInfrastructure"
+   ],
+   "put": [
+    "EtatInfrastructure",
+    "InfrastructurePortuaireOut",
+    "TypeInfrastructure"
+   ],
+   "delete": []
+  },
+  "/api/v1/amenagement-portuaire/infrastructures/{ident}/inspection": {
+   "post": [
+    "EtatInfrastructure",
+    "InfrastructurePortuaireOut",
+    "TypeInfrastructure"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/dragage": {
+   "get": [
+    "DragageOut"
+   ],
+   "post": [
+    "DragageOut",
+    "TypeDragage"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/dragage/{ident}": {
+   "get": [
+    "DragageOut",
+    "TypeDragage"
+   ],
+   "put": [
+    "DragageOut",
+    "TypeDragage"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/dragage/{ident}/bathymetrie": {
+   "post": [
+    "DragageOut",
+    "TypeDragage"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/dragage/{ident}/autorisation-rejet": {
+   "post": []
+  },
+  "/api/v1/amenagement-portuaire/autorisations": {
+   "get": [
+    "AutorisationTravauxOut"
+   ],
+   "post": [
+    "AutorisationTravauxOut",
+    "StatutAutorisation",
+    "TypeAutorisationTravaux"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/autorisations/{ident}": {
+   "get": [
+    "AutorisationTravauxOut",
+    "StatutAutorisation",
+    "TypeAutorisationTravaux"
+   ],
+   "put": [
+    "AutorisationTravauxOut",
+    "StatutAutorisation",
+    "TypeAutorisationTravaux"
+   ]
+  },
+  "/api/v1/amenagement-portuaire/autorisations/{ident}/depot": {
+   "post": []
+  },
+  "/api/v1/amenagement-portuaire/synthese": {
+   "get": []
+  },
   "/api/v1/collaboration/rooms": {
    "get": [],
    "post": []
@@ -16648,10 +18226,29 @@
     "PlanComptableOHADAResponse"
    ]
   },
-  "/api/finance/ecritures": {
+  "/api/finance/pieces": {
    "post": [
-    "EcritureComptableResponse"
+    "LignePieceResponse",
+    "PieceResponse"
+   ],
+   "get": [
+    "PieceResponse"
    ]
+  },
+  "/api/finance/pieces/{piece_id}": {
+   "get": [
+    "LignePieceResponse",
+    "PieceResponse"
+   ]
+  },
+  "/api/finance/pieces/{piece_id}/valider": {
+   "put": [
+    "LignePieceResponse",
+    "PieceResponse"
+   ]
+  },
+  "/api/finance/ecritures": {
+   "post": []
   },
   "/api/finance/ecritures/{ecriture_id}/valider": {
    "put": [
