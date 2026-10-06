@@ -1,5 +1,5 @@
 import json, pathlib
-spec = json.loads(pathlib.Path("tests/artifacts/openapi.json").read_text(encoding="utf-8"))
+spec = json.loads(pathlib.Path(__file__).resolve().parent.joinpath("tests/artifacts/openapi.json").read_text(encoding="utf-8"))
 paths = set(spec["paths"])
 for base in ["/api/v1/saas/console", "/api/v1/company-admin", "/api/v1/departement", "/api/v1/amenagement-portuaire"]:
     n = sum(1 for p in paths if p.startswith(base + "/"))

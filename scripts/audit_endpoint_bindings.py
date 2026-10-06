@@ -234,7 +234,7 @@ def main():
             "routes_backend": len(chemins_bruts),
             "operations_backend": len(operations),
             "sites_controles": len(sites),
-            "sites_non_resolutionnes": len(non_resolution),
+            "sites_prefixe_inconnu": len(non_resolution),
             "sites_opaques": len(opaques),
             "liaisons_mortes": [
                 {"fichier": str(f), "ligne": l, "methode": m, "url": u}
