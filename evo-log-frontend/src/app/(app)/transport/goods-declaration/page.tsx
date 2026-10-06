@@ -45,6 +45,8 @@ interface DumDetail extends DumItem {
   centimes_additionnels?: number | null;
   timbre_usage?: number | null;
   notes?: string | null;
+  numero_agrement?: string | null;
+  numero_contribuable?: string | null;
   date_liquidation?: string | null;
   agent_douane?: string | null;
   validations: {
@@ -265,7 +267,7 @@ export default function GoodsDeclarationPage() {
                       {d.nomenclature ? ` (${d.nomenclature})` : ""}
                     </td>
                     <td className="px-4 py-3 text-center text-muted-foreground">{fmtNum(d.poids_brut)}</td>
-                    <td className="px-4 py-3 text-center">{d.valeur_caf != null ? `${fmtNum(d.valeur_caf)} ${d.devise ?? ""}` : "Non enregistrée"}</td>
+                    <td className="px-4 py-3 text-center">{d.valeur_caf != null ? fmtNum(d.valeur_caf) : "Non enregistrée"}</td>
                     <td className="px-4 py-3 text-center font-bold">{fmtNum(d.montant_total)}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${cfg.color}`}>

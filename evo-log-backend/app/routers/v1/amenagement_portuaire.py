@@ -678,14 +678,23 @@ def inscrire_pip(
     return _to_out(obj)
 
 
-@router.post("/programmation/{ident}/notification-minfi", summary="Notification MINFI (501)")
-def notifier_minfi(ident: int, user: User = Depends(require_perm("amenagement.programmation.approve"))):
-    """Aucune interconnexion avec le MINFI/MINEPAT n'est deployee ici (501)."""
-    not_implemented(
+@router.post("/programmation/{ident}/notification-minfi",
+             summary="Notification MINFI (connecteur GOV)")
+def notifier_minfi(
+    ident: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_perm("amenagement.programmation.approve")),
+):
+    """Remise officielle au MINFI via la gateway de teleprocedures configuree
+    (GOV_TELEPROC_*). 503 si non configuree. La piece doit exister en base."""
+    from app.utils.external import call_provider
+
+    _get_or_404(db, DocumentProgrammation, ident, "Dossier de programmation")
+    return call_provider(
+        "GOV_TELEPROC",
         "Notification teletransmise d'un engagement au MINFI",
-        "un canal officiel de teletransmission des dossiers de programmation "
-        "vers le Tresor public / MINFI (le depot reste papier ou email adresse "
-        "au greffe)",
+        path="/amenagement/programmation",
+        payload={"programmation_id": ident, "acte": "NOTIFICATION_MINFI"},
     )
 
 
@@ -804,14 +813,22 @@ def receptionner_marche(
     return _to_out(obj)
 
 
-@router.post("/marches/{ident}/soumission-colife", summary="Passage en COLIFE (501)")
-def soumettre_colife(ident: int, user: User = Depends(require_perm("amenagement.marche.approve"))):
-    """La COLIFE/CIP instruit sur son propre circuit (501, rien n'est simule)."""
-    not_implemented(
-        "Soumission dematerialisee d'un dossier d'amenagement a la COLIFE ou a la CIP",
-        "un acces au circuit officiel de controle des marches publics "
-        "(plateforme MINFI/ARMP) ; le module tient deja l'avis rendu quand il "
-        "est notifie",
+@router.post("/marches/{ident}/soumission-colife", summary="Passage en COLIFE (connecteur GOV)")
+def soumettre_colife(
+    ident: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_perm("amenagement.marche.approve")),
+):
+    """Depot officiel aupres de la COLIFE/CIP via la gateway de teleprocedures
+    configuree (GOV_TELEPROC_*). 503 si non configuree : rien n'est simule."""
+    from app.utils.external import call_provider
+
+    _get_or_404(db, MarcheAmenagement, ident, "Marche / contrat d'amenagement")
+    return call_provider(
+        "GOV_TELEPROC",
+        "Soumission dematerialisee d'un dossier d'amenagement a la COLIFE / CIP",
+        path="/amenagement/marches",
+        payload={"marche_id": ident, "acte": "SOUMISSION_COLIFE"},
     )
 
 
@@ -1014,15 +1031,33 @@ def suivi_obligations(
     }
 
 
-@router.post("/concessions/{ident}/reversaison", summary="Prononcer la reversaison (501)")
-def reverser_concession(ident: int, user: User = Depends(require_perm("amenagement.concession.approve"))):
-    """La reversaison est un acte juridique de l'autorite concedante (501)."""
-    not_implemented(
-        "Prononce de la reversaison du patrimoine concessionne",
-        "un acte officiel de l'autorite portuaire (proces-verbal de transfer "
-        "et evaluation des biens) ; le module tient deja la liste des biens "
-        "reversibles saisie au contrat",
-    )
+@router.post("/concessions/{ident}/reversaison", response_model=ConcessionPortuaireOut,
+             summary="Enregistrer la reversaison prononcee par l'autorite concedante")
+def reverser_concession(
+    ident: int,
+    reference_acte: str = Query(..., min_length=2,
+                                description="Reference du PV d'evaluation / arrete de reversaison notifie"),
+    date_acte: Optional[date] = Query(None, description="Date de l'acte officiel"),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_perm("amenagement.concession.approve")),
+):
+    """La reversaison est prononcee par l'autorite concedante, pas par le
+    logiciel : cette route enregistre l'acte OFFICIEL notifie (reference +
+    date obligatoires) et bascule le contrat en « transfere ». Rien n'est
+    decide a la place de l'autorite ; sans reference d'acte, 422."""
+    obj = _get_or_404(db, ConcessionPortuaire, ident, "Contrat d'exploitation")
+    if obj.statut == StatutContrat.TRANSFERE:
+        raise HTTPException(
+            status_code=409,
+            detail="Contrat deja enregistre comme reverse (transfere).",
+        )
+    obj.statut = StatutContrat.TRANSFERE
+    obj.source_reference = reference_acte[:200]
+    obj.date_verification = date_acte or date.today()
+    obj.auteur_saisie = getattr(user, "username", None) or obj.auteur_saisie
+    db.commit()
+    db.refresh(obj)
+    return _to_out(obj)
 
 
 # ─── 7. Inventaire des infrastructures ───────────────────────────────────────
@@ -1211,14 +1246,23 @@ def consigner_bathymetrie(
     return _to_out(obj)
 
 
-@router.post("/dragage/{ident}/autorisation-rejet", summary="Demande d'exutoire (501)")
-def demande_exutoire(ident: int, user: User = Depends(require_perm("amenagement.dragage.approve"))):
-    """L'autorisation de rejet releve du MINEPPT (501, aucune decision simulee)."""
-    not_implemented(
+@router.post("/dragage/{ident}/autorisation-rejet", summary="Demande d'exutoire (connecteur GOV)")
+def demande_exutoire(
+    ident: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_perm("amenagement.dragage.approve")),
+):
+    """Demande officielle d'agrement d'exutoire aupres du MINEPPT via la
+    gateway de teleprocedures configuree (GOV_TELEPROC_*). 503 si non
+    configuree : aucune decision n'est simulee."""
+    from app.utils.external import call_provider
+
+    _get_or_404(db, Dragage, ident, "Operation de dragage")
+    return call_provider(
+        "GOV_TELEPROC",
         "Demande dematerialisee d'agrement d'un exutoire pour sediments de dragage",
-        "un canal officiel aupres du MINEPPT / de l'autorite portuaire pour "
-        "l'agrement des sites d'immersion ; le module conserve deja la "
-        "reference de l'autorisation quand elle est notifiee"
+        path="/amenagement/dragage",
+        payload={"dragage_id": ident, "acte": "DEMANDE_EXUTOIRE_MINEPPT"},
     )
 
 
