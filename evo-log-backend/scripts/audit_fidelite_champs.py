@@ -36,15 +36,26 @@ BACKEND = RACINE
 FRONT = RACINE.parent / "evo-log-frontend" / "src"
 CONTRAT = BACKEND / "_openapi_contrat.json"
 
-# `apiClient.get('/api/x')`  objet client + verbe + literal de chemin.
+# `apiClient.get('/api/x')`  objet client + verbe + litteral de chemin, y compris
+# compose depuis une constante de prefix (`` `${AMGT}/places` ``). Sans cette
+# seconde forme, les namespaces bats sur prefix (amenagement, company-admin,
+# departement, saas/console, comptabilite-avance) etaient ENTIEREMENT hors de
+# verification des champs : 106 sites d'appel, et l'outil affichait « clean ».
 APPEL_DIRECT = re.compile(
-    r"\b(apiClient|[\w$]*API)\.(get|post|put|patch|delete)\(\s*[`'\"](/[^`'\"]*)[`'\"]"
+    r"\b(apiClient|[\w$]*API)\.(get|post|put|patch|delete)\(\s*[`'\"]"
+    r"(/[^`'\"]*|\$\{[^}]+\}[^`'\"]*)[`'\"]"
 )
+# Declaration de prefix dans le code client : `const AMGT = '/api/v1/amenagement-portuaire'`.
+DECLARATION_PREFIXE = re.compile(
+    r"(?:export\s+)?const\s+([A-Za-z_$][\w$]*)\s*=\s*[`'\"](/api/[^`'\"]*)[`'\"]"
+)
+# Interpolation JS a convertir en joker de segment.
+INTERPOLATION = re.compile(r"\$\{[^}]*\}")
 # Appel d'une methode centralisee : `transportAPI.getMissions()`.
 APPEL_METODE = re.compile(r"\b([\w$]*API)\.(\w+)\s*\(")
 # Dans api-client.ts : `getMissions: (p) => apiClient.get('/api/transport/missions'`
 METHODE_CLIENT = re.compile(
-    r"^\s*(\w+)\s*:\s*(?:\([^)]*\)|[\w$]+)\s*=>\s*[\w.]*\.(get|post|put|patch|delete)\(\s*[`'\"](/[^`'\"]*)[`'\"]",
+    r"^\s*(\w+)\s*:\s*(?:\([^)]*\)|[\w$]+)\s*=>\s*[\w.]*\.(get|post|put|patch|delete)\(\s*[`'\"](/[^`'\"]*|\$\{[^}]+\}[^`'\"]*)[`'\"]",
     re.M,
 )
 # `const [camions, setCamions] = useState(...)`
