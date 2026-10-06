@@ -93,6 +93,11 @@ def retirer_commentaires(texte):
             for j in range(i, fin):
                 out[j] = " "
             i = fin
+        else:
+            # Branche indispensable : sans elle, tout caractere courant relance la
+            # boucle sur lui-meme et l'audit ne termine jamais (bug constate : le
+            # scan marqua au passe des le premier fichier, sans la moindre sortie).
+            i += 1
     return "".join(out)
 
 
