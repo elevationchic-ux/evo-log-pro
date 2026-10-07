@@ -413,7 +413,7 @@ def main():
         dash_dir = os.path.join(app_dir, "dashboard")
         os.makedirs(dash_dir, exist_ok=True)
         with open(os.path.join(dash_dir, "page.tsx"), "w", encoding="utf-8", newline="\n") as f:
-            f.write(DASH_TEMPLATE.format(module_dir=module["dir_name"], perm=module["perm_module"], title=module["nav_title"]))
+            f.write(render_dash(module))
         print(f"[OK] dashboard    {dash_dir}")
 
     # 3) fragment de navigation (ecrit dans un fichier a part pour inspection)
@@ -427,32 +427,36 @@ def main():
 
 
 DASH_TEMPLATE = """'use client';
-// Dashboard module {title}
-// Presente les KPI synthetiques et aiguille vers chaque registre.
+// Dashboard module __TITLE__
 import Link from 'next/link';
-import { Card } from '@/components/ui/Card';
 
-const REGISTRES = [
-  ['sections', 'Registres du module'],
-];
+const MODULE_DIR = '__MODULE_DIR__';
+const PERM = '__PERM__';
 
-export default function PageDashboard() {{
+export default function PageDashboard() {
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">{title}</h1>
+      <h1 className="text-2xl font-bold">__TITLE__</h1>
       <p className="text-sm text-gray-500">Centre de pilotage — selectionnez un registre ci-dessous.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <div className="p-4">
-            <div className="text-sm text-gray-500">Module</div>
-            <div className="text-lg font-semibold">{perm}</div>
-          </div>
-        </Card>
+        <div className="rounded-xl border bg-white dark:bg-slate-900 p-4 shadow-sm">
+          <div className="text-sm text-gray-500">Module</div>
+          <div className="text-lg font-semibold">{PERM}</div>
+        </div>
       </div>
     </div>
   );
-}}
+}
 """
+
+
+def render_dash(module):
+    return (
+        DASH_TEMPLATE
+        .replace("__TITLE__", module["nav_title"])
+        .replace("__MODULE_DIR__", module["dir_name"])
+        .replace("__PERM__", module["perm_module"])
+    )
 
 if __name__ == "__main__":
     main()
