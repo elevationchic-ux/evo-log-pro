@@ -582,7 +582,7 @@ def gen_frontend_registres(m: dict) -> str:
                 nomkey = f["name"]
                 champs_lines.append(f'    sel("{f["name"]}", "{label_fr}", "{label_en}", "{nomkey}"),')
 
-        lines.append(f'export const {varname}: ConfigRegistre = {')
+        lines.append(f'export const {varname}: ConfigRegistre = ' + '{')
         lines.append(f'  permModule: "{perm}",')
         lines.append(f'  permSousModule: "{ent["perm"]}",')
         lines.append(f'  tcode: "registre-{ent["slug"]}",')
