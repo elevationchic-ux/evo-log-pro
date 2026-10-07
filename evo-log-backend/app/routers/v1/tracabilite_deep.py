@@ -1,5 +1,6 @@
 """Routeur CRUD genere pour tracabilite-bout-en-bout (expansion wave 6)."""
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import Optional, List
 
@@ -61,17 +62,36 @@ def _get_or_404(db: Session, model, ident: int, label: str):
     return row
 
 
-def _check_unique(db: Session, model, field: str, value, label: str, company_id: int, exclude_id=None):
-    if value is None:
+def _check_unique(db: Session, model, fields, data: dict, label: str, company_id: int, exclude_id=None):
+    if not fields:
         return
-    q = db.query(model).filter(getattr(model, field) == value, model.company_id == company_id)
+    if any(data.get(f) is None for f in fields):
+        return
+    q = db.query(model).filter(model.company_id == company_id)
+    for f in fields:
+        q = q.filter(getattr(model, f) == data.get(f))
     if exclude_id is not None:
         q = q.filter(model.id != exclude_id)
     if q.first():
+        human = ' / '.join(str(data.get(f)) for f in fields)
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"{label} {value} existe deja dans votre organisation.",
+            detail=f"{label} '{human}' existe deja dans votre organisation.",
         )
+
+
+def _commit(db: Session, obj, label: str):
+    db.add(obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        msg = str(getattr(exc, 'orig', exc))
+        if 'FOREIGN KEY' in msg.upper() or 'foreign key' in msg:
+            raise HTTPException(422, detail=f"References invalides : un enregistrement lie ({label}) n'existe pas ou appartient a une autre organisation.")
+        raise HTTPException(409, detail=f"Conflit d'integrite lors de l'enregistrement de {label}.")
+    db.refresh(obj)
+    return obj
 
 
 def _scoped_list(db, model, company_id, filters=None):
@@ -113,11 +133,11 @@ def nomenclatures(user: User = Depends(require_perm("tracabilite.nomenclature.re
 # --- Evenement tracabilite ---------------------------------------------------------
 
 @router.get("/events", response_model=List[TraceabilityEventOut])
-def list_events(statut: Optional[str] = None, db: Session = Depends(get_db),
+def list_events(db: Session = Depends(get_db),
     user: User = Depends(require_perm("tracabilite.events.read")),
 ):
     cid = _company_id(user)
-    return _scoped_list(db, TraceabilityEvent, cid, {'statut': statut})
+    return _scoped_list(db, TraceabilityEvent, cid)
 
 
 @router.post("/events", response_model=TraceabilityEventOut, status_code=201)
@@ -128,13 +148,10 @@ def create_events(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, TraceabilityEvent, "event_uid", data.get("event_uid"), "event_uid", cid)
+    _check_unique(db, TraceabilityEvent, ['event_uid'], data, "Evenement tracabilite", cid)
     obj = TraceabilityEvent(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Evenement tracabilite")
 
 
 @router.put("/events/{ident}", response_model=TraceabilityEventOut)
@@ -148,8 +165,15 @@ def update_events(
     obj = _get_or_404(db, TraceabilityEvent, ident, "Evenement tracabilite")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['event_uid']}
+    _check_unique(db, TraceabilityEvent, ['event_uid'], _chk, "Evenement tracabilite", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -188,13 +212,10 @@ def create_custody_transfers(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, ChainOfCustodyTransfer, "reference_transfert", data.get("reference_transfert"), "reference_transfert", cid)
+    _check_unique(db, ChainOfCustodyTransfer, ['reference_transfert'], data, "Chaine de custody", cid)
     obj = ChainOfCustodyTransfer(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Chaine de custody")
 
 
 @router.put("/custody-transfers/{ident}", response_model=ChainOfCustodyTransferOut)
@@ -208,8 +229,15 @@ def update_custody_transfers(
     obj = _get_or_404(db, ChainOfCustodyTransfer, ident, "Chaine de custody")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['reference_transfert']}
+    _check_unique(db, ChainOfCustodyTransfer, ['reference_transfert'], _chk, "Chaine de custody", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -233,11 +261,11 @@ def delete_custody_transfers(
 # --- Genealogie lot ---------------------------------------------------------
 
 @router.get("/batch-genealogy", response_model=List[BatchGenealogyOut])
-def list_batch_genealogy(statut: Optional[str] = None, db: Session = Depends(get_db),
+def list_batch_genealogy(db: Session = Depends(get_db),
     user: User = Depends(require_perm("tracabilite.batch_genealogy.read")),
 ):
     cid = _company_id(user)
-    return _scoped_list(db, BatchGenealogy, cid, {'statut': statut})
+    return _scoped_list(db, BatchGenealogy, cid)
 
 
 @router.post("/batch-genealogy", response_model=BatchGenealogyOut, status_code=201)
@@ -248,13 +276,10 @@ def create_batch_genealogy(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, BatchGenealogy, "child_lot", data.get("child_lot"), "child_lot", cid)
+    _check_unique(db, BatchGenealogy, ['child_lot', 'parent_lot'], data, "Genealogie lot", cid)
     obj = BatchGenealogy(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Genealogie lot")
 
 
 @router.put("/batch-genealogy/{ident}", response_model=BatchGenealogyOut)
@@ -268,8 +293,15 @@ def update_batch_genealogy(
     obj = _get_or_404(db, BatchGenealogy, ident, "Genealogie lot")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['child_lot', 'parent_lot']}
+    _check_unique(db, BatchGenealogy, ['child_lot', 'parent_lot'], _chk, "Genealogie lot", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -293,11 +325,11 @@ def delete_batch_genealogy(
 # --- Genealogie numero serial ---------------------------------------------------------
 
 @router.get("/serial-genealogy", response_model=List[SerialGenealogyOut])
-def list_serial_genealogy(statut: Optional[str] = None, db: Session = Depends(get_db),
+def list_serial_genealogy(db: Session = Depends(get_db),
     user: User = Depends(require_perm("tracabilite.serial_genealogy.read")),
 ):
     cid = _company_id(user)
-    return _scoped_list(db, SerialGenealogy, cid, {'statut': statut})
+    return _scoped_list(db, SerialGenealogy, cid)
 
 
 @router.post("/serial-genealogy", response_model=SerialGenealogyOut, status_code=201)
@@ -308,13 +340,10 @@ def create_serial_genealogy(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, SerialGenealogy, "child_serial", data.get("child_serial"), "child_serial", cid)
+    _check_unique(db, SerialGenealogy, ['child_serial', 'parent_serial'], data, "Genealogie numero serial", cid)
     obj = SerialGenealogy(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Genealogie numero serial")
 
 
 @router.put("/serial-genealogy/{ident}", response_model=SerialGenealogyOut)
@@ -328,8 +357,15 @@ def update_serial_genealogy(
     obj = _get_or_404(db, SerialGenealogy, ident, "Genealogie numero serial")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['child_serial', 'parent_serial']}
+    _check_unique(db, SerialGenealogy, ['child_serial', 'parent_serial'], _chk, "Genealogie numero serial", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -368,13 +404,10 @@ def create_document_hashes(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, DocumentHash, "document_ref", data.get("document_ref"), "document_ref", cid)
+    _check_unique(db, DocumentHash, ['document_ref', 'version'], data, "Empreinte document", cid)
     obj = DocumentHash(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Empreinte document")
 
 
 @router.put("/document-hashes/{ident}", response_model=DocumentHashOut)
@@ -388,8 +421,15 @@ def update_document_hashes(
     obj = _get_or_404(db, DocumentHash, ident, "Empreinte document")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['document_ref', 'version']}
+    _check_unique(db, DocumentHash, ['document_ref', 'version'], _chk, "Empreinte document", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -430,10 +470,7 @@ def create_geolocations(
     data = payload.model_dump(exclude_unset=True)
     obj = GeolocationTrace(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Trace geolocalisation")
 
 
 @router.put("/geolocations/{ident}", response_model=GeolocationTraceOut)
@@ -447,8 +484,13 @@ def update_geolocations(
     obj = _get_or_404(db, GeolocationTrace, ident, "Trace geolocalisation")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -489,10 +531,7 @@ def create_cold_chain(
     data = payload.model_dump(exclude_unset=True)
     obj = ColdChainTrace(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Chaine du froid")
 
 
 @router.put("/cold-chain/{ident}", response_model=ColdChainTraceOut)
@@ -506,8 +545,13 @@ def update_cold_chain(
     obj = _get_or_404(db, ColdChainTrace, ident, "Chaine du froid")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -546,13 +590,10 @@ def create_incidents(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, IncidentChainOfCommand, "reference_incident", data.get("reference_incident"), "reference_incident", cid)
+    _check_unique(db, IncidentChainOfCommand, ['reference_incident'], data, "Post commandement incident", cid)
     obj = IncidentChainOfCommand(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Post commandement incident")
 
 
 @router.put("/incidents/{ident}", response_model=IncidentChainOfCommandOut)
@@ -566,8 +607,15 @@ def update_incidents(
     obj = _get_or_404(db, IncidentChainOfCommand, ident, "Post commandement incident")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['reference_incident']}
+    _check_unique(db, IncidentChainOfCommand, ['reference_incident'], _chk, "Post commandement incident", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -606,13 +654,10 @@ def create_regulatory_exports(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, RegulatoryTraceExport, "numero_expedition", data.get("numero_expedition"), "numero_expedition", cid)
+    _check_unique(db, RegulatoryTraceExport, ['numero_expedition'], data, "Export reglementaire", cid)
     obj = RegulatoryTraceExport(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Export reglementaire")
 
 
 @router.put("/regulatory-exports/{ident}", response_model=RegulatoryTraceExportOut)
@@ -626,8 +671,15 @@ def update_regulatory_exports(
     obj = _get_or_404(db, RegulatoryTraceExport, ident, "Export reglementaire")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['numero_expedition']}
+    _check_unique(db, RegulatoryTraceExport, ['numero_expedition'], _chk, "Export reglementaire", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -668,10 +720,7 @@ def create_audit_logs(
     data = payload.model_dump(exclude_unset=True)
     obj = ImmutableAuditLog(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Journal audit inalterable")
 
 
 @router.put("/audit-logs/{ident}", response_model=ImmutableAuditLogOut)
@@ -685,8 +734,13 @@ def update_audit_logs(
     obj = _get_or_404(db, ImmutableAuditLog, ident, "Journal audit inalterable")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -725,13 +779,10 @@ def create_timestamps(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, TimestampAuthority, "token_tsa", data.get("token_tsa"), "token_tsa", cid)
+    _check_unique(db, TimestampAuthority, ['token_tsa'], data, "Horodatage qualifie", cid)
     obj = TimestampAuthority(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Horodatage qualifie")
 
 
 @router.put("/timestamps/{ident}", response_model=TimestampAuthorityOut)
@@ -745,8 +796,15 @@ def update_timestamps(
     obj = _get_or_404(db, TimestampAuthority, ident, "Horodatage qualifie")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['token_tsa']}
+    _check_unique(db, TimestampAuthority, ['token_tsa'], _chk, "Horodatage qualifie", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -785,13 +843,10 @@ def create_signatures(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, WitnessSignature, "reference_signature", data.get("reference_signature"), "reference_signature", cid)
+    _check_unique(db, WitnessSignature, ['reference_signature'], data, "Signature / temoin", cid)
     obj = WitnessSignature(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Signature / temoin")
 
 
 @router.put("/signatures/{ident}", response_model=WitnessSignatureOut)
@@ -805,8 +860,15 @@ def update_signatures(
     obj = _get_or_404(db, WitnessSignature, ident, "Signature / temoin")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['reference_signature']}
+    _check_unique(db, WitnessSignature, ['reference_signature'], _chk, "Signature / temoin", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -845,13 +907,10 @@ def create_merkle_proofs(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, IntegrityMerkleProof, "periode", data.get("periode"), "periode", cid)
+    _check_unique(db, IntegrityMerkleProof, ['periode', 'racine_type'], data, "Preuve Merkle", cid)
     obj = IntegrityMerkleProof(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Preuve Merkle")
 
 
 @router.put("/merkle-proofs/{ident}", response_model=IntegrityMerkleProofOut)
@@ -865,8 +924,15 @@ def update_merkle_proofs(
     obj = _get_or_404(db, IntegrityMerkleProof, ident, "Preuve Merkle")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['periode', 'racine_type']}
+    _check_unique(db, IntegrityMerkleProof, ['periode', 'racine_type'], _chk, "Preuve Merkle", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -905,13 +971,10 @@ def create_seals(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, ContainerSeal, "numero_sceau", data.get("numero_sceau"), "numero_sceau", cid)
+    _check_unique(db, ContainerSeal, ['numero_sceau'], data, "Sceau conteneur ISO 17712", cid)
     obj = ContainerSeal(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Sceau conteneur ISO 17712")
 
 
 @router.put("/seals/{ident}", response_model=ContainerSealOut)
@@ -925,8 +988,15 @@ def update_seals(
     obj = _get_or_404(db, ContainerSeal, ident, "Sceau conteneur ISO 17712")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['numero_sceau']}
+    _check_unique(db, ContainerSeal, ['numero_sceau'], _chk, "Sceau conteneur ISO 17712", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -965,13 +1035,10 @@ def create_cargo_handoffs(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, CargoHandoff, "reference_handoff", data.get("reference_handoff"), "reference_handoff", cid)
+    _check_unique(db, CargoHandoff, ['reference_handoff'], data, "Transfert cargo multimodal", cid)
     obj = CargoHandoff(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Transfert cargo multimodal")
 
 
 @router.put("/cargo-handoffs/{ident}", response_model=CargoHandoffOut)
@@ -985,8 +1052,15 @@ def update_cargo_handoffs(
     obj = _get_or_404(db, CargoHandoff, ident, "Transfert cargo multimodal")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['reference_handoff']}
+    _check_unique(db, CargoHandoff, ['reference_handoff'], _chk, "Transfert cargo multimodal", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -1027,10 +1101,7 @@ def create_access_logs(
     data = payload.model_dump(exclude_unset=True)
     obj = AccessSecurityLog(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Journal securite acces")
 
 
 @router.put("/access-logs/{ident}", response_model=AccessSecurityLogOut)
@@ -1044,8 +1115,13 @@ def update_access_logs(
     obj = _get_or_404(db, AccessSecurityLog, ident, "Journal securite acces")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -1084,13 +1160,10 @@ def create_consents(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, ConsentGrant, "reference_consentement", data.get("reference_consentement"), "reference_consentement", cid)
+    _check_unique(db, ConsentGrant, ['reference_consentement'], data, "Consentement RGPD / loi Cameroun", cid)
     obj = ConsentGrant(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Consentement RGPD / loi Cameroun")
 
 
 @router.put("/consents/{ident}", response_model=ConsentGrantOut)
@@ -1104,8 +1177,15 @@ def update_consents(
     obj = _get_or_404(db, ConsentGrant, ident, "Consentement RGPD / loi Cameroun")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['reference_consentement']}
+    _check_unique(db, ConsentGrant, ['reference_consentement'], _chk, "Consentement RGPD / loi Cameroun", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -1144,13 +1224,10 @@ def create_anti_tampering(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, AntiTamperingEvent, "reference_alerte", data.get("reference_alerte"), "reference_alerte", cid)
+    _check_unique(db, AntiTamperingEvent, ['reference_alerte'], data, "Evenement anti-falsification", cid)
     obj = AntiTamperingEvent(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Evenement anti-falsification")
 
 
 @router.put("/anti-tampering/{ident}", response_model=AntiTamperingEventOut)
@@ -1164,8 +1241,15 @@ def update_anti_tampering(
     obj = _get_or_404(db, AntiTamperingEvent, ident, "Evenement anti-falsification")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['reference_alerte']}
+    _check_unique(db, AntiTamperingEvent, ['reference_alerte'], _chk, "Evenement anti-falsification", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 
@@ -1204,13 +1288,10 @@ def create_retention_policies(
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, RetentionPolicy, "code_politique", data.get("code_politique"), "code_politique", cid)
+    _check_unique(db, RetentionPolicy, ['code_politique'], data, "Politique conservation", cid)
     obj = RetentionPolicy(company_id=cid)
     _apply(data, obj)
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    return _commit(db, obj, "Politique conservation")
 
 
 @router.put("/retention-policies/{ident}", response_model=RetentionPolicyOut)
@@ -1224,8 +1305,15 @@ def update_retention_policies(
     obj = _get_or_404(db, RetentionPolicy, ident, "Politique conservation")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
-    _apply(payload.model_dump(exclude_unset=True), obj)
-    db.commit()
+    upd = payload.model_dump(exclude_unset=True)
+    _chk = {f: upd.get(f, getattr(obj, f)) for f in ['code_politique']}
+    _check_unique(db, RetentionPolicy, ['code_politique'], _chk, "Politique conservation", cid, exclude_id=ident)
+    _apply(upd, obj)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(422, detail="Reference invalide ou conflit d'integrite.")
     db.refresh(obj)
     return obj
 

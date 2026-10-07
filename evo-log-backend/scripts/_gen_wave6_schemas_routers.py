@@ -348,8 +348,6 @@ def gen_router_file(slug: str, perm_module: str, tag_label: str, models, paths_m
         lines.append('        raise HTTPException(403, "Acces refuse.")')
         lines.append("    upd = payload.model_dump(exclude_unset=True)")
         if unique_fields:
-            _ufrepr = unique_fields!r
-            lines.append(f"    _chk = {{{'!r'.replace('!r', repr(unique_fields))}: [upd.get(f, getattr(obj, f)) for f in {'!r'.replace('!r', repr(unique_fields))}]}}")
             lines.append(f"    _chk = {{f: upd.get(f, getattr(obj, f)) for f in {unique_fields!r}}}")
             lines.append(f'    _check_unique(db, {n}, {unique_fields!r}, _chk, "{label}", cid, exclude_id=ident)')
         lines.append("    _apply(upd, obj)")
