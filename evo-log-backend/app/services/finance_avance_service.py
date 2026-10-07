@@ -263,7 +263,7 @@ class GestionDettesService:
         
         # Dettes à la fin de la période
         dettes = db.query(func.sum(Facture.solde_restant)).filter(
-            Facture.type_factire == "achat"
+            Facture.type_facture == "achat"
         ).scalar() or 0
         
         # Achats de la période
