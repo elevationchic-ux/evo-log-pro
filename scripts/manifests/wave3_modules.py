@@ -1121,6 +1121,7 @@ MODULES["dashboard"] = dict(
 MODULES["amenagement_extra"] = dict(
     module_key="amenagement_extra", module_slug="amenagement-portuaire", module_path="amenagement-portuaire",
     perm_module="amenagement", revision="061", down_revision="060_dashboard_deep",
+    registre_filename="registres_expansion",
     entities=[
         E("construction-tracking", "construction_progress", "ConstructionProgress", "construction-progresses", "construction_tracking",
           "Suivi avancement physique travaux", "Physical construction progress",
