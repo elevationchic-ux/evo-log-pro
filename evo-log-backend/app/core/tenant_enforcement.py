@@ -42,7 +42,17 @@ def _tenant_scoped_classes() -> list:
     global _tenant_classes
     if _tenant_classes is None:
         from app.core.database import Base
-        import app.models  # noqa: F401 - ensures full mapper registration
+        # `import app.models` ne couvre PAS tous les modeles : plusieurs entites
+        # portant company_id (Navire, Escale, BonCommande, BonReception,
+        # OrdreTransport, DeclarationFiscale, ContratFiscal,
+        # RetenueSourceCameroun) ne sont enregistrees que par les routers, donc
+        # uniquement quand app.main est importe (cf. conftest._ensure_tables, qui
+        # fait pareil pour la meme raison). Cette fonction etant pigee paresseu-
+        # sement a la premiere requete (apres demarrage complet en prod ; apres
+        # `import app.main` explicite dans les tests), on force l'import complet
+        # pour que la liste figee ici soit TOUJOURS exhaustive. Sinon une entite
+        # vue trop tard resterait NON filtree par tenant -> fuite inter-company.
+        import app.main  # noqa: F401 - enregistre la totalite des mappers
         classes = []
         for mapper in Base.registry.mappers:
             # mapper.columns inclut les colonnes HERITEES (herite de table Jointe
