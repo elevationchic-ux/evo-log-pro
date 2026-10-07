@@ -866,16 +866,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       
       
       
-      {
-        label: "Enregistrement operateur economique",
-        path: "/transit-douane/trader-registration",
-        icon: (LUCIDE as any)["Contact"],
-        badge: "Expansion",
-        tcode: "registre-trader-registration",
-        description: "Numeros operateur EORI local / agrements OEA.",
-        businessProcess: "Registre genere (expansion)",
-        requiredRoles: ["transit.trader_registration.read"],
-      },
+
       
     ]
   },
@@ -1296,16 +1287,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       
       
       
-      {
-        label: "Stock en consignation",
-        path: "/magasin-stock/consignment-stock",
-        icon: (LUCIDE as any)["DollarSign"],
-        badge: "Expansion",
-        tcode: "registre-consignment-stock",
-        description: "Stock detenu pour un tiers.",
-        businessProcess: "Registre genere (expansion)",
-        requiredRoles: ["magasin.consignment_stock.read"],
-      },
+
       
       
     ]
@@ -1523,16 +1505,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       
       
       
-      {
-        label: "Comptes de tresorerie",
-        path: "/comptabilite-ohada/treasury-accounts",
-        icon: (LUCIDE as any)["Lock"],
-        badge: "Expansion",
-        tcode: "registre-treasury-accounts",
-        description: "Comptes banque / caisse / regies.",
-        businessProcess: "Registre genere (expansion)",
-        requiredRoles: ["compta.treasury_accounts.read"],
-      },
+
       
     ]
   },
@@ -1740,16 +1713,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         requiredRoles: ["finance.treasury_alerts.read"],
       },
           
-      {
-        label: "Facilites de caisse et credits",
-        path: "/finance-ohada/credit-facilities",
-        icon: (LUCIDE as any)["DollarSign"],
-        badge: "Expansion",
-        tcode: "registre-credit-facilities",
-        description: "Facilites bancaires autorisees.",
-        businessProcess: "Registre genere (expansion)",
-        requiredRoles: ["finance.credit_facility.read"],
-      },
+
       
       
       
@@ -1935,16 +1899,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       
       
       
-      {
-        label: "Suivi immatriculation",
-        path: "/parc-vehicules/registration-tracking",
-        icon: (LUCIDE as any)["Contact"],
-        badge: "Expansion",
-        tcode: "registre-registration-tracking",
-        description: "Documents officiels d'immatriculation.",
-        businessProcess: "Registre genere (expansion)",
-        requiredRoles: ["parc.registration_tracking.read"],
-      },
+
       
       
       
@@ -3062,16 +3017,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       
       
       
-      {
-        label: "Reseau partenaires technologiques",
-        path: "/superadmin-cadc/partner-network",
-        icon: (LUCIDE as any)["Users"],
-        badge: "Expansion",
-        tcode: "registre-partner-network",
-        description: "Partenaires editeurs / integrateurs.",
-        businessProcess: "Registre genere (expansion)",
-        requiredRoles: ["superadmin.partner_network.read"],
-      },
+
       
       
       
