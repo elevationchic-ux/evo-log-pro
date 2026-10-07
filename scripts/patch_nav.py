@@ -25,6 +25,8 @@ def load(path):
 MODULES = {}
 MODULES.update(load(HERE / "manifests" / "all_modules.py"))
 MODULES.update(load(HERE / "manifests" / "wave3_modules.py"))
+MODULES.update(load(HERE / "manifests" / "wave4_transports.py"))
+MODULES.update(load(HERE / "manifests" / "wave4_logistique.py"))
 
 # Also add port-ops + transit
 PORT_OPS_SLUG = "port-operations"
