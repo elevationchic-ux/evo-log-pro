@@ -36,6 +36,16 @@ def _build_engine():
             engine = create_engine(
                 DATABASE_URL,
                 connect_args={"check_same_thread": False, "timeout": 30},
+                # Pool calibre pour un server complet (~500 routes) : le defaut
+                # 5+10 sature des qu'une dizaine d'ecrans du front se chargent
+                # en parallele -> requetes bloquees 30 s dans la file d'attente,
+                # le front affiche « serveur injoignable » alors que le backend
+                # est vivant. WAL autorise de nombreux lecteurs concurrents.
+                poolclass=QueuePool,
+                pool_size=20,
+                max_overflow=20,
+                pool_timeout=60,
+                pool_recycle=1800,
                 echo=settings.DEBUG,
             )
 
