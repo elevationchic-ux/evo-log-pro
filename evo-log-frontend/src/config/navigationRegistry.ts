@@ -3641,7 +3641,47 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         tcode: 'KDEP_EQP',
         description: 'Fiche du département (modules autorisés, effectif) et roster des collaborateurs rattachés',
         businessProcess: 'Périmètre départemental'
-      }
+      },
+      {
+        label: "Objectifs de service",
+        path: "/departement/objectives",
+        icon: (LUCIDE as any)["Target"],
+        badge: "Expansion",
+        tcode: "registre-objectives",
+        description: "Objectif de service suivi par le chef de departement.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["departments.objective.read"],
+      },
+      {
+        label: "Reunions de service",
+        path: "/departement/service-meetings",
+        icon: (LUCIDE as any)["CalendarClock"],
+        badge: "Expansion",
+        tcode: "registre-service-meetings",
+        description: "Reunion de service avec ordre du jour et compte rendu.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["departments.service_meeting.read"],
+      },
+      {
+        label: "Projets internes du service",
+        path: "/departement/projects",
+        icon: (LUCIDE as any)["FolderKanban"],
+        badge: "Expansion",
+        tcode: "registre-projects",
+        description: "Projet interne porte par le departement.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["departments.project.read"],
+      },
+      {
+        label: "Demandes inter-services",
+        path: "/departement/inter-service-requests",
+        icon: (LUCIDE as any)["ArrowLeftRight"],
+        badge: "Expansion",
+        tcode: "registre-inter-service-requests",
+        description: "Demande formelle d' un service vers un autre service.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["departments.service_request.read"],
+      },
     ]
   },
 
@@ -3677,7 +3717,37 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         tcode: 'KCOM_DIR',
         description: 'Échange individuel instantané avec recherche par Nom ou par Rôle dans l entreprise',
         businessProcess: 'Messagerie directe'
-      }
+      },
+      {
+        label: "Communiques officiels",
+        path: "/chat/announcements",
+        icon: (LUCIDE as any)["Megaphone"],
+        badge: "Expansion",
+        tcode: "registre-announcements",
+        description: "Communique officiel diffuse par la direction ou un chef de service.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["communication.announcement.read"],
+      },
+      {
+        label: "Canaux thematiques",
+        path: "/chat/channels",
+        icon: (LUCIDE as any)["Hash"],
+        badge: "Expansion",
+        tcode: "registre-channels",
+        description: "Canal de discussion thematique cree et administre dans le chat.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["communication.channel.read"],
+      },
+      {
+        label: "Signalements de contenu",
+        path: "/chat/content-reports",
+        icon: (LUCIDE as any)["Flag"],
+        badge: "Expansion",
+        tcode: "registre-content-reports",
+        description: "Signalement d' un message pour moderation par un habilité.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["communication.content_report.read"],
+      },
     ]
   },
 

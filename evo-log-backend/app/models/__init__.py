@@ -1297,3 +1297,28 @@ try:
 except Exception:
     pass
 # </expansion:heavylift_e>
+
+# <expansion:chat_d5>
+try:
+    from app.models.chat_d5_deep import (
+        ChtAnnouncement,
+        ChtChannel,
+        ChtContentReport,
+    )
+    __all__.extend(["ChtAnnouncement", "ChtChannel", "ChtContentReport"])
+except Exception:
+    pass
+# </expansion:chat_d5>
+
+# <expansion:departement_d5>
+try:
+    from app.models.departement_d5_deep import (
+        DepObjective,
+        DepServiceMeeting,
+        DepProject,
+        DepServiceRequest,
+    )
+    __all__.extend(["DepObjective", "DepServiceMeeting", "DepProject", "DepServiceRequest"])
+except Exception:
+    pass
+# </expansion:departement_d5>

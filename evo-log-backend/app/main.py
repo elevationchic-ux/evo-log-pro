@@ -978,7 +978,6 @@ try:
 except ImportError as e:
     logger.warning(f"Router heavylift_e_deep absent : {e}")
 # </expansion:heavylift_e>
-
 # <expansion:maintenance_deep>
 # Wave 6 : maintenance industrielle experte (FMEA/RCM/TPM, MTBF/MTTR/OEE,
 # piéces sérialisées singleton, chaine BOM, prédictif IoT).
@@ -988,7 +987,6 @@ try:
 except ImportError as e:
     logger.warning(f"Router maintenance_deep absent : {e}")
 # </expansion:maintenance_deep>
-
 # <expansion:tracabilite_deep>
 # Wave 6 : traçabilité bout-en-bout (chaîne de custody, Merkle/hash chain,
 # sceau ISO 17712, horodatage qualifié eIDAS/CAMPOST, RGPD + loi Cameroun
@@ -999,6 +997,20 @@ try:
 except ImportError as e:
     logger.warning(f"Router tracabilite_deep absent : {e}")
 # </expansion:tracabilite_deep>
+# <expansion:chat_d5>
+try:
+    from app.routers.v1 import chat_d5_deep
+    safe_include_router(chat_d5_deep.router, prefix="/api/v1/chat", tags=["chat (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router chat_d5_deep absent : {e}")
+# </expansion:chat_d5>
+# <expansion:departement_d5>
+try:
+    from app.routers.v1 import departement_d5_deep
+    safe_include_router(departement_d5_deep.router, prefix="/api/v1/departement", tags=["departement (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router departement_d5_deep absent : {e}")
+# </expansion:departement_d5>
 
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)
