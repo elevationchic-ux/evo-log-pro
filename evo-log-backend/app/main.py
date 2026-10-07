@@ -726,6 +726,34 @@ try:
 except ImportError as e:
     logger.warning(f"Router ferroviaire_b_deep absent : {e}")
 # </expansion:ferroviaire_b>
+# <expansion:pipeline>
+try:
+    from app.routers.v1 import pipeline_deep
+    safe_include_router(pipeline_deep.router, prefix="/api/v1/pipeline-oleoduc", tags=["pipeline-oleoduc (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router pipeline_deep absent : {e}")
+# </expansion:pipeline>
+# <expansion:courier>
+try:
+    from app.routers.v1 import courier_deep
+    safe_include_router(courier_deep.router, prefix="/api/v1/courier-express", tags=["courier-express (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router courier_deep absent : {e}")
+# </expansion:courier>
+# <expansion:coldchain>
+try:
+    from app.routers.v1 import coldchain_deep
+    safe_include_router(coldchain_deep.router, prefix="/api/v1/chaine-froid", tags=["chaine-froid (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router coldchain_deep absent : {e}")
+# </expansion:coldchain>
+# <expansion:heavylift>
+try:
+    from app.routers.v1 import heavylift_deep
+    safe_include_router(heavylift_deep.router, prefix="/api/v1/convoi-exceptionnel", tags=["convoi-exceptionnel (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router heavylift_deep absent : {e}")
+# </expansion:heavylift>
 # <expansion:parc_b>
 try:
     from app.routers.v1 import parc_b_deep
