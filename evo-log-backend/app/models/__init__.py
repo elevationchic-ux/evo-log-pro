@@ -163,3 +163,262 @@ try:
     from app.models import transit_deep as _transit_deep  # noqa: F401
 except Exception:
     pass
+
+# <expansion:transport>
+try:
+    from app.models.transport_deep import (
+        VehicleRegistration,
+        RoutePlan,
+        CheckpointControl,
+        CargoInsurance,
+        FreightBill,
+        Subcontractor,
+        DangerousGoodsLoad,
+        VehicleDocument,
+        GpsDevice,
+        TrafficPenalty,
+        Convoy,
+        FleetKpi,
+    )
+    __all__.extend(["VehicleRegistration", "RoutePlan", "CheckpointControl", "CargoInsurance", "FreightBill", "Subcontractor", "DangerousGoodsLoad", "VehicleDocument", "GpsDevice", "TrafficPenalty", "Convoy", "FleetKpi"])
+except Exception:
+    pass
+# </expansion:transport>
+
+# <expansion:magasin>
+try:
+    from app.models.magasin_deep import (
+        ArticleCatalog,
+        SupplierArticle,
+        PurchaseOrderDeep,
+        QualityInspection,
+        StockAlert,
+        ExpiryRecord,
+        SerialNumber,
+        PackingUnit,
+        StockReturn,
+        ConsignmentStock,
+        StockValuation,
+        WmsKpi,
+    )
+    __all__.extend(["ArticleCatalog", "SupplierArticle", "PurchaseOrderDeep", "QualityInspection", "StockAlert", "ExpiryRecord", "SerialNumber", "PackingUnit", "StockReturn", "ConsignmentStock", "StockValuation", "WmsKpi"])
+except Exception:
+    pass
+# </expansion:magasin>
+
+# <expansion:comptabilite>
+try:
+    from app.models.comptabilite_deep import (
+        AssetRegistration,
+        DepreciationSchedule,
+        Provision,
+        BankReconciliation,
+        IntercompanyEntry,
+        BudgetControl,
+        AuditPaf,
+        TaxDeclaration,
+        PayrollEntry,
+        TreasuryAccount,
+        AnalyticalSection,
+    )
+    __all__.extend(["AssetRegistration", "DepreciationSchedule", "Provision", "BankReconciliation", "IntercompanyEntry", "BudgetControl", "AuditPaf", "TaxDeclaration", "PayrollEntry", "TreasuryAccount", "AnalyticalSection"])
+except Exception:
+    pass
+# </expansion:comptabilite>
+
+# <expansion:finance>
+try:
+    from app.models.finance_deep import (
+        MultiyearBudget,
+        CreditFacility,
+        CashPool,
+        FinancialInvestment,
+        FxExposure,
+        PaymentSchedule,
+        ExpenseReport,
+        PettyCashBox,
+        BankGuarantee,
+        LeaseContract,
+        CashForecast,
+        TreasuryAlert,
+    )
+    __all__.extend(["MultiyearBudget", "CreditFacility", "CashPool", "FinancialInvestment", "FxExposure", "PaymentSchedule", "ExpenseReport", "PettyCashBox", "BankGuarantee", "LeaseContract", "CashForecast", "TreasuryAlert"])
+except Exception:
+    pass
+# </expansion:finance>
+
+# <expansion:parc>
+try:
+    from app.models.parc_deep import (
+        VehicleInventory,
+        TyreRecord,
+        SparePart,
+        WorkshopAppointment,
+        InsuranceClaim,
+        RegistrationRecord,
+        TechnicalVisit,
+        FuelConsumption,
+        VehicleLifecycle,
+        CostAnalysis,
+    )
+    __all__.extend(["VehicleInventory", "TyreRecord", "SparePart", "WorkshopAppointment", "InsuranceClaim", "RegistrationRecord", "TechnicalVisit", "FuelConsumption", "VehicleLifecycle", "CostAnalysis"])
+except Exception:
+    pass
+# </expansion:parc>
+
+# <expansion:rh>
+try:
+    from app.models.rh_deep import (
+        Recruitment,
+        TrainingPlan,
+        PerformanceReview,
+        DisciplinaryCase,
+        OrgUnit,
+        WorkforcePlan,
+        EmploymentContract,
+        EmployeeBenefit,
+        EmployeeExit,
+        AttendanceDevice,
+        LeaveQuota,
+        EmployeeSkill,
+        HrReport,
+    )
+    __all__.extend(["Recruitment", "TrainingPlan", "PerformanceReview", "DisciplinaryCase", "OrgUnit", "WorkforcePlan", "EmploymentContract", "EmployeeBenefit", "EmployeeExit", "AttendanceDevice", "LeaveQuota", "EmployeeSkill", "HrReport"])
+except Exception:
+    pass
+# </expansion:rh>
+
+# <expansion:qhse>
+try:
+    from app.models.qhse_deep import (
+        EnvironmentalMeasurement,
+        WasteRecord,
+        SafetyDataSheet,
+        EmergencyPlan,
+        PpeItem,
+        HealthVisit,
+        RiskAssessment,
+        CorrectiveAction,
+        ManagementReview,
+        ComplianceRecord,
+        QualityAudit,
+    )
+    __all__.extend(["EnvironmentalMeasurement", "WasteRecord", "SafetyDataSheet", "EmergencyPlan", "PpeItem", "HealthVisit", "RiskAssessment", "CorrectiveAction", "ManagementReview", "ComplianceRecord", "QualityAudit"])
+except Exception:
+    pass
+# </expansion:qhse>
+
+# <expansion:b2b>
+try:
+    from app.models.b2b_deep import (
+        ClientOnboarding,
+        SlaContract,
+        B2bContract,
+        SatisfactionSurvey,
+        ClientCreditLimit,
+        B2bDocument,
+        ServiceRequest,
+        PricingAgreement,
+        ShipmentBooking,
+        ClientClaim,
+        AccountReport,
+    )
+    __all__.extend(["ClientOnboarding", "SlaContract", "B2bContract", "SatisfactionSurvey", "ClientCreditLimit", "B2bDocument", "ServiceRequest", "PricingAgreement", "ShipmentBooking", "ClientClaim", "AccountReport"])
+except Exception:
+    pass
+# </expansion:b2b>
+
+# <expansion:reports>
+try:
+    from app.models.reports_deep import (
+        WarehouseTable,
+        Scorecard,
+        IndustryBenchmark,
+        PredictiveModel,
+        CustomDashboard,
+        ReportExport,
+        KpiDefinition,
+        DrillPath,
+        CohortAnalysis,
+        AnomalyRecord,
+        RegulatoryReport,
+    )
+    __all__.extend(["WarehouseTable", "Scorecard", "IndustryBenchmark", "PredictiveModel", "CustomDashboard", "ReportExport", "KpiDefinition", "DrillPath", "CohortAnalysis", "AnomalyRecord", "RegulatoryReport"])
+except Exception:
+    pass
+# </expansion:reports>
+
+# <expansion:admin>
+try:
+    from app.models.admin_deep import (
+        FeatureFlag,
+        ApiQuota,
+        WhiteLabel,
+        TenantOnboarding,
+        TenantApiKey,
+        TenantWebhook,
+        DataMigration,
+        PlatformTicket,
+        BillingEntry,
+        UsageAnalytics,
+        UptimeRecord,
+    )
+    __all__.extend(["FeatureFlag", "ApiQuota", "WhiteLabel", "TenantOnboarding", "TenantApiKey", "TenantWebhook", "DataMigration", "PlatformTicket", "BillingEntry", "UsageAnalytics", "UptimeRecord"])
+except Exception:
+    pass
+# </expansion:admin>
+
+# <expansion:superadmin>
+try:
+    from app.models.superadmin_deep import (
+        PlatformAudit,
+        ComplianceDashboard,
+        RetentionPolicy,
+        PlatformIncident,
+        AccessReview,
+        SoftwareLicense,
+        TechnologyPartner,
+        SaasRevenueRecord,
+        GlobalConfigSetting,
+        DrPlan,
+    )
+    __all__.extend(["PlatformAudit", "ComplianceDashboard", "RetentionPolicy", "PlatformIncident", "AccessReview", "SoftwareLicense", "TechnologyPartner", "SaasRevenueRecord", "GlobalConfigSetting", "DrPlan"])
+except Exception:
+    pass
+# </expansion:superadmin>
+
+# <expansion:dashboard>
+try:
+    from app.models.dashboard_deep import (
+        ModuleHealth,
+        ActivityRecord,
+        UnifiedTask,
+        QuickAction,
+        TeamPerformance,
+        FinancialSummary,
+        OperationalAlert,
+        RecentDocument,
+        UnifiedAgenda,
+        IntegrationStatus,
+    )
+    __all__.extend(["ModuleHealth", "ActivityRecord", "UnifiedTask", "QuickAction", "TeamPerformance", "FinancialSummary", "OperationalAlert", "RecentDocument", "UnifiedAgenda", "IntegrationStatus"])
+except Exception:
+    pass
+# </expansion:dashboard>
+
+# <expansion:amenagement_extra>
+try:
+    from app.models.amenagement_extra_deep import (
+        ConstructionProgress,
+        InfrastructureMaintenance,
+        IspsRecord,
+        PortPerception,
+        AnnualActivityReport,
+        SigLayer,
+        DomainArchive,
+        AmenagementKpi,
+    )
+    __all__.extend(["ConstructionProgress", "InfrastructureMaintenance", "IspsRecord", "PortPerception", "AnnualActivityReport", "SigLayer", "DomainArchive", "AmenagementKpi"])
+except Exception:
+    pass
+# </expansion:amenagement_extra>
