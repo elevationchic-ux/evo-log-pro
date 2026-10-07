@@ -1018,3 +1018,63 @@ try:
 except Exception:
     pass
 # </expansion:commercial_d>
+
+# <expansion:commercial_d2>
+try:
+    from app.models.commercial_d2_deep import (
+        CommCompetitorNote,
+    )
+    __all__.extend(["CommCompetitorNote"])
+except Exception:
+    pass
+# </expansion:commercial_d2>
+
+# <expansion:employe_d>
+try:
+    from app.models.employe_d_deep import (
+        EmpLeaveRequest,
+        EmpTimesheetEntry,
+        EmpOvertimeRequest,
+        EmpAttendanceCorrection,
+        EmpShiftSwap,
+        EmpTrainingEnrollment,
+        EmpSkillDeclaration,
+        EmpCertificationRenewal,
+        EmpPersonalInfoChange,
+        EmpBankDetailsUpdate,
+        EmpEmergencyContact,
+        EmpBadgeRequest,
+        EmpAccessRequest,
+        EmpDocumentUpload,
+        EmpSelfReview,
+        EmpMobilityApplication,
+        EmpSicknessDeclaration,
+    )
+    __all__.extend(["EmpLeaveRequest", "EmpTimesheetEntry", "EmpOvertimeRequest", "EmpAttendanceCorrection", "EmpShiftSwap", "EmpTrainingEnrollment", "EmpSkillDeclaration", "EmpCertificationRenewal", "EmpPersonalInfoChange", "EmpBankDetailsUpdate", "EmpEmergencyContact", "EmpBadgeRequest", "EmpAccessRequest", "EmpDocumentUpload", "EmpSelfReview", "EmpMobilityApplication", "EmpSicknessDeclaration"])
+except Exception:
+    pass
+# </expansion:employe_d>
+
+# <expansion:chef_personnel_d>
+try:
+    from app.models.chef_personnel_d_deep import (
+        ChpRecruitmentCampaign,
+        ChpJobPosting,
+        ChpCandidateSelection,
+        ChpInterviewSchedule,
+        ChpOfferApproval,
+        ChpOnboardingChecklist,
+        ChpProbationReview,
+        ChpExitInterview,
+        ChpHeadcountRequest,
+        ChpOrgMovement,
+        ChpDisciplinaryAction,
+        ChpTrainingPlan,
+        ChpAbsenceApproval,
+        ChpPayrollAdjustmentRequest,
+        ChpPolicyAck,
+    )
+    __all__.extend(["ChpRecruitmentCampaign", "ChpJobPosting", "ChpCandidateSelection", "ChpInterviewSchedule", "ChpOfferApproval", "ChpOnboardingChecklist", "ChpProbationReview", "ChpExitInterview", "ChpHeadcountRequest", "ChpOrgMovement", "ChpDisciplinaryAction", "ChpTrainingPlan", "ChpAbsenceApproval", "ChpPayrollAdjustmentRequest", "ChpPolicyAck"])
+except Exception:
+    pass
+# </expansion:chef_personnel_d>
