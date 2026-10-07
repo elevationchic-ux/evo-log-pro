@@ -32,7 +32,7 @@ DOMAINS: Dict[str, Dict] = {
             # quotidien sont un objet separate), formation, indicateur,
             # rapport annuel, enregistrements generiques, permis de travail
             # et consultation de la matrice IMDG.
-            "qhse": {"label": "QHSE (qualite, hygiene, securite, environnement)", "sub_modules": {"risque": ["create", "modify"], "prevention": ["create", "modify"], "epi": ["create", "modify"], "accident": ["read", "create", "modify"], "investigation": ["read", "create", "modify"], "certification": ["read", "create", "modify"], "audit": ["read", "create", "modify"], "haccp": ["create", "modify"], "controle": ["create", "modify"], "formation": ["read", "create", "modify"], "indicateur": ["create", "modify"], "rapport": ["read"], "enregistrement": ["read", "create", "modify", "delete"], "permis": ["create"], "imdg": ["read"]}},
+            "qhse": {"label": "QHSE (qualite, hygiene, securite, environnement)", "sub_modules": {"risque": ["create", "modify"], "prevention": ["create", "modify"], "epi": ["create", "modify"], "accident": ["read", "create", "modify"], "investigation": ["read", "create", "modify"], "certification": ["read", "create", "modify"], "audit": ["read", "create", "modify"], "haccp": ["create", "modify"], "controle": ["create", "modify"], "formation": ["read", "create", "modify"], "indicateur": ["create", "modify"], "rapport": ["read"], "enregistrement": ["read", "create", "modify", "delete"], "permis": ["read", "create"], "imdg": ["read"]}},
             "settings": {"label": "Parametres entreprise", "sub_modules": {"generaux": ["read", "modify"], "communs": ["read", "modify"]}},
         },
     },
@@ -222,7 +222,7 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         # declare les accidents du quai, demande un permis de travail,
         # consulte la segregation IMDG avant co-stivage et signale un risque.
         "qhse.accident.read", "qhse.accident.create", "qhse.accident.modify",
-        "qhse.permis.create", "qhse.imdg.read", "qhse.risque.create",
+        "qhse.permis.create", "qhse.permis.read", "qhse.imdg.read", "qhse.risque.create",
         # Un chantier d'amenagement ferme un poste ou change la portance d'une
         # aire : le chef d'exploitation doit voir l'avancement et les arretes
         # domaniaux, sans les rediger.
