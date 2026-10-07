@@ -415,7 +415,7 @@ export const registreConsignmentStock: ConfigRegistre = {
   permModule: "magasin",
   permSousModule: "consignment_stock",
   tcode: "registre-consignment-stock",
-  icon: Icons.HandCoins,
+  icon: Icons.DollarSign,
   titre: "Stock en consignation",
   titreEn: "Consignment stock",
   description: "Stock detenu pour un tiers.",

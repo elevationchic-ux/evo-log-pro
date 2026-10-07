@@ -89,7 +89,7 @@ export const registreCreditFacility: ConfigRegistre = {
   permModule: "finance",
   permSousModule: "credit_facility",
   tcode: "registre-credit-facilities",
-  icon: Icons.HandCoins,
+  icon: Icons.DollarSign,
   titre: "Facilites de caisse et credits",
   titreEn: "Cash credit facilities",
   description: "Facilites bancaires autorisees.",

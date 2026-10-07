@@ -12,29 +12,29 @@ import { registreAPI } from '@/lib/api-client';
 
 const api = registreAPI("port-operations");
 
-function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
-  return { key, header, headerEn, ...opts } as ColonneRegistre;
+function col(name: string, label: string, labelEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
+  return { name, label, labelEn, ...opts } as ColonneRegistre;
 }
-function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;
+function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;
 }
 function num(key: string, label: string, labelEn: string): ChampRegistre {
   return { key, label, labelEn, type: "number" } as ChampRegistre;
 }
-function dt(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "date" } as ChampRegistre;
+function dt(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
-function dtx(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;
+function dtx(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
-function area(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "textarea" } as ChampRegistre;
+function area(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "zone" } as ChampRegistre;
 }
-function chk(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;
+function chk(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "booleen" } as ChampRegistre;
 }
-function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
+function sel(name: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
 }
 
 export const registreDraftSurvey: ConfigRegistre = {
@@ -53,7 +53,7 @@ export const registreDraftSurvey: ConfigRegistre = {
   modifier: (id, data) => api.modifier("draft-surveys", id, data),
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_constat", "Numero", "Number", { searchable: true }),
+    col("numero_constat", "Numero", "Number"),
     col("navire_id", "Navire", "Vessel"),
     col("date_constat", "Date", "Date"),
     col("lieu_constat", "Lieu", "Location"),
@@ -62,7 +62,7 @@ export const registreDraftSurvey: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("numero_constat", "Numero de constat", "Report number", { obligatoire: true }),
+    txt("numero_constat", "Numero de constat", "Report number", { requisCreation: true }),
     num("navire_id", "ID navire", "Vessel id"),
     num("escale_id", "ID escale", "Call id"),
     dt("date_constat", "Date du constat", "Report date"),
@@ -96,7 +96,7 @@ export const registreStevedoringCrew: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "code_gang",
   colonnes: [
-    col("code_gang", "Code", "Code", { searchable: true }),
+    col("code_gang", "Code", "Code"),
     col("nom_gang", "Nom", "Name"),
     col("type_equipe", "Type", "Type"),
     col("chef_gang", "Chef", "Leader"),
@@ -104,7 +104,7 @@ export const registreStevedoringCrew: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("code_gang", "Code gang", "Gang code", { obligatoire: true }),
+    txt("code_gang", "Code gang", "Gang code", { requisCreation: true }),
     txt("nom_gang", "Nom du gang", "Gang name"),
     sel("type_equipe", "Type d'equipe", "Crew type", "type_equipage"),
     sel("statut", "Statut", "Status", "statut_gang"),
@@ -135,7 +135,7 @@ export const registreCargoHandlingPlan: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "reference_plan",
   colonnes: [
-    col("reference_plan", "Reference", "Reference", { searchable: true }),
+    col("reference_plan", "Reference", "Reference"),
     col("escale_id", "Escale", "Call"),
     col("type_operation", "Type operation", "Operation"),
     col("numero_cale", "Cale", "Hold"),
@@ -143,7 +143,7 @@ export const registreCargoHandlingPlan: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference_plan", "Reference plan", "Plan reference", { obligatoire: true }),
+    txt("reference_plan", "Reference plan", "Plan reference", { requisCreation: true }),
     num("escale_id", "ID escale", "Call id"),
     num("navire_id", "ID navire", "Vessel id"),
     sel("type_operation", "Type d'operation", "Operation type", "type_operation_quai"),
@@ -183,7 +183,7 @@ export const registreQuayEquipment: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "code_equipement",
   colonnes: [
-    col("code_equipement", "Code", "Code", { searchable: true }),
+    col("code_equipement", "Code", "Code"),
     col("designation", "Designation", "Description"),
     col("type_equipement", "Type", "Type"),
     col("etat", "Etat", "Condition"),
@@ -191,8 +191,8 @@ export const registreQuayEquipment: ConfigRegistre = {
     col("poste_quai_assigne", "Poste", "Berth"),
   ],
   champs: [
-    txt("code_equipement", "Code equipement", "Equipment code", { obligatoire: true }),
-    txt("designation", "Designation", "Description", { obligatoire: true }),
+    txt("code_equipement", "Code equipement", "Equipment code", { requisCreation: true }),
+    txt("designation", "Designation", "Description", { requisCreation: true }),
     sel("type_equipement", "Type", "Type", "type_equipement"),
     sel("etat", "Etat", "Condition", "etat_equipement"),
     txt("marque", "Marque", "Brand"),
@@ -227,7 +227,7 @@ export const registrePilotageSession: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "reference",
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("navire_id", "Navire", "Vessel"),
     col("pilote_nom", "Pilote", "Pilot"),
     col("type_mouvement", "Mouvement", "Movement"),
@@ -235,7 +235,7 @@ export const registrePilotageSession: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("navire_id", "ID navire", "Vessel id"),
     num("escale_id", "ID escale", "Call id"),
     txt("pilote_nom", "Nom du pilote", "Pilot name"),
@@ -273,7 +273,7 @@ export const registreTowageOperation: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "reference",
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("navire_id", "Navire", "Vessel"),
     col("remorqueur_nom", "Remorqueur", "Tug"),
     col("nombre_remorqueurs", "Nb", "Count"),
@@ -281,7 +281,7 @@ export const registreTowageOperation: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("navire_id", "ID navire", "Vessel id"),
     num("escale_id", "ID escale", "Call id"),
     txt("remorqueur_nom", "Nom du remorqueur", "Tug name"),
@@ -318,7 +318,7 @@ export const registreBunkeringOrder: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "reference",
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("navire_id", "Navire", "Vessel"),
     col("type_carburant", "Carburant", "Fuel"),
     col("quantite_tonnes", "Quantite (t)", "Quantity (t)"),
@@ -326,7 +326,7 @@ export const registreBunkeringOrder: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("navire_id", "ID navire", "Vessel id"),
     num("escale_id", "ID escale", "Call id"),
     sel("type_carburant", "Type de carburant", "Fuel type", "type_soute"),
@@ -367,7 +367,7 @@ export const registreVesselWasteReceipt: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "reference",
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("navire_id", "Navire", "Vessel"),
     col("type_dechet", "Type", "Type"),
     col("quantite", "Quantite", "Quantity"),
@@ -375,7 +375,7 @@ export const registreVesselWasteReceipt: ConfigRegistre = {
     col("conforme", "Conforme", "Compliant"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("navire_id", "ID navire", "Vessel id"),
     num("escale_id", "ID escale", "Call id"),
     sel("type_dechet", "Type de dechet", "Waste type", "type_dechet"),
@@ -412,7 +412,7 @@ export const registreTallySheet: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "reference",
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("escale_id", "Escale", "Call"),
     col("type_operation", "Type", "Type"),
     col("poids_tally_t", "Poids tally (t)", "Tally weight (t)"),
@@ -420,7 +420,7 @@ export const registreTallySheet: ConfigRegistre = {
     col("valide", "Valide", "Validated"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("escale_id", "ID escale", "Call id"),
     num("navire_id", "ID navire", "Vessel id"),
     num("operation_id", "ID operation", "Operation id"),
@@ -460,7 +460,7 @@ export const registreDemurrageCase: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "reference",
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("conteneur_id", "Conteneur", "Container"),
     col("client_id", "Client", "Client"),
     col("nb_jours_facturables", "Jours fact.", "Billable days"),
@@ -468,7 +468,7 @@ export const registreDemurrageCase: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("escale_id", "ID escale", "Call id"),
     num("navire_id", "ID navire", "Vessel id"),
     num("conteneur_id", "ID conteneur", "Container id"),
@@ -504,7 +504,7 @@ export const registreGatePass: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "numero_gate",
   colonnes: [
-    col("numero_gate", "Numero", "Number", { searchable: true }),
+    col("numero_gate", "Numero", "Number"),
     col("type_sortie", "Type", "Type"),
     col("camion_immatriculation", "Camion", "Truck"),
     col("chauffeur_nom", "Chauffeur", "Driver"),
@@ -512,7 +512,7 @@ export const registreGatePass: ConfigRegistre = {
     col("date_passage", "Passage", "Passage"),
   ],
   champs: [
-    txt("numero_gate", "Numero gate pass", "Gate pass number", { obligatoire: true }),
+    txt("numero_gate", "Numero gate pass", "Gate pass number", { requisCreation: true }),
     txt("type_sortie", "Type de sortie", "Exit type"),
     num("conteneur_id", "ID conteneur", "Container id"),
     txt("camion_immatriculation", "Immatriculation camion", "Truck plate"),
@@ -549,7 +549,7 @@ export const registreYardOperation: ConfigRegistre = {
   fetchNomenclatures: () => api.getNomenclatures(),
   unicite: "reference",
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("conteneur_id", "Conteneur", "Container"),
     col("type_mouvement", "Mouvement", "Move"),
     col("emplacement_source", "Source", "From"),
@@ -557,7 +557,7 @@ export const registreYardOperation: ConfigRegistre = {
     col("date_operation", "Date", "Date"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("conteneur_id", "ID conteneur", "Container id"),
     sel("type_mouvement", "Type de mouvement", "Move type", "type_mouvement_yard"),
     txt("emplacement_source", "Emplacement source", "Source slot"),

@@ -413,7 +413,7 @@ export const registreTreasuryAccount: ConfigRegistre = {
   permModule: "compta",
   permSousModule: "treasury_accounts",
   tcode: "registre-treasury-accounts",
-  icon: Icons.Vault,
+  icon: Icons.Lock,
   titre: "Comptes de tresorerie",
   titreEn: "Treasury accounts",
   description: "Comptes banque / caisse / regies.",

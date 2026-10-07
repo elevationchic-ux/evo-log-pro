@@ -257,7 +257,7 @@ export const registreRegistrationRecord: ConfigRegistre = {
   permModule: "parc",
   permSousModule: "registration_tracking",
   tcode: "registre-registration-tracking",
-  icon: Icons.IdCard,
+  icon: Icons.Contact,
   titre: "Suivi immatriculation",
   titreEn: "Registration tracking",
   description: "Documents officiels d'immatriculation.",
