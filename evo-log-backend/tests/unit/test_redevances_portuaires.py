@@ -76,12 +76,12 @@ def test_escale_inconnue_404(db: Session):
     assert exc.value.status_code == 404
 
 
-def test_tarifs_non_importes_501_sans_inventer(db: Session):
+def test_tarifs_non_importes_503_sans_inventer(db: Session):
     _seed_escale(db)
-    # Aucun TarifPortuaire en base -> 501 nommant les codes attendus, jamais de taux forge.
+    # Aucun TarifPortuaire en base -> 503 nommant les codes attendus, jamais de taux forge.
     with pytest.raises(HTTPException) as exc:
         PortAdvancedTOSService.calculate_port_dues_cemac(db, 1)
-    assert exc.value.status_code == 501
+    assert exc.value.status_code == 503
     assert "TPC-CHENAL" in exc.value.detail
 
 

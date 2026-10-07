@@ -98,7 +98,7 @@ def test_template_facture_present():
 
 
 def test_generer_pdf_honnete_quand_weasyprint_absent():
-    """Sans WeasyPrint (dev Windows), 501 explicite  jamais un faux PDF."""
+    """Sans WeasyPrint (dev Windows), 503 explicite  jamais un faux PDF."""
     weasyprint_present = True
     try:
         import weasyprint  # noqa: F401
@@ -111,13 +111,13 @@ def test_generer_pdf_honnete_quand_weasyprint_absent():
     else:
         with pytest.raises(HTTPException) as exc:
             generer_pdf("facture.html.j2", _contexte_facture())
-        assert exc.value.status_code == 501
+        assert exc.value.status_code == 503
 
 
-def test_generer_pdf_template_inconnu_501():
+def test_generer_pdf_template_inconnu_503():
     with pytest.raises(HTTPException) as exc:
         generer_pdf("module_inexistant.html.j2", {})
-    assert exc.value.status_code == 501
+    assert exc.value.status_code == 503
 
 
 # ─── Endpoint GET /finance/factures/{id}/pdf ────────────────────────────────
@@ -190,8 +190,8 @@ def test_endpoint_facture_pdf(client, db):
             assert resp.content[:5] == b"%PDF-"
             assert "facture-FAC-TEST-001" in resp.headers.get("content-disposition", "")
         else:
-            # Environnement sans Pango/Cairo : 501 explicite, jamais un faux PDF.
-            assert resp.status_code == 501
+            # Environnement sans Pango/Cairo : 503 explicite, jamais un faux PDF.
+            assert resp.status_code == 503
             assert "PDF" in resp.json()["detail"]
     finally:
         # Pop cible (contrat conftest) : clear() emporterait l'override
