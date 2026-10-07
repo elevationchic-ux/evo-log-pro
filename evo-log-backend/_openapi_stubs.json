@@ -1,15 +1,1 @@
-[
- "/api/v1/amenagement-portuaire/autorisations/{ident}/depot",
- "/api/v1/amenagement-portuaire/concessions/{ident}/reversaison",
- "/api/v1/amenagement-portuaire/dragage/{ident}/autorisation-rejet",
- "/api/v1/amenagement-portuaire/marches/{ident}/soumission-colife",
- "/api/v1/amenagement-portuaire/programmation/{ident}/notification-minfi",
- "/api/v1/amenagement-portuaire/schemas-directeurs/{ident}/demande-visa-minmivt",
- "/api/v1/chat/contextual-pin",
- "/api/v1/chat/sms-gateway/send-urgent",
- "/api/v1/chat/webrtc/push-to-talk",
- "/api/v1/notifications/sms",
- "/api/v1/real-customs/camcis/export-edi/{numero_dum}",
- "/api/v1/real-customs/guce/formalites/{dossier_id}",
- "/api/v1/whatsapp/send"
-]
+[]

@@ -85,7 +85,7 @@ def _company_id(user: User) -> int:
 # ─── Nomenclatures ───────────────────────────────────────────────────────────
 
 @router.get("/nomenclatures", summary="Vocabulaire metier finance-ohada")
-def nomenclatures(user: User = Depends(require_perm("finance.nomenclature.read"))):
+def nomenclatures(user: User = Depends(require_perm("tresorerie.nomenclature.read"))):
     from app.models import finance_deep as _md
     import enum as _pyenum
     out = {}
@@ -100,7 +100,7 @@ def nomenclatures(user: User = Depends(require_perm("finance.nomenclature.read")
 
 @router.get("/multiyear-budgets", response_model=List[MultiyearBudgetOut])
 def list_budget_management(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.budget_management.read")),
+    user: User = Depends(require_perm("tresorerie.budget_management.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, MultiyearBudget, cid, {"statut": statut})
@@ -110,7 +110,7 @@ def list_budget_management(statut: Optional[str] = None, db: Session = Depends(g
 def create_budget_management(
     payload: MultiyearBudgetCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.budget_management.create")),
+    user: User = Depends(require_perm("tresorerie.budget_management.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -128,7 +128,7 @@ def update_budget_management(
     ident: int,
     payload: MultiyearBudgetUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.budget_management.modify")),
+    user: User = Depends(require_perm("tresorerie.budget_management.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, MultiyearBudget, ident, "Budget pluriannuel")
@@ -144,7 +144,7 @@ def update_budget_management(
 def delete_budget_management(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.budget_management.modify")),
+    user: User = Depends(require_perm("tresorerie.budget_management.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, MultiyearBudget, ident, "Budget pluriannuel")
@@ -160,7 +160,7 @@ def delete_budget_management(
 
 @router.get("/credit-facilities", response_model=List[CreditFacilityOut])
 def list_credit_facility(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.credit_facility.read")),
+    user: User = Depends(require_perm("tresorerie.credit_facility.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, CreditFacility, cid, {"statut": statut})
@@ -170,7 +170,7 @@ def list_credit_facility(statut: Optional[str] = None, db: Session = Depends(get
 def create_credit_facility(
     payload: CreditFacilityCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.credit_facility.create")),
+    user: User = Depends(require_perm("tresorerie.credit_facility.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -188,7 +188,7 @@ def update_credit_facility(
     ident: int,
     payload: CreditFacilityUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.credit_facility.modify")),
+    user: User = Depends(require_perm("tresorerie.credit_facility.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, CreditFacility, ident, "Facilites de caisse et credits")
@@ -204,7 +204,7 @@ def update_credit_facility(
 def delete_credit_facility(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.credit_facility.modify")),
+    user: User = Depends(require_perm("tresorerie.credit_facility.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, CreditFacility, ident, "Facilites de caisse et credits")
@@ -220,7 +220,7 @@ def delete_credit_facility(
 
 @router.get("/cash-pools", response_model=List[CashPoolOut])
 def list_cash_pooling(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.cash_pooling.read")),
+    user: User = Depends(require_perm("tresorerie.cash_pooling.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, CashPool, cid, {"statut": statut})
@@ -230,7 +230,7 @@ def list_cash_pooling(statut: Optional[str] = None, db: Session = Depends(get_db
 def create_cash_pooling(
     payload: CashPoolCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.cash_pooling.create")),
+    user: User = Depends(require_perm("tresorerie.cash_pooling.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -248,7 +248,7 @@ def update_cash_pooling(
     ident: int,
     payload: CashPoolUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.cash_pooling.modify")),
+    user: User = Depends(require_perm("tresorerie.cash_pooling.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, CashPool, ident, "Centralisation de tresorerie")
@@ -264,7 +264,7 @@ def update_cash_pooling(
 def delete_cash_pooling(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.cash_pooling.modify")),
+    user: User = Depends(require_perm("tresorerie.cash_pooling.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, CashPool, ident, "Centralisation de tresorerie")
@@ -280,7 +280,7 @@ def delete_cash_pooling(
 
 @router.get("/financial-investments", response_model=List[FinancialInvestmentOut])
 def list_investment_tracking(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.investment_tracking.read")),
+    user: User = Depends(require_perm("tresorerie.investment_tracking.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, FinancialInvestment, cid, {"statut": statut})
@@ -290,7 +290,7 @@ def list_investment_tracking(statut: Optional[str] = None, db: Session = Depends
 def create_investment_tracking(
     payload: FinancialInvestmentCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.investment_tracking.create")),
+    user: User = Depends(require_perm("tresorerie.investment_tracking.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -308,7 +308,7 @@ def update_investment_tracking(
     ident: int,
     payload: FinancialInvestmentUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.investment_tracking.modify")),
+    user: User = Depends(require_perm("tresorerie.investment_tracking.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, FinancialInvestment, ident, "Investissements financiers")
@@ -324,7 +324,7 @@ def update_investment_tracking(
 def delete_investment_tracking(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.investment_tracking.modify")),
+    user: User = Depends(require_perm("tresorerie.investment_tracking.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, FinancialInvestment, ident, "Investissements financiers")
@@ -340,7 +340,7 @@ def delete_investment_tracking(
 
 @router.get("/fx-exposures", response_model=List[FxExposureOut])
 def list_fx_management(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.fx_management.read")),
+    user: User = Depends(require_perm("tresorerie.fx_management.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, FxExposure, cid, {"statut": statut})
@@ -350,7 +350,7 @@ def list_fx_management(statut: Optional[str] = None, db: Session = Depends(get_d
 def create_fx_management(
     payload: FxExposureCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.fx_management.create")),
+    user: User = Depends(require_perm("tresorerie.fx_management.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -368,7 +368,7 @@ def update_fx_management(
     ident: int,
     payload: FxExposureUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.fx_management.modify")),
+    user: User = Depends(require_perm("tresorerie.fx_management.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, FxExposure, ident, "Risque de change XAF/EUR/USD")
@@ -384,7 +384,7 @@ def update_fx_management(
 def delete_fx_management(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.fx_management.modify")),
+    user: User = Depends(require_perm("tresorerie.fx_management.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, FxExposure, ident, "Risque de change XAF/EUR/USD")
@@ -400,7 +400,7 @@ def delete_fx_management(
 
 @router.get("/payment-schedules", response_model=List[PaymentScheduleOut])
 def list_payment_scheduling(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.payment_scheduling.read")),
+    user: User = Depends(require_perm("tresorerie.payment_scheduling.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, PaymentSchedule, cid, {"statut": statut})
@@ -410,7 +410,7 @@ def list_payment_scheduling(statut: Optional[str] = None, db: Session = Depends(
 def create_payment_scheduling(
     payload: PaymentScheduleCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.payment_scheduling.create")),
+    user: User = Depends(require_perm("tresorerie.payment_scheduling.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -428,7 +428,7 @@ def update_payment_scheduling(
     ident: int,
     payload: PaymentScheduleUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.payment_scheduling.modify")),
+    user: User = Depends(require_perm("tresorerie.payment_scheduling.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, PaymentSchedule, ident, "Echeancier reglements fournisseurs")
@@ -444,7 +444,7 @@ def update_payment_scheduling(
 def delete_payment_scheduling(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.payment_scheduling.modify")),
+    user: User = Depends(require_perm("tresorerie.payment_scheduling.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, PaymentSchedule, ident, "Echeancier reglements fournisseurs")
@@ -460,7 +460,7 @@ def delete_payment_scheduling(
 
 @router.get("/expense-reports", response_model=List[ExpenseReportOut])
 def list_expense_report(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.expense_report.read")),
+    user: User = Depends(require_perm("tresorerie.expense_report.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, ExpenseReport, cid, {"statut": statut})
@@ -470,7 +470,7 @@ def list_expense_report(statut: Optional[str] = None, db: Session = Depends(get_
 def create_expense_report(
     payload: ExpenseReportCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.expense_report.create")),
+    user: User = Depends(require_perm("tresorerie.expense_report.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -488,7 +488,7 @@ def update_expense_report(
     ident: int,
     payload: ExpenseReportUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.expense_report.modify")),
+    user: User = Depends(require_perm("tresorerie.expense_report.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, ExpenseReport, ident, "Notes de frais")
@@ -504,7 +504,7 @@ def update_expense_report(
 def delete_expense_report(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.expense_report.modify")),
+    user: User = Depends(require_perm("tresorerie.expense_report.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, ExpenseReport, ident, "Notes de frais")
@@ -520,7 +520,7 @@ def delete_expense_report(
 
 @router.get("/petty-cash-boxes", response_model=List[PettyCashBoxOut])
 def list_petty_cash(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.petty_cash.read")),
+    user: User = Depends(require_perm("tresorerie.petty_cash.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, PettyCashBox, cid, {"statut": statut})
@@ -530,7 +530,7 @@ def list_petty_cash(statut: Optional[str] = None, db: Session = Depends(get_db),
 def create_petty_cash(
     payload: PettyCashBoxCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.petty_cash.create")),
+    user: User = Depends(require_perm("tresorerie.petty_cash.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -548,7 +548,7 @@ def update_petty_cash(
     ident: int,
     payload: PettyCashBoxUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.petty_cash.modify")),
+    user: User = Depends(require_perm("tresorerie.petty_cash.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, PettyCashBox, ident, "Regies d'avance")
@@ -564,7 +564,7 @@ def update_petty_cash(
 def delete_petty_cash(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.petty_cash.modify")),
+    user: User = Depends(require_perm("tresorerie.petty_cash.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, PettyCashBox, ident, "Regies d'avance")
@@ -580,7 +580,7 @@ def delete_petty_cash(
 
 @router.get("/bank-guarantees", response_model=List[BankGuaranteeOut])
 def list_bank_guarantee(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.bank_guarantee.read")),
+    user: User = Depends(require_perm("tresorerie.bank_guarantee.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, BankGuarantee, cid, {"statut": statut})
@@ -590,7 +590,7 @@ def list_bank_guarantee(statut: Optional[str] = None, db: Session = Depends(get_
 def create_bank_guarantee(
     payload: BankGuaranteeCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.bank_guarantee.create")),
+    user: User = Depends(require_perm("tresorerie.bank_guarantee.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -608,7 +608,7 @@ def update_bank_guarantee(
     ident: int,
     payload: BankGuaranteeUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.bank_guarantee.modify")),
+    user: User = Depends(require_perm("tresorerie.bank_guarantee.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, BankGuarantee, ident, "Garanties bancaires")
@@ -624,7 +624,7 @@ def update_bank_guarantee(
 def delete_bank_guarantee(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.bank_guarantee.modify")),
+    user: User = Depends(require_perm("tresorerie.bank_guarantee.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, BankGuarantee, ident, "Garanties bancaires")
@@ -640,7 +640,7 @@ def delete_bank_guarantee(
 
 @router.get("/lease-contracts", response_model=List[LeaseContractOut])
 def list_lease_accounting(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.lease_accounting.read")),
+    user: User = Depends(require_perm("tresorerie.lease_accounting.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, LeaseContract, cid, {"statut": statut})
@@ -650,7 +650,7 @@ def list_lease_accounting(statut: Optional[str] = None, db: Session = Depends(ge
 def create_lease_accounting(
     payload: LeaseContractCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.lease_accounting.create")),
+    user: User = Depends(require_perm("tresorerie.lease_accounting.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -668,7 +668,7 @@ def update_lease_accounting(
     ident: int,
     payload: LeaseContractUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.lease_accounting.modify")),
+    user: User = Depends(require_perm("tresorerie.lease_accounting.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, LeaseContract, ident, "Credit-leasing / contrats location")
@@ -684,7 +684,7 @@ def update_lease_accounting(
 def delete_lease_accounting(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.lease_accounting.modify")),
+    user: User = Depends(require_perm("tresorerie.lease_accounting.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, LeaseContract, ident, "Credit-leasing / contrats location")
@@ -700,7 +700,7 @@ def delete_lease_accounting(
 
 @router.get("/cash-forecasts", response_model=List[CashForecastOut])
 def list_financial_forecast(db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.financial_forecast.read")),
+    user: User = Depends(require_perm("tresorerie.financial_forecast.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, CashForecast, cid)
@@ -710,7 +710,7 @@ def list_financial_forecast(db: Session = Depends(get_db),
 def create_financial_forecast(
     payload: CashForecastCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.financial_forecast.create")),
+    user: User = Depends(require_perm("tresorerie.financial_forecast.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -728,7 +728,7 @@ def update_financial_forecast(
     ident: int,
     payload: CashForecastUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.financial_forecast.modify")),
+    user: User = Depends(require_perm("tresorerie.financial_forecast.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, CashForecast, ident, "Previsions de tresorerie")
@@ -744,7 +744,7 @@ def update_financial_forecast(
 def delete_financial_forecast(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.financial_forecast.modify")),
+    user: User = Depends(require_perm("tresorerie.financial_forecast.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, CashForecast, ident, "Previsions de tresorerie")
@@ -760,7 +760,7 @@ def delete_financial_forecast(
 
 @router.get("/treasury-alerts", response_model=List[TreasuryAlertOut])
 def list_treasury_alerts(statut: Optional[str] = None, db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.treasury_alerts.read")),
+    user: User = Depends(require_perm("tresorerie.treasury_alerts.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, TreasuryAlert, cid, {"statut": statut})
@@ -770,7 +770,7 @@ def list_treasury_alerts(statut: Optional[str] = None, db: Session = Depends(get
 def create_treasury_alerts(
     payload: TreasuryAlertCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.treasury_alerts.create")),
+    user: User = Depends(require_perm("tresorerie.treasury_alerts.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -788,7 +788,7 @@ def update_treasury_alerts(
     ident: int,
     payload: TreasuryAlertUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.treasury_alerts.modify")),
+    user: User = Depends(require_perm("tresorerie.treasury_alerts.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, TreasuryAlert, ident, "Alertes tresorerie")
@@ -804,7 +804,7 @@ def update_treasury_alerts(
 def delete_treasury_alerts(
     ident: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("finance.treasury_alerts.modify")),
+    user: User = Depends(require_perm("tresorerie.treasury_alerts.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, TreasuryAlert, ident, "Alertes tresorerie")
