@@ -512,40 +512,40 @@ def gen_frontend_registres(m: dict) -> str:
         f'',
         f'const api = registreAPI("{mod_slug}");',
         f'',
-        "function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {",
-        "  return { key, header, headerEn, ...opts } as ColonneRegistre;",
+        "function col(name: string, label: string, labelEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {",
+        "  return { name, label, labelEn, ...opts } as ColonneRegistre;",
         "}",
         "",
-        "function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {",
-        '  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;',
+        "function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {",
+        '  return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;',
         "}",
         "",
-        "function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {",
-        '  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;',
+        "function num(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {",
+        '  return { name, label, labelEn, type: "nombre", ...opts } as ChampRegistre;',
         "}",
         "",
-        "function dt(key: string, label: string, labelEn: string): ChampRegistre {",
-        '  return { key, label, labelEn, type: "date" } as ChampRegistre;',
+        "function dt(name: string, label: string, labelEn: string): ChampRegistre {",
+        '  return { name, label, labelEn, type: "date" } as ChampRegistre;',
         "}",
         "",
-        "function dtx(key: string, label: string, labelEn: string): ChampRegistre {",
-        '  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;',
+        "function dtx(name: string, label: string, labelEn: string): ChampRegistre {",
+        '  return { name, label, labelEn, type: "date" } as ChampRegistre;',
         "}",
         "",
-        "function area(key: string, label: string, labelEn: string): ChampRegistre {",
-        '  return { key, label, labelEn, type: "textarea" } as ChampRegistre;',
+        "function area(name: string, label: string, labelEn: string): ChampRegistre {",
+        '  return { name, label, labelEn, type: "zone" } as ChampRegistre;',
         "}",
         "",
-        "function chk(key: string, label: string, labelEn: string): ChampRegistre {",
-        '  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;',
+        "function chk(name: string, label: string, labelEn: string): ChampRegistre {",
+        '  return { name, label, labelEn, type: "booleen" } as ChampRegistre;',
         "}",
         "",
-        "function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {",
-        '  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;',
+        "function sel(name: string, label: string, labelEn: string, nomKey: string): ChampRegistre {",
+        '  return { name, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;',
         "}",
         "",
-        "function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {",
-        '  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;',
+        "function filtreSel(name: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {",
+        '  return { name, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;',
         "}",
         "",
     ]
@@ -559,12 +559,12 @@ def gen_frontend_registres(m: dict) -> str:
             label_en = f.get("labelEn", label_fr)
             t = f["type"]
             if f.get("search"):
-                cols_lines.append(f'    col("{f["name"]}", "{label_fr}", "{label_en}", {{ searchable: true }}),')
+                cols_lines.append(f'    col("{f["name"]}", "{label_fr}", "{label_en}"),')
             else:
                 cols_lines.append(f'    col("{f["name"]}", "{label_fr}", "{label_en}"),')
             if t in ("str", "text"):
                 if f.get("required"):
-                    champs_lines.append(f'    txt("{f["name"]}", "{label_fr}", "{label_en}", {{ obligatoire: true }}),')
+                    champs_lines.append(f'    txt("{f["name"]}", "{label_fr}", "{label_en}", {{ requisCreation: true }}),')
                 else:
                     champs_lines.append(f'    txt("{f["name"]}", "{label_fr}", "{label_en}"),')
             elif t == "num":

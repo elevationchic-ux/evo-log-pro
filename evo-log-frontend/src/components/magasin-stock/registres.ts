@@ -12,40 +12,40 @@ import { registreAPI } from '@/lib/api-client';
 
 const api = registreAPI("magasin-stock");
 
-function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
-  return { key, header, headerEn, ...opts } as ColonneRegistre;
+function col(name: string, label: string, labelEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
+  return { name, label, labelEn, ...opts } as ColonneRegistre;
 }
 
-function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;
+function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;
 }
 
-function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;
+function num(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "nombre", ...opts } as ChampRegistre;
 }
 
-function dt(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "date" } as ChampRegistre;
+function dt(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function dtx(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;
+function dtx(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function area(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "textarea" } as ChampRegistre;
+function area(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "zone" } as ChampRegistre;
 }
 
-function chk(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;
+function chk(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "booleen" } as ChampRegistre;
 }
 
-function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
+function sel(name: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
 }
 
-function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
+function filtreSel(name: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
 }
 
 export const registreArticleCatalog: ConfigRegistre = {
@@ -65,7 +65,7 @@ export const registreArticleCatalog: ConfigRegistre = {
   unicite: "code_sku",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_sku", "Code SKU", "SKU code", { searchable: true }),
+    col("code_sku", "Code SKU", "SKU code"),
     col("designation", "Designation", "Name"),
     col("categorie", "Categorie", "Category"),
     col("unite_principale", "Unite", "UoM"),
@@ -77,7 +77,7 @@ export const registreArticleCatalog: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("code_sku", "Code SKU", "SKU code", { obligatoire: true }),
+    txt("code_sku", "Code SKU", "SKU code", { requisCreation: true }),
     txt("designation", "Designation", "Name"),
     txt("categorie", "Categorie", "Category"),
     txt("unite_principale", "Unite", "UoM"),
@@ -108,7 +108,7 @@ export const registreSupplierArticle: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("article_id", "Article", "Article"),
     col("fournisseur_id", "Fournisseur", "Supplier"),
     col("prix_unitaire_xaf", "Prix unitaire XAF", "Unit price XAF"),
@@ -119,7 +119,7 @@ export const registreSupplierArticle: ConfigRegistre = {
     col("actif", "Actif", "Active"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("article_id", "Article", "Article"),
     num("fournisseur_id", "Fournisseur", "Supplier"),
     num("prix_unitaire_xaf", "Prix unitaire XAF", "Unit price XAF"),
@@ -149,7 +149,7 @@ export const registrePurchaseOrderDeep: ConfigRegistre = {
   unicite: "numero_commande",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_commande", "Numero", "Number", { searchable: true }),
+    col("numero_commande", "Numero", "Number"),
     col("fournisseur_id", "Fournisseur", "Supplier"),
     col("date_commande", "Date", "Date"),
     col("date_livraison_prevue", "Livraison prevue", "Planned delivery"),
@@ -160,7 +160,7 @@ export const registrePurchaseOrderDeep: ConfigRegistre = {
     col("notes", "Notes", "Notes"),
   ],
   champs: [
-    txt("numero_commande", "Numero", "Number", { obligatoire: true }),
+    txt("numero_commande", "Numero", "Number", { requisCreation: true }),
     num("fournisseur_id", "Fournisseur", "Supplier"),
     dt("date_commande", "Date", "Date"),
     dt("date_livraison_prevue", "Livraison prevue", "Planned delivery"),
@@ -190,7 +190,7 @@ export const registreQualityInspection: ConfigRegistre = {
   unicite: "numero_controle",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_controle", "Numero", "Number", { searchable: true }),
+    col("numero_controle", "Numero", "Number"),
     col("reception_id", "Reception", "Receipt"),
     col("article_id", "Article", "Article"),
     col("quantite_inspekte", "Qte inspekte", "Inspected quantity"),
@@ -202,7 +202,7 @@ export const registreQualityInspection: ConfigRegistre = {
     col("observations", "Observations", "Observations"),
   ],
   champs: [
-    txt("numero_controle", "Numero", "Number", { obligatoire: true }),
+    txt("numero_controle", "Numero", "Number", { requisCreation: true }),
     num("reception_id", "Reception", "Receipt"),
     num("article_id", "Article", "Article"),
     num("quantite_inspekte", "Qte inspekte", "Inspected quantity"),
@@ -233,7 +233,7 @@ export const registreStockAlert: ConfigRegistre = {
   unicite: "code_alerte",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_alerte", "Code alerte", "Alert code", { searchable: true }),
+    col("code_alerte", "Code alerte", "Alert code"),
     col("article_id", "Article", "Article"),
     col("depot_id", "Depot", "Warehouse"),
     col("seuil_min", "Seuil mini", "Min threshold"),
@@ -244,7 +244,7 @@ export const registreStockAlert: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("code_alerte", "Code alerte", "Alert code", { obligatoire: true }),
+    txt("code_alerte", "Code alerte", "Alert code", { requisCreation: true }),
     num("article_id", "Article", "Article"),
     num("depot_id", "Depot", "Warehouse"),
     num("seuil_min", "Seuil mini", "Min threshold"),
@@ -274,7 +274,7 @@ export const registreExpiryRecord: ConfigRegistre = {
   unicite: "numero_lot",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_lot", "Numero lot", "Lot number", { searchable: true }),
+    col("numero_lot", "Numero lot", "Lot number"),
     col("article_id", "Article", "Article"),
     col("quantite", "Quantite", "Quantity"),
     col("date_peremption", "Date peremption", "Expiry date"),
@@ -283,7 +283,7 @@ export const registreExpiryRecord: ConfigRegistre = {
     col("notes", "Notes", "Notes"),
   ],
   champs: [
-    txt("numero_lot", "Numero lot", "Lot number", { obligatoire: true }),
+    txt("numero_lot", "Numero lot", "Lot number", { requisCreation: true }),
     num("article_id", "Article", "Article"),
     num("quantite", "Quantite", "Quantity"),
     dt("date_peremption", "Date peremption", "Expiry date"),
@@ -311,7 +311,7 @@ export const registreSerialNumber: ConfigRegistre = {
   unicite: "numero_serial",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_serial", "Numero serie", "Serial", { searchable: true }),
+    col("numero_serial", "Numero serie", "Serial"),
     col("article_id", "Article", "Article"),
     col("numero_lot", "Numero lot", "Lot"),
     col("statut", "Statut", "Status"),
@@ -321,7 +321,7 @@ export const registreSerialNumber: ConfigRegistre = {
     col("notes", "Notes", "Notes"),
   ],
   champs: [
-    txt("numero_serial", "Numero serie", "Serial", { obligatoire: true }),
+    txt("numero_serial", "Numero serie", "Serial", { requisCreation: true }),
     num("article_id", "Article", "Article"),
     txt("numero_lot", "Numero lot", "Lot"),
     sel("statut", "Statut", "Status", "statut"),
@@ -350,7 +350,7 @@ export const registrePackingUnit: ConfigRegistre = {
   unicite: "code_uc",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_uc", "Code UC", "PU code", { searchable: true }),
+    col("code_uc", "Code UC", "PU code"),
     col("type_uc", "Type UC", "Type"),
     col("dimensions", "Dimensions", "Dimensions"),
     col("poids_tare_kg", "Poids tare (kg)", "Tare (kg)"),
@@ -359,7 +359,7 @@ export const registrePackingUnit: ConfigRegistre = {
     col("actif", "Actif", "Active"),
   ],
   champs: [
-    txt("code_uc", "Code UC", "PU code", { obligatoire: true }),
+    txt("code_uc", "Code UC", "PU code", { requisCreation: true }),
     sel("type_uc", "Type UC", "Type", "type_uc"),
     txt("dimensions", "Dimensions", "Dimensions"),
     num("poids_tare_kg", "Poids tare (kg)", "Tare (kg)"),
@@ -387,7 +387,7 @@ export const registreStockReturn: ConfigRegistre = {
   unicite: "numero_retour",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_retour", "Numero retour", "Return number", { searchable: true }),
+    col("numero_retour", "Numero retour", "Return number"),
     col("type_retour", "Type", "Type"),
     col("client_id", "Client", "Client"),
     col("fournisseur_id", "Fournisseur", "Supplier"),
@@ -398,7 +398,7 @@ export const registreStockReturn: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("numero_retour", "Numero retour", "Return number", { obligatoire: true }),
+    txt("numero_retour", "Numero retour", "Return number", { requisCreation: true }),
     sel("type_retour", "Type", "Type", "type_retour"),
     num("client_id", "Client", "Client"),
     num("fournisseur_id", "Fournisseur", "Supplier"),
@@ -428,7 +428,7 @@ export const registreConsignmentStock: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("proprietaire_id", "Proprietaire", "Owner"),
     col("article_id", "Article", "Article"),
     col("quantite_deposee", "Qte deposee", "Deposited quantity"),
@@ -439,7 +439,7 @@ export const registreConsignmentStock: ConfigRegistre = {
     col("notes", "Notes", "Notes"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("proprietaire_id", "Proprietaire", "Owner"),
     num("article_id", "Article", "Article"),
     num("quantite_deposee", "Qte deposee", "Deposited quantity"),
@@ -469,7 +469,7 @@ export const registreStockValuation: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("periode", "Periode", "Period"),
     col("article_id", "Article", "Article"),
     col("methode", "Methode", "Method"),
@@ -479,7 +479,7 @@ export const registreStockValuation: ConfigRegistre = {
     col("date_calcul", "Date calcul", "Calculation date"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("periode", "Periode", "Period"),
     num("article_id", "Article", "Article"),
     sel("methode", "Methode", "Method", "methode"),
@@ -508,7 +508,7 @@ export const registreWmsKpi: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("periode_debut", "Debut", "Start"),
     col("periode_fin", "Fin", "End"),
     col("rotation", "Rotation", "Turnover"),
@@ -519,7 +519,7 @@ export const registreWmsKpi: ConfigRegistre = {
     col("notes", "Notes", "Notes"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     dt("periode_debut", "Debut", "Start"),
     dt("periode_fin", "Fin", "End"),
     num("rotation", "Rotation", "Turnover"),

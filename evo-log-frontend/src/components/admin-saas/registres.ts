@@ -12,40 +12,40 @@ import { registreAPI } from '@/lib/api-client';
 
 const api = registreAPI("admin-saas");
 
-function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
-  return { key, header, headerEn, ...opts } as ColonneRegistre;
+function col(name: string, label: string, labelEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
+  return { name, label, labelEn, ...opts } as ColonneRegistre;
 }
 
-function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;
+function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;
 }
 
-function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;
+function num(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "nombre", ...opts } as ChampRegistre;
 }
 
-function dt(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "date" } as ChampRegistre;
+function dt(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function dtx(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;
+function dtx(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function area(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "textarea" } as ChampRegistre;
+function area(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "zone" } as ChampRegistre;
 }
 
-function chk(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;
+function chk(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "booleen" } as ChampRegistre;
 }
 
-function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
+function sel(name: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
 }
 
-function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
+function filtreSel(name: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
 }
 
 export const registreFeatureFlag: ConfigRegistre = {
@@ -65,7 +65,7 @@ export const registreFeatureFlag: ConfigRegistre = {
   unicite: "code_flag",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_flag", "Code flag", "Flag code", { searchable: true }),
+    col("code_flag", "Code flag", "Flag code"),
     col("description", "Description", "Description"),
     col("actif", "Actif", "Active"),
     col("tenants_concernes", "Tenants concerns", "Tenants affected"),
@@ -73,7 +73,7 @@ export const registreFeatureFlag: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("code_flag", "Code flag", "Flag code", { obligatoire: true }),
+    txt("code_flag", "Code flag", "Flag code", { requisCreation: true }),
     txt("description", "Description", "Description"),
     chk("actif", "Actif", "Active"),
     txt("tenants_concernes", "Tenants concerns", "Tenants affected"),
@@ -100,7 +100,7 @@ export const registreApiQuota: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("tenant_id", "Tenant", "Tenant"),
     col("api_group", "Groupe API", "API group"),
     col("limite_minute", "Limite minute", "Per-minute limit"),
@@ -109,7 +109,7 @@ export const registreApiQuota: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("tenant_id", "Tenant", "Tenant"),
     txt("api_group", "Groupe API", "API group"),
     num("limite_minute", "Limite minute", "Per-minute limit"),
@@ -137,7 +137,7 @@ export const registreWhiteLabel: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("tenant_id", "Tenant", "Tenant"),
     col("nom_marque", "Nom marque", "Brand name"),
     col("domaine_personnalise", "Domaine", "Custom domain"),
@@ -147,7 +147,7 @@ export const registreWhiteLabel: ConfigRegistre = {
     col("actif", "Actif", "Active"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("tenant_id", "Tenant", "Tenant"),
     txt("nom_marque", "Nom marque", "Brand name"),
     txt("domaine_personnalise", "Domaine", "Custom domain"),
@@ -176,7 +176,7 @@ export const registreTenantOnboarding: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("tenant_id", "Tenant", "Tenant"),
     col("date_debut", "Debut", "Start"),
     col("date_activation", "Activation", "Activation"),
@@ -185,7 +185,7 @@ export const registreTenantOnboarding: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("tenant_id", "Tenant", "Tenant"),
     dt("date_debut", "Debut", "Start"),
     dt("date_activation", "Activation", "Activation"),
@@ -213,7 +213,7 @@ export const registreTenantApiKey: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("tenant_id", "Tenant", "Tenant"),
     col("label", "Label", "Label"),
     col("scopes", "Scopes", "Scopes"),
@@ -223,7 +223,7 @@ export const registreTenantApiKey: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("tenant_id", "Tenant", "Tenant"),
     txt("label", "Label", "Label"),
     txt("scopes", "Scopes", "Scopes"),
@@ -252,7 +252,7 @@ export const registreTenantWebhook: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("tenant_id", "Tenant", "Tenant"),
     col("url_destination", "URL", "URL"),
     col("evenements_abonnes", "Evenements abonnes", "Subscribed events"),
@@ -261,7 +261,7 @@ export const registreTenantWebhook: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("tenant_id", "Tenant", "Tenant"),
     txt("url_destination", "URL", "URL"),
     txt("evenements_abonnes", "Evenements abonnes", "Subscribed events"),
@@ -289,7 +289,7 @@ export const registreDataMigration: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("tenant_id", "Tenant", "Tenant"),
     col("type_migration", "Type", "Type"),
     col("source", "Source", "Source"),
@@ -301,7 +301,7 @@ export const registreDataMigration: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("tenant_id", "Tenant", "Tenant"),
     sel("type_migration", "Type", "Type", "type_migration"),
     txt("source", "Source", "Source"),
@@ -332,7 +332,7 @@ export const registrePlatformTicket: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("tenant_id", "Tenant", "Tenant"),
     col("titre", "Titre", "Title"),
     col("description", "Description", "Description"),
@@ -342,7 +342,7 @@ export const registrePlatformTicket: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("tenant_id", "Tenant", "Tenant"),
     txt("titre", "Titre", "Title"),
     txt("description", "Description", "Description"),
@@ -371,7 +371,7 @@ export const registreBillingEntry: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("tenant_id", "Tenant", "Tenant"),
     col("periode", "Periode", "Period"),
     col("type_facture", "Type facture", "Invoice type"),
@@ -381,7 +381,7 @@ export const registreBillingEntry: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("tenant_id", "Tenant", "Tenant"),
     txt("periode", "Periode", "Period"),
     sel("type_facture", "Type facture", "Invoice type", "type_facture"),
@@ -410,7 +410,7 @@ export const registreUsageAnalytics: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("tenant_id", "Tenant", "Tenant"),
     col("periode", "Periode", "Period"),
     col("utilisateurs_actifs", "Utilisateurs actifs", "Active users"),
@@ -419,7 +419,7 @@ export const registreUsageAnalytics: ConfigRegistre = {
     col("score_sante", "Score sante", "Health score"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("tenant_id", "Tenant", "Tenant"),
     txt("periode", "Periode", "Period"),
     num("utilisateurs_actifs", "Utilisateurs actifs", "Active users"),
@@ -447,7 +447,7 @@ export const registreUptimeRecord: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("service", "Service", "Service"),
     col("region", "Region", "Region"),
     col("statut", "Statut", "Status"),
@@ -456,7 +456,7 @@ export const registreUptimeRecord: ConfigRegistre = {
     col("date_mesure", "Date mesure", "Measurement date"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("service", "Service", "Service"),
     txt("region", "Region", "Region"),
     sel("statut", "Statut", "Status", "statut"),

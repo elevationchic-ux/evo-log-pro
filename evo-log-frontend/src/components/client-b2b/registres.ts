@@ -12,40 +12,40 @@ import { registreAPI } from '@/lib/api-client';
 
 const api = registreAPI("client-b2b");
 
-function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
-  return { key, header, headerEn, ...opts } as ColonneRegistre;
+function col(name: string, label: string, labelEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
+  return { name, label, labelEn, ...opts } as ColonneRegistre;
 }
 
-function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;
+function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;
 }
 
-function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;
+function num(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "nombre", ...opts } as ChampRegistre;
 }
 
-function dt(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "date" } as ChampRegistre;
+function dt(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function dtx(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;
+function dtx(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function area(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "textarea" } as ChampRegistre;
+function area(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "zone" } as ChampRegistre;
 }
 
-function chk(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;
+function chk(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "booleen" } as ChampRegistre;
 }
 
-function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
+function sel(name: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
 }
 
-function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
+function filtreSel(name: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
 }
 
 export const registreClientOnboarding: ConfigRegistre = {
@@ -65,7 +65,7 @@ export const registreClientOnboarding: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("raison_sociale", "Raison sociale", "Legal name"),
     col("niu", "NIU", "Tax ID"),
     col("rc", "Registre commerce", "Reg. commerce"),
@@ -76,7 +76,7 @@ export const registreClientOnboarding: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("raison_sociale", "Raison sociale", "Legal name"),
     txt("niu", "NIU", "Tax ID"),
     txt("rc", "Registre commerce", "Reg. commerce"),
@@ -106,7 +106,7 @@ export const registreSlaContract: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("client_id", "Client", "Client"),
     col("type_prestation", "Type prestation", "Service type"),
     col("engagement_valeur", "Valeur engagement", "Committed value"),
@@ -116,7 +116,7 @@ export const registreSlaContract: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("client_id", "Client", "Client"),
     txt("type_prestation", "Type prestation", "Service type"),
     num("engagement_valeur", "Valeur engagement", "Committed value"),
@@ -145,7 +145,7 @@ export const registreB2bContract: ConfigRegistre = {
   unicite: "numero_contrat",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_contrat", "Numero contrat", "Contract number", { searchable: true }),
+    col("numero_contrat", "Numero contrat", "Contract number"),
     col("client_id", "Client", "Client"),
     col("type_contrat", "Type", "Type"),
     col("date_debut", "Debut", "Start"),
@@ -155,7 +155,7 @@ export const registreB2bContract: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("numero_contrat", "Numero contrat", "Contract number", { obligatoire: true }),
+    txt("numero_contrat", "Numero contrat", "Contract number", { requisCreation: true }),
     num("client_id", "Client", "Client"),
     sel("type_contrat", "Type", "Type", "type_contrat"),
     dt("date_debut", "Debut", "Start"),
@@ -184,7 +184,7 @@ export const registreSatisfactionSurvey: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("client_id", "Client", "Client"),
     col("date_enquete", "Date", "Survey date"),
     col("note_global", "Note globale", "Overall score"),
@@ -192,7 +192,7 @@ export const registreSatisfactionSurvey: ConfigRegistre = {
     col("commentaires", "Commentaires", "Comments"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("client_id", "Client", "Client"),
     dt("date_enquete", "Date", "Survey date"),
     num("note_global", "Note globale", "Overall score"),
@@ -219,7 +219,7 @@ export const registreClientCreditLimit: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("client_id", "Client", "Client"),
     col("plafond_xaf", "Plafond", "Limit"),
     col("encours_actuel_xaf", "Encours", "Current outstanding"),
@@ -228,7 +228,7 @@ export const registreClientCreditLimit: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("client_id", "Client", "Client"),
     num("plafond_xaf", "Plafond", "Limit"),
     num("encours_actuel_xaf", "Encours", "Current outstanding"),
@@ -256,7 +256,7 @@ export const registreB2bDocument: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("client_id", "Client", "Client"),
     col("type_document", "Type document", "Document type"),
     col("nom_fichier", "Nom fichier", "File name"),
@@ -265,7 +265,7 @@ export const registreB2bDocument: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("client_id", "Client", "Client"),
     txt("type_document", "Type document", "Document type"),
     txt("nom_fichier", "Nom fichier", "File name"),
@@ -293,7 +293,7 @@ export const registreServiceRequest: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("client_id", "Client", "Client"),
     col("type_demande", "Type demande", "Request type"),
     col("description", "Description", "Description"),
@@ -303,7 +303,7 @@ export const registreServiceRequest: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("client_id", "Client", "Client"),
     txt("type_demande", "Type demande", "Request type"),
     txt("description", "Description", "Description"),
@@ -332,7 +332,7 @@ export const registrePricingAgreement: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("client_id", "Client", "Client"),
     col("type_prestation", "Type prestation", "Service type"),
     col("remise_pct", "Remise %", "Discount %"),
@@ -342,7 +342,7 @@ export const registrePricingAgreement: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("client_id", "Client", "Client"),
     txt("type_prestation", "Type prestation", "Service type"),
     num("remise_pct", "Remise %", "Discount %"),
@@ -371,7 +371,7 @@ export const registreShipmentBooking: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("client_id", "Client", "Client"),
     col("escale_id", "Escale", "Call"),
     col("type_expedition", "Type expedition", "Shipment type"),
@@ -381,7 +381,7 @@ export const registreShipmentBooking: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("client_id", "Client", "Client"),
     num("escale_id", "Escale", "Call"),
     sel("type_expedition", "Type expedition", "Shipment type", "type_expedition"),
@@ -410,7 +410,7 @@ export const registreClientClaim: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("client_id", "Client", "Client"),
     col("objet", "Objet", "Subject"),
     col("description", "Description", "Description"),
@@ -419,7 +419,7 @@ export const registreClientClaim: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("client_id", "Client", "Client"),
     txt("objet", "Objet", "Subject"),
     txt("description", "Description", "Description"),
@@ -447,7 +447,7 @@ export const registreAccountReport: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("client_id", "Client", "Client"),
     col("periode_debut", "Debut", "Start"),
     col("periode_fin", "Fin", "End"),
@@ -456,7 +456,7 @@ export const registreAccountReport: ConfigRegistre = {
     col("solde_a_payer_xaf", "Solde a payer", "Balance owed"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("client_id", "Client", "Client"),
     dt("periode_debut", "Debut", "Start"),
     dt("periode_fin", "Fin", "End"),

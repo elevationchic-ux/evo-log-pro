@@ -12,40 +12,40 @@ import { registreAPI } from '@/lib/api-client';
 
 const api = registreAPI("dashboard");
 
-function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
-  return { key, header, headerEn, ...opts } as ColonneRegistre;
+function col(name: string, label: string, labelEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
+  return { name, label, labelEn, ...opts } as ColonneRegistre;
 }
 
-function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;
+function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;
 }
 
-function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;
+function num(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "nombre", ...opts } as ChampRegistre;
 }
 
-function dt(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "date" } as ChampRegistre;
+function dt(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function dtx(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;
+function dtx(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function area(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "textarea" } as ChampRegistre;
+function area(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "zone" } as ChampRegistre;
 }
 
-function chk(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;
+function chk(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "booleen" } as ChampRegistre;
 }
 
-function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
+function sel(name: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
 }
 
-function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
+function filtreSel(name: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
 }
 
 export const registreModuleHealth: ConfigRegistre = {
@@ -65,7 +65,7 @@ export const registreModuleHealth: ConfigRegistre = {
   unicite: "code_module",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_module", "Code module", "Module code", { searchable: true }),
+    col("code_module", "Code module", "Module code"),
     col("etat", "Etat", "State"),
     col("nombre_requetes_jour", "Nb requetes / jour", "Daily calls"),
     col("taux_erreur_pct", "Taux erreur %", "Error rate %"),
@@ -73,7 +73,7 @@ export const registreModuleHealth: ConfigRegistre = {
     col("dernier_incident", "Dernier incident", "Last incident"),
   ],
   champs: [
-    txt("code_module", "Code module", "Module code", { obligatoire: true }),
+    txt("code_module", "Code module", "Module code", { requisCreation: true }),
     sel("etat", "Etat", "State", "etat"),
     num("nombre_requetes_jour", "Nb requetes / jour", "Daily calls"),
     num("taux_erreur_pct", "Taux erreur %", "Error rate %"),
@@ -100,7 +100,7 @@ export const registreActivityRecord: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("module_source", "Module source", "Source module"),
     col("type_action", "Type action", "Action type"),
     col("utilisateur", "Utilisateur", "User"),
@@ -109,7 +109,7 @@ export const registreActivityRecord: ConfigRegistre = {
     col("resume", "Resume", "Summary"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("module_source", "Module source", "Source module"),
     txt("type_action", "Type action", "Action type"),
     txt("utilisateur", "Utilisateur", "User"),
@@ -137,7 +137,7 @@ export const registreUnifiedTask: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("titre", "Titre", "Title"),
     col("module_source", "Module source", "Source module"),
     col("entite_id", "ID entite", "Entity id"),
@@ -147,7 +147,7 @@ export const registreUnifiedTask: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("titre", "Titre", "Title"),
     txt("module_source", "Module source", "Source module"),
     num("entite_id", "ID entite", "Entity id"),
@@ -176,7 +176,7 @@ export const registreQuickAction: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("libelle", "Libelle", "Label"),
     col("module_source", "Module source", "Source module"),
     col("url_action", "URL action", "Action URL"),
@@ -185,7 +185,7 @@ export const registreQuickAction: ConfigRegistre = {
     col("actif", "Actif", "Active"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("libelle", "Libelle", "Label"),
     txt("module_source", "Module source", "Source module"),
     txt("url_action", "URL action", "Action URL"),
@@ -213,7 +213,7 @@ export const registreTeamPerformance: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("equipe", "Equipe", "Team"),
     col("periode", "Periode", "Period"),
     col("objectifs_atteints_pct", "Objectifs atteints %", "Goals reached %"),
@@ -221,7 +221,7 @@ export const registreTeamPerformance: ConfigRegistre = {
     col("qualite_score", "Score qualite", "Quality score"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("equipe", "Equipe", "Team"),
     txt("periode", "Periode", "Period"),
     num("objectifs_atteints_pct", "Objectifs atteints %", "Goals reached %"),
@@ -248,7 +248,7 @@ export const registreFinancialSummary: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("periode", "Periode", "Period"),
     col("ca_consolide_xaf", "CA consolide", "Consolidated revenue"),
     col("marge_brute_xaf", "Marge brute", "Gross margin"),
@@ -257,7 +257,7 @@ export const registreFinancialSummary: ConfigRegistre = {
     col("tresorerie_xaf", "Tresorerie", "Cash"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("periode", "Periode", "Period"),
     num("ca_consolide_xaf", "CA consolide", "Consolidated revenue"),
     num("marge_brute_xaf", "Marge brute", "Gross margin"),
@@ -285,7 +285,7 @@ export const registreOperationalAlert: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("module_source", "Module source", "Source module"),
     col("niveau", "Niveau", "Level"),
     col("description", "Description", "Description"),
@@ -294,7 +294,7 @@ export const registreOperationalAlert: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("module_source", "Module source", "Source module"),
     sel("niveau", "Niveau", "Level", "niveau"),
     txt("description", "Description", "Description"),
@@ -322,7 +322,7 @@ export const registreRecentDocument: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("titre", "Titre", "Title"),
     col("module_source", "Module source", "Source module"),
     col("entite_id", "ID entite", "Entity id"),
@@ -331,7 +331,7 @@ export const registreRecentDocument: ConfigRegistre = {
     col("partage", "Partage", "Sharing"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("titre", "Titre", "Title"),
     txt("module_source", "Module source", "Source module"),
     num("entite_id", "ID entite", "Entity id"),
@@ -359,7 +359,7 @@ export const registreUnifiedAgenda: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("titre", "Titre", "Title"),
     col("module_source", "Module source", "Source module"),
     col("entite_id", "ID entite", "Entity id"),
@@ -368,7 +368,7 @@ export const registreUnifiedAgenda: ConfigRegistre = {
     col("invite_par", "Invite par", "Invited by"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("titre", "Titre", "Title"),
     txt("module_source", "Module source", "Source module"),
     num("entite_id", "ID entite", "Entity id"),
@@ -396,7 +396,7 @@ export const registreIntegrationStatus: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("nom_integration", "Nom integration", "Integration name"),
     col("url_testee", "URL testee", "Tested URL"),
     col("date_dernier_test", "Dernier test", "Last test"),
@@ -405,7 +405,7 @@ export const registreIntegrationStatus: ConfigRegistre = {
     col("message_erreur", "Message erreur", "Error message"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("nom_integration", "Nom integration", "Integration name"),
     txt("url_testee", "URL testee", "Tested URL"),
     dtx("date_dernier_test", "Dernier test", "Last test"),

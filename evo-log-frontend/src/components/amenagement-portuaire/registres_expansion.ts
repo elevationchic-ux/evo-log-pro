@@ -12,40 +12,40 @@ import { registreAPI } from '@/lib/api-client';
 
 const api = registreAPI("amenagement-portuaire");
 
-function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
-  return { key, header, headerEn, ...opts } as ColonneRegistre;
+function col(name: string, label: string, labelEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
+  return { name, label, labelEn, ...opts } as ColonneRegistre;
 }
 
-function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;
+function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;
 }
 
-function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;
+function num(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "nombre", ...opts } as ChampRegistre;
 }
 
-function dt(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "date" } as ChampRegistre;
+function dt(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function dtx(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;
+function dtx(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function area(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "textarea" } as ChampRegistre;
+function area(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "zone" } as ChampRegistre;
 }
 
-function chk(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;
+function chk(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "booleen" } as ChampRegistre;
 }
 
-function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
+function sel(name: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
 }
 
-function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
+function filtreSel(name: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
 }
 
 export const registreConstructionProgress: ConfigRegistre = {
@@ -65,7 +65,7 @@ export const registreConstructionProgress: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("marche_id", "Marche", "Contract"),
     col("lot", "Lot", "Lot"),
     col("avancement_pct", "Avancement %", "Progress %"),
@@ -74,7 +74,7 @@ export const registreConstructionProgress: ConfigRegistre = {
     col("observateur", "Observateur", "Observer"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("marche_id", "Marche", "Contract"),
     txt("lot", "Lot", "Lot"),
     num("avancement_pct", "Avancement %", "Progress %"),
@@ -102,7 +102,7 @@ export const registreInfrastructureMaintenance: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("ouvrage_id", "Ouvrage", "Structure"),
     col("type_intervention", "Type intervention", "Intervention type"),
     col("frequence_mois", "Frequence (mois)", "Frequency (months)"),
@@ -111,7 +111,7 @@ export const registreInfrastructureMaintenance: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("ouvrage_id", "Ouvrage", "Structure"),
     sel("type_intervention", "Type intervention", "Intervention type", "type_intervention"),
     num("frequence_mois", "Frequence (mois)", "Frequency (months)"),
@@ -139,7 +139,7 @@ export const registreIspsRecord: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("niveau_isps", "Niveau ISPS", "ISPS level"),
     col("date_application", "Application", "Applied date"),
     col("motif", "Motif", "Reason"),
@@ -147,7 +147,7 @@ export const registreIspsRecord: ConfigRegistre = {
     col("date_levee", "Levee", "Lift date"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     sel("niveau_isps", "Niveau ISPS", "ISPS level", "niveau_isps"),
     dtx("date_application", "Application", "Applied date"),
     txt("motif", "Motif", "Reason"),
@@ -174,7 +174,7 @@ export const registrePortPerception: ConfigRegistre = {
   unicite: "code_perception",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_perception", "Code", "Code", { searchable: true }),
+    col("code_perception", "Code", "Code"),
     col("intitule", "Intitule", "Title"),
     col("type_perception", "Type", "Type"),
     col("base_calcul", "Base calcul", "Calculation base"),
@@ -184,7 +184,7 @@ export const registrePortPerception: ConfigRegistre = {
     col("date_application", "Application", "Application date"),
   ],
   champs: [
-    txt("code_perception", "Code", "Code", { obligatoire: true }),
+    txt("code_perception", "Code", "Code", { requisCreation: true }),
     txt("intitule", "Intitule", "Title"),
     sel("type_perception", "Type", "Type", "type_perception"),
     txt("base_calcul", "Base calcul", "Calculation base"),
@@ -213,7 +213,7 @@ export const registreAnnualActivityReport: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("annee", "Annee", "Year"),
     col("tonnage_traite_t", "Tonnage traite (t)", "Tonnage handled (t)"),
     col("nb_escales", "Nb escales", "Call count"),
@@ -222,7 +222,7 @@ export const registreAnnualActivityReport: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("annee", "Annee", "Year"),
     num("tonnage_traite_t", "Tonnage traite (t)", "Tonnage handled (t)"),
     num("nb_escales", "Nb escales", "Call count"),
@@ -250,7 +250,7 @@ export const registreSigLayer: ConfigRegistre = {
   unicite: "code_couche",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_couche", "Code couche", "Layer code", { searchable: true }),
+    col("code_couche", "Code couche", "Layer code"),
     col("nom", "Nom", "Name"),
     col("type_couche", "Type couche", "Layer type"),
     col("projection", "Projection", "Projection"),
@@ -258,7 +258,7 @@ export const registreSigLayer: ConfigRegistre = {
     col("superficie_ha", "Superficie (ha)", "Area (ha)"),
   ],
   champs: [
-    txt("code_couche", "Code couche", "Layer code", { obligatoire: true }),
+    txt("code_couche", "Code couche", "Layer code", { requisCreation: true }),
     txt("nom", "Nom", "Name"),
     sel("type_couche", "Type couche", "Layer type", "type_couche"),
     txt("projection", "Projection", "Projection"),
@@ -285,7 +285,7 @@ export const registreDomainArchive: ConfigRegistre = {
   unicite: "cote_archive",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("cote_archive", "Cote archive", "Archive ref", { searchable: true }),
+    col("cote_archive", "Cote archive", "Archive ref"),
     col("titre", "Titre", "Title"),
     col("type_piece", "Type piece", "Document type"),
     col("periode_couverte", "Periode", "Period covered"),
@@ -294,7 +294,7 @@ export const registreDomainArchive: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("cote_archive", "Cote archive", "Archive ref", { obligatoire: true }),
+    txt("cote_archive", "Cote archive", "Archive ref", { requisCreation: true }),
     txt("titre", "Titre", "Title"),
     sel("type_piece", "Type piece", "Document type", "type_piece"),
     txt("periode_couverte", "Periode", "Period covered"),
@@ -322,7 +322,7 @@ export const registreAmenagementKpi: ConfigRegistre = {
   unicite: "code_kpi",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_kpi", "Code KPI", "KPI code", { searchable: true }),
+    col("code_kpi", "Code KPI", "KPI code"),
     col("intitule", "Intitule", "Title"),
     col("periode", "Periode", "Period"),
     col("valeur", "Valeur", "Value"),
@@ -331,7 +331,7 @@ export const registreAmenagementKpi: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("code_kpi", "Code KPI", "KPI code", { obligatoire: true }),
+    txt("code_kpi", "Code KPI", "KPI code", { requisCreation: true }),
     txt("intitule", "Intitule", "Title"),
     txt("periode", "Periode", "Period"),
     num("valeur", "Valeur", "Value"),

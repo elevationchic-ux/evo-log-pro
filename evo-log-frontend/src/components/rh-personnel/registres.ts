@@ -12,40 +12,40 @@ import { registreAPI } from '@/lib/api-client';
 
 const api = registreAPI("rh-personnel");
 
-function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
-  return { key, header, headerEn, ...opts } as ColonneRegistre;
+function col(name: string, label: string, labelEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
+  return { name, label, labelEn, ...opts } as ColonneRegistre;
 }
 
-function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;
+function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;
 }
 
-function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;
+function num(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "nombre", ...opts } as ChampRegistre;
 }
 
-function dt(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "date" } as ChampRegistre;
+function dt(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function dtx(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;
+function dtx(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function area(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "textarea" } as ChampRegistre;
+function area(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "zone" } as ChampRegistre;
 }
 
-function chk(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;
+function chk(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "booleen" } as ChampRegistre;
 }
 
-function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
+function sel(name: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
 }
 
-function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
+function filtreSel(name: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
 }
 
 export const registreRecruitment: ConfigRegistre = {
@@ -65,7 +65,7 @@ export const registreRecruitment: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("poste", "Poste", "Position"),
     col("departement", "Departement", "Department"),
     col("type_contrat", "Type contrat", "Contract type"),
@@ -75,7 +75,7 @@ export const registreRecruitment: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("poste", "Poste", "Position"),
     txt("departement", "Departement", "Department"),
     sel("type_contrat", "Type contrat", "Contract type", "type_contrat"),
@@ -104,7 +104,7 @@ export const registreTrainingPlan: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("intitule", "Intitule", "Title"),
     col("type_action", "Type", "Type"),
     col("organisme", "Organisme", "Provider"),
@@ -115,7 +115,7 @@ export const registreTrainingPlan: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("intitule", "Intitule", "Title"),
     sel("type_action", "Type", "Type", "type_action"),
     txt("organisme", "Organisme", "Provider"),
@@ -145,7 +145,7 @@ export const registrePerformanceReview: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("employe_id", "Employe", "Employee"),
     col("periode", "Periode", "Period"),
     col("date_entretien", "Date entretien", "Interview date"),
@@ -155,7 +155,7 @@ export const registrePerformanceReview: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("employe_id", "Employe", "Employee"),
     txt("periode", "Periode", "Period"),
     dt("date_entretien", "Date entretien", "Interview date"),
@@ -184,7 +184,7 @@ export const registreDisciplinaryCase: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("employe_id", "Employe", "Employee"),
     col("date_fait", "Date du fait", "Incident date"),
     col("type_sanction", "Type sanction", "Sanction type"),
@@ -194,7 +194,7 @@ export const registreDisciplinaryCase: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("employe_id", "Employe", "Employee"),
     dt("date_fait", "Date du fait", "Incident date"),
     sel("type_sanction", "Type sanction", "Sanction type", "type_sanction"),
@@ -223,7 +223,7 @@ export const registreOrgUnit: ConfigRegistre = {
   unicite: "code_unite",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_unite", "Code unite", "Unit code", { searchable: true }),
+    col("code_unite", "Code unite", "Unit code"),
     col("nom", "Nom", "Name"),
     col("parent_code", "Code parent", "Parent code"),
     col("type_unite", "Type", "Type"),
@@ -231,7 +231,7 @@ export const registreOrgUnit: ConfigRegistre = {
     col("effectif", "Effectif", "Headcount"),
   ],
   champs: [
-    txt("code_unite", "Code unite", "Unit code", { obligatoire: true }),
+    txt("code_unite", "Code unite", "Unit code", { requisCreation: true }),
     txt("nom", "Nom", "Name"),
     txt("parent_code", "Code parent", "Parent code"),
     sel("type_unite", "Type", "Type", "type_unite"),
@@ -258,7 +258,7 @@ export const registreWorkforcePlan: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("exercice", "Exercice", "Fiscal year"),
     col("mois", "Mois", "Month"),
     col("masse_salariale_prevue_xaf", "Masse prevue", "Forecast payroll"),
@@ -267,7 +267,7 @@ export const registreWorkforcePlan: ConfigRegistre = {
     col("hypothese_inflation_pct", "Inflation %", "Inflation %"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("exercice", "Exercice", "Fiscal year"),
     txt("mois", "Mois", "Month"),
     num("masse_salariale_prevue_xaf", "Masse prevue", "Forecast payroll"),
@@ -295,7 +295,7 @@ export const registreEmploymentContract: ConfigRegistre = {
   unicite: "numero_contrat",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_contrat", "Numero contrat", "Contract number", { searchable: true }),
+    col("numero_contrat", "Numero contrat", "Contract number"),
     col("employe_id", "Employe", "Employee"),
     col("type_contrat", "Type contrat", "Contract type"),
     col("date_debut", "Debut", "Start"),
@@ -304,7 +304,7 @@ export const registreEmploymentContract: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("numero_contrat", "Numero contrat", "Contract number", { obligatoire: true }),
+    txt("numero_contrat", "Numero contrat", "Contract number", { requisCreation: true }),
     num("employe_id", "Employe", "Employee"),
     sel("type_contrat", "Type contrat", "Contract type", "type_contrat"),
     dt("date_debut", "Debut", "Start"),
@@ -332,7 +332,7 @@ export const registreEmployeeBenefit: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("employe_id", "Employe", "Employee"),
     col("type_avantage", "Type avantage", "Benefit type"),
     col("montant_annuel_xaf", "Montant annuel", "Annual amount"),
@@ -341,7 +341,7 @@ export const registreEmployeeBenefit: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("employe_id", "Employe", "Employee"),
     sel("type_avantage", "Type avantage", "Benefit type", "type_avantage"),
     num("montant_annuel_xaf", "Montant annuel", "Annual amount"),
@@ -369,7 +369,7 @@ export const registreEmployeeExit: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("employe_id", "Employe", "Employee"),
     col("type_depart", "Type depart", "Exit type"),
     col("date_depart", "Date depart", "Exit date"),
@@ -379,7 +379,7 @@ export const registreEmployeeExit: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("employe_id", "Employe", "Employee"),
     sel("type_depart", "Type depart", "Exit type", "type_depart"),
     dt("date_depart", "Date depart", "Exit date"),
@@ -408,7 +408,7 @@ export const registreAttendanceDevice: ConfigRegistre = {
   unicite: "code_terminal",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_terminal", "Code terminal", "Terminal code", { searchable: true }),
+    col("code_terminal", "Code terminal", "Terminal code"),
     col("lieu", "Lieu", "Location"),
     col("type_terminal", "Type", "Type"),
     col("adresse_ip", "Adresse IP", "IP address"),
@@ -416,7 +416,7 @@ export const registreAttendanceDevice: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("code_terminal", "Code terminal", "Terminal code", { obligatoire: true }),
+    txt("code_terminal", "Code terminal", "Terminal code", { requisCreation: true }),
     txt("lieu", "Lieu", "Location"),
     sel("type_terminal", "Type", "Type", "type_terminal"),
     txt("adresse_ip", "Adresse IP", "IP address"),
@@ -443,7 +443,7 @@ export const registreLeaveQuota: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("employe_id", "Employe", "Employee"),
     col("exercice", "Exercice", "Fiscal year"),
     col("droit_initial_jours", "Droit initial (j)", "Initial entitlement (d)"),
@@ -452,7 +452,7 @@ export const registreLeaveQuota: ConfigRegistre = {
     col("solde_actuel", "Solde actuel", "Current balance"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("employe_id", "Employe", "Employee"),
     num("exercice", "Exercice", "Fiscal year"),
     num("droit_initial_jours", "Droit initial (j)", "Initial entitlement (d)"),
@@ -480,7 +480,7 @@ export const registreEmployeeSkill: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("employe_id", "Employe", "Employee"),
     col("competence", "Competence", "Skill"),
     col("niveau", "Niveau", "Level"),
@@ -488,7 +488,7 @@ export const registreEmployeeSkill: ConfigRegistre = {
     col("date_expiration", "Expiration", "Expiry"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("employe_id", "Employe", "Employee"),
     txt("competence", "Competence", "Skill"),
     sel("niveau", "Niveau", "Level", "niveau"),
@@ -515,7 +515,7 @@ export const registreHrReport: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("periode_debut", "Debut", "Start"),
     col("periode_fin", "Fin", "End"),
     col("effectif_debut", "Effectif debut", "Opening headcount"),
@@ -525,7 +525,7 @@ export const registreHrReport: ConfigRegistre = {
     col("masse_salariale_xaf", "Masse salariale", "Payroll"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     dt("periode_debut", "Debut", "Start"),
     dt("periode_fin", "Fin", "End"),
     num("effectif_debut", "Effectif debut", "Opening headcount"),

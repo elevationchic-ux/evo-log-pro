@@ -12,40 +12,40 @@ import { registreAPI } from '@/lib/api-client';
 
 const api = registreAPI("parc-vehicules");
 
-function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
-  return { key, header, headerEn, ...opts } as ColonneRegistre;
+function col(name: string, label: string, labelEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
+  return { name, label, labelEn, ...opts } as ColonneRegistre;
 }
 
-function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;
+function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;
 }
 
-function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;
+function num(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "nombre", ...opts } as ChampRegistre;
 }
 
-function dt(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "date" } as ChampRegistre;
+function dt(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function dtx(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;
+function dtx(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function area(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "textarea" } as ChampRegistre;
+function area(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "zone" } as ChampRegistre;
 }
 
-function chk(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;
+function chk(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "booleen" } as ChampRegistre;
 }
 
-function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
+function sel(name: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
 }
 
-function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
+function filtreSel(name: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
 }
 
 export const registreVehicleInventory: ConfigRegistre = {
@@ -65,7 +65,7 @@ export const registreVehicleInventory: ConfigRegistre = {
   unicite: "numero_serie",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_serie", "Numero serie", "Serial number", { searchable: true }),
+    col("numero_serie", "Numero serie", "Serial number"),
     col("marque", "Marque", "Brand"),
     col("modele", "Modele", "Model"),
     col("annee", "Annee", "Year"),
@@ -76,7 +76,7 @@ export const registreVehicleInventory: ConfigRegistre = {
     col("valeur_argent_xaf", "Valeur veneur", "Market value"),
   ],
   champs: [
-    txt("numero_serie", "Numero serie", "Serial number", { obligatoire: true }),
+    txt("numero_serie", "Numero serie", "Serial number", { requisCreation: true }),
     txt("marque", "Marque", "Brand"),
     txt("modele", "Modele", "Model"),
     num("annee", "Annee", "Year"),
@@ -106,7 +106,7 @@ export const registreTyreRecord: ConfigRegistre = {
   unicite: "numero_gomme",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_gomme", "Numero gomme", "Tyre number", { searchable: true }),
+    col("numero_gomme", "Numero gomme", "Tyre number"),
     col("vehicule_id", "Vehicule", "Vehicle"),
     col("dimension", "Dimension", "Size"),
     col("marque", "Marque", "Brand"),
@@ -117,7 +117,7 @@ export const registreTyreRecord: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("numero_gomme", "Numero gomme", "Tyre number", { obligatoire: true }),
+    txt("numero_gomme", "Numero gomme", "Tyre number", { requisCreation: true }),
     num("vehicule_id", "Vehicule", "Vehicle"),
     txt("dimension", "Dimension", "Size"),
     txt("marque", "Marque", "Brand"),
@@ -147,7 +147,7 @@ export const registreSparePart: ConfigRegistre = {
   unicite: "code_piece",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_piece", "Code piece", "Part code", { searchable: true }),
+    col("code_piece", "Code piece", "Part code"),
     col("designation", "Designation", "Description"),
     col("referencence_constructeur", "Ref. constructeur", "Manufacturer ref"),
     col("famille", "Famille", "Family"),
@@ -158,7 +158,7 @@ export const registreSparePart: ConfigRegistre = {
     col("compatibilites", "Compatibilites", "Compatibilities"),
   ],
   champs: [
-    txt("code_piece", "Code piece", "Part code", { obligatoire: true }),
+    txt("code_piece", "Code piece", "Part code", { requisCreation: true }),
     txt("designation", "Designation", "Description"),
     txt("referencence_constructeur", "Ref. constructeur", "Manufacturer ref"),
     sel("famille", "Famille", "Family", "famille"),
@@ -188,7 +188,7 @@ export const registreWorkshopAppointment: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("vehicule_id", "Vehicule", "Vehicle"),
     col("date_horaire", "Date heure", "Date time"),
     col("type_intervention", "Type", "Type"),
@@ -199,7 +199,7 @@ export const registreWorkshopAppointment: ConfigRegistre = {
     col("notes", "Notes", "Notes"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("vehicule_id", "Vehicule", "Vehicle"),
     dtx("date_horaire", "Date heure", "Date time"),
     sel("type_intervention", "Type", "Type", "type_intervention"),
@@ -229,7 +229,7 @@ export const registreInsuranceClaim: ConfigRegistre = {
   unicite: "numero_sinistre",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_sinistre", "Numero sinistre", "Claim number", { searchable: true }),
+    col("numero_sinistre", "Numero sinistre", "Claim number"),
     col("vehicule_id", "Vehicule", "Vehicle"),
     col("date_sinistre", "Date sinistre", "Incident date"),
     col("type_sinistre", "Type", "Type"),
@@ -240,7 +240,7 @@ export const registreInsuranceClaim: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("numero_sinistre", "Numero sinistre", "Claim number", { obligatoire: true }),
+    txt("numero_sinistre", "Numero sinistre", "Claim number", { requisCreation: true }),
     num("vehicule_id", "Vehicule", "Vehicle"),
     dt("date_sinistre", "Date sinistre", "Incident date"),
     sel("type_sinistre", "Type", "Type", "type_sinistre"),
@@ -270,7 +270,7 @@ export const registreRegistrationRecord: ConfigRegistre = {
   unicite: "numero_immatriculation",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_immatriculation", "Immatriculation", "Plate", { searchable: true }),
+    col("numero_immatriculation", "Immatriculation", "Plate"),
     col("vehicule_id", "Vehicule", "Vehicle"),
     col("proprietaire", "Proprietaire", "Owner"),
     col("date_emission", "Date emission", "Issue date"),
@@ -279,7 +279,7 @@ export const registreRegistrationRecord: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("numero_immatriculation", "Immatriculation", "Plate", { obligatoire: true }),
+    txt("numero_immatriculation", "Immatriculation", "Plate", { requisCreation: true }),
     num("vehicule_id", "Vehicule", "Vehicle"),
     txt("proprietaire", "Proprietaire", "Owner"),
     dt("date_emission", "Date emission", "Issue date"),
@@ -307,7 +307,7 @@ export const registreTechnicalVisit: ConfigRegistre = {
   unicite: "numero_pv",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_pv", "Numero PV", "Report number", { searchable: true }),
+    col("numero_pv", "Numero PV", "Report number"),
     col("vehicule_id", "Vehicule", "Vehicle"),
     col("date_visite", "Date visite", "Inspection date"),
     col("centre_controle", "Centre controle", "Inspection center"),
@@ -317,7 +317,7 @@ export const registreTechnicalVisit: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("numero_pv", "Numero PV", "Report number", { obligatoire: true }),
+    txt("numero_pv", "Numero PV", "Report number", { requisCreation: true }),
     num("vehicule_id", "Vehicule", "Vehicle"),
     dt("date_visite", "Date visite", "Inspection date"),
     txt("centre_controle", "Centre controle", "Inspection center"),
@@ -346,7 +346,7 @@ export const registreFuelConsumption: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("vehicule_id", "Vehicule", "Vehicle"),
     col("date", "Date", "Date"),
     col("litres", "Litres", "Litres"),
@@ -357,7 +357,7 @@ export const registreFuelConsumption: ConfigRegistre = {
     col("carburant", "Carburant", "Fuel type"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("vehicule_id", "Vehicule", "Vehicle"),
     dt("date", "Date", "Date"),
     num("litres", "Litres", "Litres"),
@@ -387,7 +387,7 @@ export const registreVehicleLifecycle: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("vehicule_id", "Vehicule", "Vehicle"),
     col("date_acquisition", "Acquisition", "Acquisition"),
     col("date_reforme", "Reforme", "Decommission"),
@@ -397,7 +397,7 @@ export const registreVehicleLifecycle: ConfigRegistre = {
     col("valeur_recuperation_xaf", "Valeur recuperation", "Recovery value"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("vehicule_id", "Vehicule", "Vehicle"),
     dt("date_acquisition", "Acquisition", "Acquisition"),
     dt("date_reforme", "Reforme", "Decommission"),
@@ -426,7 +426,7 @@ export const registreCostAnalysis: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("vehicule_id", "Vehicule", "Vehicle"),
     col("periode", "Periode", "Period"),
     col("cout_carburant_xaf", "Carburant", "Fuel"),
@@ -436,7 +436,7 @@ export const registreCostAnalysis: ConfigRegistre = {
     col("cout_total_xaf", "Cout total", "Total cost"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("vehicule_id", "Vehicule", "Vehicle"),
     txt("periode", "Periode", "Period"),
     num("cout_carburant_xaf", "Carburant", "Fuel"),

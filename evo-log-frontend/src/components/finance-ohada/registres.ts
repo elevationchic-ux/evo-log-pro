@@ -12,40 +12,40 @@ import { registreAPI } from '@/lib/api-client';
 
 const api = registreAPI("finance-ohada");
 
-function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
-  return { key, header, headerEn, ...opts } as ColonneRegistre;
+function col(name: string, label: string, labelEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {
+  return { name, label, labelEn, ...opts } as ColonneRegistre;
 }
 
-function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;
+function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;
 }
 
-function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
-  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;
+function num(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
+  return { name, label, labelEn, type: "nombre", ...opts } as ChampRegistre;
 }
 
-function dt(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "date" } as ChampRegistre;
+function dt(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function dtx(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;
+function dtx(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "date" } as ChampRegistre;
 }
 
-function area(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "textarea" } as ChampRegistre;
+function area(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "zone" } as ChampRegistre;
 }
 
-function chk(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;
+function chk(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "booleen" } as ChampRegistre;
 }
 
-function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
+function sel(name: string, label: string, labelEn: string, nomKey: string): ChampRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;
 }
 
-function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
-  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
+function filtreSel(name: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {
+  return { name, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;
 }
 
 export const registreMultiyearBudget: ConfigRegistre = {
@@ -65,7 +65,7 @@ export const registreMultiyearBudget: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("exercice_debut", "Exercice debut", "Start year"),
     col("exercice_fin", "Exercice fin", "End year"),
     col("montant_prevu_xaf", "Montant prevu", "Planned amount"),
@@ -74,7 +74,7 @@ export const registreMultiyearBudget: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("exercice_debut", "Exercice debut", "Start year"),
     num("exercice_fin", "Exercice fin", "End year"),
     num("montant_prevu_xaf", "Montant prevu", "Planned amount"),
@@ -102,7 +102,7 @@ export const registreCreditFacility: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("banque", "Banque", "Bank"),
     col("type_facilite", "Type", "Type"),
     col("montant_autorise_xaf", "Montant autorise", "Approved amount"),
@@ -113,7 +113,7 @@ export const registreCreditFacility: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("banque", "Banque", "Bank"),
     sel("type_facilite", "Type", "Type", "type_facilite"),
     num("montant_autorise_xaf", "Montant autorise", "Approved amount"),
@@ -143,7 +143,7 @@ export const registreCashPool: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("entite_pilote", "Entite pilote", "Lead entity"),
     col("entites_participantes", "Entites participantes", "Participating entities"),
     col("montant_pool_xaf", "Montant pool", "Pool amount"),
@@ -152,7 +152,7 @@ export const registreCashPool: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("entite_pilote", "Entite pilote", "Lead entity"),
     txt("entites_participantes", "Entites participantes", "Participating entities"),
     num("montant_pool_xaf", "Montant pool", "Pool amount"),
@@ -180,7 +180,7 @@ export const registreFinancialInvestment: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("type_placement", "Type placement", "Investment type"),
     col("institution", "Institution", "Institution"),
     col("montant_place_xaf", "Montant place", "Amount placed"),
@@ -190,7 +190,7 @@ export const registreFinancialInvestment: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     sel("type_placement", "Type placement", "Investment type", "type_placement"),
     txt("institution", "Institution", "Institution"),
     num("montant_place_xaf", "Montant place", "Amount placed"),
@@ -219,7 +219,7 @@ export const registreFxExposure: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("devise", "Devise", "Currency"),
     col("exposition_nette", "Exposition nette", "Net exposure"),
     col("valeur_couverte", "Valeur couverte", "Hedged amount"),
@@ -229,7 +229,7 @@ export const registreFxExposure: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("devise", "Devise", "Currency"),
     num("exposition_nette", "Exposition nette", "Net exposure"),
     num("valeur_couverte", "Valeur couverte", "Hedged amount"),
@@ -258,7 +258,7 @@ export const registrePaymentSchedule: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("fournisseur_id", "Fournisseur", "Supplier"),
     col("facture_id", "Facture", "Invoice"),
     col("montant_echeance_xaf", "Montant", "Amount"),
@@ -267,7 +267,7 @@ export const registrePaymentSchedule: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("fournisseur_id", "Fournisseur", "Supplier"),
     num("facture_id", "Facture", "Invoice"),
     num("montant_echeance_xaf", "Montant", "Amount"),
@@ -295,7 +295,7 @@ export const registreExpenseReport: ConfigRegistre = {
   unicite: "numero_note_frais",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("numero_note_frais", "Numero", "Number", { searchable: true }),
+    col("numero_note_frais", "Numero", "Number"),
     col("employe_id", "Employe", "Employee"),
     col("periode", "Periode", "Period"),
     col("montant_total_xaf", "Montant total", "Total amount"),
@@ -305,7 +305,7 @@ export const registreExpenseReport: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("numero_note_frais", "Numero", "Number", { obligatoire: true }),
+    txt("numero_note_frais", "Numero", "Number", { requisCreation: true }),
     num("employe_id", "Employe", "Employee"),
     txt("periode", "Periode", "Period"),
     num("montant_total_xaf", "Montant total", "Total amount"),
@@ -334,7 +334,7 @@ export const registrePettyCashBox: ConfigRegistre = {
   unicite: "code_regie",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("code_regie", "Code regie", "Float code", { searchable: true }),
+    col("code_regie", "Code regie", "Float code"),
     col("lieu", "Lieu", "Location"),
     col("responsable", "Responsable", "Owner"),
     col("fond_initial_xaf", "Fond initial", "Initial float"),
@@ -343,7 +343,7 @@ export const registrePettyCashBox: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("code_regie", "Code regie", "Float code", { obligatoire: true }),
+    txt("code_regie", "Code regie", "Float code", { requisCreation: true }),
     txt("lieu", "Lieu", "Location"),
     txt("responsable", "Responsable", "Owner"),
     num("fond_initial_xaf", "Fond initial", "Initial float"),
@@ -371,7 +371,7 @@ export const registreBankGuarantee: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("banque_emettrice", "Banque emettrice", "Issuing bank"),
     col("beneficiaire", "Beneficiaire", "Beneficiary"),
     col("type_garantie", "Type", "Type"),
@@ -382,7 +382,7 @@ export const registreBankGuarantee: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     txt("banque_emettrice", "Banque emettrice", "Issuing bank"),
     txt("beneficiaire", "Beneficiaire", "Beneficiary"),
     sel("type_garantie", "Type", "Type", "type_garantie"),
@@ -412,7 +412,7 @@ export const registreLeaseContract: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("type_contrat", "Type", "Type"),
     col("bien_concerne", "Bien concerne", "Asset"),
     col("loyer_mensuel_xaf", "Loyer mensuel", "Monthly payment"),
@@ -422,7 +422,7 @@ export const registreLeaseContract: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     sel("type_contrat", "Type", "Type", "type_contrat"),
     txt("bien_concerne", "Bien concerne", "Asset"),
     num("loyer_mensuel_xaf", "Loyer mensuel", "Monthly payment"),
@@ -451,7 +451,7 @@ export const registreCashForecast: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("horizon_mois", "Horizon (mois)", "Horizon (months)"),
     col("entree_attendue_xaf", "Entrees attendues", "Expected inflow"),
     col("sortie_attendue_xaf", "Sorties attendues", "Expected outflow"),
@@ -460,7 +460,7 @@ export const registreCashForecast: ConfigRegistre = {
     col("date_revision", "Revision", "Revision date"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     num("horizon_mois", "Horizon (mois)", "Horizon (months)"),
     num("entree_attendue_xaf", "Entrees attendues", "Expected inflow"),
     num("sortie_attendue_xaf", "Sorties attendues", "Expected outflow"),
@@ -488,7 +488,7 @@ export const registreTreasuryAlert: ConfigRegistre = {
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [
-    col("reference", "Reference", "Reference", { searchable: true }),
+    col("reference", "Reference", "Reference"),
     col("type_alerte", "Type", "Type"),
     col("seuil_declencheur", "Seuil declencheur", "Trigger threshold"),
     col("valeur_constatee", "Valeur constatee", "Observed value"),
@@ -497,7 +497,7 @@ export const registreTreasuryAlert: ConfigRegistre = {
     col("statut", "Statut", "Status"),
   ],
   champs: [
-    txt("reference", "Reference", "Reference", { obligatoire: true }),
+    txt("reference", "Reference", "Reference", { requisCreation: true }),
     sel("type_alerte", "Type", "Type", "type_alerte"),
     num("seuil_declencheur", "Seuil declencheur", "Trigger threshold"),
     num("valeur_constatee", "Valeur constatee", "Observed value"),
