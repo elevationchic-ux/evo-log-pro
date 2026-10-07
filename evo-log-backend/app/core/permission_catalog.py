@@ -84,7 +84,22 @@ DOMAINS: Dict[str, Dict] = {
     "amenagement_portuaire": {
         "label": "Amenagement portuaire & domaine public",
         "modules": {
-            "amenagement": {"label": "Amenagement portuaire (Douala, Kribi, Limbe)", "sub_modules": {"place": ["read", "create", "modify"], "schema_directeur": ["read", "create", "modify", "approve", "export"], "projet": ACTIONS, "programmation": ["read", "create", "modify", "approve", "export"], "marche": ACTIONS, "titre_domanial": ACTIONS, "concession": ["read", "create", "modify", "approve", "export"], "infrastructure": ACTIONS, "dragage": ACTIONS, "autorisation": ["read", "create", "modify", "approve", "export"]}},
+            "amenagement": {"label": "Amenagement portuaire (Douala, Kribi, Limbe)", "sub_modules": {"place": ["read", "create", "modify"], "schema_directeur": ["read", "create", "modify", "approve", "export"], "projet": ACTIONS, "programmation": ["read", "create", "modify", "approve", "export"], "marche": ACTIONS, "titre_domanial": ACTIONS, "concession": ["read", "create", "modify", "approve", "export"], "infrastructure": ACTIONS, "dragage": ACTIONS, "autorisation": ["read", "create", "modify", "approve", "export"],
+                # Expansion du departement (routeur amenagement_extra_deep) :
+                # registres operationnels reels du domaine. Chaque objet est une
+                # piece a valeur documentaire -> le routeur garde le DELETE sous
+                # le code « modify » (corriger, jamais effacer), d'ou read/create/
+                # modify seulement. CHEF_AMENAGEMENT_PORTUAIRE (« amenagement.*.* »)
+                # pilote, INGENIEUR et AUDITEUR (« amenagement.*.read ») consultent.
+                "nomenclature": ["read"],
+                "construction_tracking": ["read", "create", "modify"],
+                "infrastructure_maintenance": ["read", "create", "modify"],
+                "port_security_isps": ["read", "create", "modify"],
+                "port_pricing": ["read", "create", "modify"],
+                "activity_report": ["read", "create", "modify"],
+                "domain_cartography": ["read", "create", "modify"],
+                "archive_management": ["read", "create", "modify"],
+                "development_kpi": ["read", "create", "modify"]}},
         },
     },
     "transport": {
