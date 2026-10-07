@@ -32,7 +32,18 @@ DOMAINS: Dict[str, Dict] = {
             # quotidien sont un objet separate), formation, indicateur,
             # rapport annuel, enregistrements generiques, permis de travail
             # et consultation de la matrice IMDG.
-            "qhse": {"label": "QHSE (qualite, hygiene, securite, environnement)", "sub_modules": {"risque": ["create", "modify"], "prevention": ["create", "modify"], "epi": ["create", "modify"], "accident": ["read", "create", "modify"], "investigation": ["read", "create", "modify"], "certification": ["read", "create", "modify"], "audit": ["read", "create", "modify"], "haccp": ["create", "modify"], "controle": ["create", "modify"], "formation": ["read", "create", "modify"], "indicateur": ["create", "modify"], "rapport": ["read"], "enregistrement": ["read", "create", "modify", "delete"], "permis": ["read", "create"], "imdg": ["read"]}},
+            "qhse": {"label": "QHSE (qualite, hygiene, securite, environnement)", "sub_modules": {"risque": ["create", "modify"], "prevention": ["create", "modify"], "epi": ["create", "modify"], "accident": ["read", "create", "modify"], "investigation": ["read", "create", "modify"], "certification": ["read", "create", "modify"], "audit": ["read", "create", "modify"], "haccp": ["create", "modify"], "controle": ["create", "modify"], "formation": ["read", "create", "modify"], "indicateur": ["create", "modify"], "rapport": ["read"], "enregistrement": ["read", "create", "modify", "delete"], "permis": ["read", "create"], "imdg": ["read"],
+                # Expansion QHSE approfondi (routeur qhse_deep). Objets reels du systeme
+                # de management (evaluation de risque, action corrective, plan d'urgence,
+                # environnement, sante au travail, suivi EPI, conformite reglementaire,
+                # audit qualite, revue de direction, dechets, securite chimique). QHSE
+                # (« qhse.*.* ») porte, AUDITEUR (« qhse.*.read ») lit.
+                "nomenclature": ["read"], "risk_assessment": ["read", "create", "modify"],
+                "corrective_action": ["read", "create", "modify"], "emergency_plan": ["read", "create", "modify"],
+                "environmental": ["read", "create", "modify"], "occupational_health": ["read", "create", "modify"],
+                "ppe_tracking": ["read", "create", "modify"], "regulatory_compliance": ["read", "create", "modify"],
+                "quality_audit": ["read", "create", "modify"], "management_review": ["read", "create", "modify"],
+                "waste_management": ["read", "create", "modify"], "chemical_safety": ["read", "create", "modify"]}},
             "settings": {"label": "Parametres entreprise", "sub_modules": {"generaux": ["read", "modify"], "communs": ["read", "modify"]}},
         },
     },
@@ -64,8 +75,32 @@ DOMAINS: Dict[str, Dict] = {
             # portuaires, dockers)  les plaquer sur « escale » aurait ete du
             # bricolage et un wildcard acconage.*.* sans nuance.
             "acconage": {"label": "Acconage", "sub_modules": {"escale": ACTIONS, "manifeste": ["read", "create", "modify"], "stevedoring": ACTIONS, "navire": ["read", "create", "modify"], "stowage": ["create", "modify", "approve"], "moyen": ["read", "create", "modify"], "reservation": ["create", "modify"], "conteneur": ["create", "modify"], "connaissement": ["create", "modify"], "packing_list": ["create"], "frais": ["read", "create", "modify"], "nettoyage": ["create", "modify"], "dockers": ["read", "create", "modify", "delete", "approve"]}},
-            "transit": {"label": "Transit & Douane", "sub_modules": {"dossier": ACTIONS, "declaration": ACTIONS, "tarification": ["read", "modify", "approve"]}},
-            "magasin": {"label": "Magasin (WMS)", "sub_modules": {"stock": ["read", "modify"], "mouvement": ACTIONS, "inventaire": ["read", "create", "modify", "approve"], "picking": ["read", "create", "modify"]}},
+            "transit": {"label": "Transit & Douane", "sub_modules": {"dossier": ACTIONS, "declaration": ACTIONS, "tarification": ["read", "modify", "approve"],
+                # Expansion transit-douane approfondi (routeur transit_deep). Sous-modules
+                # alignes sur les objets reels du circuit (regime, valeur, droits,
+                # inspection, garantie, classification SH, marchandise prohibee, ...).
+                # Tous en lecture/creation/modification ; TRANSIT_PRINCIPAL (« transit.*.* »)
+                # pilote, DECLARANT garde sa liste explicite, AUDITEUR (« transit.*.read ») lit.
+                "nomenclature": ["read"], "customs_regime": ["read", "create", "modify"],
+                "customs_valuation": ["read", "create", "modify"], "duty_payment": ["read", "create", "modify"],
+                "export_declaration": ["read", "create", "modify"], "physical_inspection": ["read", "create", "modify"],
+                "transit_guarantee": ["read", "create", "modify"], "bonded_warehouse": ["read", "create", "modify"],
+                "hs_classification": ["read", "create", "modify"], "origin_certificate": ["read", "create", "modify"],
+                "prohibited_good": ["read", "create", "modify"], "trader_registration": ["read", "create", "modify"],
+                "tariff_reference": ["read", "create", "modify"]}},
+            "magasin": {"label": "Magasin (WMS)", "sub_modules": {"stock": ["read", "modify"], "mouvement": ACTIONS, "inventaire": ["read", "create", "modify", "approve"], "picking": ["read", "create", "modify"],
+                # Expansion WMS approfondi (routeur magasin_deep). Registres reels du
+                # depot (catalogue article/fournisseur, peremption FEFO, serial/lot,
+                # controle qualite, retours, consignation, valorisation, alertes,
+                # analytic). CHEF_MAGASIN (« magasin.*.* ») pilote, MAGASINIER garde sa
+                # liste explicite sans validation, AUDITEUR (« magasin.*.read ») lit.
+                "nomenclature": ["read"], "article_catalog": ["read", "create", "modify"],
+                "supplier_catalog": ["read", "create", "modify"], "packing_unit": ["read", "create", "modify"],
+                "expiry_tracking": ["read", "create", "modify"], "serial_tracking": ["read", "create", "modify"],
+                "consignment_stock": ["read", "create", "modify"], "quality_control": ["read", "create", "modify"],
+                "returns_management": ["read", "create", "modify"], "stock_alert": ["read", "create", "modify"],
+                "stock_valuation": ["read", "create", "modify"], "purchase_order": ["read", "create", "modify"],
+                "wms_analytics": ["read", "create", "modify"]}},
             "port": {"label": "Operations portuaires", "sub_modules": {"quai": ACTIONS, "pesee": ["read", "create"], "zone": ACTIONS}},
         },
     },
