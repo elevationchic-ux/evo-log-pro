@@ -1,18 +1,14 @@
 import traceback
 try:
-    import app.schemas.maintenance_deep as sm
-    import app.schemas.tracabilite_deep as st
-    from app.routers.v1 import maintenance_deep as rm, tracabilite_deep as rt
-    print("schemas maintenance classes:", sum(1 for n in dir(sm) if n.endswith(("Create","Update","Out"))))
-    print("schemas tracabilite classes:", sum(1 for n in dir(st) if n.endswith(("Create","Update","Out"))))
-    routes_m = list(rm.router.routes)
-    routes_t = list(rt.router.routes)
-    print("routes maintenance:", len(routes_m), "expected:", 25*4+1)
-    print("routes tracabilite:", len(routes_t), "expected:", 19*4+1)
-    # Print first 3 route paths
-    for r in routes_m[:3]:
-        print("M:", r.path, sorted(r.methods))
-    for r in routes_t[:3]:
-        print("T:", r.path, sorted(r.methods))
+    import app.main
+    from app.main import app
+    routes_m = [r for r in app.routes if hasattr(r, 'path') and '/maintenance-industrielle' in r.path]
+    routes_t = [r for r in app.routes if hasattr(r, 'path') and '/tracabilite' in r.path]
+    print("maintenance routes mounted:", len(routes_m), "expected 101")
+    print("tracabilite routes mounted:", len(routes_t), "expected 77")
+    if routes_m:
+        print("sample maint:", sorted({r.path for r in routes_m})[:5])
+    if routes_t:
+        print("sample trace:", sorted({r.path for r in routes_t})[:5])
 except Exception:
     traceback.print_exc()
