@@ -45,7 +45,7 @@ def _codes_role(nom):
 # ── 1. Parite catalogue ──────────────────────────────────────────────────────
 def test_tous_les_codes_du_routeur_existent_au_catalogue():
     codes = _codes_utilises()
-    assert len(codes) == 34, f"attendu 34 codes distincts, trouve {len(codes)}"
+    assert len(codes) == 35, f"attendu 35 codes distincts, trouve {len(codes)}"
     catalogue = {row[0] for row in iter_permission_rows()}
     fantomes = [c for c in codes if c not in catalogue]
     assert not fantomes, f"codes require_perm inconnus du catalogue: {fantomes}"
@@ -56,14 +56,14 @@ def test_tous_les_codes_du_routeur_existent_au_catalogue():
 # quai, demande un permis, consulte l'IMDG et signale un risque. Rien d'autre.
 _CHEF_AUTORISES = (
     "qhse.accident.read", "qhse.accident.create", "qhse.accident.modify",
-    "qhse.permis.create", "qhse.imdg.read", "qhse.risque.create",
+    "qhse.permis.create", "qhse.permis.read", "qhse.imdg.read", "qhse.risque.create",
 )
-# AUDITEUR : lecture transversale uniquement (wildcard qhse.*.read). Les huit
-# codes *.read du module, aucune ecriture.
+# AUDITEUR : lecture transversale uniquement (wildcard qhse.*.read). Les codes
+# *.read du module, aucune ecriture.
 _AUDITEUR_AUTORISES = (
     "qhse.accident.read", "qhse.audit.read", "qhse.certification.read",
     "qhse.enregistrement.read", "qhse.formation.read", "qhse.imdg.read",
-    "qhse.investigation.read", "qhse.rapport.read",
+    "qhse.investigation.read", "qhse.permis.read", "qhse.rapport.read",
 )
 
 
@@ -205,20 +205,47 @@ def test_transit_principal_403_partout(client):
             app.dependency_overrides.pop(get_current_user, None)
 
 
-# -- Honnetete : les 3 ex-endpoints publics ne fabriquent plus ---------------
-def test_permis_travail_501_jamais_fausse_signature(client_officier):
-    # L'officier PORTE permis.create : la garde passe, puis la route refuse
-    # explicitement d'emettre un permis avec signatures inventees -> 501.
+# -- Honnetete : les ex-endpoints publics ne fabriquent plus rien -------------
+def test_permis_travail_refuse_champs_manquants_jamais_signature_inventee(client_officier):
+    # Permis REELlement persiste : la route exige type_permis, zone, description
+    # et n'invente AUCUNE signature. Un envoi incomplet est refuse (400), jamais
+    # un faux succes avec signatures fabriquees.
     r = client_officier.post(f"{BASE}/permis-travail", json={"type_permis": "PERMIS_DE_FEU"})
-    assert r.status_code == 501, r.text
-    assert "501" in r.text or "impl" in r.text.lower()
+    assert r.status_code == 400, r.text
+    assert "zone" in r.text.lower() or "requis" in r.text.lower()
 
 
-def test_bilan_csst_cnps_501_chiffres_non_inventes(client_officier):
-    # rapport.read est porte : la route repond 501 tant que les heures
-    # reelles ne sont pas saisies (aucun TF/TG fabrique).
+def test_permis_travail_cree_sans_signature_reste_brouillon(client_officier):
+    # Permis complet cree -> statut EN_ATTENTE_SIGN / BROUILLON, AUCUNE signature
+    # (le systeme ne simule pas la signature manuscrite numerique).
+    r = client_officier.post(
+        f"{BASE}/permis-travail",
+        json={
+            "type_permis": "permis_de_feu",
+            "zone": "Quai Nord, poste 3",
+            "description": "Soudure sur structure",
+            "mesures_preventives": "Extincteur, vigie",
+        },
+    )
+    assert r.status_code in (200, 201), r.text
+    body = r.json()
+    assert body.get("statut") in ("BROUILLON", "EN_ATTENTE_SIGN")
+    assert not body.get("signatures")  # aucune signature inventee a la creation
+
+
+def test_bilan_csst_cnps_chiffres_reels_non_inventes(client_officier):
+    # rapport.read porte : le bilan repond 200 sur les DONNEES REELLES en base.
+    # Sans denominateur d'heures saisi, aucun TF/TG n'est publie (null + flag
+    # heures_non_saisies), l'ancienne version inventait 2 850 000 h.
     r = client_officier.get(f"{BASE}/csst-cnps/bilan?annee=2026")
-    assert r.status_code == 501, r.text
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body.get("source"), "la source de calcul doit etre declaree"
+    # Aucun taux fabrique sans denominateur saisi.
+    if body.get("heures_non_saisies"):
+        assert body.get("taux_frequence_TF_par_million_h") is None
+        assert body.get("taux_gravite_TG_par_million_h") is None
+        assert "avertissement" in body
 
 
 def test_imdg_aide_memoire_non_reglementaire(client_officier):
