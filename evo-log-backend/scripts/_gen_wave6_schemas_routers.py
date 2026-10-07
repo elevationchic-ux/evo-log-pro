@@ -108,16 +108,42 @@ def _pyd_type(col_type):
     return "str"
 
 
-def _unique_field(model):
+def _fk_columns(model):
+    from sqlalchemy import ForeignKeyConstraint
+    out = set()
+    for fk in model.__table__.foreign_key_constraints:
+        for c in fk.columns:
+            if c.name != "company_id":
+                out.add(c.name)
+    return out
+
+
+def _unique_fields(model):
+    """Cle metier unique (hors company_id) utilise pour le controle de doublon.
+
+    Retourne la liste complete des colonnes non-NULL de la contrainte unique
+    (minus company_id). On exclut les colonnes FK cross-tables (ancre parente)
+    qui ne sont pas verifiables en scope tenant seul quand elles sont alone ;
+    mais on les garde dans la cle compositée quand elles coexistent avec une
+    colonne non-FK, ce qui evite de choisir un FK nu comme cle unique.
+    """
     from sqlalchemy import UniqueConstraint as UC
+    fkcols = _fk_columns(model)
     for constr in model.__table__.constraints:
         if isinstance(constr, UC):
-            cols = [c.name for c in constr.columns]
-            if "company_id" in cols:
-                others = [x for x in cols if x != "company_id"]
-                if others:
-                    return others[0]
-    return None
+            cols = [c for c in constr.columns if c.name != "company_id"]
+            nonnull = [c for c in cols if not c.nullable]
+            if not nonnull:
+                nonnull = cols
+            names = [c.name for c in nonnull]
+            if not names:
+                continue
+            # Preferer la cle complete sans FK cross-table si une colonne non-FK existe.
+            nonfk = [c.name for c in nonnull if c.name not in fkcols]
+            if nonfk:
+                return nonfk
+            return names
+    return []
 
 
 def gen_schema_file(models) -> str:
@@ -172,6 +198,7 @@ def gen_router_file(slug: str, perm_module: str, tag_label: str, models, paths_m
     lines = []
     lines.append(f'"""Routeur CRUD genere pour {tag_label} (expansion wave 6)."""')
     lines.append("from fastapi import APIRouter, Depends, HTTPException, status")
+    lines.append("from sqlalchemy.exc import IntegrityError")
     lines.append("from sqlalchemy.orm import Session")
     lines.append("from typing import Optional, List")
     lines.append("")
@@ -201,17 +228,36 @@ def gen_router_file(slug: str, perm_module: str, tag_label: str, models, paths_m
         "    return row",
         "",
         "",
-        "def _check_unique(db: Session, model, field: str, value, label: str, company_id: int, exclude_id=None):",
-        "    if value is None:",
+        "def _check_unique(db: Session, model, fields, data: dict, label: str, company_id: int, exclude_id=None):",
+        "    if not fields:",
         "        return",
-        "    q = db.query(model).filter(getattr(model, field) == value, model.company_id == company_id)",
+        "    if any(data.get(f) is None for f in fields):",
+        "        return",
+        "    q = db.query(model).filter(model.company_id == company_id)",
+        "    for f in fields:",
+        "        q = q.filter(getattr(model, f) == data.get(f))",
         "    if exclude_id is not None:",
         "        q = q.filter(model.id != exclude_id)",
         "    if q.first():",
+        "        human = ' / '.join(str(data.get(f)) for f in fields)",
         "        raise HTTPException(",
         "            status_code=status.HTTP_409_CONFLICT,",
-        '            detail=f"{label} {value} existe deja dans votre organisation.",',
+        "            detail=f\"{label} '{human}' existe deja dans votre organisation.\",",
         "        )",
+        "",
+        "",
+        "def _commit(db: Session, obj, label: str):",
+        "    db.add(obj)",
+        "    try:",
+        "        db.commit()",
+        "    except IntegrityError as exc:",
+        "        db.rollback()",
+        "        msg = str(getattr(exc, 'orig', exc))",
+        "        if 'FOREIGN KEY' in msg.upper() or 'foreign key' in msg:",
+        "            raise HTTPException(422, detail=f\"References invalides : un enregistrement lie ({label}) n'existe pas ou appartient a une autre organisation.\")",
+        "        raise HTTPException(409, detail=f\"Conflit d'integrite lors de l'enregistrement de {label}.\")",
+        "    db.refresh(obj)",
+        "    return obj",
         "",
         "",
         "def _scoped_list(db, model, company_id, filters=None):",
@@ -256,11 +302,11 @@ def gen_router_file(slug: str, perm_module: str, tag_label: str, models, paths_m
         path, label = paths_map[m]
         subperm = path.replace("-", "_")
         fn = subperm.replace("-", "_")
-        unique_field = _unique_field(m)
+        unique_fields = _unique_fields(m)
         lines.append(f"# --- {label} ---------------------------------------------------------")
         lines.append("")
         lines.append(f'@router.get("/{path}", response_model=List[{n}Out])')
-        if unique_field and unique_field != "reference":
+        if unique_fields and "statut" in [c.name for c in m.__table__.columns]:
             lines.append(f"def list_{fn}(statut: Optional[str] = None, db: Session = Depends(get_db),")
             lines.append(f'    user: User = Depends(require_perm("{perm_module}.{subperm}.read")),')
             lines.append("):")
@@ -282,14 +328,11 @@ def gen_router_file(slug: str, perm_module: str, tag_label: str, models, paths_m
         lines.append("):")
         lines.append("    cid = _company_id(user)")
         lines.append("    data = payload.model_dump(exclude_unset=True)")
-        if unique_field:
-            lines.append(f'    _check_unique(db, {n}, "{unique_field}", data.get("{unique_field}"), "{unique_field}", cid)')
+        if unique_fields:
+            lines.append(f'    _check_unique(db, {n}, {unique_fields!r}, data, "{label}", cid)')
         lines.append(f"    obj = {n}(company_id=cid)")
         lines.append("    _apply(data, obj)")
-        lines.append("    db.add(obj)")
-        lines.append("    db.commit()")
-        lines.append("    db.refresh(obj)")
-        lines.append("    return obj")
+        lines.append(f'    return _commit(db, obj, "{label}")')
         lines.append("")
         lines.append("")
         lines.append(f'@router.put("/{path}/{{ident}}", response_model={n}Out)')
@@ -303,8 +346,18 @@ def gen_router_file(slug: str, perm_module: str, tag_label: str, models, paths_m
         lines.append(f'    obj = _get_or_404(db, {n}, ident, "{label}")')
         lines.append("    if obj.company_id != cid:")
         lines.append('        raise HTTPException(403, "Acces refuse.")')
-        lines.append("    _apply(payload.model_dump(exclude_unset=True), obj)")
-        lines.append("    db.commit()")
+        lines.append("    upd = payload.model_dump(exclude_unset=True)")
+        if unique_fields:
+            _ufrepr = unique_fields!r
+            lines.append(f"    _chk = {{{'!r'.replace('!r', repr(unique_fields))}: [upd.get(f, getattr(obj, f)) for f in {'!r'.replace('!r', repr(unique_fields))}]}}")
+            lines.append(f"    _chk = {{f: upd.get(f, getattr(obj, f)) for f in {unique_fields!r}}}")
+            lines.append(f'    _check_unique(db, {n}, {unique_fields!r}, _chk, "{label}", cid, exclude_id=ident)')
+        lines.append("    _apply(upd, obj)")
+        lines.append("    try:")
+        lines.append("        db.commit()")
+        lines.append("    except IntegrityError as exc:")
+        lines.append("        db.rollback()")
+        lines.append('        raise HTTPException(422, detail="Reference invalide ou conflit d\'integrite.")')
         lines.append("    db.refresh(obj)")
         lines.append("    return obj")
         lines.append("")
