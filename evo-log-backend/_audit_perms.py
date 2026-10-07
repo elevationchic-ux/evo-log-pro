@@ -1,41 +1,48 @@
-"""Classification des codes require_perm par module : couverts par un role ?"""
+"""Inventaire par router deep: (module,sous_module,action) + fichier + prefix."""
 import re
 import pathlib
 from collections import defaultdict
+
 from app.core.permission_catalog import iter_permission_rows, ROLE_GRANTS
 from app.core.permissions import has_perm
 
+catalog_modules = {r[2] for r in iter_permission_rows()}
 catalog = {r[0] for r in iter_permission_rows()}
 
+
 def porteurs(code):
-    return [n for n, _l, _d, grants in ROLE_GRANTS if has_perm(grants, code)]
+    return [n for n, _l, _d, g in ROLE_GRANTS if has_perm(g, code)]
 
-root = pathlib.Path('app/routers')
-used = {}
-for f in sorted(root.rglob('*.py')):
-    for m in re.findall(r'require_perm\(\s*"([^"]+)"', f.read_text(encoding='utf-8')):
-        used.setdefault(m, f.name)
+# quel module canonique existe deja au catalogue ?
+print("CATALOG MODULES:", sorted(catalog_modules))
+print()
 
-by_module = defaultdict(lambda: {'total': 0, 'orphelins': [], 'fantomes': 0})
-for code, fname in used.items():
-    mod = code.split('.')[0]
-    d = by_module[mod]
-    d['total'] += 1
-    if code not in catalog:
-        d['fantomes'] += 1
-    if not porteurs(code):
-        d['orphelins'].append(code)
-
-print(f"{'module':22} {'codes':>6} {'fantomes':>9} {'orphelins(aucun role)':>22}")
-for mod in sorted(by_module):
-    d = by_module[mod]
-    print(f"{mod:22} {d['total']:>6} {d['fantomes']:>9} {len(d['orphelins']):>22}")
-
-print("\n=== ORPHELINS (aucun role ne les porte => bypass 0/1 seul) ===")
-tot = 0
-for mod in sorted(by_module):
-    o = by_module[mod]['orphelins']
-    if o:
-        tot += len(o)
-        print(f"[{mod}] ({len(o)}) via {used[o[0]]}: {sorted(o)[:4]}{' ...' if len(o)>4 else ''}")
-print("TOTAL orphelins:", tot)
+targets = [
+    'port_deep', 'transit_deep', 'transport_deep', 'magasin_deep',
+    'comptabilite_deep', 'finance_deep', 'parc_deep', 'rh_deep', 'qhse_deep',
+    'b2b_deep', 'reports_deep', 'admin_deep', 'superadmin_deep', 'dashboard_deep',
+]
+root = pathlib.Path('app/routers/v1')
+for name in targets:
+    f = root / f"{name}.py"
+    if not f.exists():
+        print(f"### {name}: ABSENT")
+        continue
+    codes = sorted(set(re.findall(r'require_perm\(\s*"([^"]+)"', f.read_text(encoding='utf-8'))))
+    mods = defaultdict(lambda: defaultdict(set))
+    for c in codes:
+        parts = c.split('.')
+        if len(parts) == 3:
+            mods[parts[0]][parts[1]].add(parts[2])
+        else:
+            mods[parts[0]]['_raw_'].add(c)
+    print(f"### {name}.py  ({len(codes)} codes)")
+    for mod, subs in mods.items():
+        canon = 'CANON' if mod in catalog_modules else 'NOUVEAU'
+        # representative porteurs for one sub
+        anycode = next(iter(next(iter(subs.values()))))
+        carrier = porteurs(f"{mod}.{list(subs)[0]}.{list(subs.values())[0]}")
+        print(f"   module={mod} [{canon}] porteur-type={carrier}")
+        for sub in sorted(subs):
+            print(f"       {sub}: {sorted(subs[sub])}")
+    print()
