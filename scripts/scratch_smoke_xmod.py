@@ -58,6 +58,9 @@ def seed():
 
     db = SessionLocal()
     out = {}
+    # admin@evolog.cm = user 2, company_id 1 : les seeds doivent porter le meme
+    # tenant, sinon l'isolation multi-tenant (tenant_enforcement) les masque.
+    TENANT = 1
     try:
         # Rolutère les seeds d'une exécution précédemment interrompue (rollback
         # partiel ayant quand même comités des orphelins).
@@ -67,14 +70,16 @@ def seed():
         client = db.query(Client).filter(Client.code == "CLI-SMOKE-1").first() or db.query(Client).filter(Client.code != "CLI-SMOKE-1").first()
         if not client:
             client = Client(code="CLI-SMOKE-1", type=TiersType.CLIENT,
-                            name="Client Smoke", email="smoke@evolog.cm")
+                            name="Client Smoke", email="smoke@evolog.cm",
+                            company_id=TENANT)
             db.add(client); db.flush()
         out["client_id"] = client.id
 
         fournisseur = db.query(Fournisseur).filter(Fournisseur.code == "FRS-SMOKE-1").first() or db.query(Fournisseur).filter(Fournisseur.code != "FRS-SMOKE-1").first()
         if not fournisseur:
             fournisseur = Fournisseur(code="FRS-SMOKE-1", type=TiersType.FOURNISSEUR,
-                                      name="Fournisseur Smoke", email="frs@evolog.cm")
+                                      name="Fournisseur Smoke", email="frs@evolog.cm",
+                                      company_id=TENANT)
             db.add(fournisseur); db.flush()
         out["fournisseur_id"] = fournisseur.id
 
@@ -99,6 +104,7 @@ def seed():
             prestataire = Prestataire(
                 code="PRE-SMOKE-1", raison_sociale="Prestataire Smoke",
                 specialite="MANUTENTION_PORTUAIRE", contact_telephone="+237600000000",
+                company_id=TENANT,
             )
             db.add(prestataire); db.flush()
         out["supplier_id"] = prestataire.id
@@ -109,7 +115,7 @@ def seed():
                 reference="MIS-SMOKE-1", client_id=client.id,
                 type_mission="livraison", numero_bl="B/L-SMOKE-1",
                 point_depart="Douala Port", point_arrivee="Yaounde",
-                date_debut_prevue=datetime.utcnow(),
+                date_debut_prevue=datetime.utcnow(), company_id=TENANT,
             )
             db.add(mission); db.flush()
         out["mission_id"] = mission.id
@@ -117,9 +123,16 @@ def seed():
         commande = db.query(Commande).filter(Commande.reference == "CMD-SMOKE-1").first() or db.query(Commande).first()
         if not commande:
             commande = Commande(reference="CMD-SMOKE-1", client_id=client.id,
-                                type_commande="sortie", montant_total=50000)
+                                type_commande="sortie", montant_total=50000,
+                                company_id=TENANT)
             db.add(commande); db.flush()
         out["commande_id"] = commande.id
+
+        # Rolutère : si un seed d'une exécution précédente a été inséré sans
+        # tenant, on le rattache au tenant de test (données de dev uniquement).
+        for obj in (client, fournisseur, prestataire, mission, commande):
+            if obj is not None and getattr(obj, "company_id", None) is None:
+                obj.company_id = TENANT
 
         db.commit()
         return out
