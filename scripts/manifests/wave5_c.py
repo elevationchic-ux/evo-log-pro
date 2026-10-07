@@ -53,7 +53,9 @@ MODULES["compta_c"] = dict(
     module_key="compta_c", module_slug="comptabilite-ohada",
     module_path="comptabilite-ohada", perm_module="comptabilite",
     registre_filename="registres_c",
-    revision="079", down_revision="078_dashboard_b_deep",
+    # Re-parente sur 081_coldchain_deep (branche pipeline->courier->coldchain restee
+    # en tete separate sur 078_dashboard_b_deep) pour garder un seul head lineaire.
+    revision="079", down_revision="081_coldchain_deep",
     entities=[
         E("journal-reversals", "cmptc_journal_reversals", "CmptcJournalReversal", "cmptc-journal-reversals",
           "journal_reversal", "Contre-passations d'ecritures", "Journal reversals",

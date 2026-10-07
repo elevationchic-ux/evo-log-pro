@@ -4,7 +4,9 @@ import sqlalchemy as sa
 
 
 revision = "079_compta_c_deep"
-down_revision = "078_dashboard_b_deep"
+# Re-parente sur 081_coldchain_deep (branche pipeline->courier->coldchain restee
+# en tete separate sur 078_dashboard_b_deep) pour garder un seul head lineaire.
+down_revision = "081_coldchain_deep"
 branch_labels = None
 depends_on = None
 
