@@ -51,13 +51,24 @@ PY
 
 MODE="$(cat /tmp/_alembic_mode 2>/dev/null || echo upgrade)"
 
-if [ "$MODE" = "stamp014+upgrade" ]; then
-    echo "[entrypoint] Base heritee de create_all -> stamp 014_schema_parity_from_orm"
-    alembic stamp 014_schema_parity_from_orm
-fi
-
-echo "[entrypoint] alembic upgrade head"
-alembic upgrade head
+# ----------------------------------------------------------------------------
+# Migration SERIALIZ EE par verrou advisory PostgreSQL.
+# Railway peut demarrer plusieurs conteneurs en concurrence (relances sur
+# ON_FAILURE + nouveaux deploys declenches par l'auto-push). Si deux conteneurs
+# lancent `alembic upgrade head` en meme temps, la migration 028 (qui
+# materialise ~639 tables via create_all) se retrouve dans DEUX transactions
+# concurrentes : la seconde recoit « relation already exists » / deadlock quand
+# la premiere commit, donc ROLLBACK complet, set -e tue le conteneur, Railway le
+# relance, et la chaine repart de 024 en boucle. L'app ne se stabilise jamais ->
+# le proxy renvoie ses 502 sans en-tete CORS, lus « No Access-Control-Allow-Origin
+# » par le navigateur (listes de nomenclatures vides). serialized_migrate.py
+# prend un pg_advisory_lock de session avant de lancer alembic : un seul
+# conteneur migre a la fois, les suivants trouvent la base a head (no-op
+# instantane). Le code retour reste propage : une VRAIE erreur de migration est
+# toujours BLOQUANTE (on ne supprime que la fausse erreur due a la concurrence).
+# ----------------------------------------------------------------------------
+echo "[entrypoint] alembic upgrade head (serialise PG advisory lock, mode=$MODE)"
+python scripts/serialized_migrate.py "$MODE"
 
 # ----------------------------------------------------------------------------
 # Auto-reparation NON-BLOQUANTE du chemin de login. Le `SELECT users` de
