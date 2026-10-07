@@ -44,7 +44,6 @@ startup_errors = []
 heartbeat_task = None
 outbox_pump_task = None
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup and shutdown events."""
@@ -124,7 +123,6 @@ async def lifespan(app: FastAPI):
         except asyncio.CancelledError:
             pass
 
-
 async def _heartbeat_loop():
     """Background task to send periodic heartbeats to all tenant WebSocket connections"""
     while True:
@@ -137,7 +135,6 @@ async def _heartbeat_loop():
         except Exception as e:
             logger.error(f"Error in heartbeat loop: {e}")
             await asyncio.sleep(5)  # Wait before retrying
-
 
 async def _outbox_pump_loop():
     """Live le outbox transactionnel vers le bus temps reel (Redis/WebSocket).
@@ -161,7 +158,6 @@ async def _outbox_pump_loop():
         except Exception as e:
             logger.error(f"Error in outbox pump loop: {e}")
             await asyncio.sleep(5)
-
 
 app = FastAPI(
     title="EVO-LOG EM-ERP API",
@@ -307,7 +303,6 @@ try:
     app.mount("/static/uploads", _StaticFiles(directory=str(_upload_root)), name="cadc_uploads")
 except Exception as e:  # noqa: BLE001 - un echec de mount ne doit pas couper l'API
     logger.warning(f"Mount /static/uploads ignore : {e}")
-
 
 @app.middleware("http")
 async def api_v1_rewrite_middleware(request: Request, call_next):
@@ -559,7 +554,6 @@ try:
 except ImportError:
     raise
 
-
 # Backward compatibility - Original API endpoints (deprecated, will be removed in v2)
 safe_include_router(auth.router, prefix="/api/auth", tags=["Auth - DEPRECATED"])
 safe_include_router(tiers.router, prefix="/api/tiers", tags=["Tiers - DEPRECATED"])
@@ -576,6 +570,98 @@ safe_include_router(transactions.router, prefix="/api/transactions", tags=["Tran
 # keeps precedence. It only answers requests that would otherwise 404 on the
 # business API surface, degrading them to an honest empty/pending envelope
 # instead of a dead screen. See app/routers/v1/pending_modules.py.
+# <expansion:transport>
+try:
+    from app.routers.v1 import transport_deep
+    safe_include_router(transport_deep.router, prefix="/api/v1/transport-flotte", tags=["transport-flotte (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router transport_deep absent : {e}")
+# </expansion:transport>
+# <expansion:magasin>
+try:
+    from app.routers.v1 import magasin_deep
+    safe_include_router(magasin_deep.router, prefix="/api/v1/magasin-stock", tags=["magasin-stock (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router magasin_deep absent : {e}")
+# </expansion:magasin>
+# <expansion:comptabilite>
+try:
+    from app.routers.v1 import comptabilite_deep
+    safe_include_router(comptabilite_deep.router, prefix="/api/v1/comptabilite-ohada", tags=["comptabilite-ohada (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router comptabilite_deep absent : {e}")
+# </expansion:comptabilite>
+# <expansion:finance>
+try:
+    from app.routers.v1 import finance_deep
+    safe_include_router(finance_deep.router, prefix="/api/v1/finance-ohada", tags=["finance-ohada (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router finance_deep absent : {e}")
+# </expansion:finance>
+# <expansion:parc>
+try:
+    from app.routers.v1 import parc_deep
+    safe_include_router(parc_deep.router, prefix="/api/v1/parc-vehicules", tags=["parc-vehicules (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router parc_deep absent : {e}")
+# </expansion:parc>
+# <expansion:rh>
+try:
+    from app.routers.v1 import rh_deep
+    safe_include_router(rh_deep.router, prefix="/api/v1/rh-personnel", tags=["rh-personnel (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router rh_deep absent : {e}")
+# </expansion:rh>
+# <expansion:qhse>
+try:
+    from app.routers.v1 import qhse_deep
+    safe_include_router(qhse_deep.router, prefix="/api/v1/qhse-securite", tags=["qhse-securite (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router qhse_deep absent : {e}")
+# </expansion:qhse>
+# <expansion:b2b>
+try:
+    from app.routers.v1 import b2b_deep
+    safe_include_router(b2b_deep.router, prefix="/api/v1/client-b2b", tags=["client-b2b (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router b2b_deep absent : {e}")
+# </expansion:b2b>
+# <expansion:reports>
+try:
+    from app.routers.v1 import reports_deep
+    safe_include_router(reports_deep.router, prefix="/api/v1/reports-bi", tags=["reports-bi (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router reports_deep absent : {e}")
+# </expansion:reports>
+# <expansion:admin>
+try:
+    from app.routers.v1 import admin_deep
+    safe_include_router(admin_deep.router, prefix="/api/v1/admin-saas", tags=["admin-saas (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router admin_deep absent : {e}")
+# </expansion:admin>
+# <expansion:superadmin>
+try:
+    from app.routers.v1 import superadmin_deep
+    safe_include_router(superadmin_deep.router, prefix="/api/v1/superadmin-cadc", tags=["superadmin-cadc (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router superadmin_deep absent : {e}")
+# </expansion:superadmin>
+# <expansion:dashboard>
+try:
+    from app.routers.v1 import dashboard_deep
+    safe_include_router(dashboard_deep.router, prefix="/api/v1/dashboard", tags=["dashboard (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router dashboard_deep absent : {e}")
+# </expansion:dashboard>
+# <expansion:amenagement_extra>
+try:
+    from app.routers.v1 import amenagement_extra_deep
+    safe_include_router(amenagement_extra_deep.router, prefix="/api/v1/amenagement-portuaire", tags=["amenagement-portuaire (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router amenagement_extra_deep absent : {e}")
+# </expansion:amenagement_extra>
+
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)
 
@@ -591,12 +677,10 @@ async def health_check():
         }
     return {"status": "ok", "service": "EVO-LOG EM-ERP", "version": "2.0.0"}
 
-
 def _setup_password_provided(username: str) -> bool:
     """True si l'operateur a fourni explicitement le mot de passe initial."""
     attr = "SETUP_SUPERADMIN_PASSWORD" if username == "supadmin" else "SETUP_ADMIN_PASSWORD"
     return bool(getattr(settings, attr, None))
-
 
 def _setup_password(env_attr: str) -> str:
     """Mot de passe initial admin : valeur env si presente, sinon genere.
@@ -609,7 +693,6 @@ def _setup_password(env_attr: str) -> str:
         return value
     # 16 caracteres URL-safe -> ~96 bits d'entropie, conforme a la politique.
     return secrets.token_urlsafe(16)
-
 
 def _enforce_setup_access(x_setup_token: Optional[str]) -> None:
     """Gating des endpoints d'initialisation.
@@ -630,7 +713,6 @@ def _enforce_setup_access(x_setup_token: Optional[str]) -> None:
             status_code=403,
             detail="Initialisation refusee en production sans SETUP_TOKEN.",
         )
-
 
 def _bootstrap_schema_and_seed():
     """
@@ -731,7 +813,6 @@ def _bootstrap_schema_and_seed():
     finally:
         db.close()
 
-
 @app.post('/api/setup')
 @app.get('/api/setup')
 @app.post('/api/v1/setup')
@@ -758,7 +839,6 @@ async def setup_database(x_setup_token: Optional[str] = Header(None)):
         "note": "Mot de passe a changer a la premiere connexion.",
     }
 
-
 @app.post('/api/seed')
 @app.get('/api/seed')
 @app.post('/api/v1/seed')
@@ -784,7 +864,6 @@ async def seed_users_raw(x_setup_token: Optional[str] = Header(None)):
         "generated_credentials": result.get("generated_credentials", []),
         "note": "Mot de passe a changer a la premiere connexion.",
     }
-
 
 @app.get("/", response_class=HTMLResponse)
 async def root_gateway():
@@ -944,12 +1023,10 @@ async def root_gateway():
 </html>
 """)
 
-
 @app.get("/docs", include_in_schema=False)
 async def redirect_docs():
     """Redirect /docs to /api/docs"""
     return RedirectResponse(url="/api/docs")
-
 
 @app.get("/health", tags=["Health"])
 @app.get("/api/v1/health", tags=["Health"])
@@ -1015,116 +1092,12 @@ async def detailed_health_check():
     
     return checks
 
-
 # Prometheus metrics disabled - instrumentator incompatible with current FastAPI version
 # @app.on_event('startup')
 # async def expose_metrics():
 #     instrumentator.expose(app)
 
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
-# <expansion:transport>
-try:
-    from app.routers.v1 import transport_deep
-    safe_include_router(transport_deep.router, prefix="/api/v1/transport-flotte", tags=["transport-flotte (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router transport_deep absent : {e}")
-# </expansion:transport>
 
-# <expansion:magasin>
-try:
-    from app.routers.v1 import magasin_deep
-    safe_include_router(magasin_deep.router, prefix="/api/v1/magasin-stock", tags=["magasin-stock (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router magasin_deep absent : {e}")
-# </expansion:magasin>
-
-# <expansion:comptabilite>
-try:
-    from app.routers.v1 import comptabilite_deep
-    safe_include_router(comptabilite_deep.router, prefix="/api/v1/comptabilite-ohada", tags=["comptabilite-ohada (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router comptabilite_deep absent : {e}")
-# </expansion:comptabilite>
-
-# <expansion:finance>
-try:
-    from app.routers.v1 import finance_deep
-    safe_include_router(finance_deep.router, prefix="/api/v1/finance-ohada", tags=["finance-ohada (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router finance_deep absent : {e}")
-# </expansion:finance>
-
-# <expansion:parc>
-try:
-    from app.routers.v1 import parc_deep
-    safe_include_router(parc_deep.router, prefix="/api/v1/parc-vehicules", tags=["parc-vehicules (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router parc_deep absent : {e}")
-# </expansion:parc>
-
-# <expansion:rh>
-try:
-    from app.routers.v1 import rh_deep
-    safe_include_router(rh_deep.router, prefix="/api/v1/rh-personnel", tags=["rh-personnel (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router rh_deep absent : {e}")
-# </expansion:rh>
-
-# <expansion:qhse>
-try:
-    from app.routers.v1 import qhse_deep
-    safe_include_router(qhse_deep.router, prefix="/api/v1/qhse-securite", tags=["qhse-securite (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router qhse_deep absent : {e}")
-# </expansion:qhse>
-
-# <expansion:b2b>
-try:
-    from app.routers.v1 import b2b_deep
-    safe_include_router(b2b_deep.router, prefix="/api/v1/client-b2b", tags=["client-b2b (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router b2b_deep absent : {e}")
-# </expansion:b2b>
-
-# <expansion:reports>
-try:
-    from app.routers.v1 import reports_deep
-    safe_include_router(reports_deep.router, prefix="/api/v1/reports-bi", tags=["reports-bi (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router reports_deep absent : {e}")
-# </expansion:reports>
-
-# <expansion:admin>
-try:
-    from app.routers.v1 import admin_deep
-    safe_include_router(admin_deep.router, prefix="/api/v1/admin-saas", tags=["admin-saas (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router admin_deep absent : {e}")
-# </expansion:admin>
-
-# <expansion:superadmin>
-try:
-    from app.routers.v1 import superadmin_deep
-    safe_include_router(superadmin_deep.router, prefix="/api/v1/superadmin-cadc", tags=["superadmin-cadc (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router superadmin_deep absent : {e}")
-# </expansion:superadmin>
-
-# <expansion:dashboard>
-try:
-    from app.routers.v1 import dashboard_deep
-    safe_include_router(dashboard_deep.router, prefix="/api/v1/dashboard", tags=["dashboard (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router dashboard_deep absent : {e}")
-# </expansion:dashboard>
-
-# <expansion:amenagement_extra>
-try:
-    from app.routers.v1 import amenagement_extra_deep
-    safe_include_router(amenagement_extra_deep.router, prefix="/api/v1/amenagement-portuaire", tags=["amenagement-portuaire (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router amenagement_extra_deep absent : {e}")
-# </expansion:amenagement_extra>
