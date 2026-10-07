@@ -329,14 +329,19 @@ export default function ClientShipmentsPage() {
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <span className={
-                      mission.statut === 'LIVREE' ? 'badge badge-success' :
-                      mission.statut === 'EN_ROUTE' ? 'badge badge-warning' :
-                      mission.statut === 'EN_CHARGEMENT' ? 'badge badge-warning' :
-                      mission.statut === 'EN_ATTENTE_AFFECTATION' ? 'badge badge-info' :
-                      mission.statut === 'BROUILLON' ? 'badge badge-secondary' :
+                      mission.statut === 'terminee' ? 'badge badge-success' :
+                      mission.statut === 'en_cours' ? 'badge badge-warning' :
+                      mission.statut === 'en_retard' ? 'badge badge-warning' :
+                      mission.statut === 'planifiee' ? 'badge badge-info' :
                       'badge badge-destructive'
                     }>
-                      {mission.statut}
+                      {{
+                        planifiee: 'Programmée',
+                        en_cours: 'En cours',
+                        en_retard: 'En retard',
+                        terminee: 'Terminée',
+                        annulee: 'Annulée',
+                      }[mission.statut as string] || mission.statut || '—'}
                     </span>
                     <button
                       onClick={() => handleToggleExpand(mission.id.toString())}
@@ -359,43 +364,43 @@ export default function ClientShipmentsPage() {
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-slate-300">Date de Départ Prévue</p>
                         <p className="text-slate-500">
-                          {mission.date_depart_prevue ? new Date(mission.date_depart_prevue).toLocaleDateString('fr-FR') : 'Non définie'}
+                          {mission.date_debut_prevue ? new Date(mission.date_debut_prevue).toLocaleDateString('fr-FR') : 'Non enregistrée'}
                         </p>
                       </div>
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-slate-300">Date d'Arrivée Prévue</p>
                         <p className="text-slate-500">
-                          {mission.date_arrivee_prevue ? new Date(mission.date_arrivee_prevue).toLocaleDateString('fr-FR') : 'Non définie'}
+                          {mission.date_fin_prevue ? new Date(mission.date_fin_prevue).toLocaleDateString('fr-FR') : 'Non enregistrée'}
                         </p>
                       </div>
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-slate-300">Chauffeur Assigné</p>
                         <p className="text-slate-500">
-                          {mission.chauffeur_nom || 'Non assigné'}
+                          {mission.chauffeur ? `${mission.chauffeur.nom} ${mission.chauffeur.prenom || ''}`.trim() : 'Non assigné'}
                         </p>
                       </div>
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-slate-300">Camion Assigné</p>
                         <p className="text-slate-500">
-                          {mission.camion_immatriculation || 'Non assigné'}
+                          {mission.camion?.immatriculation || 'Non assigné'}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-300">Type de Marchandise</p>
+                        <p className="text-sm font-medium text-slate-300">Type de Mission</p>
                         <p className="text-slate-500 capitalize">
-                          {mission.nature_fret || 'Non spécifiée'}
+                          {mission.type_mission || 'Non enregistré'}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-300">Poids</p>
+                        <p className="text-sm font-medium text-slate-300">Distance</p>
                         <p className="text-slate-500">
-                          {mission.poids_total ? `${mission.poids_total} kg` : 'Non spécifié'}
+                          {mission.distance_km ? `${mission.distance_km} km` : 'Non enregistrée'}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-300">Volume</p>
+                        <p className="text-sm font-medium text-slate-300">Montant Fret</p>
                         <p className="text-slate-500">
-                          {mission.volume_total ? `${mission.volume_total} m³` : 'Non spécifié'}
+                          {mission.montant_fret ? `${Number(mission.montant_fret).toLocaleString()} FCFA` : 'Non enregistré'}
                         </p>
                       </div>
                     </div>
@@ -403,22 +408,22 @@ export default function ClientShipmentsPage() {
                     {/* Action Buttons */}
                     <div className="mt-4 pt-3 border-t border-slate-700 flex flex-col sm:flex-row gap-3">
                       <button
-                        onClick={() => handleStatusChange(mission.id, 'EN_ROUTE')}
-                        disabled={mission.statut !== 'EN_ATTENTE_AFFECTATION'}
+                        onClick={() => handleStatusChange(mission.id, 'en_cours')}
+                        disabled={mission.statut !== 'planifiee'}
                         className="btn btn-sm btn-outline btn-primary flex-1"
                       >
                         Démarrer la Mission
                       </button>
                       <button
-                        onClick={() => handleStatusChange(mission.id, 'LIVREE')}
-                        disabled={!['EN_ROUTE', 'EN_CHARGEMENT'].includes(mission.statut)}
+                        onClick={() => handleStatusChange(mission.id, 'terminee')}
+                        disabled={mission.statut !== 'en_cours'}
                         className="btn btn-sm btn-outline btn-success flex-1"
                       >
-                        Marquer comme Livré
+                        Marquer comme Terminée
                       </button>
                       <button
                         onClick={() => handleGenererBL(mission)}
-                        disabled={mission.statut !== 'LIVREE'}
+                        disabled={mission.statut !== 'terminee'}
                         className="btn btn-sm btn-outline btn-info flex-1"
                       >
                         Générer BL
@@ -468,20 +473,25 @@ export default function ClientShipmentsPage() {
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-slate-300">Statut</p>
                     <span className={
-                      selectedMission.statut === 'LIVREE' ? 'badge badge-success' :
-                      selectedMission.statut === 'EN_ROUTE' ? 'badge badge-warning' :
-                      selectedMission.statut === 'EN_CHARGEMENT' ? 'badge badge-warning' :
-                      selectedMission.statut === 'EN_ATTENTE_AFFECTATION' ? 'badge badge-info' :
-                      selectedMission.statut === 'BROUILLON' ? 'badge badge-secondary' :
+                      selectedMission.statut === 'terminee' ? 'badge badge-success' :
+                      selectedMission.statut === 'en_cours' ? 'badge badge-warning' :
+                      selectedMission.statut === 'en_retard' ? 'badge badge-warning' :
+                      selectedMission.statut === 'planifiee' ? 'badge badge-info' :
                       'badge badge-destructive'
                     }>
-                      {selectedMission.statut}
+                      {{
+                        planifiee: 'Programmée',
+                        en_cours: 'En cours',
+                        en_retard: 'En retard',
+                        terminee: 'Terminée',
+                        annulee: 'Annulée',
+                      }[selectedMission.statut as string] || selectedMission.statut || '—'}
                     </span>
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-slate-300">Date de Création</p>
                     <p className="text-slate-500">
-                      {selectedMission.dateCreation ? new Date(selectedMission.dateCreation).toLocaleDateString('fr-FR') : 'Non définie'}
+                      {selectedMission.date_creation ? new Date(selectedMission.date_creation).toLocaleDateString('fr-FR') : 'Non enregistrée'}
                     </p>
                   </div>
                 </div>
@@ -490,16 +500,16 @@ export default function ClientShipmentsPage() {
                   <h3 className="text-lg font-semibold text-slate-200">Itinéraire</h3>
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-slate-300">Départ</p>
-                    <p className="text-slate-500">{selectedMission.lieu_depart || 'Non défini'}</p>
+                    <p className="text-slate-500">{selectedMission.origine || 'Non enregistré'}</p>
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-slate-300">Arrivée</p>
-                    <p className="text-slate-500">{selectedMission.lieu_arrivee || 'Non défini'}</p>
+                    <p className="text-slate-500">{selectedMission.destination || 'Non enregistré'}</p>
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-slate-300">Distance Estimée</p>
                     <p className="text-slate-500">
-                      {selectedMission.distance_estimee ? `${selectedMission.distance_estimee} km` : 'Non définie'}
+                      {selectedMission.distance_km ? `${selectedMission.distance_km} km` : 'Non enregistrée'}
                     </p>
                   </div>
                 </div>
