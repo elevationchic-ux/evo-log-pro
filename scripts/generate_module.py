@@ -652,6 +652,10 @@ def write_file(path: Path, content: str):
 
 def generate(manifest_path: Path, apply: bool = True):
     m = load_manifest(manifest_path)
+    generate_from_dict(m, apply=apply)
+
+
+def generate_from_dict(m: dict, apply: bool = True):
     if not apply:
         print("DRY RUN: manifest loaded, files not written")
         return
