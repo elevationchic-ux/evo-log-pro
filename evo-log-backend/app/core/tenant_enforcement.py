@@ -42,17 +42,25 @@ def _tenant_scoped_classes() -> list:
     global _tenant_classes
     if _tenant_classes is None:
         from app.core.database import Base
-        # `import app.models` ne couvre PAS tous les modeles : plusieurs entites
-        # portant company_id (Navire, Escale, BonCommande, BonReception,
+        # `import app.models` ne couvre PAS la totalite des modeles : plusieurs
+        # entites portant company_id (Navire, Escale, BonCommande, BonReception,
         # OrdreTransport, DeclarationFiscale, ContratFiscal,
-        # RetenueSourceCameroun) ne sont enregistrees que par les routers, donc
-        # uniquement quand app.main est importe (cf. conftest._ensure_tables, qui
-        # fait pareil pour la meme raison). Cette fonction etant pigee paresseu-
-        # sement a la premiere requete (apres demarrage complet en prod ; apres
-        # `import app.main` explicite dans les tests), on force l'import complet
-        # pour que la liste figee ici soit TOUJOURS exhaustive. Sinon une entite
-        # vue trop tard resterait NON filtree par tenant -> fuite inter-company.
-        import app.main  # noqa: F401 - enregistre la totalite des mappers
+        # RetenueSourceCameroun) ne sont declarees que dans des modules consommes
+        # par les routers. Si ces modules n'ont pas encore ete importés quand la
+        # liste se fige ici (premiere requete), leurs tables resteraient NON
+        # filtree par tenant -> fuite de donnees inter-entreprises. On force donc
+        # l'import des modules modeles concernés (PAS app.main : importer toute
+        # l'app ici serait reentrant pendant son propre chargement et ferait
+        # redéfinir des tables comme feature_flags). Ces modules sont de simples
+        # feuilles de modeles, sans routers ni effet de bord -> import sur.
+        import app.models  # noqa: F401 - socle de registres
+        from app.models import (  # noqa: F401 - enregistre les 8 entites manquantes
+            acconage,
+            acquisition,
+            magasin_avance,
+            transport_international,
+            fiscalite_cameroun,
+        )
         classes = []
         for mapper in Base.registry.mappers:
             # mapper.columns inclut les colonnes HERITEES (herite de table Jointe
