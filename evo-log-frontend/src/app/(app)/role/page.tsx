@@ -53,9 +53,9 @@ export default function RolePage() {
     } catch (err) { console.error('Erreur création rôle:', err); }
   };
 
-  const handleUpdateModules = async (id: number, modules: string[]) => {
+  const handleUpdateModules = async (id: number, modules_allowed: string[]) => {
     try {
-      await apiClient.put(`/api/v1/roles/${id}/modules`, { modules });
+      await apiClient.put(`/api/v1/roles/${id}`, { modules_allowed });
       fetchData();
     } catch (err) { console.error('Erreur mise à jour modules:', err); }
   };
@@ -63,7 +63,7 @@ export default function RolePage() {
   const toggleModule = (m: string) => {
     setNewRole(prev => ({
       ...prev,
-      modules: prev.modules.includes(m) ? prev.modules.filter(x => x !== m) : [...prev.modules, m]
+      modules_allowed: prev.modules_allowed.includes(m) ? prev.modules_allowed.filter(x => x !== m) : [...prev.modules_allowed, m]
     }));
   };
 
@@ -101,8 +101,8 @@ export default function RolePage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Total Rôles', value: roles.length, icon: Shield, color: 'text-red-400' },
-          { label: 'Rôles Système', value: roles.filter(r => r.systeme || r.is_system).length, icon: Lock, color: 'text-purple-400' },
-          { label: 'Rôles Personnalisés', value: roles.filter(r => !r.systeme && !r.is_system).length, icon: UserCheck, color: 'text-cyan-400' },
+          { label: 'Rôles Système', value: roles.filter(r => r.is_system).length, icon: Lock, color: 'text-purple-400' },
+          { label: 'Rôles Personnalisés', value: roles.filter(r => !r.is_system).length, icon: UserCheck, color: 'text-cyan-400' },
           { label: 'Modules Couverts', value: availableModules.length, icon: Layers, color: 'text-emerald-400' },
         ].map((s) => (
           <div key={s.label} className="bg-slate-900/80 border border-slate-800/80 p-5 rounded-3xl">
