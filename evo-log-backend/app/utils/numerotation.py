@@ -20,6 +20,7 @@ from datetime import date
 from typing import Optional
 
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.numerotation import SequenceNumerotation
@@ -80,6 +81,17 @@ def prochaine_reference(
 
     annee = (date_reference or date.today()).year
 
+    # Une piece portee par aucun company_id explicite (ex. facture OHADA, table
+    # sans colonne tenant) est numerotee pour le tenant de la requete en cours :
+    # sinon la lookup taperait sur company_id IS NULL alors que le hook
+    # d'isolation tamponne la ligne creee avec le tenant du request -> le meme
+    # numero est re-insere a chaque appel (IntegrityError 500). Ces deux lignes
+    # sont les deux seules sources du tenant ici ; le middleware les a deja
+    # validatees cote JWT.
+    if company_id is None:
+        from app.core.tenant_context import get_current_tenant
+        company_id = get_current_tenant()
+
     seq = (
         db.query(SequenceNumerotation)
         .filter(
@@ -102,7 +114,30 @@ def prochaine_reference(
             courant=_numero_max_deja_pose(db, prefixe, annee, company_id),
         )
         db.add(seq)
-        db.flush()
+        try:
+            db.flush()
+        except IntegrityError:
+            # Course entre deux requetes simultanlees : la ligne du compteur
+            # vient d'etre creee dans le meme intervalle (company, type, annee).
+            # On reprend le SAVEPOINT, on relit la ligne existante et on
+            # poursuit sur elle — aucun numero n'est consomme twice.
+            db.rollback()
+            seq = (
+                db.query(SequenceNumerotation)
+                .filter(
+                    SequenceNumerotation.company_id.is_(None)
+                    if company_id is None
+                    else SequenceNumerotation.company_id == company_id,
+                    SequenceNumerotation.type_document == type_document,
+                    SequenceNumerotation.exercice == annee,
+                )
+                .first()
+            )
+            if seq is None:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Sequence de numerotation indisponible, reessayez.",
+                )
 
     seq.courant += 1
     db.flush()
