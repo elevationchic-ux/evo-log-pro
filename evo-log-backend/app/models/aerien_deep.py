@@ -114,15 +114,15 @@ class CargoSecurityScreen_statut(str, enum.Enum):
 
 
 class AirDangerousGoods_classe(str, enum.Enum):
-    1 = "1"
-    2 = "2"
-    3 = "3"
-    4 = "4"
-    5 = "5"
-    6 = "6"
-    7 = "7"
-    8 = "8"
-    9 = "9"
+    C1 = "c1"
+    C2 = "c2"
+    C3 = "c3"
+    C4 = "c4"
+    C5 = "c5"
+    C6 = "c6"
+    C7 = "c7"
+    C8 = "c8"
+    C9 = "c9"
 
 
 class AirDangerousGoods_packaging_group(str, enum.Enum):
