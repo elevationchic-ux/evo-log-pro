@@ -274,7 +274,7 @@ export const registreTechnologyPartner: ConfigRegistre = {
   permModule: "superadmin",
   permSousModule: "partner_network",
   tcode: "registre-partner-network",
-  icon: Icons.Handshake,
+  icon: Icons.Users,
   titre: "Reseau partenaires technologiques",
   titreEn: "Technology partner network",
   description: "Partenaires editeurs / integrateurs.",

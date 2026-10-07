@@ -18,8 +18,8 @@ function col(name: string, label: string, labelEn: string, opts: Partial<Colonne
 function txt(name: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {
   return { name, label, labelEn, type: "texte", ...opts } as ChampRegistre;
 }
-function num(key: string, label: string, labelEn: string): ChampRegistre {
-  return { key, label, labelEn, type: "number" } as ChampRegistre;
+function num(name: string, label: string, labelEn: string): ChampRegistre {
+  return { name, label, labelEn, type: "nombre" } as ChampRegistre;
 }
 function dt(name: string, label: string, labelEn: string): ChampRegistre {
   return { name, label, labelEn, type: "date" } as ChampRegistre;

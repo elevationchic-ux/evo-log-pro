@@ -931,7 +931,7 @@ MODULES["superadmin"] = dict(
           "Reseau partenaires technologiques", "Technology partner network",
           "Partenaires editeurs / integrateurs.", "Editor / integrator partners.",
           "Revue annuelle.", "Annual review.",
-          "Handshake", "reference",
+          "Users", "reference",
           [F("reference", "str", "Reference", "Reference", required=True, search=True),
            F("nom", "str", "Nom", "Name"),
            F("type_partenaire", "enum", "Type", "Type"),
