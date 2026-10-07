@@ -179,7 +179,7 @@ class DashboardbSavedView(Base):
     nom = Column(String(150), nullable=True)
     owner = Column(String(150), nullable=True)
     type_visuel = Column(String(150), nullable=True)
-    filtres = Column(Text(2000), nullable=True)
+    filtres = Column(Text, nullable=True)
     partage = Column(Boolean, nullable=True)
     statut = Column(String(150), nullable=True)
     is_active = Column(Boolean, default=True)

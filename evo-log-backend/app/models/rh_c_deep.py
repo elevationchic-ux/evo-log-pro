@@ -85,7 +85,7 @@ class RhCDisciplinaryRecord(Base):
     reference = Column(String(150), nullable=False, index=True)
     collaborateur = Column(String(150), nullable=True)
     type_sanction = Column(String(150), nullable=True)
-    motif = Column(Text(2000), nullable=True)
+    motif = Column(Text, nullable=True)
     date_effet = Column(Date, nullable=True)
     date_fin_effet = Column(Date, nullable=True)
     decideur = Column(String(150), nullable=True)

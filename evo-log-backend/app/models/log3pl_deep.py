@@ -148,7 +148,7 @@ class TplContract(Base):
     numero_contrat = Column(String(150), nullable=False, index=True)
     client = Column(String(150), nullable=True)
     perimetre = Column(String(150), nullable=True)
-    sites_couverts = Column(Text(2000), nullable=True)
+    sites_couverts = Column(Text, nullable=True)
     date_debut = Column(Date, nullable=True)
     date_fin = Column(Date, nullable=True)
     valeur_annuelle_xaf = Column(Integer, nullable=True)

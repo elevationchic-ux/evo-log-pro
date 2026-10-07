@@ -50,7 +50,7 @@ class CmptcJournalReversal(Base):
     compte_debit = Column(String(150), nullable=True)
     compte_credit = Column(String(150), nullable=True)
     montant = Column(Numeric, nullable=True)
-    motif = Column(Text(2000), nullable=True)
+    motif = Column(Text, nullable=True)
     statut = Column(String(150), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -137,7 +137,7 @@ class IspsRecord(Base):
     reference = Column(String(150), nullable=False, index=True)
     niveau_isps = Column(_enum(IspsRecord_niveau_isps), default=IspsRecord_niveau_isps.N1)
     date_application = Column(DateTime(timezone=True), nullable=True)
-    motif = Column(Text(2000), nullable=True)
+    motif = Column(Text, nullable=True)
     authorite_emetteuse = Column(String(150), nullable=True)
     date_levee = Column(DateTime(timezone=True), nullable=True)
     is_active = Column(Boolean, default=True)

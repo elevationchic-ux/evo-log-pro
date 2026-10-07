@@ -100,7 +100,7 @@ class QhseNearMiss(Base):
     site = Column(String(150), nullable=True)
     date_evenement = Column(DateTime(timezone=True), nullable=True)
     zone = Column(String(150), nullable=True)
-    description = Column(Text(2000), nullable=True)
+    description = Column(Text, nullable=True)
     gravite_potentielle = Column(String(150), nullable=True)
     statut = Column(String(150), nullable=True)
     is_active = Column(Boolean, default=True)

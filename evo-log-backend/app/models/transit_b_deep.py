@@ -86,7 +86,7 @@ class TransitbInspectionRecord(Base):
     agent = Column(String(150), nullable=True)
     bureau = Column(String(150), nullable=True)
     date_inspection = Column(DateTime(timezone=True), nullable=True)
-    observation = Column(Text(2000), nullable=True)
+    observation = Column(Text, nullable=True)
     conformite = Column(Boolean, nullable=True)
     statut = Column(String(150), nullable=True)
     is_active = Column(Boolean, default=True)

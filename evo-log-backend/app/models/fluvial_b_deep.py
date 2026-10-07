@@ -286,7 +286,7 @@ class FluvialVesselInspection(Base):
     date_visite = Column(Date, nullable=True)
     date_echeance = Column(Date, nullable=True)
     resultat = Column(String(150), nullable=True)
-    observations = Column(Text(2000), nullable=True)
+    observations = Column(Text, nullable=True)
     statut = Column(String(150), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

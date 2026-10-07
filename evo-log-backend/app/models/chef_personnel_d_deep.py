@@ -373,7 +373,7 @@ class ChpDisciplinaryAction(Base):
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=False, index=True)
     reference = Column(String(150), nullable=False, index=True)
     collaborateur = Column(String(150), nullable=True)
-    motif = Column(Text(2000), nullable=True)
+    motif = Column(Text, nullable=True)
     type_mesure = Column(String(150), nullable=True)
     date = Column(Date, nullable=True)
     statut = Column(String(150), nullable=True)

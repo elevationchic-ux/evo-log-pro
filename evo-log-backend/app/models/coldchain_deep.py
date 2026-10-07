@@ -363,7 +363,7 @@ class ColdChainHaccpRecord(Base):
     seuil_mini = Column(String(150), nullable=True)
     seuil_maxi = Column(String(150), nullable=True)
     operateur = Column(String(150), nullable=True)
-    action_corrective = Column(Text(2000), nullable=True)
+    action_corrective = Column(Text, nullable=True)
     resultat = Column(String(150), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

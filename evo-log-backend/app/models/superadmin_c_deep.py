@@ -117,7 +117,7 @@ class SaCSystemParameter(Base):
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=False, index=True)
     reference = Column(String(150), nullable=False, index=True)
-    valeur = Column(Text(2000), nullable=True)
+    valeur = Column(Text, nullable=True)
     categorie = Column(String(150), nullable=True)
     portee = Column(String(150), nullable=True)
     modifie_par = Column(String(150), nullable=True)

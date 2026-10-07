@@ -39,7 +39,7 @@ class CommCompetitorNote(Base):
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=False, index=True)
     reference = Column(String(150), nullable=False, index=True)
     concurrent = Column(String(150), nullable=True)
-    fait_observe = Column(Text(2000), nullable=True)
+    fait_observe = Column(Text, nullable=True)
     marche = Column(String(150), nullable=True)
     date = Column(Date, nullable=True)
     statut = Column(String(150), nullable=True)

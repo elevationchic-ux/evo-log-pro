@@ -228,7 +228,7 @@ class AdmtImpersonationLog(Base):
     reference = Column(String(150), nullable=False, index=True)
     admin = Column(String(150), nullable=True)
     cible_tenant = Column(String(150), nullable=True)
-    motif = Column(Text(2000), nullable=True)
+    motif = Column(Text, nullable=True)
     debut = Column(DateTime(timezone=True), nullable=True)
     fin = Column(DateTime(timezone=True), nullable=True)
     statut = Column(String(150), nullable=True)
