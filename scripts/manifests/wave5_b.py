@@ -51,7 +51,9 @@ MODULES["port_ops_b"] = dict(
     module_key="port_ops_b", module_slug="port-operations",
     module_path="port-operations", perm_module="port",
     registre_filename="registres_b",
-    revision="073", down_revision="072_qhse_b_deep",
+    # Re-parente sur 076_heavylift_deep (branche pipeline/courier/coldchain/heavylift
+    # restee en attente sur 072) pour garder un seul head lineaire.
+    revision="073", down_revision="076_heavylift_deep",
     entities=[
         E("berth-schedules", "portb_berth_schedules", "PortbBerthSchedule", "portb-berth-schedules",
           "berth_schedule", "Plans d'escale et postes d'amarrage", "Berth schedules",

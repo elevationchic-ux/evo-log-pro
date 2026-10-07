@@ -28,8 +28,8 @@ class TransitbIncoterm_categorie(str, enum.Enum):
 
 
 class TransitbIncoterm_version(str, enum.Enum):
-    2010 = "2010"
-    2020 = "2020"
+    V_2010 = "2010"
+    V_2020 = "2020"
 
 
 class TransitbIncoterm_statut(str, enum.Enum):

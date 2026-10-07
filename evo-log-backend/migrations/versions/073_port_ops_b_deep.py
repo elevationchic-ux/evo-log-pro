@@ -4,7 +4,10 @@ import sqlalchemy as sa
 
 
 revision = "073_port_ops_b_deep"
-down_revision = "072_qhse_b_deep"
+# Re-parente sur la pointe existante 076_heavylift_deep pour garder une chaine
+# lineaire (un seul head) : la branche pipeline->courier->coldchain->heavylift
+# etait deja en attente sur 072_qhse_b_deep.
+down_revision = "076_heavylift_deep"
 branch_labels = None
 depends_on = None
 
