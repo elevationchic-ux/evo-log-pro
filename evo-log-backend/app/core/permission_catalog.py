@@ -44,6 +44,27 @@ DOMAINS: Dict[str, Dict] = {
                 "ppe_tracking": ["read", "create", "modify"], "regulatory_compliance": ["read", "create", "modify"],
                 "quality_audit": ["read", "create", "modify"], "management_review": ["read", "create", "modify"],
                 "waste_management": ["read", "create", "modify"], "chemical_safety": ["read", "create", "modify"]}},
+            # Wave 6  traçabilité bout-en-bout (routeur tracabilite_deep). Couvre
+            # la chaine de custody, la genealogie lot/serial, les empreintes documentaires,
+            # la géolocalisation, la chaine du froid, les sceaux ISO 17712, les exports
+            # réglementaires (SAT/DGI/ANINF/APN/CAMPOST), les horodatages qualifiés
+            # eIDAS, les preuves Merkle, les consentements loi Cameroun 2010/041 + RGPD,
+            # les logs inaltérables et les politiques de rétention légale OGIC/CGI.
+            # Les tables trace_events / trace_audit_logs / trace_access_security /
+            # trace_anti_tampering sont logiquement append-only  le DELETE du
+            # routeur n'est qu'un soft-delete (is_active=False) qui reste
+            # detectable par la chaine de hash Merkle.
+            "tracabilite": {"label": "Traçabilité bout-en-bout", "sub_modules": {"nomenclature": ["read"],
+                "events": ["read", "create", "modify"], "custody_transfers": ["read", "create", "modify"],
+                "batch_genealogy": ["read", "create", "modify"], "serial_genealogy": ["read", "create", "modify"],
+                "document_hashes": ["read", "create", "modify"], "geolocations": ["read", "create", "modify"],
+                "cold_chain": ["read", "create", "modify"], "incidents": ["read", "create", "modify"],
+                "regulatory_exports": ["read", "create", "modify"], "audit_logs": ["read", "create", "modify"],
+                "timestamps": ["read", "create", "modify"], "signatures": ["read", "create", "modify"],
+                "merkle_proofs": ["read", "create", "modify"], "seals": ["read", "create", "modify"],
+                "cargo_handoffs": ["read", "create", "modify"], "access_logs": ["read", "create", "modify"],
+                "consents": ["read", "create", "modify"], "anti_tampering": ["read", "create", "modify"],
+                "retention_policies": ["read", "create", "modify"]}},
             "settings": {"label": "Parametres entreprise", "sub_modules": {"generaux": ["read", "modify"], "communs": ["read", "modify"]}},
         },
     },
@@ -143,6 +164,32 @@ DOMAINS: Dict[str, Dict] = {
                 "stevedoring_crew": ["read", "create", "modify"], "tally": ["read", "create", "modify"],
                 "towage": ["read", "create", "modify"], "vessel_waste": ["read", "create", "modify"],
                 "yard": ["read", "create", "modify"]}},
+            # Wave 6  maintenance industrielle experte (routeur maintenance_deep).
+            # Coverage asset-intense : actif technique hiérarchique → composant → BOM →
+            # pièce (catalogue OEM/aftermarket/reconditionné) → pièce sérialisée singleton
+            # (injecteur common-rail, roulement, courroie) → stock/mouvement → FMEA
+            # (G×O×D) → plan préventif/conditionnel/prédictif → OT curatif/évolutif →
+            # RCA (5 pourquoi, Ishikawa, arbre de défaut) → révision (overhaul) →
+            # graissage → condition monitoring (vibration/thermographie/huile/ultrason) →
+            # capteurs IoT (Modbus/MQTT/OPC-UA/LoRa) → modèles prédictifs (Weibull, Bayes,
+            # random forest) → KPI fiabilité (MTBF/MTTR/MTTF/OEE) → inspections
+            # réglementaires ANINF/Inspection Travail/APN → budget → prestataires habilités.
+            # CHEF_MAITENANCE (« maintindustrielle.*.* ») pilote, TECHNICIEN
+            # saisit ses OT, AUDITEUR (« maintindustrielle.*.read ») lit.
+            "maintindustrielle": {"label": "Maintenance industrielle", "sub_modules": {"nomenclature": ["read"],
+                "assets": ["read", "create", "modify"], "components": ["read", "create", "modify"],
+                "spare_parts": ["read", "create", "modify"], "bill_of_material": ["read", "create", "modify"],
+                "serialized_parts": ["read", "create", "modify"], "inventory": ["read", "create", "modify"],
+                "movements": ["read", "create", "modify"], "failure_modes": ["read", "create", "modify"],
+                "plans": ["read", "create", "modify"], "tasks": ["read", "create", "modify"],
+                "work_orders": ["read", "create", "modify"], "asset_failures": ["read", "create", "modify"],
+                "wo_parts": ["read", "create", "modify"], "wo_labours": ["read", "create", "modify"],
+                "wo_tools": ["read", "create", "modify"], "root_causes": ["read", "create", "modify"],
+                "overhauls": ["read", "create", "modify"], "lubrication": ["read", "create", "modify"],
+                "condition_readings": ["read", "create", "modify"], "sensors": ["read", "create", "modify"],
+                "predictive_models": ["read", "create", "modify"], "reliability_kpis": ["read", "create", "modify"],
+                "inspections": ["read", "create", "modify"], "budgets": ["read", "create", "modify"],
+                "vendors": ["read", "create", "modify"]}},
         },
     },
     # Departement autonome : l'amenagement portuaire n'est pas l'exploitation
