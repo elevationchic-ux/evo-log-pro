@@ -219,7 +219,7 @@ class PartInventory(Base):
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False, index=True)
     part_id = Column(Integer, ForeignKey("maint_spare_part_catalog.id"), nullable=False, index=True)
-    magasin_id = Column(Integer, ForeignKey("magasins.id"), nullable=True, index=True)
+    magasin_id = Column(Integer, ForeignKey("entrepots.id"), nullable=True, index=True)
     emplacement = Column(String(180), nullable=True, index=True)
     quantite_en_stock = Column(Integer, nullable=False, default=0)
     quantite_reservee = Column(Integer, nullable=True, default=0)
@@ -254,8 +254,8 @@ class PartMovement(Base):
     type_mouvement = Column(String(40), nullable=False, index=True)
     # entree_achat / sortie_ot / retour_garantie / transfert / adjustment / rebut / inventaire
     quantite = Column(Float, nullable=False)
-    magasin_source_id = Column(Integer, ForeignKey("magasins.id"), nullable=True, index=True)
-    magasin_destination_id = Column(Integer, ForeignKey("magasins.id"), nullable=True, index=True)
+    magasin_source_id = Column(Integer, ForeignKey("entrepots.id"), nullable=True, index=True)
+    magasin_destination_id = Column(Integer, ForeignKey("entrepots.id"), nullable=True, index=True)
     work_order_id = Column(Integer, ForeignKey("maint_work_orders.id"), nullable=True, index=True)
     bon_livraison_id = Column(Integer, nullable=True, index=True)  # lien vers BL achat si entree
     facture_achat_id = Column(Integer, nullable=True, index=True)
@@ -482,7 +482,7 @@ class WorkOrderPart(Base):
     valeur_xaf = Column(Numeric(18, 2), nullable=True)
     date_sortie = Column(DateTime(timezone=True), nullable=True, index=True)
     motif_retour = Column(String(220), nullable=True)
-    magasin_id = Column(Integer, ForeignKey("magasins.id"), nullable=True)
+    magasin_id = Column(Integer, ForeignKey("entrepots.id"), nullable=True)
     is_active = Column(Boolean, default=True, nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), nullable=True)
