@@ -29,6 +29,8 @@ def load(path):
 MODULES = {}
 MODULES.update(load(HERE / "manifests" / "all_modules.py"))
 MODULES.update(load(HERE / "manifests" / "wave3_modules.py"))
+MODULES.update(load(HERE / "manifests" / "wave4_transports.py"))
+MODULES.update(load(HERE / "manifests" / "wave4_logistique.py"))
 
 
 def build_main_block(mk, slug):

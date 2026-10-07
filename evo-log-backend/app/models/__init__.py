@@ -423,3 +423,83 @@ try:
 except Exception:
     pass
 # </expansion:admin>
+
+# <expansion:ferroviaire>
+try:
+    from app.models.ferroviaire_deep import (
+        RailWagon,
+        RailLocomotive,
+        RailTrainPath,
+        RailShuntingYard,
+        RailTerminal,
+        RailConsistencyPlan,
+        RailWaybill,
+        RailTariff,
+        RailWagonTracking,
+        RailWagonMaintenance,
+        RailSafetyRecord,
+        RailCorridor,
+    )
+    __all__.extend(["RailWagon", "RailLocomotive", "RailTrainPath", "RailShuntingYard", "RailTerminal", "RailConsistencyPlan", "RailWaybill", "RailTariff", "RailWagonTracking", "RailWagonMaintenance", "RailSafetyRecord", "RailCorridor"])
+except Exception:
+    pass
+# </expansion:ferroviaire>
+
+# <expansion:aerien>
+try:
+    from app.models.aerien_deep import (
+        Aircraft,
+        AirWaybill,
+        AirSlot,
+        GroundHandlingJob,
+        ULDInventory,
+        CargoSecurityScreen,
+        AirDangerousGoods,
+        FlightOperation,
+        CrewRoster,
+        AircraftCheck,
+        AirportCargoWarehouse,
+        AirTariff,
+    )
+    __all__.extend(["Aircraft", "AirWaybill", "AirSlot", "GroundHandlingJob", "ULDInventory", "CargoSecurityScreen", "AirDangerousGoods", "FlightOperation", "CrewRoster", "AircraftCheck", "AirportCargoWarehouse", "AirTariff"])
+except Exception:
+    pass
+# </expansion:aerien>
+
+# <expansion:fluvial>
+try:
+    from app.models.fluvial_deep import (
+        FluvialBarge,
+        FluvialTowboat,
+        LockTransit,
+        RiverDepthSurvey,
+        FluvialTerminal,
+        FluvialBulkOperation,
+        FluvialSafetyRecord,
+        FluvialTariff,
+        FluvialWaybill,
+        FluvialPosition,
+    )
+    __all__.extend(["FluvialBarge", "FluvialTowboat", "LockTransit", "RiverDepthSurvey", "FluvialTerminal", "FluvialBulkOperation", "FluvialSafetyRecord", "FluvialTariff", "FluvialWaybill", "FluvialPosition"])
+except Exception:
+    pass
+# </expansion:fluvial>
+
+# <expansion:log3pl>
+try:
+    from app.models.log3pl_deep import (
+        TplContract,
+        TplWarehouse,
+        TplCrossDock,
+        TplPickingLine,
+        TplSlaKpi,
+        TplInvoice,
+        TplInventoryValuation,
+        TplSubProvider,
+        TplReverseOperation,
+        TplControlTower,
+    )
+    __all__.extend(["TplContract", "TplWarehouse", "TplCrossDock", "TplPickingLine", "TplSlaKpi", "TplInvoice", "TplInventoryValuation", "TplSubProvider", "TplReverseOperation", "TplControlTower"])
+except Exception:
+    pass
+# </expansion:log3pl>

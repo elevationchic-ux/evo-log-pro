@@ -26,6 +26,8 @@ def main():
     manifests = [
         HERE / "manifests" / "all_modules.py",
         HERE / "manifests" / "wave3_modules.py",
+        HERE / "manifests" / "wave4_transports.py",
+        HERE / "manifests" / "wave4_logistique.py",
     ]
     for p in manifests:
         print(f"\n=== {p.name} ===")

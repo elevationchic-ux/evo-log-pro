@@ -252,6 +252,47 @@ DOMAINS: Dict[str, Dict] = {
                 "sla_management": ["read", "create", "modify"]}},
         },
     },
+    # Consoles de plateforme (SaaS operateur). Ces quatre modules ne sont PAS un
+    # perimetre metier : ils sont reservees au proprietaire de la plateforme
+    # (SUPER_ADMIN, niveau 0) et a l'administrateur de l'entreprise locataire
+    # (ADMIN_ENTREPRISE, niveau 1). Le moteur d'autorisation (permissions.py)
+    # fait BYPASSER les niveaux 0/1 : ces routes leurs sont donc ouvertes sans
+    # ligne « permissions » accordee, et FERMEES (403) a tout role metier
+    # (niveaux 2/3). Volonte explicite, pas un oubli : aucun ROLE_GRANTS metier
+    # ne porte ces codes. Ils sont declares ici pour que la table « permissions »,
+    # la matrice d'admin et GET /permissions/catalog les rendent VISIBLES et
+    # auditable, non pour etre grantes a un departement.
+    "plateforme": {
+        "label": "Console plateforme (reserves SuperAdmin / Admin-entreprise)",
+        "modules": {
+            "admin": {"label": "Administration SaaS (tenant)", "sub_modules": {"nomenclature": ["read"],
+                "api_key": ["read", "create", "modify"], "billing_engine": ["read", "create", "modify"],
+                "data_migration": ["read", "create", "modify"], "feature_flag": ["read", "create", "modify"],
+                "onboarding_wizard": ["read", "create", "modify"], "rate_limit": ["read", "create", "modify"],
+                "support_ticket": ["read", "create", "modify"], "uptime_monitoring": ["read", "create", "modify"],
+                "usage_analytics": ["read", "create", "modify"], "webhook": ["read", "create", "modify"],
+                "white_label": ["read", "create", "modify"]}},
+            "superadmin": {"label": "Console super administrateur", "sub_modules": {"nomenclature": ["read"],
+                "access_review": ["read", "create", "modify"], "compliance_dashboards": ["read", "create", "modify"],
+                "data_retention": ["read", "create", "modify"], "disaster_recovery": ["read", "create", "modify"],
+                "incident_response": ["read", "create", "modify"], "license_management": ["read", "create", "modify"],
+                "partner_network": ["read", "create", "modify"], "platform_audit": ["read", "create", "modify"],
+                "revenue_analytics": ["read", "create", "modify"], "system_config": ["read", "create", "modify"]}},
+            "dashboard": {"label": "Tableau de bord transverse", "sub_modules": {"nomenclature": ["read"],
+                "activity_feed": ["read", "create", "modify"], "calendar_agenda": ["read", "create", "modify"],
+                "document_center": ["read", "create", "modify"], "financial_summary": ["read", "create", "modify"],
+                "integration_status": ["read", "create", "modify"], "module_health": ["read", "create", "modify"],
+                "operational_alerts": ["read", "create", "modify"], "quick_actions": ["read", "create", "modify"],
+                "task_center": ["read", "create", "modify"], "team_performance": ["read", "create", "modify"]}},
+            "reports": {"label": "BI & analytique", "sub_modules": {"nomenclature": ["read"],
+                "anomaly_detection": ["read", "create", "modify"], "benchmark": ["read", "create", "modify"],
+                "cohort_analysis": ["read", "create", "modify"], "custom_dashboard": ["read", "create", "modify"],
+                "data_warehouse": ["read", "create", "modify"], "drill_down": ["read", "create", "modify"],
+                "export_reports": ["read", "create", "modify"], "kpi_definition": ["read", "create", "modify"],
+                "predictive_analytics": ["read", "create", "modify"], "regulatory_report": ["read", "create", "modify"],
+                "scorecard": ["read", "create", "modify"]}},
+        },
+    },
 }
 
 # Roles metier granulaires (systemes, company_id=NULL). Chaque entree :
