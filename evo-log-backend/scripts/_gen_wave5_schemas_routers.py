@@ -219,7 +219,7 @@ def gen_router_file(slug: str, perm_module: str, tag_label: str, models, paths_m
         "",
         "# ─── Nomenclatures ───────────────────────────────────────────────────────────",
         "",
-        '@router.get("/nomenclatures", summary=f"Vocabulaire metier {tag_label}")',
+        f'@router.get("/nomenclatures", summary="Vocabulaire metier {tag_label}")',
         f'def nomenclatures(user: User = Depends(require_perm("{perm_module}.nomenclature.read"))):',
         f"    from app.models import {slug}_deep as _md",
         "    import enum as _pyenum",
