@@ -36,9 +36,9 @@ class InfrastructureMaintenance_statut(str, enum.Enum):
 
 
 class IspsRecord_niveau_isps(str, enum.Enum):
-    1 = "1"
-    2 = "2"
-    3 = "3"
+    N1 = "n1"
+    N2 = "n2"
+    N3 = "n3"
 
 
 class PortPerception_type_perception(str, enum.Enum):
@@ -135,7 +135,7 @@ class IspsRecord(Base):
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=False, index=True)
     reference = Column(String(150), nullable=False, index=True)
-    niveau_isps = Column(_enum(IspsRecord_niveau_isps), default=IspsRecord_niveau_isps.1)
+    niveau_isps = Column(_enum(IspsRecord_niveau_isps), default=IspsRecord_niveau_isps.N1)
     date_application = Column(DateTime(timezone=True), nullable=True)
     motif = Column(Text(2000), nullable=True)
     authorite_emetteuse = Column(String(150), nullable=True)
