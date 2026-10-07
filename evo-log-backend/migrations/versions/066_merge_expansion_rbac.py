@@ -9,7 +9,7 @@ unique. Cette migration est la MERGE des deux (down_revision = tuple) et redevie
 l'unique tete.
 
 Fonction : reconciler le catalogue vers la base deja migree. Le catalogue
-(permission_catalog.DDOMAINS) a ete etendu de toutes les expansions profondes
+(permission_catalog.DOMAINS) a ete etendu de toutes les expansions profondes
 (transit/rh/qhse/magasin/parc, transport fret, comptabilite/tresorerie/port
 reconcilies depuis les noms inventes compta/finance/port_ops, portail b2b, modes
 aerien/ferroviaire/fluvial/log3pl, consoles plateforme) et ROLE_GRANTS porte un
