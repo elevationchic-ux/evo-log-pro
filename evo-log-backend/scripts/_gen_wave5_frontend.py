@@ -71,7 +71,7 @@ MODULES = [
         "nav_area": "Pipeline Oléoduc-Gazoduc",
         "nav_phase": "Mode Pipeline: Sections, Stations, Stockage & Metering",
         "entities": [
-            ("PipelineSection",           "sections",            "sections",            "code_section",  "registreSection",         "Troncons de pipeline",            "Pipeline sections",             "Sections physiques du reseau (troncon, diametre, produit transporté).", "Physical sections of the network.", "Pipeline"),
+            ("PipelineSection",           "sections",            "sections",            "code_section",  "registreSection",         "Troncons de pipeline",            "Pipeline sections",             "Sections physiques du reseau (troncon, diametre, produit transporte).", "Physical sections of the network.", "Waypoints"),
             ("PipelinePumpStation",       "pump-stations",       "pump_stations",       "code_station",  "registrePumpStation",     "Stations de pompage",              "Pump stations",                   "Stations de compression/pompage et postes de sectionnement.", "Compression/pumping stations.", "Zap"),
             ("PipelineStorageTank",       "storage-tanks",       "storage_tanks",       "code_cuve",     "registreStorageTank",     "Cuves de stockage",                "Storage tanks",                   "Bacs de stockage hydrocarbures (fixes et flottants).", "Hydrocarbon storage tanks.", "Database"),
             ("PipelineMeteringPoint",     "metering-points",     "metering_points",     "code_point",    "registreMeteringPoint",   "Points de mesure",                 "Metering points",                 "Systemes de comptage fiscal et commercial (turbinex, coriolis).", "Fiscal/commercial metering skids.", "Gauge"),
