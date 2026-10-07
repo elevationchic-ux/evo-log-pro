@@ -4,12 +4,26 @@ Dialect-aware: PostgreSQL with QueuePool for production multi-tenant concurrency
 SQLite with WAL mode for development. Zero "database is locked" errors.
 """
 import logging
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, event, text, Text
+from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.pool import QueuePool, StaticPool
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+@compiles(Text, "postgresql")
+def _pg_text(type_, compiler, **kw):
+    """Postgres interdit tout modificateur de type sur TEXT (TEXT(2000) est une
+    erreur de syntaxe, tolerée seulement par SQLite). Un modele qui redigerait
+    encore `Column(Text(n))` echouerait donc le `alembic upgrade head` de
+    l'entrypoint (crash loop : la 502 du proxy Railway est lue « CORS » par le
+    navigateur). Cette regle de compilation est LA garantie definitive : sur le
+    dialecte PostgreSQL, une colonne Text emitting toujours `TEXT`, quelle que
+    soit la longueur declaree. SQLite garde sa declaration telle quelle (le
+    developement local est inchange)."""
+    return "TEXT"
 
 DATABASE_URL: str = settings.DATABASE_URL
 _is_sqlite = DATABASE_URL.startswith("sqlite")
