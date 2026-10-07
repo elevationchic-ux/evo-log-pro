@@ -85,7 +85,7 @@ FIELD_WIDTH = {
 
 
 def _sqla_type_str(ftype: str) -> str:
-    if ftype.startswith("enum:"):
+    if ftype == "enum" or ftype.startswith("enum:"):
         return "String(50)"
     return SQLA_TYPE[ftype] + FIELD_WIDTH.get(ftype, "")
 
@@ -343,10 +343,6 @@ def _company_id(user: User) -> int:
         lines.append(f'# ─── {label} ─────────────────────────────────────────────────')
         lines.append('')
         lines.append(f'@router.get("/{path}", response_model=List[{cn}Out])')
-        filter_params = []
-        for f in ent["fields"]:
-            if f["type"] == "str" and (f.get("search") or f["name"] in ("statut", "type", "categorie")):
-                filter_params.append(f{f['name']}: Optional[str] = None,)
         # Simpler: add a statut filter if the field exists
         statut_field = next((f for f in ent["fields"] if f["name"] == "statut"), None)
         if statut_field:
