@@ -123,7 +123,7 @@ export default function RolePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
             {[
-              { key: 'nom', label: 'Nom du Rôle', type: 'text' },
+              { key: 'name', label: 'Nom du Rôle', type: 'text' },
               { key: 'description', label: 'Description', type: 'text' },
             ].map(f => (
               <div key={f.key}>
@@ -174,18 +174,18 @@ export default function RolePage() {
               <div key={r.id} className="p-5 hover:bg-slate-800/40 transition-colors">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase border ${getRoleColor(r.nom)}`}>{r.nom}</span>
-                    {(r.systeme || r.is_system) && (
+                    <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase border ${getRoleColor(r.name)}`}>{r.name}</span>
+                    {r.is_system && (
                       <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-700/60 text-slate-400 border border-slate-600/60">Système</span>
                     )}
                   </div>
                   <p className="text-xs text-slate-400">{r.description || 'Sans description'}</p>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {(r.modules || []).map((m: string) => (
+                  {(r.modules_allowed || []).map((m: string) => (
                     <span key={m} className="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">{m}</span>
                   ))}
-                  {(!r.modules || r.modules.length === 0) && <span className="text-xs text-slate-400 italic">Aucun module assigné</span>}
+                  {(!r.modules_allowed || r.modules_allowed.length === 0) && <span className="text-xs text-slate-400 italic">Aucun module assigné</span>}
                 </div>
               </div>
             ))}
