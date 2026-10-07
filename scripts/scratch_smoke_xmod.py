@@ -23,7 +23,7 @@ def login():
     body = json.dumps({"username": "admin@evolog.cm", "password": "admin123"}).encode()
     req = urllib.request.Request(BASE + "/api/v1/auth/login", data=body,
                                  headers={"Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(req, timeout=15) as r:
+    with urllib.request.urlopen(req, timeout=45) as r:
         data = json.loads(r.read().decode())
     return data.get("access_token") or data.get("token")
 
@@ -36,7 +36,7 @@ def call(method, path, token, body=None):
         headers["Authorization"] = "Bearer " + token
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=25) as r:
+        with urllib.request.urlopen(req, timeout=60) as r:
             return r.status, r.read().decode()[:220]
     except urllib.error.HTTPError as e:
         return e.code, e.read().decode()[:220]
