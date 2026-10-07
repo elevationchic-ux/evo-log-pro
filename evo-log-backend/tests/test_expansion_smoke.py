@@ -74,7 +74,13 @@ def test_list_ok_for_superuser(client, module_slug, entite, unicite, payload):
     assert r.status_code == 200, (
         f"list {module_slug}/{entite} -> {r.status_code}: {r.text[:200]}"
     )
-    assert isinstance(r.json(), list)
+    body = r.json()
+    # global response wrapper may normalize list to {items|results|data, total}
+    assert isinstance(body, (list, dict)), f"unexpected body type {type(body)}"
+    if isinstance(body, dict):
+        assert any(k in body for k in ("items", "results", "data")), (
+            f"paginated body missing list field: keys={list(body.keys())}"
+        )
 
 
 @pytest.mark.parametrize("module_slug,entite,unicite,payload", _CASES, ids=_IDS)
