@@ -2,9 +2,7 @@ import re, pathlib
 from collections import defaultdict
 
 targets = [
-    "transport_deep.py", "port_deep.py", "comptabilite_deep.py", "finance_deep.py",
-    "b2b_deep.py", "reports_deep.py", "admin_deep.py", "superadmin_deep.py",
-    "dashboard_deep.py",
+    "aerien_deep.py", "ferroviaire_deep.py", "fluvial_deep.py", "log3pl_deep.py",
 ]
 root = pathlib.Path("app/routers")
 byname = {f.name: f for f in root.rglob("*.py")}
