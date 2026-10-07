@@ -327,3 +327,52 @@ def test_migration_036_refuse_explicitement_base_sans_tables_rbac(tmp_path, monk
     msg = str(exc.value).lower()
     assert "permissions" in msg or "rbac" in msg, (
         "la garde doit nommer la precondition RBAC, pas echouer en silence")
+
+
+# ── 5. Migration 046 : le droit qhse.permis.read est REELLEMENT materialise ──
+# Le catalogue declare qhse.permis.read pour CHEF_EXPLOITATION (liste explicite,
+# sans wildcard). Sans lien materialise en base, le chef qui cree un permis ne
+# peut pas le relire (403). On verifie que la migration 046 cree la ligne de
+# permission ET le lien role->permission, de facon idempotente.
+def test_migration_046_materialise_permis_read_pour_chef(tmp_path, monkeypatch):
+    db_file = tmp_path / "mig046.db"
+    url = f"sqlite:///{db_file.as_posix()}"
+    monkeypatch.setenv("DATABASE_URL", url)
+    cfg = _make_config()
+
+    command.upgrade(cfg, "head")
+
+    # La ligne de permission existe.
+    n = _scalar(url, "SELECT COUNT(*) FROM permissions WHERE code = 'qhse.permis.read'")
+    assert n == 1, "qhse.permis.read doit etre seede en base par 046"
+
+    # CHEF_EXPLOITATION porte reellement le lien.
+    rid = _scalar(url, "SELECT id FROM roles WHERE name = 'CHEF_EXPLOITATION'")
+    assert rid is not None, "CHEF_EXPLOITATION doit exister apres head"
+    pid = _scalar(url, "SELECT id FROM permissions WHERE code = 'qhse.permis.read'")
+    liens = _scalar(
+        url,
+        f"SELECT COUNT(*) FROM role_permissions WHERE role_id = {rid} AND permission_id = {pid}",
+    )
+    assert liens == 1, "le chef doit porte le lien vers qhse.permis.read"
+
+    # Idempotence : rejouer 046 ne duplique ni la permission ni le lien.
+    total_perms_avant = _scalar(url, "SELECT COUNT(*) FROM permissions")
+    total_liens_avant = _scalar(url, "SELECT COUNT(*) FROM role_permissions")
+    command.downgrade(cfg, "045_add_batch4_tables")
+    command.upgrade(cfg, "head")
+    assert _scalar(url, "SELECT COUNT(*) FROM permissions") == total_perms_avant
+    assert _scalar(url, "SELECT COUNT(*) FROM role_permissions") == total_liens_avant
+
+
+def test_migration_046_refuse_base_sans_tables_rbac(tmp_path, monkeypatch):
+    db_file = tmp_path / "mig046_guard.db"
+    url = f"sqlite:///{db_file.as_posix()}"
+    monkeypatch.setenv("DATABASE_URL", url)
+    cfg = _make_config()
+    command.stamp(cfg, "045_add_batch4_tables")
+    with pytest.raises(RuntimeError) as exc:
+        command.upgrade(cfg, "head")
+    msg = str(exc.value).lower()
+    assert "permissions" in msg or "rbac" in msg, (
+        "la garde 046 doit nommer la precondition RBAC, pas echouer en silence")
