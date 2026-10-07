@@ -910,3 +910,59 @@ try:
 except Exception:
     pass
 # </expansion:magasinier_c>
+
+# <expansion:technicien_d>
+try:
+    from app.models.technicien_d_deep import (
+        TechWorkOrder,
+        TechInterventionSheet,
+        TechDiagnosis,
+        TechPartConsumption,
+        TechPreventivePlan,
+        TechBreakdownTicket,
+        TechRepairReport,
+        TechCalibrationRecord,
+        TechEquipmentChecklist,
+        TechToolLoan,
+        TechSafetyLockout,
+        TechWarrantyClaim,
+        TechServiceAppointment,
+        TechLaborTimesheet,
+        TechUpgradeRequest,
+        TechFailureAnalysis,
+        TechSpareRequest,
+        TechInspectionRecord,
+        TechWorkOrderCost,
+    )
+    __all__.extend(["TechWorkOrder", "TechInterventionSheet", "TechDiagnosis", "TechPartConsumption", "TechPreventivePlan", "TechBreakdownTicket", "TechRepairReport", "TechCalibrationRecord", "TechEquipmentChecklist", "TechToolLoan", "TechSafetyLockout", "TechWarrantyClaim", "TechServiceAppointment", "TechLaborTimesheet", "TechUpgradeRequest", "TechFailureAnalysis", "TechSpareRequest", "TechInspectionRecord", "TechWorkOrderCost"])
+except Exception:
+    pass
+# </expansion:technicien_d>
+
+# <expansion:qhse_portal_d>
+try:
+    from app.models.qhse_portal_d_deep import (
+        QspHazardReport,
+        QspNearMiss,
+        QspSafetyObservation,
+        QspPpeAttestation,
+        QspToolboxTalk,
+        QspWorkPermitRequest,
+        QspSafetyTrainingLog,
+        QspExposureRecord,
+        QspFirstAidLog,
+        QspSafetySuggestion,
+        QspStopWorkAuthority,
+        QspSpillReport,
+        QspMsdsAck,
+        QspErgonomicsAssessment,
+        QspHygieneCheck,
+        QspInspectionFinding,
+        QspCapaReply,
+        QspRiskAssessmentInput,
+        QspEvacuationDrill,
+    )
+    __all__.extend(["QspHazardReport", "QspNearMiss", "QspSafetyObservation", "QspPpeAttestation", "QspToolboxTalk", "QspWorkPermitRequest", "QspSafetyTrainingLog", "QspExposureRecord", "QspFirstAidLog", "QspSafetySuggestion", "QspStopWorkAuthority", "QspSpillReport", "QspMsdsAck", "QspErgonomicsAssessment", "QspHygieneCheck", "QspInspectionFinding", "QspCapaReply", "QspRiskAssessmentInput", "QspEvacuationDrill"])
+except Exception:
+    pass
+# </expansion:qhse_portal_d>

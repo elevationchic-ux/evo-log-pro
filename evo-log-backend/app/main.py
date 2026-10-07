@@ -880,6 +880,20 @@ try:
 except ImportError as e:
     logger.warning(f"Router magasinier_c_deep absent : {e}")
 # </expansion:magasinier_c>
+# <expansion:technicien_d>
+try:
+    from app.routers.v1 import technicien_d_deep
+    safe_include_router(technicien_d_deep.router, prefix="/api/v1/portail-technicien", tags=["portail-technicien (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router technicien_d_deep absent : {e}")
+# </expansion:technicien_d>
+# <expansion:qhse_portal_d>
+try:
+    from app.routers.v1 import qhse_portal_d_deep
+    safe_include_router(qhse_portal_d_deep.router, prefix="/api/v1/portail-qhse", tags=["portail-qhse (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router qhse_portal_d_deep absent : {e}")
+# </expansion:qhse_portal_d>
 
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)
