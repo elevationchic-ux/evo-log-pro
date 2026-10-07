@@ -297,8 +297,8 @@ def test_pdf_bon_sortie_statut_honnete(client, db):
     bon_id = created.json()["id"]
 
     r = client.get(f"{BASE}/{bon_id}/pdf")
-    if r.status_code == 501:
-        # Environnement sans WeasyPrint/Pango : 501 explicite, acceptable.
+    if r.status_code == 503:
+        # Environnement sans WeasyPrint/Pango : 503 explicite, acceptable.
         assert "PDF" in r.json()["detail"]
     else:
         assert r.status_code == 200
