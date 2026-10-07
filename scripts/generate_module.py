@@ -472,7 +472,8 @@ def gen_migration(m: dict) -> str:
             elif t == "bool":
                 sa_t = 'sa.Boolean'
             else:  # enum
-                sa_t = 'sa.String(50)'            null = 'nullable=False' if f.get("required") else 'nullable=True'
+                sa_t = 'sa.String(50)'
+            null = 'nullable=False' if f.get("required") else 'nullable=True'
             idx = ', index=True' if f.get("search") else ''
             lines.append(f'            sa.Column("{f["name"]}", {sa_t}, {null}{idx}),')
         lines.append(f'            sa.Column("is_active", sa.Boolean, nullable=True),')
@@ -511,42 +512,42 @@ def gen_frontend_registres(m: dict) -> str:
         f'',
         f'const api = registreAPI("{mod_slug}");',
         f'',
-        f'function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {',
-        f'  return { key, header, headerEn, ...opts } as ColonneRegistre;',
-        f'}',
-        f'',
-        f'function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {',
-        f'  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;',
-        f'}',
-        f'',
-        f'function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {',
-        f'  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;',
-        f'}',
-        f'',
-        f'function dt(key: string, label: string, labelEn: string): ChampRegistre {',
-        f'  return { key, label, labelEn, type: "date" } as ChampRegistre;',
-        f'}',
-        f'',
-        f'function dtx(key: string, label: string, labelEn: string): ChampRegistre {',
-        f'  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;',
-        f'}',
-        f'',
-        f'function area(key: string, label: string, labelEn: string): ChampRegistre {',
-        f'  return { key, label, labelEn, type: "textarea" } as ChampRegistre;',
-        f'}',
-        f'',
-        f'function chk(key: string, label: string, labelEn: string): ChampRegistre {',
-        f'  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;',
-        f'}',
-        f'',
-        f'function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {',
-        f'  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;',
-        f'}',
-        f'',
-        f'function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {',
-        f'  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;',
-        f'}',
-        f'',
+        "function col(key: string, header: string, headerEn: string, opts: Partial<ColonneRegistre> = {}): ColonneRegistre {",
+        "  return { key, header, headerEn, ...opts } as ColonneRegistre;",
+        "}",
+        "",
+        "function txt(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {",
+        '  return { key, label, labelEn, type: "text", ...opts } as ChampRegistre;',
+        "}",
+        "",
+        "function num(key: string, label: string, labelEn: string, opts: Partial<ChampRegistre> = {}): ChampRegistre {",
+        '  return { key, label, labelEn, type: "number", ...opts } as ChampRegistre;',
+        "}",
+        "",
+        "function dt(key: string, label: string, labelEn: string): ChampRegistre {",
+        '  return { key, label, labelEn, type: "date" } as ChampRegistre;',
+        "}",
+        "",
+        "function dtx(key: string, label: string, labelEn: string): ChampRegistre {",
+        '  return { key, label, labelEn, type: "datetime-local" } as ChampRegistre;',
+        "}",
+        "",
+        "function area(key: string, label: string, labelEn: string): ChampRegistre {",
+        '  return { key, label, labelEn, type: "textarea" } as ChampRegistre;',
+        "}",
+        "",
+        "function chk(key: string, label: string, labelEn: string): ChampRegistre {",
+        '  return { key, label, labelEn, type: "checkbox" } as ChampRegistre;',
+        "}",
+        "",
+        "function sel(key: string, label: string, labelEn: string, nomKey: string): ChampRegistre {",
+        '  return { key, label, labelEn, type: "select", nomenclature: nomKey } as ChampRegistre;',
+        "}",
+        "",
+        "function filtreSel(key: string, label: string, labelEn: string, nomKey: string): FiltreRegistre {",
+        '  return { key, label, labelEn, type: "select", nomenclature: nomKey } as FiltreRegistre;',
+        "}",
+        "",
     ]
 
     for ent in m["entities"]:
@@ -613,13 +614,14 @@ def gen_frontend_registres(m: dict) -> str:
 # ─── Page wrappers ───────────────────────────────────────────────────────────
 
 def gen_page_wrapper(ent: dict, module_slug: str) -> str:
+    cn = ent["class_name"]
     return (
         f"'use client';\n"
         f"import RegistreGenerique from '@/components/registre-generique/RegistreGenerique';\n"
-        f"import {{{' '}registre{ent['class_name']}{'} '}}from '@/components/{module_slug}/registres';\n"
+        f"import {{ registre{cn} }} from '@/components/{module_slug}/registres';\n"
         f"\n"
-        f"export default function Page{ent['class_name']}() {{\n"
-        f"  return <RegistreGenerique config={{registre{ent['class_name']}}} />;\n"
+        f"export default function Page{cn}() {{\n"
+        f"  return <RegistreGenerique config={{registre{cn}}} />;\n"
         f"}}\n"
     )
 
