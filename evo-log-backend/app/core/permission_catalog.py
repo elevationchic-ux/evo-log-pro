@@ -449,6 +449,10 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "aerien.*.read", "ferroviaire.*.read", "fluvial.*.read", "log3pl.*.read",
         # Wave 5 : pipeline, courier, coldchain, heavylift (lecture seule).
         "pipeline.*.read", "courier.*.read", "coldchain.*.read", "heavylift.*.read",
+        # Wave 6 : maintenance industrielle + traçabilité bout-en-bout
+        # (lecture transversale ; les tables append-only tracabilite sont
+        # tracables par nature, lire n'altère pas la chaine de hash).
+        "maintindustrielle.*.read", "tracabilite.*.read",
         # Batch 24 : meme lecture transversale sur le QHSE (rapports annuels
         # includes), sans jamais d'ecriture.
         "qhse.*.read",
@@ -547,6 +551,11 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         # Un poste ferme ou une aire changeee se refere a la place portuaire :
         # lecture du referentiel, jamais declaration d'une place.
         "amenagement.place.read",
+        # Wave 6 : le chef d'exploitation lit les OT maintenance des
+        # equipements de quai (STS/RTG/PM/reefers) et la traçabilité
+        # operationnelle des transferts cargo. Il ne saisit pas les OT
+        # (tache du service maintenance) ni ne signe les horodatages.
+        "maintindustrielle.*.read", "tracabilite.*.read",
     ]),
     ("OPERATEUR_ACCONAGE", 3, "Operateur d'acconage : execution au quai, sans validation", [
         "acconage.navire.read", "acconage.escale.read", "acconage.escale.create",
@@ -598,6 +607,96 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         # Un quai mis hors service pour travaux se coordonne avec l'exploitation :
         # lecture utile, pas decision.
         "port.quai.read",
+    ]),
+    # ---- Wave 6  maintenance industrielle ------------------------------------
+    ("CHEF_MAINTENANCE", 2, "Chef maintenance : pilotage complet du cycle de vie des actifs industriels (FMEA, RCM, TPM)", [
+        # Pilote les 25 registres de maintenance (actifs → composants → BOM →
+        # catalogue pièce → pièces sérialisées singleton → stock → mouvements →
+        # modes FMEA → plans préventifs/conditionnels/prédictifs → tâches →
+        # OT curatifs/évolutifs/correctifs → pannes → OT pièces/labour/outils →
+        # RCA → campagnes révision → graissage → conditions → capteurs →
+        # modèles prédictifs → KPI fiabilité MTBF/MTTR/OEE → inspections
+        # réglementaires → budget → prestataires).
+        "maintindustrielle.*.*",
+        # Le chef lit la traçabilité (hash chain) pour auditer les OT, et les
+        # actifs opérationnels côté terminal (quay_equipment) et magasin
+        # (inventaire des pièces).
+        "tracabilite.*.read",
+        "port.quay_equipment.read", "magasin.stock.read",
+    ]),
+    ("TECHNICIEN_MAINTENANCE", 3, "Technicien maintenance : exécution des OT, saisie des consommations pièces/heures, sans validation budgétaire ni suppression", [
+        # Le technicien clôture ses OT, consomme les pièces, relève les
+        # capteurs et les conditions ; il ne valide pas le budget, ne clôture
+        # pas une campagne de grande révision, ne supprime jamais un actif
+        # (désactivation via modify).
+        "maintindustrielle.nomenclature.read",
+        "maintindustrielle.assets.read", "maintindustrielle.components.read",
+        "maintindustrielle.spare_parts.read", "maintindustrielle.bill_of_material.read",
+        "maintindustrielle.serialized_parts.read", "maintindustrielle.serialized_parts.modify",
+        "maintindustrielle.inventory.read", "maintindustrielle.movements.read",
+        "maintindustrielle.movements.create",
+        "maintindustrielle.failure_modes.read",
+        "maintindustrielle.plans.read", "maintindustrielle.tasks.read",
+        "maintindustrielle.tasks.create", "maintindustrielle.tasks.modify",
+        "maintindustrielle.work_orders.read", "maintindustrielle.work_orders.create",
+        "maintindustrielle.work_orders.modify",
+        "maintindustrielle.asset_failures.read", "maintindustrielle.asset_failures.create",
+        "maintindustrielle.asset_failures.modify",
+        "maintindustrielle.wo_parts.read", "maintindustrielle.wo_parts.create",
+        "maintindustrielle.wo_parts.modify",
+        "maintindustrielle.wo_labours.read", "maintindustrielle.wo_labours.create",
+        "maintindustrielle.wo_labours.modify",
+        "maintindustrielle.wo_tools.read", "maintindustrielle.wo_tools.create",
+        "maintindustrielle.wo_tools.modify",
+        "maintindustrielle.root_causes.read", "maintindustrielle.root_causes.create",
+        "maintindustrielle.root_causes.modify",
+        "maintindustrielle.overhauls.read",
+        "maintindustrielle.lubrication.read", "maintindustrielle.lubrication.create",
+        "maintindustrielle.lubrication.modify",
+        "maintindustrielle.condition_readings.read",
+        "maintindustrielle.condition_readings.create",
+        "maintindustrielle.condition_readings.modify",
+        "maintindustrielle.sensors.read",
+        "maintindustrielle.predictive_models.read",
+        "maintindustrielle.reliability_kpis.read",
+        "maintindustrielle.inspections.read", "maintindustrielle.inspections.create",
+        "maintindustrielle.inspections.modify",
+        "maintindustrielle.vendors.read",
+        # Le technicien lit le stock magasin pour tirer ses pièces et la
+        # géolocalisation pour retracer ses interventions.
+        "magasin.stock.read", "magasin.mouvement.create", "tracabilite.geolocations.read",
+    ]),
+    # ---- Wave 6  traçabilité & sécurité -------------------------------------
+    ("RESPONSABLE_TRACABILITE", 2, "Responsable traçabilité bout-en-bout : pilotage des chaînes de custody, horodatages qualifiés, sceaux ISO 17712 et conformité RGPD / loi Cameroun 2010/041", [
+        # Le responsable possède l'ensemble des 19 registres traçabilité :
+        # événements, chaîne de custody, généalogie lot/serial, empreintes,
+        # géolocalisation, chaîne du froid, PC incident, exports réglementaires,
+        # journal inaltérable, horodatage, signatures témoin, preuves Merkle,
+        # sceaux, transferts cargo, logs d'accès, consentements, anti-
+        # falsification, politiques de rétention.
+        "tracabilite.*.*",
+        # Il lit les opérations qui nourrissent la chaîne (BL, LSE, facture,
+        # conteneur, magasin, transport) et les OT maintenance pour les
+        # pièces changées en intervention.
+        "transport.*.read", "magasin.*.read", "acconage.*.read",
+        "port.*.read", "maintindustrielle.*.read",
+    ]),
+    ("RSSI", 3, "RSSI / Sécurité SI : surveillance des accès, détection anti-falsification, gestion des consentements", [
+        # Le RSSI pilote la sécurité d'accès, l'anti-falsification et les
+        # consentements. Les logs inaltérables sont en lecture seule (append-
+        # only de par leur conception hash chain) ; il ne modifie jamais un
+        # événement tracabilite brut ni un sceau.
+        "tracabilite.nomenclature.read",
+        "tracabilite.access_logs.read", "tracabilite.access_logs.create",
+        "tracabilite.anti_tampering.read", "tracabilite.anti_tampering.create",
+        "tracabilite.anti_tampering.modify",
+        "tracabilite.consents.read", "tracabilite.consents.create",
+        "tracabilite.consents.modify",
+        "tracabilite.audit_logs.read", "tracabilite.document_hashes.read",
+        "tracabilite.merkle_proofs.read", "tracabilite.merkle_proofs.create",
+        "tracabilite.timestamps.read", "tracabilite.timestamps.create",
+        # Il audite les logs de la console plateforme (super admin).
+        "superadmin.platform_audit.read", "audit.journal.read",
     ]),
 ]
 
