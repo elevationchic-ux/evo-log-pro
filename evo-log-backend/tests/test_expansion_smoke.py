@@ -28,6 +28,26 @@ def _load_modules(path: Path) -> dict:
     return mod.MODULES
 
 
+def _load_manifest(path: Path) -> dict:
+    spec = importlib.util.spec_from_file_location(f"m_{path.stem}", str(path))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.MANIFEST
+
+
+# Port-ops Wave 1A was handcrafted (no manifest). Enumerate its deep-router entities
+# here so the smoke test still covers the plan's 3-tests-per-entity contract for it.
+_PORT_OPS_HANDCRAFTED = [
+    ("draft-surveys", "reference"),
+    ("stevedoring-crews", "reference"),
+    ("cargo-handling-plans", "reference"),
+    ("quay-equipments", "reference"),
+    ("pilotage-sessions", "reference"),
+    ("towage-operations", "reference"),
+    ("bunkering-orders", "reference"),
+]
+
+
 def _collect() -> list[tuple[str, str, str, str]]:
     """Return (module_slug, entite_path, unicite_field, required_minimal_json)."""
     out = []
