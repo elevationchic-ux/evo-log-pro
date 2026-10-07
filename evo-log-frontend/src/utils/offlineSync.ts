@@ -300,10 +300,17 @@ export function queueEpodSignature(
   data: { mission_id: number; signature_base64: string; gps_lat?: number; gps_lon?: number; notes?: string },
   context: { company_id: number; user_id: string }
 ) {
+  // Le backend clot la mission via POST /transport/missions/{mission_id}/livrer
+  // (e-POD). La file rejoue un chemin statique : on interpole la mission_id ici.
   return enqueueOperation({
     type: 'EPOD_SIGNATURE',
-    endpoint: '/api/v1/transport/missions/epod',
-    payload: data,
+    endpoint: `/api/v1/transport/missions/${data.mission_id}/livrer`,
+    payload: {
+      epod_signature: data.signature_base64,
+      epod_note: data.notes,
+      gps_lat: data.gps_lat,
+      gps_lon: data.gps_lon,
+    },
     ...context,
   });
 }

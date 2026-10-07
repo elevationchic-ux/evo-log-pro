@@ -46,7 +46,7 @@ export default function ShiftPlanningPage() {
     setLoading(true);
     try {
       const [resList, resStats] = await Promise.allSettled([
-        apiClient.get('/api/v1/shift-planning', { params: { search: search || undefined } }),
+        apiClient.get('/api/v1/shift-planning/', { params: { search: search || undefined } }),
         apiClient.get('/api/v1/shift-planning/stats')
       ]);
 
@@ -70,7 +70,9 @@ export default function ShiftPlanningPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiClient.post('/api/v1/shift-planning', formData);
+      // Le shift est une fiche de temps de travail : le backend exige une date.
+      const payload = { ...formData, date: new Date().toISOString().slice(0, 10) };
+      await apiClient.post('/api/v1/shift-planning/temps-travail', payload);
       setIsModalOpen(false);
       await fetchData();
     } catch (err) {
