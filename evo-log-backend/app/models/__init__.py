@@ -1227,3 +1227,73 @@ try:
 except Exception:
     pass
 # </expansion:tracabilite_deep>
+
+# <expansion:pipeline_e>
+try:
+    from app.models.pipeline_e_deep import (
+        Pipe2CustodyTransfer,
+        Pipe2PressureLog,
+        Pipe2PumpStationRead,
+        Pipe2CorrosionReading,
+        Pipe2FlowCalibration,
+        Pipe2BatchQualityTest,
+        Pipe2InterfaceDetection,
+        Pipe2IntegrityAssessment,
+        Pipe2SpillResponseAction,
+    )
+    __all__.extend(["Pipe2CustodyTransfer", "Pipe2PressureLog", "Pipe2PumpStationRead", "Pipe2CorrosionReading", "Pipe2FlowCalibration", "Pipe2BatchQualityTest", "Pipe2InterfaceDetection", "Pipe2IntegrityAssessment", "Pipe2SpillResponseAction"])
+except Exception:
+    pass
+# </expansion:pipeline_e>
+
+# <expansion:courier_e>
+try:
+    from app.models.courier_e_deep import (
+        Cour2RouteScan,
+        Cour2LastMileHandoff,
+        Cour2DeliveryAttempt,
+        Cour2ExceptionParcel,
+        Cour2ReturnToSender,
+        Cour2CourierShiftLog,
+        Cour2SlaBreachLog,
+    )
+    __all__.extend(["Cour2RouteScan", "Cour2LastMileHandoff", "Cour2DeliveryAttempt", "Cour2ExceptionParcel", "Cour2ReturnToSender", "Cour2CourierShiftLog", "Cour2SlaBreachLog"])
+except Exception:
+    pass
+# </expansion:courier_e>
+
+# <expansion:coldchain_e>
+try:
+    from app.models.coldchain_e_deep import (
+        Cold2TemperatureLog,
+        Cold2ColdExcursion,
+        Cold2ProbeCalibration,
+        Cold2BlastFreezeCycle,
+        Cold2DoorOpenEvent,
+        Cold2HumidityLog,
+        Cold2RefrigerantCharge,
+        Cold2ShipmentApproval,
+        Cold2IceBatteryCharge,
+    )
+    __all__.extend(["Cold2TemperatureLog", "Cold2ColdExcursion", "Cold2ProbeCalibration", "Cold2BlastFreezeCycle", "Cold2DoorOpenEvent", "Cold2HumidityLog", "Cold2RefrigerantCharge", "Cold2ShipmentApproval", "Cold2IceBatteryCharge"])
+except Exception:
+    pass
+# </expansion:coldchain_e>
+
+# <expansion:heavylift_e>
+try:
+    from app.models.heavylift_e_deep import (
+        Heavy2LiftPlan,
+        Heavy2RouteSurvey,
+        Heavy2EscortSchedule,
+        Heavy2LoadMomentCalc,
+        Heavy2CraneSetupRecord,
+        Heavy2PermitObtention,
+        Heavy2LashingRig,
+        Heavy2AxleLoadReading,
+        Heavy2ConvoyStagingReport,
+    )
+    __all__.extend(["Heavy2LiftPlan", "Heavy2RouteSurvey", "Heavy2EscortSchedule", "Heavy2LoadMomentCalc", "Heavy2CraneSetupRecord", "Heavy2PermitObtention", "Heavy2LashingRig", "Heavy2AxleLoadReading", "Heavy2ConvoyStagingReport"])
+except Exception:
+    pass
+# </expansion:heavylift_e>

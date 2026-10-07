@@ -1,25 +1,18 @@
 import traceback
 try:
-    import app.models  # noqa
-    from app.models import tracabilite_deep  # noqa - ensure imported
-    from app.models.maintenance_deep import Base
-    from app.core.database import engine
-    print("Base is same:", Base is tracabilite_deep.Base)
-    tabs = [t for t in Base.metadata.tables.values() if t.name.startswith(("maint_", "trace_"))]
-    maint = sorted(t.name for t in tabs if t.name.startswith("maint_"))
-    trace = sorted(t.name for t in tabs if t.name.startswith("trace_"))
-    print(f"maint={len(maint)}  trace={len(trace)}")
-    missing = []
-    for t in tabs:
-        for col in t.columns:
-            for fk in col.foreign_keys:
-                target = fk.target_fullname.split(".")[0]
-                if target not in Base.metadata.tables:
-                    missing.append((t.name, col.name, target))
-    if missing:
-        print("MISSING FK TARGETS:", missing)
-    else:
-        Base.metadata.create_all(bind=engine, tables=tabs, checkfirst=True)
-        print("create_all wave6 OK")
+    import app.schemas.maintenance_deep as sm
+    import app.schemas.tracabilite_deep as st
+    from app.routers.v1 import maintenance_deep as rm, tracabilite_deep as rt
+    print("schemas maintenance classes:", sum(1 for n in dir(sm) if n.endswith(("Create","Update","Out"))))
+    print("schemas tracabilite classes:", sum(1 for n in dir(st) if n.endswith(("Create","Update","Out"))))
+    routes_m = list(rm.router.routes)
+    routes_t = list(rt.router.routes)
+    print("routes maintenance:", len(routes_m), "expected:", 25*4+1)
+    print("routes tracabilite:", len(routes_t), "expected:", 19*4+1)
+    # Print first 3 route paths
+    for r in routes_m[:3]:
+        print("M:", r.path, sorted(r.methods))
+    for r in routes_t[:3]:
+        print("T:", r.path, sorted(r.methods))
 except Exception:
     traceback.print_exc()
