@@ -517,24 +517,26 @@ export default function ClientShipmentsPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-slate-200">Détails du Fret</h3>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-300">Nature du Fret</p>
-                    <p className="text-slate-500 capitalize">{selectedMission.nature_fret || 'Non spécifié'}</p>
+                    <p className="text-sm font-medium text-slate-300">Type de Mission</p>
+                    <p className="text-slate-500 capitalize">{selectedMission.type_mission || 'Non enregistré'}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-300">Poids Total</p>
+                    <p className="text-sm font-medium text-slate-300">N° B/L</p>
                     <p className="text-slate-500">
-                      {selectedMission.poids_total ? `${selectedMission.poids_total} kg` : 'Non spécifié'}
+                      {selectedMission.numero_bl || 'Non enregistré'}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-300">Volume Total</p>
+                    <p className="text-sm font-medium text-slate-300">Client</p>
                     <p className="text-slate-500">
-                      {selectedMission.volume_total ? `${selectedMission.volume_total} m³` : 'Non spécifié'}
+                      {selectedMission.client?.nom || 'Non rattaché'}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-300">Nombre de Colis</p>
-                    <p className="text-slate-500">{selectedMission.nombre_colis || 'Non spécifié'}</p>
+                    <p className="text-sm font-medium text-slate-300">Montant Fret</p>
+                    <p className="text-slate-500">
+                      {selectedMission.montant_fret ? `${Number(selectedMission.montant_fret).toLocaleString()} FCFA` : 'Non enregistré'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -554,7 +556,7 @@ export default function ClientShipmentsPage() {
                         <div>
                           <p className="font-medium text-slate-200">Mission créée</p>
                           <p className="text-sm text-slate-500">
-                            {selectedMission.dateCreation ? new Date(selectedMission.dateCreation).toLocaleString('fr-FR') : ''}
+                            {selectedMission.date_creation ? new Date(selectedMission.date_creation).toLocaleString('fr-FR') : 'Non enregistrée'}
                           </p>
                         </div>
                       </div>
