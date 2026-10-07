@@ -141,14 +141,36 @@ DOMAINS: Dict[str, Dict] = {
         "label": "Transport & Flotte",
         "modules": {
             "transport": {"label": "Transport", "sub_modules": {"mission": ACTIONS, "dispatch": ["read", "create", "modify", "approve"], "epod": ["read", "create", "modify"], "carburant": ACTIONS}},
-            "parc": {"label": "Parc vehicules", "sub_modules": {"flotte": ACTIONS, "maintenance": ACTIONS, "documents": ["read", "create", "modify"]}},
+            "parc": {"label": "Parc vehicules", "sub_modules": {"flotte": ACTIONS, "maintenance": ACTIONS, "documents": ["read", "create", "modify"],
+                # Expansion parc approfondie (routeur parc_deep). Gestion complete du
+                # cycle vehicule (inventaire,/immatriculation, visite technique, pneus,
+                # pieces detachees, consommation carburant, sinistre assurance, atelier,
+                # analyse cout, cycle de vie). CHEF_PARC (« parc.*.* ») pilote.
+                "nomenclature": ["read"], "vehicle_inventory": ["read", "create", "modify"],
+                "registration_tracking": ["read", "create", "modify"], "technical_visit": ["read", "create", "modify"],
+                "tyre_management": ["read", "create", "modify"], "spare_part": ["read", "create", "modify"],
+                "fuel_consumption": ["read", "create", "modify"], "insurance_claim": ["read", "create", "modify"],
+                "workshop_scheduling": ["read", "create", "modify"], "cost_analysis": ["read", "create", "modify"],
+                "vehicle_lifecycle": ["read", "create", "modify"]}},
             "gps": {"label": "Suivi GPS", "sub_modules": {"tracking": ["read"], "alertes": ["read", "modify"]}},
         },
     },
     "ressources_humaines": {
         "label": "Ressources Humaines",
         "modules": {
-            "rh": {"label": "Administration du personnel", "sub_modules": {"employes": ACTIONS, "contrat": ACTIONS, "monitoring": ["read", "modify"]}},
+            "rh": {"label": "Administration du personnel", "sub_modules": {"employes": ACTIONS, "contrat": ACTIONS, "monitoring": ["read", "modify"],
+                # Expansion RH approfondie (routeur rh_deep). Fonctions RH reelles
+                # (recrutement,entretien d'evaluation, gestion des sorties, disciplinaire,
+                # Avantages, masse salariale/planning, organisation, competences, formation,
+                # contingent conges, reporting HR, badgeage). ADMIN_RH (« rh.*.* ») pilote,
+                # CHEF_DEPARTEMENT garde son perimetre, AUDITEUR ne lit pas rh (hors scope).
+                "nomenclature": ["read"], "recruitment": ["read", "create", "modify"],
+                "performance_review": ["read", "create", "modify"], "exit_management": ["read", "create", "modify"],
+                "disciplinary": ["read", "create", "modify"], "benefits": ["read", "create", "modify"],
+                "workforce_planning": ["read", "create", "modify"], "org_chart": ["read", "create", "modify"],
+                "skills_matrix": ["read", "create", "modify"], "training": ["read", "create", "modify"],
+                "leave_quota": ["read", "create", "modify"], "hr_reports": ["read", "create", "modify"],
+                "attendance_device": ["read", "create", "modify"], "contract_management": ["read", "create", "modify"]}},
             "paie": {"label": "Paie & declarations", "sub_modules": {"bulletin": ACTIONS, "declarations_sociales": ["read", "create", "approve", "export"]}},
             "conges": {"label": "Conges & presences", "sub_modules": {"demande": ["read", "create", "approve"], "pointage": ["read", "create"]}},
         },
