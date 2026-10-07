@@ -211,6 +211,13 @@ async def generer_facture_auto(
     if not client_id or montant_ht <= 0:
         raise HTTPException(status_code=400, detail="client_id et montant_ht > 0 requis")
 
+    # Validation pre-FK : le client doit exister (tiers.id), sinon 400 lisible
+    # au lieu d'une IntegrityError 500 en base.
+    from app.models.tiers import Tiers
+    client = db.query(Tiers).filter(Tiers.id == int(client_id)).first()
+    if not client:
+        raise HTTPException(status_code=400, detail=f"Client introuvable (id={client_id})")
+
     reference_source = data.get("reference_source")
     type_operation = data.get("type_operation", "mission_transport")
 
