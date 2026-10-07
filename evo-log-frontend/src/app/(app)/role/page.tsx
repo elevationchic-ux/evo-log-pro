@@ -138,7 +138,7 @@ export default function RolePage() {
             <div className="flex flex-wrap gap-2">
               {availableModules.map(m => (
                 <button key={m} onClick={() => toggleModule(m)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${newRole.modules.includes(m) ? 'bg-red-600/30 text-red-300 border-red-500/50' : 'bg-slate-800/60 text-slate-400 border-slate-700/60 hover:border-slate-600/60'}`}>
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${newRole.modules_allowed.includes(m) ? 'bg-red-600/30 text-red-300 border-red-500/50' : 'bg-slate-800/60 text-slate-400 border-slate-700/60 hover:border-slate-600/60'}`}>
                   {m}
                 </button>
               ))}
