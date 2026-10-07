@@ -835,3 +835,78 @@ try:
 except Exception:
     pass
 # </expansion:superadmin_c>
+
+# <expansion:admin_tenant_c>
+try:
+    from app.models.admin_tenant_c_deep import (
+        AdmtDomainConfig,
+        AdmtDnsRecord,
+        AdmtDataResidency,
+        AdmtFeatureEntitlement,
+        AdmtUsageQuota,
+        AdmtImpersonationLog,
+        AdmtOnboardingStep,
+        AdmtWhiteLabelConfig,
+        AdmtTenantBackup,
+        AdmtIntegrationWebhook,
+    )
+    __all__.extend(["AdmtDomainConfig", "AdmtDnsRecord", "AdmtDataResidency", "AdmtFeatureEntitlement", "AdmtUsageQuota", "AdmtImpersonationLog", "AdmtOnboardingStep", "AdmtWhiteLabelConfig", "AdmtTenantBackup", "AdmtIntegrationWebhook"])
+except Exception:
+    pass
+# </expansion:admin_tenant_c>
+
+# <expansion:chauffeur_c>
+try:
+    from app.models.chauffeur_c_deep import (
+        ChfTripSheet,
+        ChfDailyVehicleCheck,
+        ChfFuelLog,
+        ChfDrivingTimeRecord,
+        ChfRestBreak,
+        ChfTollReceipt,
+        ChfParkingSession,
+        ChfCargoSeal,
+        ChfRoadsideIncident,
+        ChfDeliveryStop,
+        ChfMileageLog,
+        ChfLoadSecuringCheck,
+        ChfBorderCrossing,
+        ChfDeliveryAppointment,
+        ChfPpeIssue,
+        ChfShiftHandover,
+        ChfBreakdownReport,
+        ChfTyreCheck,
+        ChfCargoPhoto,
+    )
+    __all__.extend(["ChfTripSheet", "ChfDailyVehicleCheck", "ChfFuelLog", "ChfDrivingTimeRecord", "ChfRestBreak", "ChfTollReceipt", "ChfParkingSession", "ChfCargoSeal", "ChfRoadsideIncident", "ChfDeliveryStop", "ChfMileageLog", "ChfLoadSecuringCheck", "ChfBorderCrossing", "ChfDeliveryAppointment", "ChfPpeIssue", "ChfShiftHandover", "ChfBreakdownReport", "ChfTyreCheck", "ChfCargoPhoto"])
+except Exception:
+    pass
+# </expansion:chauffeur_c>
+
+# <expansion:magasinier_c>
+try:
+    from app.models.magasinier_c_deep import (
+        MagcPickingTask,
+        MagcPackingSlip,
+        MagcPutawayTask,
+        MagcCycleCount,
+        MagcInternalMove,
+        MagcGoodsIssue,
+        MagcReturnProcessing,
+        MagcLabelPrint,
+        MagcPalletBuild,
+        MagcEquipmentCheck,
+        MagcSafetyInspection,
+        MagcSpillCleanup,
+        MagcLoadingCheck,
+        MagcReceivingCheck,
+        MagcPutawayException,
+        MagcOrderStaging,
+        MagcColdChainCheck,
+        MagcHazmatHandling,
+        MagcDockAssignment,
+    )
+    __all__.extend(["MagcPickingTask", "MagcPackingSlip", "MagcPutawayTask", "MagcCycleCount", "MagcInternalMove", "MagcGoodsIssue", "MagcReturnProcessing", "MagcLabelPrint", "MagcPalletBuild", "MagcEquipmentCheck", "MagcSafetyInspection", "MagcSpillCleanup", "MagcLoadingCheck", "MagcReceivingCheck", "MagcPutawayException", "MagcOrderStaging", "MagcColdChainCheck", "MagcHazmatHandling", "MagcDockAssignment"])
+except Exception:
+    pass
+# </expansion:magasinier_c>

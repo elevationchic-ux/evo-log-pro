@@ -859,6 +859,27 @@ try:
 except ImportError as e:
     logger.warning(f"Router superadmin_c_deep absent : {e}")
 # </expansion:superadmin_c>
+# <expansion:admin_tenant_c>
+try:
+    from app.routers.v1 import admin_tenant_c_deep
+    safe_include_router(admin_tenant_c_deep.router, prefix="/api/v1/admin-tenant", tags=["admin-tenant (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router admin_tenant_c_deep absent : {e}")
+# </expansion:admin_tenant_c>
+# <expansion:chauffeur_c>
+try:
+    from app.routers.v1 import chauffeur_c_deep
+    safe_include_router(chauffeur_c_deep.router, prefix="/api/v1/portail-chauffeur", tags=["portail-chauffeur (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router chauffeur_c_deep absent : {e}")
+# </expansion:chauffeur_c>
+# <expansion:magasinier_c>
+try:
+    from app.routers.v1 import magasinier_c_deep
+    safe_include_router(magasinier_c_deep.router, prefix="/api/v1/portail-magasinier", tags=["portail-magasinier (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router magasinier_c_deep absent : {e}")
+# </expansion:magasinier_c>
 
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)
