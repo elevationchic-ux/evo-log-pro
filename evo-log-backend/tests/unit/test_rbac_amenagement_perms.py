@@ -352,7 +352,9 @@ def test_toutes_les_routes_exigent_une_identite(unauthenticated):
     # amenagement_extra_deep (construction-progresses, infrastructure-maintenances,
     # isps-records, port-perceptions, annual-activity-reports, sig-layers,
     # domain-archives, amenagement-kpis), toutes gardees par require_perm().
-    assert len(routes) == 92, f"attendu 92 operations, trouve {len(routes)}"
+    # + 8 operations de l'expansion amenagement_b_deep (amgtb-dredging-projects,
+    # amgtb-concession-plots) : 2 entites x 4 methodes CRUD.
+    assert len(routes) == 100, f"attendu 100 operations, trouve {len(routes)}"
     for method, path in routes:
         url = path.replace("{ident}", "1")
         r = unauthenticated.request(method, url)
