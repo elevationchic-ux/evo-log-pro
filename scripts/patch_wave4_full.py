@@ -145,8 +145,8 @@ def module_block(key, m):
 DASH_TEMPLATE = """'use client';
 
 /**
- * Centre de pilotage {TITRE} (module genere, expansion).
- * Grille de registres reellement servis par /api/v1/{SLUG} : aucun chiffre
+ * Centre de pilotage @@TITRE@@ (module genere, expansion).
+ * Grille de registres reellement servis par /api/v1/@@SLUG@@ : aucun chiffre
  * invente, aucune donnee factice. Chaque carte ouvre le registre correspondant ;
  * la lecture reste soumise aux habilitations du tenant.
  */
@@ -158,10 +158,10 @@ import { useCan } from '@/hooks/useCan';
 import { useSettings } from '@/components/layout/SettingsProvider';
 
 const ENTITES = [
-{ENTITES}
+@@ENTITES@@
 ];
 
-export default function {FN}() {{
+export default function @@FN@@() {{
   const can = useCan();
   const {{ language }} = useSettings();
   const lang: 'fr' | 'en' = language === 'en' ? 'en' : 'fr';
@@ -169,8 +169,8 @@ export default function {FN}() {{
 
   return (
     <ModuleLayout
-      title={{t('{DASH_LABEL}', '{DASH_LABEL_EN}')}}
-      description={{t('{DASH_DESC}', '{DASH_DESC_EN}')}}
+      title={{t('@@DASH_LABEL@@', '@@DASH_LABEL_EN@@')}}
+      description={{t('@@DASH_DESC@@', '@@DASH_DESC_EN@@')}}
       help={{t(
         'Chaque carte ouvre un registre reellement servi par le serveur. Les compteurs ne sont affiches que lorsque la donnee existe.',
         'Each card opens a register actually served by the server. Counters are only shown when the data exists.',
@@ -179,25 +179,25 @@ export default function {FN}() {{
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {{ENTITES.map((e) => {{
           const Icon = (Icons as any)[e.icon] ?? Icons.Folder;
-          const autorise = can('{PERM}.' + e.perm + '.read');
+          const autorise = can('@@PERM@@.' + e.perm + '.read');
           return (
             <Link
               key={{e.slug}}
-              href={{'/{SLUG}/' + e.slug}}
+              href={{'/@@SLUG@@/' + e.slug}}
               className={{`group rounded-2xl border p-4 transition ${{autorise
-                  ? 'border-slate-800 bg-slate-900/60 hover:border-{ACCENT}-700/70 hover:bg-slate-900'
+                  ? 'border-slate-800 bg-slate-900/60 hover:border-@@ACCENT@@-700/70 hover:bg-slate-900'
                   : 'border-slate-800/60 bg-slate-950/40'
                 }}`}}
             >
               <div className="flex items-start justify-between gap-2">
-                <div className={{`p-2 rounded-xl ${{autorise ? 'bg-{ACCENT}-700 text-{ACCENT}-50' : 'bg-slate-800 text-slate-400' }}`}}>
+                <div className={{`p-2 rounded-xl ${{autorise ? 'bg-@@ACCENT@@-700 text-@@ACCENT@@-50' : 'bg-slate-800 text-slate-400' }}`}}>
                   <Icon className="w-4 h-4" />
                 </div>
                 <span className="font-mono text-[10px] text-slate-500 border border-slate-800 rounded px-1.5 py-0.5">
                   {{e.tcode}}
                 </span>
               </div>
-              <h3 className="mt-2 text-sm font-semibold text-slate-100 group-hover:text-{ACCENT}-200">
+              <h3 className="mt-2 text-sm font-semibold text-slate-100 group-hover:text-@@ACCENT@@-200">
                 {{lang === 'en' ? e.titreEn : e.titre}}
               </h3>
               <p className="mt-1 text-[11px] leading-relaxed text-slate-400 line-clamp-2">
@@ -205,7 +205,7 @@ export default function {FN}() {{
               </p>
               {{!autorise && (
                 <p className="mt-2 text-[10px] font-semibold text-amber-300/90">
-                  {{t('Lecture soumise a ' + '{PERM}.' + e.perm + '.read', 'Reading requires {PERM}.' + e.perm + '.read')}}
+                  {{t('Lecture soumise a ' + '@@PERM@@.' + e.perm + '.read', 'Reading requires @@PERM@@.' + e.perm + '.read')}}
                 </p>
               )}}
             </Link>
@@ -234,12 +234,16 @@ def dash_page(key, m):
             )
         )
     fn = "PageDashboard" + "".join(p.capitalize() for p in re.split(r"[-_]", slug))
-    return DASH_TEMPLATE.format(
-        TITRE=meta["title"], SLUG=slug, PERM=perm, ACCENT=meta["accent"],
-        ENTITES="\n".join(lines), FN=fn,
-        DASH_LABEL=fr_ts(meta["dash_label"]), DASH_LABEL_EN=fr_ts(meta["dash_label"]),
-        DASH_DESC=fr_ts(meta["dash_desc"]), DASH_DESC_EN=fr_ts(meta["dash_desc_en"]),
-    )
+    out = DASH_TEMPLATE
+    repl = {
+        "@@TITRE@@": meta["title"], "@@SLUG@@": slug, "@@PERM@@": perm,
+        "@@ACCENT@@": meta["accent"], "@@ENTITES@@": "\n".join(lines), "@@FN@@": fn,
+        "@@DASH_LABEL@@": fr_ts(meta["dash_label"]), "@@DASH_LABEL_EN@@": fr_ts(meta["dash_label"]),
+        "@@DASH_DESC@@": fr_ts(meta["dash_desc"]), "@@DASH_DESC_EN@@": fr_ts(meta["dash_desc_en"]),
+    }
+    for k, v in repl.items():
+        out = out.replace(k, v)
+    return out.replace("{{", "{").replace("}}", "}")
 
 
 def close_of(txt, decl_marker):
