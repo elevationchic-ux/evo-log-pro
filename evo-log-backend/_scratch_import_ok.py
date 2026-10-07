@@ -1,14 +1,18 @@
-import sys, io
-# Add a print at start of maintenance_deep module to trace execution
-import app.routers.v1.maintenance_deep as md
-print("md imported:", md.router, "routes count:", len(md.router.routes))
-# Now import main and re-check
 import app.main
 from app.main import app as fastapi_app
-paths = [getattr(r, 'path', '') for r in fastapi_app.routes]
-maint = [p for p in paths if 'maintenance-industrielle' in p]
-trace = [p for p in paths if 'tracabilite' in p]
-print("maintenance mounted count:", len(maint))
-print("tracabilite mounted count:", len(trace))
-# Also print total app.routes count
-print("total app.routes:", len(fastapi_app.routes))
+paths = sorted({getattr(r, 'path', '') for r in fastapi_app.routes})
+print("total paths:", len(paths))
+# Show samples per major module
+import collections
+prefixes = collections.Counter()
+for p in paths:
+    if p.startswith('/api/v1/'):
+        parts = p.split('/')
+        if len(parts) >= 4:
+            prefixes[parts[3]] += 1
+for k, v in sorted(prefixes.items(), key=lambda x: -x[1])[:30]:
+    print(f"{v:4d}  /api/v1/{k}")
+# Check any maintenance-industrielle path
+print("---")
+print("has maint:", any('maintenance-industrielle' in p for p in paths))
+print("has trace:", any('tracabilite' in p for p in paths))
