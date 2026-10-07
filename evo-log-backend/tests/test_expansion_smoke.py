@@ -35,6 +35,38 @@ def _load_manifest(path: Path) -> dict:
     return mod.MANIFEST
 
 
+def _iter_manifest_modules(path: Path):
+    """Yield module dicts from a manifest file, supporting both the MODULES
+    (dict-of-modules) and MANIFEST (single module) conventions so every wave
+    is picked up automatically without editing this test."""
+    spec = importlib.util.spec_from_file_location(f"m_{path.stem}", str(path))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    if hasattr(mod, "MODULES"):
+        yield from mod.MODULES.values()
+    elif hasattr(mod, "MANIFEST"):
+        yield mod.MANIFEST
+
+
+def _minimal_payload(ent: dict) -> dict:
+    payload = {}
+    for f in ent["fields"]:
+        if not f.get("required"):
+            continue
+        t = f["type"]
+        if t in ("str", "text", "enum"):
+            payload[f["name"]] = "test"
+        elif t in ("int", "num", "number"):
+            payload[f["name"]] = 1
+        elif t == "bool":
+            payload[f["name"]] = True
+        elif t == "date":
+            payload[f["name"]] = "2024-01-01"
+        elif t == "datetime":
+            payload[f["name"]] = "2024-01-01T00:00:00"
+    return payload
+
+
 # Port-ops Wave 1A was handcrafted (no manifest). Enumerate its deep-router entities
 # here so the smoke test still covers the plan's 3-tests-per-entity contract for it.
 _PORT_OPS_HANDCRAFTED = [
@@ -51,48 +83,18 @@ _PORT_OPS_HANDCRAFTED = [
 def _collect() -> list[tuple[str, str, str, str]]:
     """Return (module_slug, entite_path, unicite_field, required_minimal_json)."""
     out = []
-    for p in [SCRIPTS / "manifests" / "all_modules.py", SCRIPTS / "manifests" / "wave3_modules.py",
-              SCRIPTS / "manifests" / "wave4_transports.py", SCRIPTS / "manifests" / "wave4_logistique.py",
-              SCRIPTS / "manifests" / "wave5_a.py"]:
-        for m in _load_modules(p).values():
+    # Glob every manifest so future waves (B/C/D) are covered automatically.
+    for p in sorted((SCRIPTS / "manifests").glob("*.py")):
+        if p.name.startswith("_"):
+            continue
+        try:
+            modules = list(_iter_manifest_modules(p))
+        except AttributeError:
+            continue  # file has neither MODULES nor MANIFEST
+        for m in modules:
             slug = m["module_slug"]
             for ent in m["entities"]:
-                # Build a minimal create payload using required fields typed loosely.
-                payload = {}
-                for f in ent["fields"]:
-                    if not f.get("required"):
-                        continue
-                    t = f["type"]
-                    if t in ("str", "text"):
-                        payload[f["name"]] = "test"
-                    elif t in ("int", "number"):
-                        payload[f["name"]] = 1
-                    elif t == "bool":
-                        payload[f["name"]] = True
-                    elif t == "date":
-                        payload[f["name"]] = "2024-01-01"
-                    elif t == "datetime":
-                        payload[f["name"]] = "2024-01-01T00:00:00"
-                out.append((slug, ent["entite"], ent.get("unicite", "reference"), payload))
-    # Transit-douane Wave 1B uses MANIFEST (single dict) not MODULES
-    transit = _load_manifest(SCRIPTS / "manifests" / "transit.py")
-    for ent in transit["entities"]:
-        payload = {}
-        for f in ent["fields"]:
-            if not f.get("required"):
-                continue
-            t = f["type"]
-            if t in ("str", "text"):
-                payload[f["name"]] = "test"
-            elif t in ("int", "number"):
-                payload[f["name"]] = 1
-            elif t == "bool":
-                payload[f["name"]] = True
-            elif t == "date":
-                payload[f["name"]] = "2024-01-01"
-            elif t == "datetime":
-                payload[f["name"]] = "2024-01-01T00:00:00"
-        out.append((transit["module_slug"], ent["entite"], ent.get("unicite", "reference"), payload))
+                out.append((slug, ent["entite"], ent.get("unicite", "reference"), _minimal_payload(ent)))
     # Port-ops Wave 1A was handcrafted (no manifest); use a minimal required payload
     # derived from the unicite field name so POST does not return 422 for shape reasons.
     for entite, unicite in _PORT_OPS_HANDCRAFTED:
