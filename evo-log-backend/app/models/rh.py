@@ -424,3 +424,47 @@ class CompetenceEmploye(Base):
     # Relationships
     employe = relationship("User", foreign_keys=[employe_id])
     competence = relationship("Competence", foreign_keys=[competence_id])
+
+
+class OffreEmploi(Base):
+    """Offre d'emploi (recrutement RH avance)
+
+    competences_requises : liste JSON serialisee en Text (meme convention que
+    les autres champs listes du projet), pas de table de jointure pour un
+    simple catalogue de libelles.
+    """
+    __tablename__ = "offres_emploi"
+
+    id = Column(Integer, primary_key=True, index=True)
+    titre = Column(String(200), nullable=False)
+    departement = Column(String(100), nullable=False)
+    type_contrat = Column(String(50), nullable=False, default="CDI")
+    description = Column(Text, nullable=False)
+    competences_requises = Column(Text, nullable=False, default="[]")
+    salaire_min = Column(Numeric)
+    salaire_max = Column(Numeric)
+    statut = Column(String(20), nullable=False, default="PUBLIEE")  # PUBLIEE, CLOTUREE, ANNULEE
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    # Relationships
+    candidatures = relationship("Candidature", back_populates="offre")
+
+
+class Candidature(Base):
+    """Candidature recue sur une offre d'emploi"""
+    __tablename__ = "candidatures"
+
+    id = Column(Integer, primary_key=True, index=True)
+    offre_id = Column(Integer, ForeignKey('offres_emploi.id'), nullable=False)
+    candidat_nom = Column(String(150), nullable=False)
+    email = Column(String(150), nullable=False)
+    telephone = Column(String(30), nullable=False)
+    cv_url = Column(String(300))
+    experience_annees = Column(Integer, nullable=False, default=0)
+    statut = Column(String(20), nullable=False, default="RECU")  # RECU, PRESELECTIONNE, ENTREVUE, REFUSEE, EMBAUCHE
+    decision_notes = Column(Text)
+    date_decision = Column(Date)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    # Relationships
+    offre = relationship("OffreEmploi", back_populates="candidatures")

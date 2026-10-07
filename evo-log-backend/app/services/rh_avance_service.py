@@ -11,7 +11,10 @@ from datetime import datetime, date, timedelta
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
-from app.models.rh import Conge, Absence, TempsTravail, Salaire, Prime
+from app.models.rh import (
+    Conge, Absence, TempsTravail, Salaire, Prime,
+    Formation, ParticipationFormation, OffreEmploi, Candidature,
+)
 from app.models.user import User
 
 
@@ -241,71 +244,154 @@ class PaieOHADAService:
 
 
 class RecrutementService:
-    """Service de recrutement"""
-    
+    """Service de recrutement — persistance REELLE (offres_emploi, candidatures).
+
+    Aucun identifiant invente : l'objet creé est relis en base apres commit et
+    le statut renvoie l'etat reellement stocke.
+    """
+
+    STATUTS_OFFRE = ("PUBLIEE", "CLOTUREE", "ANNULEE")
+    STATUTS_CANDIDATURE = ("RECU", "PRESELECTIONNE", "ENTREVUE", "REFUSEE", "EMBAUCHE")
+
     @staticmethod
     def creer_offre_emploi(
         db: Session,
         titre: str,
-        description: str,
         departement: str,
-        profil_requis: str,
-        date_limite: date
-    ) -> Dict[str, Any]:
-        """Créer une offre d'emploi"""
-        # Placeholder - modèle OffreEmploi à créer
-        return {
-            "titre": titre,
-            "description": description,
-            "departement": departement,
-            "profil_requis": profil_requis,
-            "date_limite": date_limite,
-            "statut": "active",
-            "date_creation": date.today()
-        }
-    
+        description: str,
+        type_contrat: str = "CDI",
+        competences_requises: Optional[List[str]] = None,
+        salaire_min: Optional[float] = None,
+        salaire_max: Optional[float] = None,
+    ) -> OffreEmploi:
+        """Creer et enregistrer une offre d'emploi."""
+        import json as _json
+        offre = OffreEmploi(
+            titre=titre,
+            departement=departement,
+            type_contrat=type_contrat,
+            description=description,
+            competences_requises=_json.dumps(competences_requises or [], ensure_ascii=False),
+            salaire_min=salaire_min,
+            salaire_max=salaire_max,
+            statut="PUBLIEE",
+        )
+        db.add(offre)
+        db.commit()
+        db.refresh(offre)
+        return offre
+
+    @staticmethod
+    def enregistrer_candidature(
+        db: Session,
+        offre_id: int,
+        candidat_nom: str,
+        email: str,
+        telephone: str,
+        cv_url: Optional[str] = None,
+        experience_annees: int = 0,
+    ) -> Candidature:
+        """Enregistrer une candidature sur une offre existante (404 sinon)."""
+        offre = db.query(OffreEmploi).filter(OffreEmploi.id == offre_id).first()
+        if not offre:
+            raise ValueError(f"Offre d'emploi {offre_id} introuvable")
+        cand = Candidature(
+            offre_id=offre.id,
+            candidat_nom=candidat_nom,
+            email=email,
+            telephone=telephone,
+            cv_url=cv_url,
+            experience_annees=experience_annees or 0,
+            statut="RECU",
+        )
+        db.add(cand)
+        db.commit()
+        db.refresh(cand)
+        return cand
+
     @staticmethod
     def traiter_candidature(
         db: Session,
         candidature_id: int,
         decision: str,
         notes: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """Traiter une candidature"""
-        return {
-            "candidature_id": candidature_id,
-            "decision": decision,
-            "notes": notes,
-            "date_decision": date.today()
-        }
+    ) -> Candidature:
+        """Traiter une candidature : la decision modifie la ligne reellement en base."""
+        decision = (decision or "").upper()
+        if decision not in RecrutementService.STATUTS_CANDIDATURE:
+            raise ValueError(
+                "Decision invalide. Attendu : "
+                + ", ".join(RecrutementService.STATUTS_CANDIDATURE)
+            )
+        cand = db.query(Candidature).filter(Candidature.id == candidature_id).first()
+        if not cand:
+            raise ValueError(f"Candidature {candidature_id} introuvable")
+        cand.statut = decision
+        cand.decision_notes = notes
+        cand.date_decision = date.today()
+        db.commit()
+        db.refresh(cand)
+        return cand
 
 
 class FormationService:
-    """Service de formation"""
-    
+    """Service de formation — persistance REELLE (formations, participations_formation)."""
+
     @staticmethod
     def plan_formation_annuel(
         db: Session,
         exercice_id: int
     ) -> Dict[str, Any]:
-        """Plan de formation annuel"""
+        """Bilan du plan de formation : agregation REELLE depuis la table formations.
+
+        Sans sessions en base, les compteurs retournent 0 honnetes ; rien n'est
+        invente.
+        """
+        from app.models.rh import Formation as _F
+
+        sessions = db.query(_F).all()
+        budget = sum(float(f.cout or 0) for f in sessions)
+        nb_inscrits = db.query(func.count(ParticipationFormation.id)).scalar() or 0
         return {
             "exercice_id": exercice_id,
-            "budget_formation": 5000000,
-            "nombre_formations": 10,
-            "statut": "en_cours"
+            "budget_formation": round(budget, 2),
+            "nombre_formations": len(sessions),
+            "nombre_inscrits": int(nb_inscrits),
+            "statut": "en_cours" if sessions else "aucune_session",
+            "source": "table formations (agregation reelle)",
         }
-    
+
     @staticmethod
     def inscrire_formation(
         db: Session,
         employe_id: int,
         formation_id: int
-    ) -> Dict[str, Any]:
-        """Inscrire un employé à une formation"""
-        return {
-            "employe_id": employe_id,
-            "formation_id": formation_id,
-            "date_inscription": date.today(),
-            "statut": "inscrit"
-        }
+    ) -> ParticipationFormation:
+        """Inscrire un employe a une formation (identifiants reels, doublon 409)."""
+        formation = db.query(Formation).filter(Formation.id == formation_id).first()
+        if not formation:
+            raise ValueError(f"Formation {formation_id} introuvable")
+        employe = (
+            db.query(User)
+            .filter(User.id == employe_id, User.is_active.is_(True))
+            .first()
+        )
+        if not employe:
+            raise ValueError(f"Employe {employe_id} introuvable ou inactif")
+        existant = (
+            db.query(ParticipationFormation)
+            .filter(
+                ParticipationFormation.formation_id == formation_id,
+                ParticipationFormation.employe_id == employe_id,
+            )
+            .first()
+        )
+        if existant:
+            raise RuntimeError(
+                f"Employe {employe_id} deja inscrit a la formation {formation_id}"
+            )
+        part = ParticipationFormation(formation_id=formation_id, employe_id=employe_id)
+        db.add(part)
+        db.commit()
+        db.refresh(part)
+        return part

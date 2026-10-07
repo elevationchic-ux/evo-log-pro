@@ -11,15 +11,23 @@ import { toast } from 'sonner';
 
 interface DossierItem {
   id: number;
-  numero_dossier?: string;
-  reference?: string;
-  client_nom?: string;
-  bureau_douane?: string;
-  statut: string;
-  type_regime?: string;
-  etape_actuelle?: string;
+  numero_dossier: string;
+  client_id: number;
+  transitaire_id: number;
+  type_transit?: string;
+  regime_douanier?: string;
+  bureau_entree_id?: number;
+  bureau_sortie_id?: number;
   marchandise?: string;
-  date_depot?: string;
+  valeur_marchandise?: number;
+  origine?: string;
+  destination?: string;
+  numero_connaisse?: string;
+  statut: string;
+  date_ouverture?: string;
+  date_cloture?: string | null;
+  montant_total?: number | null;
+  notes?: string | null;
 }
 
 export default function PortailDeclarantPage() {
