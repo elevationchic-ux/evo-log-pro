@@ -26,7 +26,6 @@ from datetime import datetime, date
 
 from app.core.database import get_db
 from app.core.security import get_current_user
-from app.core.not_implemented import not_implemented  # noqa: F401 (tenu pour audit)
 from app.models.user import User
 from app.models.transit import CautionDouaniere, DumCustomsRecord
 

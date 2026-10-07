@@ -22,13 +22,15 @@ import { toast } from 'sonner';
 
 interface DocumentItem {
   id: number;
-  nom: string;
+  numero_document: string;
+  titre: string;
   type_document: string;
-  reference_dossier?: string;
-  taille_ko?: number;
+  dossier_id?: number | null;
+  taille_octets?: number | null;
   statut: string;
   created_at?: string;
-  tags?: string;
+  date_creation?: string;
+  mots_cles?: string | null;
 }
 
 export default function DocumentsGedPage() {
@@ -103,8 +105,8 @@ export default function DocumentsGedPage() {
     const matchCat = selectedCategory === 'ALL' || doc.type_document === selectedCategory;
     const q = searchQuery.toLowerCase();
     const matchSearch = !q || (
-      (doc.nom && doc.nom.toLowerCase().includes(q)) ||
-      (doc.reference_dossier && doc.reference_dossier.toLowerCase().includes(q)) ||
+      (doc.titre && doc.titre.toLowerCase().includes(q)) ||
+      (doc.numero_document && doc.numero_document.toLowerCase().includes(q)) ||
       (doc.type_document && doc.type_document.toLowerCase().includes(q))
     );
     return matchCat && matchSearch;
@@ -222,8 +224,8 @@ export default function DocumentsGedPage() {
                     <td className="px-5 py-3.5 flex items-center gap-2.5">
                       <FileText className="w-4 h-4 text-primary shrink-0" />
                       <div>
-                        <div className="font-bold text-on-surface">{doc.nom}</div>
-                        <div className="text-[11px] text-on-surface-variant font-mono">{doc.taille_ko ? `${doc.taille_ko} Ko` : 'PDF Numérique'}</div>
+                        <div className="font-bold text-on-surface">{doc.titre}</div>
+                        <div className="text-[11px] text-on-surface-variant font-mono">{doc.taille_octets ? `${Math.round(doc.taille_octets / 1024)} Ko` : 'Taille non enregistrée'}</div>
                       </div>
                     </td>
                     <td className="px-5 py-3.5 text-xs font-semibold text-on-surface-variant">
@@ -232,10 +234,10 @@ export default function DocumentsGedPage() {
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-xs font-mono text-on-surface">
-                      {doc.reference_dossier || 'Non rattaché'}
+                      {doc.dossier_id ? `Dossier #${doc.dossier_id}` : 'Non rattaché'}
                     </td>
                     <td className="px-5 py-3.5 text-xs text-on-surface-variant">
-                      {doc.created_at?.slice(0, 10) || '2026-08-30'}
+                      {doc.created_at?.slice(0, 10) || doc.date_creation?.slice(0, 10) || 'Non enregistrée'}
                     </td>
                     <td className="px-5 py-3.5 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600">
