@@ -330,7 +330,7 @@ MANIFEST = {
             "descriptionEn": "Local EORI numbers / authorized economic operator approvals.",
             "aide": "L'operateur doit etre a jour de ses obligations fiscales.",
             "aideEn": "Operator must be up to date on tax obligations.",
-            "icon": "IdCard",
+            "icon": "Contact",
             "unicite": "numero_operateur",
             "fields": [
                 {"name": "numero_operateur", "type": "str", "required": True, "label": "Numero operateur", "labelEn": "Operator number", "search": True},
