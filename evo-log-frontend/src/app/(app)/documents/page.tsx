@@ -72,19 +72,21 @@ export default function DocumentsGedPage() {
     setUploading(true);
     try {
       const formData = new FormData();
-      if (selectedFile) formData.append('file', selectedFile);
-      formData.append('nom', docName || selectedFile?.name || 'Document Numérisé');
+      if (selectedFile) formData.append('fichier', selectedFile);
+      formData.append('titre', docName || selectedFile?.name || 'Document');
       formData.append('type_document', docType);
-      formData.append('reference_dossier', refDossier);
+      formData.append('dossier_id', refDossier || '0');
 
       await apiClient.post('/api/v1/documents/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       }).catch(() => {
+        // Fallback JSON — utilise les reels champs de DocumentCreate
         return apiClient.post('/api/v1/documents/', {
-          nom: docName || selectedFile?.name || 'Document Numérisé',
+          numero_document: `DOC-${Date.now()}`,
+          titre: docName || selectedFile?.name || 'Document',
           type_document: docType,
-          reference_dossier: refDossier,
-          statut: 'VALIDE'
+          proprietaire_id: 0,
+          dossier_id: refDossier ? parseInt(refDossier, 10) : null,
         });
       });
 
@@ -247,7 +249,7 @@ export default function DocumentsGedPage() {
                     <td className="px-5 py-3.5 text-right">
                       <div className="flex justify-end gap-1.5">
                         <button
-                          onClick={() => toast.success(`Téléchargement de ${doc.nom}...`)}
+                          onClick={() => toast.success(`Téléchargement de ${doc.titre}...`)}
                           className="p-1.5 rounded-lg border border-outline hover:bg-surface-container text-on-surface-variant"
                           title="Télécharger"
                         >
@@ -305,10 +307,10 @@ export default function DocumentsGedPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Réf. Dossier Associé</label>
+                  <label className="block text-xs font-semibold mb-1">ID Dossier Associé</label>
                   <input
-                    type="text"
-                    placeholder="Ex: TR-2026-0012"
+                    type="number"
+                    placeholder="Ex: 42"
                     value={refDossier}
                     onChange={(e) => setRefDossier(e.target.value)}
                     className="w-full px-3 py-2 text-sm bg-surface-container-low border border-outline rounded-xl"

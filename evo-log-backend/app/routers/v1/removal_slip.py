@@ -437,8 +437,8 @@ async def telecharger_bon_sortie_pdf(
 
     Les blocs signataires sont IMPRIMES (nom/date reels quand le bon est
     signe, zone vierge sinon) : le systeme ne simule jamais une signature
-    manuscrite numerique. 501 honnete si la chaine WeasyPrint est absente
-    (convention app/core/not_implemented.py, cf. facture PDF batch 2).
+    manuscrite numerique. 503 honnete si la chaine WeasyPrint est absente
+    (rendu reellement indisponible, jamais un faux PDF ; cf. pdf_generator).
     """
     from fastapi import Response
     from app.models.tenant import Company
