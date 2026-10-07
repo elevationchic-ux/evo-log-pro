@@ -31,7 +31,13 @@ from alembic import op
 import sqlalchemy as sa
 
 revision = "062_rbac_amenagement_extra_grants"
-down_revision = "061_amenagement_extra_deep"
+# Chaîne strictement linéaire (exigence test_migrations_chain : « rollback
+# lineaire propre ») : cette branche RBAC est re-rattachee en queue de la
+# branche des tables de modes (061 -> 062_ferroviaire -> ... -> 065_log3pl).
+# Ordre sans impact : les migrations RBAC (020/033/034/039/042/046/062/066)
+# sont des miroirs idempotents du catalogue ; les tables 062..065 ne
+# dépendent pas des grants, et les grants ne dépendent pas de ces tables.
+down_revision = "065_log3pl_deep"
 branch_labels = None
 depends_on = None
 
