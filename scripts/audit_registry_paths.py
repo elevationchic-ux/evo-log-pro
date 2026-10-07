@@ -65,21 +65,40 @@ def scan_frontend() -> dict[str, dict[str, set[str]]]:
 
 def classify(module_slug: str, entite: str, actions: set[str],
              paths: dict[str, dict[str, str]]) -> tuple[str, list[str]]:
-    """Return (status, list of issues)."""
-    prefix = f"/api/v1/{module_slug}/{entite}"
+    """Return (status, list of issues).
+
+    Backend CRUD routers declare list/create at /<entite> and update/delete at
+    /<entite>/{ident}. We accept both concrete and templated variants.
+    """
+    base = f"/api/v1/{module_slug}/{entite}"
+    mapped = {
+        "lister":   ("GET",    False),
+        "creer":    ("POST",   False),
+        "modifier": ("PUT",    True),
+        "supprimer":("DELETE", True),
+    }
     issues = []
-    mapped = {"lister": "GET", "creer": "POST", "modifier": "PUT", "supprimer": "DELETE"}
     ok = 0
     missing = 0
     for action in actions:
-        method = mapped.get(action)
-        if not method:
+        spec = mapped.get(action)
+        if not spec:
             continue
-        if prefix in paths and method in paths[prefix]:
+        method, needs_id = spec
+        if needs_id:
+            candidate_keys = {f"{base}{{{{ident}}}}".replace("{{{{", "{").replace("}}}}", "}")}
+            # any OpenAPI path with the same base + trailing /{...} segment
+            for p in paths:
+                if p.startswith(base + "/") and p.count("/") == base.count("/") + 1:
+                    candidate_keys.add(p)
+            found = any(method in paths.get(k, {}) for k in candidate_keys)
+        else:
+            found = method in paths.get(base, {})
+        if found:
             ok += 1
         else:
             missing += 1
-            issues.append(f"{method} {prefix} absent ({action})")
+            issues.append(f"{method} {base}{'/{id}' if needs_id else ''} absent ({action})")
     if missing == 0:
         return ("OK", [])
     if ok == 0:

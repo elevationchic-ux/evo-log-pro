@@ -140,7 +140,21 @@ DOMAINS: Dict[str, Dict] = {
     "transport": {
         "label": "Transport & Flotte",
         "modules": {
-            "transport": {"label": "Transport", "sub_modules": {"mission": ACTIONS, "dispatch": ["read", "create", "modify", "approve"], "epod": ["read", "create", "modify"], "carburant": ACTIONS}},
+            "transport": {"label": "Transport", "sub_modules": {"mission": ACTIONS, "dispatch": ["read", "create", "modify", "approve"], "epod": ["read", "create", "modify"], "carburant": ACTIONS,
+                # Expansion transport approfondi (routeur transport_deep). Registres reels
+                # de l'exploitation du fret (plan de tournee, convoi, matieres dangereuses
+                # ADR, facturation fret, checkpoint, penalites, assurance marchandise,
+                # sous-traitant, registre/documentation vehicule, dispositif GPS, KPI de
+                # performance) plus la nomenclature. CHEF_PARC (« transport.*.* ») pilote
+                # le fret, DISPATCHER garde sa liste explicite missions/tournees, AUDITEUR
+                # (« transport.*.read ») lit.
+                "nomenclature": ["read"], "route_plan": ["read", "create", "modify"],
+                "convoy": ["read", "create", "modify"], "dangerous_goods": ["read", "create", "modify"],
+                "freight_billing": ["read", "create", "modify"], "checkpoint": ["read", "create", "modify"],
+                "penalty": ["read", "create", "modify"], "cargo_insurance": ["read", "create", "modify"],
+                "subcontractor": ["read", "create", "modify"], "vehicle_registry": ["read", "create", "modify"],
+                "vehicle_document": ["read", "create", "modify"], "gps_device": ["read", "create", "modify"],
+                "performance_kpi": ["read", "create", "modify"]}},
             "parc": {"label": "Parc vehicules", "sub_modules": {"flotte": ACTIONS, "maintenance": ACTIONS, "documents": ["read", "create", "modify"],
                 # Expansion parc approfondie (routeur parc_deep). Gestion complete du
                 # cycle vehicule (inventaire,/immatriculation, visite technique, pneus,
@@ -264,8 +278,14 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "achats.commande.read", "achats.commande.create",
         "fournisseurs.referentiel.read",
     ]),
-    ("CHEF_PARC", 2, "Chef de parc : gestion complete de la flotte", [
-        "parc.*.*", "transport.*.read", "gps.tracking.read", "gps.alertes.modify",
+    ("CHEF_PARC", 2, "Chef de parc : gestion complete de la flotte et du fret", [
+        "parc.*.*",
+        # Le chef de parc porte aussi l'exploitation du fret (routeur
+        # transport_deep : tournees, convois, ADR, facturation fret,
+        # checkpoints, penalites, assurance marchandise, sous-traitants,
+        # registre/documentation vehicule, KPI). Il etend « transport.*.read »
+        # qu'il detient deja en lecture.
+        "transport.*.*", "gps.tracking.read", "gps.alertes.modify",
     ]),
     ("DISPATCHER", 3, "Dispatcher transport : missions et tournes", [
         "transport.mission.read", "transport.mission.create", "transport.dispatch.read",
