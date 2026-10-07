@@ -221,7 +221,7 @@ def test_permis_travail_cree_sans_signature_reste_brouillon(client_officier):
     r = client_officier.post(
         f"{BASE}/permis-travail",
         json={
-            "type_permis": "permis_de_feu",
+            "type_permis": "feu",
             "zone": "Quai Nord, poste 3",
             "description": "Soudure sur structure",
             "mesures_preventives": "Extincteur, vigie",

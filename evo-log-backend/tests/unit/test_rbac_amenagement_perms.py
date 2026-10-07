@@ -344,12 +344,16 @@ def test_toutes_les_routes_exigent_une_identite(unauthenticated):
     "/dragage/1/autorisation-rejet",
     "/autorisations/1/depot",
 ])
-def test_teleprocedures_institutionnelles_501_jamais_faux_succes(client_chef, path):
-    # Le chef PORTE l'approve : la garde passe, puis la route refuse d'emettre
-    # un acte qui appartient a un systeme externe inexistant ici.
+def test_teleprocedures_institutionnelles_jamais_faux_succes(client_chef, path):
+    # Teleprocedures institutionnelles REELLES : chaque route valide d'abord
+    # l'entite ciblee (404 si absente), puis delegue a un connecteur gouvernemental
+    # configure (503 si le fournisseur n'est pasbranche). La reversaison est une
+    # ecriture locale reelle qui EXIGE la reference de l'acte (422 sinon).
+    # Aucun de ces cas ne fabrique un succes 200 avec acte officiel invente.
     r = client_chef.post(f"{BASE}{path}")
-    assert r.status_code == 501, r.text
-    assert "501" in r.text or "impl" in r.text.lower()
+    assert r.status_code != 200, f"faux succes sur {path} : {r.text[:200]}"
+    assert r.status_code in (404, 422, 502, 503), (
+        f"{path} : statut inattendu {r.status_code} : {r.text[:200]}")
 
 
 def test_la_garde_passe_avant_le_501(client_auditeur):
