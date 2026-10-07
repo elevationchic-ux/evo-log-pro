@@ -143,6 +143,25 @@ try:
 except Exception:
     pass
 
+# Entites metiers portant company_id mais declarees dans des modules chargés
+# uniquement par les routers (app.main), jamais via app.models. L'enumeration du
+# moteur d'isolation multi-tenant (tenant_enforcement._tenant_scoped_classes)
+# fait `import app.models` pour figer sa liste ; si ces classes n'y sont pas, la
+# liste peut etre calculee AVANT qu'app.main ne les enregistre -> entites NON
+# filtres par tenant = fuite de donnees inter-entreprises. On les enregistre donc
+# ici pour que `import app.models` soit la source complete et ordonnable.
+from app.models.acconage import Navire, Escale
+from app.models.acquisition import BonCommande
+from app.models.magasin_avance import BonReception
+from app.models.transport_international import OrdreTransport
+from app.models.fiscalite_cameroun import (
+    DeclarationFiscale, ContratFiscal, RetenueSourceCameroun,
+)
+__all__.extend([
+    "Navire", "Escale", "BonCommande", "BonReception", "OrdreTransport",
+    "DeclarationFiscale", "ContratFiscal", "RetenueSourceCameroun",
+])
+
 # Wave 1A expansion : operations portuaires approfondies (12 entites).
 try:
     from app.models.port_operations_deep import (
