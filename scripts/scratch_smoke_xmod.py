@@ -47,6 +47,8 @@ def call(method, path, token, body=None):
 def seed():
     """Insere le strict necessaire via les modeles, idempotent. Retourne les ids."""
     from datetime import date, datetime
+    import app.models  # charge la metadore complete (FK croisées...)
+    import app.models.acconage  # Escale : FK factures_ohada.escale_id, hors __init__
     from app.core.database import SessionLocal
     from app.models.tiers import Client, Fournisseur, TiersType
     from app.models.prestataire import Prestataire
@@ -57,14 +59,19 @@ def seed():
     db = SessionLocal()
     out = {}
     try:
-        client = db.query(Client).first()
+        # Rolutère les seeds d'une exécution précédemment interrompue (rollback
+        # partiel ayant quand même comités des orphelins).
+        for cls, label in ((Mission, 'MIS-SMOKE-1'), (Commande, 'CMD-SMOKE-1')):
+            for row in db.query(cls).filter(cls.reference == label).all():
+                db.delete(row)
+        client = db.query(Client).filter(Client.code == "CLI-SMOKE-1").first() or db.query(Client).filter(Client.code != "CLI-SMOKE-1").first()
         if not client:
             client = Client(code="CLI-SMOKE-1", type=TiersType.CLIENT,
                             name="Client Smoke", email="smoke@evolog.cm")
             db.add(client); db.flush()
         out["client_id"] = client.id
 
-        fournisseur = db.query(Fournisseur).first()
+        fournisseur = db.query(Fournisseur).filter(Fournisseur.code == "FRS-SMOKE-1").first() or db.query(Fournisseur).filter(Fournisseur.code != "FRS-SMOKE-1").first()
         if not fournisseur:
             fournisseur = Fournisseur(code="FRS-SMOKE-1", type=TiersType.FOURNISSEUR,
                                       name="Fournisseur Smoke", email="frs@evolog.cm")
@@ -87,7 +94,7 @@ def seed():
             db.add(dette); db.flush()
         out["dette_id"] = dette.id
 
-        prestataire = db.query(Prestataire).first()
+        prestataire = db.query(Prestataire).filter(Prestataire.code == "PRE-SMOKE-1").first() or db.query(Prestataire).filter(Prestataire.code != "PRE-SMOKE-1").first()
         if not prestataire:
             prestataire = Prestataire(
                 code="PRE-SMOKE-1", raison_sociale="Prestataire Smoke",
@@ -96,7 +103,7 @@ def seed():
             db.add(prestataire); db.flush()
         out["supplier_id"] = prestataire.id
 
-        mission = db.query(Mission).first()
+        mission = db.query(Mission).filter(Mission.reference == "MIS-SMOKE-1").first() or db.query(Mission).first()
         if not mission:
             mission = Mission(
                 reference="MIS-SMOKE-1", client_id=client.id,
@@ -107,7 +114,7 @@ def seed():
             db.add(mission); db.flush()
         out["mission_id"] = mission.id
 
-        commande = db.query(Commande).first()
+        commande = db.query(Commande).filter(Commande.reference == "CMD-SMOKE-1").first() or db.query(Commande).first()
         if not commande:
             commande = Commande(reference="CMD-SMOKE-1", client_id=client.id,
                                 type_commande="sortie", montant_total=50000)
