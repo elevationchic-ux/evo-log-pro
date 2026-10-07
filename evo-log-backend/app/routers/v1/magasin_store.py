@@ -42,6 +42,7 @@ from app.schemas.magasin_store import (
     ClientUpdate,
     ClientResponse,
     CommandeCreate,
+    CommandeUpdate,
     CommandeResponse,
     OrdreTransfertCreate,
     OrdreTransfertResponse,
@@ -231,6 +232,17 @@ async def create_commande(payload: CommandeCreate, db: Session = Depends(get_db)
 @router.get("/commandes/{commande_id}", response_model=CommandeResponse)
 async def get_commande(commande_id: int, db: Session = Depends(get_db)):
     return _get_or_404(Commande, db, commande_id, "Commande")
+
+
+@router.put("/commandes/{commande_id}", response_model=CommandeResponse)
+async def update_commande(commande_id: int, payload: CommandeUpdate, db: Session = Depends(get_db)):
+    """Mettre à jour une commande (champs fournis uniquement)."""
+    row = _get_or_404(Commande, db, commande_id, "Commande")
+    for k, v in payload.model_dump(exclude_unset=True).items():
+        setattr(row, k, v)
+    db.commit()
+    db.refresh(row)
+    return row
 
 
 def _transition(commande_id: int, db: Session, target: CommandeStatut):

@@ -150,6 +150,16 @@ class CommandeCreate(CommandeBase):
     lignes: List[LigneCommandeCreate] = []
 
 
+class CommandeUpdate(BaseModel):
+    client_id: Optional[int] = None
+    type_commande: Optional[str] = None
+    date_livraison_prevue: Optional[datetime] = None
+    montant_total: Optional[float] = None
+    devise: Optional[str] = None
+    notes: Optional[str] = None
+    statut: Optional[CommandeStatut] = None
+
+
 class CommandeResponse(CommandeBase):
     id: int
     company_id: Optional[int] = None
