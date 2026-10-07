@@ -203,13 +203,13 @@ class GestionCreancesService:
         factures_en_retard = sum(1 for f in factures if f.statut == "payee_partiel")
         
         # Calcul du score (0-100)
-        taux_paiement = ((nombre_factures - factures_en_retard) / nombre_factaires * 100) if nombre_factires > 0 else 100
+        taux_paiement = ((nombre_factures - factures_en_retard) / nombre_factures * 100) if nombre_factures > 0 else 100
         
         score = taux_paiement
         
         return {
             "client_id": client_id,
-            "client_nom": client.nom,
+            "client_nom": client.name,
             "nombre_factures": nombre_factures,
             "factures_en_retard": factures_en_retard,
             "taux_paiement": taux_paiement,
@@ -230,20 +230,22 @@ class GestionDettesService:
         
         balance_agee = []
         for fournisseur in fournisseurs:
+            # FactureNew n'a pas de colonne fournisseur_id : la dette d'achat
+            # est rattachee au tiers via client_id (le tiers peut etre fournisseur).
             factures = db.query(Facture).filter(
                 and_(
-                    Facture.fournisseur_id == fournisseur.id,
+                    Facture.client_id == fournisseur.id,
                     Facture.type_facture == "achat",
                     Facture.statut.in_(["emise", "payee_partiel"])
                 )
             ).all()
             
-            total_solde = sum(f.solde_restant for f in factures)
+            total_solde = sum(f.solde_restant or 0 for f in factures)
             
             if total_solde > 0:
                 balance_agee.append({
                     "fournisseur_id": fournisseur.id,
-                    "fournisseur_nom": fournisseur.nom,
+                    "fournisseur_nom": fournisseur.name,
                     "total_solde": total_solde,
                     "nombre_factures": len(factures)
                 })
