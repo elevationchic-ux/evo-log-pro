@@ -57,8 +57,35 @@ DOMAINS: Dict[str, Dict] = {
             # force sur « journal », sous-modules dedies, alignes sur les
             # ecrans. bilan etendu car creer/modifier un bilan est distinct de
             # l'approuver.
-            "comptabilite": {"label": "Comptabilite SYSCOHADA", "sub_modules": {"journal": ACTIONS, "grand_livre": ["read", "export"], "balance": ["read", "export"], "bilan": ["read", "create", "modify", "approve", "export"], "lettrage": ["read", "modify"], "plan_comptable": ["read", "create", "modify"], "exercice": ["read", "create", "modify", "approve"], "compte_resultat": ["read", "create", "modify"]}},
-            "tresorerie": {"label": "Tresorerie", "sub_modules": {"mouvement": ACTIONS, "rapprochement": ["read", "modify"]}},
+            "comptabilite": {"label": "Comptabilite SYSCOHADA", "sub_modules": {"journal": ACTIONS, "grand_livre": ["read", "export"], "balance": ["read", "export"], "bilan": ["read", "create", "modify", "approve", "export"], "lettrage": ["read", "modify"], "plan_comptable": ["read", "create", "modify"], "exercice": ["read", "create", "modify", "approve"], "compte_resultat": ["read", "create", "modify"],
+                # Expansion comptabilite approfondie (routeur comptabilite_deep). Objets
+                # reels du departement (comabilite analytique, piste d'audit, rapprochement
+                # bancaire, controle budgetaire, amortissements, actifs immobilises,
+                # conventions intragroupe, comptes de paie, provisions, declaration fiscale,
+                # comptes de tresorerie) plus la nomenclature. DIRECTEUR_FINANCIER et
+                # CHEF_COMPTABLE (« comptabilite.*.* ») pilotent, COMPTABLE garde sa liste
+                # explicite, AUDITEUR (« comptabilite.*.read ») lit.
+                "nomenclature": ["read"], "analytical_accounting": ["read", "create", "modify"],
+                "audit_trail": ["read", "create", "modify"], "bank_reconciliation": ["read", "create", "modify"],
+                "budget_control": ["read", "create", "modify"], "depreciation": ["read", "create", "modify"],
+                "fixed_asset": ["read", "create", "modify"], "intercompany": ["read", "create", "modify"],
+                "payroll_accounts": ["read", "create", "modify"], "provision": ["read", "create", "modify"],
+                "tax_declaration": ["read", "create", "modify"], "treasury_accounts": ["read", "create", "modify"]}},
+            "tresorerie": {"label": "Tresorerie", "sub_modules": {"mouvement": ACTIONS, "rapprochement": ["read", "modify"],
+                # Expansion finance/tresorerie approfondie (routeur finance_deep). Objets
+                # reels de la direction financiere (garantie bancaire, gestion budgetaire,
+                # cash pooling, ligne de credit, note de frais, previsionnel, gestion FX,
+                # suivi des investissements, comptabilite de credit-bail, echeancier de
+                # paiement, caisse menue, alertes de tresorerie) plus la nomenclature.
+                # DIRECTEUR_FINANCIER (« tresorerie.*.* ») pilote, CHEF_COMPTABLE et
+                # AUDITEUR (« tresorerie.*.read ») lisent, CAISSIER garde sa liste explicite.
+                "nomenclature": ["read"], "bank_guarantee": ["read", "create", "modify"],
+                "budget_management": ["read", "create", "modify"], "cash_pooling": ["read", "create", "modify"],
+                "credit_facility": ["read", "create", "modify"], "expense_report": ["read", "create", "modify"],
+                "financial_forecast": ["read", "create", "modify"], "fx_management": ["read", "create", "modify"],
+                "investment_tracking": ["read", "create", "modify"], "lease_accounting": ["read", "create", "modify"],
+                "payment_scheduling": ["read", "create", "modify"], "petty_cash": ["read", "create", "modify"],
+                "treasury_alerts": ["read", "create", "modify"]}},
             "facturation": {"label": "Facturation", "sub_modules": {"facture": ACTIONS, "devis": ACTIONS, "avoir": ACTIONS}},
             # declarations + modify : une declaration fiscale se corrige avant
             # d'être depotree ; le depot lui-meme reste l'approve (501 tant que
@@ -101,7 +128,21 @@ DOMAINS: Dict[str, Dict] = {
                 "returns_management": ["read", "create", "modify"], "stock_alert": ["read", "create", "modify"],
                 "stock_valuation": ["read", "create", "modify"], "purchase_order": ["read", "create", "modify"],
                 "wms_analytics": ["read", "create", "modify"]}},
-            "port": {"label": "Operations portuaires", "sub_modules": {"quai": ACTIONS, "pesee": ["read", "create"], "zone": ACTIONS}},
+            "port": {"label": "Operations portuaires", "sub_modules": {"quai": ACTIONS, "pesee": ["read", "create"], "zone": ACTIONS,
+                # Expansion operations portuaires approfondies (routeur port_deep). Registres
+                # reels de l'escale et du terminal (soutage/bunkering, plan de chargement,
+                # surestarie demurrage, releve de tirant d'eau, laissez-pour-circle gate pass,
+                # pilotage, equipements de quai, equipe de manutention, tally, remorquage,
+                # dechets navires, parc/yard) plus registre navires et nomenclature.
+                # CHEF_EXPLOITATION (« port.*.* ») pilote le terminal, AUDITEUR
+                # (« port.*.read ») lit. Les codes historiques quai/pesee/zone restent.
+                "nomenclature": ["read"], "vessel_registry": ["read"], "bunkering": ["read", "create", "modify"],
+                "cargo_plan": ["read", "create", "modify"], "demurrage": ["read", "create", "modify"],
+                "draft_survey": ["read", "create", "modify"], "gate_pass": ["read", "create", "modify"],
+                "pilotage": ["read", "create", "modify"], "quay_equipment": ["read", "create", "modify"],
+                "stevedoring_crew": ["read", "create", "modify"], "tally": ["read", "create", "modify"],
+                "towage": ["read", "create", "modify"], "vessel_waste": ["read", "create", "modify"],
+                "yard": ["read", "create", "modify"]}},
         },
     },
     # Departement autonome : l'amenagement portuaire n'est pas l'exploitation
@@ -307,8 +348,12 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     # d'exploitation ; l'operateur execute au quai sans jamais approuver
     # (valider le plan d'arrimage, cloturer les dockers, emettre un
     # connaissement ou contester un frais restent des actes du chef).
-    ("CHEF_EXPLOITATION", 2, "Chef d'exploitation du terminal : pilotage complet de l'acconage", [
+    ("CHEF_EXPLOITATION", 2, "Chef d'exploitation du terminal : pilotage complet de l'acconage et des operations de quai", [
         "acconage.*.*",
+        # Le chef d'exploitation est le proprietaire metier des operations du
+        # terminal (routeur port_deep : escale, soutage, pilotage, remorquage,
+        # manutention, demurrage, gate pass, tally, parc, dechets navires).
+        "port.*.*",
         "magasin.stock.read", "transport.*.read",
         # Batch 24 : le chef n'est pas officier QHSE, mais c'est lui qui
         # declare les accidents du quai, demande un permis de travail,

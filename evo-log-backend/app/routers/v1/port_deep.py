@@ -9,7 +9,7 @@ Expose 12 registres operationnels sous /api/v1/port-operations/ :
 Chaque registre : list, create, update (4 endpoints incl. get-by-id).
 Les nomenclatures sont servies via /port-operations/nomenclatures.
 
-RBAC : require_perm("port_ops.{sous_module}.{action}").
+RBAC : require_perm("port.{sous_module}.{action}").
 Multi-tenant : company_id injecte depuis la session utilisateur.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -100,7 +100,7 @@ def _company_id(user: User) -> int:
 # ─── Nomenclatures ───────────────────────────────────────────────────────────
 
 @router.get("/nomenclatures", summary="Vocabulaire metier des operations portuaires")
-def nomenclatures(user: User = Depends(require_perm("port_ops.vessel_registry.read"))):
+def nomenclatures(user: User = Depends(require_perm("port.vessel_registry.read"))):
     return {
         "type_avarie": _enum_catalog(TypeAvarie),
         "gravite_avarie": _enum_catalog(GraviteAvarie),
@@ -126,7 +126,7 @@ def list_draft_surveys(
     statut: Optional[str] = None,
     navire_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.draft_survey.read")),
+    user: User = Depends(require_perm("port.draft_survey.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, DraftSurvey, cid, {"statut": statut, "navire_id": navire_id})
@@ -136,7 +136,7 @@ def list_draft_surveys(
 def create_draft_survey(
     payload: DraftSurveyCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.draft_survey.create")),
+    user: User = Depends(require_perm("port.draft_survey.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -154,7 +154,7 @@ def update_draft_survey(
     ident: int,
     payload: DraftSurveyUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.draft_survey.modify")),
+    user: User = Depends(require_perm("port.draft_survey.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, DraftSurvey, ident, "Constat")
@@ -173,7 +173,7 @@ def list_crews(
     statut: Optional[str] = None,
     type_equipe: Optional[str] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.stevedoring_crew.read")),
+    user: User = Depends(require_perm("port.stevedoring_crew.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, StevedoringCrew, cid, {"statut": statut, "type_equipe": type_equipe})
@@ -183,7 +183,7 @@ def list_crews(
 def create_crew(
     payload: StevedoringCrewCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.stevedoring_crew.create")),
+    user: User = Depends(require_perm("port.stevedoring_crew.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -200,7 +200,7 @@ def create_crew(
 def update_crew(
     ident: int, payload: StevedoringCrewUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.stevedoring_crew.modify")),
+    user: User = Depends(require_perm("port.stevedoring_crew.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, StevedoringCrew, ident, "Gang")
@@ -220,7 +220,7 @@ def list_cargo_plans(
     type_operation: Optional[str] = None,
     escale_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.cargo_plan.read")),
+    user: User = Depends(require_perm("port.cargo_plan.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, CargoHandlingPlan, cid, {"statut": statut, "type_operation": type_operation, "escale_id": escale_id})
@@ -230,7 +230,7 @@ def list_cargo_plans(
 def create_cargo_plan(
     payload: CargoHandlingPlanCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.cargo_plan.create")),
+    user: User = Depends(require_perm("port.cargo_plan.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -247,7 +247,7 @@ def create_cargo_plan(
 def update_cargo_plan(
     ident: int, payload: CargoHandlingPlanUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.cargo_plan.modify")),
+    user: User = Depends(require_perm("port.cargo_plan.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, CargoHandlingPlan, ident, "Plan manutention")
@@ -266,7 +266,7 @@ def list_quay_equipments(
     type_equipement: Optional[str] = None,
     etat: Optional[str] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.quay_equipment.read")),
+    user: User = Depends(require_perm("port.quay_equipment.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, QuayEquipment, cid, {"type_equipement": type_equipement, "etat": etat})
@@ -276,7 +276,7 @@ def list_quay_equipments(
 def create_quay_equipment(
     payload: QuayEquipmentCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.quay_equipment.create")),
+    user: User = Depends(require_perm("port.quay_equipment.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -293,7 +293,7 @@ def create_quay_equipment(
 def update_quay_equipment(
     ident: int, payload: QuayEquipmentUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.quay_equipment.modify")),
+    user: User = Depends(require_perm("port.quay_equipment.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, QuayEquipment, ident, "Equipement")
@@ -312,7 +312,7 @@ def list_pilotage(
     statut: Optional[str] = None,
     navire_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.pilotage.read")),
+    user: User = Depends(require_perm("port.pilotage.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, PilotageSession, cid, {"statut": statut, "navire_id": navire_id})
@@ -322,7 +322,7 @@ def list_pilotage(
 def create_pilotage(
     payload: PilotageSessionCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.pilotage.create")),
+    user: User = Depends(require_perm("port.pilotage.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -339,7 +339,7 @@ def create_pilotage(
 def update_pilotage(
     ident: int, payload: PilotageSessionUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.pilotage.modify")),
+    user: User = Depends(require_perm("port.pilotage.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, PilotageSession, ident, "Session pilotage")
@@ -357,7 +357,7 @@ def update_pilotage(
 def list_towage(
     statut: Optional[str] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.towage.read")),
+    user: User = Depends(require_perm("port.towage.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, TowageOperation, cid, {"statut": statut})
@@ -367,7 +367,7 @@ def list_towage(
 def create_towage(
     payload: TowageOperationCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.towage.create")),
+    user: User = Depends(require_perm("port.towage.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -384,7 +384,7 @@ def create_towage(
 def update_towage(
     ident: int, payload: TowageOperationUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.towage.modify")),
+    user: User = Depends(require_perm("port.towage.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, TowageOperation, ident, "Operation remorquage")
@@ -403,7 +403,7 @@ def list_bunkering(
     statut: Optional[str] = None,
     type_carburant: Optional[str] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.bunkering.read")),
+    user: User = Depends(require_perm("port.bunkering.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, BunkeringOrder, cid, {"statut": statut, "type_carburant": type_carburant})
@@ -413,7 +413,7 @@ def list_bunkering(
 def create_bunkering(
     payload: BunkeringOrderCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.bunkering.create")),
+    user: User = Depends(require_perm("port.bunkering.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -430,7 +430,7 @@ def create_bunkering(
 def update_bunkering(
     ident: int, payload: BunkeringOrderUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.bunkering.modify")),
+    user: User = Depends(require_perm("port.bunkering.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, BunkeringOrder, ident, "Ordre soute")
@@ -449,7 +449,7 @@ def list_waste(
     type_dechet: Optional[str] = None,
     navire_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.vessel_waste.read")),
+    user: User = Depends(require_perm("port.vessel_waste.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, VesselWasteReceipt, cid, {"type_dechet": type_dechet, "navire_id": navire_id})
@@ -459,7 +459,7 @@ def list_waste(
 def create_waste(
     payload: VesselWasteReceiptCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.vessel_waste.create")),
+    user: User = Depends(require_perm("port.vessel_waste.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -476,7 +476,7 @@ def create_waste(
 def update_waste(
     ident: int, payload: VesselWasteReceiptUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.vessel_waste.modify")),
+    user: User = Depends(require_perm("port.vessel_waste.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, VesselWasteReceipt, ident, "Recu dechet")
@@ -496,7 +496,7 @@ def list_tally(
     escale_id: Optional[int] = None,
     valide: Optional[bool] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.tally.read")),
+    user: User = Depends(require_perm("port.tally.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, TallySheet, cid, {"type_operation": type_operation, "escale_id": escale_id, "valide": valide})
@@ -506,7 +506,7 @@ def list_tally(
 def create_tally(
     payload: TallySheetCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.tally.create")),
+    user: User = Depends(require_perm("port.tally.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -523,7 +523,7 @@ def create_tally(
 def update_tally(
     ident: int, payload: TallySheetUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.tally.modify")),
+    user: User = Depends(require_perm("port.tally.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, TallySheet, ident, "Feuille tally")
@@ -542,7 +542,7 @@ def list_demurrage(
     statut: Optional[str] = None,
     client_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.demurrage.read")),
+    user: User = Depends(require_perm("port.demurrage.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, DemurrageCase, cid, {"statut": statut, "client_id": client_id})
@@ -552,7 +552,7 @@ def list_demurrage(
 def create_demurrage(
     payload: DemurrageCaseCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.demurrage.create")),
+    user: User = Depends(require_perm("port.demurrage.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -569,7 +569,7 @@ def create_demurrage(
 def update_demurrage(
     ident: int, payload: DemurrageCaseUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.demurrage.modify")),
+    user: User = Depends(require_perm("port.demurrage.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, DemurrageCase, ident, "Dossier surestarie")
@@ -588,7 +588,7 @@ def list_gate_passes(
     statut: Optional[str] = None,
     conteneur_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.gate_pass.read")),
+    user: User = Depends(require_perm("port.gate_pass.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, GatePass, cid, {"statut": statut, "conteneur_id": conteneur_id})
@@ -598,7 +598,7 @@ def list_gate_passes(
 def create_gate_pass(
     payload: GatePassCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.gate_pass.create")),
+    user: User = Depends(require_perm("port.gate_pass.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -615,7 +615,7 @@ def create_gate_pass(
 def update_gate_pass(
     ident: int, payload: GatePassUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.gate_pass.modify")),
+    user: User = Depends(require_perm("port.gate_pass.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, GatePass, ident, "Gate pass")
@@ -635,7 +635,7 @@ def list_yard_ops(
     conteneur_id: Optional[int] = None,
     statut: Optional[str] = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.yard.read")),
+    user: User = Depends(require_perm("port.yard.read")),
 ):
     cid = _company_id(user)
     return _scoped_list(db, YardOperation, cid, {"type_mouvement": type_mouvement, "conteneur_id": conteneur_id, "statut": statut})
@@ -645,7 +645,7 @@ def list_yard_ops(
 def create_yard_op(
     payload: YardOperationCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.yard.create")),
+    user: User = Depends(require_perm("port.yard.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
@@ -662,7 +662,7 @@ def create_yard_op(
 def update_yard_op(
     ident: int, payload: YardOperationUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_perm("port_ops.yard.modify")),
+    user: User = Depends(require_perm("port.yard.modify")),
 ):
     cid = _company_id(user)
     obj = _get_or_404(db, YardOperation, ident, "Mouvement yard")
