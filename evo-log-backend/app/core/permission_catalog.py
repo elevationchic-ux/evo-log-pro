@@ -372,6 +372,8 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "transport.*.read", "magasin.*.read", "transit.*.read", "audit.journal.read",
         # Lecture transversale des operations du terminal (routeur port_deep).
         "port.*.read",
+        # Lecture transversale du fret multi-modal (routeurs *_deep transport).
+        "aerien.*.read", "ferroviaire.*.read", "fluvial.*.read", "log3pl.*.read",
         # Batch 24 : meme lecture transversale sur le QHSE (rapports annuels
         # includes), sans jamais d'ecriture.
         "qhse.*.read",

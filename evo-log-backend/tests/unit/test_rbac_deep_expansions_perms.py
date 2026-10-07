@@ -60,6 +60,10 @@ METIERS = {
     "finance_deep.py": 37,          # finance -> tresorerie (Phase 3)
     "port_deep.py": 37,             # port_ops -> port (Phase 3)
     "b2b_deep.py": 34,              # nouveau module b2b (Phase 4)
+    "aerien_deep.py": 37,           # fret aerien (ajoute par l'expansion)
+    "ferroviaire_deep.py": 37,      # fret ferroviaire
+    "fluvial_deep.py": 31,          # fret fluvial
+    "log3pl_deep.py": 31,           # logistique 3PL
 }
 
 # Routeurs plateforme : bypass niveaux 0/1 uniquement, aucun porteur metier.
