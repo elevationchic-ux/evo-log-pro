@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, and_
 from typing import Optional
-from datetime import datetime, date as date_type
+from datetime import datetime, date as date_type, timedelta
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
@@ -194,6 +194,60 @@ async def create_invoice(
     db.commit()
     db.refresh(facture)
     return {"message": "Facture créée", "id": facture.id, "numero_facture": numero}
+
+
+@router.post("/generate")
+async def generer_facture_auto(
+    data: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Générer automatiquement une facture depuis une opération source
+    (mission transport, escale, accostage...) : numérotation légale séquentiée."""
+    from app.utils.numerotation import prochaine_reference
+
+    client_id = data.get("client_id")
+    montant_ht = float(data.get("montant_ht", 0) or 0)
+    if not client_id or montant_ht <= 0:
+        raise HTTPException(status_code=400, detail="client_id et montant_ht > 0 requis")
+
+    reference_source = data.get("reference_source")
+    type_operation = data.get("type_operation", "mission_transport")
+
+    taux_tva = float(data.get("taux_tva", 19.25))
+    montant_tva = montant_ht * (taux_tva / 100)
+    montant_ttc = montant_ht + montant_tva
+
+    numero = prochaine_reference(
+        db, "FACTURE", company_id=getattr(current_user, "company_id", None)
+    )
+
+    facture = FactureNew(
+        numero_facture=numero,
+        client_id=client_id,
+        type_facture="vente",
+        date_emission=datetime.utcnow().date(),
+        date_echeance=datetime.utcnow().date() + timedelta(days=30),
+        montant_ht=montant_ht,
+        taux_tva=taux_tva,
+        montant_tva=montant_tva,
+        montant_ttc=montant_ttc,
+        devise=data.get("devise", "XAF"),
+        statut="emise",
+        notes=f"Facturation automatique - opération {type_operation} - réf. source : {reference_source or 'N/A'}",
+        solde_restant=montant_ttc,
+    )
+    db.add(facture)
+    db.commit()
+    db.refresh(facture)
+    return {
+        "message": "Facture générée automatiquement",
+        "id": facture.id,
+        "numero_facture": numero,
+        "montant_ttc": montant_ttc,
+        "type_operation": type_operation,
+        "reference_source": reference_source,
+    }
 
 
 @router.post("/{facture_id}/emettre")

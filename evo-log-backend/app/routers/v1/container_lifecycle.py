@@ -219,6 +219,85 @@ async def create_container(
     return {"message": "Conteneur créé", "id": conteneur.id, "numero": conteneur.numero}
 
 
+@router.post("/gate-in")
+async def gate_in_conteneur(
+    data: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Gate-In portuaire : enregistre l'entrée d'un conteneur au terminal.
+    Crée le conteneur s'il est nouveau, puis ouvre un cycle « arrivé »
+    localisé au terre-plein indiqué."""
+    from app.models.conteneur_cycle import TypeConteneur
+
+    numero = (data.get("numero_conteneur") or data.get("numero") or "").strip()
+    if not numero:
+        raise HTTPException(status_code=400, detail="numero_conteneur requis")
+
+    taille = int(data.get("taille", 20) or 20)
+    type_brut = (data.get("type_conteneur") or "DRY").strip().lower().replace("_", "")
+
+    # Mapper type + taille vers l'enum ISO du modèle (dry_20, reefer_40...)
+    suffixe = "_40" if taille >= 40 else "_20"
+    candidats = [f"{type_brut}{suffixe}", f"{type_brut}_40_hc" if taille >= 40 else None, type_brut]
+    type_enum = None
+    for c in candidats:
+        if c and c in TypeConteneur.__members__.values().__iter__().__class__.__dict__.get("_value2member_map_", {}):
+            type_enum = TypeConteneur(c)
+            break
+    if type_enum is None:
+        try:
+            type_enum = TypeConteneur[type_brut.upper() + suffixe] if (TypeConteneur.__members__.get(type_brut.upper() + suffixe)) else None
+        except KeyError:
+            type_enum = None
+    if type_enum is None:
+        try:
+            type_enum = TypeConteneur(f"dry{suffixe}")
+        except ValueError:
+            type_enum = TypeConteneur.DRY_20
+
+    conteneur = scope_query(
+        db.query(Conteneur).filter(Conteneur.numero == numero),
+        Conteneur,
+        current_user,
+    ).first()
+    cree = False
+    if not conteneur:
+        conteneur = Conteneur(
+            numero=numero,
+            type_conteneur=type_enum,
+            taille_pieds=taille,
+            etat=EtatConteneur.CLEAN,
+            compagnie=data.get("compagnie"),
+            proprietaire=data.get("proprietaire"),
+            company_id=getattr(current_user, "company_id", None),
+        )
+        db.add(conteneur)
+        db.flush()
+        cree = True
+
+    cycle = CycleConteneur(
+        conteneur_id=conteneur.id,
+        voyage=data.get("navire") or data.get("voyage"),
+        statut=StatutConteneur.ARRIVE,
+        localisation=data.get("emplacement") or data.get("port") or "Terminal",
+        operateur_dechargement=data.get("port"),
+        company_id=conteneur.company_id,
+    )
+    db.add(cycle)
+    db.commit()
+    db.refresh(conteneur)
+    db.refresh(cycle)
+    return {
+        "message": "Gate-In enregistré",
+        "conteneur_id": conteneur.id,
+        "conteneur_cree": cree,
+        "cycle_id": cycle.id,
+        "statut": StatutConteneur.ARRIVE.value,
+        "localisation": cycle.localisation,
+    }
+
+
 @router.post("/{conteneur_id}/cycle")
 async def create_cycle(
     conteneur_id: int,

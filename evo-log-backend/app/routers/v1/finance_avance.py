@@ -110,6 +110,77 @@ def analyse_dpo(
     return GestionDettesService.analyse_dpo(db, periode)
 
 
+@router.post("/dettes/regler")
+def regler_dette_fournisseur(
+    data: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Régler une dette fournisseur : impute le paiement sur les factures d'achat
+    ouvertes les plus anciennes (FIFO) et génère les règlements correspondants."""
+    from decimal import Decimal
+    from app.models.finance_ohada import Reglement, FactureNew as Facture
+    from app.models.tiers import Fournisseur
+    from app.utils.numerotation import prochaine_reference
+
+    fournisseur_id = data.get("fournisseur_id")
+    montant = Decimal(str(data.get("montant", 0) or 0))
+    mode_paiement = data.get("mode_paiement", "virement")
+
+    if not fournisseur_id or montant <= 0:
+        raise HTTPException(status_code=400, detail="fournisseur_id et montant > 0 requis")
+
+    fournisseur = db.query(Fournisseur).filter(Fournisseur.id == fournisseur_id).first()
+    if not fournisseur:
+        raise HTTPException(status_code=404, detail="Fournisseur non trouvé")
+
+    factures = db.query(Facture).filter(
+        and_(
+            Facture.fournisseur_id == fournisseur_id,
+            Facture.type_facture == "achat",
+            Facture.statut.in_(["emise", "payee_partiel"]),
+            Facture.solde_restant > 0,
+        )
+    ).order_by(Facture.date_emission.asc()).all()
+
+    restant = montant
+    reglements = []
+    for facture in factures:
+        if restant <= 0:
+            break
+        applicable = min(restant, facture.solde_restant)
+        facture.solde_restant = facture.solde_restant - applicable
+        facture.statut = "payee" if facture.solde_restant <= 0 else "payee_partiel"
+        reg = Reglement(
+            numero_reglement=prochaine_reference(db, "REGLEMENT", getattr(facture, "company_id", None)),
+            facture_id=facture.id,
+            date_reglement=date.today(),
+            montant=applicable,
+            devise="XAF",
+            mode_paiement=mode_paiement,
+            effectue_par=getattr(current_user, "full_name", None) or getattr(current_user, "email", None),
+            statut="valide",
+            notes=f"Règlement fournisseur {fournisseur.nom}",
+        )
+        db.add(reg)
+        db.flush()
+        reglements.append({"reglement_id": reg.id, "facture_id": facture.id, "montant": float(applicable)})
+        restant -= applicable
+
+    if not reglements:
+        raise HTTPException(status_code=400, detail="Aucune facture d'achat ouverte pour ce fournisseur")
+
+    db.commit()
+    return {
+        "status": "success",
+        "fournisseur_id": fournisseur_id,
+        "fournisseur_nom": fournisseur.nom,
+        "montant_reglé": float(montant - restant),
+        "montant_non_impute": float(restant),
+        "reglements": reglements,
+    }
+
+
 # ============ BUDGET ============
 
 @router.post("/budget/annuel", response_model=BudgetAnnuelResponse)
