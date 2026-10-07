@@ -501,6 +501,13 @@ except ImportError as e:
     logger.critical(f"Departement Amenagement portuaire router failed to load: {e}")
     raise
 
+# Wave 1A expansion : operations portuaires approfondies (12 registres).
+try:
+    from app.routers.v1 import port_deep
+    safe_include_router(port_deep.router, prefix="/api/v1/port-operations", tags=["Operations portuaires approfondies"])
+except ImportError as e:
+    logger.warning(f"Router port_deep absent : {e}")
+
 # WebSocket and additional routers
 try:
     from app.routers import ws, collaboration, iot, webhook_whatsapp, telematics
