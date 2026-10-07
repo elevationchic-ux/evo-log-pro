@@ -613,12 +613,12 @@ def gen_frontend_registres(m: dict) -> str:
 
 # ─── Page wrappers ───────────────────────────────────────────────────────────
 
-def gen_page_wrapper(ent: dict, module_slug: str) -> str:
+def gen_page_wrapper(ent: dict, module_slug: str, registre_filename: str = "registres") -> str:
     cn = ent["class_name"]
     return (
         f"'use client';\n"
         f"import RegistreGenerique from '@/components/registre-generique/RegistreGenerique';\n"
-        f"import {{ registre{cn} }} from '@/components/{module_slug}/registres';\n"
+        f"import {{ registre{cn} }} from '@/components/{module_slug}/{registre_filename}';\n"
         f"\n"
         f"export default function Page{cn}() {{\n"
         f"  return <RegistreGenerique config={{registre{cn}}} />;\n"
@@ -661,15 +661,16 @@ def generate_from_dict(m: dict, apply: bool = True):
         return
     mod_key = m["module_key"]
     mod_slug = m["module_slug"]
+    registre_filename = m.get("registre_filename", "registres")
 
     write_file(BACKEND / "app" / "models" / f"{mod_key}_deep.py", gen_model_file(m))
     write_file(BACKEND / "app" / "schemas" / f"{mod_key}_deep.py", gen_schema_file(m))
     write_file(BACKEND / "app" / "routers" / "v1" / f"{mod_key}_deep.py", gen_router_file(m))
     write_file(BACKEND / "migrations" / "versions" / f"{m['revision']}_{mod_key}_deep.py", gen_migration(m))
-    write_file(FRONTEND / "src" / "components" / mod_slug / "registres.ts", gen_frontend_registres(m))
+    write_file(FRONTEND / "src" / "components" / mod_slug / f"{registre_filename}.ts", gen_frontend_registres(m))
     for ent in m["entities"]:
         page_path = FRONTEND / "src" / "app" / "(app)" / mod_slug / ent["slug"] / "page.tsx"
-        write_file(page_path, gen_page_wrapper(ent, mod_slug))
+        write_file(page_path, gen_page_wrapper(ent, mod_slug, registre_filename))
 
     print("\n--- Navigation entries (paste into navigationRegistry.ts) ---\n")
     print(f'// Module: {mod_slug}')
