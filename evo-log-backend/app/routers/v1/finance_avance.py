@@ -135,9 +135,11 @@ def regler_dette_fournisseur(
     if not fournisseur:
         raise HTTPException(status_code=404, detail="Fournisseur non trouvé")
 
+    # FactureNew n'a pas de colonne fournisseur_id : une facture d'achat est
+    # rattachee au tiers payee via client_id (le tiers peut etre un fournisseur).
     factures = db.query(Facture).filter(
         and_(
-            Facture.fournisseur_id == fournisseur_id,
+            Facture.client_id == fournisseur_id,
             Facture.type_facture == "achat",
             Facture.statut.in_(["emise", "payee_partiel"]),
             Facture.solde_restant > 0,
@@ -161,7 +163,7 @@ def regler_dette_fournisseur(
             mode_paiement=mode_paiement,
             effectue_par=getattr(current_user, "full_name", None) or getattr(current_user, "email", None),
             statut="valide",
-            notes=f"Règlement fournisseur {fournisseur.nom}",
+            notes=f"Règlement fournisseur {fournisseur.name}",
         )
         db.add(reg)
         db.flush()

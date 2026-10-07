@@ -246,7 +246,7 @@ def tracer_mission(
             from app.models.tiers import Client
             client = db.query(Client).filter(Client.id == mission.client_id).first()
             if client:
-                stages["client"] = {"id": client.id, "nom": getattr(client, "nom", None) or getattr(client, "raison_sociale", None)}
+                stages["client"] = {"id": client.id, "nom": getattr(client, "name", None)}
         except Exception:
             pass
 
