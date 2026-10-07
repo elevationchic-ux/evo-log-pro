@@ -142,3 +142,18 @@ try:
     __all__.extend(["PermisTravail", "SignaturePermis", "HeuresExposition"])
 except Exception:
     pass
+
+# Wave 1A expansion : operations portuaires approfondies (12 entites).
+try:
+    from app.models.port_operations_deep import (
+        DraftSurvey, StevedoringCrew, CargoHandlingPlan, QuayEquipment,
+        PilotageSession, TowageOperation, BunkeringOrder, VesselWasteReceipt,
+        TallySheet, DemurrageCase, GatePass, YardOperation,
+    )
+    __all__.extend([
+        "DraftSurvey", "StevedoringCrew", "CargoHandlingPlan", "QuayEquipment",
+        "PilotageSession", "TowageOperation", "BunkeringOrder", "VesselWasteReceipt",
+        "TallySheet", "DemurrageCase", "GatePass", "YardOperation",
+    ])
+except Exception:
+    pass
