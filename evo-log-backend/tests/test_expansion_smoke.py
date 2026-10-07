@@ -51,7 +51,9 @@ _PORT_OPS_HANDCRAFTED = [
 def _collect() -> list[tuple[str, str, str, str]]:
     """Return (module_slug, entite_path, unicite_field, required_minimal_json)."""
     out = []
-    for p in [SCRIPTS / "manifests" / "all_modules.py", SCRIPTS / "manifests" / "wave3_modules.py"]:
+    for p in [SCRIPTS / "manifests" / "all_modules.py", SCRIPTS / "manifests" / "wave3_modules.py",
+              SCRIPTS / "manifests" / "wave4_transports.py", SCRIPTS / "manifests" / "wave4_logistique.py",
+              SCRIPTS / "manifests" / "wave5_a.py"]:
         for m in _load_modules(p).values():
             slug = m["module_slug"]
             for ent in m["entities"]:
