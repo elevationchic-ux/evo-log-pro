@@ -239,22 +239,11 @@ async def gate_in_conteneur(
 
     # Mapper type + taille vers l'enum ISO du modèle (dry_20, reefer_40...)
     suffixe = "_40" if taille >= 40 else "_20"
-    candidats = [f"{type_brut}{suffixe}", f"{type_brut}_40_hc" if taille >= 40 else None, type_brut]
-    type_enum = None
-    for c in candidats:
-        if c and c in TypeConteneur.__members__.values().__iter__().__class__.__dict__.get("_value2member_map_", {}):
-            type_enum = TypeConteneur(c)
-            break
+    type_enum = TypeConteneur.__members__.get(type_brut.upper() + suffixe)
     if type_enum is None:
-        try:
-            type_enum = TypeConteneur[type_brut.upper() + suffixe] if (TypeConteneur.__members__.get(type_brut.upper() + suffixe)) else None
-        except KeyError:
-            type_enum = None
+        type_enum = TypeConteneur.__members__.get(type_brut.upper())
     if type_enum is None:
-        try:
-            type_enum = TypeConteneur(f"dry{suffixe}")
-        except ValueError:
-            type_enum = TypeConteneur.DRY_20
+        type_enum = TypeConteneur.DRY_40 if taille >= 40 else TypeConteneur.DRY_20
 
     conteneur = scope_query(
         db.query(Conteneur).filter(Conteneur.numero == numero),

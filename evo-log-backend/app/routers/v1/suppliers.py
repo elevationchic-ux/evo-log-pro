@@ -214,6 +214,22 @@ async def update_supplier(
     return {"message": "Fournisseur mis à jour", "id": supplier.id}
 
 
+@router.delete("/{supplier_id}")
+async def delete_supplier(
+    supplier_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Désactiver un fournisseur (suppression douce : l'historique est conservé)"""
+    supplier = db.query(Prestataire).filter(Prestataire.id == supplier_id).first()
+    if not supplier:
+        raise HTTPException(status_code=404, detail="Fournisseur introuvable")
+
+    supplier.est_actif = False
+    db.commit()
+    return {"message": "Fournisseur désactivé", "id": supplier.id}
+
+
 @router.get("/{supplier_id}/cotations")
 async def get_supplier_cotations(
     supplier_id: int,

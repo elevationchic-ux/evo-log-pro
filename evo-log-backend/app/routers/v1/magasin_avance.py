@@ -127,6 +127,16 @@ def obtenir_peremptions_expirees(
 
 
 # ============ RÉSERVATIONS ============
+@router.get("/reservations", response_model=List[ReservationStockResponse])
+def lister_reservations(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.picking.read"))
+):
+    """Lister les réservations de stock actives"""
+    from app.models.magasin_avance import ReservationStock
+    return db.query(ReservationStock).order_by(ReservationStock.date_reservation.desc()).all()
+
+
 @router.post("/reservations", response_model=ReservationStockResponse, status_code=status.HTTP_201_CREATED)
 def reserver_stock(
     reservation: ReservationStockCreate,
