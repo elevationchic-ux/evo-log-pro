@@ -239,6 +239,32 @@ DOMAINS: Dict[str, Dict] = {
                 "pickpack": ["read", "create", "modify"], "reverse": ["read", "create", "modify"],
                 "slakpi": ["read", "create", "modify"], "subcontractors": ["read", "create", "modify"],
                 "valuation": ["read", "create", "modify"], "warehouses": ["read", "create", "modify"]}},
+            # Wave 5 : pipeline, courier express, chaine du froid, convoi exceptionnel.
+            "pipeline": {"label": "Pipeline oleoduc-gazoduc", "sub_modules": {"nomenclature": ["read"],
+                "sections": ["read", "create", "modify"], "pump_stations": ["read", "create", "modify"],
+                "storage_tanks": ["read", "create", "modify"], "metering_points": ["read", "create", "modify"],
+                "product_batches": ["read", "create", "modify"], "pressure_readings": ["read", "create", "modify"],
+                "leak_detections": ["read", "create", "modify"], "maintenance_works": ["read", "create", "modify"],
+                "injection_campaigns": ["read", "create", "modify"], "ship_nominations": ["read", "create", "modify"]}},
+            "courier": {"label": "Courier messagerie express", "sub_modules": {"nomenclature": ["read"],
+                "parcels": ["read", "create", "modify"], "waybills": ["read", "create", "modify"],
+                "hubs": ["read", "create", "modify"], "delivery_zones": ["read", "create", "modify"],
+                "routes": ["read", "create", "modify"], "couriers": ["read", "create", "modify"],
+                "pods": ["read", "create", "modify"], "slas": ["read", "create", "modify"],
+                "lockers": ["read", "create", "modify"], "vehicules": ["read", "create", "modify"],
+                "tarifs": ["read", "create", "modify"], "exceptions": ["read", "create", "modify"]}},
+            "coldchain": {"label": "Chaine du froid", "sub_modules": {"nomenclature": ["read"],
+                "chambers": ["read", "create", "modify"], "reefers": ["read", "create", "modify"],
+                "loggers": ["read", "create", "modify"], "products": ["read", "create", "modify"],
+                "excursions": ["read", "create", "modify"], "vaccin_batches": ["read", "create", "modify"],
+                "haccp_records": ["read", "create", "modify"], "defrost_cycles": ["read", "create", "modify"],
+                "energy_meters": ["read", "create", "modify"], "transport_legs": ["read", "create", "modify"]}},
+            "heavylift": {"label": "Convoi exceptionnel / Heavy-lift", "sub_modules": {"nomenclature": ["read"],
+                "projects": ["read", "create", "modify"], "cranes": ["read", "create", "modify"],
+                "modular_trailers": ["read", "create", "modify"], "route_surveys": ["read", "create", "modify"],
+                "lift_plans": ["read", "create", "modify"], "permits": ["read", "create", "modify"],
+                "escorts": ["read", "create", "modify"], "lashings": ["read", "create", "modify"],
+                "ballasts": ["read", "create", "modify"], "rigging_methods": ["read", "create", "modify"]}},
         },
     },
     "ressources_humaines": {
@@ -374,6 +400,8 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "port.*.read",
         # Lecture transversale du fret multi-modal (routeurs *_deep transport).
         "aerien.*.read", "ferroviaire.*.read", "fluvial.*.read", "log3pl.*.read",
+        # Wave 5 : pipeline, courier, coldchain, heavylift (lecture seule).
+        "pipeline.*.read", "courier.*.read", "coldchain.*.read", "heavylift.*.read",
         # Batch 24 : meme lecture transversale sur le QHSE (rapports annuels
         # includes), sans jamais d'ecriture.
         "qhse.*.read",
@@ -428,6 +456,8 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         # chef de parc etend sa responsabilite freight au-dela de la route (air,
         # fer, fleuve, logistique 3PL sous-traitee).
         "aerien.*.*", "ferroviaire.*.*", "fluvial.*.*", "log3pl.*.*",
+        # Wave 5 : pipeline, courier express, chaine du froid, heavy-lift.
+        "pipeline.*.*", "courier.*.*", "coldchain.*.*", "heavylift.*.*",
         "gps.tracking.read", "gps.alertes.modify",
     ]),
     ("DISPATCHER", 3, "Dispatcher transport : missions et tournes", [

@@ -677,3 +677,72 @@ try:
 except Exception:
     pass
 # </expansion:heavylift>
+
+# <expansion:port_ops_b>
+try:
+    from app.models.port_ops_b_deep import (
+        PortbBerthSchedule,
+        PortbVesselTrafficLog,
+    )
+    __all__.extend(["PortbBerthSchedule", "PortbVesselTrafficLog"])
+except Exception:
+    pass
+# </expansion:port_ops_b>
+
+# <expansion:amenagement_b>
+try:
+    from app.models.amenagement_b_deep import (
+        AmgtbDredgingProject,
+        AmgtbConcessionPlot,
+    )
+    __all__.extend(["AmgtbDredgingProject", "AmgtbConcessionPlot"])
+except Exception:
+    pass
+# </expansion:amenagement_b>
+
+# <expansion:transit_b>
+try:
+    from app.models.transit_b_deep import (
+        TransitbIncoterm,
+        TransitbInspectionRecord,
+    )
+    __all__.extend(["TransitbIncoterm", "TransitbInspectionRecord"])
+except Exception:
+    pass
+# </expansion:transit_b>
+
+# <expansion:transport_b>
+try:
+    from app.models.transport_b_deep import (
+        TransportbDispatch,
+        TransportbPod,
+    )
+    __all__.extend(["TransportbDispatch", "TransportbPod"])
+except Exception:
+    pass
+# </expansion:transport_b>
+
+# <expansion:magasin_b>
+try:
+    from app.models.magasin_b_deep import (
+        MagasinbStockCount,
+        MagasinbGoodsReceipt,
+    )
+    __all__.extend(["MagasinbStockCount", "MagasinbGoodsReceipt"])
+except Exception:
+    pass
+# </expansion:magasin_b>
+
+# <expansion:dashboard_b>
+try:
+    from app.models.dashboard_b_deep import (
+        DashboardbOperationalKpi,
+        DashboardbScorecard,
+        DashboardbAlertRule,
+        DashboardbRefreshJob,
+        DashboardbSavedView,
+    )
+    __all__.extend(["DashboardbOperationalKpi", "DashboardbScorecard", "DashboardbAlertRule", "DashboardbRefreshJob", "DashboardbSavedView"])
+except Exception:
+    pass
+# </expansion:dashboard_b>

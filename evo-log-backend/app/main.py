@@ -768,6 +768,48 @@ try:
 except ImportError as e:
     logger.warning(f"Router qhse_b_deep absent : {e}")
 # </expansion:qhse_b>
+# <expansion:port_ops_b>
+try:
+    from app.routers.v1 import port_ops_b_deep
+    safe_include_router(port_ops_b_deep.router, prefix="/api/v1/port-operations", tags=["port-operations (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router port_ops_b_deep absent : {e}")
+# </expansion:port_ops_b>
+# <expansion:amenagement_b>
+try:
+    from app.routers.v1 import amenagement_b_deep
+    safe_include_router(amenagement_b_deep.router, prefix="/api/v1/amenagement-portuaire", tags=["amenagement-portuaire (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router amenagement_b_deep absent : {e}")
+# </expansion:amenagement_b>
+# <expansion:transit_b>
+try:
+    from app.routers.v1 import transit_b_deep
+    safe_include_router(transit_b_deep.router, prefix="/api/v1/transit-douane", tags=["transit-douane (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router transit_b_deep absent : {e}")
+# </expansion:transit_b>
+# <expansion:transport_b>
+try:
+    from app.routers.v1 import transport_b_deep
+    safe_include_router(transport_b_deep.router, prefix="/api/v1/transport-flotte", tags=["transport-flotte (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router transport_b_deep absent : {e}")
+# </expansion:transport_b>
+# <expansion:magasin_b>
+try:
+    from app.routers.v1 import magasin_b_deep
+    safe_include_router(magasin_b_deep.router, prefix="/api/v1/magasin-stock", tags=["magasin-stock (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router magasin_b_deep absent : {e}")
+# </expansion:magasin_b>
+# <expansion:dashboard_b>
+try:
+    from app.routers.v1 import dashboard_b_deep
+    safe_include_router(dashboard_b_deep.router, prefix="/api/v1/dashboard", tags=["dashboard (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router dashboard_b_deep absent : {e}")
+# </expansion:dashboard_b>
 
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)

@@ -210,16 +210,56 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["dashboard.integration_status.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      {
+        label: "Indicateurs de performance operationnelle",
+        path: "/dashboard/operational-kpis",
+        icon: (LUCIDE as any)["Gauge"],
+        badge: "Expansion",
+        tcode: "registre-operational-kpis",
+        description: "Valeur mesuree d'un indicateur pour une periode donnee.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["dashboard.operational_kpi.read"],
+      },
+      {
+        label: "Tableaux de bord direction",
+        path: "/dashboard/executive-scorecards",
+        icon: (LUCIDE as any)["Trophy"],
+        badge: "Expansion",
+        tcode: "registre-executive-scorecards",
+        description: "Synthese periodique des indicateurs d'une direction.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["dashboard.scorecard.read"],
+      },
+      {
+        label: "Regles d'alerte",
+        path: "/dashboard/alert-rules",
+        icon: (LUCIDE as any)["BellRing"],
+        badge: "Expansion",
+        tcode: "registre-alert-rules",
+        description: "Condition declenchant une notification sur un indicateur.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["dashboard.alert_rule.read"],
+      },
+      {
+        label: "Taches de rafraichissement",
+        path: "/dashboard/data-refresh-jobs",
+        icon: (LUCIDE as any)["RefreshCw"],
+        badge: "Expansion",
+        tcode: "registre-data-refresh-jobs",
+        description: "Execution periodique du rafraichissement des donnees agrgees.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["dashboard.refresh_job.read"],
+      },
+      {
+        label: "Vues enregistrees",
+        path: "/dashboard/saved-views",
+        icon: (LUCIDE as any)["Bookmark"],
+        badge: "Expansion",
+        tcode: "registre-saved-views",
+        description: "Sauvegarde d'un parametrage de visualisation (filtres + type).",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["dashboard.saved_view.read"],
+      },
     ]
   },
 
@@ -419,18 +459,26 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["port_ops.yard_operation.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      {
+        label: "Plans d'escale et postes d'amarrage",
+        path: "/port-operations/berth-schedules",
+        icon: (LUCIDE as any)["Anchor"],
+        badge: "Expansion",
+        tcode: "registre-berth-schedules",
+        description: "Affectation d'un poste d'amarrage et d'un creneau a un navire.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["port.berth_schedule.read"],
+      },
+      {
+        label: "Journal de trafic maritime (VTS)",
+        path: "/port-operations/vessel-traffic-logs",
+        icon: (LUCIDE as any)["Ship"],
+        badge: "Expansion",
+        tcode: "registre-vessel-traffic-logs",
+        description: "Enregistrement des mouvements de navires dans la zone VTS.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["port.vessel_traffic_log.read"],
+      },
     ]
   },
 
@@ -645,14 +693,26 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["amenagement.development_kpi.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
+      {
+        label: "Projets de dragage",
+        path: "/amenagement-portuaire/dredging-projects",
+        icon: (LUCIDE as any)["Shovel"],
+        badge: "Expansion",
+        tcode: "registre-dredging-projects",
+        description: "Suivi des campagnes de dragage des chenaux et zones d'accostage.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["amenagement.dredging_project.read"],
+      },
+      {
+        label: "Parcelles sous concession",
+        path: "/amenagement-portuaire/concession-plots",
+        icon: (LUCIDE as any)["LandPlot"],
+        badge: "Expansion",
+        tcode: "registre-concession-plots",
+        description: "Inventaire des terrains portuaires concodes et de leur echeance.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["amenagement.concession_plot.read"],
+      },
     ]
   },
 
@@ -856,18 +916,26 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["transit.tariff_reference.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
-      
-      
-
-      
+      {
+        label: "Incoterms applicables",
+        path: "/transit-douane/incoterm-terms",
+        icon: (LUCIDE as any)["Scale"],
+        badge: "Expansion",
+        tcode: "registre-incoterm-terms",
+        description: "Referentiel des incoterms et de leur version.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["transit.incoterm_term.read"],
+      },
+      {
+        label: "Proces-verbaux de visite douaniere",
+        path: "/transit-douane/customs-inspection-records",
+        icon: (LUCIDE as any)["SearchCheck"],
+        badge: "Expansion",
+        tcode: "registre-customs-inspection-records",
+        description: "Consigne des visites (documentaire, physique, radiographie) et resultats.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["transit.inspection_record.read"],
+      },
     ]
   },
 
@@ -1066,18 +1134,26 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["transport.performance_kpi.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      {
+        label: "Bons de mission / affectation",
+        path: "/transport-flotte/mission-dispatches",
+        icon: (LUCIDE as any)["Navigation"],
+        badge: "Expansion",
+        tcode: "registre-mission-dispatches",
+        description: "Affectation d'un vehicule et d'un chauffeur a une mission de transport.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["transport.dispatch.read"],
+      },
+      {
+        label: "Preuves de livraison (POD)",
+        path: "/transport-flotte/proof-of-delivery",
+        icon: (LUCIDE as any)["FileSignature"],
+        badge: "Expansion",
+        tcode: "registre-proof-of-delivery",
+        description: "Accuse de livraison signe par le destinataire.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["transport.pod.read"],
+      },
     ]
   },
 
@@ -1278,18 +1354,26 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["magasin.wms_analytics.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
-      
-
-      
-      
+      {
+        label: "Comptages d'inventaire",
+        path: "/magasin-stock/stock-counts",
+        icon: (LUCIDE as any)["ClipboardList"],
+        badge: "Expansion",
+        tcode: "registre-stock-counts",
+        description: "Confrontation quantite theorique / quantite physique par emplacement.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["magasin.stock_count.read"],
+      },
+      {
+        label: "Receptions marchandise",
+        path: "/magasin-stock/goods-receipts",
+        icon: (LUCIDE as any)["PackageCheck"],
+        badge: "Expansion",
+        tcode: "registre-goods-receipts",
+        description: "Enregistrement des entrees en magasin suite a commande fournisseur.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["magasin.goods_receipt.read"],
+      },
     ]
   },
 
