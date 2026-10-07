@@ -342,11 +342,31 @@ class IndicateurDouanierResponse(IndicateurDouanierBase):
 
 
 # Rapports consolidés
+class ExecutifKpiItem(BaseModel):
+    """Un item de la liste kpis du rapport executif."""
+    code: str
+    nom: str
+    valeur: Optional[float] = None
+    unite: Optional[str] = None
+    objectif: Optional[float] = None
+    categorie: Optional[str] = None
+    type_rapport: Optional[str] = None
+    tendance: Optional[str] = None
+    variation: Optional[float] = None
+
+
+class ExecutifPoleItem(BaseModel):
+    """Un item de la liste poles du rapport executif."""
+    pole: str
+    nb_indicateurs: int
+    valeur_cumulee: float
+
+
 class RapportExecutifResponse(BaseModel):
-    kpis: list
+    kpis: List[ExecutifKpiItem]
     nombre_kpis: int
     k_par_type: dict
-    poles: list = []
+    poles: List[ExecutifPoleItem] = []
 
 
 class RapportFinancierResponse(BaseModel):
