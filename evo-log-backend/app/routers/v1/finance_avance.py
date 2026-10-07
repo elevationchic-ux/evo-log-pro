@@ -1,6 +1,7 @@
 """Router API pour la finance avancée - Trésorerie, Créances, Dettes, Budget"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 from datetime import date, datetime
 from typing import List, Optional
 

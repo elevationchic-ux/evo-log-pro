@@ -33,6 +33,7 @@ from app.models.documents import (
     # Ces trois modeles sont utilises par les PUT /sceaux, /archivages-legal et
     # /partages sans jamais etre imports : la requete levait un NameError (500).
     SceauNumerique, ArchivageLegal, PartageDocument,
+    TypeDocument,
 )
 
 router = APIRouter(tags=["Documents"])  # monte sur /api/v1/documents par main.py; routes relatives au prefix
@@ -65,6 +66,53 @@ def creer_document(
         db, document.numero_document, document.type_document, document.titre,
         document.proprietaire_id, document.dossier_id, None,
         "placeholder.pdf", "application/pdf"
+    )
+
+
+@router.post("/bl", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
+def generer_bon_livraison(
+    data: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Générer un Bon de Livraison (BL) à partir d'une mission de transport.
+
+    Le BL est un document réel persisté dans la table Document, rattaché à la
+    mission (référence, itinéraire). Idempotent : rejouer la génération sur la
+    même mission renvoie le BL déjà créé au lieu d'en dupliquer un second.
+    """
+    from app.models.transport import Mission
+
+    mission_id = data.get("mission_id")
+    if not mission_id:
+        raise HTTPException(status_code=400, detail="mission_id requis")
+
+    mission = db.query(Mission).filter(Mission.id == mission_id).first()
+    if not mission:
+        raise HTTPException(status_code=404, detail="Mission introuvable")
+
+    numero = f"BL-{mission.reference}"
+    existant = db.query(Document).filter(Document.numero_document == numero).first()
+    if existant:
+        return existant
+
+    itineraire = " → ".join(
+        p for p in (mission.point_depart, mission.point_arrivee) if p
+    )
+    titre = f"Bon de Livraison - Mission {mission.reference}"
+    if itineraire:
+        titre = f"{titre} ({itineraire})"
+
+    return DocumentService.creer_document(
+        db,
+        numero,
+        TypeDocument.CONNAISSEMENT,
+        titre[:200],
+        getattr(current_user, "id", None),
+        None,
+        None,
+        "placeholder.pdf",
+        "application/pdf",
     )
 
 
