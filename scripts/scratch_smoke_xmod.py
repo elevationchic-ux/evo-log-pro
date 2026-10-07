@@ -62,11 +62,6 @@ def seed():
     # tenant, sinon l'isolation multi-tenant (tenant_enforcement) les masque.
     TENANT = 1
     try:
-        # Rolutère les seeds d'une exécution précédemment interrompue (rollback
-        # partiel ayant quand même comités des orphelins).
-        for cls, label in ((Mission, 'MIS-SMOKE-1'), (Commande, 'CMD-SMOKE-1')):
-            for row in db.query(cls).filter(cls.reference == label).all():
-                db.delete(row)
         client = db.query(Client).filter(Client.code == "CLI-SMOKE-1").first() or db.query(Client).filter(Client.code != "CLI-SMOKE-1").first()
         if not client:
             client = Client(code="CLI-SMOKE-1", type=TiersType.CLIENT,
