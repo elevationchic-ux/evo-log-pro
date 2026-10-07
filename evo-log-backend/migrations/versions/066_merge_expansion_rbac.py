@@ -1,12 +1,13 @@
-"""066 : fusionne les deux tetes de la chaine et materialise l'RBAC complet.
+"""066 : materialise l'RBAC complet des expansions profondes (queue de chaine).
 
-Contexte. Deux branches sont nees au-dessus de 061_amenagement_extra_deep :
+Contexte. Deux branches etaient nees au-dessus de 061_amenagement_extra_deep :
   - la notre, 062_rbac_amenagement_extra_grants (reflet du catalogue amenagement) ;
   - celle du plan d'expansion, 062_ferroviaire_deep -> 063_aerien_deep ->
     064_fluvial_deep -> 065_log3pl_deep (tables des modes de transport ajoutes).
-``alembic upgrade head`` refuserait deux tetes ; le test de chaine exige une tete
-unique. Cette migration est la MERGE des deux (down_revision = tuple) et redevient
-l'unique tete.
+Le test de chaine exige une chaine strictement lineaire (downgrade « base »
+propre, impossible a traverser un merge point), donc 062_rbac_amenagement_extra_grants
+a ete re-rattachee en queue de la branche des tables de modes, et cette migration 066
+clot la chaine en tete unique lineaire.
 
 Fonction : reconciler le catalogue vers la base deja migree. Le catalogue
 (permission_catalog.DOMAINS) a ete etendu de toutes les expansions profondes
@@ -35,8 +36,11 @@ from alembic import op
 import sqlalchemy as sa
 
 revision = "066_merge_expansion_rbac"
-# Fusion des deux branches nees au-dessus de 061.
-down_revision = ("062_rbac_amenagement_extra_grants", "065_log3pl_deep")
+# Queue de la chaine lineaire : 065_log3pl -> 062_rbac_amenagement_extra_grants -> 066.
+# (La branche RBAC a ete re-rattachee apres les tables de modes pour garder une
+# chaine strictement lineaire — le downgrade "base" du test de chaine ne sait pas
+# traverser un merge point.)
+down_revision = "062_rbac_amenagement_extra_grants"
 branch_labels = None
 depends_on = None
 
