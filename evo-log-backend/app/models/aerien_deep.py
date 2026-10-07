@@ -129,7 +129,7 @@ class AirDangerousGoods_packaging_group(str, enum.Enum):
     I = "i"
     II = "ii"
     III = "iii"
-    N/A = "n/a"
+    NA = "na"
 
 
 class AirDangerousGoods_statut(str, enum.Enum):
