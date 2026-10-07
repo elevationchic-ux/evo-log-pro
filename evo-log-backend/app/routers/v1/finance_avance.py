@@ -156,14 +156,17 @@ def regler_dette_fournisseur(
         facture.statut = "payee" if facture.solde_restant <= 0 else "payee_partiel"
         reg = Reglement(
             numero_reglement=prochaine_reference(db, "REGLEMENT", getattr(facture, "company_id", None)),
-            facture_id=facture.id,
+            # Reglement.facture_id référence la table legacy « factures » ; une
+            # facture OHADA (factures_ohada) n'y a pas d'équivalent : on laisse
+            # la FK à NULL et la référence OHADA est tracée dans les notes.
+            facture_id=None,
             date_reglement=date.today(),
             montant=applicable,
             devise="XAF",
             mode_paiement=mode_paiement,
             effectue_par=getattr(current_user, "full_name", None) or getattr(current_user, "email", None),
             statut="valide",
-            notes=f"Règlement fournisseur {fournisseur.name}",
+            notes=f"Règlement fournisseur {fournisseur.name} - facture OHADA {facture.numero_facture}",
         )
         db.add(reg)
         db.flush()
@@ -177,7 +180,7 @@ def regler_dette_fournisseur(
     return {
         "status": "success",
         "fournisseur_id": fournisseur_id,
-        "fournisseur_nom": fournisseur.nom,
+        "fournisseur_nom": fournisseur.name,
         "montant_reglé": float(montant - restant),
         "montant_non_impute": float(restant),
         "reglements": reglements,

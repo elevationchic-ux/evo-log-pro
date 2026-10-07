@@ -1075,57 +1075,78 @@ async def detailed_health_check():
         "checks": {}
     }
 
-    # Vérifier la base de données
+    # Vérifier la base de données (jamais plus de ~2s : wait_for borné).
     try:
         def check_db():
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
-        await asyncio.to_thread(check_db)
-        checks["checks"]["database"] = {"status": "ok", "message": "PostgreSQL connecté"}
+        await asyncio.wait_for(asyncio.to_thread(check_db), timeout=2.0)
+        checks["checks"]["database"] = {"status": "ok", "message": "Base connectée"}
     except Exception as e:
         checks["checks"]["database"] = {"status": "error", "message": str(e)}
         checks["status"] = "degraded"
 
-    # Vérifier Redis (si configuré)
-    try:
-        import redis.asyncio as aioredis
-        redis_client = aioredis.from_url(settings.REDIS_URL)
-        await redis_client.ping()
-        await redis_client.aclose()
-        checks["checks"]["redis"] = {"status": "ok", "message": "Redis connecté"}
-    except Exception as e:
-        checks["checks"]["redis"] = {"status": "warning", "message": f"Redis indisponible: {str(e)}"}
+    # Vérifier Redis (si configuré) - fast-fail : timeouts courts + wait_for né.
+    # Sans ce bornage, un ping Redis vers un serveur absent bloque ~8s et fait
+    # cascader un « serveur injoignable » côté frontend (timeout axios 15s).
+    redis_ok = False
+    _redis_disabled = (not settings.REDIS_URL) or settings.REDIS_URL.lower() in ("none", "disabled", "")
+    if _redis_disabled:
+        checks["checks"]["redis"] = {"status": "disabled", "message": "Redis désactivé"}
+    else:
+        try:
+            import redis.asyncio as aioredis
+            redis_client = aioredis.from_url(
+                settings.REDIS_URL, socket_connect_timeout=1, socket_timeout=1,
+            )
+            try:
+                await asyncio.wait_for(redis_client.ping(), timeout=1.5)
+                redis_ok = True
+                checks["checks"]["redis"] = {"status": "ok", "message": "Redis connecté"}
+            finally:
+                await redis_client.aclose()
+        except Exception as e:
+            checks["checks"]["redis"] = {"status": "warning", "message": f"Redis indisponible: {str(e)[:120]}"}
 
-    # Vérifier MinIO (si activé)
+    # Vérifier MinIO (si activé) - l'appel SDK est synchrone bloquant : thread + wait_for.
     if settings.MINIO_ENABLED:
         try:
-            from minio import Minio
-            minio_client = Minio(
-                settings.MINIO_ENDPOINT,
-                access_key=settings.MINIO_ACCESS_KEY,
-                secret_key=settings.MINIO_SECRET_KEY,
-                secure=settings.MINIO_SECURE
-            )
-            minio_client.bucket_exists(settings.MINIO_BUCKET_DOCUMENTS)
+            def check_minio():
+                from minio import Minio
+                mc = Minio(
+                    settings.MINIO_ENDPOINT,
+                    access_key=settings.MINIO_ACCESS_KEY,
+                    secret_key=settings.MINIO_SECRET_KEY,
+                    secure=settings.MINIO_SECURE,
+                )
+                return mc.bucket_exists(settings.MINIO_BUCKET_DOCUMENTS)
+            await asyncio.wait_for(asyncio.to_thread(check_minio), timeout=2.0)
             checks["checks"]["minio"] = {"status": "ok", "message": "MinIO connecté"}
         except Exception as e:
-            checks["checks"]["minio"] = {"status": "warning", "message": f"MinIO indisponible: {str(e)}"}
+            checks["checks"]["minio"] = {"status": "warning", "message": f"MinIO indisponible: {str(e)[:120]}"}
     else:
         checks["checks"]["minio"] = {"status": "disabled", "message": "MinIO désactivé"}
 
-    # Vérifier Celery Workers
-    try:
-        from app.worker import celery_app
-        i = celery_app.control.inspect()
-        active = i.active()
-        if active is None:
-            checks["checks"]["celery"] = {"status": "warning", "message": "Aucun worker Celery actif"}
-        else:
-            checks["checks"]["celery"] = {"status": "ok", "message": "Workers Celery actifs"}
-    except Exception as e:
-        checks["checks"]["celery"] = {"status": "error", "message": str(e)}
-        checks["status"] = "degraded"
-    
+    # Vérifier Celery Workers - le broker est Redis ; si Redis est absent/ Coupé,
+    # on skippe plutot que de bloquer. L'inspect() est synchrone : thread + wait_for.
+    if _redis_disabled or not redis_ok:
+        checks["checks"]["celery"] = {"status": "disabled", "message": "Broker Redis indisponible, workers non interrogés"}
+    else:
+        try:
+            from app.worker import celery_app
+            def check_celery():
+                return celery_app.control.inspect(timeout=0.5).active()
+            active = await asyncio.wait_for(asyncio.to_thread(check_celery), timeout=1.5)
+            if active is None:
+                checks["checks"]["celery"] = {"status": "warning", "message": "Aucun worker Celery actif"}
+            else:
+                checks["checks"]["celery"] = {"status": "ok", "message": "Workers Celery actifs"}
+        except asyncio.TimeoutError:
+            checks["checks"]["celery"] = {"status": "warning", "message": "Celery injoignable (timeout)"}
+        except Exception as e:
+            checks["checks"]["celery"] = {"status": "error", "message": str(e)[:120]}
+            checks["status"] = "degraded"
+
     return checks
 
 # Prometheus metrics disabled - instrumentator incompatible with current FastAPI version
