@@ -599,3 +599,81 @@ try:
 except Exception:
     pass
 # </expansion:qhse_b>
+
+# <expansion:pipeline>
+try:
+    from app.models.pipeline_deep import (
+        PipelineSection,
+        PipelinePumpStation,
+        PipelineStorageTank,
+        PipelineMeteringPoint,
+        PipelineProductBatch,
+        PipelinePressureReading,
+        PipelineLeakDetection,
+        PipelineMaintenanceWork,
+        PipelineInjectionCampaign,
+        PipelineShipNomination,
+    )
+    __all__.extend(["PipelineSection", "PipelinePumpStation", "PipelineStorageTank", "PipelineMeteringPoint", "PipelineProductBatch", "PipelinePressureReading", "PipelineLeakDetection", "PipelineMaintenanceWork", "PipelineInjectionCampaign", "PipelineShipNomination"])
+except Exception:
+    pass
+# </expansion:pipeline>
+
+# <expansion:courier>
+try:
+    from app.models.courier_deep import (
+        CourierParcel,
+        CourierWaybill,
+        CourierHub,
+        CourierDeliveryZone,
+        CourierRoute,
+        CourierCourier,
+        CourierPod,
+        CourierSla,
+        CourierLocker,
+        CourierVehicule,
+        CourierTarif,
+        CourierException,
+    )
+    __all__.extend(["CourierParcel", "CourierWaybill", "CourierHub", "CourierDeliveryZone", "CourierRoute", "CourierCourier", "CourierPod", "CourierSla", "CourierLocker", "CourierVehicule", "CourierTarif", "CourierException"])
+except Exception:
+    pass
+# </expansion:courier>
+
+# <expansion:coldchain>
+try:
+    from app.models.coldchain_deep import (
+        ColdChainChamber,
+        ColdChainReefer,
+        ColdChainLogger,
+        ColdChainProduct,
+        ColdChainExcursion,
+        ColdChainVaccinBatch,
+        ColdChainHaccpRecord,
+        ColdChainDefrostCycle,
+        ColdChainEnergyMeter,
+        ColdChainTransportLeg,
+    )
+    __all__.extend(["ColdChainChamber", "ColdChainReefer", "ColdChainLogger", "ColdChainProduct", "ColdChainExcursion", "ColdChainVaccinBatch", "ColdChainHaccpRecord", "ColdChainDefrostCycle", "ColdChainEnergyMeter", "ColdChainTransportLeg"])
+except Exception:
+    pass
+# </expansion:coldchain>
+
+# <expansion:heavylift>
+try:
+    from app.models.heavylift_deep import (
+        HeavyLiftProject,
+        HeavyLiftCrane,
+        HeavyLiftModularTrailer,
+        HeavyLiftRouteSurvey,
+        HeavyLiftLiftPlan,
+        HeavyLiftPermit,
+        HeavyLiftEscort,
+        HeavyLiftLashing,
+        HeavyLiftBallast,
+        HeavyLiftRiggingMethod,
+    )
+    __all__.extend(["HeavyLiftProject", "HeavyLiftCrane", "HeavyLiftModularTrailer", "HeavyLiftRouteSurvey", "HeavyLiftLiftPlan", "HeavyLiftPermit", "HeavyLiftEscort", "HeavyLiftLashing", "HeavyLiftBallast", "HeavyLiftRiggingMethod"])
+except Exception:
+    pass
+# </expansion:heavylift>
