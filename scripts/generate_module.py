@@ -160,23 +160,26 @@ def gen_model_file(m: dict) -> str:
                 col_kwargs.append("nullable=False")
             if f.get("search"):
                 col_kwargs.append("index=True")
-            if f["type"].startswith("enum:"):
+            if f["type"] == "enum" or f["type"].startswith("enum:"):
                 enum_name = f"{ent['class_name']}_{f['name']}"
-                col_kwargs.append(f"_enum({enum_name})")
                 default = None
                 for en in ent.get("enums", []):
                     if en["name"] == f["name"] and "default" in en:
                         default = en["default"]
+                args = [f"_enum({enum_name})"]
                 if default:
-                    col_kwargs.append(f"default={enum_name}.{default}")
-                lines.append(f"    {f['name']} = Column({', '.join(col_kwargs) if col_kwargs else f'_enum({enum_name})'})")
+                    args.append(f"default={enum_name}.{default}")
+                if col_kwargs:
+                    args.extend(col_kwargs)
+                lines.append(f"    {f['name']} = Column({', '.join(args)})")
                 continue
             sa = SQLA_TYPE[f["type"]]
             width = FIELD_WIDTH.get(f["type"], "")
             col_kwargs.insert(0, f"{sa}{width}")
-            if not col_kwargs or "nullable=" not in ' '.join(col_kwargs):
+            if not any("nullable=" in k for k in col_kwargs):
                 col_kwargs.append("nullable=True")
             lines.append(f"    {f['name']} = Column({', '.join(col_kwargs)})")
+        lines.append(f"    is_active = Column(Boolean, default=True)")
         lines.append(f"    created_at = Column(DateTime(timezone=True), server_default=func.now())")
         lines.append(f"    updated_at = Column(DateTime(timezone=True), onupdate=func.now())")
         lines.append("")
@@ -202,7 +205,7 @@ def gen_schema_file(m: dict) -> str:
         lines.append(f"class {cn}Create(BaseModel):")
         any_field = False
         for f in ent["fields"]:
-            pt = PY_TYPE[f["type"]]
+            pt = "str" if f["type"] == "enum" or f["type"].startswith("enum:") else PY_TYPE[f["type"]]
             req = f.get("required", False)
             if req:
                 lines.append(f"    {f['name']}: {pt}")
@@ -216,7 +219,7 @@ def gen_schema_file(m: dict) -> str:
         # Update
         lines.append(f"class {cn}Update(BaseModel):")
         for f in ent["fields"]:
-            pt = PY_TYPE[f["type"]]
+            pt = "str" if f["type"] == "enum" or f["type"].startswith("enum:") else PY_TYPE[f["type"]]
             lines.append(f"    {f['name']}: Optional[{pt}] = None")
         lines.append("    is_active: Optional[bool] = None")
         lines.append("")
@@ -226,7 +229,7 @@ def gen_schema_file(m: dict) -> str:
         lines.append(f"    id: int")
         lines.append(f"    company_id: int")
         for f in ent["fields"]:
-            pt = PY_TYPE[f["type"]]
+            pt = "str" if f["type"] == "enum" or f["type"].startswith("enum:") else PY_TYPE[f["type"]]
             if f.get("required"):
                 lines.append(f"    {f['name']}: {pt}")
             else:
@@ -469,8 +472,7 @@ def gen_migration(m: dict) -> str:
             elif t == "bool":
                 sa_t = 'sa.Boolean'
             else:  # enum
-                sa_t = 'sa.String(50)'
-            null = 'nullable=False' if f.get("required") else 'nullable=True'
+                sa_t = 'sa.String(50)'            null = 'nullable=False' if f.get("required") else 'nullable=True'
             idx = ', index=True' if f.get("search") else ''
             lines.append(f'            sa.Column("{f["name"]}", {sa_t}, {null}{idx}),')
         lines.append(f'            sa.Column("is_active", sa.Boolean, nullable=True),')
@@ -504,8 +506,8 @@ def gen_frontend_registres(m: dict) -> str:
         f'"use client";',
         f'',
         f"import * as Icons from 'lucide-react';",
-        f"import type { ConfigRegistre, ColonneRegistre, ChampRegistre, FiltreRegistre } from '@/components/registre-generique/typesRegistre';",
-        f"import { registreAPI } from '@/lib/api-client';",
+        "import type { ConfigRegistre, ColonneRegistre, ChampRegistre, FiltreRegistre } from '@/components/registre-generique/typesRegistre';",
+        "import { registreAPI } from '@/lib/api-client';",
         f'',
         f'const api = registreAPI("{mod_slug}");',
         f'',
@@ -574,7 +576,7 @@ def gen_frontend_registres(m: dict) -> str:
                 champs_lines.append(f'    dtx("{f["name"]}", "{label_fr}", "{label_en}"),')
             elif t == "bool":
                 champs_lines.append(f'    chk("{f["name"]}", "{label_fr}", "{label_en}"),')
-            elif t.startswith("enum:"):
+            elif t == "enum" or t.startswith("enum:"):
                 # Reference to nomenclature - use key of nomenclature (name without prefix)
                 nomkey = f["name"]
                 champs_lines.append(f'    sel("{f["name"]}", "{label_fr}", "{label_en}", "{nomkey}"),')
