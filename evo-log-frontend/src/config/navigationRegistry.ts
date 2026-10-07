@@ -1904,7 +1904,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       
       
       
-          {
+      {
         label: "Affectation chauffeurs",
         path: "/parc-vehicules/driver-assignments",
         icon: (LUCIDE as any)["UserCheck"],
@@ -2349,7 +2349,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       
       
       
-          {
+      {
         label: "Quasi-accidents (situations dangereuses)",
         path: "/qhse-securite/near-miss-reports",
         icon: (LUCIDE as any)["TriangleAlert"],
@@ -3856,7 +3856,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["ferroviaire.corridors.read"],
       },
-          {
+      {
         label: "Essieux et roulements",
         path: "/transport-ferroviaire/wheel-sets",
         icon: (LUCIDE as any)["CircleDot"],
@@ -4073,7 +4073,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["aerien.tariffs.read"],
       },
-          {
+      {
         label: "Lettres de transport house (HAWB)",
         path: "/transport-aerien/house-waybills",
         icon: (LUCIDE as any)["FileText"],
@@ -4270,7 +4270,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["fluvial.positions.read"],
       },
-          {
+      {
         label: "Sections de voie navigable",
         path: "/transport-fluvial/canal-sections",
         icon: (LUCIDE as any)["Route"],
@@ -4487,7 +4487,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["log3pl.controltower.read"],
       },
-          {
+      {
         label: "Rendez-vous quais (dock scheduling)",
         path: "/logistique-3pl/dock-appointments",
         icon: (LUCIDE as any)["CalendarClock"],

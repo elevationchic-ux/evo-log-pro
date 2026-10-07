@@ -118,8 +118,11 @@ def patch_nav():
         if not new_entries:
             continue
         insert_at = close_p
-        prefix = "\n" if txt[insert_at - 1] == "\n" else ""
-        txt = txt[:insert_at] + prefix + "\n".join(new_entries) + "\n    " + txt[insert_at:]
+        # rstrip le white-space avant la ] fermante puis re-emet les entrees a
+        # 6 espaces + retour a la ligne + indentation de la ] (sinon la premiere
+        # entree inseree herite de l'indentation de la ] et se retrouve a 10 espaces).
+        head = txt[:insert_at].rstrip()
+        txt = head + "\n" + "\n".join(new_entries) + "\n    " + txt[insert_at:]
         added_total += len(new_entries)
         print(f"nav +{len(new_entries)} -> {slug}")
     PN.NAV_TS.write_text(txt, encoding="utf-8")

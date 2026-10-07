@@ -21,7 +21,7 @@ lines = io.open(P, encoding="utf-8").read().split("\n")
 fixed = 0
 for i in range(1, len(lines)):
     if lines[i].strip().startswith("label:") and any(l in lines[i] for l in labels):
-        if lines[i - 1] == "        {":
+        if lines[i - 1] in ("          {", "        {"):
             lines[i - 1] = "      {"
             fixed += 1
 io.open(P, "w", encoding="utf-8").write("\n".join(lines))
