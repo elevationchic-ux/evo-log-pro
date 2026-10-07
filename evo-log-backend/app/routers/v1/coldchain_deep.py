@@ -80,7 +80,7 @@ def _company_id(user: User) -> int:
 
 # ─── Nomenclatures ───────────────────────────────────────────────────────────
 
-@router.get("/nomenclatures", summary=f"Vocabulaire metier {tag_label}")
+@router.get("/nomenclatures", summary="Vocabulaire metier chaine-froid")
 def nomenclatures(user: User = Depends(require_perm("coldchain.nomenclature.read"))):
     from app.models import coldchain_deep as _md
     import enum as _pyenum

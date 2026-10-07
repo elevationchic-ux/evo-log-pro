@@ -84,7 +84,7 @@ def _company_id(user: User) -> int:
 
 # ─── Nomenclatures ───────────────────────────────────────────────────────────
 
-@router.get("/nomenclatures", summary=f"Vocabulaire metier {tag_label}")
+@router.get("/nomenclatures", summary="Vocabulaire metier courier-express")
 def nomenclatures(user: User = Depends(require_perm("courier.nomenclature.read"))):
     from app.models import courier_deep as _md
     import enum as _pyenum
