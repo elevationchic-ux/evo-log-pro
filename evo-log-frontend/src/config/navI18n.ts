@@ -34,6 +34,10 @@ export const MODULE_TITLES_EN: Record<string, string> = {
   'portail-commercial': '🤝 Sales & Quotations Space',
   'annuaire-prestataires': 'Providers & Subcontractors Directory',
   'chef-personnel': 'Head of Personnel (N+1 Passive Roles)',
+  'transport-ferroviaire': 'Rail Freight & Infrastructure',
+  'transport-aerien': 'Air Cargo & Airport Ops',
+  'transport-fluvial': 'River & Lake Transport',
+  'logistique-3pl': 'Contract Logistics 3PL',
 };
 
 export type Localizable = { title: string; titleEn?: string };

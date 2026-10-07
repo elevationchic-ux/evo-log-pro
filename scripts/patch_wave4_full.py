@@ -1,9 +1,10 @@
-"""Wave 4 completion : blocks NAVIGATION_REGISTRY + palette + i18n + pages dashboard.
+"""Wave 4 completion : blocs NAVIGATION_REGISTRY + palette + i18n + pages dashboard.
 
 Contrairement a patch_nav.py (qui ne fait qu'ajouter des sous-entrees dans des
-blocs existants), ce script CREER les blocs de module complets des 4 modules
+blocs existants), ce script CREE les blocs de module complets des 4 modules
 ferroviaire / aerien / fluvial / 3PL, puis genere leur page dashboard (grille
 de registres branchee sur donnees reelles uniquement : aucun KPI invente).
+Idempotent : ne cree que ce qui manque encore.
 """
 import importlib.util
 import re
@@ -39,6 +40,7 @@ META = {
         phase="Mode Rail: Parc, Sillons, Fret & Corridors",
         dash_label="Centre de pilotage ferroviaire",
         dash_desc="Parc wagons/locomotives, sillons, lettres de voiture CIM et corridors fer-port",
+        dash_desc_en="Wagon and locomotive fleet, train paths, CIM waybills and rail-port corridors",
         accent="indigo",
     ),
     "aerien": dict(
@@ -50,6 +52,7 @@ META = {
         phase="Mode Air: Fret, AWB, Slots & Surete",
         dash_label="Centre de pilotage aerien",
         dash_desc="Flotte, AWB maitres/secondaires, slots IATA, ULD et surete du fret",
+        dash_desc_en="Fleet, master/house AWBs, IATA slots, ULD inventory and cargo security",
         accent="fuchsia",
     ),
     "fluvial": dict(
@@ -61,6 +64,7 @@ META = {
         phase="Mode Eau interieure: Peniches, Ecluses & Terminaux",
         dash_label="Centre de pilotage fluvial",
         dash_desc="Flotte fluviale, transits d'ecluses, sondes, terminaux et lettres de voiture CMNI",
+        dash_desc_en="River fleet, lock transits, depth surveys, terminals and CMNI waybills",
         accent="teal",
     ),
     "log3pl": dict(
@@ -72,6 +76,7 @@ META = {
         phase="3PL: Contrats, Entrepots, Pick&Pack & SLA",
         dash_label="Tour de controle 3PL",
         dash_desc="Contrats clients, entrepot sous contrat, pick&pack, cross-dock, KPI SLA et facturation 3PL",
+        dash_desc_en="Client contracts, contracted warehouse, pick&pack, cross-dock, SLA KPIs and 3PL billing",
         accent="orange",
     ),
 }
@@ -81,17 +86,19 @@ def esc(s):
     return s.replace('"', '\\"')
 
 
-def sub_entry(slug, ent, perm_module, first=False):
-    label_fr = esc(ent["titre"])
-    desc = esc(ent["description"])
+def fr_ts(s):
+    return s.replace("'", "\\'")
+
+
+def sub_entry(slug, ent, perm_module):
     return (
         "      {\n"
-        f'        label: "{label_fr}",\n'
+        f'        label: "{esc(ent["titre"])}",\n'
         f'        path: "/{slug}/{ent["slug"]}",\n'
         f'        icon: (LUCIDE as any)["{ent["icon"]}"],\n'
         f'        badge: "Expansion",\n'
         f'        tcode: "registre-{ent["slug"]}",\n'
-        f'        description: "{desc}",\n'
+        f'        description: "{esc(ent["description"])}",\n'
         f'        businessProcess: "Registre genere (expansion)",\n'
         f'        requiredRoles: ["{perm_module}.{ent["perm"]}.read"],\n'
         "      },"
@@ -108,7 +115,7 @@ def module_block(key, m):
         f'        path: "/{slug}/dashboard",\n'
         '        icon: (LUCIDE as any)["LayoutDashboard"],\n'
         '        badge: "Synthese",\n'
-        f'        tcode: "registre-{slug}-dashboard",\n'
+        f'        tcode: "registre-{slug}-dash",\n'
         f'        description: "{esc(meta["dash_desc"])}",\n'
         '        businessProcess: "Pilotage du module",\n'
         f'        requiredRoles: ["{perm}.{m["entities"][0]["perm"]}.read"],\n'
@@ -118,15 +125,15 @@ def module_block(key, m):
     return (
         f"  '{slug}': {{\n"
         f"    key: '{slug}',\n"
-        f"    title: '{meta['title']}',\n"
-        f"    titleEn: '{meta['title_en']}',\n"
+        f"    title: '{fr_ts(meta['title'])}',\n"
+        f"    titleEn: '{fr_ts(meta['title_en'])}',\n"
         f"    path: '/{slug}/dashboard',\n"
-        f"    icon: (LUCIDE as any)[\"{meta['icon']}\"],\n"
+        f'    icon: (LUCIDE as any)["{meta["icon"]}"],\n'
         f"    color: '{meta['hex']}',\n"
         f"    glow: '{meta['glow']}',\n"
         f"    bgGradient: '{meta['grad']}',\n"
-        f"    businessArea: '{meta['area']}',\n"
-        f"    processPhase: '{meta['phase']}',\n"
+        f"    businessArea: '{fr_ts(meta['area'])}',\n"
+        f"    processPhase: '{fr_ts(meta['phase'])}',\n"
         "    requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MANAGER'],\n"
         "    subModules: [\n"
         f"{subs}\n"
@@ -138,10 +145,10 @@ def module_block(key, m):
 DASH_TEMPLATE = """'use client';
 
 /**
- * Centre de pilotage {TITRE} (module genere, expansion vague 4).
- * Grille de registres reellement servics par /api/v1/{SLUG} :
- * aucun chiffre invente, aucune donnee factice. Chaque carte ouvre le
- * registre correspondant ; la lecture reste soumise aux habilitations.
+ * Centre de pilotage {TITRE} (module genere, expansion).
+ * Grille de registres reellement servis par /api/v1/{SLUG} : aucun chiffre
+ * invente, aucune donnee factice. Chaque carte ouvre le registre correspondant ;
+ * la lecture reste soumise aux habilitations du tenant.
  */
 import Link from 'next/link';
 import * as Icons from 'lucide-react';
@@ -152,7 +159,7 @@ import { useSettings } from '@/components/layout/SettingsProvider';
 
 const ENTITES = [
 {ENTITES}
-] as const;
+];
 
 export default function {FN}() {{
   const can = useCan();
@@ -221,10 +228,8 @@ def dash_page(key, m):
             "  { slug: '%s', tcode: 'registre-%s', titre: '%s', titreEn: '%s', description: '%s', descriptionEn: '%s', icon: '%s', perm: '%s' },"
             % (
                 e["slug"], e["slug"],
-                e["titre"].replace("'", "\\'"),
-                e["titreEn"].replace("'", "\\'"),
-                e["description"].replace("'", "\\'"),
-                e["descriptionEn"].replace("'", "\\'"),
+                fr_ts(e["titre"]), fr_ts(e["titreEn"]),
+                fr_ts(e["description"]), fr_ts(e["descriptionEn"]),
                 e["icon"], e["perm"],
             )
         )
@@ -232,13 +237,18 @@ def dash_page(key, m):
     return DASH_TEMPLATE.format(
         TITRE=meta["title"], SLUG=slug, PERM=perm, ACCENT=meta["accent"],
         ENTITES="\n".join(lines), FN=fn,
-        DASH_LABEL=meta["dash_label"], DASH_LABEL_EN=meta["dash_label"],
-        DASH_DESC=meta["dash_desc"], DASH_DESC_EN=meta["dash_desc"],
+        DASH_LABEL=fr_ts(meta["dash_label"]), DASH_LABEL_EN=fr_ts(meta["dash_label"]),
+        DASH_DESC=fr_ts(meta["dash_desc"]), DASH_DESC_EN=fr_ts(meta["dash_desc_en"]),
     )
 
 
+def close_of(txt, decl_marker):
+    """Index of the '\\n};' closing the object literal that opens at decl_marker."""
+    return txt.index("\n};", txt.index(decl_marker))
+
+
 def main():
-    # 1. NAVIGATION_REGISTRY : creer les 4 blocs avant la fermeture '};'
+    # 1. NAVIGATION_REGISTRY : creer les 4 blocs avant la fermeture
     txt = NAV_TS.read_text(encoding="utf-8")
     created = []
     for key, m in MODULES.items():
@@ -246,54 +256,63 @@ def main():
         if re.search(r"^\s*['\"]?" + re.escape(slug) + r"['\"]?:\s*\{", txt, re.M):
             print("nav block already present:", slug)
             continue
-        anchor = txt.index("\n};", txt.index("export const NAVIGATION_REGISTRY"))
-        prev = txt.rindex("}", 0, anchor)
+        anchor = close_of(txt, "export const NAVIGATION_REGISTRY")
+        head = txt[:anchor].rstrip()
         block = module_block(key, m)
-        txt = txt[:prev + 1] + "," + "\n\n  // WAVE 4 : multimodal fer / air / fluvial + 3PL\n" + block + "\n" + txt[prev + 1:]
+        sep = "," if not head.endswith(",") else ""
+        txt = head + sep + "\n\n  // WAVE 4 : multimodal fer / air / fluvial + 3PL (generes)\n" + block + "\n" + txt[anchor + 1:]
         created.append(slug)
     NAV_TS.write_text(txt, encoding="utf-8")
     print("nav blocks created:", created)
 
-    # 2. Palette : inserer avant la derniere fermeture '};' de MODULE_PALETTE
+    # 2. Palette : inserer avant la derniere fermeture de MODULE_PALETTE
     pal = PAL_TS.read_text(encoding="utf-8")
-    anchor = pal.index("\n};", pal.index("MODULE_PALETTE"))
-    prev = pal.rindex("}", 0, anchor)
-    entries = []
-    for key, m in MODULES.items():
-        meta = META[key]
-        a = meta["accent"]
-        entries.append(
-            "  '%s': {\n    hex: '%s',\n    glow: '%s',\n    bgGradient: '%s',\n"
-            "    sidebar: { activeAccent: 'text-%s-400 border-%s-400', activeBgSubtle: 'bg-%s-500/10', brandIconBg: 'bg-%s-600' },\n  },"
-            % (m["module_slug"], meta["hex"], meta["glow"], meta["grad"], a, a, a, a)
-        )
-    pal = pal[:prev + 1] + ",\n\n  // ── Modules Wave 4 (fer, aerien, fluvial, 3PL) ──\n" + "\n".join(entries) + "\n" + pal[prev + 1:]
-    # le '}' remplace avait une virgule superflue si c'etait le dernier ; normaliser
-    pal = pal.replace("},\n\n  // ── Modules Wave 4", "}\n\n  // ── Modules Wave 4", 0)
-    PAL_TS.write_text(pal, encoding="utf-8")
-    print("palette entries added:", len(entries))
+    missing = [m["module_slug"] for m in MODULES.values() if "'" + m["module_slug"] + "':" not in pal]
+    if missing:
+        anchor = close_of(pal, "MODULE_PALETTE: Record<string, ModulePaletteEntry> = {")
+        head = pal[:anchor].rstrip()
+        sep = "," if not head.endswith(",") else ""
+        entries = []
+        for m in MODULES.values():
+            if m["module_slug"] not in missing:
+                continue
+            meta = META[m["module_key"]]
+            a = meta["accent"]
+            entries.append(
+                "  '%s': {\n    hex: '%s',\n    glow: '%s',\n    bgGradient: '%s',\n"
+                "    sidebar: { activeAccent: 'text-%s-400 border-%s-400', activeBgSubtle: 'bg-%s-500/10', brandIconBg: 'bg-%s-600' },\n  },"
+                % (m["module_slug"], meta["hex"], meta["glow"], meta["grad"], a, a, a, a)
+            )
+        pal = head + sep + "\n\n  // ── Modules Wave 4 (fer, aerien, fluvial, 3PL) ──\n" + "\n".join(entries) + "\n" + pal[anchor + 1:]
+        PAL_TS.write_text(pal, encoding="utf-8")
+        print("palette entries added:", missing)
+    else:
+        print("palette already complete")
 
     # 3. navI18n : titres EN
     i18n = I18N_TS.read_text(encoding="utf-8")
-    anchor = i18n.index("\n};", i18n.index("MODULE_TITLES_EN"))
-    prev = i18n.rindex("}", 0, anchor)
-    lines = []
-    for key, m in MODULES.items():
-        lines.append("  '%s': '%s'," % (m["module_slug"], META[key]["title_en"]))
-    i18n = i18n[:prev + 1] + ",\n" + "\n".join(lines) + "\n" + i18n[prev + 1:]
-    I18N_TS.write_text(i18n, encoding="utf-8")
-    print("i18n entries added:", len(lines))
+    missing = [m["module_slug"] for m in MODULES.values() if "'" + m["module_slug"] + "':" not in i18n]
+    if missing:
+        anchor = close_of(i18n, "MODULE_TITLES_EN: Record<string, string> = {")
+        head = i18n[:anchor].rstrip()
+        sep = "," if not head.endswith(",") else ""
+        lines = ["  '%s': '%s'," % (m["module_slug"], fr_ts(META[m["module_key"]]["title_en"]))
+                 for m in MODULES.values() if m["module_slug"] in missing]
+        i18n = head + sep + "\n" + "\n".join(lines) + "\n" + i18n[anchor + 1:]
+        I18N_TS.write_text(i18n, encoding="utf-8")
+        print("i18n titles added:", missing)
+    else:
+        print("i18n already complete")
 
     # 4. Pages dashboard
     for key, m in MODULES.items():
         slug = m["module_slug"]
-        d = APP_DIR / slug / "dashboard"
-        d.mkdir(parents=True, exist_ok=True)
-        page = d / "page.tsx"
-        if page.exists():
+        target = APP_DIR / slug / "dashboard" / "page.tsx"
+        if target.exists():
             print("dashboard exists:", slug)
             continue
-        page.write_text(dash_page(key, m), encoding="utf-8")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(dash_page(key, m), encoding="utf-8")
         print("dashboard generated:", slug)
 
 

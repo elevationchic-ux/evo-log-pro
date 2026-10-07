@@ -219,6 +219,32 @@ export const MODULE_PALETTE: Record<string, ModulePaletteEntry> = {
     bgGradient: 'from-sky-600 to-cyan-600',
     sidebar: { activeAccent: 'text-sky-400 border-sky-400', activeBgSubtle: 'bg-sky-500/10', brandIconBg: 'bg-sky-600' },
   },
+
+  // ── Modules Wave 4 (fer, aerien, fluvial, 3PL) ──
+  'transport-ferroviaire': {
+    hex: '#6366F1',
+    glow: 'shadow-indigo-500/50 border-indigo-500/60',
+    bgGradient: 'from-indigo-600 to-violet-600',
+    sidebar: { activeAccent: 'text-indigo-400 border-indigo-400', activeBgSubtle: 'bg-indigo-500/10', brandIconBg: 'bg-indigo-600' },
+  },
+  'transport-aerien': {
+    hex: '#C026D3',
+    glow: 'shadow-fuchsia-500/50 border-fuchsia-500/60',
+    bgGradient: 'from-fuchsia-600 to-purple-600',
+    sidebar: { activeAccent: 'text-fuchsia-400 border-fuchsia-400', activeBgSubtle: 'bg-fuchsia-500/10', brandIconBg: 'bg-fuchsia-600' },
+  },
+  'transport-fluvial': {
+    hex: '#14B8A6',
+    glow: 'shadow-teal-500/50 border-teal-500/60',
+    bgGradient: 'from-teal-600 to-cyan-600',
+    sidebar: { activeAccent: 'text-teal-400 border-teal-400', activeBgSubtle: 'bg-teal-500/10', brandIconBg: 'bg-teal-600' },
+  },
+  'logistique-3pl': {
+    hex: '#EA580C',
+    glow: 'shadow-orange-500/50 border-orange-500/60',
+    bgGradient: 'from-orange-600 to-amber-600',
+    sidebar: { activeAccent: 'text-orange-400 border-orange-400', activeBgSubtle: 'bg-orange-500/10', brandIconBg: 'bg-orange-600' },
+  },
 };
 
 /** Alias legacy → module majeur de la palette (hérite de sa couleur). */
