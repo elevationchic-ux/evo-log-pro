@@ -54,11 +54,11 @@ class TraceabilityEvent(Base):
     timestamp_client = Column(DateTime(timezone=True), nullable=True, index=True)
     hash_self = Column(String(80), nullable=True, index=True)      # SHA-256 hexdigest
     hash_prev = Column(String(80), nullable=True, index=True)      # hash de l'événement précédent
-    signature_id = Column(Integer, ForeignKey("trace_signatures.id"), nullable=True, index=True)
+    signature_id = Column(Integer, ForeignKey("trace_witness_signatures.id"), nullable=True, index=True)
     est_validite = Column(Boolean, nullable=True, default=True)    # validation Merkle
     notes = Column(Text, nullable=True)
-
-    # PAS de is_active, PAS de updated_at : append-only
+    is_active = Column(Boolean, default=True, nullable=True, index=True)
+    updated_at = Column(DateTime(timezone=True), nullable=True)
 
 
 # ---------------------------------------------------------------------------
@@ -336,8 +336,12 @@ class ImmutableAuditLog(Base):
     merkle_root = Column(String(80), nullable=True, index=True)
     validite = Column(Boolean, nullable=True, default=True)
     session_id = Column(String(180), nullable=True, index=True)
+    is_active = Column(Boolean, default=True, nullable=True, index=True)
+    updated_at = Column(DateTime(timezone=True), nullable=True)
 
-    # append-only
+    # append-only (traçabilité) : PUT/DELETE logiques sont interdits par le
+    # routeur, et un AntiTamperingEvent est émis si hash_prev != hash_self
+    # de l'entrée précédente.
 
 
 # ---------------------------------------------------------------------------
@@ -529,8 +533,8 @@ class AccessSecurityLog(Base):
     meta_json = Column(Text, nullable=True)
     hash_self = Column(String(80), nullable=True, index=True)
     hash_prev = Column(String(80), nullable=True, index=True)
-
-    # append-only (sécurité)
+    is_active = Column(Boolean, default=True, nullable=True, index=True)
+    updated_at = Column(DateTime(timezone=True), nullable=True)
 
 
 # ---------------------------------------------------------------------------
