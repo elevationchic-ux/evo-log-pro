@@ -41,12 +41,20 @@ if BEGIN in src and END in src:
     print("REPLACE existing WAVE5 block")
 else:
     # inserer avant le `};` qui ferme NAVIGATION_REGISTRY
-    # on cherche `  },\n};` : le dernier `  },` avant `};` cloture logistique-3pl
-    idx = src.rfind("\n};")
+    # ancre specifique : cloture de logistique-3pl (dernier module wave4)
+    anchor = (
+        '        requiredRoles: ["log3pl.damage_claim.read"],\n'
+        "      },\n"
+        "    ]\n"
+        "  },\n"
+        "};\n"
+    )
+    idx = src.find(anchor)
     if idx < 0:
-        print("ERROR: cannot find `};` closing NAVIGATION_REGISTRY")
+        print("ERROR: anchor (log3pl.damage_claim + };) not found")
         sys.exit(2)
-    new_src = src[:idx] + "\n" + block + src[idx:]
+    insert_at = idx + len(anchor) - len("};\n")
+    new_src = src[:insert_at] + "\n" + block + src[insert_at:]
     print("INSERT new WAVE5 block before NAVIGATION_REGISTRY closing")
 
 with open(NAV, "w", encoding="utf-8", newline="\n") as f:
