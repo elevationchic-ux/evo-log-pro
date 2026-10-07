@@ -894,6 +894,20 @@ try:
 except ImportError as e:
     logger.warning(f"Router qhse_portal_d_deep absent : {e}")
 # </expansion:qhse_portal_d>
+# <expansion:declarant_d>
+try:
+    from app.routers.v1 import declarant_d_deep
+    safe_include_router(declarant_d_deep.router, prefix="/api/v1/portail-declarant", tags=["portail-declarant (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router declarant_d_deep absent : {e}")
+# </expansion:declarant_d>
+# <expansion:commercial_d>
+try:
+    from app.routers.v1 import commercial_d_deep
+    safe_include_router(commercial_d_deep.router, prefix="/api/v1/portail-commercial", tags=["portail-commercial (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router commercial_d_deep absent : {e}")
+# </expansion:commercial_d>
 
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)

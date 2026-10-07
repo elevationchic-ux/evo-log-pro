@@ -966,3 +966,55 @@ try:
 except Exception:
     pass
 # </expansion:qhse_portal_d>
+
+# <expansion:declarant_d>
+try:
+    from app.models.declarant_d_deep import (
+        DeclCustomsDeclaration,
+        DeclHsClassification,
+        DeclOriginCertificate,
+        DeclCustomsValuation,
+        DeclIncotermsRecord,
+        DeclImportLicense,
+        DeclExportLicense,
+        DeclPreClearance,
+        DeclCustomsInvoice,
+        DeclPackingList,
+        DeclCertificateAnalysis,
+        DeclPhytosanitaryApp,
+        DeclCustomsPayment,
+        DeclTransitDocument,
+        DeclDangerousGoods,
+        DeclBondedWarehouseEntry,
+        DeclDutyReliefClaim,
+        DeclManifestCorrection,
+        DeclCustomsAuditSupport,
+    )
+    __all__.extend(["DeclCustomsDeclaration", "DeclHsClassification", "DeclOriginCertificate", "DeclCustomsValuation", "DeclIncotermsRecord", "DeclImportLicense", "DeclExportLicense", "DeclPreClearance", "DeclCustomsInvoice", "DeclPackingList", "DeclCertificateAnalysis", "DeclPhytosanitaryApp", "DeclCustomsPayment", "DeclTransitDocument", "DeclDangerousGoods", "DeclBondedWarehouseEntry", "DeclDutyReliefClaim", "DeclManifestCorrection", "DeclCustomsAuditSupport"])
+except Exception:
+    pass
+# </expansion:declarant_d>
+
+# <expansion:commercial_d>
+try:
+    from app.models.commercial_d_deep import (
+        CommLead,
+        CommOpportunity,
+        CommQuote,
+        CommSalesOrder,
+        CommCustomerVisit,
+        CommSampleRequest,
+        CommTender,
+        CommContractRenewal,
+        CommPriceRequest,
+        CommCreditRequest,
+        CommOrderModification,
+        CommCustomerComplaint,
+        CommUpsellRecord,
+        CommCommissionStatement,
+        CommPipelineReview,
+    )
+    __all__.extend(["CommLead", "CommOpportunity", "CommQuote", "CommSalesOrder", "CommCustomerVisit", "CommSampleRequest", "CommTender", "CommContractRenewal", "CommPriceRequest", "CommCreditRequest", "CommOrderModification", "CommCustomerComplaint", "CommUpsellRecord", "CommCommissionStatement", "CommPipelineReview"])
+except Exception:
+    pass
+# </expansion:commercial_d>
