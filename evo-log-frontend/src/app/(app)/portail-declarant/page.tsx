@@ -36,10 +36,11 @@ export default function PortailDeclarantPage() {
   const [selectedDossier, setSelectedDossier] = useState<DossierItem | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Jalons physiques
+  // Jalons physiques — simulation locale uniquement (aucun endpoint de
+  // jalonnement ne persiste ces étapes côté serveur à ce jour).
   const [jalons, setJalons] = useState({
-    depot_dum: true,
-    passage_scanner: true,
+    depot_dum: false,
+    passage_scanner: false,
     visite_conjointe: false,
     pesage_pont_bascule: false,
     liquidation_droits: false,
@@ -90,17 +91,16 @@ export default function PortailDeclarantPage() {
       return;
     }
     try {
-      await apiClient.post('/api/v1/incidents', {
-        titre: `[LITIGE DOUANE] ${litigeType} - Dossier ${selectedDossier.numero_dossier || selectedDossier.id}`,
-        type_incident: 'LITIGE_DOUANIER',
+      await apiClient.post('/api/v1/transit-avance/litiges', {
+        dossier_transit_id: selectedDossier.id,
+        type_litige: litigeType,
         description: litigeDesc || 'Contestation soulevée par les inspecteurs des douanes.',
-        severite: 'HAUTE',
-        dossier_id: selectedDossier.id,
+        montant_en_litige: selectedDossier.montant_total || selectedDossier.valeur_marchandise || 0,
       });
       setLitigeSent(true);
       toast.success('Litige douanier transmis immédiatement au chef de bureau transit !');
     } catch (err: any) {
-      toast.error('Erreur transmission du litige');
+      toast.error(err?.response?.data?.detail || 'Erreur transmission du litige');
     }
   };
 
@@ -190,15 +190,15 @@ export default function PortailDeclarantPage() {
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-xs font-mono font-black text-slate-200">
-                      #{d.numero_dossier || d.reference || `TR-${d.id}`}
+                      #{d.numero_dossier || `TR-${d.id}`}
                     </span>
                     <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300">
                       {d.statut}
                     </span>
                   </div>
-                  <div className="text-xs font-semibold text-slate-200">{d.client_nom || 'Importateur Industriel'}</div>
+                  <div className="text-xs font-semibold text-slate-200">Client #{d.client_id}</div>
                   <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-rose-500" /> {d.bureau_douane || 'Port de Douala (Sydonia)'}
+                    <MapPin className="w-3.5 h-3.5 text-rose-500" /> {d.marchandise || 'Marchandise non enregistrée'}
                   </div>
                 </div>
               ))
@@ -212,9 +212,9 @@ export default function PortailDeclarantPage() {
                   <div>
                     <span className="text-xs font-mono text-indigo-300 font-bold">Dossier de Transit Actif</span>
                     <h2 className="text-xl font-black text-slate-200">
-                      #{selectedDossier.numero_dossier || selectedDossier.reference || `TR-${selectedDossier.id}`}
+                      #{selectedDossier.numero_dossier || `TR-${selectedDossier.id}`}
                     </h2>
-                    <p className="text-xs text-slate-500">Client : {selectedDossier.client_nom || 'Client Partenaire'}</p>
+                    <p className="text-xs text-slate-500">Client : #{selectedDossier.client_id}</p>
                   </div>
 
                   <button
@@ -228,13 +228,13 @@ export default function PortailDeclarantPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-1.5">
                     <span className="font-bold text-slate-500 uppercase">Bureau & Régime Douanier</span>
-                    <p className="font-bold text-slate-200">{selectedDossier.bureau_douane || 'Douala Port Terminal Conteneurs'}</p>
-                    <p className="text-slate-400">Régime : <strong>{selectedDossier.type_regime || 'Mise à la consommation (IM4)'}</strong></p>
+                    <p className="font-bold text-slate-200">Bureau entrée #{selectedDossier.bureau_entree_id || '—'}</p>
+                    <p className="text-slate-400">Régime : <strong>{selectedDossier.regime_douanier || 'Non enregistré'}</strong></p>
                   </div>
 
                   <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-1.5">
                     <span className="font-bold text-slate-500 uppercase">Marchandise & Cargaison</span>
-                    <p className="font-bold text-slate-200">{selectedDossier.marchandise || 'Matériel de Construction & Équipements'}</p>
+                    <p className="font-bold text-slate-200">{selectedDossier.marchandise || 'Non enregistrée'}</p>
                     <p className="text-slate-400">Statut actuel : <strong className="text-indigo-600">{selectedDossier.statut}</strong></p>
                   </div>
                 </div>
@@ -251,6 +251,10 @@ export default function PortailDeclarantPage() {
       {/* Onglet 2 : Jalonnement Physique */}
       {activeTab === 'jalonnement' && (
         <div className="bg-slate-900 rounded-2xl border border-slate-700 p-6 space-y-6 max-w-2xl mx-auto shadow-sm">
+          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300">
+            <AlertTriangle className="w-3.5 h-3.5 inline mr-1" />
+            Simulation locale — aucun endpoint serveur ne persiste ces jalons. Les cases cochées ne sont pas enregistrées en base.
+          </div>
           <div className="pb-4 border-b border-slate-700">
             <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-indigo-600" /> Jalonnement des Étapes Physiques au Port
