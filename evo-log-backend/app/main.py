@@ -810,6 +810,55 @@ try:
 except ImportError as e:
     logger.warning(f"Router dashboard_b_deep absent : {e}")
 # </expansion:dashboard_b>
+# <expansion:compta_c>
+try:
+    from app.routers.v1 import compta_c_deep
+    safe_include_router(compta_c_deep.router, prefix="/api/v1/comptabilite-ohada", tags=["comptabilite-ohada (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router compta_c_deep absent : {e}")
+# </expansion:compta_c>
+# <expansion:finance_c>
+try:
+    from app.routers.v1 import finance_c_deep
+    safe_include_router(finance_c_deep.router, prefix="/api/v1/finance-ohada", tags=["finance-ohada (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router finance_c_deep absent : {e}")
+# </expansion:finance_c>
+# <expansion:rh_c>
+try:
+    from app.routers.v1 import rh_c_deep
+    safe_include_router(rh_c_deep.router, prefix="/api/v1/rh-personnel", tags=["rh-personnel (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router rh_c_deep absent : {e}")
+# </expansion:rh_c>
+# <expansion:b2b_c>
+try:
+    from app.routers.v1 import b2b_c_deep
+    safe_include_router(b2b_c_deep.router, prefix="/api/v1/client-b2b", tags=["client-b2b (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router b2b_c_deep absent : {e}")
+# </expansion:b2b_c>
+# <expansion:reports_c>
+try:
+    from app.routers.v1 import reports_c_deep
+    safe_include_router(reports_c_deep.router, prefix="/api/v1/reports-bi", tags=["reports-bi (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router reports_c_deep absent : {e}")
+# </expansion:reports_c>
+# <expansion:admin_c>
+try:
+    from app.routers.v1 import admin_c_deep
+    safe_include_router(admin_c_deep.router, prefix="/api/v1/admin-saas", tags=["admin-saas (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router admin_c_deep absent : {e}")
+# </expansion:admin_c>
+# <expansion:superadmin_c>
+try:
+    from app.routers.v1 import superadmin_c_deep
+    safe_include_router(superadmin_c_deep.router, prefix="/api/v1/superadmin-cadc", tags=["superadmin-cadc (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router superadmin_c_deep absent : {e}")
+# </expansion:superadmin_c>
 
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)

@@ -1580,17 +1580,26 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["compta.analytical_accounting.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
-      
-
-      
+      {
+        label: "Contre-passations d'ecritures",
+        path: "/comptabilite-ohada/journal-reversals",
+        icon: (LUCIDE as any)["History"],
+        badge: "Expansion",
+        tcode: "registre-journal-reversals",
+        description: "Annulation d' une ecriture comptable par une ecriture inverse.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["comptabilite.journal_reversal.read"],
+      },
+      {
+        label: "Rapprochements bancaires",
+        path: "/comptabilite-ohada/bank-reconciliations",
+        icon: (LUCIDE as any)["Landmark"],
+        badge: "Expansion",
+        tcode: "registre-bank-reconciliations",
+        description: "Rapprochement entre solde comptable et releve bancaire.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["comptabilite.bank_reconciliation.read"],
+      },
     ]
   },
 
@@ -1796,18 +1805,26 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["finance.treasury_alerts.read"],
       },
-          
-
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      {
+        label: "Previsions de tresorerie",
+        path: "/finance-ohada/cash-flow-forecasts",
+        icon: (LUCIDE as any)["TrendingUp"],
+        badge: "Expansion",
+        tcode: "registre-cash-flow-forecasts",
+        description: "Projection des entrees et sorties de tresorerie par periode.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["tresorerie.cash_flow_forecast.read"],
+      },
+      {
+        label: "Affacturage / escompte de factures",
+        path: "/finance-ohada/invoice-financing",
+        icon: (LUCIDE as any)["Coins"],
+        badge: "Expansion",
+        tcode: "registre-invoice-financing",
+        description: "Affacturage de factures clients pour accelerer la tresorerie.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["tresorerie.invoice_financing.read"],
+      },
     ]
   },
 
@@ -2240,19 +2257,26 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["rh.hr_reports.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      {
+        label: "Plans de formation",
+        path: "/rh-personnel/training-plans",
+        icon: (LUCIDE as any)["GraduationCap"],
+        badge: "Expansion",
+        tcode: "registre-training-plans",
+        description: "Plan individuel ou collectif de developpement des competences.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["rh.training_plan.read"],
+      },
+      {
+        label: "Registre disciplinaire",
+        path: "/rh-personnel/disciplinary-records",
+        icon: (LUCIDE as any)["Gavel"],
+        badge: "Expansion",
+        tcode: "registre-disciplinary-records",
+        description: "Consigne des sanctions et mesures disciplinaires.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["rh.disciplinary_record.read"],
+      },
     ]
   },
 
@@ -2652,17 +2676,56 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["b2b.account_report.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      {
+        label: "Contrats-cadres clients",
+        path: "/client-b2b/contract-agreements",
+        icon: (LUCIDE as any)["FileSignature"],
+        badge: "Expansion",
+        tcode: "registre-contract-agreements",
+        description: "Accord commercial cadre avec un client B2B.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["b2b.contract_agreement.read"],
+      },
+      {
+        label: "Grilles tarifaires client",
+        path: "/client-b2b/price-lists",
+        icon: (LUCIDE as any)["Tags"],
+        badge: "Expansion",
+        tcode: "registre-price-lists",
+        description: "Tarifies negocies appliques aux commandes d' un client.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["b2b.price_list.read"],
+      },
+      {
+        label: "Commandes clients",
+        path: "/client-b2b/sales-orders",
+        icon: (LUCIDE as any)["ShoppingCart"],
+        badge: "Expansion",
+        tcode: "registre-sales-orders",
+        description: "Commande passee par un client B2B.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["b2b.sales_order.read"],
+      },
+      {
+        label: "Encours clients",
+        path: "/client-b2b/customer-credit-accounts",
+        icon: (LUCIDE as any)["CreditCard"],
+        badge: "Expansion",
+        tcode: "registre-customer-credit-accounts",
+        description: "Suivi de l'encours et de la limite de credit d' un client.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["b2b.credit_account.read"],
+      },
+      {
+        label: "Tickets support client",
+        path: "/client-b2b/support-tickets",
+        icon: (LUCIDE as any)["LifeBuoy"],
+        badge: "Expansion",
+        tcode: "registre-support-tickets",
+        description: "Demande d' assistance ou reclamation d' un client B2B.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["b2b.support_ticket.read"],
+      },
     ]
   },
 
@@ -2832,17 +2895,56 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["reports.regulatory_report.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      {
+        label: "Rapports planifies",
+        path: "/reports-bi/scheduled-reports",
+        icon: (LUCIDE as any)["CalendarClock"],
+        badge: "Expansion",
+        tcode: "registre-scheduled-reports",
+        description: "Execution periodique automatique d' un rapport.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["reports.scheduled_report.read"],
+      },
+      {
+        label: "Modeles de rapport",
+        path: "/reports-bi/report-templates",
+        icon: (LUCIDE as any)["LayoutTemplate"],
+        badge: "Expansion",
+        tcode: "registre-report-templates",
+        description: "Definition reutilisable de la mise en page d' un rapport.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["reports.report_template.read"],
+      },
+      {
+        label: "Extractions de donnees",
+        path: "/reports-bi/data-exports",
+        icon: (LUCIDE as any)["Download"],
+        badge: "Expansion",
+        tcode: "registre-data-exports",
+        description: "Demande d' extraction d' un jeu de donnees au format fichier.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["reports.data_export.read"],
+      },
+      {
+        label: "Requetes ad hoc",
+        path: "/reports-bi/ad-hoc-queries",
+        icon: (LUCIDE as any)["Terminal"],
+        badge: "Expansion",
+        tcode: "registre-ad-hoc-queries",
+        description: "Requete analytique ponctuelle construite par un utilisateur.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["reports.ad_hoc_query.read"],
+      },
+      {
+        label: "Cubes analytiques",
+        path: "/reports-bi/olap-cubes",
+        icon: (LUCIDE as any)["Database"],
+        badge: "Expansion",
+        tcode: "registre-olap-cubes",
+        description: "Cube multidimensionnel prepoure pour l' analyse.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["reports.olap_cube.read"],
+      },
     ]
   },
 
@@ -3011,17 +3113,56 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["admin.uptime_monitoring.read"],
       },
-          
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      {
+        label: "Plans d' abonnement",
+        path: "/admin-saas/subscription-plans",
+        icon: (LUCIDE as any)["Layers"],
+        badge: "Expansion",
+        tcode: "registre-subscription-plans",
+        description: "Offres tarifaires SaaS et leurs limites.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["admin.subscription_plan.read"],
+      },
+      {
+        label: "Invitations des locataires",
+        path: "/admin-saas/tenant-invites",
+        icon: (LUCIDE as any)["UserPlus"],
+        badge: "Expansion",
+        tcode: "registre-tenant-invites",
+        description: "Invitation d' un utilisateur a rejoindre un tenant.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["admin.tenant_invite.read"],
+      },
+      {
+        label: "Jeton d' API",
+        path: "/admin-saas/api-tokens",
+        icon: (LUCIDE as any)["KeyRound"],
+        badge: "Expansion",
+        tcode: "registre-api-tokens",
+        description: "Credenciaux d' acces programmatique a l' API.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["admin.api_token.read"],
+      },
+      {
+        label: "Factures d' abonnement",
+        path: "/admin-saas/billing-invoices",
+        icon: (LUCIDE as any)["Receipt"],
+        badge: "Expansion",
+        tcode: "registre-billing-invoices",
+        description: "Facturation recurrente des abonnements SaaS.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["admin.billing_invoice.read"],
+      },
+      {
+        label: "Mesure d' usage",
+        path: "/admin-saas/usage-metering",
+        icon: (LUCIDE as any)["Activity"],
+        badge: "Expansion",
+        tcode: "registre-usage-metering",
+        description: "Releve de consommation des ressources par tenant pour la facturation.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["admin.usage_metering.read"],
+      },
     ]
   },
 
@@ -3195,16 +3336,56 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Registre genere (expansion)",
         requiredRoles: ["superadmin.disaster_recovery.read"],
       },
-          
-      
-      
-      
-      
-      
-
-      
-      
-      
+      {
+        label: "Revues des journaux d' audit",
+        path: "/superadmin-cadc/audit-log-reviews",
+        icon: (LUCIDE as any)["ScrollText"],
+        badge: "Expansion",
+        tcode: "registre-audit-log-reviews",
+        description: "Examen periodique des journaux d' activite sensible.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["superadmin.audit_log_review.read"],
+      },
+      {
+        label: "Parametres systeme",
+        path: "/superadmin-cadc/system-parameters",
+        icon: (LUCIDE as any)["Settings"],
+        badge: "Expansion",
+        tcode: "registre-system-parameters",
+        description: "Reglage global de la plateforme (valeur cle/parametre).",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["superadmin.system_parameter.read"],
+      },
+      {
+        label: "Alertes plateforme",
+        path: "/superadmin-cadc/platform-alerts",
+        icon: (LUCIDE as any)["BellRing"],
+        badge: "Expansion",
+        tcode: "registre-platform-alerts",
+        description: "Notification d' un incident ou depassement de seuile technique.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["superadmin.platform_alert.read"],
+      },
+      {
+        label: "Executions de migration",
+        path: "/superadmin-cadc/migration-runs",
+        icon: (LUCIDE as any)["GitBranch"],
+        badge: "Expansion",
+        tcode: "registre-migration-runs",
+        description: "Journal des deploiements de migrations base de donnees.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["superadmin.migration_run.read"],
+      },
+      {
+        label: "Cles de licence",
+        path: "/superadmin-cadc/license-keys",
+        icon: (LUCIDE as any)["Key"],
+        badge: "Expansion",
+        tcode: "registre-license-keys",
+        description: "Cles de licence produit et leur activation.",
+        businessProcess: "Registre genere (expansion)",
+        requiredRoles: ["superadmin.license_key.read"],
+      },
     ]
   },
 

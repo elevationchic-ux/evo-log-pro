@@ -746,3 +746,92 @@ try:
 except Exception:
     pass
 # </expansion:dashboard_b>
+
+# <expansion:compta_c>
+try:
+    from app.models.compta_c_deep import (
+        CmptcJournalReversal,
+        CmptcBankReconciliation,
+    )
+    __all__.extend(["CmptcJournalReversal", "CmptcBankReconciliation"])
+except Exception:
+    pass
+# </expansion:compta_c>
+
+# <expansion:finance_c>
+try:
+    from app.models.finance_c_deep import (
+        FincCashFlowForecast,
+        FincInvoiceFinancing,
+    )
+    __all__.extend(["FincCashFlowForecast", "FincInvoiceFinancing"])
+except Exception:
+    pass
+# </expansion:finance_c>
+
+# <expansion:rh_c>
+try:
+    from app.models.rh_c_deep import (
+        RhCTrainingPlan,
+        RhCDisciplinaryRecord,
+    )
+    __all__.extend(["RhCTrainingPlan", "RhCDisciplinaryRecord"])
+except Exception:
+    pass
+# </expansion:rh_c>
+
+# <expansion:b2b_c>
+try:
+    from app.models.b2b_c_deep import (
+        B2bCContractAgreement,
+        B2bCPriceList,
+        B2bCSalesOrder,
+        B2bCCreditAccount,
+        B2bCSupportTicket,
+    )
+    __all__.extend(["B2bCContractAgreement", "B2bCPriceList", "B2bCSalesOrder", "B2bCCreditAccount", "B2bCSupportTicket"])
+except Exception:
+    pass
+# </expansion:b2b_c>
+
+# <expansion:reports_c>
+try:
+    from app.models.reports_c_deep import (
+        RptcScheduledReport,
+        RptcReportTemplate,
+        RptcDataExport,
+        RptcAdHocQuery,
+        RptcOlapCube,
+    )
+    __all__.extend(["RptcScheduledReport", "RptcReportTemplate", "RptcDataExport", "RptcAdHocQuery", "RptcOlapCube"])
+except Exception:
+    pass
+# </expansion:reports_c>
+
+# <expansion:admin_c>
+try:
+    from app.models.admin_c_deep import (
+        AdmCSubscriptionPlan,
+        AdmCTenantInvite,
+        AdmCApiToken,
+        AdmCBillingInvoice,
+        AdmCUsageMetering,
+    )
+    __all__.extend(["AdmCSubscriptionPlan", "AdmCTenantInvite", "AdmCApiToken", "AdmCBillingInvoice", "AdmCUsageMetering"])
+except Exception:
+    pass
+# </expansion:admin_c>
+
+# <expansion:superadmin_c>
+try:
+    from app.models.superadmin_c_deep import (
+        SaCAuditLogReview,
+        SaCSystemParameter,
+        SaCPlatformAlert,
+        SaCMigrationRun,
+        SaCLicenseKey,
+    )
+    __all__.extend(["SaCAuditLogReview", "SaCSystemParameter", "SaCPlatformAlert", "SaCMigrationRun", "SaCLicenseKey"])
+except Exception:
+    pass
+# </expansion:superadmin_c>
