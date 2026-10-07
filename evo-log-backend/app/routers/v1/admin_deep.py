@@ -11,7 +11,7 @@ from app.models.admin_deep import (
     ApiQuota,
     WhiteLabel,
     TenantOnboarding,
-    TenantApiKey,
+    SaasApiKey,
     TenantWebhook,
     DataMigration,
     PlatformTicket,
@@ -24,7 +24,7 @@ from app.schemas.admin_deep import (
     ApiQuotaCreate, ApiQuotaUpdate, ApiQuotaOut,
     WhiteLabelCreate, WhiteLabelUpdate, WhiteLabelOut,
     TenantOnboardingCreate, TenantOnboardingUpdate, TenantOnboardingOut,
-    TenantApiKeyCreate, TenantApiKeyUpdate, TenantApiKeyOut,
+    SaasApiKeyCreate, SaasApiKeyUpdate, SaasApiKeyOut,
     TenantWebhookCreate, TenantWebhookUpdate, TenantWebhookOut,
     DataMigrationCreate, DataMigrationUpdate, DataMigrationOut,
     PlatformTicketCreate, PlatformTicketUpdate, PlatformTicketOut,
@@ -336,24 +336,24 @@ def delete_onboarding_wizard(
 
 # ─── Cles API tierces par tenant ─────────────────────────────────────────────────
 
-@router.get("/tenant-api-keys", response_model=List[TenantApiKeyOut])
+@router.get("/saas-api-keys", response_model=List[SaasApiKeyOut])
 def list_api_key(statut: Optional[str] = None, db: Session = Depends(get_db),
     user: User = Depends(require_perm("admin.api_key.read")),
 ):
     cid = _company_id(user)
-    return _scoped_list(db, TenantApiKey, cid, {"statut": statut})
+    return _scoped_list(db, SaasApiKey, cid, {"statut": statut})
 
 
-@router.post("/tenant-api-keys", response_model=TenantApiKeyOut, status_code=201)
+@router.post("/saas-api-keys", response_model=SaasApiKeyOut, status_code=201)
 def create_api_key(
-    payload: TenantApiKeyCreate,
+    payload: SaasApiKeyCreate,
     db: Session = Depends(get_db),
     user: User = Depends(require_perm("admin.api_key.create")),
 ):
     cid = _company_id(user)
     data = payload.model_dump(exclude_unset=True)
-    _check_unique(db, TenantApiKey, "reference", data.get("reference"), "reference", cid)
-    obj = TenantApiKey(company_id=cid)
+    _check_unique(db, SaasApiKey, "reference", data.get("reference"), "reference", cid)
+    obj = SaasApiKey(company_id=cid)
     _apply(data, obj)
     db.add(obj)
     db.commit()
@@ -361,15 +361,15 @@ def create_api_key(
     return obj
 
 
-@router.put("/tenant-api-keys/{ident}", response_model=TenantApiKeyOut)
+@router.put("/saas-api-keys/{ident}", response_model=SaasApiKeyOut)
 def update_api_key(
     ident: int,
-    payload: TenantApiKeyUpdate,
+    payload: SaasApiKeyUpdate,
     db: Session = Depends(get_db),
     user: User = Depends(require_perm("admin.api_key.modify")),
 ):
     cid = _company_id(user)
-    obj = _get_or_404(db, TenantApiKey, ident, "Cles API tierces par tenant")
+    obj = _get_or_404(db, SaasApiKey, ident, "Cles API tierces par tenant")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
     _apply(payload.model_dump(exclude_unset=True), obj)
@@ -378,14 +378,14 @@ def update_api_key(
     return obj
 
 
-@router.delete("/tenant-api-keys/{ident}", response_model=TenantApiKeyOut)
+@router.delete("/saas-api-keys/{ident}", response_model=SaasApiKeyOut)
 def delete_api_key(
     ident: int,
     db: Session = Depends(get_db),
     user: User = Depends(require_perm("admin.api_key.modify")),
 ):
     cid = _company_id(user)
-    obj = _get_or_404(db, TenantApiKey, ident, "Cles API tierces par tenant")
+    obj = _get_or_404(db, SaasApiKey, ident, "Cles API tierces par tenant")
     if obj.company_id != cid:
         raise HTTPException(403, "Acces refuse.")
     obj.is_active = False

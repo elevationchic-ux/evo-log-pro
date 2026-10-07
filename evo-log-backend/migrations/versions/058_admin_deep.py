@@ -14,7 +14,7 @@ TABLES = [
     "api_quotas",
     "white_labels",
     "tenant_onboardings",
-    "tenant_api_keys",
+    "saas_api_keys",
     "tenant_webhooks",
     "data_migrations",
     "platform_tickets",
@@ -102,9 +102,9 @@ def upgrade():
             sa.UniqueConstraint("company_id", "reference", name="uix_tenant_onboardings_uniq"),
         )
 
-    if not _has("tenant_api_keys"):
+    if not _has("saas_api_keys"):
         op.create_table(
-            "tenant_api_keys",
+            "saas_api_keys",
             sa.Column("id", sa.Integer, primary_key=True, index=True),
             sa.Column("company_id", sa.Integer, nullable=False, index=True),
             sa.Column("reference", sa.String(200), nullable=False, index=True),
@@ -118,7 +118,7 @@ def upgrade():
             sa.Column("is_active", sa.Boolean, nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
-            sa.UniqueConstraint("company_id", "reference", name="uix_tenant_api_keys_uniq"),
+            sa.UniqueConstraint("company_id", "reference", name="uix_saas_api_keys_uniq"),
         )
 
     if not _has("tenant_webhooks"):

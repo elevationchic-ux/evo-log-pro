@@ -40,7 +40,7 @@ class TenantOnboarding_statut(str, enum.Enum):
     REFUSE = "refuse"
 
 
-class TenantApiKey_statut(str, enum.Enum):
+class SaasApiKey_statut(str, enum.Enum):
     ACTIF = "actif"
     REVOKE = "revoke"
     EXPIRE = "expire"
@@ -183,11 +183,11 @@ class TenantOnboarding(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
-class TenantApiKey(Base):
+class SaasApiKey(Base):
     """Cles API tierces par tenant."""
-    __tablename__ = "tenant_api_keys"
+    __tablename__ = "saas_api_keys"
     __table_args__ = (
-        UniqueConstraint('company_id', 'reference', name='uix_tenant_api_keys_company_reference'),
+        UniqueConstraint('company_id', 'reference', name='uix_saas_api_keys_company_reference'),
     )
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=False, index=True)
@@ -198,7 +198,7 @@ class TenantApiKey(Base):
     date_creation = Column(Date, nullable=True)
     date_expiration = Column(Date, nullable=True)
     derniere_utilisation = Column(DateTime(timezone=True), nullable=True)
-    statut = Column(_enum(TenantApiKey_statut), default=TenantApiKey_statut.ACTIF)
+    statut = Column(_enum(SaasApiKey_statut), default=SaasApiKey_statut.ACTIF)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

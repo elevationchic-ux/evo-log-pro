@@ -196,7 +196,7 @@ export const registreTenantOnboarding: ConfigRegistre = {
 };
 
 
-export const registreTenantApiKey: ConfigRegistre = {
+export const registreSaasApiKey: ConfigRegistre = {
   permModule: "admin",
   permSousModule: "api_key",
   tcode: "registre-api-keys",
@@ -207,9 +207,9 @@ export const registreTenantApiKey: ConfigRegistre = {
   descriptionEn: "Access keys for third-party webhooks.",
   aide: "Rotation annuelle.",
   aideEn: "Annual rotation.",
-  lister: (params) => api.lister("tenant-api-keys", params),
-  creer: (data) => api.creer("tenant-api-keys", data),
-  modifier: (id, data) => api.modifier("tenant-api-keys", id, data),
+  lister: (params) => api.lister("saas-api-keys", params),
+  creer: (data) => api.creer("saas-api-keys", data),
+  modifier: (id, data) => api.modifier("saas-api-keys", id, data),
   unicite: "reference",
   fetchNomenclatures: () => api.getNomenclatures(),
   colonnes: [

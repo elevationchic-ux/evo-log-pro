@@ -152,7 +152,7 @@ class TenantOnboardingOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class TenantApiKeyCreate(BaseModel):
+class SaasApiKeyCreate(BaseModel):
     reference: str
     tenant_id: Optional[int] = None
     label: Optional[str] = None
@@ -163,7 +163,7 @@ class TenantApiKeyCreate(BaseModel):
     statut: Optional[str] = None
 
 
-class TenantApiKeyUpdate(BaseModel):
+class SaasApiKeyUpdate(BaseModel):
     reference: Optional[str] = None
     tenant_id: Optional[int] = None
     label: Optional[str] = None
@@ -175,7 +175,7 @@ class TenantApiKeyUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-class TenantApiKeyOut(BaseModel):
+class SaasApiKeyOut(BaseModel):
     id: int
     company_id: int
     reference: str
