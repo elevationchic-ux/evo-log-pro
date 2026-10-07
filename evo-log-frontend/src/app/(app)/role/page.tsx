@@ -12,9 +12,10 @@ export default function RolePage() {
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newRole, setNewRole] = useState({
-    nom: '',
+    name: '',
     description: '',
-    modules: [] as string[],
+    level: 5,
+    modules_allowed: [] as string[],
   });
 
   const availableModules = [
