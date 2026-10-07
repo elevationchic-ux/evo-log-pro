@@ -1078,3 +1078,85 @@ try:
 except Exception:
     pass
 # </expansion:chef_personnel_d>
+
+# <expansion:frais_d>
+try:
+    from app.models.frais_d_deep import (
+        FraExpenseReport,
+        FraExpenseReceipt,
+        FraExpenseAdvance,
+        FraPerDiemClaim,
+        FraMileageClaim,
+        FraMealExpense,
+        FraTravelBooking,
+        FraHotelStay,
+        FraTransportExpense,
+        FraClientEntertainment,
+        FraConferenceFee,
+        FraOfficeSupply,
+        FraCardTransaction,
+        FraCurrencyConversion,
+        FraExpenseApproval,
+        FraExpenseDispute,
+        FraVatRecovery,
+        FraExpenseBudgetTracking,
+        FraExpenseCategory,
+    )
+    __all__.extend(["FraExpenseReport", "FraExpenseReceipt", "FraExpenseAdvance", "FraPerDiemClaim", "FraMileageClaim", "FraMealExpense", "FraTravelBooking", "FraHotelStay", "FraTransportExpense", "FraClientEntertainment", "FraConferenceFee", "FraOfficeSupply", "FraCardTransaction", "FraCurrencyConversion", "FraExpenseApproval", "FraExpenseDispute", "FraVatRecovery", "FraExpenseBudgetTracking", "FraExpenseCategory"])
+except Exception:
+    pass
+# </expansion:frais_d>
+
+# <expansion:annuaire_d>
+try:
+    from app.models.annuaire_d_deep import (
+        ProvProfile,
+        ProvCategory,
+        ProvCertification,
+        ProvInsuranceAttestation,
+        ProvServiceContract,
+        ProvEvaluation,
+        ProvIncident,
+        ProvAvailabilityCalendar,
+        ProvPriceList,
+        ProvContact,
+        ProvOnboarding,
+        ProvReview,
+        ProvRfqRequest,
+        ProvIntervention,
+        ProvComplianceDoc,
+        ProvBankDetail,
+        ProvBlacklist,
+    )
+    __all__.extend(["ProvProfile", "ProvCategory", "ProvCertification", "ProvInsuranceAttestation", "ProvServiceContract", "ProvEvaluation", "ProvIncident", "ProvAvailabilityCalendar", "ProvPriceList", "ProvContact", "ProvOnboarding", "ProvReview", "ProvRfqRequest", "ProvIntervention", "ProvComplianceDoc", "ProvBankDetail", "ProvBlacklist"])
+except Exception:
+    pass
+# </expansion:annuaire_d>
+
+# <expansion:collaborateur_d>
+try:
+    from app.models.collaborateur_d_deep import (
+        CollAssignment,
+        CollActivityLog,
+        CollDeliverable,
+        CollTimesheet,
+        CollSiteAccessLog,
+        CollWorkInstructionReceipt,
+        CollIncidentReport,
+        CollQualityCheck,
+        CollTrainingCompletion,
+        CollEquipmentIssue,
+        CollShiftAttendance,
+        CollTravelOrder,
+        CollExpenseDeclaration,
+        CollCertificationUpload,
+        CollTaskCompletion,
+        CollFeedback,
+        CollAvailability,
+        CollContractRenewalRequest,
+        CollDocumentRequest,
+    )
+    __all__.extend(["CollAssignment", "CollActivityLog", "CollDeliverable", "CollTimesheet", "CollSiteAccessLog", "CollWorkInstructionReceipt", "CollIncidentReport", "CollQualityCheck", "CollTrainingCompletion", "CollEquipmentIssue", "CollShiftAttendance", "CollTravelOrder", "CollExpenseDeclaration", "CollCertificationUpload", "CollTaskCompletion", "CollFeedback", "CollAvailability", "CollContractRenewalRequest", "CollDocumentRequest"])
+except Exception:
+    pass
+# </expansion:collaborateur_d>

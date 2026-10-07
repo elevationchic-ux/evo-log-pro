@@ -929,6 +929,27 @@ try:
 except ImportError as e:
     logger.warning(f"Router chef_personnel_d_deep absent : {e}")
 # </expansion:chef_personnel_d>
+# <expansion:frais_d>
+try:
+    from app.routers.v1 import frais_d_deep
+    safe_include_router(frais_d_deep.router, prefix="/api/v1/portail-frais", tags=["portail-frais (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router frais_d_deep absent : {e}")
+# </expansion:frais_d>
+# <expansion:annuaire_d>
+try:
+    from app.routers.v1 import annuaire_d_deep
+    safe_include_router(annuaire_d_deep.router, prefix="/api/v1/annuaire-prestataires", tags=["annuaire-prestataires (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router annuaire_d_deep absent : {e}")
+# </expansion:annuaire_d>
+# <expansion:collaborateur_d>
+try:
+    from app.routers.v1 import collaborateur_d_deep
+    safe_include_router(collaborateur_d_deep.router, prefix="/api/v1/portail-collaborateur", tags=["portail-collaborateur (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router collaborateur_d_deep absent : {e}")
+# </expansion:collaborateur_d>
 
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)
