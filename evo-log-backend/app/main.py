@@ -698,6 +698,48 @@ try:
 except ImportError as e:
     logger.warning(f"Router log3pl_deep absent : {e}")
 # </expansion:log3pl>
+# <expansion:log3pl_b>
+try:
+    from app.routers.v1 import log3pl_b_deep
+    safe_include_router(log3pl_b_deep.router, prefix="/api/v1/logistique-3pl", tags=["logistique-3pl (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router log3pl_b_deep absent : {e}")
+# </expansion:log3pl_b>
+# <expansion:fluvial_b>
+try:
+    from app.routers.v1 import fluvial_b_deep
+    safe_include_router(fluvial_b_deep.router, prefix="/api/v1/transport-fluvial", tags=["transport-fluvial (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router fluvial_b_deep absent : {e}")
+# </expansion:fluvial_b>
+# <expansion:aerien_b>
+try:
+    from app.routers.v1 import aerien_b_deep
+    safe_include_router(aerien_b_deep.router, prefix="/api/v1/transport-aerien", tags=["transport-aerien (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router aerien_b_deep absent : {e}")
+# </expansion:aerien_b>
+# <expansion:ferroviaire_b>
+try:
+    from app.routers.v1 import ferroviaire_b_deep
+    safe_include_router(ferroviaire_b_deep.router, prefix="/api/v1/transport-ferroviaire", tags=["transport-ferroviaire (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router ferroviaire_b_deep absent : {e}")
+# </expansion:ferroviaire_b>
+# <expansion:parc_b>
+try:
+    from app.routers.v1 import parc_b_deep
+    safe_include_router(parc_b_deep.router, prefix="/api/v1/parc-vehicules", tags=["parc-vehicules (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router parc_b_deep absent : {e}")
+# </expansion:parc_b>
+# <expansion:qhse_b>
+try:
+    from app.routers.v1 import qhse_b_deep
+    safe_include_router(qhse_b_deep.router, prefix="/api/v1/qhse-securite", tags=["qhse-securite (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router qhse_b_deep absent : {e}")
+# </expansion:qhse_b>
 
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)
@@ -1100,11 +1142,9 @@ async def detailed_health_check():
 
     return checks
 
-
 # Cache de la sonde des dependances externes (evite un probe lent a chaque /health).
 _HEALTH_DEPS_TTL = 15.0
 _HEALTH_DEPS_CACHE: dict = {"ts": 0.0, "deps": {}, "degraded": False}
-
 
 async def _probe_external_deps():
     """Sonde Redis / MinIO / Celery en fast-fail. Retourne (deps, degraded, redis_ok, redis_disabled)."""
@@ -1182,51 +1222,3 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
 
-
-# <expansion:log3pl_b>
-try:
-    from app.routers.v1 import log3pl_b_deep
-    safe_include_router(log3pl_b_deep.router, prefix="/api/v1/logistique-3pl", tags=["logistique-3pl (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router log3pl_b_deep absent : {e}")
-# </expansion:log3pl_b>
-
-# <expansion:fluvial_b>
-try:
-    from app.routers.v1 import fluvial_b_deep
-    safe_include_router(fluvial_b_deep.router, prefix="/api/v1/transport-fluvial", tags=["transport-fluvial (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router fluvial_b_deep absent : {e}")
-# </expansion:fluvial_b>
-
-# <expansion:aerien_b>
-try:
-    from app.routers.v1 import aerien_b_deep
-    safe_include_router(aerien_b_deep.router, prefix="/api/v1/transport-aerien", tags=["transport-aerien (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router aerien_b_deep absent : {e}")
-# </expansion:aerien_b>
-
-# <expansion:ferroviaire_b>
-try:
-    from app.routers.v1 import ferroviaire_b_deep
-    safe_include_router(ferroviaire_b_deep.router, prefix="/api/v1/transport-ferroviaire", tags=["transport-ferroviaire (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router ferroviaire_b_deep absent : {e}")
-# </expansion:ferroviaire_b>
-
-# <expansion:parc_b>
-try:
-    from app.routers.v1 import parc_b_deep
-    safe_include_router(parc_b_deep.router, prefix="/api/v1/parc-vehicules", tags=["parc-vehicules (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router parc_b_deep absent : {e}")
-# </expansion:parc_b>
-
-# <expansion:qhse_b>
-try:
-    from app.routers.v1 import qhse_b_deep
-    safe_include_router(qhse_b_deep.router, prefix="/api/v1/qhse-securite", tags=["qhse-securite (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router qhse_b_deep absent : {e}")
-# </expansion:qhse_b>
