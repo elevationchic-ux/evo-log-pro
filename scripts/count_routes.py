@@ -21,7 +21,8 @@ PREFIXES = [
     "/api/v1/dashboard",
 ]
 
-paths = [r.path for r in app.routes]
+schema = app.openapi()
+paths = list(schema["paths"].keys())
 for p in PREFIXES:
     n = sum(1 for x in paths if x.startswith(p))
     print(f"{n:4d}  {p}")
