@@ -155,13 +155,13 @@ class MagcColdChainCheck_statut(str, enum.Enum):
 
 
 class MagcHazmatHandling_classe(str, enum.Enum):
-    1 = "1"
-    2 = "2"
-    3 = "3"
-    5 = "5"
-    6 = "6"
-    8 = "8"
-    9 = "9"
+    V_1 = "1"
+    V_2 = "2"
+    V_3 = "3"
+    V_5 = "5"
+    V_6 = "6"
+    V_8 = "8"
+    V_9 = "9"
 
 
 class MagcHazmatHandling_statut(str, enum.Enum):
