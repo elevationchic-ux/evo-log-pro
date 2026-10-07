@@ -4119,6 +4119,18 @@
    "champs": [],
    "enums": {}
   },
+  "CommandeUpdate": {
+   "champs": [
+    "client_id",
+    "date_livraison_prevue",
+    "devise",
+    "montant_total",
+    "notes",
+    "statut",
+    "type_commande"
+   ],
+   "enums": {}
+  },
   "CompanyAccreditationCreate": {
    "champs": [
     "date_debut",
@@ -23640,6 +23652,11 @@
     "DocumentResponse"
    ]
   },
+  "/api/v1/documents/bl": {
+   "post": [
+    "DocumentResponse"
+   ]
+  },
   "/api/v1/documents/upload": {
    "post": [
     "DocumentResponse"
@@ -23860,6 +23877,11 @@
   },
   "/api/v1/magasin/commandes/{commande_id}": {
    "get": [
+    "CommandeResponse",
+    "CommandeStatut",
+    "LigneCommandeResponse"
+   ],
+   "put": [
     "CommandeResponse",
     "CommandeStatut",
     "LigneCommandeResponse"
@@ -24222,7 +24244,8 @@
   },
   "/api/v1/suppliers/{supplier_id}": {
    "get": [],
-   "put": []
+   "put": [],
+   "delete": []
   },
   "/api/v1/suppliers/{supplier_id}/cotations": {
    "get": []
@@ -24944,6 +24967,9 @@
    "get": []
   },
   "/api/v1/magasin-avance/reservations": {
+   "get": [
+    "ReservationStockResponse"
+   ],
    "post": [
     "ReservationStockResponse"
    ]
@@ -26832,6 +26858,9 @@
     "DPOResponse"
    ]
   },
+  "/api/v1/finance-avance/dettes/regler": {
+   "post": []
+  },
   "/api/v1/finance-avance/budget/annuel": {
    "post": [
     "BudgetAnnuelResponse"
@@ -27214,6 +27243,9 @@
   "/api/v1/auto-invoicing/{facture_id}": {
    "get": []
   },
+  "/api/v1/auto-invoicing/generate": {
+   "post": []
+  },
   "/api/v1/auto-invoicing/{facture_id}/emettre": {
    "post": []
   },
@@ -27261,6 +27293,9 @@
   },
   "/api/v1/container-lifecycle/{conteneur_id}": {
    "get": []
+  },
+  "/api/v1/container-lifecycle/gate-in": {
+   "post": []
   },
   "/api/v1/container-lifecycle/{conteneur_id}/cycle": {
    "post": []
@@ -28042,6 +28077,9 @@
   "/api/v1/iot/live-fleet-map": {
    "get": []
   },
+  "/api/v1/webhooks/chatops/logs": {
+   "get": []
+  },
   "/api/v1/webhooks/whatsapp": {
    "get": [],
    "post": []
@@ -28704,6 +28742,11 @@
    "get": [
     "DocumentResponse"
    ],
+   "post": [
+    "DocumentResponse"
+   ]
+  },
+  "/api/documents/bl": {
    "post": [
     "DocumentResponse"
    ]
