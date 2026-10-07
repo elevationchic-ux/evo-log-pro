@@ -367,7 +367,7 @@ class MaintenanceTask(Base):
     niveau_habiliture = Column(String(120), nullable=True)
     epi_requis = Column(String(220), nullable=True)
     outillage = Column(Text, nullable=True)
-    couples_re serrage = Column(String(220), nullable=True)
+    couples_re_serrage = Column(String(220), nullable=True)
     pieces_requises = Column(Text, nullable=True)  # JSON [{part_id, qte}]
     ordre_execution = Column(Integer, nullable=True)
     is_active = Column(Boolean, default=True, nullable=True, index=True)
