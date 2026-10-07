@@ -236,6 +236,20 @@ DOMAINS: Dict[str, Dict] = {
             "achats": {"label": "Achats", "sub_modules": {"commande": ACTIONS, "reception": ACTIONS}},
             "fournisseurs": {"label": "Fournisseurs", "sub_modules": {"referentiel": ACTIONS}},
             "cotations": {"label": "Cotation & devis", "sub_modules": {"cotation": ACTIONS}},
+            # Portail client B2B (routeur b2b_deep). Registres propres de la relation
+            # commerciale en libre-service client (reservation d'acheminement, suivi
+            # contractuel et accords tarifaires, limite de credit, echange de documents,
+            # demande de service, reclamation/litige, enquete de satisfaction, rapport de
+            # compte, onboarding client, pilotage SLA) plus la nomenclature. RESPONSABLE_
+            # COMMERCIAL (« b2b.*.* ») pilote le portail ; les clients externes ne sont pas
+            # des roles systeme seeds ici (authentification portail distincte).
+            "b2b": {"label": "Portail client B2B", "sub_modules": {"nomenclature": ["read"],
+                "shipment_booking": ["read", "create", "modify"], "contract_tracking": ["read", "create", "modify"],
+                "pricing_agreement": ["read", "create", "modify"], "credit_limit": ["read", "create", "modify"],
+                "document_exchange": ["read", "create", "modify"], "service_request": ["read", "create", "modify"],
+                "claim_dispute": ["read", "create", "modify"], "satisfaction_survey": ["read", "create", "modify"],
+                "account_report": ["read", "create", "modify"], "client_onboarding": ["read", "create", "modify"],
+                "sla_management": ["read", "create", "modify"]}},
         },
     },
 }
@@ -284,6 +298,8 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "comptabilite.*.read", "tresorerie.*.read", "facturation.*.read",
         "fiscalite.*.read",
         "transport.*.read", "magasin.*.read", "transit.*.read", "audit.journal.read",
+        # Lecture transversale des operations du terminal (routeur port_deep).
+        "port.*.read",
         # Batch 24 : meme lecture transversale sur le QHSE (rapports annuels
         # includes), sans jamais d'ecriture.
         "qhse.*.read",
@@ -318,6 +334,13 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "achats.reception.approve",
         "achats.commande.read", "achats.commande.create",
         "fournisseurs.referentiel.read",
+    ]),
+    # Portail client B2B (routeur b2b_deep). Le responsable commercial pilote la
+    # relation client en libre-service (reservations, contrats/tarifs, credit,
+    # documents, reclamations, SLA, rapports de compte). Il lit la facturation
+    # pour afficher factures et devis du client dans son portail, sans y toucher.
+    ("RESPONSABLE_COMMERCIAL", 2, "Responsable commercial : pilotage du portail client B2B", [
+        "b2b.*.*", "facturation.*.read",
     ]),
     ("CHEF_PARC", 2, "Chef de parc : gestion complete de la flotte et du fret", [
         "parc.*.*",
