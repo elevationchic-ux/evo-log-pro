@@ -121,3 +121,24 @@ try:
     ])
 except Exception:
     pass
+
+# Batch 4 : surfaces auparavant stubs 501 / succes fabrique, desormais persistees.
+# Importees ici pour que Base.metadata les voie des le demarrage (create_all dev,
+# autogenerate Alembic) meme si aucun router ne les a encore chargees.
+try:
+    from app.models.chat import ChatMeetingRoom, ChatRoomMember, EnterpriseChatMessage, ChatContextualPin
+    __all__.extend(["ChatMeetingRoom", "ChatRoomMember", "EnterpriseChatMessage", "ChatContextualPin"])
+except Exception:
+    pass
+
+try:
+    from app.models.rh import OffreEmploi, Candidature
+    __all__.extend(["OffreEmploi", "Candidature"])
+except Exception:
+    pass
+
+try:
+    from app.models.qhse import PermisTravail, SignaturePermis, HeuresExposition
+    __all__.extend(["PermisTravail", "SignaturePermis", "HeuresExposition"])
+except Exception:
+    pass
