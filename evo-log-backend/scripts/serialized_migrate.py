@@ -1,4 +1,4 @@
-"""Migration Alembic SERIALIZ EE par verrou advisory PostgreSQL.
+"""Migration Alembic SERIALIZÉE par verrou advisory PostgreSQL.
 
 POURQUOI CE SCRIPT EXISTE (cas reel 2026-10-08, prod Railway) :
     L'entrypoint lance `alembic upgrade head` PUIS uvicorn, et toute echec de
@@ -66,6 +66,13 @@ def _run(cmd):
     return subprocess.call(cmd)
 
 
+def _alembic(*args):
+    """Commande alembic portables : `python -m alembic` plutot que le shim
+    console `alembic`, introuvable par subprocess selon le PATH/OS. Resout
+    identiquement dans le conteneur Linux (prod) et sous Windows (dev)."""
+    return [sys.executable, "-m", "alembic", *args]
+
+
 def main() -> int:
     mode = (sys.argv[1] if len(sys.argv) > 1 else "upgrade").strip()
     url = _normalize_db_url(os.environ.get("DATABASE_URL", ""))
@@ -76,16 +83,16 @@ def main() -> int:
         print("[serialized_migrate] DATABASE_URL absent -> alembic direct (dev).",
               flush=True)
         if mode == "stamp014+upgrade":
-            subprocess.call(["alembic", "stamp", "014_schema_parity_from_orm"])
-        return _run(["alembic", "upgrade", "head"])
+            subprocess.call(_alembic("stamp", "014_schema_parity_from_orm"))
+        return _run(_alembic("upgrade", "head"))
 
     is_pg = url.startswith("postgresql") or url.startswith("postgres+")
 
     # Non-PostgreSQL (SQLite dev/test) : pas d'advisory lock, execution directe.
     if not is_pg:
         if mode == "stamp014+upgrade":
-            subprocess.call(["alembic", "stamp", "014_schema_parity_from_orm"])
-        return _run(["alembic", "upgrade", "head"])
+            subprocess.call(_alembic("stamp", "014_schema_parity_from_orm"))
+        return _run(_alembic("upgrade", "head"))
 
     # PostgreSQL : serialization par verrou advisory de session.
     from sqlalchemy import create_engine, text
@@ -103,8 +110,8 @@ def main() -> int:
         if mode == "stamp014+upgrade":
             # Idempotence du stamp : si deja a head, le stamp+upgrade suivant
             # est un no-op ; on ne casse rien si la table alembic_version existe.
-            subprocess.call(["alembic", "stamp", "014_schema_parity_from_orm"])
-        rc = _run(["alembic", "upgrade", "head"])
+            subprocess.call(_alembic("stamp", "014_schema_parity_from_orm"))
+        rc = _run(_alembic("upgrade", "head"))
     finally:
         try:
             conn.execute(text("SELECT pg_advisory_unlock(:k)"), {"k": _LOCK_KEY})

@@ -52,7 +52,7 @@ PY
 MODE="$(cat /tmp/_alembic_mode 2>/dev/null || echo upgrade)"
 
 # ----------------------------------------------------------------------------
-# Migration SERIALIZ EE par verrou advisory PostgreSQL.
+# Migration SERIALIZÉE par verrou advisory PostgreSQL.
 # Railway peut demarrer plusieurs conteneurs en concurrence (relances sur
 # ON_FAILURE + nouveaux deploys declenches par l'auto-push). Si deux conteneurs
 # lancent `alembic upgrade head` en meme temps, la migration 028 (qui
