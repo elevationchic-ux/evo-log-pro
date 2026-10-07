@@ -349,23 +349,20 @@ except Exception:
 # </expansion:reports>
 
 # <expansion:admin>
-try:
-    from app.models.admin_deep import (
-        FeatureFlag,
-        ApiQuota,
-        WhiteLabel,
-        TenantOnboarding,
-        TenantApiKey,
-        TenantWebhook,
-        DataMigration,
-        PlatformTicket,
-        BillingEntry,
-        UsageAnalytics,
-        UptimeRecord,
-    )
-    __all__.extend(["FeatureFlag", "ApiQuota", "WhiteLabel", "TenantOnboarding", "TenantApiKey", "TenantWebhook", "DataMigration", "PlatformTicket", "BillingEntry", "UsageAnalytics", "UptimeRecord"])
-except Exception:
-    pass
+from app.models.admin_deep import (
+    FeatureFlag,
+    ApiQuota,
+    WhiteLabel,
+    TenantOnboarding,
+    TenantApiKey,
+    TenantWebhook,
+    DataMigration,
+    PlatformTicket,
+    BillingEntry,
+    UsageAnalytics,
+    UptimeRecord,
+)
+__all__.extend(["FeatureFlag", "ApiQuota", "WhiteLabel", "TenantOnboarding", "TenantApiKey", "TenantWebhook", "DataMigration", "PlatformTicket", "BillingEntry", "UsageAnalytics", "UptimeRecord"])
 # </expansion:admin>
 
 # <expansion:superadmin>

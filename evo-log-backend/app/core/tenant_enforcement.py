@@ -42,25 +42,7 @@ def _tenant_scoped_classes() -> list:
     global _tenant_classes
     if _tenant_classes is None:
         from app.core.database import Base
-        # `import app.models` ne couvre PAS la totalite des modeles : plusieurs
-        # entites portant company_id (Navire, Escale, BonCommande, BonReception,
-        # OrdreTransport, DeclarationFiscale, ContratFiscal,
-        # RetenueSourceCameroun) ne sont declarees que dans des modules consommes
-        # par les routers. Si ces modules n'ont pas encore ete importés quand la
-        # liste se fige ici (premiere requete), leurs tables resteraient NON
-        # filtree par tenant -> fuite de donnees inter-entreprises. On force donc
-        # l'import des modules modeles concernés (PAS app.main : importer toute
-        # l'app ici serait reentrant pendant son propre chargement et ferait
-        # redéfinir des tables comme feature_flags). Ces modules sont de simples
-        # feuilles de modeles, sans routers ni effet de bord -> import sur.
-        import app.models  # noqa: F401 - socle de registres
-        from app.models import (  # noqa: F401 - enregistre les 8 entites manquantes
-            acconage,
-            acquisition,
-            magasin_avance,
-            transport_international,
-            fiscalite_cameroun,
-        )
+        import app.models  # noqa: F401 - ensures full mapper registration
         classes = []
         for mapper in Base.registry.mappers:
             # mapper.columns inclut les colonnes HERITEES (herite de table Jointe
