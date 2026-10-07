@@ -1,14 +1,14 @@
 'use client';
-// Dashboard module 🛢️ K-Pipeline Oléoduc-Gazoduc
+// Dashboard module ❄️ K-Chaine du Froid
 import Link from 'next/link';
 
-const MODULE_DIR = 'pipeline-oleoduc';
-const PERM = 'pipeline';
+const MODULE_DIR = 'chaine-froid';
+const PERM = 'coldchain';
 
 export default function PageDashboard() {
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">🛢️ K-Pipeline Oléoduc-Gazoduc</h1>
+      <h1 className="text-2xl font-bold">❄️ K-Chaine du Froid</h1>
       <p className="text-sm text-gray-500">Centre de pilotage — selectionnez un registre ci-dessous.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-xl border bg-white dark:bg-slate-900 p-4 shadow-sm">
