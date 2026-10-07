@@ -212,7 +212,7 @@ export default function AdminTenantMultiTenant() {
       let tenantId: number | null = editingTenant?.id ?? null;
 
       if (editingTenant) {
-        await apiClient.put(`/api/v1/tenant/companies/${editingTenant.id}`, payload);
+        await apiClient.patch(`/api/v1/tenant/companies/${editingTenant.id}`, payload);
         toast.success('Entreprise mise à jour.');
       } else {
         const res = await apiClient.post('/api/v1/tenant/companies', payload);

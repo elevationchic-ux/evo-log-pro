@@ -55,7 +55,7 @@ export default function RolePage() {
 
   const handleUpdateModules = async (id: number, modules_allowed: string[]) => {
     try {
-      await apiClient.put(`/api/v1/roles/${id}`, { modules_allowed });
+      await apiClient.put(`/api/v1/roles/${id}/modules`, modules_allowed);
       fetchData();
     } catch (err) { console.error('Erreur mise à jour modules:', err); }
   };
