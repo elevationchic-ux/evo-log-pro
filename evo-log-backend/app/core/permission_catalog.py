@@ -208,6 +208,37 @@ DOMAINS: Dict[str, Dict] = {
                 "workshop_scheduling": ["read", "create", "modify"], "cost_analysis": ["read", "create", "modify"],
                 "vehicle_lifecycle": ["read", "create", "modify"]}},
             "gps": {"label": "Suivi GPS", "sub_modules": {"tracking": ["read"], "alertes": ["read", "modify"]}},
+            # Expansions multi-modal (generatees par le plan d'expansion, routeurs
+            # *_deep montes dans main.py) : aerien (transport aeré fret), ferroviaire,
+            # fluvial, et logistique 3PL. Sous-modules alignes sur les objets reels de
+            # chaque mode. CHEF_PARC (« aerien/ferroviaire/fluvial/log3pl.*.* ») pilote le
+            # fret multi-modal, AUDITEUR (« *.read ») lit. Nomenclature en lecture seule.
+            "aerien": {"label": "Transport aerien (fret)", "sub_modules": {"nomenclature": ["read"],
+                "awb": ["read", "create", "modify"], "cargo": ["read", "create", "modify"],
+                "crew": ["read", "create", "modify"], "dgr": ["read", "create", "modify"],
+                "fleet": ["read", "create", "modify"], "flightops": ["read", "create", "modify"],
+                "handling": ["read", "create", "modify"], "mro": ["read", "create", "modify"],
+                "security": ["read", "create", "modify"], "slots": ["read", "create", "modify"],
+                "tariffs": ["read", "create", "modify"], "uld": ["read", "create", "modify"]}},
+            "ferroviaire": {"label": "Transport ferroviaire", "sub_modules": {"nomenclature": ["read"],
+                "consistency": ["read", "create", "modify"], "corridors": ["read", "create", "modify"],
+                "locomotive_fleet": ["read", "create", "modify"], "maintenance": ["read", "create", "modify"],
+                "rail_terminals": ["read", "create", "modify"], "safety": ["read", "create", "modify"],
+                "shunting_yards": ["read", "create", "modify"], "tariffs": ["read", "create", "modify"],
+                "tracking": ["read", "create", "modify"], "train_paths": ["read", "create", "modify"],
+                "wagon_fleet": ["read", "create", "modify"], "waybills": ["read", "create", "modify"]}},
+            "fluvial": {"label": "Transport fluvial", "sub_modules": {"nomenclature": ["read"],
+                "barge_fleet": ["read", "create", "modify"], "bulk": ["read", "create", "modify"],
+                "depth": ["read", "create", "modify"], "locks": ["read", "create", "modify"],
+                "positions": ["read", "create", "modify"], "safety": ["read", "create", "modify"],
+                "tariffs": ["read", "create", "modify"], "terminals": ["read", "create", "modify"],
+                "tow_fleet": ["read", "create", "modify"], "waybills": ["read", "create", "modify"]}},
+            "log3pl": {"label": "Logistique 3PL", "sub_modules": {"nomenclature": ["read"],
+                "billing": ["read", "create", "modify"], "contracts": ["read", "create", "modify"],
+                "controltower": ["read", "create", "modify"], "crossdock": ["read", "create", "modify"],
+                "pickpack": ["read", "create", "modify"], "reverse": ["read", "create", "modify"],
+                "slakpi": ["read", "create", "modify"], "subcontractors": ["read", "create", "modify"],
+                "valuation": ["read", "create", "modify"], "warehouses": ["read", "create", "modify"]}},
         },
     },
     "ressources_humaines": {
@@ -390,7 +421,12 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         # checkpoints, penalites, assurance marchandise, sous-traitants,
         # registre/documentation vehicule, KPI). Il etend « transport.*.read »
         # qu'il detient deja en lecture.
-        "transport.*.*", "gps.tracking.read", "gps.alertes.modify",
+        "transport.*.*",
+        # Fret multi-modal (routeurs aerien/ferroviaire/fluvial/log3pl_deep) : le
+        # chef de parc etend sa responsabilite freight au-dela de la route (air,
+        # fer, fleuve, logistique 3PL sous-traitee).
+        "aerien.*.*", "ferroviaire.*.*", "fluvial.*.*", "log3pl.*.*",
+        "gps.tracking.read", "gps.alertes.modify",
     ]),
     ("DISPATCHER", 3, "Dispatcher transport : missions et tournes", [
         "transport.mission.read", "transport.mission.create", "transport.dispatch.read",
