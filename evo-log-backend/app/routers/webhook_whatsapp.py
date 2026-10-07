@@ -19,6 +19,26 @@ class SendWhatsAppMessageSchema(BaseModel):
     template_name: str = Field("mission_assigned", example="mission_assigned")
     parameters: List[str] = Field(..., example=["OT-2026-089", "Douala Port", "Yaoundé Depot"])
 
+# Journal ChatOps en mémoire (ring buffer) : alimente la page /transport/chatops.
+# Volontairement sans persistance : les échanges réels vivent dans WhatsApp/Meta,
+# ce buffer ne garde que les traces courtes pour le moniteur du bot.
+_CHATOPS_LOGS: List[Dict[str, Any]] = []
+_CHATOPS_MAX = 100
+_LOG_SEQ = {"n": 0}
+
+
+def _chatops_append(entry: Dict[str, Any]) -> None:
+    _LOG_SEQ["n"] += 1
+    _CHATOPS_LOGS.append({"id": _LOG_SEQ["n"], **entry})
+    if len(_CHATOPS_LOGS) > _CHATOPS_MAX:
+        del _CHATOPS_LOGS[: len(_CHATOPS_LOGS) - _CHATOPS_MAX]
+
+
+@router.get("/api/v1/webhooks/chatops/logs")
+def get_chatops_logs(limit: int = Query(50, ge=1, le=100)):
+    """Journal des échanges WhatsApp entrants/sortants vus par le bot K-Bot."""
+    return {"logs": _CHATOPS_LOGS[-limit:], "total": len(_CHATOPS_LOGS)}
+
 # Meta verifie le webhook en GET sur l'URL exacte /api/v1/webhooks/whatsapp
 # (appelee par la page ChatOps du frontend).
 @router.get("/api/v1/webhooks/whatsapp")
@@ -45,6 +65,15 @@ async def receive_whatsapp_notification(request: Request):
     payload = await request.json()
     logger.info(f"Incoming WhatsApp notification: {payload}")
 
+    # Trace pour le moniteur ChatOps du frontend (page transport/chatops)
+    if "message" in payload or "sender" in payload:
+        _chatops_append({
+            "sender": payload.get("sender", "inconnu"),
+            "text": payload.get("message", ""),
+            "timestamp": datetime.utcnow().isoformat(),
+            "is_bot": False,
+        })
+
     entries = payload.get("entry", [])
     processed_messages = []
 
@@ -63,6 +92,12 @@ async def receive_whatsapp_notification(request: Request):
                         "from": from_num,
                         "text": body,
                         "received_at": datetime.utcnow().isoformat()
+                    })
+                    _chatops_append({
+                        "sender": from_num or "inconnu",
+                        "text": body,
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "is_bot": False,
                     })
 
     return {
