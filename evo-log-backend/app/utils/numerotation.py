@@ -85,9 +85,7 @@ def prochaine_reference(
     # sans colonne tenant) est numerotee pour le tenant de la requete en cours :
     # sinon la lookup taperait sur company_id IS NULL alors que le hook
     # d'isolation tamponne la ligne creee avec le tenant du request -> le meme
-    # numero est re-insere a chaque appel (IntegrityError 500). Ces deux lignes
-    # sont les deux seules sources du tenant ici ; le middleware les a deja
-    # validatees cote JWT.
+    # numero est re-insere a chaque appel (IntegrityError 500).
     if company_id is None:
         from app.core.tenant_context import get_current_tenant
         company_id = get_current_tenant()
@@ -117,10 +115,11 @@ def prochaine_reference(
         try:
             db.flush()
         except IntegrityError:
-            # Course entre deux requetes simultanlees : la ligne du compteur
+            # Course entre deux requetes simultanees : la ligne du compteur
             # vient d'etre creee dans le meme intervalle (company, type, annee).
-            # On reprend le SAVEPOINT, on relit la ligne existante et on
-            # poursuit sur elle — aucun numero n'est consomme twice.
+            # db.rollback() revient au SAVEPOINT du flush (la transaction du
+            # caller est preservee), puis on relit la ligne existante et on
+            # poursuit sur elle — aucun numero n'est consomme deux fois.
             db.rollback()
             seq = (
                 db.query(SequenceNumerotation)

@@ -14,6 +14,11 @@ import urllib.request
 import urllib.error
 
 BASE = "http://127.0.0.1:8000"
+# Console Windows (cp1252) : les corps de reponse contiennent des fleches/accents.
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 # A lancer depuis evo-log-backend/ : DATABASE_URL est relatif (./kamlog_erp.db),
 # le seed doit taper la MEME base que le serveur uvicorn.
 sys.path.insert(0, ".")

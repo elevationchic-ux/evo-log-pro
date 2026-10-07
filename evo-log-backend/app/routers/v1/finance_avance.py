@@ -155,7 +155,14 @@ def regler_dette_fournisseur(
         facture.solde_restant = facture.solde_restant - applicable
         facture.statut = "payee" if facture.solde_restant <= 0 else "payee_partiel"
         reg = Reglement(
-            numero_reglement=prochaine_reference(db, "REGLEMENT", getattr(facture, "company_id", None)),
+            # FactureNew (factures_ohada) ne porte pas de company_id : le tenant
+            # de la numerotation est celui de la requete (secu multiprocession),
+            # avec repli explicite sur celui du user pour garder la semantique.
+            numero_reglement=prochaine_reference(
+                db, "REGLEMENT",
+                company_id=getattr(facture, "company_id", None)
+                or getattr(current_user, "company_id", None),
+            ),
             # Reglement.facture_id référence la table legacy « factures » ; une
             # facture OHADA (factures_ohada) n'y a pas d'équivalent : on laisse
             # la FK à NULL et la référence OHADA est tracée dans les notes.
