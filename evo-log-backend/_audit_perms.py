@@ -1,29 +1,41 @@
-"""Audit global : codes require_perm() utilises par les routers vs catalogue."""
+"""Classification des codes require_perm par module : couverts par un role ?"""
 import re
 import pathlib
+from collections import defaultdict
 from app.core.permission_catalog import iter_permission_rows, ROLE_GRANTS
 from app.core.permissions import has_perm
 
 catalog = {r[0] for r in iter_permission_rows()}
 
-# Un code est reachable si au moins un role du catalogue le porte (wildcard ou liste).
 def porteurs(code):
     return [n for n, _l, _d, grants in ROLE_GRANTS if has_perm(grants, code)]
 
 root = pathlib.Path('app/routers')
-used = {}  # code -> set(files)
+used = {}
 for f in sorted(root.rglob('*.py')):
-    src = f.read_text(encoding='utf-8')
-    for m in re.findall(r'require_perm\(\s*"([^"]+)"', src):
-        used.setdefault(m, set()).add(f.name)
+    for m in re.findall(r'require_perm\(\s*"([^"]+)"', f.read_text(encoding='utf-8')):
+        used.setdefault(m, f.name)
 
-phantoms = {c: fs for c, fs in used.items() if c not in catalog}
-orphans_no_role = {c: porteurs(c) for c in used if c in catalog and not porteurs(c)}
+by_module = defaultdict(lambda: {'total': 0, 'orphelins': [], 'fantomes': 0})
+for code, fname in used.items():
+    mod = code.split('.')[0]
+    d = by_module[mod]
+    d['total'] += 1
+    if code not in catalog:
+        d['fantomes'] += 1
+    if not porteurs(code):
+        d['orphelins'].append(code)
 
-print('=== total codes utilises dans les routers:', len(used))
-print('=== FANTOMES (utilises, absents du catalogue):', len(phantoms))
-for c, fs in sorted(phantoms.items()):
-    print('  ', c, '<-', sorted(fs))
-print('=== CATALOGUES AUCUN PORTEUR (inaccessibles):', len(orphans_no_role))
-for c, p in sorted(orphans_no_role.items()):
-    print('  ', c, 'porteurs=', p)
+print(f"{'module':22} {'codes':>6} {'fantomes':>9} {'orphelins(aucun role)':>22}")
+for mod in sorted(by_module):
+    d = by_module[mod]
+    print(f"{mod:22} {d['total']:>6} {d['fantomes']:>9} {len(d['orphelins']):>22}")
+
+print("\n=== ORPHELINS (aucun role ne les porte => bypass 0/1 seul) ===")
+tot = 0
+for mod in sorted(by_module):
+    o = by_module[mod]['orphelins']
+    if o:
+        tot += len(o)
+        print(f"[{mod}] ({len(o)}) via {used[o[0]]}: {sorted(o)[:4]}{' ...' if len(o)>4 else ''}")
+print("TOTAL orphelins:", tot)
