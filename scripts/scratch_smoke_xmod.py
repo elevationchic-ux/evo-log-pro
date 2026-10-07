@@ -14,8 +14,9 @@ import urllib.request
 import urllib.error
 
 BASE = "http://127.0.0.1:8000"
-BACKEND = r"c:\Users\chris\Documents\Projet\Documents\evo-log pro\evo-log-backend"
-sys.path.insert(0, BACKEND)
+# A lancer depuis evo-log-backend/ : DATABASE_URL est relatif (./kamlog_erp.db),
+# le seed doit taper la MEME base que le serveur uvicorn.
+sys.path.insert(0, ".")
 
 
 def login():
