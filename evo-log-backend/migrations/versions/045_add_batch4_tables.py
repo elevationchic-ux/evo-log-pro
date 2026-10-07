@@ -133,9 +133,11 @@ def upgrade():
             sa.Column("annee", sa.Integer, nullable=False, index=True),
             sa.Column("heures_travaillees", sa.Numeric, nullable=False),
             sa.Column("nb_employes", sa.Integer, nullable=True),
-            sa.Column("jours_arret_total", sa.Numeric, nullable=True),
+            sa.Column("jours_arret_total", sa.Integer, nullable=True),
             sa.Column("saisi_par", sa.Integer, sa.ForeignKey("users.id"), nullable=True),
             sa.Column("source_piece", sa.String(200), nullable=True),
+            sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+            sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         )
 
 
