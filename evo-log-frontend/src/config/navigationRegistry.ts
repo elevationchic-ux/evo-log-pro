@@ -3509,7 +3509,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: 'Informations de la société, plan d\'abonnement, quotas et admins désignés par le CADC',
         businessProcess: 'Identité du tenant',
         requiredRoles: ['ADMIN', 'SUPER_ADMIN']
-      }
+      },
       {
         label: "Configurations de domaine",
         path: "/admin-tenant/domain-configs",
@@ -3776,7 +3776,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         tcode: 'KDRV_TRN',
         description: 'Ordres de transport, itinéraires GPS et statut de livraison',
         businessProcess: 'Exécution transport'
-      }
+      },
       {
         label: "Feuilles de route",
         path: "/portail-chauffeur/trip-sheets",
@@ -4020,7 +4020,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         tcode: 'KWMS_OP',
         description: 'Préparation commandes, réceptions à quai et inventaires tournants',
         businessProcess: 'Manutention entrepôt'
-      }
+      },
       {
         label: "Taches de preparation",
         path: "/portail-magasinier/picking-tasks",

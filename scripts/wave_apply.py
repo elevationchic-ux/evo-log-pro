@@ -108,6 +108,11 @@ def patch_nav(MODS):
         if not new_entries:
             continue
         head = txt[:close_p].rstrip()
+        # The pre-existing last entry of a bespoke portal may end with '}' and NO
+        # trailing comma; the generated entries are comma-terminated. Add the
+        # missing separator so the spliced block stays valid TypeScript.
+        if head.endswith("}"):
+            head += ","
         txt = head + "\n" + "\n".join(new_entries) + "\n    " + txt[close_p:]
         added_total += len(new_entries)
         print(f"nav +{len(new_entries)} -> {slug}")
