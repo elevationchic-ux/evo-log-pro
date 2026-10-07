@@ -503,3 +503,99 @@ try:
 except Exception:
     pass
 # </expansion:log3pl>
+
+# <expansion:log3pl_b>
+try:
+    from app.models.log3pl_b_deep import (
+        TplDockAppointment,
+        TplLoadingPlan,
+        TplShipmentManifest,
+        TplInventoryTransfer,
+        TplColdChainLog,
+        TplReturnAuthorization,
+        TplCarrierRate,
+        TplOrderNode,
+        TplDamageClaim,
+    )
+    __all__.extend(["TplDockAppointment", "TplLoadingPlan", "TplShipmentManifest", "TplInventoryTransfer", "TplColdChainLog", "TplReturnAuthorization", "TplCarrierRate", "TplOrderNode", "TplDamageClaim"])
+except Exception:
+    pass
+# </expansion:log3pl_b>
+
+# <expansion:fluvial_b>
+try:
+    from app.models.fluvial_b_deep import (
+        FluvialCanalSection,
+        FluvialConvoy,
+        FluvialBallastOperation,
+        FluvialWaterGauge,
+        FluvialBerthingSlot,
+        FluvialCrewRoster,
+        FluvialCargoManifest,
+        FluvialPortFee,
+        FluvialVesselInspection,
+    )
+    __all__.extend(["FluvialCanalSection", "FluvialConvoy", "FluvialBallastOperation", "FluvialWaterGauge", "FluvialBerthingSlot", "FluvialCrewRoster", "FluvialCargoManifest", "FluvialPortFee", "FluvialVesselInspection"])
+except Exception:
+    pass
+# </expansion:fluvial_b>
+
+# <expansion:aerien_b>
+try:
+    from app.models.aerien_b_deep import (
+        HouseAirWaybill,
+        PerishableCargo,
+        LiveAnimalShipment,
+        CharteredFlight,
+        AirCustomsClearance,
+        ApronMovement,
+        NoiseComplianceRecord,
+    )
+    __all__.extend(["HouseAirWaybill", "PerishableCargo", "LiveAnimalShipment", "CharteredFlight", "AirCustomsClearance", "ApronMovement", "NoiseComplianceRecord"])
+except Exception:
+    pass
+# </expansion:aerien_b>
+
+# <expansion:ferroviaire_b>
+try:
+    from app.models.ferroviaire_b_deep import (
+        RailWheelSet,
+        RailLoadingGauge,
+        RailShuntingPlan,
+        RailTrainConsist,
+        RailPathOccupancy,
+        RailWagonDispatch,
+        RailTerminalCrane,
+    )
+    __all__.extend(["RailWheelSet", "RailLoadingGauge", "RailShuntingPlan", "RailTrainConsist", "RailPathOccupancy", "RailWagonDispatch", "RailTerminalCrane"])
+except Exception:
+    pass
+# </expansion:ferroviaire_b>
+
+# <expansion:parc_b>
+try:
+    from app.models.parc_b_deep import (
+        ParcDriverAssignment,
+        ParcGeofenceZone,
+        ParcInspectionChecklist,
+        ParcLeaseContract,
+        ParcTollPass,
+    )
+    __all__.extend(["ParcDriverAssignment", "ParcGeofenceZone", "ParcInspectionChecklist", "ParcLeaseContract", "ParcTollPass"])
+except Exception:
+    pass
+# </expansion:parc_b>
+
+# <expansion:qhse_b>
+try:
+    from app.models.qhse_b_deep import (
+        QhseNearMiss,
+        QhseCalibration,
+        QhseWasteManifest,
+        QhseTrainingRecord,
+        QhseWorkPermit,
+    )
+    __all__.extend(["QhseNearMiss", "QhseCalibration", "QhseWasteManifest", "QhseTrainingRecord", "QhseWorkPermit"])
+except Exception:
+    pass
+# </expansion:qhse_b>
