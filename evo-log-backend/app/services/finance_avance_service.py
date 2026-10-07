@@ -135,12 +135,12 @@ class GestionCreancesService:
                 )
             ).all()
             
-            total_solde = sum(f.solde_restant for f in factures)
+            total_solde = sum(f.solde_restant or 0 for f in factures)
             
             if total_solde > 0:
                 balance_agee.append({
                     "client_id": client.id,
-                    "client_nom": client.nom,
+                    "client_nom": client.name,
                     "total_solde": total_solde,
                     "nombre_factures": len(factures)
                 })
