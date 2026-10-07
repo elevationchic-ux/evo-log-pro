@@ -72,6 +72,29 @@ def _collect() -> list[tuple[str, str, str, str]]:
                     elif t == "datetime":
                         payload[f["name"]] = "2024-01-01T00:00:00"
                 out.append((slug, ent["entite"], ent.get("unicite", "reference"), payload))
+    # Transit-douane Wave 1B uses MANIFEST (single dict) not MODULES
+    transit = _load_manifest(SCRIPTS / "manifests" / "transit.py")
+    for ent in transit["entities"]:
+        payload = {}
+        for f in ent["fields"]:
+            if not f.get("required"):
+                continue
+            t = f["type"]
+            if t in ("str", "text"):
+                payload[f["name"]] = "test"
+            elif t in ("int", "number"):
+                payload[f["name"]] = 1
+            elif t == "bool":
+                payload[f["name"]] = True
+            elif t == "date":
+                payload[f["name"]] = "2024-01-01"
+            elif t == "datetime":
+                payload[f["name"]] = "2024-01-01T00:00:00"
+        out.append((transit["module_slug"], ent["entite"], ent.get("unicite", "reference"), payload))
+    # Port-ops Wave 1A was handcrafted (no manifest); use a minimal required payload
+    # derived from the unicite field name so POST does not return 422 for shape reasons.
+    for entite, unicite in _PORT_OPS_HANDCRAFTED:
+        out.append(("port-operations", entite, unicite, {unicite: "test"}))
     # dedupe (some modules define the same entite across port+transit reuses)
     seen = set()
     unique = []
