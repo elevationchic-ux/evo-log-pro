@@ -4,9 +4,13 @@ import re
 p = Path("evo-log-frontend/src/config/navigationRegistry.ts")
 txt = p.read_text(encoding="utf-8")
 
-pat = re.compile(r'(\})(?!,)(\s+)(\{[\s\S]{0,400}?badge:\s*"Expansion\.)')
-matches = list(pat.finditer(txt))
-print(f"matches: {len(matches)}")
+# Just look for occurrences of 'badge: "Expansion"' with any preceding context
+matches = list(re.finditer(r'badge:\s*"Expansion', txt))
+print(f"badge Expansion occurrences: {len(matches)}")
+
+# Look at context around first one
 if matches:
-    for i, m in enumerate(matches[:3]):
-        print(f"[{i}] at {m.start()}: {m.group(0)[:80]!r}")
+    m = matches[0]
+    ctx = txt[max(0,m.start()-500):m.end()+50]
+    print("---- 500 chars before first badge:")
+    print(ctx)
