@@ -570,6 +570,7 @@ safe_include_router(transactions.router, prefix="/api/transactions", tags=["Tran
 # keeps precedence. It only answers requests that would otherwise 404 on the
 # business API surface, degrading them to an honest empty/pending envelope
 # instead of a dead screen. See app/routers/v1/pending_modules.py.
+
 # <expansion:transport>
 try:
     from app.routers.v1 import transport_deep
@@ -661,6 +662,34 @@ try:
 except ImportError as e:
     logger.warning(f"Router amenagement_extra_deep absent : {e}")
 # </expansion:amenagement_extra>
+# <expansion:ferroviaire>
+try:
+    from app.routers.v1 import ferroviaire_deep
+    safe_include_router(ferroviaire_deep.router, prefix="/api/v1/transport-ferroviaire", tags=["transport-ferroviaire (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router ferroviaire_deep absent : {e}")
+# </expansion:ferroviaire>
+# <expansion:aerien>
+try:
+    from app.routers.v1 import aerien_deep
+    safe_include_router(aerien_deep.router, prefix="/api/v1/transport-aerien", tags=["transport-aerien (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router aerien_deep absent : {e}")
+# </expansion:aerien>
+# <expansion:fluvial>
+try:
+    from app.routers.v1 import fluvial_deep
+    safe_include_router(fluvial_deep.router, prefix="/api/v1/transport-fluvial", tags=["transport-fluvial (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router fluvial_deep absent : {e}")
+# </expansion:fluvial>
+# <expansion:log3pl>
+try:
+    from app.routers.v1 import log3pl_deep
+    safe_include_router(log3pl_deep.router, prefix="/api/v1/logistique-3pl", tags=["logistique-3pl (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router log3pl_deep absent : {e}")
+# </expansion:log3pl>
 
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)
@@ -1101,35 +1130,3 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
 
-
-# <expansion:ferroviaire>
-try:
-    from app.routers.v1 import ferroviaire_deep
-    safe_include_router(ferroviaire_deep.router, prefix="/api/v1/transport-ferroviaire", tags=["transport-ferroviaire (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router ferroviaire_deep absent : {e}")
-# </expansion:ferroviaire>
-
-# <expansion:aerien>
-try:
-    from app.routers.v1 import aerien_deep
-    safe_include_router(aerien_deep.router, prefix="/api/v1/transport-aerien", tags=["transport-aerien (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router aerien_deep absent : {e}")
-# </expansion:aerien>
-
-# <expansion:fluvial>
-try:
-    from app.routers.v1 import fluvial_deep
-    safe_include_router(fluvial_deep.router, prefix="/api/v1/transport-fluvial", tags=["transport-fluvial (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router fluvial_deep absent : {e}")
-# </expansion:fluvial>
-
-# <expansion:log3pl>
-try:
-    from app.routers.v1 import log3pl_deep
-    safe_include_router(log3pl_deep.router, prefix="/api/v1/logistique-3pl", tags=["logistique-3pl (expansion)"])
-except ImportError as e:
-    logger.warning(f"Router log3pl_deep absent : {e}")
-# </expansion:log3pl>

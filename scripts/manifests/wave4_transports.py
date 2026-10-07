@@ -362,7 +362,7 @@ MODULES["aerien"] = dict(
            F("quantite", "str", "Quantite", "Quantity"),
            F("etiquettes", "str", "Etiquettes", "Labels"),
            F("statut", "str", "Statut", "Status")],
-          [EN("classe", ["1", "2", "3", "4", "5", "6", "7", "8", "9"], "3"),
+          [EN("classe", ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9"], "C3"),
            EN("packaging_group", ["I", "II", "III", "N/A"], "III"),
            EN("statut", ["DECLARER", "ACCEPTE", "REFUSE", "TRANSFERT"], "DECLARER")]),
 
