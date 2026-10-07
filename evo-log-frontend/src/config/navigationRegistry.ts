@@ -109,8 +109,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         tcode: 'KTRN_RTE',
         description: 'Poste de contrôle en temps réel de la flotte et des tournées',
         businessProcess: 'Activité live'
-      }
-          {
+      },
+      {
         label: "Sante fonctionnelle des modules",
         path: "/dashboard/module-health",
         icon: (LUCIDE as any)["HeartPulse"],
@@ -288,8 +288,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: 'Intégration systèmes',
         isCemacSpecific: true,
         requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'INTEGRATION']
-      }
-          {
+      },
+      {
         label: "Constats tirant d'eau",
         path: "/port-operations/draft-surveys",
         icon: (LUCIDE as any)["Ruler"],
@@ -542,8 +542,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: 'Conformité réglementaire',
         isCemacSpecific: true,
         requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'QHSE', 'AUDITEUR']
-      }
-          {
+      },
+      {
         label: "Suivi avancement physique travaux",
         path: "/amenagement-portuaire/construction-tracking",
         icon: (LUCIDE as any)["Building2"],
@@ -705,8 +705,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: 'Conformité douanière',
         isCemacSpecific: true,
         requiredRoles: ['DOUANE', 'COMPLIANCE']
-      }
-          {
+      },
+      {
         label: "Classification tarifaire SH",
         path: "/transit-douane/hs-classification",
         icon: (LUCIDE as any)["BookOpen"],
@@ -903,8 +903,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: 'Tickets carburant, contrôle des consommations, alertes anomalies',
         businessProcess: 'Maîtrise carburant',
         requiredRoles: ['TRANSPORT', 'FINANCE']
-      }
-          {
+      },
+      {
         label: "Fiche vehicule",
         path: "/transport-flotte/vehicle-registry",
         icon: (LUCIDE as any)["Truck"],
@@ -1103,8 +1103,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: 'Mouvements stock',
         isOhadaCompliant: true,
         requiredRoles: ['MAGASIN', 'STOCK']
-      }
-          {
+      },
+      {
         label: "Referentiel articles / SKU",
         path: "/magasin-stock/article-catalog",
         icon: (LUCIDE as any)["Boxes"],
@@ -1319,8 +1319,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         isCemacSpecific: true,
         isOhadaCompliant: true,
         requiredRoles: ['EXPERT_COMPTABLE', 'FINANCE']
-      }
-          {
+      },
+      {
         label: "Registre immobilisations",
         path: "/comptabilite-ohada/fixed-assets",
         icon: (LUCIDE as any)["Building"],
@@ -1514,8 +1514,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         isCemacSpecific: true,
         isOhadaCompliant: true,
         requiredRoles: ['FINANCE']
-      }
-          {
+      },
+      {
         label: "Budget pluriannuel",
         path: "/finance-ohada/budget-management",
         icon: (LUCIDE as any)["CalendarRange"],
@@ -1704,8 +1704,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: 'Rentabilité parc',
         isOhadaCompliant: true,
         requiredRoles: ['PARC', 'FINANCE']
-      }
-          {
+      },
+      {
         label: "Inventaire complet du parc",
         path: "/parc-vehicules/vehicle-inventory",
         icon: (LUCIDE as any)["Truck"],
@@ -1876,8 +1876,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: 'Déclarations sociales',
         isCemacSpecific: true,
         requiredRoles: ['RH', 'PAIE']
-      }
-          {
+      },
+      {
         label: "Offres et candidatures",
         path: "/rh-personnel/recruitment",
         icon: (LUCIDE as any)["UserPlus"],
@@ -2065,8 +2065,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: 'Certificats de sécurité portuaire, recyclages EPI et caristes',
         businessProcess: 'Habilitations',
         requiredRoles: ['QHSE', 'RH']
-      }
-          {
+      },
+      {
         label: "Suivi environnemental",
         path: "/qhse-securite/environmental-monitoring",
         icon: (LUCIDE as any)["Activity"],
@@ -2234,8 +2234,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: 'Ouverture de tickets, réclamations fret et suivi résolutions',
         businessProcess: 'Support réclamations',
         requiredRoles: ['CLIENT', 'CLIENT_B2B', 'COMMERCIAL']
-      }
-          {
+      },
+      {
         label: "Admission nouveau client",
         path: "/client-b2b/client-onboarding",
         icon: (LUCIDE as any)["UserPlus"],
@@ -2403,8 +2403,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: 'Constructeur de rapports ad-hoc et export multi-formats',
         businessProcess: 'Génération rapports',
         requiredRoles: ['ANALYST', 'POWER_USER', 'ADMIN']
-      }
-          {
+      },
+      {
         label: "Entrepot de donnees",
         path: "/reports-bi/data-warehouse",
         icon: (LUCIDE as any)["Database"],
@@ -2571,8 +2571,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: 'Traçabilité complète des accès inter-organisations',
         businessProcess: 'Sécurité globale',
         requiredRoles: ['SUPER_ADMIN']
-      }
-          {
+      },
+      {
         label: "Gestion fonctionnalites par tenant",
         path: "/admin-saas/feature-flags",
         icon: (LUCIDE as any)["ToggleRight"],
@@ -2754,8 +2754,8 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: 'File d\'attente des demandes de modules des entreprises à approuver ou refuser',
         businessProcess: 'Conformité & délais',
         requiredRoles: ['SUPER_ADMIN', 'CADC']
-      }
-          {
+      },
+      {
         label: "Audit global plateforme multi-tenant",
         path: "/superadmin-cadc/platform-audit",
         icon: (LUCIDE as any)["ScanSearch"],
