@@ -979,6 +979,27 @@ except ImportError as e:
     logger.warning(f"Router heavylift_e_deep absent : {e}")
 # </expansion:heavylift_e>
 
+# <expansion:maintenance_deep>
+# Wave 6 : maintenance industrielle experte (FMEA/RCM/TPM, MTBF/MTTR/OEE,
+# piéces sérialisées singleton, chaine BOM, prédictif IoT).
+try:
+    from app.routers.v1 import maintenance_deep
+    safe_include_router(maintenance_deep.router, prefix="/api/v1/maintenance-industrielle", tags=["maintenance-industrielle (expansion wave 6)"])
+except ImportError as e:
+    logger.warning(f"Router maintenance_deep absent : {e}")
+# </expansion:maintenance_deep>
+
+# <expansion:tracabilite_deep>
+# Wave 6 : traçabilité bout-en-bout (chaîne de custody, Merkle/hash chain,
+# sceau ISO 17712, horodatage qualifié eIDAS/CAMPOST, RGPD + loi Cameroun
+# 2010/041, anti-falsification, rétention légale OGIC/CGI).
+try:
+    from app.routers.v1 import tracabilite_deep
+    safe_include_router(tracabilite_deep.router, prefix="/api/v1/tracabilite", tags=["tracabilite-bout-en-bout (expansion wave 6)"])
+except ImportError as e:
+    logger.warning(f"Router tracabilite_deep absent : {e}")
+# </expansion:tracabilite_deep>
+
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)
 
