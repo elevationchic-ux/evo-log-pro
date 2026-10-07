@@ -44,7 +44,7 @@ class DeclHsClassification_statut(str, enum.Enum):
 
 class DeclOriginCertificate_type(str, enum.Enum):
     EUR1 = "eur1"
-    A.TR = "a.tr"
+    ATR = "atr"
     CERTINE = "certine"
     ATTA_ORIGINE = "atta_origine"
 

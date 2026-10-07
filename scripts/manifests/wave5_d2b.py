@@ -89,7 +89,7 @@ MODULES["declarant_d"] = dict(
            F("numero", "str", "Numero", "Number"),
            F("date_emission", "date", "Date emission", "Issue date"),
            F("statut", "str", "Statut", "Status")],
-          [EN("type", ["EUR1", "A.TR", "CERTINE", "ATTA_ORIGINE"]),
+          [EN("type", ["EUR1", "ATR", "CERTINE", "ATTA_ORIGINE"]),
            EN("statut", ["DEMANDE", "EMIS", "EXPIRE", "REVOQUE"])]),
 
         E("customs-valuations", "decl_customs_valuations", "DeclCustomsValuation", "decl-customs-valuations",
