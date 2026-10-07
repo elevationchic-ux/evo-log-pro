@@ -69,10 +69,23 @@ export function classifyApiError(err: unknown): ApiErrorInfo {
   if (status && status >= 500) {
     return { kind: 'server', message: 'Le serveur rencontre un problème technique. Réessayez dans quelques instants.', detail: tech, status };
   }
-  if (!ax?.response && (ax?.code === 'ERR_NETWORK' || ax?.message?.includes('Network') || ax?.message?.includes('timeout'))) {
-    return { kind: 'network', message: 'Le serveur EVO-LOG est injoignable (réseau ou maintenance). Vérifiez votre connexion puis réessayez.', detail: tech };
+  // Distinguer deux echecs sans reponse : le backend etait VIVANT mais lent
+  // (timeout client) vs reellement injoignable (DNS / connexion refusee).
+  // Dire « verifiez votre connexion » sur un simple timeout egare le diagnostic.
+  const noResponse = !ax?.response;
+  const isTimeout = ax?.code === 'ECONNABORTED' || /timeout/i.test(ax?.message || '');
+  const isNetDown = ax?.code === 'ERR_NETWORK' || /network/i.test(ax?.message || '');
+  if (noResponse && (isTimeout || isNetDown)) {
+    const message = isTimeout
+      ? 'Le serveur met trop de temps a repondre (charge elevee ou redemarrage). Nouvelle tentative automatique en cours : patientez quelques secondes puis rechargez.'
+      : 'Le serveur EVO-LOG est injoignable (reseau ou maintenance). Verifiez votre connexion puis reessayez.';
+    return { kind: 'network', message, detail: tech };
   }
-  return { kind: 'unknown', message: 'Une erreur est survenue pendant le chargement des données.', detail: tech, status };
+  if (noResponse) {
+    // Aucune reponse sans code reseau identifie (ex. connexion interrompue).
+    return { kind: 'network', message: 'Le serveur EVO-LOG n\u2019a pas repondu (reseau ou maintenance). Reessayez.', detail: tech };
+  }
+  return { kind: 'unknown', message: 'Une erreur est survenue pendant le chargement des donnees.', detail: tech, status };
 }
 
 export interface UseApiOptions<T> {
