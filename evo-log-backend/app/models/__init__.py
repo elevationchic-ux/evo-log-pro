@@ -1160,3 +1160,70 @@ try:
 except Exception:
     pass
 # </expansion:collaborateur_d>
+
+# <expansion:maintenance_deep>
+# Wave 6 : maintenance industrielle experte (FMEA / RCM / TPM, MTBF/MTTR/OEE,
+# singleton piece de rechange serialisee, chaine de cote BOM, predictif).
+try:
+    from app.models.maintenance_deep import (
+        TechnicalAsset,
+        AssetComponent,
+        SparePartCatalog,
+        BillOfMaterial,
+        SerializedPart,
+        PartInventory,
+        PartMovement,
+        FailureMode,
+        MaintenancePlan,
+        MaintenanceTask,
+        WorkOrder,
+        AssetFailure,
+        WorkOrderPart,
+        WorkOrderLabour,
+        WorkOrderTool,
+        RootCauseAnalysis,
+        OverhaulCampaign,
+        LubricationSchedule,
+        ConditionReading,
+        Sensor,
+        PredictiveModel,
+        ReliabilityKpi,
+        RegulatoryInspection,
+        MaintenanceBudget,
+        MaintenanceVendor,
+    )
+    __all__.extend(["TechnicalAsset", "AssetComponent", "SparePartCatalog", "BillOfMaterial", "SerializedPart", "PartInventory", "PartMovement", "FailureMode", "MaintenancePlan", "MaintenanceTask", "WorkOrder", "AssetFailure", "WorkOrderPart", "WorkOrderLabour", "WorkOrderTool", "RootCauseAnalysis", "OverhaulCampaign", "LubricationSchedule", "ConditionReading", "Sensor", "PredictiveModel", "ReliabilityKpi", "RegulatoryInspection", "MaintenanceBudget", "MaintenanceVendor"])
+except Exception:
+    pass
+# </expansion:maintenance_deep>
+
+# <expansion:tracabilite_deep>
+# Wave 6 : tracaibilite bout-en-bout (chaine de custody, Merkle / hash chain,
+# sceau ISO 17712, horodatage qualifie eIDAS/CAMPOST, RGPD + loi Cameroun
+# 2010/041, anti-falsification, rétention légale OGIC/CGI).
+try:
+    from app.models.tracabilite_deep import (
+        TraceabilityEvent,
+        ChainOfCustodyTransfer,
+        BatchGenealogy,
+        SerialGenealogy,
+        DocumentHash,
+        GeolocationTrace,
+        ColdChainTrace,
+        IncidentChainOfCommand,
+        RegulatoryTraceExport,
+        ImmutableAuditLog,
+        TimestampAuthority,
+        WitnessSignature,
+        IntegrityMerkleProof,
+        ContainerSeal,
+        CargoHandoff,
+        AccessSecurityLog,
+        ConsentGrant,
+        AntiTamperingEvent,
+        RetentionPolicy,
+    )
+    __all__.extend(["TraceabilityEvent", "ChainOfCustodyTransfer", "BatchGenealogy", "SerialGenealogy", "DocumentHash", "GeolocationTrace", "ColdChainTrace", "IncidentChainOfCommand", "RegulatoryTraceExport", "ImmutableAuditLog", "TimestampAuthority", "WitnessSignature", "IntegrityMerkleProof", "ContainerSeal", "CargoHandoff", "AccessSecurityLog", "ConsentGrant", "AntiTamperingEvent", "RetentionPolicy"])
+except Exception:
+    pass
+# </expansion:tracabilite_deep>
