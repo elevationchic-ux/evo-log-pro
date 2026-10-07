@@ -26284,6 +26284,18 @@
     "RapportIntegrationResponse"
    ]
   },
+  "/api/v1/chaine/graphe": {
+   "get": []
+  },
+  "/api/v1/chaine/escale/{escale_id}": {
+   "get": []
+  },
+  "/api/v1/chaine/mission/{mission_id}": {
+   "get": []
+  },
+  "/api/v1/chaine/propager": {
+   "post": []
+  },
   "/api/v1/reporting/rapports": {
    "get": [
     "RapportResponse"
