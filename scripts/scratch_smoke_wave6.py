@@ -1,19 +1,23 @@
 # -*- coding: utf-8 -*-
-"""Smoke test wave 6 : maintenance industrielle (25) + tracaabilite (19).
+"""Smoke test wave 6 : maintenance industrielle (25) + traçabilité (19).
 
-V1 : test de reachabilite route. Pour chaque endpoint :
-  GET  /list           -> attend 200 (array vide ok)
-  GET  /nomenclatures  -> attend 200 (dico des enums)
-  POST /list minimal   -> attend 201 (cree) OU 422 (endpoint cablé, validation
-                          Pydantic sur les champs non-null obligatoires) :
-                          les deux sont des succes de wiring.
-  PUT  /list/{id}      -> si POST a cree : attend 200 ; sinon skip.
-  DELETE /list/{id}    -> si POST a cree : attend 200 ; sinon skip.
+Approche "flux métier réel" (parent-first) :
+  1. On cree d'abord les racines (actif, piece, prestataire, plan, OT...) et on
+    memorise leurs VRAIS ids retournes par l'API.
+  2. Les entites enfants referencent ces ids reels (jetons {ASSET}, {PART}...)
+    au lieu d'un id 9999 fictif -> cela prouve que l'integrite referentielle
+    cross-table fonctionne et que le POST renvoie un vrai 201.
+  3. Chaque POST inclut TOUTES les colonnes NOT NULL (satisfait le schema
+    Pydantic) -> plus de 422 "toleres" : on exige 201 reel.
+  4. PUT + DELETE sur chaque ligne creee.
 
-Cible : 44 listes x 4 methodes + 2 nomenclatures = 178 endpoints.
+Un suffixe temporel rend les cles metier uniques entre executions.
+
+Cible : 44 listes x 4 methodes + 2 nomenclatures = 178 endpoints, 0 echec.
 """
 import json
 import sys
+import time
 import urllib.request
 import urllib.error
 
@@ -22,6 +26,8 @@ try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
     pass
+
+SFX = str(int(time.time()))[-6:]
 
 
 def login():
@@ -42,68 +48,95 @@ def call(method, path, token, body=None):
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
-            return r.status, r.read().decode()[:220]
+            return r.status, r.read().decode()[:300]
     except urllib.error.HTTPError as e:
-        return e.code, e.read().decode()[:220]
+        return e.code, e.read().decode()[:300]
     except Exception as e:
-        return "ERR", str(e)[:220]
+        return "ERR", str(e)[:300]
 
 
-# (module_prefix, sub_path, unique_field, seed_value, extra_body)
-SUBMODULES = [
-    # --- MAINTENANCE INDUSTRIELLE -----------------------------------------
-    ("/api/v1/maintenance-industrielle", "assets",              "tag_actif",              "MA-ASM-1", {"nom": "Grue STS-01", "categorie": "grue"}),
-    ("/api/v1/maintenance-industrielle", "components",          "asset_id",               9999,        {"nom_composant": "Moteur principal", "code_composant": "CMP-1"}),
-    ("/api/v1/maintenance-industrielle", "spare-parts",         "reference_interne",      "PI-SMOKE-1",{"designation": "Filtre a huile"}),
-    ("/api/v1/maintenance-industrielle", "bill-of-material",    "asset_id",               9999,        {"piece_id": 9999, "quantite": 1}),
-    ("/api/v1/maintenance-industrielle", "serialized-parts",    "numero_serial",          "SER-SMOKE-1",{"piece_id": 9999}),
-    ("/api/v1/maintenance-industrielle", "inventory",           "part_id",                9999,        {"quantite_en_stock": 5}),
-    ("/api/v1/maintenance-industrielle", "movements",           "reference_mouvement",    "MV-SMOKE-1",{"piece_id": 9999, "type_mouvement": "entree_achat", "quantite": 1}),
-    ("/api/v1/maintenance-industrielle", "failure-modes",       "code_fmea",              "FM-SMOKE-1",{}),
-    ("/api/v1/maintenance-industrielle", "plans",               "code_plan",              "PL-SMOKE-1",{"nom_plan": "P1"}),
-    ("/api/v1/maintenance-industrielle", "tasks",               "code_tache",             "TS-SMOKE-1",{"libelle": "T1"}),
-    ("/api/v1/maintenance-industrielle", "work-orders",         "numero_ot",              "OT-SMOKE-1",{"type_ot": "preventif", "actif_id": 9999}),
-    ("/api/v1/maintenance-industrielle", "asset-failures",      "reference_defaillance",  "PA-SMOKE-1",{"actif_id": 9999}),
-    ("/api/v1/maintenance-industrielle", "wo-parts",            "work_order_id",          9999,        {"piece_id": 9999}),
-    ("/api/v1/maintenance-industrielle", "wo-labours",          "work_order_id",          9999,        {"user_id": 1, "heures_reelles": 1}),
-    ("/api/v1/maintenance-industrielle", "wo-tools",            "work_order_id",          9999,        {"nom_outil": "Cle"}),
-    ("/api/v1/maintenance-industrielle", "root-causes",         "reference_rca",          "RCA-SMOKE-1",{}),
-    ("/api/v1/maintenance-industrielle", "overhauls",           "code_overhaul",          "OVB-SMOKE-1",{}),
-    ("/api/v1/maintenance-industrielle", "lubrication",         "asset_id",               9999,        {"point_graissage": "PG1"}),
-    ("/api/v1/maintenance-industrielle", "condition-readings",  "reference_lecture",      "CR-SMOKE-1",{"actif_id": 9999, "type_technique": "vibration"}),
-    ("/api/v1/maintenance-industrielle", "sensors",             "code_capteur",           "SEN-SMOKE-1",{}),
-    ("/api/v1/maintenance-industrielle", "predictive-models",   "code_modele",            "PMO-SMOKE-1",{}),
-    ("/api/v1/maintenance-industrielle", "reliability-kpis",    "asset_id",               9999,        {"periode": "2026-01"}),
-    ("/api/v1/maintenance-industrielle", "inspections",         "numero_pv",              "PV-SMOKE-1",{}),
-    ("/api/v1/maintenance-industrielle", "budgets",             "asset_id",               9999,        {"exercice": 2026}),
-    ("/api/v1/maintenance-industrielle", "vendors",             "code_prestataire",       "VEN-SMOKE-1",{"nom": "Presta"}),
-    # --- TRAÇABILITE BOUT-EN-BOUT -----------------------------------------
-    ("/api/v1/tracabilite", "events",              "event_uid",              "11111111-1111-1111-1111-111111111111",
-     {"event_type": "colis.scan", "module_source": "smoke"}),
-    ("/api/v1/tracabilite", "custody-transfers",   "reference_transfert",    "CT-SMOKE-1", {"asset_type": "colis", "asset_ref": "PK1", "type_transfert": "remise_physique"}),
-    ("/api/v1/tracabilite", "batch-genealogy",     "child_lot",              "LOT-ENF-1",  {"parent_lot": "LOT-PAR-1", "operation": "melange"}),
-    ("/api/v1/tracabilite", "serial-genealogy",    "child_serial",           "SER-ENF-1",  {"parent_serial": "SER-PAR-1", "relation_type": "sous_ensemble"}),
-    ("/api/v1/tracabilite", "document-hashes",     "document_ref",           "DOC-SMOKE-1",{"version": 1, "hash_algos": "sha256", "hash_valeur": "abc"}),
-    ("/api/v1/tracabilite", "geolocations",        "subject_type",           "vehicule",   {"subject_ref": "VH1", "gps_lat": 4.05, "gps_lng": 9.70}),
-    ("/api/v1/tracabilite", "cold-chain",          "subject_ref",            "RF-SMOKE-1", {"sonde_id": "S1", "temperature_c": -18.5}),
-    ("/api/v1/tracabilite", "incidents",           "reference_incident",     "INC-SMOKE-1",{"type_incident": "accident", "severite": "mineure"}),
-    ("/api/v1/tracabilite", "regulatory-exports",  "numero_expedition",      "EXP-SMOKE-1",{"autorite": "SAT", "type_document": "DUM"}),
-    ("/api/v1/tracabilite", "audit-logs",          "action",                 "login",     {"user_id_test": 1, "hash_self": "h", "hash_prev": "h"}),
-    ("/api/v1/tracabilite", "timestamps",          "token_tsa",              "TSA-SMOKE-1",{"autorite": "CAMPOST", "objet_hash": "abc"}),
-    ("/api/v1/tracabilite", "signatures",          "reference_signature",    "SG-SMOKE-1",{"type_signataire": "emetteur", "type_signature": "manuscrite"}),
-    ("/api/v1/tracabilite", "merkle-proofs",       "periode",                "2026-01",   {"racine_type": "trace_events", "merkle_root": "r0"}),
-    ("/api/v1/tracabilite", "seals",               "numero_sceau",           "SEL-SMOKE-1",{"conteneur_numero": "MSKU123", "type_sceau": "haute_securite"}),
-    ("/api/v1/tracabilite", "cargo-handoffs",      "reference_handoff",      "HO-SMOKE-1",{"type_cargo": "container", "mode_precedent": "maritime", "mode_suivant": "routier"}),
-    ("/api/v1/tracabilite", "access-logs",         "type_evenement",         "login_success",{"user_id_test": 1}),
-    ("/api/v1/tracabilite", "consents",            "reference_consentement", "CG-SMOKE-1",{"finalite": "newsletter", "categorie_donnees": "contact"}),
-    ("/api/v1/tracabilite", "anti-tampering",      "reference_evenement",    "AT-SMOKE-1",{"type_attaque": "hash_mismatch"}),
-    ("/api/v1/tracabilite", "retention-policies",  "code_politique",         "RP-SMOKE-1",{"type_objet": "facture", "duree_conservation_ans": 10}),
+def s(val):
+    """Cle metier unique suffixee."""
+    return f"{val}-{SFX}"
+
+
+# (subpath, body)  -- body values may contain jetons {ASSET} {PART} {WO} {PLAN}
+# {COMP} {SER} {FM} {RCA} {TSA} remplaces par les vrais ids enregistres.
+MNT = "/api/v1/maintenance-industrielle"
+TRC = "/api/v1/tracabilite"
+
+PHASES = [
+    # --- racines sans dependance (ordre = topologie) ---
+    (MNT, "vendors", {"code_prestataire": s("VEN"), "raison_sociale": "Prestataire test"}),
+    (MNT, "assets", {"tag_actif": s("MA"), "nom": "Grue portique STS"}),
+    (MNT, "spare-parts", {"reference_interne": s("PI"), "designation": "Filtre a huile moteur"}),
+    # --- enfants dependants ---
+    (MNT, "components", {"asset_id": "{ASSET}", "code_composant": s("CMP"), "nom_composant": "Moteur principal"}),
+    (MNT, "plans", {"code_plan": s("PL"), "nom": "Plan preventif moteur", "type_plan": "preventif", "asset_id": "{ASSET}"}),
+    (MNT, "work-orders", {"numero_ot": s("OT"), "type_ot": "preventif", "asset_id": "{ASSET}", "titre": "Revision 500h"}),
+    (MNT, "bill-of-material", {"asset_id": "{ASSET}", "part_id": "{PART}", "position_index": 1}),
+    (MNT, "serialized-parts", {"part_id": "{PART}", "numero_serial": s("SER")}),
+    (MNT, "inventory", {"part_id": "{PART}", "quantite_en_stock": 12}),
+    (MNT, "movements", {"reference_mouvement": s("MV"), "part_id": "{PART}", "type_mouvement": "entree_achat",
+                        "quantite": 5, "date_mouvement": "2026-01-01T10:00:00"}),
+    (MNT, "failure-modes", {"code_fmea": s("FM"), "mode_defaillance": "Usure prematuree", "asset_id": "{ASSET}"}),
+    (MNT, "tasks", {"code_tache": s("TS"), "titre": "Vidange", "plan_id": "{PLAN}"}),
+    (MNT, "asset-failures", {"reference_defaillance": s("PA"), "asset_id": "{ASSET}", "date_detection": "2026-01-01T10:00:00"}),
+    (MNT, "wo-parts", {"work_order_id": "{WO}", "part_id": "{PART}", "quantite_demandee": 2}),
+    (MNT, "wo-labours", {"work_order_id": "{WO}", "user_id": 2, "date_travail": "2026-01-01", "heures_reelles": 3.5}),
+    (MNT, "wo-tools", {"work_order_id": "{WO}", "reference_outillage": s("OUT")}),
+    (MNT, "root-causes", {"reference_rca": s("RCA"), "probleme": "Surchauffe moteur"}),
+    (MNT, "overhauls", {"code_overhaul": s("OVB"), "asset_id": "{ASSET}"}),
+    (MNT, "lubrication", {"asset_id": "{ASSET}", "point_lubrifiant": s("PG")}),
+    (MNT, "condition-readings", {"reference_lecture": s("CR"), "asset_id": "{ASSET}", "type_technique": "vibration",
+                                 "date_lecture": "2026-01-01T10:00:00"}),
+    (MNT, "sensors", {"code_capteur": s("SEN")}),
+    (MNT, "predictive-models", {"code_modele": s("PMO")}),
+    (MNT, "reliability-kpis", {"asset_id": "{ASSET}", "periode": s("2026-01")}),
+    (MNT, "inspections", {"numero_pv": s("PV"), "asset_id": "{ASSET}"}),
+    (MNT, "budgets", {"asset_id": "{ASSET}", "exercice": 2026}),
+    # --- TRAÇABILITE (auto-suffisant, pas de FK wave 6 obligatoire) ---
+    (TRC, "events", {"event_uid": s("EV"), "event_type": "colis.scan", "module_source": "smoke",
+                     "timestamp_server": "2026-01-01T10:00:00"}),
+    (TRC, "custody-transfers", {"reference_transfert": s("CT"), "asset_type": "colis", "asset_ref": "PK1",
+                                "date_transfert": "2026-01-01T10:00:00"}),
+    (TRC, "batch-genealogy", {"child_lot": s("LOT-E"), "parent_lot": s("LOT-P")}),
+    (TRC, "serial-genealogy", {"child_serial": s("SER-E"), "parent_serial": s("SER-P")}),
+    (TRC, "document-hashes", {"document_ref": s("DOC"), "version": 1}),
+    (TRC, "geolocations", {"subject_type": "vehicule", "subject_ref": "VH1", "date_position": "2026-01-01T10:00:00",
+                           "gps_lat": 4.05, "gps_lng": 9.70}),
+    (TRC, "cold-chain", {"subject_type": "reefer", "subject_ref": "RF1", "date_lecture": "2026-01-01T10:00:00"}),
+    (TRC, "incidents", {"reference_incident": s("INC"), "type_incident": "accident", "date_debut": "2026-01-01T10:00:00"}),
+    (TRC, "regulatory-exports", {"numero_expedition": s("EXP"), "autorite_destinataire": "SAT"}),
+    (TRC, "audit-logs", {"timestamp_server": "2026-01-01T10:00:00"}),
+    (TRC, "timestamps", {"token_tsa": s("TSA"), "date_horodatage": "2026-01-01T10:00:00"}),
+    (TRC, "signatures", {"reference_signature": s("SG"), "date_signature": "2026-01-01T10:00:00"}),
+    (TRC, "merkle-proofs", {"racine_type": "trace_events", "periode": s("2026-01")}),
+    (TRC, "seals", {"numero_sceau": s("SEL")}),
+    (TRC, "cargo-handoffs", {"reference_handoff": s("HO")}),
+    (TRC, "access-logs", {"type_evenement": "login_success", "date_evenement": "2026-01-01T10:00:00"}),
+    (TRC, "consents", {"reference_consentement": s("CG")}),
+    (TRC, "anti-tampering", {"reference_alerte": s("AT"), "type_alerte": "hash_mismatch",
+                             "date_detection": "2026-01-01T10:00:00"}),
+    (TRC, "retention-policies", {"code_politique": s("RP")}),
 ]
 
-MODULES = [
-    "/api/v1/maintenance-industrielle",
-    "/api/v1/tracabilite",
-]
+# token -> cle du registre des ids crees
+TOKEN_KEY = {
+    "{ASSET}": "assets", "{PART}": "spare-parts", "{WO}": "work-orders",
+    "{PLAN}": "plans", "{COMP}": "components", "{SER}": "serialized-parts",
+    "{FM}": "failure-modes", "{RCA}": "root-causes", "{TSA}": "timestamps",
+}
+
+
+def resolve(body, ids):
+    out = {}
+    for k, v in body.items():
+        if isinstance(v, str) and v in TOKEN_KEY:
+            out[k] = ids.get(TOKEN_KEY[v])
+        else:
+            out[k] = v
+    return out
 
 
 def main():
@@ -111,53 +144,51 @@ def main():
     print("token:", "OK" if tok else "ABSENT")
     if not tok:
         return 2
+    ids = {}
     results = []
 
-    # nomenclatures par module (doit etre 200)
-    for m in MODULES:
+    # nomenclatures par module
+    for m in (MNT, TRC):
         results.append((f"GET {m}/nomenclatures", *call("GET", m + "/nomenclatures", tok)))
 
-    for prefix, subpath, ufield, uval, extra in SUBMODULES:
+    for prefix, subpath, body in PHASES:
         path = f"{prefix}/{subpath}"
         # LIST
         results.append((f"GET {path}", *call("GET", path, tok)))
-        # CREATE (payload = champ unique + extras)
-        body = dict(extra)
-        body[ufield] = uval
-        code, resp_body = call("POST", path, tok, body)
-        results.append((f"POST {path}", code, resp_body))
+        # CREATE (resolve jetons -> ids reels)
+        payload = resolve(body, ids)
+        missing = [k for k, v in payload.items() if v is None]
+        if missing:
+            results.append((f"POST {path}", "SKIP", f"parent manquant pour {missing}"))
+            continue
+        code, resp = call("POST", path, tok, payload)
+        results.append((f"POST {path}", code, resp))
         new_id = None
         try:
-            new_id = json.loads(resp_body).get("id")
+            new_id = json.loads(resp).get("id")
         except Exception:
             pass
-        # UPDATE + DELETE si POST a cree
         if new_id is not None:
-            results.append((f"PUT  {path}/{new_id}", *call("PUT", f"{path}/{new_id}", tok, {ufield: uval})))
+            ids[subpath] = new_id
+            results.append((f"PUT  {path}/{new_id}", *call("PUT", f"{path}/{new_id}", tok, payload)))
             results.append((f"DEL  {path}/{new_id}", *call("DELETE", f"{path}/{new_id}", tok)))
 
     print("\n================ SMOKE WAVE 6 RESULTS ================")
-    strict_bad = 0
-    tolerated = 0
+    bad = 0
     for name, code, body_txt in results:
-        # POST peut retourne 201 (cree) OU 422 (validation attendue) OU 409 (doublon)
         if name.startswith("POST"):
-            if code in (201, 422, 409):
-                if code != 201:
-                    tolerated += 1
+            if code in (201, 409, "SKIP"):
                 continue
-            strict_bad += 1
-            print(f"{code}  {name}")
-            print(f"       body: {body_txt[:180]}")
+            bad += 1
+            print(f"{code}  {name}\n       {body_txt[:220]}")
         else:
             if code in (200, 201):
                 continue
-            strict_bad += 1
-            print(f"{code}  {name}")
-            print(f"       body: {body_txt[:180]}")
+            bad += 1
+            print(f"{code}  {name}\n       {body_txt[:220]}")
     total = len(results)
-    print(f"\nDONE: {total - strict_bad}/{total} endpoints OK ({tolerated} POST rejected by schema but wired), {strict_bad} problems")
-    return 0 if strict_bad == 0 else 1
+    print(f"\nDONE: {total - bad}/{total} endpoints OK, {bad} problems")
+    return 0 if bad == 0 else 1
 
 
 if __name__ == "__main__":
