@@ -1160,7 +1160,7 @@ MODULES["amenagement_extra"] = dict(
            F("motif", "text", "Motif", "Reason"),
            F("authorite_emetteuse", "str", "Autorite emetteuse", "Issuing authority"),
            F("date_levee", "datetime", "Levee", "Lift date")],
-          [EN("niveau_isps", ["1", "2", "3"], "1")]),
+          [EN("niveau_isps", ["N1", "N2", "N3"], "N1")]),
         E("port-pricing", "port_perceptions", "PortPerception", "port-perceptions", "port_pricing",
           "Redevances et perceptions portuaires", "Port fees and perceptions",
           "Grille tarifaire du domaine portuaire.", "Port fee grid.",
