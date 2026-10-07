@@ -1342,5 +1342,39 @@ export const documentsAPI = {
     apiClient.put(`/api/v1/documents/archivages-legal/${id}`, data),
 };
 
+/**
+ * Fabrique generique d'API registre pour le chassis RegistreGenerique.
+ *
+ * Usage :
+ *   const portOpsAPI = registreAPI('port-operations');
+ *   portOpsAPI.lister('vessels', { statut: 'en_escale' })
+ *   portOpsAPI.creer('vessels', { nom: 'MSC ...' })
+ *   portOpsAPI.modifier('vessels', 42, { tirant_eau: 12.5 })
+ *   portOpsAPI.getNomenclatures()  // GET /api/v1/port-operations/nomenclatures
+ */
+export function registreAPI(modulePath: string) {
+  const base = apiUrl(`/${modulePath}`);
+  return {
+    lister: (entite: string, params?: Record<string, string | number | boolean>) =>
+      apiClient.get(`${base}/${entite}`, { params }),
+    creer: (entite: string, data: Record<string, unknown>) =>
+      apiClient.post(`${base}/${entite}`, data),
+    modifier: (entite: string, id: number, data: Record<string, unknown>) =>
+      apiClient.put(`${base}/${entite}/${id}`, data),
+    lire: (entite: string, id: number) =>
+      apiClient.get(`${base}/${entite}/${id}`),
+    supprimer: (entite: string, id: number, params?: Record<string, unknown>) =>
+      apiClient.delete(`${base}/${entite}/${id}`, { params, data: params ? undefined : {} }),
+    getNomenclatures: () =>
+      apiClient.get(`${base}/nomenclatures`),
+    /** Action specifique ex. POST /{module}/{entite}/{id}/approve */
+    action: (entite: string, id: number, action: string, data?: Record<string, unknown>) =>
+      apiClient.post(`${base}/${entite}/${id}/${action}`, data || {}),
+    /** Sonde GET /{module}/{entite}/{id}/{probe} */
+    sonde: (entite: string, id: number, probe: string) =>
+      apiClient.get(`${base}/${entite}/${id}/${probe}`),
+  };
+}
+
 export default apiClient;
 
