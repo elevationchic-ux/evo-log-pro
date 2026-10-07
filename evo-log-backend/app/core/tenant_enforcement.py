@@ -34,15 +34,29 @@ from app.core.tenant_context import (
 
 logger = logging.getLogger(__name__)
 
-# Cached lazily: list of (mapped_class) with a local company_id column.
+# Cached lazily: list of (mapped_class) with a local company_id column, plus the
+# size of the mapper registry observed when that list was computed. Some ORM
+# entities bearing company_id are declared in modules pulled in only by the
+# routers (app.main), not by app.models.__init__ (ex. Navire/Escale via
+# acconage, BonCommande via acquisition, BonReception via magasin_avance,
+# OrdreTransport via transport_international, DeclarationFiscale/ContratFiscal/
+# RetenueSourceCameroun via fiscalite_cameroun). If the very first tenant query
+# runs while the registry is still partial, a permanently-cached list would
+# freeze an INCOMPLETE set and silently leave those tables unscoped (cross-
+# tenant leak). The list is therefore re-synced whenever the registry grew, so
+# the tracked set always equals the live enumeration (the invariant asserted by
+# tests/unit/test_tenant_http_isolation.py). In production the registry is
+# stable after startup, so this is a cheap len() check per query.
 _tenant_classes: list | None = None
+_tenant_registry_size: int = -1
 
 
 def _tenant_scoped_classes() -> list:
-    global _tenant_classes
-    if _tenant_classes is None:
-        from app.core.database import Base
-        import app.models  # noqa: F401 - ensures full mapper registration
+    global _tenant_classes, _tenant_registry_size
+    from app.core.database import Base
+    registry_size = len(list(Base.registry.mappers))
+    if _tenant_classes is None or registry_size != _tenant_registry_size:
+        import app.models  # noqa: F401 - ensures base mapper registration
         classes = []
         for mapper in Base.registry.mappers:
             # mapper.columns inclut les colonnes HERITEES (herite de table Jointe
@@ -51,6 +65,7 @@ def _tenant_scoped_classes() -> list:
             if "company_id" in mapper.columns:
                 classes.append(mapper.class_)
         _tenant_classes = classes
+        _tenant_registry_size = registry_size
         logger.info(
             "Tenant enforcement: %d tenant-scoped entities (company_id) tracked",
             len(classes),
@@ -60,8 +75,9 @@ def _tenant_scoped_classes() -> list:
 
 def reset_tenant_class_cache() -> None:
     """Test hook: force re-computation after model changes."""
-    global _tenant_classes
+    global _tenant_classes, _tenant_registry_size
     _tenant_classes = None
+    _tenant_registry_size = -1
 
 
 @event.listens_for(Session, "do_orm_execute")

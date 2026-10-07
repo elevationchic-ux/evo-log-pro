@@ -740,7 +740,7 @@ MODULES["admin"] = dict(
            F("responsable_succeed", "str", "Succeed", "Succeed"),
            F("statut", "enum", "Statut", "Status")],
           [EN("statut", ["EN_COURS", "ACTIF", "ABANONNE", "REFUSE"], "EN_COURS")]),
-        E("api-keys", "tenant_api_keys", "TenantApiKey", "tenant-api-keys", "api_key",
+        E("api-keys", "saas_api_keys", "SaasApiKey", "saas-api-keys", "api_key",
           "Cles API tierces par tenant", "Third-party API keys per tenant",
           "Cles d'acces aux webhooks tierces.", "Access keys for third-party webhooks.",
           "Rotation annuelle.", "Annual rotation.",
