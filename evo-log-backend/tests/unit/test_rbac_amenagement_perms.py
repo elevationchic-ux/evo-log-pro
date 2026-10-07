@@ -323,7 +323,11 @@ def _routes_openapi():
 
 def test_toutes_les_routes_exigent_une_identite(unauthenticated):
     routes = _routes_openapi()
-    assert len(routes) == 60, f"attendu 60 operations, trouve {len(routes)}"
+    # 60 operations du routeur historique + 32 operations de l'expansion
+    # amenagement_extra_deep (construction-progresses, infrastructure-maintenances,
+    # isps-records, port-perceptions, annual-activity-reports, sig-layers,
+    # domain-archives, amenagement-kpis), toutes gardees par require_perm().
+    assert len(routes) == 92, f"attendu 92 operations, trouve {len(routes)}"
     for method, path in routes:
         url = path.replace("{ident}", "1")
         r = unauthenticated.request(method, url)
