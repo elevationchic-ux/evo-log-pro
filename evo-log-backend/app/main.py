@@ -508,6 +508,13 @@ try:
 except ImportError as e:
     logger.warning(f"Router port_deep absent : {e}")
 
+# Wave 1B expansion : transit-douane approfondi (12 registres).
+try:
+    from app.routers.v1 import transit_deep
+    safe_include_router(transit_deep.router, prefix="/api/v1/transit-douane", tags=["Transit douane (expansion)"])
+except ImportError as e:
+    logger.warning(f"Router transit_deep absent : {e}")
+
 # WebSocket and additional routers
 try:
     from app.routers import ws, collaboration, iot, webhook_whatsapp, telematics

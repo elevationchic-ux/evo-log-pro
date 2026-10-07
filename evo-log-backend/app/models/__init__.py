@@ -176,3 +176,9 @@ try:
     ])
 except Exception:
     pass
+
+# Wave 1B expansion : transit-douane approfondi (12 entites).
+try:
+    from app.models import transit_deep as _transit_deep  # noqa: F401
+except Exception:
+    pass
