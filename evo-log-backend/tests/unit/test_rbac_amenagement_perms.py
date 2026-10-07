@@ -1,4 +1,4 @@
-"""Departement Amenagement portuaire : RBAC granulaire (60 routes, 39 codes) + honnetete.
+"""Departement Amenagement portuaire : RBAC granulaire (92 operations, 39 codes historique + 25 expansion) + honnetete.
 
 Meme discipline que les batches 21 a 24, trois volets :
   1. DROITS : parite catalogue (53 codes `amenagement.*`, dont 39 utilises par le
@@ -56,19 +56,44 @@ def test_tous_les_codes_du_routeur_existent_au_catalogue():
     assert not fantomes, f"codes require_perm inconnus du catalogue: {fantomes}"
 
 
-def test_le_catalogue_decrit_dix_sous_modules_d_amenagement():
+def test_le_catalogue_decrit_les_sous_modules_d_amenagement():
     codes = _codes_catalogue_amenagement()
-    # 53 codes : 5 sous-modules complets (6 actions) + 4 sans delete (5 actions)
-    # + le referentiel des places (read/create/modify, jamais delete).
-    assert len(codes) == 53, f"attendu 53 codes amenagement, trouve {len(codes)}"
+    # 53 codes historiques : 5 sous-modules complets (6 actions) + 4 sans delete
+    # (5 actions) + le referentiel des places (read/create/modify, jamais delete).
+    # + 25 codes de l'expansion (amenagement_extra_deep) : nomenclature (read) et
+    # huit registres operationnels en read/create/modify (le DELETE du routeur est
+    # garde sous « modify », jamais effacement d'une piece a valeur).
+    assert len(codes) == 78, f"attendu 78 codes amenagement, trouve {len(codes)}"
     sous_modules = {c.split(".")[1] for c in codes}
     assert sous_modules == {
         "place",
         "schema_directeur", "projet", "programmation", "marche", "titre_domanial",
         "concession", "infrastructure", "dragage", "autorisation",
+        # Expansion (routeur amenagement_extra_deep) :
+        "nomenclature", "construction_tracking", "infrastructure_maintenance",
+        "port_security_isps", "port_pricing", "activity_report",
+        "domain_cartography", "archive_management", "development_kpi",
     }, sous_modules
     # Tout ce que le routeur exige est bien dans la zone du departement.
     assert set(_codes_utilises()) <= codes
+
+
+def test_expansion_amenagement_extra_deep_aucun_code_fantome():
+    # Le routeur d'expansion n'est pas couvert par _codes_utilises() (qui ne lit
+    # que le routeur historique). On verifie ici, sans rien simuler, que chaque
+    # require_perm() qu'il emploie est declare au catalogue ET porte par au moins
+    # un role, pour qu'aucune de ses routes ne soit unreachable/403 permanent.
+    src = ROUTER_FILE.with_name("amenagement_extra_deep.py").read_text(encoding="utf-8")
+    codes = sorted(set(re.findall(r'require_perm\("([^"]+)"\)', src)))
+    assert codes, "aucun code require_perm trouve dans le routeur d'expansion"
+    catalogue = _codes_catalogue_amenagement()
+    fantomes = [c for c in codes if c not in catalogue]
+    assert not fantomes, f"codes require_perm inconnus du catalogue: {fantomes}"
+    for code in codes:
+        porteurs = [
+            nom for nom, _l, _d, grant in ROLE_GRANTS if has_perm(grant, code)
+        ]
+        assert porteurs, f"aucun role ne porte {code}"
 
 
 def test_chaque_code_utilise_a_au_moins_un_role_porteur():
