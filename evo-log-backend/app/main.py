@@ -384,6 +384,13 @@ try:
     safe_include_router(acquisition.router, prefix="/api/v1/acquisition", tags=["Acquisition"])
     safe_include_router(maintenance_gmao.router, prefix="/api/v1/maintenance-gmao", tags=["Maintenance GMAO"])
     safe_include_router(integration.router, prefix="/api/v1/integration", tags=["Integration"])
+    # Couche cross-module : tracage de la hiérarchie réelle (escale/mission) et
+    # propagation d'événements. Lit à travers les modules sans les modifier.
+    try:
+        from app.routers.v1 import chainage
+        safe_include_router(chainage.router, prefix="/api/v1/chaine", tags=["Chaîne cross-module"])
+    except ImportError as e:
+        logger.warning(f"Router chainage absent : {e}")
     safe_include_router(reporting.router, prefix="/api/v1/reporting", tags=["Reporting"])
     safe_include_router(tenant.router, prefix="/api/v1/tenant", tags=["Tenant Management"])
     safe_include_router(role.router, prefix="/api/v1/roles", tags=["Role Management"])

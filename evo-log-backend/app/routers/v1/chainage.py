@@ -145,7 +145,8 @@ def tracer_escale(
                 TerminalPortuaire.id.in_(terminal_ids)
             ).all()
             stages["amenagement_portuaire"] = [
-                {"id": t.id, "nom": getattr(t, "nom", None) or getattr(t, "nom_terminal", None)}
+                {"id": t.id, "nom": t.nom, "code": t.code,
+                 "type_terminal": (t.type_terminal.value if hasattr(t.type_terminal, "value") else str(t.type_terminal))}
                 for t in terminaux
             ]
     except Exception:
@@ -181,15 +182,11 @@ def tracer_escale(
         ]
 
     # 5. Factures OHADA rattachées (escale directe ou l'un des conteneurs)
-    fcond = [FactureNew.escale_id == escale.id]
     if conteneur_ids:
-        fcond.append(FactureNew.conteneur_id.in_(conteneur_ids))
-    factures = db.query(FactureNew).filter(
-        FactureNew.numero_facture.isnot(None)
-    ).filter(
-        (FactureNew.escale_id == escale.id) if not conteneur_ids
-        else ((FactureNew.escale_id == escale.id) | (FactureNew.conteneur_id.in_(conteneur_ids)))
-    ).all()
+        facture_filter = (FactureNew.escale_id == escale.id) | (FactureNew.conteneur_id.in_(conteneur_ids))
+    else:
+        facture_filter = (FactureNew.escale_id == escale.id)
+    factures = db.query(FactureNew).filter(facture_filter).all()
     if factures:
         stages["facturation"] = [
             {"id": f.id, "numero_facture": f.numero_facture, "statut": f.statut,
