@@ -317,7 +317,7 @@ export const registreFluvialPortFee: ConfigRegistre = {
   permModule: "fluvial",
   permSousModule: "port_fee",
   tcode: "registre-port-fees-river",
-  icon: Icons.ReceiptText,
+  icon: Icons.Receipt,
   titre: "Droits de port fluvial",
   titreEn: "River port dues",
   description: "Tarifs de stationnement et de manutention par terminal.",

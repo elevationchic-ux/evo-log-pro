@@ -52,7 +52,7 @@ export const registreQhseNearMiss: ConfigRegistre = {
   permModule: "qhse",
   permSousModule: "near_miss",
   tcode: "registre-near-miss-reports",
-  icon: Icons.TriangleAlert,
+  icon: Icons.AlertTriangle,
   titre: "Quasi-accidents (situations dangereuses)",
   titreEn: "Near-miss reports",
   description: "Declaration des situations dangereuses sans accident.",

@@ -126,7 +126,7 @@ export const registreParcInspectionChecklist: ConfigRegistre = {
   permModule: "parc",
   permSousModule: "inspection_checklist",
   tcode: "registre-inspection-checklists",
-  icon: Icons.SquareCheckBig,
+  icon: Icons.CheckSquare,
   titre: "Checklists de controle",
   titreEn: "Inspection checklists",
   description: "Controles avant depart (exterieur, interieur, securite).",

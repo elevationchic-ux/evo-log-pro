@@ -1927,7 +1927,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       {
         label: "Checklists de controle",
         path: "/parc-vehicules/inspection-checklists",
-        icon: (LUCIDE as any)["SquareCheckBig"],
+        icon: (LUCIDE as any)["CheckSquare"],
         badge: "Expansion",
         tcode: "registre-inspection-checklists",
         description: "Controles avant depart (exterieur, interieur, securite).",
@@ -2352,7 +2352,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       {
         label: "Quasi-accidents (situations dangereuses)",
         path: "/qhse-securite/near-miss-reports",
-        icon: (LUCIDE as any)["TriangleAlert"],
+        icon: (LUCIDE as any)["AlertTriangle"],
         badge: "Expansion",
         tcode: "registre-near-miss-reports",
         description: "Declaration des situations dangereuses sans accident.",
@@ -4343,7 +4343,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
       {
         label: "Droits de port fluvial",
         path: "/transport-fluvial/port-fees-river",
-        icon: (LUCIDE as any)["ReceiptText"],
+        icon: (LUCIDE as any)["Receipt"],
         badge: "Expansion",
         tcode: "registre-port-fees-river",
         description: "Tarifs de stationnement et de manutention par terminal.",
