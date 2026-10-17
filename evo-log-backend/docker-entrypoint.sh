@@ -19,9 +19,69 @@
 # ============================================================================
 set -e
 
+# ----------------------------------------------------------------------------
+# PATIENCE POSTGRESQL : Railway demarre tres souvent ce conteneur AVANT que
+# Postgres ait fini son initialisation ("Connection refused") ou pendant sa
+# reprise apres un redemarrage ("FATAL: the database system is starting up").
+# Sans attente, l'introspection et les migrations ci-dessous leves par
+# `inspect(engine)` declenchent une OperationalError ; `set -e` tue alors le
+# conteneur, Railway le relance (restartPolicy ON_FAILURE) et le log se
+# remplit de tracebacks identiques en boucle. On boucle donc ici jusqu'a ce
+# que la base accepte une vraie requete, avec un delai BORNE et sans traceback
+# parasite (un simple message "pas encore pret" par essai).
+# ----------------------------------------------------------------------------
+export DB_WAIT_TIMEOUT="${DB_WAIT_TIMEOUT:-120}"
+echo "[entrypoint] attente de la base PostgreSQL (max ${DB_WAIT_TIMEOUT}s)..."
 python <<'PY'
-import os, sys
-from sqlalchemy import create_engine, inspect
+import os, sys, time
+import sqlalchemy as sa
+from sqlalchemy.pool import NullPool
+
+raw = os.environ.get("DATABASE_URL", "")
+if not raw:
+    print("[entrypoint] DATABASE_URL absent ; attente ignoree (dev sqlite?).")
+    sys.exit(0)
+# alembic attend postgresql:// ; Railway fournit parfois des URLs heroku
+# postgres:// -> normalisation minimale.
+if raw.startswith("postgres://"):
+    raw = raw.replace("postgres://", "postgresql://", 1)
+
+timeout = float(os.environ.get("DB_WAIT_TIMEOUT", "120"))
+deadline = time.time() + timeout
+engine = sa.create_engine(
+    raw,
+    pool_pre_ping=True,
+    poolclass=NullPool,
+    connect_args={"connect_timeout": 5},
+)
+
+attempt = 0
+while True:
+    attempt += 1
+    try:
+        with engine.connect() as conn:
+            conn.execute(sa.text("SELECT 1"))
+        print("[entrypoint] PostgreSQL pret (essai %d)." % attempt)
+        engine.dispose()
+        sys.exit(0)
+    except Exception as exc:
+        lines = str(exc).strip().splitlines()
+        short = lines[-1] if lines else exc.__class__.__name__
+        remaining = deadline - time.time()
+        if remaining <= 0:
+            print("[entrypoint] TIMEOUT: PostgreSQL indisponible apres %ss "
+                  "(%d essais) : %s" % (int(timeout), attempt, short),
+                  file=sys.stderr)
+            engine.dispose()
+            sys.exit(1)
+        print("[entrypoint] PostgreSQL pas encore pret (essai %d) : %s ; "
+              "nouvelle tentative..." % (attempt, short), file=sys.stderr)
+        time.sleep(min(3.0, max(0.5, remaining)))
+PY
+
+python <<'PY'
+import os, sys, time
+from sqlalchemy import create_engine, exc as sa_exc, inspect
 
 url = os.environ.get("DATABASE_URL")
 if not url:
@@ -33,9 +93,28 @@ if not url:
 if url.startswith("postgres://"):
     url = url.replace("postgres://", "postgresql://", 1)
 
-engine = create_engine(url)
-insp = inspect(engine)
-tables = set(insp.get_table_names())
+engine = create_engine(url, pool_pre_ping=True)
+
+# Filet de securite : on attend quelques secondes de plus si la base re-echoe
+# pile pendant l'introspection (redemarrage Postgres en cours). On n'imprime
+# JAMAIS le traceback brut, seulement une ligne concise.
+tables = None
+last_err = None
+for attempt in range(1, 6):
+    try:
+        insp = inspect(engine)
+        tables = set(insp.get_table_names())
+        break
+    except sa_exc.OperationalError as e:
+        last_err = str(e).strip().splitlines()[-1] if str(e).strip() else "OperationalError"
+        print("[entrypoint] introspection indisponible (essai %d/5) : %s" % (attempt, last_err),
+              file=sys.stderr)
+        time.sleep(3)
+
+if tables is None:
+    print("[entrypoint] ECHEC introspection apres 5 essais : %s" % last_err,
+          file=sys.stderr)
+    sys.exit(1)
 
 if "alembic_version" in tables:
     mode = "upgrade"

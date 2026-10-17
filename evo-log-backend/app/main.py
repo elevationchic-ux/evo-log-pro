@@ -78,11 +78,35 @@ async def lifespan(app: FastAPI):
             "multiple processes is disabled until Redis becomes reachable."
         )
     
+    # Test database connection with a bounded retry so a still-booting
+    # PostgreSQL ("Connection refused" / "the database system is starting up")
+    # during a Railway redeploy does not immediately mark /health as degraded.
+    # The check runs in a worker thread so the event loop is never blocked.
+    async def _probe_database(max_attempts: int = 20, delay: float = 2.0) -> None:
+        import asyncio
+
+        def _once() -> None:
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+
+        last_exc: Exception | None = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                await asyncio.to_thread(_once)
+                logger.info("Database connection established successfully")
+                return
+            except Exception as e:
+                last_exc = e
+                if attempt < max_attempts:
+                    logger.warning(
+                        "Database not ready (attempt %d/%d): %s; retrying...",
+                        attempt, max_attempts, str(e).splitlines()[-1],
+                    )
+                    await asyncio.sleep(delay)
+        raise last_exc  # type: ignore[misc]
+
     try:
-        # Test database connection
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-        logger.info("Database connection established successfully")
+        await _probe_database()
     except Exception as e:
         err_msg = f"Database connection failed: {e}"
         logger.error(f"? {err_msg}")
