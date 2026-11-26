@@ -642,6 +642,57 @@ def calculer_precision_inventaire(
     }
 
 
+@router.get("/inventaires/{inventaire_id}/valorisation-ecarts")
+def valorisation_ecarts_inventaire(
+    inventaire_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.inventaire.read"))
+):
+    """Valorisation monetaire des ecarts d'inventaire.
+
+    Chaque ecart est multiplie par le prix_unitaire reel du stock :
+    c'est l'impact financier de l'inventaire (base des ajustements
+    comptables 37x/63x). Aucun montant n'est estime."""
+    from app.models.magasin_avance import InventaireTournant, LigneInventaire
+    from app.models.magasin import Stock
+
+    inventaire = db.query(InventaireTournant).filter(InventaireTournant.id == inventaire_id).first()
+    if not inventaire:
+        raise HTTPException(status_code=404, detail="Inventaire non trouvé")
+
+    lignes = (
+        db.query(LigneInventaire, Stock)
+        .join(Stock, Stock.id == LigneInventaire.stock_id)
+        .filter(LigneInventaire.inventaire_id == inventaire_id)
+        .all()
+    )
+    details = []
+    impact_total = 0.0
+    for ligne, stock in lignes:
+        ecart = float(ligne.ecart or 0)
+        pu = float(stock.prix_unitaire or 0)
+        impact = round(ecart * pu, 2)
+        impact_total += impact
+        details.append({
+            "ligne_id": ligne.id,
+            "stock_id": stock.id,
+            "code_article": stock.code_article,
+            "designation": stock.designation,
+            "quantite_theorique": float(ligne.quantite_theorique or 0),
+            "quantite_comptee": float(ligne.quantite_comptee or 0) if ligne.quantite_comptee is not None else None,
+            "ecart": ecart,
+            "prix_unitaire": pu,
+            "impact_xaf": impact,
+        })
+    return {
+        "inventaire_id": inventaire_id,
+        "numero_inventaire": inventaire.numero_inventaire,
+        "lignes_avec_ecart": sum(1 for d in details if d["ecart"] != 0),
+        "impact_total_xaf": round(impact_total, 2),
+        "details": details,
+    }
+
+
 # ============ FOURNISSEURS ============
 @router.post("/fournisseurs-stock", response_model=FournisseurStockResponse, status_code=status.HTTP_201_CREATED)
 def creer_fournisseur_stock(
