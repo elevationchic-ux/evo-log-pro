@@ -51,10 +51,31 @@ frontend `npm run dev` (:3000, `NEXT_PUBLIC_API_URL=http://localhost:8000`).
 - **PDF** : WeasyPrint requiert Pango/Cairo (prod Linux) ; repli HTML
   automatique en dev Windows.
 
+## Audit de couverture (réel, pas déclaratif)
+
+**Profonds (logique métier normative + tests)** : comptabilité OHADA,
+GMAO, juridique, paie CEMAC, magasin/FEFO/inventaires.
+
+**Profonds existants (services métier, à auditer pour tests)** :
+douane CEMAC (`taxation_douaniere.py` = moteur unique de liquidation :
+DD + redevance 0.45 % + CCI 1 % + OHADA 0.05 % + TVA 19,25 % + IS 2,2 %),
+QHSE (taux TF/TG par million d'heures, dénominateur réel
+`HeuresExposition`, bilan CSST/CNPS, HACCP, permis IMDG), acconage,
+transport international, transit, acquisition, finance, RH,
+magasin douane, reporting, fiscalité Cameroun, documents, intégration.
+
+**Surface (CRUD généré, profondeur à construire)** : port ops,
+aménagement portuaire, ferroviaire, fluvial, aérien, cold chain,
+log3pl, heavylift, conteneurs, b2b, chat, notifications, annuaire,
+formation, pipeline, tracabilité — ~60 modules avec modèles+routeurs
+mais services minces (0-3 fonctions). Priorité : audit fonction par
+fonction avant d'ajouter du normatif.
+
 ## Reste à couvrir (prochains chantiers)
 
 - Économie / analytique (rentabilité par mission/client/unité)
-- Transport international (conventions, Incoterms, documents)
-- QHSE approfondi, douane SYDONIA+ réelle
+- Tests unitaires des services profonds non couverts (douane, QHSE,
+  acconage, transport international, transit, acquisition)
+- Surface CRUD → normatif : port, aménagement, modes de transport
 - Paie : bulletin PDF, cumuls IRGM annuels progressifs
 - Validation PostgreSQL + e2e Playwright
