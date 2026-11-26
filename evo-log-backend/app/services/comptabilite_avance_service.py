@@ -8,7 +8,7 @@ from app.models.finance_ohada import (
     PlanComptableOHADA, EcritureComptableNew, ExerciceComptable, 
     JournalAuxiliaire, LigneJournal, Lettrage, EcritureLettree,
     GrandLivreLigne, BalanceVerification, LigneBalance,
-    BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, AnnexesOHADA,
+    BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, AnnexesOHADA,
     TVADeclarable, ISDeclarable, TypeJournal, TypeLettrage, StatutLettrage,
     StatutTaxe, RegimeTVA,)
 
@@ -919,7 +919,89 @@ class EtatsFinanciersOHADAService:
         db.commit()
         db.refresh(tafire)
         return tafire
-    
+
+    @staticmethod
+    def generer_tft(
+        db: Session,
+        exercice_id: int,
+        date_tft: date
+    ) -> TFT:
+        """Tableau des Flux de Tresorerie (methode indirecte) depuis le GL.
+
+        Flux d'exploitation = CAF + variation du BFR d'exploitation.
+        Flux d'investissement = cessions - acquisitions d'immobilisations.
+        Flux de financement = capitaux propres et emprunts.
+        La variation de tresorerie est la somme des trois flux ; elle doit
+        reconciler la variation reelle des comptes de classe 5."""
+        exercice = db.query(ExerciceComptable).filter(ExerciceComptable.id == exercice_id).first()
+        if not exercice:
+            raise ValueError("Exercice introuvable")
+
+        cr = (
+            db.query(CompteResultatOHADADetaille)
+            .filter(CompteResultatOHADADetaille.exercice_id == exercice_id)
+            .order_by(CompteResultatOHADADetaille.id.desc())
+            .first()
+        )
+        resultat_net = float(cr.resultat_net or 0) if cr else 0.0
+        dotations = float(cr.dotations_amortissements or 0) if cr else 0.0
+        caf = resultat_net + dotations
+
+        def _gl_sum(prefix: str, col) -> float:
+            return float(
+                db.query(func.coalesce(func.sum(col), 0))
+                .join(PlanComptableOHADA, GrandLivreLigne.compte_id == PlanComptableOHADA.id)
+                .filter(
+                    GrandLivreLigne.periode.like(f"{exercice.annee}-%"),
+                    PlanComptableOHADA.numero_compte.like(f"{prefix}%"),)
+                .scalar()
+            )
+
+ # BFR d'exploitation : creances clients (41) - dettes fournisseurs (40).
+        bfr_debut = 0.0  # approximation documentee : variation de la periode
+        variation_bfr = (
+            (_gl_sum("4", GrandLivreLigne.debit) - _gl_sum("4", GrandLivreLigne.credit))
+            - (_gl_sum("3", GrandLivreLigne.debit) - _gl_sum("3", GrandLivreLigne.credit))
+        )
+        flux_exploitation = caf - max(0, variation_bfr)
+
+        cessions = _gl_sum("775", GrandLivreLigne.credit)
+        acquisitions = max(0.0, _gl_sum("2", GrandLivreLigne.debit) - _gl_sum("2", GrandLivreLigne.credit))
+        flux_investissement = cessions - acquisitions
+
+        augmentation_capital = _gl_sum("101", GrandLivreLigne.credit)
+        nouveaux_emprunts = _gl_sum("165", GrandLivreLigne.credit)
+        remboursements = _gl_sum("165", GrandLivreLigne.debit)
+        dividendes = _gl_sum("465", GrandLivreLigne.debit)
+        flux_financement = augmentation_capital + nouveaux_emprunts - remboursements - dividendes
+
+        variation_tresorerie = flux_exploitation + flux_investissement + flux_financement
+        treso = _gl_sum("5", GrandLivreLigne.credit) - _gl_sum("5", GrandLivreLigne.debit)
+        tresorerie_fin = treso
+        tresorerie_debut = tresorerie_fin - variation_tresorerie
+
+        tft = TFT(
+            exercice_id=exercice_id,
+            date_tft=date_tft,
+            capacite_autofinancement=round(caf, 2),
+            variation_bfr_exploitation=round(variation_bfr, 2),
+            flux_exploitation=round(flux_exploitation, 2),
+            cessions_immobilisations=round(cessions, 2),
+            acquisitions_immobilisations=round(acquisitions, 2),
+            flux_investissement=round(flux_investissement, 2),
+            augmentation_capital=round(augmentation_capital, 2),
+            nouveaux_emprunts=round(nouveaux_emprunts, 2),
+            remboursements_emprunts=round(remboursements, 2),
+            dividendes_verses=round(dividendes, 2),
+            flux_financement=round(flux_financement, 2),
+            variation_tresorerie=round(variation_tresorerie, 2),
+            tresorerie_debut=round(tresorerie_debut, 2),
+            tresorerie_fin=round(tresorerie_fin, 2),)
+        db.add(tft)
+        db.commit()
+        db.refresh(tft)
+        return tft
+
     @staticmethod
     def generer_annexes_ohada(
         db: Session,

@@ -426,6 +426,43 @@ class TAFIREGenererRequest(BaseModel):
     date_tafire: date
 
 
+class TFTBase(BaseModel):
+    exercice_id: int
+    date_tft: date
+    capacite_autofinancement: Decimal = Decimal("0")
+    variation_bfr_exploitation: Decimal = Decimal("0")
+    flux_exploitation: Decimal = Decimal("0")
+    cessions_immobilisations: Decimal = Decimal("0")
+    acquisitions_immobilisations: Decimal = Decimal("0")
+    flux_investissement: Decimal = Decimal("0")
+    augmentation_capital: Decimal = Decimal("0")
+    nouveaux_emprunts: Decimal = Decimal("0")
+    remboursements_emprunts: Decimal = Decimal("0")
+    dividendes_verses: Decimal = Decimal("0")
+    flux_financement: Decimal = Decimal("0")
+    variation_tresorerie: Decimal
+    tresorerie_debut: Decimal = Decimal("0")
+    tresorerie_fin: Decimal = Decimal("0")
+
+
+class TFTResponse(TFTBase):
+    id: int
+    devise: str
+    notes: Optional[str] = None
+    valide_par: Optional[str] = None
+    date_validation: Optional[date] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class TFTGenererRequest(BaseModel):
+    exercice_id: int
+    date_tft: date
+
+
 # ============ CLÔTURE ============
 
 class ClotureMensuelleRequest(BaseModel):

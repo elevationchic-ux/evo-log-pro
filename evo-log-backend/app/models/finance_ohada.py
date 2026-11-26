@@ -755,6 +755,52 @@ class TAFIRE(Base):
     exercice = relationship("ExerciceComptable")
 
 
+class TFT(Base):
+    """Tableau des Flux de Tresorerie - TFT OHADA (methode indirecte).
+
+    Etat financier obligatoire SYSCOHADA au meme titre que le bilan, le
+    compte de resultat et le TAFIRE : il explique la variation de la
+    tresorerie par les flux d'exploitation, d'investissement et de
+    financement."""
+    __tablename__ = "tft"
+
+    id = Column(Integer, primary_key=True, index=True)
+    exercice_id = Column(Integer, ForeignKey('exercices_comptables.id'), nullable=False)
+    date_tft = Column(Date, nullable=False)
+
+ # FLUX D'EXPLOITATION
+    capacite_autofinancement = Column(Numeric(15, 2), default=0)
+    variation_bfr_exploitation = Column(Numeric(15, 2), default=0)
+    flux_exploitation = Column(Numeric(15, 2), default=0)
+
+ # FLUX D'INVESTISSEMENT
+    cessions_immobilisations = Column(Numeric(15, 2), default=0)
+    acquisitions_immobilisations = Column(Numeric(15, 2), default=0)
+    flux_investissement = Column(Numeric(15, 2), default=0)
+
+ # FLUX DE FINANCEMENT
+    augmentation_capital = Column(Numeric(15, 2), default=0)
+    nouveaux_emprunts = Column(Numeric(15, 2), default=0)
+    remboursements_emprunts = Column(Numeric(15, 2), default=0)
+    dividendes_verses = Column(Numeric(15, 2), default=0)
+    flux_financement = Column(Numeric(15, 2), default=0)
+
+ # VARIATION DE TRESORERIE
+    variation_tresorerie = Column(Numeric(15, 2), default=0)
+    tresorerie_debut = Column(Numeric(15, 2), default=0)
+    tresorerie_fin = Column(Numeric(15, 2), default=0)
+
+    devise = Column(String(3), default="XAF")
+    notes = Column(Text)
+    valide_par = Column(String(100))
+    date_validation = Column(Date)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+ # Relationships
+    exercice = relationship("ExerciceComptable")
+
+
 class AnnexesOHADA(Base):
     """Annexes OHADA - Notes et informations complémentaires"""
     __tablename__ = "annexes_ohada"

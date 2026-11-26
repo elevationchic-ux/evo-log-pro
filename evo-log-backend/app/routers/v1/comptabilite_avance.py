@@ -20,6 +20,7 @@ from app.schemas.comptabilite_avance import (
     TAFIRECreate, TAFIREResponse,
     AnnexesOHDACreate, AnnexesOHDAResponse, AnnexesGenererRequest,
     BilanGenererRequest, CompteResultatGenererRequest, TAFIREGenererRequest,
+    TFTGenererRequest, TFTResponse,
     ClotureMensuelleRequest, ClotureMensuelleResponse,
     ClotureAnnuelleRequest, ClotureAnnuelleResponse,
     ReportANouveauRequest, ReportANouveauResponse,
@@ -32,7 +33,7 @@ from app.services.comptabilite_avance_service import (
     EtatsFinanciersOHADAService, ClotureService, TVAService, ISService,)
 from app.models.finance_ohada import (
     JournalAuxiliaire, Lettrage, GrandLivreLigne, BalanceVerification,
-    BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, AnnexesOHADA,
+    BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, AnnexesOHADA,
     ExerciceComptable,)
 
 router = APIRouter(tags=["Comptabilité Avancée"])  # monte sur /api/v1/comptabilite-avance par main.py
@@ -398,6 +399,34 @@ def obtenir_tafire(
     if not tafire:
         raise HTTPException(status_code=404, detail="TAFIRE non trouvé")
     return tafire
+
+
+@router.post("/etats-financiers/tft", response_model=TFTResponse)
+def generer_tft(
+    request: TFTGenererRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
+):
+    """Générer le TFT (Tableau des Flux de Trésorerie) depuis le grand livre"""
+    tft = EtatsFinanciersOHADAService.generer_tft(
+        db,
+        request.exercice_id,
+        request.date_tft
+    )
+    return tft
+
+
+@router.get("/etats-financiers/tft/{tft_id}", response_model=TFTResponse)
+def obtenir_tft(
+    tft_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
+):
+    """Obtenir un TFT par ID"""
+    tft = db.query(TFT).filter(TFT.id == tft_id).first()
+    if not tft:
+        raise HTTPException(status_code=404, detail="TFT non trouvé")
+    return tft
 
 
 @router.post("/etats-financiers/annexes", response_model=AnnexesOHDAResponse)
