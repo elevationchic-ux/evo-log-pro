@@ -52,14 +52,35 @@ interface AnnexesData {
   engagements_hors_bilan: string | null; [key: string]: unknown;
 }
 
+interface TFTData {
+  id: number; exercice_id: number; date_tft: string;
+  capacite_autofinancement: number; variation_bfr_exploitation: number;
+  flux_exploitation: number; cessions_immobilisations: number;
+  acquisitions_immobilisations: number; flux_investissement: number;
+  augmentation_capital: number; nouveaux_emprunts: number;
+  flux_financement: number; variation_tresorerie: number;
+  tresorerie_debut: number; tresorerie_fin: number;
+  [key: string]: unknown;
+}
+
+interface SIGData {
+  id: number; exercice_id: number; date_sig: string;
+  effectif_moyen: number; masse_salariale: number; chiffre_affaires: number;
+  excédent_brut_exploitation: number; capacite_autofinancement: number;
+  investissements: number; besoin_en_fonds_de_roulement: number;
+  tresorerie_nette: number; resultat_net: number;
+  [key: string]: unknown;
+}
+
 interface EtatsResponse {
   exercice_id: number; annee: number;
   bilan: BilanData | null; compte_resultat: CRData | null;
   tafire: TAFIREData | null; annexes: AnnexesData | null;
+  tft: TFTData | null; sig: SIGData | null;
 }
 
 export default function ComptabiliteOhadaFinancialStatements() {
-  const [activeTab, setActiveTab] = useState<'BILAN' | 'COMPTE_RESULTAT' | 'TAFIRE' | 'ANNEXES'>('BILAN');
+  const [activeTab, setActiveTab] = useState<'BILAN' | 'COMPTE_RESULTAT' | 'TAFIRE' | 'TFT' | 'SIG' | 'ANNEXES'>('BILAN');
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +134,47 @@ export default function ComptabiliteOhadaFinancialStatements() {
     } catch { toast.error('Erreur réseau.'); } finally { setGenerating(false); }
   };
 
+  const genererTFT = async () => {
+    if (!etats) return; setGenerating(true);
+    try {
+      const res = await fetch(`${API_BASE}/comptabilite-avance/etats-financiers/tft`, {
+        method: 'POST', headers: AUTH(),
+        body: JSON.stringify({ exercice_id: etats.exercice_id, date_tft: new Date().toISOString().slice(0, 10) }),
+      });
+      if (res.ok) { toast.success('TFT généré depuis le GL.'); await charger(); }
+      else { const b = await res.json().catch(() => ({})); toast.error(b.detail || 'Échec TFT.'); }
+    } catch { toast.error('Erreur réseau.'); } finally { setGenerating(false); }
+  };
+
+  const genererSIG = async () => {
+    if (!etats) return; setGenerating(true);
+    try {
+      const res = await fetch(`${API_BASE}/comptabilite-avance/etats-financiers/sig`, {
+        method: 'POST', headers: AUTH(),
+        body: JSON.stringify({ exercice_id: etats.exercice_id, date_sig: new Date().toISOString().slice(0, 10) }),
+      });
+      if (res.ok) { toast.success('SIG généré depuis le GL.'); await charger(); }
+      else { const b = await res.json().catch(() => ({})); toast.error(b.detail || 'Échec SIG.'); }
+    } catch { toast.error('Erreur réseau.'); } finally { setGenerating(false); }
+  };
+
+  const exporterPDF = async () => {
+    if (!etats) return; setGenerating(true);
+    try {
+      const res = await fetch(`${API_BASE}/comptabilite-avance/etats-financiers/export/pdf?exercice_id=${etats.exercice_id}`, { headers: AUTH() });
+      if (!res.ok) { toast.error('Export indisponible dans cet environnement.'); return; }
+      const blob = await res.blob();
+      const type = res.headers.get('content-type') || '';
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = type.includes('pdf') ? `etats-financiers-${etats.annee}.pdf` : `etats-financiers-${etats.annee}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(type.includes('pdf') ? 'PDF téléchargé.' : 'Export HTML téléchargé (PDF indisponible en local).');
+    } catch { toast.error('Erreur export.'); } finally { setGenerating(false); }
+  };
+
   const fmt = (v: number | unknown) => Number(v || 0).toLocaleString('fr-FR');
 
   return (
@@ -145,6 +207,11 @@ export default function ComptabiliteOhadaFinancialStatements() {
         </div>
         <div className="flex items-center gap-3">
           {etats && <span className="text-xs font-mono text-slate-400">Exercice {etats.annee}</span>}
+          {etats && (
+            <button onClick={exporterPDF} disabled={generating} className="px-3 py-2 bg-violet-700/60 hover:bg-violet-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center gap-2 border border-violet-500/40 transition-all">
+              <FileText className="w-3.5 h-3.5" /> Export PDF
+            </button>
+          )}
           <button onClick={charger} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl flex items-center gap-2 border border-slate-700 transition-all">
             <RefreshCw className="w-3.5 h-3.5" /> Recharger
           </button>
@@ -160,6 +227,8 @@ export default function ComptabiliteOhadaFinancialStatements() {
           { key: 'BILAN', label: 'Bilan (Actif / Passif)' },
           { key: 'COMPTE_RESULTAT', label: 'Compte de Résultat (SIG)' },
           { key: 'TAFIRE', label: 'TAFIRE (Ressources / Emplois)' },
+          { key: 'TFT', label: 'TFT (Flux de Trésorerie)' },
+          { key: 'SIG', label: 'SIG (Indicateurs Globaux)' },
           { key: 'ANNEXES', label: 'Notes Annexes' },
         ].map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key as typeof activeTab)}
@@ -309,6 +378,93 @@ export default function ComptabiliteOhadaFinancialStatements() {
               <p className="text-xs text-slate-400">TAFIRE non encore généré. Nécessite le CR et le Bilan.</p>
               <button onClick={genererTAFIRE} disabled={generating} className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center gap-2 mx-auto">
                 {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Générer le TAFIRE depuis le GL
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TFT */}
+      {activeTab === 'TFT' && !loading && (
+        <div>
+          {etats?.tft ? (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h2 className="text-base font-black text-white uppercase flex items-center gap-2"><Layers className="w-5 h-5 text-cyan-400" /> TFT — Tableau des Flux de Trésorerie</h2>
+                <span className="text-[11px] font-mono text-cyan-400">Du {etats.tft.date_tft}</span>
+              </div>
+              <div className="divide-y divide-slate-800 font-mono text-xs">
+                {[
+                  ['CAF', etats.tft.capacite_autofinancement],
+                  ['Variation BFR exploitation', etats.tft.variation_bfr_exploitation],
+                  ['FLUX D\'EXPLOITATION', etats.tft.flux_exploitation, true],
+                  ['Cessions immobilisations', etats.tft.cessions_immobilisations],
+                  ['Acquisitions immobilisations', -Math.abs(Number(etats.tft.acquisitions_immobilisations))],
+                  ['FLUX D\'INVESTISSEMENT', etats.tft.flux_investissement, true],
+                  ['Augmentation capital', etats.tft.augmentation_capital],
+                  ['Nouveaux emprunts', etats.tft.nouveaux_emprunts],
+                  ['FLUX DE FINANCEMENT', etats.tft.flux_financement, true],
+                ].map(([lbl, v, fort]) => (
+                  <div key={lbl as string} className={`py-2 flex justify-between ${fort ? 'bg-cyan-950/20 px-3 rounded-xl border border-cyan-500/20 font-bold' : ''}`}>
+                    <span className="text-slate-300">{lbl}</span>
+                    <span className={Number(v) >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmt(v)}</span>
+                  </div>
+                ))}
+                <div className="py-3 flex justify-between bg-cyan-950/30 px-3 rounded-xl border border-cyan-500/40 text-sm font-black">
+                  <span className="text-cyan-300">Variation de trésorerie</span>
+                  <span className={Number(etats.tft.variation_tresorerie) >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmt(etats.tft.variation_tresorerie)} XAF</span>
+                </div>
+                <div className="py-2 flex justify-between"><span className="text-slate-400">Trésorerie début</span><span>{fmt(etats.tft.tresorerie_debut)}</span></div>
+                <div className="py-3 flex justify-between bg-slate-950 px-3 rounded-xl border border-slate-700 font-bold"><span className="text-slate-200">Trésorerie de fin</span><span className="text-cyan-300">{fmt(etats.tft.tresorerie_fin)} XAF</span></div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 text-center space-y-4">
+              <p className="text-xs text-slate-400">TFT non encore généré.</p>
+              <button onClick={genererTFT} disabled={generating} className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center gap-2 mx-auto">
+                {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Générer le TFT depuis le GL
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SIG */}
+      {activeTab === 'SIG' && !loading && (
+        <div>
+          {etats?.sig ? (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h2 className="text-base font-black text-white uppercase flex items-center gap-2"><TrendingUp className="w-5 h-5 text-amber-400" /> SIG — Situation Globale des Entreprises</h2>
+                <span className="text-[11px] font-mono text-amber-400">Du {etats.sig.date_sig}</span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-xs">
+                {[
+                  ['Effectif moyen', etats.sig.effectif_moyen, ''],
+                  ['Chiffre d\'affaires', etats.sig.chiffre_affaires, 'XAF'],
+                  ['Masse salariale', etats.sig.masse_salariale, 'XAF'],
+                  ['EBE', etats.sig.excédent_brut_exploitation, 'XAF'],
+                  ['CAF', etats.sig.capacite_autofinancement, 'XAF'],
+                  ['Investissements', etats.sig.investissements, 'XAF'],
+                  ['BFR', etats.sig.besoin_en_fonds_de_roulement, 'XAF'],
+                  ['Trésorerie nette', etats.sig.tresorerie_nette, 'XAF'],
+                ].map(([lbl, v, unit]) => (
+                  <div key={lbl as string} className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                    <div className="text-[10px] text-slate-500 font-sans uppercase">{lbl}</div>
+                    <div className="text-sm font-bold text-slate-100">{fmt(v)}{unit ? ` ${unit}` : ''}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-3 bg-amber-950/30 border border-amber-500/40 rounded-xl flex justify-between text-sm font-black font-mono">
+                <span className="text-amber-300">RÉSULTAT NET</span>
+                <span className={Number(etats.sig.resultat_net) >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmt(etats.sig.resultat_net)} XAF</span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 text-center space-y-4">
+              <p className="text-xs text-slate-400">SIG non encore généré.</p>
+              <button onClick={genererSIG} disabled={generating} className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center gap-2 mx-auto">
+                {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Générer le SIG depuis le GL
               </button>
             </div>
           )}

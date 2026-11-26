@@ -688,3 +688,5 @@ class DerniersEtatsFinanciersResponse(BaseModel):
     compte_resultat: Optional[CompteResultatOHADADetailleResponse] = None
     tafire: Optional[TAFIREResponse] = None
     annexes: Optional[AnnexesOHDAResponse] = None
+    tft: Optional[TFTResponse] = None
+    sig: Optional[SIGResponse] = None

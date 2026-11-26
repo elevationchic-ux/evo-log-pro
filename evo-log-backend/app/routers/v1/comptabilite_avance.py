@@ -935,6 +935,18 @@ def derniers_etats_financiers(
         .order_by(AnnexesOHADA.id.desc())
         .first()
     )
+    tft = (
+        db.query(TFT)
+        .filter(TFT.exercice_id == ex_id)
+        .order_by(TFT.id.desc())
+        .first()
+    )
+    sig = (
+        db.query(SIG)
+        .filter(SIG.exercice_id == ex_id)
+        .order_by(SIG.id.desc())
+        .first()
+    )
 
     return {
         "exercice_id": ex_id,
@@ -943,4 +955,6 @@ def derniers_etats_financiers(
         "compte_resultat": cr,
         "tafire": tafire,
         "annexes": annexes,
+        "tft": tft,
+        "sig": sig,
     }
