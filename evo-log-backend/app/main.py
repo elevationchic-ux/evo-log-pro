@@ -423,9 +423,10 @@ try:
     safe_include_router(transit_douane_avance.router, prefix="/api/v1/transit-douane-avance", tags=["Transit & Douane Avancé"])
     safe_include_router(magasin_wms_avance.router, prefix="/api/v1/magasin-wms-avance", tags=["Magasin WMS Avancé"])
     safe_include_router(maintenance_gmao_avance.router, prefix="/api/v1/maintenance-gmao-avance", tags=["Maintenance GMAO Avancée"])
-    from app.routers.v1 import maintenance_planification, juridique
+    from app.routers.v1 import maintenance_planification, juridique, magasin_valuation
     safe_include_router(maintenance_planification.router, prefix="/api/v1/maintenance-planification", tags=["Maintenance Planification"])
     safe_include_router(juridique.router, prefix="/api/v1/juridique", tags=["Juridique"])
+    safe_include_router(magasin_valuation.router, prefix="/api/v1/magasin-valuation", tags=["Magasin Valorisation"])
     from app.routers.v1 import rbac_avance, b2b_portal, audit, security_escalation
     safe_include_router(rbac_avance.router, prefix="/api/v1/rbac", tags=["RBAC & Multi-Tenant"])
     safe_include_router(b2b_portal.router, prefix="/api/v1/b2b-portal", tags=["Portail B2B Client"])
