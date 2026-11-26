@@ -36,6 +36,8 @@ from app.services.comptabilite_avance_service import (
     JournalAuxiliaireService, LettrageService, GrandLivreService, BalanceService,
     EtatsFinanciersOHADAService, ClotureService, TVAService, ISService,
     ImmobilisationService, LiasseFiscaleService,)
+from app.services.etats_financiers_export import (
+    generer_pdf_exercice, generer_html_exercice,)
 from app.models.finance_ohada import (
     JournalAuxiliaire, Lettrage, GrandLivreLigne, BalanceVerification,
     BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, SIG, AnnexesOHADA,
@@ -595,6 +597,33 @@ def obtenir_liasse_fiscale(
     if not liasse:
         raise HTTPException(status_code=404, detail="Liasse fiscale non trouvée")
     return liasse
+
+
+@router.get("/etats-financiers/export/pdf")
+def export_etats_financiers_pdf(
+    exercice_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.bilan.export"))
+):
+    """Exporte les etats financiers de l'exercice (Bilan, CR, TAFIRE, TFT, SIG, liasse).
+
+    PDF via WeasyPrint quand les bibliotheques natives sont presentes
+    (production) ; repli HTML explicite en environnement sans Pango/Cairo
+    plutot qu'un 503 muet."""
+    from fastapi.responses import HTMLResponse, Response
+    try:
+        pdf = generer_pdf_exercice(db, exercice_id)
+        return Response(
+            content=pdf,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=etats-financiers-{exercice_id}.pdf"},
+        )
+    except RuntimeError:
+        try:
+            html = generer_html_exercice(db, exercice_id)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc))
+        return HTMLResponse(content=html)
 
 
 @router.post("/etats-financiers/annexes", response_model=AnnexesOHDAResponse)
