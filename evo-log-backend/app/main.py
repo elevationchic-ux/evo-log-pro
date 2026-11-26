@@ -770,6 +770,11 @@ try:
     safe_include_router(coldchain_deep.router, prefix="/api/v1/chaine-froid", tags=["chaine-froid"])
 except ImportError as e:
     logger.warning(f"Router coldchain_deep absent : {e}")
+try:
+    from app.routers.v1 import coldchain
+    safe_include_router(coldchain.router, prefix="/api/v1/chaine-froid", tags=["chaine-froid"])
+except ImportError as e:
+    logger.warning(f"Router coldchain absent : {e}")
 # </coldchain>
 # <:heavylift>
 try:
