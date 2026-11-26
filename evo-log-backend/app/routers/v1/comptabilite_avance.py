@@ -23,6 +23,7 @@ from app.schemas.comptabilite_avance import (
     TFTGenererRequest, TFTResponse, SIGGenererRequest, SIGResponse,
     NoteAnnexeResponse, NotesAnnexesGenererRequest,
     ImmobilisationCreate, ImmobilisationResponse, AmortissementRequest, AmortissementResponse,
+    ImmobilisationDepuisActifRequest,
     LiasseFiscaleResponse, LiasseFiscaleGenererRequest,
     ClotureMensuelleRequest, ClotureMensuelleResponse,
     ClotureAnnuelleRequest, ClotureAnnuelleResponse,
@@ -537,6 +538,26 @@ def generer_amortissement(
     try:
         return ImmobilisationService.generer_ecriture_amortissement(
             db, immobilisation_id, request.date_ecriture, request.periode, request.journal_code)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/immobilisations/from-asset", response_model=ImmobilisationResponse, status_code=status.HTTP_201_CREATED)
+def creer_immobilisation_depuis_actif(
+    request: ImmobilisationDepuisActifRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("immobilisations.actif.create"))
+):
+    """Cree une immobilisation amortissable depuis un actif GMAO.
+
+    L'equipement saisit une fois dans la maintenance alimente le registre
+    des immobilisations : cout, date et duree de vie sont repris tels quels,
+    jamais estimes."""
+    try:
+        return ImmobilisationService.creer_depuis_actif_gmao(
+            db, request.asset_id, request.compte_immobilisation,
+            request.compte_amortissement, request.compte_dotation,
+            request.valeur_residuelle)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 

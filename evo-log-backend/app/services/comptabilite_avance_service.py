@@ -1652,6 +1652,51 @@ class ImmobilisationService:
         return imm
 
     @staticmethod
+    def creer_depuis_actif_gmao(
+        db: Session,
+        asset_id: int,
+        compte_immobilisation: str,
+        compte_amortissement: str,
+        compte_dotation: str = "681",
+        valeur_residuelle: Decimal = Decimal("0"),
+    ) -> Immobilisation:
+        """Cree une immobilisation amortissable depuis un TechnicalAsset GMAO.
+
+        L'actif fournit l'identite (tag, nom, date de mise en service, cout
+        d'acquisition, duree de vie) ; les comptes SYSCOHADA restent a la
+        decision du comptable. Une immobilisation n'est creee que si les
+        donnees comptables minimales existent — jamais de montant invente."""
+        from app.models.maintenance_deep import TechnicalAsset
+
+        asset = db.query(TechnicalAsset).filter(TechnicalAsset.id == asset_id).first()
+        if not asset:
+            raise ValueError("Actif GMAO introuvable")
+        if not asset.cout_acquisition_xaf:
+            raise ValueError("L'actif n'a pas de cout d'acquisition : impossible de valoriser l'immobilisation")
+        if not asset.duree_vieutile_ans:
+            raise ValueError("L'actif n'a pas de duree de vie utile : impossible de calculer l'amortissement")
+        if not asset.date_mise_service:
+            raise ValueError("L'actif n'a pas de date de mise en service")
+
+        deja = db.query(Immobilisation).filter(
+            Immobilisation.numero_immobilisation == asset.tag_actif).first()
+        if deja:
+            raise ValueError(f"Une immobilisation existe deja pour l'actif {asset.tag_actif}")
+
+        return ImmobilisationService.creer_immobilisation(db, {
+            "company_id": asset.company_id,
+            "numero_immobilisation": asset.tag_actif,
+            "designation": f"{asset.nom} ({asset.categorie or 'equipement'})",
+            "date_acquisition": asset.date_mise_service,
+            "valeur_acquisition": Decimal(str(asset.cout_acquisition_xaf)),
+            "valeur_residuelle": valeur_residuelle,
+            "duree_mois": int(asset.duree_vieutile_ans) * 12,
+            "compte_immobilisation": compte_immobilisation,
+            "compte_amortissement": compte_amortissement,
+            "compte_dotation": compte_dotation,
+        })
+
+    @staticmethod
     def lister_immobilisations(db: Session) -> List[Immobilisation]:
         return db.query(Immobilisation).order_by(Immobilisation.date_acquisition).all()
 

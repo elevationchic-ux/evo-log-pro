@@ -552,6 +552,14 @@ class AmortissementRequest(BaseModel):
     journal_code: Optional[str] = None
 
 
+class ImmobilisationDepuisActifRequest(BaseModel):
+    asset_id: int
+    compte_immobilisation: str
+    compte_amortissement: str
+    compte_dotation: str = "681"
+    valeur_residuelle: Decimal = Decimal("0")
+
+
 class AmortissementResponse(BaseModel):
     immobilisation_id: int
     ecriture_id: int

@@ -126,3 +126,45 @@ def test_lubrification_echeance_depassee_genere_ot_graissage(db, gmao):
     assert "Graissage" in ot.titre
     db.refresh(lub)
     assert lub.prochaine_date > date.today()
+
+
+# --------------------------------------------------------------------------- #
+# Pont GMAO -> immobilisations amortissables (comptabilite OHADA) #
+# --------------------------------------------------------------------------- #
+def test_immobilisation_creee_depuis_actif_gmao(db, gmao):
+    from decimal import Decimal
+    from app.models.maintenance_deep import TechnicalAsset
+    from app.services.comptabilite_avance_service import ImmobilisationService
+
+    actif = TechnicalAsset(
+        company_id=gmao["company"].id, tag_actif="CHARIOT-07",
+        nom="Chariot elevateur 3T", categorie="manutention",
+        cout_acquisition_xaf=Decimal("15000000"), duree_vieutile_ans=8,
+        date_mise_service=date(2026, 1, 10), criticite="A",
+        statut="actif", is_active=True)
+    db.add(actif)
+    db.commit()
+
+    imm = ImmobilisationService.creer_depuis_actif_gmao(
+        db, actif.id, "215", "2815", "6815")
+
+    assert imm.numero_immobilisation == "CHARIOT-07"
+    assert imm.designation.startswith("Chariot elevateur 3T")
+    assert float(imm.valeur_acquisition) == 15_000_000
+    assert imm.duree_mois == 96          # 8 ans x 12
+    assert imm.compte_immobilisation == "215"
+    assert imm.company_id == gmao["company"].id
+
+
+def test_immobilisation_refusee_sans_donnees_comptables(db, gmao):
+    from app.models.maintenance_deep import TechnicalAsset
+    from app.services.comptabilite_avance_service import ImmobilisationService
+
+    actif = TechnicalAsset(
+        company_id=gmao["company"].id, tag_actif="EQUIPE-VIDE",
+        nom="Equipement sans valorisation", statut="actif", is_active=True)
+    db.add(actif)
+    db.commit()
+
+    with pytest.raises(ValueError):
+        ImmobilisationService.creer_depuis_actif_gmao(db, actif.id, "215", "2815")
