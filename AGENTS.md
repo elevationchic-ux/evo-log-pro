@@ -56,13 +56,22 @@ frontend `npm run dev` (:3000, `NEXT_PUBLIC_API_URL=http://localhost:8000`).
 **Profonds (logique métier normative + tests)** : comptabilité OHADA,
 GMAO, juridique, paie CEMAC, magasin/FEFO/inventaires.
 
-**Profonds existants (services métier, à auditer pour tests)** :
-douane CEMAC (`taxation_douaniere.py` = moteur unique de liquidation :
-DD + redevance 0.45 % + CCI 1 % + OHADA 0.05 % + TVA 19,25 % + IS 2,2 %),
-QHSE (taux TF/TG par million d'heures, dénominateur réel
-`HeuresExposition`, bilan CSST/CNPS, HACCP, permis IMDG), acconage,
-transport international, transit, acquisition, finance, RH,
-magasin douane, reporting, fiscalité Cameroun, documents, intégration.
+**Profonds + testés** (40+ nouveaux tests, suite complète 987 verts) :
+comptabilité OHADA (5 états + TFT/SIG + immo + liasse + export),
+GMAO (planification compteurs + préventif parc), juridique, paie CEMAC,
+magasin (FEFO + inventaires + écarts→compta), douane CEMAC
+(`taxation_douaniere.py` = moteur unique : DD + redevance 0.45 % +
+CCI 1 % + OHADA 0.05 % + TVA 19,25 % + IS 2,2 %), transit CEMAC,
+acconage (surestarie, redevances port), QHSE (accidentologie TF/TG),
+acquisition (notation offres), transport international (stats/rapport),
+RH (congés/absentéisme/paie), finance (balance âgée, clôture),
+fiscalité Cameroun (TVA/CNPS/IRPP/IS), conformité RGPD (rétention),
+WMS (écarts/cross-dock), BSC/CNCC, reporting (notifications/documents/
+ruptures), magasin douane.
+
+**Profonds existants (services métier, tests partiels)** : finance
+avancée (DSO, scoring client), documents, notifications, tiers, RBAC,
+intégrations externes (SYDONIA+, APIES, BEAC — gabarits documentés).
 
 **Surface (CRUD généré, profondeur à construire)** : port ops,
 aménagement portuaire, ferroviaire, fluvial, aérien, cold chain,
