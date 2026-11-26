@@ -693,6 +693,27 @@ def valorisation_ecarts_inventaire(
     }
 
 
+@router.post("/inventaires/{inventaire_id}/ecriture-ecarts")
+def ecrire_ecarts_inventaire(
+    inventaire_id: int,
+    date_ecriture: date,
+    compte_stocks: str = Query(..., min_length=3, max_length=10),
+    compte_variation: str = Query(..., min_length=3, max_length=10),
+    journal_code: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.inventaire.modify"))
+):
+    """Comptabilise les ecarts valorises : surplus -> DEBIT stocks /
+    CREDIT 603x ; depere -> inverse. Idempotent par inventaire."""
+    from app.services.inventaire_ecriture_service import InventaireEcritureService
+    try:
+        return InventaireEcritureService.generer_ecriture_ecarts(
+            db, inventaire_id, date_ecriture, compte_stocks,
+            compte_variation, journal_code)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 # ============ FOURNISSEURS ============
 @router.post("/fournisseurs-stock", response_model=FournisseurStockResponse, status_code=status.HTTP_201_CREATED)
 def creer_fournisseur_stock(
