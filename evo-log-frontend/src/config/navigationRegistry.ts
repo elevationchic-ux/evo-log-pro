@@ -651,6 +651,17 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: "Rotation, rupture, taux de service, cadence de preparation.",
         requiredRoles: ["magasin.wms_analytics.read"],
       },
+      {
+        label: "Valorisation & FEFO",
+        path: "/magasin-stock/valorisation",
+        icon: (LUCIDE as any)["Package"],
+        badge: "FEFO",
+        tcode: "KMAG_VAL",
+        description: "Valorisation des stocks et allocation FEFO par péremption croissante",
+        businessProcess: "Valorisation & sortie FEFO",
+        isOhadaCompliant: true,
+        requiredRoles: ['MAGASIN', 'FINANCE', 'AUDITOR']
+      },
     ]
   },
 
@@ -743,6 +754,29 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         tcode: 'KOHA_TAX',
         description: 'Déclarations fiscales CEMAC, TVA 19.25%, IS, acomptes et DIPE',
         businessProcess: 'Fiscalité d entreprise',
+        isCemacSpecific: true,
+        isOhadaCompliant: true,
+        requiredRoles: ['EXPERT_COMPTABLE', 'FINANCE']
+      },
+      {
+        label: 'Immobilisations amortissables',
+        path: '/comptabilite-ohada/immobilisations',
+        icon: (LUCIDE as any)["Building2"],
+        badge: 'Immo',
+        tcode: 'KOHA_IMM',
+        description: 'Registre des immobilisations, échéancier et dotations 681/28x automatiques',
+        businessProcess: 'Amortissements SYSCOHADA',
+        isOhadaCompliant: true,
+        requiredRoles: ['EXPERT_COMPTABLE', 'FINANCE']
+      },
+      {
+        label: 'Liasse fiscale CEMAC',
+        path: '/comptabilite-ohada/liasse-fiscale',
+        icon: (LUCIDE as any)["FileSpreadsheet"],
+        badge: 'Liasse',
+        tcode: 'KOHA_LIA',
+        description: 'Consolidation TVA + IS depuis les déclarations réelles de l exercice',
+        businessProcess: 'Déclarations fiscales',
         isCemacSpecific: true,
         isOhadaCompliant: true,
         requiredRoles: ['EXPERT_COMPTABLE', 'FINANCE']
@@ -948,6 +982,18 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         tcode: 'KRH_PAY',
         description: 'Calcul net à payer, retenues fiscales IRGM, primes de transport',
         businessProcess: 'Émission paie',
+        isOhadaCompliant: true,
+        isCemacSpecific: true,
+        requiredRoles: ['RH', 'PAIE']
+      },
+      {
+        label: 'Récapitulatif annuel de paie',
+        path: '/rh/paie-recapitulatif',
+        icon: (LUCIDE as any)["Wallet"],
+        badge: 'Paie',
+        tcode: 'KRH_RCA',
+        description: 'Cumuls annuels par employé : brut, net, CNPS salarial/patronal, IRGM',
+        businessProcess: 'État récapitulatif paie',
         isOhadaCompliant: true,
         isCemacSpecific: true,
         requiredRoles: ['RH', 'PAIE']
@@ -2453,6 +2499,41 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: "Pilotage transversal du module maintenance-industrielle",
         businessProcess: "Pilotage du module",
         requiredRoles: ["maintindustrielle.assets.read"],
+      },
+      {
+        label: "Planification préventive GMAO",
+        path: "/maintenance-gmao/planification",
+        icon: (LUCIDE as any)["Wrench"],
+        badge: "Préventif",
+        tcode: "maint-planif",
+        description: "OT préventifs par compteurs réels (heures/km), échéances et lubrifications",
+        businessProcess: "Maintenance préventive ISO 55000",
+        requiredRoles: ["maintindustrielle.work_orders.read"],
+      },
+    ]
+  },
+
+  'juridique': {
+    key: 'juridique',
+    title: 'Juridique & Contrats',
+    path: '/juridique',
+    icon: (LUCIDE as any)["Scale"],
+    color: '#f59e0b',
+    glow: 'shadow-amber-500/50 border-amber-500/60',
+    bgGradient: 'from-amber-600 to-yellow-500',
+    businessArea: 'Juridique & Conformité',
+    processPhase: 'Support: Valeur documentaire',
+    requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'MANAGER'],
+    subModules: [
+      {
+        label: 'Contrats, Contentieux & Échéances',
+        path: '/juridique',
+        icon: (LUCIDE as any)["Scale"],
+        badge: 'Juridique',
+        tcode: 'KJUR_CON',
+        description: 'Registre des contrats à valeur documentaire, contentieux et fenêtres de préavis',
+        businessProcess: 'Gestion contractuelle',
+        requiredRoles: ['juridique.contrats.read', 'juridique.contentieux.read', 'juridique.echeances.read']
       },
     ]
   },
