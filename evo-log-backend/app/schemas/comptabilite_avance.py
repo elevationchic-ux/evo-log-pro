@@ -496,6 +496,28 @@ class SIGGenererRequest(BaseModel):
     effectif_moyen: Optional[Decimal] = None
 
 
+class NoteAnnexeResponse(BaseModel):
+    id: int
+    annexes_id: int
+    numero: int
+    intitule: str
+    contenu: Optional[str] = None
+    montant: Optional[Decimal] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class NotesAnnexesGenererRequest(BaseModel):
+    exercice_id: int
+    date_annexes: date
+    denomination: str
+    forme_juridique: str
+    siege: str
+    effectif_moyen: Optional[Decimal] = None
+
+
 # ============ CLÔTURE ============
 
 class ClotureMensuelleRequest(BaseModel):

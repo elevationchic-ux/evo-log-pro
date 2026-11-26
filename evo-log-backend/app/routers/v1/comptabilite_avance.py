@@ -21,6 +21,7 @@ from app.schemas.comptabilite_avance import (
     AnnexesOHDACreate, AnnexesOHDAResponse, AnnexesGenererRequest,
     BilanGenererRequest, CompteResultatGenererRequest, TAFIREGenererRequest,
     TFTGenererRequest, TFTResponse, SIGGenererRequest, SIGResponse,
+    NoteAnnexeResponse, NotesAnnexesGenererRequest,
     ClotureMensuelleRequest, ClotureMensuelleResponse,
     ClotureAnnuelleRequest, ClotureAnnuelleResponse,
     ReportANouveauRequest, ReportANouveauResponse,
@@ -34,7 +35,7 @@ from app.services.comptabilite_avance_service import (
 from app.models.finance_ohada import (
     JournalAuxiliaire, Lettrage, GrandLivreLigne, BalanceVerification,
     BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, SIG, AnnexesOHADA,
-    ExerciceComptable,)
+    NoteAnnexe, ExerciceComptable,)
 
 router = APIRouter(tags=["Comptabilité Avancée"])  # monte sur /api/v1/comptabilite-avance par main.py
 
@@ -456,6 +457,34 @@ def obtenir_sig(
     if not sig:
         raise HTTPException(status_code=404, detail="SIG non trouvé")
     return sig
+
+
+@router.post("/etats-financiers/annexes/notes", response_model=AnnexesOHDAResponse)
+def generer_notes_annexes_detaillees(
+    request: NotesAnnexesGenererRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
+):
+    """Générer le jeu d'annexes avec les notes normalisées SYSCOHADA"""
+    return EtatsFinanciersOHADAService.generer_notes_annexes_detaillees(
+        db,
+        request.exercice_id,
+        request.date_annexes,
+        request.denomination,
+        request.forme_juridique,
+        request.siege,
+        request.effectif_moyen,
+    )
+
+
+@router.get("/etats-financiers/annexes/{annexes_id}/notes", response_model=List[NoteAnnexeResponse])
+def lister_notes_annexes(
+    annexes_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
+):
+    """Lister les notes annexes normalisées d'un jeu d'annexes"""
+    return db.query(NoteAnnexe).filter(NoteAnnexe.annexes_id == annexes_id).order_by(NoteAnnexe.numero).all()
 
 
 @router.post("/etats-financiers/annexes", response_model=AnnexesOHDAResponse)

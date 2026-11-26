@@ -834,6 +834,26 @@ class SIG(Base):
     exercice = relationship("ExerciceComptable")
 
 
+class NoteAnnexe(Base):
+    """Note annexe normalisee SYSCOHADA rattachee a un jeu d'annexes.
+
+    Chaque note porte un numero officiel (1 a 21+), son intitule et le
+    contenu calcule depuis le grand livre : le document d'annexes devient
+    ainsi une liasse exploitable, pas un formulaire vide."""
+    __tablename__ = "notes_annexes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    annexes_id = Column(Integer, ForeignKey('annexes_ohada.id'), nullable=False)
+    numero = Column(Integer, nullable=False)
+    intitule = Column(String(200), nullable=False)
+    contenu = Column(Text)
+    montant = Column(Numeric(15, 2))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+ # Relationships
+    annexes = relationship("AnnexesOHADA")
+
+
 class AnnexesOHADA(Base):
     """Annexes OHADA - Notes et informations complémentaires"""
     __tablename__ = "annexes_ohada"
