@@ -1,0 +1,278 @@
+"""
+Security utilities and authentication
+"""
+from passlib.context import CryptContext
+from jose import JWTError, jwt
+from datetime import datetime, timedelta
+from fastapi import Depends, HTTPException, WebSocket, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+import pyotp
+import hashlib
+import json
+import re
+import secrets
+from typing import List, Optional
+from app.core.config import settings
+from app.core.database import get_db
+from app.models.user import User
+from sqlalchemy.orm import Session
+
+import bcrypt
+
+security = HTTPBearer(auto_error=True)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Rate limiter
+limiter = Limiter(key_func=get_remote_address)
+
+# JWT Bearer
+security = HTTPBearer()
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against a hash"""
+    try:
+        if isinstance(hashed_password, str):
+            hashed_bytes = hashed_password.encode('utf-8')
+        else:
+            hashed_bytes = hashed_password
+        plain_bytes = plain_password.encode('utf-8')[:72]
+        return bcrypt.checkpw(plain_bytes, hashed_bytes)
+    except Exception:
+        try:
+            return pwd_context.verify(plain_password, hashed_password)
+        except Exception:
+            return False
+
+
+def get_password_hash(password: str) -> str:
+    """Hash a password"""
+    plain_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(plain_bytes, salt).decode('utf-8')
+
+
+# Liste courte de mots de passe bannis (les plus frequents / evidents).
+_COMMON_PASSWORDS = {
+    "password", "motdepasse", "12345678", "123456789", "azertyuiop",
+    "admin123", "supadmin123", "qwer1234", "11111111", "iloveyou",
+}
+
+
+def validate_password_strength(password: str, username: str | None = None) -> None:
+    """Verifie la robustesse minimale d'un mot de passe.
+
+    Leve une ``ValueError`` (message pret a afficher) si la politique n'est
+    pas satisfaite. Politique volontairement raisonnable pour ne pas bloquer
+    les utilisateurs legitimes :
+      - au moins 8 caracteres ;
+      - au moins une lettre et au moins un chiffre ;
+      - ne doit pas figurer dans la liste des mots de passe les plus courants ;
+      - ne doit pas egaliser le nom d'utilisateur.
+    """
+    if not password or len(password) < 8:
+        raise ValueError("Le mot de passe doit contenir au moins 8 caracteres.")
+    if not any(c.isdigit() for c in password):
+        raise ValueError("Le mot de passe doit contenir au moins un chiffre.")
+    if not any(c.isalpha() for c in password):
+        raise ValueError("Le mot de passe doit contenir au moins une lettre.")
+    lowered = password.lower()
+    if lowered in _COMMON_PASSWORDS:
+        raise ValueError("Ce mot de passe est trop courant, choisissez-en un autre.")
+    if username and lowered == username.lower():
+        raise ValueError("Le mot de passe ne peut pas etre identique au nom d'utilisateur.")
+
+
+
+def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
+    """Create JWT access token"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+def create_refresh_token(data: dict) -> str:
+    """Create JWT refresh token"""
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({"exp": expire, "type": "refresh"})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+# --------------------------------------------------------------------------- #
+# Authentification a deux facteurs (TOTP / RFC 6238)
+# --------------------------------------------------------------------------- #
+TOTP_VALID_WINDOW = 1  # accepte le code precedent/suivant (tolerance d'horloge)
+TWO_FACTOR_TOKEN_EXPIRE_MINUTES = 5
+# Codes de secours 2FA: nombre de codes emis a chaque regeneration.
+RECOVERY_CODES_COUNT = 8
+
+
+def generate_totp_secret() -> str:
+    """Genere un secret TOTP base32 (compat Google Authenticator / Authy)."""
+    return pyotp.random_base32()
+
+
+def build_otpauth_uri(secret: str, username: str, issuer: str = "EVO-LOG") -> str:
+    """URI otpauth:// a encoder en QR code pour l'app d'authentification."""
+    return pyotp.TOTP(secret).provisioning_uri(name=username, issuer_name=issuer)
+
+
+def verify_totp(secret: str, code: str) -> bool:
+    """Verifie un code a 6 chiffres contre le secret. Robuste aux entrees vides."""
+    if not secret or not code:
+        return False
+    try:
+        return pyotp.TOTP(secret).verify(str(code).strip(), valid_window=TOTP_VALID_WINDOW)
+    except Exception:
+        return False
+
+
+def hash_recovery_code(code: str) -> str:
+    """Hash SHA-256 d'un code de secours, apres normalisation (sans tiret,
+    minuscule) : la frappe « abcd-1234 » doit valoir « ABCD1234 »."""
+    normalise = re.sub(r"[^0-9a-z]", "", str(code or "").lower())
+    return hashlib.sha256(normalise.encode("utf-8")).hexdigest()
+
+
+def generate_recovery_codes(count: int = RECOVERY_CODES_COUNT) -> tuple[List[str], str]:
+    """Codes de secours 2FA.
+
+    Retourne (codes_en_clair, blob_a_persister). Seul le blob de hachages est
+    ecrit en base : les codes en clair n'existent qu'au moment de la generation
+    et ne peuvent plus etre relus ensuite (cf. /auth/2fa/recovery-codes)."""
+    codes: List[str] = []
+    for _ in range(count):
+        brut = secrets.token_hex(4)  # 8 caracteres hexadecimaux
+        codes.append(f"{brut[:4]}-{brut[4:]}".upper())
+    blob = json.dumps(
+        [{"hash": hash_recovery_code(c), "used_at": None} for c in codes]
+    )
+    return codes, blob
+
+
+def parse_recovery_codes(blob: Optional[str]) -> List[dict]:
+    """Lit le blob JSON ; une valeur illisible n'est pas une exception 500."""
+    if not blob:
+        return []
+    try:
+        data = json.loads(blob)
+    except (ValueError, TypeError):
+        return []
+    return [c for c in data if isinstance(c, dict) and c.get("hash")] if isinstance(data, list) else []
+
+
+def try_consume_recovery_code(blob: Optional[str], code: str) -> tuple[bool, Optional[str]]:
+    """Utilise un code de secours. Retourne (acceptable, nouveau_blob) ; le
+    nouveau blob marque la ligne utilisee avec son horodatage."""
+    codes = parse_recovery_codes(blob)
+    if not codes or not (code or "").strip():
+        return False, None
+    cible = hash_recovery_code(code)
+    for entree in codes:
+        if entree.get("hash") == cible and not entree.get("used_at"):
+            entree["used_at"] = datetime.utcnow().isoformat()
+            return True, json.dumps(codes)
+    return False, None
+
+
+def create_2fa_token(user_id: int) -> str:
+    """Jeton intermediaire court delivre apres mot de passe correct, AVANT que
+    le code TOTP soit valide. N'est PAS un token d'acces (type='2fa')."""
+    expire = datetime.utcnow() + timedelta(minutes=TWO_FACTOR_TOKEN_EXPIRE_MINUTES)
+    payload = {"sub": str(user_id), "type": "2fa", "exp": expire}
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def decode_2fa_token(token: str) -> int:
+    """Retourne l'user_id porteur d'un jeton 2FA valide, sinon leve 401."""
+    payload = decode_token(token)
+    if payload.get("type") != "2fa":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Jeton de verification 2FA invalide",)
+    user_id = payload.get("sub")
+    if not str(user_id).isdigit():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Jeton de verification 2FA invalide",)
+    return int(user_id)
+
+
+def decode_token(token: str) -> dict:
+    """Decode and validate JWT token"""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        return payload
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},)
+
+
+def get_token_payload(
+    credentials: HTTPAuthorizationCredentials = Depends(security),) -> dict:
+    """Validate an access token and return its claims."""
+    payload = decode_token(credentials.credentials)
+ # Seul un token d'ACCES est admis ici. Les refresh ("refresh") et les jetons
+ # intermediaires 2FA ("2fa") ne doivent JAMAIS autoriser un acces API.
+    token_type = payload.get("type")
+    if token_type is not None and token_type != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Token type '{token_type}' cannot be used for access",)
+    return payload
+
+
+def get_current_user_id(
+    credentials: HTTPAuthorizationCredentials = Depends(security),) -> int:
+    """Return the authenticated numeric user id from an access token."""
+    payload = get_token_payload(credentials)
+    user_id = payload.get("sub")
+    if not str(user_id).isdigit():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},)
+    return int(user_id)
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db),) -> User:
+    """Return the authenticated active user from the database."""
+    user_id = get_current_user_id(credentials)
+    user = db.query(User).filter(User.id == user_id, User.is_active.is_(True)).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User account is inactive or does not exist",)
+    return user
+
+
+def authenticate_websocket(websocket: WebSocket, db: Session) -> User:
+    authorization = websocket.headers.get("authorization")
+    token = websocket.query_params.get("token")
+    if authorization and authorization.lower().startswith("bearer "):
+        token = authorization[7:].strip()
+    if not token:
+        raise HTTPException(status_code=401, detail="WebSocket authentication required")
+    payload = get_token_payload(
+        HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
+    )
+    try:
+        user = db.query(User).filter(User.id == int(payload.get("sub"))).first()
+    except (TypeError, ValueError):
+        user = None
+    if user is None or not user.is_active:
+        raise HTTPException(status_code=401, detail="Invalid WebSocket credentials")
+    return user

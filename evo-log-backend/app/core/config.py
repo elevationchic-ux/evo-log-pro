@@ -1,0 +1,171 @@
+"""
+Configuration settings for EVO-LOG EM-ERP
+"""
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Optional
+import secrets
+
+
+class Settings(BaseSettings):
+    """Application settings"""
+    
+ # Application
+    APP_NAME: str = "EVO-LOG EM-ERP"
+    APP_VERSION: str = "2.0.0"
+    ENVIRONMENT: str = "development"
+    DEBUG: bool = False
+    
+ # Database
+    DATABASE_URL: str = "sqlite:///./kamlog_erp.db"
+    DATABASE_POOL_SIZE: int = 5
+    DATABASE_MAX_OVERFLOW: int = 10
+    
+ # Redis
+    REDIS_URL: str = "redis://localhost:6379/0"
+    
+ # Security
+    SECRET_KEY: str = ""
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+ # Bootstrap / initialisation base (endpoints /api/setup et /api/seed)
+ # Jeton requis pour declencher l'initialisation. Vide => endpoints désactivés
+ # en production, ouverts seulement en dev/test.
+    SETUP_TOKEN: str = ""
+ # Mots de passe initiaux des admins seed. Si absents, un mot de passe
+ # aleatoire est genere et renvoye UNE seule fois (jamais de credential fixe).
+    SETUP_SUPERADMIN_PASSWORD: Optional[str] = None
+    SETUP_ADMIN_PASSWORD: Optional[str] = None
+    
+ # CORS
+    BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://127.0.0.1:3000", "https://EVO-LOG-erp.cm"]
+    
+ # MinIO
+    MINIO_ENABLED: bool = False
+    MINIO_ENDPOINT: str = "localhost:9000"
+    MINIO_ACCESS_KEY: str = "minioadmin"
+    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_SECURE: bool = False
+    MINIO_BUCKET_DOCUMENTS: str = "documents"
+
+ # Uploads console CADC (logos d'entreprise). Stockage filesystem servi
+ # statiquement sous /static/uploads; MinIO reste reserve aux documents.
+    UPLOAD_DIR: str = "static/uploads"
+    
+ # Sentry
+    SENTRY_DSN: Optional[str] = None
+    
+ # Email
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM: str = "noreply@EVO-LOG.cm"
+    
+ # WhatsApp
+    WHATSAPP_ENABLED: bool = False
+    WHATSAPP_API_URL: str = ""
+    WHATSAPP_API_KEY: str = ""
+
+ # SMS (gateway tierce type Twilio/SMS Pool). Desactive => la route renvoie
+ # un 503 explicite « fournisseur non configure » au lieu d'un faux succes.
+    SMS_ENABLED: bool = False
+    SMS_API_URL: str = ""
+    SMS_API_KEY: str = ""
+    SMS_SENDER: str = ""
+
+ # Assistant IA / LLM. Sans fournisseur configure, les routes basees sur un
+ # LLM repondent 503 (aucune reponse inventee); les routes purement
+ # analytiques (KPI, suggestions, scoring) fonctionnent sur les donnees reel.
+    AI_ENABLED: bool = False
+    AI_PROVIDER: str = ""      # ex. anthropic, openai
+    AI_API_KEY: str = ""
+    AI_MODEL: str = ""
+
+ # Facture electronique - connecteur DGI (valeur fiscale opposable). Desactive
+ # => sceau d'integrite local SHA-256 (verifiable), sans pretendre a l'opposabilite DGI.
+    E_INVOICING_DGI_ENABLED: bool = False
+    E_INVOICING_DGI_API_URL: str = ""
+    E_INVOICING_DGI_API_KEY: str = ""
+
+ # --- Connecteurs externes (Zero-Mock: 503 si non configure, appel reel si
+ # configure). Voir app/utils/external.py. Chaque famille expose le triplet
+ # _ENABLED / _API_URL / _API_KEY. ---
+
+ # EDI douanier CAMCIS / ASYCUDA World / e-GUCE (CCNET)
+    CUSTOMS_EDI_ENABLED: bool = False
+    CUSTOMS_EDI_API_URL: str = ""
+    CUSTOMS_EDI_API_KEY: str = ""
+
+ # Teleprocedures gouvernementales (MINMIVT/APN/MINFI/MINEPAT/MINEPPT/COLIFE/
+ # CIP/CSST/CNPS/ANT-APDP) via une gateway d'interconnexion administree
+    GOV_TELEPROC_ENABLED: bool = False
+    GOV_TELEPROC_API_URL: str = ""
+    GOV_TELEPROC_API_KEY: str = ""
+
+ # Mobile Money Orange Cameroun
+    PAYMENT_ORANGE_ENABLED: bool = False
+    PAYMENT_ORANGE_API_URL: str = ""
+    PAYMENT_ORANGE_API_KEY: str = ""
+
+ # MTN Mobile Money Cameroun
+    PAYMENT_MTN_ENABLED: bool = False
+    PAYMENT_MTN_API_URL: str = ""
+    PAYMENT_MTN_API_KEY: str = ""
+
+ # Virement / relevé bancaire (GIMAC / host-to-host)
+    PAYMENT_BANK_ENABLED: bool = False
+    PAYMENT_BANK_API_URL: str = ""
+    PAYMENT_BANK_API_KEY: str = ""
+
+ # Signature electronique qualifiee / horodatage RFC3161 (PKI tierce)
+    QUALIFIED_SIGN_ENABLED: bool = False
+    QUALIFIED_SIGN_API_URL: str = ""
+    QUALIFIED_SIGN_API_KEY: str = ""
+
+ # Signalisation WebRTC (push-to-talk / appel voix sur le terrain)
+    WEBRTC_ENABLED: bool = False
+    WEBRTC_API_URL: str = ""
+    WEBRTC_API_KEY: str = ""
+    
+ # Webhooks Mobile Money (MTN MoMo / Orange Money)
+ # Secret partagé utilisé pour vérifier la signature HMAC-SHA256 des
+ # notifications. Sans lui, le webhook refuse toute demande (fail-closed).
+    MOBILE_MONEY_WEBHOOK_SECRET: str = ""
+    
+ # Celery
+    CELERY_BROKER_URL: str = "redis://localhost:6379/1"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
+    
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
+
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT.lower() in {"production", "prod"}
+
+    def model_post_init(self, __context: object) -> None:
+        environment = self.ENVIRONMENT.lower()
+        if not self.SECRET_KEY and environment in {"development", "dev", "test", "testing"}:
+            self.SECRET_KEY = secrets.token_urlsafe(48)
+        if environment not in {"production", "prod"}:
+            return
+        if self.DEBUG:
+            raise ValueError("DEBUG must be false in production")
+        if not self.SECRET_KEY or len(self.SECRET_KEY) < 32:
+            raise ValueError("A strong SECRET_KEY is required in production")
+        if not self.BACKEND_CORS_ORIGINS or any(
+            origin == "*" or "localhost" in origin or "127.0.0.1" in origin
+            for origin in self.BACKEND_CORS_ORIGINS
+        ):
+            raise ValueError("Production CORS origins must be explicit and non-local")
+        if self.DATABASE_URL.startswith("sqlite"):
+            raise ValueError("SQLite is not supported in production")
+        if self.MINIO_ENABLED and (
+            self.MINIO_ACCESS_KEY == "minioadmin"
+            or self.MINIO_SECRET_KEY == "minioadmin"
+        ):
+            raise ValueError("Default MinIO credentials are not allowed in production")
+
+
+settings = Settings()

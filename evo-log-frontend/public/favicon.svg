@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background radial gradient: deep navy to near-black -->
+    <radialGradient id="bgGrad" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#0d1f3c"/>
+      <stop offset="60%" stop-color="#060e1f"/>
+      <stop offset="100%" stop-color="#010509"/>
+    </radialGradient>
+
+    <!-- Gold metallic gradient for the monogram -->
+    <linearGradient id="goldMain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"  stop-color="#fef3c7"/>
+      <stop offset="20%" stop-color="#fcd34d"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="80%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+
+    <!-- Gold shine highlight (top-left bevel) -->
+    <linearGradient id="goldShine" x1="0%" y1="0%" x2="50%" y2="50%">
+      <stop offset="0%"  stop-color="#fffbeb" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#fde68a" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Amber glow filter -->
+    <filter id="glowGold" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle outer glow for the background badge -->
+    <filter id="outerGlow" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Icon clip path: rounded square -->
+    <clipPath id="roundedSquare">
+      <rect x="0" y="0" width="512" height="512" rx="112" ry="112"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── BACKGROUND ── -->
+  <g clip-path="url(#roundedSquare)">
+    <rect width="512" height="512" fill="url(#bgGrad)"/>
+
+    <!-- Subtle inner amber glow center -->
+    <ellipse cx="256" cy="248" rx="200" ry="190"
+      fill="#f59e0b" fill-opacity="0.06"/>
+
+    <!-- ── RADAR RINGS (very subtle) ── -->
+    <circle cx="256" cy="248" r="175" fill="none" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.18"/>
+    <circle cx="256" cy="248" r="145" fill="none" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.14"/>
+    <circle cx="256" cy="248" r="115" fill="none" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.10"/>
+    <circle cx="256" cy="248" r="85"  fill="none" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.08"/>
+
+    <!-- ── MONOGRAM: "E" + SHIP BOW ──
+         The design is a bold geometric "E" letterform where
+         the bottom horizontal stroke extends into a tapered
+         ship bow shape pointing to the right.  -->
+    <g filter="url(#glowGold)" transform="translate(256,248)">
+
+      <!-- GLOW BASE (amber halo behind the mark) -->
+      <ellipse cx="0" cy="5" rx="115" ry="95"
+        fill="#f59e0b" fill-opacity="0.18"/>
+
+      <!-- === MAIN "E" BODY + SHIP BOW === -->
+      <!-- The monogram is drawn as a single path:
+           - Left vertical bar of E
+           - Top horizontal bar
+           - Middle horizontal bar
+           - The bottom bar flows into a pointed ship bow -->
+
+      <!-- Left vertical bar -->
+      <rect x="-110" y="-92" width="34" height="184"
+        fill="url(#goldMain)" rx="4"/>
+
+      <!-- Top horizontal bar -->
+      <rect x="-110" y="-92" width="145" height="34"
+        fill="url(#goldMain)" rx="4"/>
+
+      <!-- Middle horizontal bar (slightly shorter) -->
+      <rect x="-110" y="-17" width="115" height="30"
+        fill="url(#goldMain)" rx="4"/>
+
+      <!-- Bottom bar → merges into ship bow (tapered right) -->
+      <polygon
+        points="-110,67  35,67  115,92  35,97  -110,97"
+        fill="url(#goldMain)"/>
+
+      <!-- Ship bow pointed tip (right side extending) -->
+      <polygon
+        points="35,67  145,92  35,97"
+        fill="url(#goldMain)"/>
+
+      <!-- Shine overlay (beveled highlight) -->
+      <rect x="-110" y="-92" width="145" height="34"
+        fill="url(#goldShine)" rx="4"/>
+      <rect x="-110" y="-92" width="34" height="100"
+        fill="url(#goldShine)" rx="4"/>
+
+      <!-- Glint star on top-left corner of the E -->
+      <g transform="translate(-93,-79)">
+        <line x1="0" y1="-9" x2="0" y2="9" stroke="#fffbeb" stroke-width="2" stroke-opacity="0.9"/>
+        <line x1="-9" y1="0" x2="9" y2="0" stroke="#fffbeb" stroke-width="2" stroke-opacity="0.9"/>
+        <line x1="-6" y1="-6" x2="6" y2="6" stroke="#fffbeb" stroke-width="1" stroke-opacity="0.5"/>
+        <line x1="6" y1="-6" x2="-6" y2="6" stroke="#fffbeb" stroke-width="1" stroke-opacity="0.5"/>
+        <circle cx="0" cy="0" r="2.5" fill="#ffffff"/>
+      </g>
+
+      <!-- Glint on ship bow tip -->
+      <g transform="translate(138,92)">
+        <line x1="0" y1="-6" x2="0" y2="6" stroke="#fde68a" stroke-width="1.5" stroke-opacity="0.8"/>
+        <line x1="-6" y1="0" x2="6" y2="0" stroke="#fde68a" stroke-width="1.5" stroke-opacity="0.8"/>
+        <circle cx="0" cy="0" r="2" fill="#fffbeb"/>
+      </g>
+
+    </g>
+
+    <!-- ── BORDER: thin golden border on the rounded square ── -->
+    <rect x="2" y="2" width="508" height="508" rx="111" ry="111"
+      fill="none"
+      stroke="#f59e0b"
+      stroke-width="3"
+      stroke-opacity="0.35"/>
+
+    <!-- inner subtle border -->
+    <rect x="10" y="10" width="492" height="492" rx="105" ry="105"
+      fill="none"
+      stroke="#fde68a"
+      stroke-width="1"
+      stroke-opacity="0.08"/>
+
+  </g>
+</svg>

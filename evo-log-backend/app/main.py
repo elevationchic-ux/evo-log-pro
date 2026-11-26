@@ -1,0 +1,1510 @@
+"""
+EVO-LOG EM-ERP API - Main Application Entry Point
+ERP Logistique Portuaire - Système de gestion complet pour le port de Douala
+"""
+
+from fastapi import FastAPI, Request, HTTPException, Header
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
+import asyncio
+import logging
+import secrets
+import time
+from typing import Optional
+import sentry_sdk
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+# prometheus_fastapi_instrumentator disabled - incompatible with FastAPI 0.115+ router
+
+from app.core.config import settings
+from app.core.database import engine, get_db, Base, SessionLocal
+from app.core.security import limiter
+from app.middleware.audit import AuditMiddleware
+from app.middleware.idempotency import IdempotencyMiddleware
+from app.middleware.tracing import TracingMiddleware
+from app.middleware.tenant_context import TenantContextMiddleware
+import app.core.tenant_enforcement  # noqa: F401 - enregistre les evenements ORM d'isolation tenant
+from app.utils.error_handlers import setup_error_handlers, setup_monitoring
+from app.services.events.event_service import event_service
+from app.services.events.workflow_orchestrator import register_all_handlers
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Global startup errors for health check
+startup_errors = []
+heartbeat_task = None
+outbox_pump_task = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown events."""
+    global heartbeat_task
+    
+ # Startup
+    logger.info("Starting EVO-LOG EM-ERP API...")
+
+ # Auto-create all DB tables (idempotent - safe to run multiple times).
+ # En production, le schema est pilote EXCLUSIVEMENT par Alembic (via
+ # docker-entrypoint.sh): create_all est desactive pour eviter qu'une
+ # table emergeante ne contourne la chaine de migrations et ne fausse la
+ # parite schema/versions.
+    if settings.is_production:
+        logger.info("Environment production : schema gere par Alembic (create_all ignore)")
+    else:
+        try:
+            import app.models  # noqa: F401 - ensure all models are imported
+            Base.metadata.create_all(bind=engine)
+            logger.info("✅ Database tables created/verified")
+        except Exception as e:
+            logger.error(f"❌ Failed to create database tables: {e}")
+
+    await event_service.start()
+    if event_service.redis is not None:
+        logger.info("Redis realtime bus connected")
+    else:
+        logger.warning(
+            "Redis realtime bus unavailable  running in degraded mode. "
+            "REST API is fully operational; real-time WebSocket pub/sub across "
+            "multiple processes is disabled until Redis becomes reachable."
+        )
+    
+ # Test database connection with a bounded retry so a still-booting
+ # PostgreSQL ("Connection refused" / "the database system is starting up")
+ # during a Railway redeploy does not immediately mark /health as degraded.
+ # The check runs in a worker thread so the event loop is never blocked.
+    async def _probe_database(max_attempts: int = 20, delay: float = 2.0) -> None:
+        import asyncio
+
+        def _once() -> None:
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+
+        last_exc: Exception | None = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                await asyncio.to_thread(_once)
+                logger.info("Database connection established successfully")
+                return
+            except Exception as e:
+                last_exc = e
+                if attempt < max_attempts:
+                    logger.warning(
+                        "Database not ready (attempt %d/%d): %s; retrying...",
+                        attempt, max_attempts, str(e).splitlines()[-1],)
+                    await asyncio.sleep(delay)
+        raise last_exc  # type: ignore[misc]
+
+    try:
+        await _probe_database()
+    except Exception as e:
+        err_msg = f"Database connection failed: {e}"
+        logger.error(f"? {err_msg}")
+        startup_errors.append(err_msg)
+    
+ # Register cross-module workflow orchestrator handlers
+    try:
+        register_all_handlers()
+        logger.info("✅ Cross-module workflow orchestrator registered")
+    except Exception as e:
+        logger.error(f"❌ Orchestrator registration failed: {e}")
+    
+ # Start heartbeat task for WebSocket connections
+    heartbeat_task = asyncio.create_task(_heartbeat_loop())
+
+ # Pump de l'outbox: bascule les evenements persistes (chat, workflows)
+ # vers le bus temps reel meme si aucun worker Celery n'est actif.
+    outbox_pump_task = asyncio.create_task(_outbox_pump_loop())
+
+    yield
+    
+ # Shutdown: close connections
+    engine.dispose()
+    await event_service.stop()
+    
+ # Stop heartbeat task
+    if heartbeat_task:
+        heartbeat_task.cancel()
+        try:
+            await heartbeat_task
+        except asyncio.CancelledError:
+            pass
+
+ # Stop outbox pump task
+    if outbox_pump_task:
+        outbox_pump_task.cancel()
+        try:
+            await outbox_pump_task
+        except asyncio.CancelledError:
+            pass
+
+async def _heartbeat_loop():
+    """Background task to send periodic heartbeats to all tenant WebSocket connections"""
+    while True:
+        try:
+            await asyncio.sleep(25)  # Every 25 seconds, matching WS router ping interval
+            await event_service.broadcast_heartbeat()
+            logger.debug("Sent WebSocket heartbeat to all tenants")
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logger.error(f"Error in heartbeat loop: {e}")
+            await asyncio.sleep(5)  # Wait before retrying
+
+async def _outbox_pump_loop():
+    """Live le outbox transactionnel vers le bus temps reel (Redis/WebSocket).
+
+    Revendication atomique pending->processing : sur et un seul livreur par
+    evenement quand plusieurs replicas (ou le worker Celery) tournent.
+    """
+    from app.services.events.outbox_delivery import pump_outbox
+    while True:
+        try:
+            await asyncio.sleep(2)
+            db = SessionLocal()
+            try:
+                delivered = await pump_outbox(db)
+                if delivered:
+                    logger.debug("Outbox pump: %d event(s) delivered to realtime bus", delivered)
+            finally:
+                db.close()
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logger.error(f"Error in outbox pump loop: {e}")
+            await asyncio.sleep(5)
+
+app = FastAPI(
+    title="EVO-LOG EM-ERP API",
+    description="""ERP Logistique Portuaire - Système de gestion complet pour le port de Douala.
+
+ ## Modules disponibles
+
+    * **Auth** - Authentification et gestion des utilisateurs
+    * **Tiers** - Gestion des clients, fournisseurs et partenaires
+    * **Transport** - Suivi des véhicules, conducteurs et missions
+    * **Finance** - Comptabilité, facturation et gestion financière
+    * **Parc** - Gestion du parc automobile et des équipements
+    * **Documents** - Génération et gestion des documents logistiques
+    * **Alerts** - Système d'alertes et de notifications en temps réel
+    * **Magasin** - Gestion des stocks et entrepôts
+    * **Gateway** - Intégration avec les systèmes externes
+    * **Transactions** - Suivi des opérations commerciales
+    * **Master Data** - Données de référence (articles, incoterms, types de conteneurs)
+    * **Administratif** - Gestion des agences et paramètres système
+    * **Notifications** - Centre de notifications
+    * **Achats** - Gestion des achats et approvisionnements
+    * **Incidents** - Signalement et suivi des incidents
+    * **Public API** - Endpoints publics accessibles sans authentification
+    * **RH** - Gestion des ressources humaines
+    * **Acconage** - Gestion des opérations d'accostage
+    * **Transit** - Gestion des opérations de transit
+    * **Maintenance** - Gestion de la maintenance
+    * **QHSE** - Qualité, Hygiène, Sécurité, Environnement
+    * **Magasin Avancé** - Gestion avancée (FEFO, réservations, kits, inventaires tournants)
+    * **Transport Avancé** - Optimisation tournées, GPS, sous-traitants, maintenance préventive
+
+ ## Nouveaux Modules Version 2.0
+
+    * **Shift Planning** - Planification des shifts et ressources
+    * **Port Pricing** - Tarification des services portuaires
+    * **GPS Tracking** - Tracking temps réel de la flotte
+    * **Real Customs Integration** - Intégration SYDONIA+ et GUICHET UNIQUE
+    * **Port Incidents** - Gestion des incidents portuaires
+    * **Auto Invoicing** - Facturation automatique OHADA
+    * **Port Performance Dashboard** - Dashboard de performance
+    * **Multi-Channel Notifications** - Notifications multi-canal
+    * **Container Lifecycle** - Cycle de vie des conteneurs
+    * **Partner API** - API pour intégration B2B
+
+ ## Modules Cameroun/CEMAC
+
+    * **Cameroon Integration** - Intégration BSC, CSC, SYGED, APE (CNCC, INS, Douane)
+    * **Local Payments** - Paiements locaux (Orange Money, MTN Mobile Money, Banques locales)
+    * **Cameroon Taxation** - Fiscalité Cameroun/OHADA (IRPP, IS, TCF, TDR, TVA)
+
+ ## Authentification
+
+    La plupart des endpoints nécessitent une authentification JWT. Utilisez l'endpoint `/api/v1/auth/login` pour obtenir un token d'accès.
+
+ ## Versioning
+
+    Cet API utilise le versioning par URL. La version actuelle est v1 disponible sous `/api/v1/*`.
+    Les endpoints sous `/api/*` sont maintenus pour la compatibilité ascendante mais sont dépréciés.
+
+ ## Rate Limiting
+
+    Des limites de taux sont appliquées pour protéger contre les abus:
+    * Authentification: 5 requêtes/minute
+    * Connexion: 10 requêtes/minute
+    * Utilisateurs réguliers: 1000 requêtes/heure
+    * Administrateurs: 2000 requêtes/heure
+    * Opérations en lot: 10 requêtes/heure
+    """,
+    version="2.0.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
+    lifespan=lifespan,
+    contact={
+        "name": "Équipe EVO-LOG",
+        "url": "https://EVO-LOG.cm",
+        "email": "tech@EVO-LOG.cm",
+    },
+    license_info={
+        "name": "Propriétaire",
+        "url": "https://EVO-LOG.cm/license",
+    },
+    terms_of_service="https://EVO-LOG.cm/terms",)
+
+# Setup Prometheus Metrics (safely bypassed to prevent _IncludedRouter AttributeError in FastAPI 0.115+)
+# instrumentator = Instrumentator().instrument(app)
+
+# Sentry initialization (if DSN provided)
+if getattr(settings, "SENTRY_DSN", None):
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        traces_sample_rate=0.2,
+        integrations=[
+            SqlalchemyIntegration(),
+            RedisIntegration(),
+            CeleryIntegration(),
+        ],)
+    app.add_middleware(SentryAsgiMiddleware)
+
+# Rate limiting protection brute force
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Setup error handlers
+setup_error_handlers(app)
+
+# Setup monitoring (must be called outside lifespan because it adds a middleware)
+setup_monitoring(app)
+
+# Middleware de traçage des requêtes avec ID de corrélation
+app.add_middleware(TracingMiddleware)
+
+# Middlewares de Sécurité et Audit (Niveau World Pro)
+app.add_middleware(AuditMiddleware)
+app.add_middleware(IdempotencyMiddleware, redis_url=settings.REDIS_URL)
+
+# Isolation multi-tenant: publie le company_id du JWT dans le contexte courant.
+# app.core.tenant_enforcement filtre alors SELECT/UPDATE/DELETE et auto-trie les
+# INSERT au niveau ORM pour toutes les entites portees par une cle company_id.
+app.add_middleware(TenantContextMiddleware)
+
+# CORS autoriser les frontends locaux et l'origine de production explicite.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origin_regex=None,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-Idempotency-Key", "X-Request-ID", "trace-id", "baggage", "sentry-trace"],)
+
+# Assets televerses par la console CADC (logos d'entreprise): servis
+# statiquement sous /static/uploads. MinIO reste reserve aux documents
+# metier. Le repertoire est cree au demarrage pour eviter toute erreur de
+# mount sur un chemin absent.
+try:
+    from pathlib import Path as _Path
+    from fastapi.staticfiles import StaticFiles as _StaticFiles
+    _upload_root = _Path(settings.UPLOAD_DIR)
+    (_upload_root / "logos").mkdir(parents=True, exist_ok=True)
+    app.mount("/static/uploads", _StaticFiles(directory=str(_upload_root)), name="cadc_uploads")
+except Exception as e:  # noqa: BLE001 - un echec de mount ne doit pas couper l'API
+    logger.warning(f"Mount /static/uploads ignore : {e}")
+
+@app.middleware("http")
+async def api_v1_rewrite_middleware(request: Request, call_next):
+    """Transparently route legacy /api/* requests to /api/v1/*"""
+    path = request.url.path
+    EXCLUDED = ("/api/v1/", "/api/health", "/api/docs", "/api/redoc", "/api/openapi.json", "/api/setup", "/api/seed")
+    if path.startswith("/api/") and not any(path.startswith(e) for e in EXCLUDED):
+        new_path = path.replace("/api/", "/api/v1/", 1)
+        request.scope["path"] = new_path
+    return await call_next(request)
+
+# Import routers safely
+def safe_include_router(router, **kwargs):
+    """Include required routers; startup must fail on registration errors."""
+    app.include_router(router, **kwargs)
+
+from app.routers.v1 import auth, tiers, transport, transport_exploitation, finance, parc, parc_purchase_store, customer_support_fleet, documents, alerts, magasin, magasin_store, magasin_stock, magasin_analytics, gateway, transactions, master_data, admin, admin_agency, suppliers, notifications, bill_of_loading, purchase, incidents, public_api, rh, acconage, transit, maintenance, qhse, goods_declaration, removal_slip, reception_mag3, chat, prestataires, chef_personnel
+
+safe_include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
+
+# Pont de compatibilite: endpoints reels (chemins absolus) enregistres tot
+# pour gagner les courses d'ordre de routage (chemins absolus /a/b/c).
+try:
+    from app.routers.v1 import gap_bridges
+    safe_include_router(gap_bridges.router, tags=["Compatibilite Frontend"])
+except ImportError as e:
+ # Le module existe dans le dépôt: un échec d'import est une régression,
+ # pas une option. Échec au démarrage plutôt que 404 silencieux côté client.
+    logger.critical(f"Gap bridges router failed to load: {e}")
+    raise
+safe_include_router(chat.router, prefix="/api/v1/chat", tags=["Collaboration Chat"])
+safe_include_router(prestataires.router, prefix="/api/v1/prestataires", tags=["Annuaire Prestataires"])
+safe_include_router(chef_personnel.router, prefix="/api/v1/chef-personnel", tags=["Chef du Personnel"])
+safe_include_router(tiers.router, prefix="/api/v1/tiers", tags=["Tiers"])
+safe_include_router(transport.router, prefix="/api/v1/transport", tags=["Transport"])
+safe_include_router(transport_exploitation.router, prefix="/api/v1/transport", tags=["Transport Exploitation Flotte"])
+safe_include_router(finance.router, prefix="/api/v1/finance", tags=["Finance"])
+safe_include_router(parc.router, prefix="/api/v1/parc", tags=["Parc"])
+safe_include_router(parc_purchase_store.parc_router, prefix="/api/v1/parc", tags=["Parc Zones & Gate"])
+safe_include_router(documents.router, prefix="/api/v1/documents", tags=["Documents"])
+safe_include_router(alerts.router, prefix="/api/v1/alerts", tags=["Alerts"])
+safe_include_router(magasin.router, prefix="/api/v1/magasin", tags=["EVO-Magasin"])
+safe_include_router(magasin_store.router, prefix="/api/v1/magasin", tags=["EVO-Magasin WMS"])
+safe_include_router(magasin_stock.router, prefix="/api/v1/magasin", tags=["EVO-Magasin Stocks"])
+safe_include_router(magasin_analytics.router, prefix="/api/v1/magasin", tags=["EVO-Magasin Analytics"])
+safe_include_router(gateway.router, prefix="/api/v1/gateway", tags=["Gateway"])
+safe_include_router(transactions.router, prefix="/api/v1/transactions", tags=["Transactions"])
+safe_include_router(goods_declaration.router, prefix="/api/v1/transport/goods-declarations", tags=["Goods Declaration"])
+safe_include_router(removal_slip.router, prefix="/api/v1/magasin/removal-slips", tags=["Removal Slip"])
+safe_include_router(reception_mag3.router, prefix="/api/v1/magasin/receptions-mag3", tags=["Reception Mag3"])
+safe_include_router(master_data.router, prefix="/api/v1/master-data", tags=["Master Data"])
+safe_include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"])
+safe_include_router(admin_agency.router, prefix="/api/v1/admin/agencies", tags=["Admin Agencies"])
+safe_include_router(suppliers.router, prefix="/api/v1/suppliers", tags=["Suppliers"])
+safe_include_router(notifications.router, prefix="/api/v1/notifications", tags=["Notifications"])
+safe_include_router(bill_of_loading.router, prefix="/api/v1/bill-of-loading", tags=["Bill of Loading"])
+safe_include_router(purchase.router, prefix="/api/v1/purchase", tags=["Achats"])
+safe_include_router(parc_purchase_store.requisition_router, prefix="/api/v1/purchase", tags=["Achats - Requisitions"])
+safe_include_router(customer_support_fleet.fleet_router, prefix="/api/v1/fleet", tags=["Fleet"])
+safe_include_router(customer_support_fleet.customer_router, prefix="/api/v1/customers", tags=["Customers CRM"])
+safe_include_router(customer_support_fleet.support_router, prefix="/api/v1/support", tags=["Support"])
+safe_include_router(incidents.router, prefix="/api/v1/incidents", tags=["Incidents"])
+safe_include_router(public_api.router, prefix="/api/v1/public", tags=["Public API"])
+safe_include_router(rh.router, prefix="/api/v1/rh", tags=["Ressources Humaines"])
+safe_include_router(acconage.router, prefix="/api/v1/acconage", tags=["Accostage"])
+safe_include_router(transit.router, prefix="/api/v1/transit", tags=["Transit"])
+safe_include_router(maintenance.router, prefix="/api/v1/maintenance", tags=["Maintenance"])
+safe_include_router(qhse.router, prefix="/api/v1/qhse", tags=["QHSE"])
+
+# Advanced modules routers
+try:
+    from app.routers.v1 import magasin_avance, transport_avance, acconage_avance, transit_avance, magasin_douane, transport_international, acquisition, finance, qhse, documents, maintenance_gmao, integration, notifications, reporting, tenant, role, b2b, comptabilite_avance, transport_avance_complete, finance_avance, rh_avance, transit_douane_avance, magasin_wms_avance, maintenance_gmao_avance
+    safe_include_router(magasin_avance.router, prefix="/api/v1/magasin-avance", tags=["Magasin Avancé"])
+    safe_include_router(transport_avance.router, prefix="/api/v1/transport-avance", tags=["Transport Avancé"])
+    safe_include_router(acconage_avance.router, prefix="/api/v1/acconage-avance", tags=["Acconage Avancé"])
+    safe_include_router(transit_avance.router, prefix="/api/v1/transit-avance", tags=["Transit Avancé"])
+    safe_include_router(magasin_douane.router, prefix="/api/v1/magasin-douane", tags=["Magasin Douane"])
+    safe_include_router(transport_international.router, prefix="/api/v1/transport-international", tags=["Transport International"])
+    safe_include_router(acquisition.router, prefix="/api/v1/acquisition", tags=["Acquisition"])
+    safe_include_router(maintenance_gmao.router, prefix="/api/v1/maintenance-gmao", tags=["Maintenance GMAO"])
+    safe_include_router(integration.router, prefix="/api/v1/integration", tags=["Integration"])
+ # Couche cross-module: tracage de la hiérarchie réelle (escale/mission) et
+ # propagation d'événements. Lit à travers les modules sans les modifier.
+    try:
+        from app.routers.v1 import chainage
+        safe_include_router(chainage.router, prefix="/api/v1/chaine", tags=["Chaîne cross-module"])
+    except ImportError as e:
+        logger.warning(f"Router chainage absent : {e}")
+    safe_include_router(reporting.router, prefix="/api/v1/reporting", tags=["Reporting"])
+    safe_include_router(tenant.router, prefix="/api/v1/tenant", tags=["Tenant Management"])
+    safe_include_router(role.router, prefix="/api/v1/roles", tags=["Role Management"])
+    safe_include_router(b2b.router, prefix="/api/v1/b2b", tags=["B2B Portal"])
+    safe_include_router(comptabilite_avance.router, prefix="/api/v1/comptabilite-avance", tags=["Comptabilité Avancée"])
+    safe_include_router(transport_avance_complete.router, prefix="/api/v1/transport-avance-complete", tags=["Transport Avancé Complet"])
+    safe_include_router(finance_avance.router, prefix="/api/v1/finance-avance", tags=["Finance Avancée"])
+    safe_include_router(rh_avance.router, prefix="/api/v1/rh-avance", tags=["RH Avancé"])
+    safe_include_router(transit_douane_avance.router, prefix="/api/v1/transit-douane-avance", tags=["Transit & Douane Avancé"])
+    safe_include_router(magasin_wms_avance.router, prefix="/api/v1/magasin-wms-avance", tags=["Magasin WMS Avancé"])
+    safe_include_router(maintenance_gmao_avance.router, prefix="/api/v1/maintenance-gmao-avance", tags=["Maintenance GMAO Avancée"])
+    from app.routers.v1 import rbac_avance, b2b_portal, audit, security_escalation
+    safe_include_router(rbac_avance.router, prefix="/api/v1/rbac", tags=["RBAC & Multi-Tenant"])
+    safe_include_router(b2b_portal.router, prefix="/api/v1/b2b-portal", tags=["Portail B2B Client"])
+    safe_include_router(audit.router, prefix="/api/v1/audit", tags=["Piste d'Audit Immuable"])
+    safe_include_router(security_escalation.router, prefix="/api/v1/security", tags=["Sécurité & Escalade"])
+    from app.routers.v1 import frais_missions
+    safe_include_router(frais_missions.router, prefix="/api/v1", tags=["Notes de Frais & Avances Missions"])
+except ImportError as e:
+ # Ces modules font partie du dépôt et du contrat d'API: un ImportError
+ # signe une casse (renommage, syntaxe, dépendance) -> démarrage impossible.
+    logger.critical(f"Advanced modules failed to load: {e}")
+    raise
+
+# Habilitations avancees: accreditations + acces partages (modules communs).
+try:
+    from app.routers.v1 import accreditations
+    safe_include_router(accreditations.router, prefix="/api/v1/accreditations", tags=["Accreditations"])
+    safe_include_router(accreditations.shared_router, prefix="/api/v1/shared-access", tags=["Acces partages (modules communs)"])
+except ImportError as e:
+    logger.critical(f"Accreditations router failed to load: {e}")
+    raise
+
+# Console Super-Admin CADC (SaaS): entreprises, plans, modules, accreditations,
+# annuaire prestataires. Toutes les routes exigent require_superadmin (403 pour
+# tout autre niveau, y compris admin entreprise): console strictement invisible.
+try:
+    from app.routers.v1 import saas_console
+    safe_include_router(saas_console.router, prefix="/api/v1/saas/console", tags=["Console SuperAdmin CADC"])
+except ImportError as e:
+    logger.critical(f"Console SuperAdmin CADC router failed to load: {e}")
+    raise
+
+# Administration interne Entreprise (Phase 2, niveau 1): profil, collaborateurs,
+# roles/responsabilites, modules alloues et demandes d'accreditation vers le CADC.
+# require_company_admin + resolve_scope_company_id: each admin is pinned to its
+# own company (403 on any other tenant); the CADC passes with an explicit company_id.
+try:
+    from app.routers.v1 import company_admin
+    safe_include_router(company_admin.router, prefix="/api/v1/company-admin", tags=["Administration Entreprise"])
+except ImportError as e:
+    logger.critical(f"Administration Entreprise router failed to load: {e}")
+    raise
+
+# Espace departement (Phase 3, niveau 2): fiche du departement + roster des
+# collaborateurs. require_department_head + _scoped_department: un chef de
+# departement est epingle a SON departement (403 sur tout autre); l'admin
+# entreprise et le CADC ciblent un departement de leur entreprise seulement.
+try:
+    from app.routers.v1 import chef_departement
+    safe_include_router(chef_departement.router, prefix="/api/v1/departement", tags=["Espace Departement"])
+except ImportError as e:
+    logger.critical(f"Espace Departement router failed to load: {e}")
+    raise
+
+# New Version 2.0 Modules
+try:
+    from app.routers.v1 import shift_planning, port_pricing, gps_tracking, real_customs, port_incidents, auto_invoicing, port_performance, notification_system, container_lifecycle, partner_api
+    
+    safe_include_router(shift_planning.router, prefix="/api/v1/shift-planning", tags=["Shift Planning"])
+    safe_include_router(port_pricing.router, prefix="/api/v1/port-pricing", tags=["Port Pricing"])
+    safe_include_router(gps_tracking.router, prefix="/api/v1/gps-tracking", tags=["GPS Tracking"])
+    safe_include_router(real_customs.router, prefix="/api/v1/real-customs", tags=["Real Customs"])
+    safe_include_router(port_incidents.router, prefix="/api/v1/port-incidents", tags=["Port Incidents"])
+    safe_include_router(auto_invoicing.router, prefix="/api/v1/auto-invoicing", tags=["Auto Invoicing"])
+    safe_include_router(port_performance.router, prefix="/api/v1/port-performance", tags=["Port Performance"])
+    safe_include_router(notification_system.router, prefix="/api/v1/notification-system", tags=["Notification System"])
+    safe_include_router(container_lifecycle.router, prefix="/api/v1/container-lifecycle", tags=["Container Lifecycle"])
+    safe_include_router(partner_api.router, prefix="/api/v1/partner-api", tags=["Partner API"])
+except ImportError as e:
+    logger.critical(f"Version 2.0 modules failed to load: {e}")
+    raise
+
+# Cameroon/CEMAC Specific Modules
+try:
+    from app.routers.v1 import integration_cameroun, paiement_local, fiscalite_cameroun
+    
+    safe_include_router(integration_cameroun.router, prefix="/api/v1/integration-cameroun", tags=["Cameroon Integration"])
+    safe_include_router(paiement_local.router, prefix="/api/v1/paiement-local", tags=["Local Payments"])
+    safe_include_router(fiscalite_cameroun.router, prefix="/api/v1/fiscalite-cameroun", tags=["Cameroon Taxation"])
+except ImportError as e:
+ # Paysage réglementaire central du produit: ces routes doivent TOUJOURS
+ # être déclarées. Mieux vaut un déploiement qui échoue qu'un SaaS camerounais
+ # sans fiscalité ni paiement local, silencieusement amputé.
+    logger.critical(f"Cameroon/CEMAC modules failed to load: {e}")
+    raise
+
+# Departement autonome Amenagement portuaire (Douala, Kribi, Limbe): maitrise
+# d'ouvrage du domaine portuaire schemas directeurs, programmation DTO,
+# marches et contrats PPP, titres domaniaux, concessions, ouvrages, dragage,
+# autorisations environnementales. Ces tables portent le domaine public
+# national (aucune company_id, comme ports_cameroun): l'acces est donc purgue
+# par le RBAC granulaire ``amenagement.<sous-module>.<action>`` et non par le
+# scope tenant. Les teleprocedures institutionnelles (APN, COLIFE/CIP, MINEPF,
+# MINEPPT) repondent 501: rien n'est simule.
+try:
+    from app.routers.v1 import amenagement_portuaire
+    safe_include_router(amenagement_portuaire.router, prefix="/api/v1/amenagement-portuaire", tags=["Amenagement Portuaire"])
+except ImportError as e:
+    logger.critical(f"Departement Amenagement portuaire router failed to load: {e}")
+    raise
+
+# operations portuaires approfondies (12 registres).
+try:
+    from app.routers.v1 import port_deep
+    safe_include_router(port_deep.router, prefix="/api/v1/port-operations", tags=["Operations portuaires approfondies"])
+except ImportError as e:
+    logger.warning(f"Router port_deep absent : {e}")
+
+# transit-douane approfondi (12 registres).
+try:
+    from app.routers.v1 import transit_deep
+    safe_include_router(transit_deep.router, prefix="/api/v1/transit-douane", tags=["Transit douane"])
+except ImportError as e:
+    logger.warning(f"Router transit_deep absent : {e}")
+
+# WebSocket and additional routers
+try:
+    from app.routers import ws, collaboration, iot, webhook_whatsapp, telematics
+    
+    safe_include_router(ws.router, prefix="/api/v1/ws", tags=["WebSockets"])
+    safe_include_router(collaboration.router, prefix="/api/v1/collaboration", tags=["Collaboration"])
+    safe_include_router(iot.router, prefix="/api/v1/iot", tags=["IoT"])
+    safe_include_router(webhook_whatsapp.router, tags=["Webhook WhatsApp"])  # routes auto-porteuses (pas de double prefix)
+    safe_include_router(telematics.router, prefix="/api/v1/telematics", tags=["Telematics"])
+except ImportError as e:
+    logger.critical(f"Additional routers failed to load: {e}")
+    raise
+
+# Fused Kamlog Extended Modules (Superadmin, Onboarding, Subscription, CRM, GED, E-Invoicing, AI, Digital Twin, etc.)
+try:
+    from app.routers.v1 import (
+        superadmin, subscription, onboarding, privacy, ohada_accounting,
+        crm, projects, fixed_assets, ged, e_invoicing,
+        ai_predictive, ai_assistant, bi_advanced, marketplace, freight_exchange,
+        digital_twin, gamification, sectoral_features, status, new_k_modules
+    )
+    safe_include_router(getattr(superadmin, 'router', superadmin), prefix="/api/v1/superadmin", tags=["SuperAdmin Multi-Tenant"])
+    safe_include_router(getattr(subscription, 'router', subscription), prefix="/api/v1/saas/subscription", tags=["SaaS Subscription & Billing"])
+    safe_include_router(getattr(onboarding, 'router', onboarding), prefix="/api/v1/auth/onboarding", tags=["Self-Service Onboarding"])
+    safe_include_router(getattr(privacy, 'router', privacy), prefix="/api/v1/privacy", tags=["Data Privacy Law 2024/017"])
+    safe_include_router(getattr(ohada_accounting, 'router', ohada_accounting), prefix="/api/v1/accounting/ohada", tags=["Comptabilité SYSCOHADA Extended"])
+    safe_include_router(getattr(crm, 'router', crm), prefix="/api/v1/crm", tags=["CRM & Pipeline Commercial"])
+    safe_include_router(getattr(projects, 'router', projects), prefix="/api/v1/projects", tags=["Gestion de Projets & Chantiers"])
+    safe_include_router(getattr(fixed_assets, 'router', fixed_assets), prefix="/api/v1/assets", tags=["Immobilisations & Amortissements OHADA"])
+    safe_include_router(getattr(ged, 'router', ged), prefix="/api/v1/ged", tags=["GED Coffre-fort Numérique"])
+    safe_include_router(getattr(e_invoicing, 'router', e_invoicing), prefix="/api/v1/e-invoicing", tags=["Facturation Électronique DGI"])
+    safe_include_router(getattr(ai_predictive, 'router', ai_predictive), prefix="/api/v1/ai/predictive", tags=["Moteur IA Prédictive"])
+    safe_include_router(getattr(ai_assistant, 'router', ai_assistant), prefix="/api/v1/ai/assistant", tags=["Assistant IA"])
+    safe_include_router(getattr(bi_advanced, 'router', bi_advanced), prefix="/api/v1/bi/advanced", tags=["Business Intelligence Avancée"])
+    safe_include_router(getattr(marketplace, 'router', marketplace), prefix="/api/v1/marketplace", tags=["Marketplace & API Keys"])
+    safe_include_router(getattr(freight_exchange, 'router', freight_exchange), prefix="/api/v1/freight-exchange", tags=["Bourse de Fret CEMAC"])
+    safe_include_router(getattr(digital_twin, 'router', digital_twin), prefix="/api/v1/digital-twin", tags=["Jumeau Numérique Entrepôt/Parc"])
+    safe_include_router(getattr(gamification, 'router', gamification), prefix="/api/v1/gamification", tags=["Gamification & Éco-conduite"])
+    safe_include_router(getattr(sectoral_features, 'router', sectoral_features), prefix="/api/v1/sectoral", tags=["Paramétrage Sectoriel (Bascule, Phyto, FDS)"])
+    safe_include_router(getattr(status, 'router', status), prefix="/api/v1/status", tags=["Statut Public & SLA"])
+    safe_include_router(getattr(new_k_modules, 'router', new_k_modules), prefix="/api/v1/k-modules", tags=["Modules Spécialisés"])
+except ImportError:
+    raise
+
+# Backward compatibility - Original API endpoints (deprecated, will be removed in v2)
+safe_include_router(auth.router, prefix="/api/auth", tags=["Auth - DEPRECATED"])
+safe_include_router(tiers.router, prefix="/api/tiers", tags=["Tiers - DEPRECATED"])
+safe_include_router(transport.router, prefix="/api/transport", tags=["Transport - DEPRECATED"])
+safe_include_router(finance.router, prefix="/api/finance", tags=["Finance - DEPRECATED"])
+safe_include_router(parc.router, prefix="/api/parc", tags=["Parc - DEPRECATED"])
+safe_include_router(documents.router, prefix="/api/documents", tags=["Documents - DEPRECATED"])
+safe_include_router(alerts.router, prefix="/api/alerts", tags=["Alerts - DEPRECATED"])
+safe_include_router(magasin.router, prefix="/api/magasin", tags=["EVO-Magasin - DEPRECATED"])
+safe_include_router(gateway.router, prefix="/api/gateway", tags=["Gateway - DEPRECATED"])
+safe_include_router(transactions.router, prefix="/api/transactions", tags=["Transactions - DEPRECATED"])
+
+# Pending-modules fallback MUST be included last so every real route above
+# keeps precedence. It only answers requests that would otherwise 404 on the
+# business API surface, degrading them to an honest empty/pending envelope
+# instead of a dead screen. See app/routers/v1/pending_modules.py.
+
+# <:transport>
+try:
+    from app.routers.v1 import transport_deep
+    safe_include_router(transport_deep.router, prefix="/api/v1/transport-flotte", tags=["transport-flotte"])
+except ImportError as e:
+    logger.warning(f"Router transport_deep absent : {e}")
+# </transport>
+# <:magasin>
+try:
+    from app.routers.v1 import magasin_deep
+    safe_include_router(magasin_deep.router, prefix="/api/v1/magasin-stock", tags=["magasin-stock"])
+except ImportError as e:
+    logger.warning(f"Router magasin_deep absent : {e}")
+# </magasin>
+# <:comptabilite>
+try:
+    from app.routers.v1 import comptabilite_deep
+    safe_include_router(comptabilite_deep.router, prefix="/api/v1/comptabilite-ohada", tags=["comptabilite-ohada"])
+except ImportError as e:
+    logger.warning(f"Router comptabilite_deep absent : {e}")
+# </comptabilite>
+# <:finance>
+try:
+    from app.routers.v1 import finance_deep
+    safe_include_router(finance_deep.router, prefix="/api/v1/finance-ohada", tags=["finance-ohada"])
+except ImportError as e:
+    logger.warning(f"Router finance_deep absent : {e}")
+# </finance>
+# <:parc>
+try:
+    from app.routers.v1 import parc_deep
+    safe_include_router(parc_deep.router, prefix="/api/v1/parc-vehicules", tags=["parc-vehicules"])
+except ImportError as e:
+    logger.warning(f"Router parc_deep absent : {e}")
+# </parc>
+# <:rh>
+try:
+    from app.routers.v1 import rh_deep
+    safe_include_router(rh_deep.router, prefix="/api/v1/rh-personnel", tags=["rh-personnel"])
+except ImportError as e:
+    logger.warning(f"Router rh_deep absent : {e}")
+# </rh>
+# <:qhse>
+try:
+    from app.routers.v1 import qhse_deep
+    safe_include_router(qhse_deep.router, prefix="/api/v1/qhse-securite", tags=["qhse-securite"])
+except ImportError as e:
+    logger.warning(f"Router qhse_deep absent : {e}")
+# </qhse>
+# <:b2b>
+try:
+    from app.routers.v1 import b2b_deep
+    safe_include_router(b2b_deep.router, prefix="/api/v1/client-b2b", tags=["client-b2b"])
+except ImportError as e:
+    logger.warning(f"Router b2b_deep absent : {e}")
+# </b2b>
+# <:reports>
+try:
+    from app.routers.v1 import reports_deep
+    safe_include_router(reports_deep.router, prefix="/api/v1/reports-bi", tags=["reports-bi"])
+except ImportError as e:
+    logger.warning(f"Router reports_deep absent : {e}")
+# </reports>
+# <:admin>
+try:
+    from app.routers.v1 import admin_deep
+    safe_include_router(admin_deep.router, prefix="/api/v1/admin-saas", tags=["admin-saas"])
+except ImportError as e:
+    logger.warning(f"Router admin_deep absent : {e}")
+# </admin>
+# <:superadmin>
+try:
+    from app.routers.v1 import superadmin_deep
+    safe_include_router(superadmin_deep.router, prefix="/api/v1/superadmin-cadc", tags=["superadmin-cadc"])
+except ImportError as e:
+    logger.warning(f"Router superadmin_deep absent : {e}")
+# </superadmin>
+# <:dashboard>
+try:
+    from app.routers.v1 import dashboard_deep
+    safe_include_router(dashboard_deep.router, prefix="/api/v1/dashboard", tags=["dashboard"])
+except ImportError as e:
+    logger.warning(f"Router dashboard_deep absent : {e}")
+# </dashboard>
+# <:amenagement_extra>
+try:
+    from app.routers.v1 import amenagement_extra_deep
+    safe_include_router(amenagement_extra_deep.router, prefix="/api/v1/amenagement-portuaire", tags=["amenagement-portuaire"])
+except ImportError as e:
+    logger.warning(f"Router amenagement_extra_deep absent : {e}")
+# </amenagement_extra>
+# <:ferroviaire>
+try:
+    from app.routers.v1 import ferroviaire_deep
+    safe_include_router(ferroviaire_deep.router, prefix="/api/v1/transport-ferroviaire", tags=["transport-ferroviaire"])
+except ImportError as e:
+    logger.warning(f"Router ferroviaire_deep absent : {e}")
+# </ferroviaire>
+# <:aerien>
+try:
+    from app.routers.v1 import aerien_deep
+    safe_include_router(aerien_deep.router, prefix="/api/v1/transport-aerien", tags=["transport-aerien"])
+except ImportError as e:
+    logger.warning(f"Router aerien_deep absent : {e}")
+# </aerien>
+# <:fluvial>
+try:
+    from app.routers.v1 import fluvial_deep
+    safe_include_router(fluvial_deep.router, prefix="/api/v1/transport-fluvial", tags=["transport-fluvial"])
+except ImportError as e:
+    logger.warning(f"Router fluvial_deep absent : {e}")
+# </fluvial>
+# <:log3pl>
+try:
+    from app.routers.v1 import log3pl_deep
+    safe_include_router(log3pl_deep.router, prefix="/api/v1/logistique-3pl", tags=["logistique-3pl"])
+except ImportError as e:
+    logger.warning(f"Router log3pl_deep absent : {e}")
+# </log3pl>
+# <:log3pl_b>
+try:
+    from app.routers.v1 import log3pl_b_deep
+    safe_include_router(log3pl_b_deep.router, prefix="/api/v1/logistique-3pl", tags=["logistique-3pl"])
+except ImportError as e:
+    logger.warning(f"Router log3pl_b_deep absent : {e}")
+# </log3pl_b>
+# <:fluvial_b>
+try:
+    from app.routers.v1 import fluvial_b_deep
+    safe_include_router(fluvial_b_deep.router, prefix="/api/v1/transport-fluvial", tags=["transport-fluvial"])
+except ImportError as e:
+    logger.warning(f"Router fluvial_b_deep absent : {e}")
+# </fluvial_b>
+# <:aerien_b>
+try:
+    from app.routers.v1 import aerien_b_deep
+    safe_include_router(aerien_b_deep.router, prefix="/api/v1/transport-aerien", tags=["transport-aerien"])
+except ImportError as e:
+    logger.warning(f"Router aerien_b_deep absent : {e}")
+# </aerien_b>
+# <:ferroviaire_b>
+try:
+    from app.routers.v1 import ferroviaire_b_deep
+    safe_include_router(ferroviaire_b_deep.router, prefix="/api/v1/transport-ferroviaire", tags=["transport-ferroviaire"])
+except ImportError as e:
+    logger.warning(f"Router ferroviaire_b_deep absent : {e}")
+# </ferroviaire_b>
+# <:pipeline>
+try:
+    from app.routers.v1 import pipeline_deep
+    safe_include_router(pipeline_deep.router, prefix="/api/v1/pipeline-oleoduc", tags=["pipeline-oleoduc"])
+except ImportError as e:
+    logger.warning(f"Router pipeline_deep absent : {e}")
+# </pipeline>
+# <:courier>
+try:
+    from app.routers.v1 import courier_deep
+    safe_include_router(courier_deep.router, prefix="/api/v1/courier-express", tags=["courier-express"])
+except ImportError as e:
+    logger.warning(f"Router courier_deep absent : {e}")
+# </courier>
+# <:coldchain>
+try:
+    from app.routers.v1 import coldchain_deep
+    safe_include_router(coldchain_deep.router, prefix="/api/v1/chaine-froid", tags=["chaine-froid"])
+except ImportError as e:
+    logger.warning(f"Router coldchain_deep absent : {e}")
+# </coldchain>
+# <:heavylift>
+try:
+    from app.routers.v1 import heavylift_deep
+    safe_include_router(heavylift_deep.router, prefix="/api/v1/convoi-exceptionnel", tags=["convoi-exceptionnel"])
+except ImportError as e:
+    logger.warning(f"Router heavylift_deep absent : {e}")
+# </heavylift>
+# <:parc_b>
+try:
+    from app.routers.v1 import parc_b_deep
+    safe_include_router(parc_b_deep.router, prefix="/api/v1/parc-vehicules", tags=["parc-vehicules"])
+except ImportError as e:
+    logger.warning(f"Router parc_b_deep absent : {e}")
+# </parc_b>
+# <:qhse_b>
+try:
+    from app.routers.v1 import qhse_b_deep
+    safe_include_router(qhse_b_deep.router, prefix="/api/v1/qhse-securite", tags=["qhse-securite"])
+except ImportError as e:
+    logger.warning(f"Router qhse_b_deep absent : {e}")
+# </qhse_b>
+# <:port_ops_b>
+try:
+    from app.routers.v1 import port_ops_b_deep
+    safe_include_router(port_ops_b_deep.router, prefix="/api/v1/port-operations", tags=["port-operations"])
+except ImportError as e:
+    logger.warning(f"Router port_ops_b_deep absent : {e}")
+# </port_ops_b>
+# <:amenagement_b>
+try:
+    from app.routers.v1 import amenagement_b_deep
+    safe_include_router(amenagement_b_deep.router, prefix="/api/v1/amenagement-portuaire", tags=["amenagement-portuaire"])
+except ImportError as e:
+    logger.warning(f"Router amenagement_b_deep absent : {e}")
+# </amenagement_b>
+# <:transit_b>
+try:
+    from app.routers.v1 import transit_b_deep
+    safe_include_router(transit_b_deep.router, prefix="/api/v1/transit-douane", tags=["transit-douane"])
+except ImportError as e:
+    logger.warning(f"Router transit_b_deep absent : {e}")
+# </transit_b>
+# <:transport_b>
+try:
+    from app.routers.v1 import transport_b_deep
+    safe_include_router(transport_b_deep.router, prefix="/api/v1/transport-flotte", tags=["transport-flotte"])
+except ImportError as e:
+    logger.warning(f"Router transport_b_deep absent : {e}")
+# </transport_b>
+# <:magasin_b>
+try:
+    from app.routers.v1 import magasin_b_deep
+    safe_include_router(magasin_b_deep.router, prefix="/api/v1/magasin-stock", tags=["magasin-stock"])
+except ImportError as e:
+    logger.warning(f"Router magasin_b_deep absent : {e}")
+# </magasin_b>
+# <:dashboard_b>
+try:
+    from app.routers.v1 import dashboard_b_deep
+    safe_include_router(dashboard_b_deep.router, prefix="/api/v1/dashboard", tags=["dashboard"])
+except ImportError as e:
+    logger.warning(f"Router dashboard_b_deep absent : {e}")
+# </dashboard_b>
+# <:compta_c>
+try:
+    from app.routers.v1 import compta_c_deep
+    safe_include_router(compta_c_deep.router, prefix="/api/v1/comptabilite-ohada", tags=["comptabilite-ohada"])
+except ImportError as e:
+    logger.warning(f"Router compta_c_deep absent : {e}")
+# </compta_c>
+# <:finance_c>
+try:
+    from app.routers.v1 import finance_c_deep
+    safe_include_router(finance_c_deep.router, prefix="/api/v1/finance-ohada", tags=["finance-ohada"])
+except ImportError as e:
+    logger.warning(f"Router finance_c_deep absent : {e}")
+# </finance_c>
+# <:rh_c>
+try:
+    from app.routers.v1 import rh_c_deep
+    safe_include_router(rh_c_deep.router, prefix="/api/v1/rh-personnel", tags=["rh-personnel"])
+except ImportError as e:
+    logger.warning(f"Router rh_c_deep absent : {e}")
+# </rh_c>
+# <:b2b_c>
+try:
+    from app.routers.v1 import b2b_c_deep
+    safe_include_router(b2b_c_deep.router, prefix="/api/v1/client-b2b", tags=["client-b2b"])
+except ImportError as e:
+    logger.warning(f"Router b2b_c_deep absent : {e}")
+# </b2b_c>
+# <:reports_c>
+try:
+    from app.routers.v1 import reports_c_deep
+    safe_include_router(reports_c_deep.router, prefix="/api/v1/reports-bi", tags=["reports-bi"])
+except ImportError as e:
+    logger.warning(f"Router reports_c_deep absent : {e}")
+# </reports_c>
+# <:admin_c>
+try:
+    from app.routers.v1 import admin_c_deep
+    safe_include_router(admin_c_deep.router, prefix="/api/v1/admin-saas", tags=["admin-saas"])
+except ImportError as e:
+    logger.warning(f"Router admin_c_deep absent : {e}")
+# </admin_c>
+# <:superadmin_c>
+try:
+    from app.routers.v1 import superadmin_c_deep
+    safe_include_router(superadmin_c_deep.router, prefix="/api/v1/superadmin-cadc", tags=["superadmin-cadc"])
+except ImportError as e:
+    logger.warning(f"Router superadmin_c_deep absent : {e}")
+# </superadmin_c>
+# <:admin_tenant_c>
+try:
+    from app.routers.v1 import admin_tenant_c_deep
+    safe_include_router(admin_tenant_c_deep.router, prefix="/api/v1/admin-tenant", tags=["admin-tenant"])
+except ImportError as e:
+    logger.warning(f"Router admin_tenant_c_deep absent : {e}")
+# </admin_tenant_c>
+# <:chauffeur_c>
+try:
+    from app.routers.v1 import chauffeur_c_deep
+    safe_include_router(chauffeur_c_deep.router, prefix="/api/v1/portail-chauffeur", tags=["portail-chauffeur"])
+except ImportError as e:
+    logger.warning(f"Router chauffeur_c_deep absent : {e}")
+# </chauffeur_c>
+# <:magasinier_c>
+try:
+    from app.routers.v1 import magasinier_c_deep
+    safe_include_router(magasinier_c_deep.router, prefix="/api/v1/portail-magasinier", tags=["portail-magasinier"])
+except ImportError as e:
+    logger.warning(f"Router magasinier_c_deep absent : {e}")
+# </magasinier_c>
+# <:technicien_d>
+try:
+    from app.routers.v1 import technicien_d_deep
+    safe_include_router(technicien_d_deep.router, prefix="/api/v1/portail-technicien", tags=["portail-technicien"])
+except ImportError as e:
+    logger.warning(f"Router technicien_d_deep absent : {e}")
+# </technicien_d>
+# <:qhse_portal_d>
+try:
+    from app.routers.v1 import qhse_portal_d_deep
+    safe_include_router(qhse_portal_d_deep.router, prefix="/api/v1/portail-qhse", tags=["portail-qhse"])
+except ImportError as e:
+    logger.warning(f"Router qhse_portal_d_deep absent : {e}")
+# </qhse_portal_d>
+# <:declarant_d>
+try:
+    from app.routers.v1 import declarant_d_deep
+    safe_include_router(declarant_d_deep.router, prefix="/api/v1/portail-declarant", tags=["portail-declarant"])
+except ImportError as e:
+    logger.warning(f"Router declarant_d_deep absent : {e}")
+# </declarant_d>
+# <:commercial_d>
+try:
+    from app.routers.v1 import commercial_d_deep
+    safe_include_router(commercial_d_deep.router, prefix="/api/v1/portail-commercial", tags=["portail-commercial"])
+except ImportError as e:
+    logger.warning(f"Router commercial_d_deep absent : {e}")
+# </commercial_d>
+# <:commercial_d2>
+try:
+    from app.routers.v1 import commercial_d2_deep
+    safe_include_router(commercial_d2_deep.router, prefix="/api/v1/portail-commercial", tags=["portail-commercial"])
+except ImportError as e:
+    logger.warning(f"Router commercial_d2_deep absent : {e}")
+# </commercial_d2>
+# <:employe_d>
+try:
+    from app.routers.v1 import employe_d_deep
+    safe_include_router(employe_d_deep.router, prefix="/api/v1/portail-employe", tags=["portail-employe"])
+except ImportError as e:
+    logger.warning(f"Router employe_d_deep absent : {e}")
+# </employe_d>
+# <:chef_personnel_d>
+try:
+    from app.routers.v1 import chef_personnel_d_deep
+    safe_include_router(chef_personnel_d_deep.router, prefix="/api/v1/chef-personnel", tags=["chef-personnel"])
+except ImportError as e:
+    logger.warning(f"Router chef_personnel_d_deep absent : {e}")
+# </chef_personnel_d>
+# <:frais_d>
+try:
+    from app.routers.v1 import frais_d_deep
+    safe_include_router(frais_d_deep.router, prefix="/api/v1/portail-frais", tags=["portail-frais"])
+except ImportError as e:
+    logger.warning(f"Router frais_d_deep absent : {e}")
+# </frais_d>
+# <:annuaire_d>
+try:
+    from app.routers.v1 import annuaire_d_deep
+    safe_include_router(annuaire_d_deep.router, prefix="/api/v1/annuaire-prestataires", tags=["annuaire-prestataires"])
+except ImportError as e:
+    logger.warning(f"Router annuaire_d_deep absent : {e}")
+# </annuaire_d>
+# <:collaborateur_d>
+try:
+    from app.routers.v1 import collaborateur_d_deep
+    safe_include_router(collaborateur_d_deep.router, prefix="/api/v1/portail-collaborateur", tags=["portail-collaborateur"])
+except ImportError as e:
+    logger.warning(f"Router collaborateur_d_deep absent : {e}")
+# </collaborateur_d>
+# <:pipeline_e>
+try:
+    from app.routers.v1 import pipeline_e_deep
+    safe_include_router(pipeline_e_deep.router, prefix="/api/v1/pipeline-oleoduc", tags=["pipeline-oleoduc"])
+except ImportError as e:
+    logger.warning(f"Router pipeline_e_deep absent : {e}")
+# </pipeline_e>
+# <:courier_e>
+try:
+    from app.routers.v1 import courier_e_deep
+    safe_include_router(courier_e_deep.router, prefix="/api/v1/courier-express", tags=["courier-express"])
+except ImportError as e:
+    logger.warning(f"Router courier_e_deep absent : {e}")
+# </courier_e>
+# <:coldchain_e>
+try:
+    from app.routers.v1 import coldchain_e_deep
+    safe_include_router(coldchain_e_deep.router, prefix="/api/v1/chaine-froid", tags=["chaine-froid"])
+except ImportError as e:
+    logger.warning(f"Router coldchain_e_deep absent : {e}")
+# </coldchain_e>
+# <:heavylift_e>
+try:
+    from app.routers.v1 import heavylift_e_deep
+    safe_include_router(heavylift_e_deep.router, prefix="/api/v1/convoi-exceptionnel", tags=["convoi-exceptionnel"])
+except ImportError as e:
+    logger.warning(f"Router heavylift_e_deep absent : {e}")
+# </heavylift_e>
+# <:maintenance_deep>
+# maintenance industrielle experte (FMEA/RCM/TPM, MTBF/MTTR/OEE,
+# piéces sérialisées singleton, chaine BOM, prédictif IoT).
+try:
+    from app.routers.v1 import maintenance_deep
+    safe_include_router(maintenance_deep.router, prefix="/api/v1/maintenance-industrielle", tags=["maintenance-industrielle "])
+except ImportError as e:
+    logger.warning(f"Router maintenance_deep absent : {e}")
+# </maintenance_deep>
+# <:tracabilite_deep>
+# traçabilité bout-en-bout (chaîne de custody, Merkle/hash chain,
+# sceau ISO 17712, horodatage qualifié eIDAS/CAMPOST, RGPD + loi Cameroun
+# 2010/041, anti-falsification, rétention légale OGIC/CGI).
+try:
+    from app.routers.v1 import tracabilite_deep
+    safe_include_router(tracabilite_deep.router, prefix="/api/v1/tracabilite", tags=["tracabilite-bout-en-bout "])
+except ImportError as e:
+    logger.warning(f"Router tracabilite_deep absent : {e}")
+# </tracabilite_deep>
+# <:chat_d5>
+try:
+    from app.routers.v1 import chat_d5_deep
+    safe_include_router(chat_d5_deep.router, prefix="/api/v1/chat", tags=["chat"])
+except ImportError as e:
+    logger.warning(f"Router chat_d5_deep absent : {e}")
+# </chat_d5>
+# <:departement_d5>
+try:
+    from app.routers.v1 import departement_d5_deep
+    safe_include_router(departement_d5_deep.router, prefix="/api/v1/departement", tags=["departement"])
+except ImportError as e:
+    logger.warning(f"Router departement_d5_deep absent : {e}")
+# </departement_d5>
+
+from app.routers.v1 import pending_modules
+safe_include_router(pending_modules.router)
+
+@app.get('/api/health')
+async def health_check():
+    """Health check basique - utilisé par Railway."""
+    if startup_errors:
+        return {
+            "status": "degraded",
+            "service": "EVO-LOG EM-ERP",
+            "version": "2.0.0",
+            "errors": startup_errors
+        }
+    return {"status": "ok", "service": "EVO-LOG EM-ERP", "version": "2.0.0"}
+
+def _setup_password_provided(username: str) -> bool:
+    """True si l'operateur a fourni explicitement le mot de passe initial."""
+    attr = "SETUP_SUPERADMIN_PASSWORD" if username == "supadmin" else "SETUP_ADMIN_PASSWORD"
+    return bool(getattr(settings, attr, None))
+
+def _setup_password(env_attr: str) -> str:
+    """Mot de passe initial admin : valeur env si presente, sinon genere.
+
+    On ne code jamais de credential en dur ; un mot de passe fort est genere
+    et n'est renvoye qu'une seule fois a l'appelant autorise.
+    """
+    value = getattr(settings, env_attr, None)
+    if value:
+        return value
+ # 16 caracteres URL-safe -> ~96 bits d'entropie, conforme a la politique.
+    return secrets.token_urlsafe(16)
+
+def _enforce_setup_access(x_setup_token: Optional[str]) -> None:
+    """Gating des endpoints d'initialisation.
+
+    - SETUP_TOKEN configure : le header X-Setup-Token doit correspondre
+      exactement (comparaison temps-constant), sinon 403.
+    - SETUP_TOKEN vide : en PRODUCTION -> 403 (fail-closed) ; en dev/test ->
+      acces libre pour la convenance locale uniquement.
+    """
+    expected = (settings.SETUP_TOKEN or "").strip()
+    if expected:
+        supplied = (x_setup_token or "").strip()
+        if not supplied or not secrets.compare_digest(supplied, expected):
+            raise HTTPException(status_code=403, detail="Jeton d'initialisation invalide.")
+        return
+    if settings.ENVIRONMENT.lower() in {"production", "prod"}:
+        raise HTTPException(
+            status_code=403,
+            detail="Initialisation refusee en production sans SETUP_TOKEN.",)
+
+def _bootstrap_schema_and_seed():
+    """
+    Source de verite unique de l'initialisation de la base, partagee par
+    /api/setup et /api/seed :
+      1. Base.metadata.create_all()  un seul appel, tri topologique correct
+         (checkfirst implicite). La contrainte circulaire users<->departments
+         est declaree use_alter=True cote Department.manager_id, donc emise
+         en ALTER TABLE apres creation des deux tables : sans cela, le cycle
+         corrompait tout le tri et des CREATE TABLE echouaient en
+         cascade ("relation users does not exist") ;
+      2. insere le role superadmin, le plan / la societe par defaut et les
+         utilisateurs admin via la session ORM (typage sur, notamment pour
+         l'enum type_plan).
+    Idempotent : sans effet si 'supadmin' existe deja. Bloquant -> appele
+    via asyncio.to_thread depuis les endpoints. Retourne un dict normalise
+    avec 'status' in {success, already, error}.
+    """
+    from app.core.database import Base, engine, SessionLocal
+    import app.models  # noqa: F401 - enregistre tous les modeles
+    from app.core.security import get_password_hash
+    from app.models.user import User, Role
+    from app.models.tenant import Company, SubscriptionPlan, SubscriptionPlanType
+    from sqlalchemy import inspect as sa_inspect
+
+    before = set(sa_inspect(engine).get_table_names())
+    Base.metadata.create_all(bind=engine)
+    after = set(sa_inspect(engine).get_table_names())
+    tables_created = len(after - before)
+    tables_skipped = len(after & before)
+    logger.info(f"Tables: {tables_created} created, {tables_skipped} already present")
+
+    db = SessionLocal()
+    try:
+        existing = db.query(User).filter(User.username == "supadmin").first()
+        if existing:
+            return {
+                "status": "already",
+                "tables_created": tables_created,
+                "tables_skipped": tables_skipped,
+            }
+
+        admin_role = db.query(Role).filter(Role.name == "superadmin").first()
+        if not admin_role:
+            admin_role = Role(name="superadmin", description="Super Administrateur SaaS")
+            db.add(admin_role)
+            db.flush()
+
+        company = db.query(Company).first()
+        if not company:
+            plan = SubscriptionPlan(
+                code="ENTERPRISE",
+                nom="SaaS Entreprise",
+                type_plan=SubscriptionPlanType.ENTERPRISE,
+                prix_mensuel=1500000.0,
+                prix_annuel=15000000.0,
+                max_users=100,)
+            db.add(plan)
+            db.flush()
+            company = Company(nom="LPC SA", code="LPC", subscription_plan_id=plan.id)
+            db.add(company)
+            db.flush()
+
+        users_spec = [
+            {"username": "supadmin", "email": "supadmin@evo-log.cm", "password": _setup_password("SETUP_SUPERADMIN_PASSWORD"), "is_superuser": True, "role_level": 0},
+            {"username": "admin", "email": "admin@evo-log.cm", "password": _setup_password("SETUP_ADMIN_PASSWORD"), "is_superuser": False, "role_level": 1},
+        ]
+        created = []
+        returned_creds = []
+        for u in users_spec:
+            db.add(User(
+                username=u["username"],
+                email=u["email"],
+                hashed_password=get_password_hash(u["password"]),
+                is_active=True,
+                is_superuser=u["is_superuser"],
+                role_level=u["role_level"],
+                company_id=company.id,
+                must_change_password=True,))
+            created.append(u["username"])
+ # On ne renvoie que les mots de passe GENERES aleatoirement;
+ # ceux fournis par l'operateur via l'env ne transitent jamais API.
+            if not _setup_password_provided(u["username"]):
+                returned_creds.append({"username": u["username"], "password": u["password"]})
+        db.commit()
+        return {
+            "status": "success",
+            "tables_created": tables_created,
+            "tables_skipped": tables_skipped,
+            "users_created": created,
+            "generated_credentials": returned_creds,
+        }
+    except Exception as e:
+        db.rollback()
+        return {"status": "error", "step": "seed", "detail": str(e)}
+    finally:
+        db.close()
+
+@app.post('/api/setup')
+@app.get('/api/setup')
+@app.post('/api/v1/setup')
+@app.get('/api/v1/setup')
+async def setup_database(x_setup_token: Optional[str] = Header(None)):
+    """
+    One-time database initialization: creates all tables and seeds initial admin users.
+    Protege par jeton (X-Setup-Token) ; refuse en production sans SETUP_TOKEN.
+    Les mots de passe fixes ne sont plus jamais renvoyes : uniquement les
+    mots de passe generes aleatoirement, une seule fois.
+    """
+    _enforce_setup_access(x_setup_token)
+    result = await asyncio.to_thread(_bootstrap_schema_and_seed)
+    if result["status"] == "already":
+        return {"status": "already_initialized", "message": "Base deja initialisee."}
+    if result["status"] == "error":
+        return result
+    return {
+        "status": "success",
+        "message": "Database initialized successfully",
+        "users_created": result.get("users_created", []),
+        "tables": {"created": result["tables_created"], "skipped": result["tables_skipped"]},
+        "generated_credentials": result.get("generated_credentials", []),
+        "note": "Mot de passe a changer a la premiere connexion.",
+    }
+
+@app.post('/api/seed')
+@app.get('/api/seed')
+@app.post('/api/v1/seed')
+@app.get('/api/v1/seed')
+async def seed_users_raw(x_setup_token: Optional[str] = Header(None)):
+    """
+    Emergency seed endpoint. Meme protection par jeton que /api/setup et meme
+    logique via _bootstrap_schema_and_seed. Ne renvoie plus de credential fixe.
+    """
+    _enforce_setup_access(x_setup_token)
+    result = await asyncio.to_thread(_bootstrap_schema_and_seed)
+    if result["status"] == "already":
+        return {
+            "status": "already_seeded",
+            "message": "Utilisateurs existants deja.",
+        }
+    if result["status"] == "error":
+        return result
+    return {
+        "status": "success",
+        "message": "Tables ensured and admin users seeded",
+        "tables": {"created": result["tables_created"], "skipped": result["tables_skipped"]},
+        "generated_credentials": result.get("generated_credentials", []),
+        "note": "Mot de passe a changer a la premiere connexion.",
+    }
+
+@app.get("/", response_class=HTMLResponse)
+async def root_gateway():
+    """Root endpoint for browser visits on http://127.0.0.1:8000"""
+    return HTMLResponse(content="""<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVO-LOG EM-ERP • Passerelle API & Système Portuaire CADC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: radial-gradient(circle at center, #07152b 0%, #030d1d 55%, #01060e 100%);
+            color: #f8fafc;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .card {
+            max-width: 680px;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(245, 158, 11, 0.15);
+            text-align: center;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 38px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            background: linear-gradient(180deg, #ffffff 0%, #fef08a 30%, #f59e0b 80%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p.sub {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .metric {
+            background: rgba(2, 12, 27, 0.7);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: left;
+        }
+        .metric-title { font-size: 11px; color: #64748b; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+        .metric-val { font-size: 18px; font-weight: 700; color: #38bdf8; margin-top: 4px; }
+        .status-ok { color: #34d399; }
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #d97706, #f59e0b, #d97706);
+            color: #020c1b;
+            box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.4);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -5px rgba(245, 158, 11, 0.6); }
+        .btn-sec {
+            background: rgba(30, 41, 59, 0.8);
+            color: #e2e8f0;
+            border: 1px solid rgba(71, 85, 105, 0.6);
+        }
+        .btn-sec:hover { background: rgba(51, 65, 85, 0.8); border-color: #94a3b8; }
+        .footer {
+            margin-top: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="badge">Passerelle API Centralisée CADC</div>
+        <h1>EVO-LOG EM-ERP</h1>
+        <p class="sub">Moteur Applicatif & Passerelle Portuaire Douala / Kribi / CEMAC</p>
+        
+        <div class="grid">
+            <div class="metric">
+                <div class="metric-title">Statut API</div>
+                <div class="metric-val status-ok">● Opérationnel (200 OK)</div>
+            </div>
+            <div class="metric">
+                <div class="metric-title">Modules Actifs</div>
+                <div class="metric-val">82 Routers v1</div>
+            </div>
+            <div class="metric">
+                <div class="metric-title">Base de Données</div>
+                <div class="metric-val status-ok">PostgreSQL OHADA</div>
+            </div>
+            <div class="metric">
+                <div class="metric-title">Mode SaaS</div>
+                <div class="metric-val">Multi-Tenants Isolé</div>
+            </div>
+        </div>
+
+        <div class="links">
+            <a href="http://localhost:3000" class="btn btn-primary">
+                🖥️ Accéder à l'Application Frontend EVO-LOG (Port 3000)
+            </a>
+            <a href="/api/docs" class="btn btn-sec">
+                📚 Documentation Interactive des APIs (Swagger UI)
+            </a>
+            <a href="/api/health" class="btn btn-sec">
+                🩺 Diagnostic Santé Système (/api/health)
+            </a>
+        </div>
+
+        <div class="footer">
+            CADC • Code Axis Digital Cameroun • Port de Douala • v2.0.0
+        </div>
+    </div>
+</body>
+</html>
+""")
+
+@app.get("/docs", include_in_schema=False)
+async def redirect_docs():
+    """Redirect /docs to /api/docs"""
+    return RedirectResponse(url="/api/docs")
+
+@app.get("/health", tags=["Health"])
+@app.get("/api/v1/health", tags=["Health"])
+async def detailed_health_check():
+    """Health check détaillé avec vérification des dépendances."""
+    checks = {
+        "status": "ok",
+        "service": "EVO-LOG EM-ERP",
+        "version": "2.0.0",
+        "checks": {}
+    }
+
+ # Vérifier la base de données (jamais plus de ~2s: wait_for borné).
+    try:
+        def check_db():
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+        await asyncio.wait_for(asyncio.to_thread(check_db), timeout=2.0)
+        checks["checks"]["database"] = {"status": "ok", "message": "Base connectée"}
+    except Exception as e:
+        checks["checks"]["database"] = {"status": "error", "message": str(e)}
+        checks["status"] = "degraded"
+
+ # Redis / MinIO / Celery sont des dépendances externes lentes a retenter a
+ # chaque chargement de page. On met en cache leur sonde 15 s: le premier
+ # appel paie le fast-fail (~1 s), les suivants repondent instantanement.
+    now = time.time()
+    if (now - _HEALTH_DEPS_CACHE["ts"]) >= _HEALTH_DEPS_TTL:
+        deps, degraded, redis_ok, _redis_disabled = await _probe_external_deps()
+        _HEALTH_DEPS_CACHE.update({"ts": now, "deps": deps, "degraded": degraded})
+    checks["checks"].update(_HEALTH_DEPS_CACHE["deps"])
+    if _HEALTH_DEPS_CACHE["degraded"]:
+        checks["status"] = "degraded"
+
+    return checks
+
+# Cache de la sonde des dependances externes (evite un probe lent a chaque /health).
+_HEALTH_DEPS_TTL = 15.0
+_HEALTH_DEPS_CACHE: dict = {"ts": 0.0, "deps": {}, "degraded": False}
+
+async def _probe_external_deps():
+    """Sonde Redis / MinIO / Celery en fast-fail. Retourne (deps, degraded, redis_ok, redis_disabled)."""
+    deps = {}
+    degraded = False
+
+ # Redis - fast-fail: timeouts courts + wait_for. Sans ce bornage, un ping
+ # vers un serveur absent bloque ~8s et fait cascader « serveur injoignable »
+ # cote frontend (timeout axios 15s).
+    redis_ok = False
+    _redis_disabled = (not settings.REDIS_URL) or settings.REDIS_URL.lower() in ("none", "disabled", "")
+    if _redis_disabled:
+        deps["redis"] = {"status": "disabled", "message": "Redis désactivé"}
+    else:
+        try:
+            import redis.asyncio as aioredis
+            redis_client = aioredis.from_url(
+                settings.REDIS_URL, socket_connect_timeout=1, socket_timeout=1,)
+            try:
+                await asyncio.wait_for(redis_client.ping(), timeout=1.5)
+                redis_ok = True
+                deps["redis"] = {"status": "ok", "message": "Redis connecté"}
+            finally:
+                await redis_client.aclose()
+        except Exception as e:
+            deps["redis"] = {"status": "warning", "message": f"Redis indisponible: {str(e)[:120]}"}
+
+ # MinIO - l'appel SDK est synchrone bloquant: thread + wait_for.
+    if settings.MINIO_ENABLED:
+        try:
+            def check_minio():
+                from minio import Minio
+                mc = Minio(
+                    settings.MINIO_ENDPOINT,
+                    access_key=settings.MINIO_ACCESS_KEY,
+                    secret_key=settings.MINIO_SECRET_KEY,
+                    secure=settings.MINIO_SECURE,)
+                return mc.bucket_exists(settings.MINIO_BUCKET_DOCUMENTS)
+            await asyncio.wait_for(asyncio.to_thread(check_minio), timeout=2.0)
+            deps["minio"] = {"status": "ok", "message": "MinIO connecté"}
+        except Exception as e:
+            deps["minio"] = {"status": "warning", "message": f"MinIO indisponible: {str(e)[:120]}"}
+    else:
+        deps["minio"] = {"status": "disabled", "message": "MinIO désactivé"}
+
+ # Celery - le broker est Redis; s'il est absent on skippe plutot que bloquer.
+    if _redis_disabled or not redis_ok:
+        deps["celery"] = {"status": "disabled", "message": "Broker Redis indisponible, workers non interrogés"}
+    else:
+        try:
+            from app.worker import celery_app
+            def check_celery():
+                return celery_app.control.inspect(timeout=0.5).active()
+            active = await asyncio.wait_for(asyncio.to_thread(check_celery), timeout=1.5)
+            if active is None:
+                deps["celery"] = {"status": "warning", "message": "Aucun worker Celery actif"}
+            else:
+                deps["celery"] = {"status": "ok", "message": "Workers Celery actifs"}
+        except asyncio.TimeoutError:
+            deps["celery"] = {"status": "warning", "message": "Celery injoignable (timeout)"}
+        except Exception as e:
+            deps["celery"] = {"status": "error", "message": str(e)[:120]}
+            degraded = True
+
+    return deps, degraded, redis_ok, _redis_disabled
+
+# Prometheus metrics disabled - instrumentator incompatible with current FastAPI version
+# @app.on_event('startup')
+# async def expose_metrics():
+# instrumentator.expose(app)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+

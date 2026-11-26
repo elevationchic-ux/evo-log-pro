@@ -1,0 +1,73 @@
+// src/app/layout.tsx RootLayout EVO-LOG
+import type { Metadata } from 'next'
+import { Inter, JetBrains_Mono } from 'next/font/google'
+import './globals.css'
+import Providers from '../components/shared/Providers'
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono' })
+
+export const metadata: Metadata = {
+  title: 'EVO-LOG  Plateforme ERP Logistique SaaS • CADC',
+  description: 'Plateforme ERP Logistique SaaS Multi-Entreprises de Classe Mondiale par Code Axis Digital Cameroun (CADC)  Logistique, Transit & Acconage Portuaire.',
+  icons: {
+    icon: [
+ // ICO (legacy browsers & OS taskbar)
+      { url: '/favicon.ico', sizes: '16x16 32x32', type: 'image/x-icon' },
+ // SVG (vectoriel parfait à toutes les tailles, modern browsers)
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+ // PNG fallbacks
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: '/favicon.svg',
+  },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'EVO-LOG',
+  },
+}
+
+export const viewport = {
+  themeColor: '#f59e0b',
+  width: 'device-width',
+  initialScale: 1,
+ // Le zoom pincement est RÉAUTORISÉ (WCAG 1.4.4): l'ancien
+ // maximumScale=1 / userScalable=false rendait l'app illisible pour les
+ // opérateurs terrain qui doivent agrandir sur petits écrans.
+}
+
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="fr" className="dark" suppressHydrationWarning>
+      <head>
+        {/* Anti-flash thème : applique dark/light avant le premier paint à partir
+            de localStorage. Défaut = sombre (identité principale de l'ERP). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=document.documentElement;var t=localStorage.getItem('evolog_erp_theme');var light=false;if(t==='light'){light=true;}else if(t==='system'){light=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches;}d.classList.remove('dark','light');if(light){d.classList.add('light');d.style.colorScheme='light';}else{d.classList.add('dark');d.style.colorScheme='dark';}var s=localStorage.getItem('evolog_erp_text_scale');var fs={standard:'100%',large:'115%','very-large':'130%'}[s];if(fs)d.style.fontSize=fs;}catch(e){var r=document.documentElement;r.classList.remove('dark','light');r.classList.add('dark');}})();`,
+          }}
+        />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+      </head>
+      <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  )
+}

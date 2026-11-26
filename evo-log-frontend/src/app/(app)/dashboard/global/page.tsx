@@ -1,0 +1,607 @@
+'use client'
+
+import React, { useState, useEffect, useCallback } from 'react'
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer
+} from 'recharts'
+import {
+  TrendingUp,
+  Package,
+  AlertTriangle,
+  CreditCard,
+  Truck,
+  Terminal,
+  Building,
+  Warehouse,
+  ArrowRight,
+  Loader2,
+  Radio,
+  ShoppingCart,
+  Landmark,
+  BarChart3,
+  RefreshCw,
+  Sparkles,
+  ShieldCheck,
+  Zap,
+  Clock,
+  ShieldAlert,
+  Fuel,
+  Globe,
+  Activity,
+  Search,
+  Layers,
+  LayoutDashboard
+} from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { getRouteFromTCode } from '@/utils/tcodeLookup'
+import { financeAPI, transportAPI, magasinAPI } from '@/lib/api-client'
+import { useI18n } from '@/hooks/useI18n'
+import { useSettings } from '@/components/layout/SettingsProvider'
+import { NAVIGATION_REGISTRY, ModuleNavConfig } from '@/config/navigationRegistry'
+import { localizeTitle } from '@/config/navI18n'
+
+type Num = number | null
+
+interface DashboardData {
+  chiffreAffaires: Num
+  missionsEnCours: Num
+  vehiculesActifs: Num
+  vehiculesTotal: Num
+  camionsDispos: Num
+  valeurStock: Num
+  alertesStock: Num
+  mouvementsJour: Num
+  nbEntrepots: Num
+}
+
+interface RevenuePoint {
+  month: string
+  revenue: number
+}
+
+interface ZoneOccupation {
+  entrepot_id: number
+  zone: string
+  nb_articles: number
+  valeur_stockee: number
+  occupancy: number | null
+}
+
+interface ActivityItem {
+  id: string
+  type: string
+  date: string
+ // Champs bruts: le libellé est composé au rendu selon la langue active.
+  numero?: string
+  client?: string
+  montant?: number
+  mode?: string
+}
+
+const EMPTY: DashboardData = {
+  chiffreAffaires: null,
+  missionsEnCours: null,
+  vehiculesActifs: null,
+  vehiculesTotal: null,
+  camionsDispos: null,
+  valeurStock: null,
+  alertesStock: null,
+  mouvementsJour: null,
+  nbEntrepots: null
+}
+
+const fmtM = (v: Num, unit = 'M', locale = 'fr-FR') =>
+  v === null ? '' : `${(v / 1_000_000).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}${unit}`
+
+const fmtInt = (v: Num, locale = 'fr-FR') => (v === null ? '' : v.toLocaleString(locale))
+
+const ERP_DOMAINS = [
+  { id: 'all', label: 'Tous', labelEn: 'All' },
+  { id: 'maritime', label: 'Maritime & Quai', labelEn: 'Maritime & Port', keys: ['port-operations', 'transit-douane', 'portail-declarant'] },
+  { id: 'transport', label: 'Transport & Parc', labelEn: 'Transport & Fleet', keys: ['transport-flotte', 'parc-vehicules', 'portail-chauffeur', 'portail-technicien'] },
+  { id: 'entrepot', label: 'Entreposage & Stock', labelEn: 'Warehouse & Stock', keys: ['magasin-stock', 'portail-magasinier', 'annuaire-prestataires'] },
+  { id: 'finance', label: 'Finance & OHADA', labelEn: 'Finance & OHADA', keys: ['comptabilite-ohada', 'finance-ohada', 'portail-frais', 'portail-commercial'] },
+  { id: 'rh', label: 'Ressources Humaines', labelEn: 'Human Resources', keys: ['rh-personnel', 'chef-personnel', 'portail-employe', 'portail-collaborateur', 'departement'] },
+  { id: 'qhse', label: 'Sécurité & QHSE', labelEn: 'Safety & QHSE', keys: ['qhse-securite', 'portail-qhse'] },
+  { id: 'direction', label: 'Direction & CADC', labelEn: 'Governance & CADC', keys: ['dashboard', 'client-b2b', 'reports-bi', 'chat', 'admin-tenant', 'admin-saas', 'superadmin-cadc'] },
+] as const
+
+export default function GlobalDashboard() {
+  const router = useRouter()
+  const t = useI18n()
+  const { language } = useSettings()
+  const locale = language === 'en' ? 'en-GB' : 'fr-FR'
+  const [tcodeFocused, setTcodeFocused] = useState(false)
+  const [tcode, setTcode] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [lastSync, setLastSync] = useState<string>('')
+  const [loadError, setLoadError] = useState(false)
+
+  const [data, setData] = useState<DashboardData>(EMPTY)
+  const [revenueMonths, setRevenueMonths] = useState<RevenuePoint[]>([])
+  const [zones, setZones] = useState<ZoneOccupation[]>([])
+  const [activity, setActivity] = useState<ActivityItem[]>([])
+  const [quickNavDomain, setQuickNavDomain] = useState<string>('all')
+  const [quickNavQuery, setQuickNavQuery] = useState<string>('')
+
+  const load = useCallback(async () => {
+    const [finRes, transRes, magRes, chartRes, facturesRes, encaisRes, zonesRes] =
+      await Promise.allSettled([
+        financeAPI.getKpis(),
+        transportAPI.getKpis(),
+        magasinAPI.getKpis(),
+        financeAPI.getAnalyticsChartData(),
+        financeAPI.getFactures(),
+        financeAPI.getEncaissements(),
+        magasinAPI.getEntrepotsOccupation()
+      ])
+
+    let ok = false
+    const next: DashboardData = { ...EMPTY }
+
+    if (finRes.status === 'fulfilled' && finRes.value?.data) {
+      ok = true
+      next.chiffreAffaires = Number(finRes.value.data.chiffre_affaires ?? 0)
+    }
+    if (transRes.status === 'fulfilled' && transRes.value?.data) {
+      ok = true
+      next.missionsEnCours = Number(transRes.value.data.missions_en_cours ?? 0)
+      next.vehiculesActifs = Number(transRes.value.data.vehicules_actifs ?? 0)
+      next.vehiculesTotal = Number(transRes.value.data.vehicules_total ?? 0)
+      next.camionsDispos = Number(transRes.value.data.camions_disponibles ?? 0)
+    }
+    if (magRes.status === 'fulfilled' && magRes.value?.data) {
+      ok = true
+      next.valeurStock = Number(magRes.value.data.valeur_stock ?? 0)
+      next.alertesStock = Number(magRes.value.data.nb_alertes_min ?? 0)
+      next.mouvementsJour = Number(magRes.value.data.mouvements_jour ?? 0)
+      next.nbEntrepots = Number(magRes.value.data.nb_entrepots ?? 0)
+    }
+    setData(next)
+
+    if (chartRes.status === 'fulfilled' && Array.isArray(chartRes.value?.data?.months)) {
+      setRevenueMonths(
+        chartRes.value.data.months.map((m: { month: string; revenue: number }) => ({
+          month: m.month,
+          revenue: Number(m.revenue)
+        }))
+      )
+    } else {
+      setRevenueMonths([])
+    }
+
+    if (zonesRes.status === 'fulfilled' && Array.isArray(zonesRes.value?.data?.zones)) {
+      setZones(zonesRes.value.data.zones)
+    } else {
+      setZones([])
+    }
+
+ // Flux d'activité: fusions réelles factures + encaissements, tri chronologique.
+ // Seules les données brutes sont conservées: la phrase est composée au rendu (FR/EN).
+    const items: ActivityItem[] = []
+    if (facturesRes.status === 'fulfilled' && Array.isArray(facturesRes.value?.data)) {
+      for (const f of facturesRes.value.data.slice(0, 20)) {
+        items.push({
+          id: `F-${f.id}`,
+          type: 'FACTURE',
+          numero: f.numero || `#${f.id}`,
+          client: f.client_nom || undefined,
+          montant: Number(f.montant_ttc ?? 0),
+          date: f.date_emission || f.created_at || ''
+        })
+      }
+    }
+    if (encaisRes.status === 'fulfilled' && Array.isArray(encaisRes.value?.data)) {
+      for (const p of encaisRes.value.data.slice(0, 20)) {
+        items.push({
+          id: `E-${p.id}`,
+          type: 'ENCAISSEMENT',
+          numero: `#${p.id}`,
+          montant: Number(p.montant ?? 0),
+          mode: p.mode_paiement || undefined,
+          date: p.date_paiement || ''
+        })
+      }
+    }
+    items.sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+    setActivity(items.slice(0, 8))
+
+    setLoadError(!ok)
+ // Horodatage brut: le formatage local (heure) est appliqué à l'affichage.
+    if (ok) setLastSync(new Date().toISOString())
+    return ok
+  }, [])
+
+  useEffect(() => {
+    const run = async () => {
+      setLoading(true)
+      await load()
+      setLoading(false)
+    }
+    run()
+  }, [load])
+
+  const handleSync = async () => {
+    setIsSyncing(true)
+    await load()
+    setTimeout(() => setIsSyncing(false), 400)
+  }
+
+  const handleTCodeSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    if (tcode.trim()) {
+      router.push(getRouteFromTCode(tcode.trim()))
+    }
+  }
+
+  const kpiCards: { label: string; value: string; icon: typeof Truck; color: string; bg: string; border: string }[] = [
+    { label: t.dash.kpiRevenue, value: fmtM(data.chiffreAffaires, 'M', locale), icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
+    { label: t.dash.kpiMissions, value: fmtInt(data.missionsEnCours, locale), icon: Truck, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30' },
+    { label: t.dash.kpiActiveVehicles, value: data.vehiculesActifs === null ? '' : `${data.vehiculesActifs.toLocaleString(locale)} / ${(data.vehiculesTotal ?? 0).toLocaleString(locale)}`, icon: Radio, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30' },
+    { label: t.dash.kpiStockValue, value: fmtM(data.valeurStock, 'M', locale), icon: Package, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/30' },
+    { label: t.dash.kpiBelowMinimum, value: fmtInt(data.alertesStock, locale), icon: AlertTriangle, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/30' },
+    { label: t.dash.kpiMovements, value: fmtInt(data.mouvementsJour, locale), icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/30' }
+  ]
+
+ // Composition localisée du flux d'activité: les donnees restent brutes, seule
+ // la phrase suit la langue active. Montants toujours exprimes en millions de FCFA.
+  const activityText = (log: ActivityItem) =>
+    log.type === 'FACTURE'
+      ? `${t.dash.actInvoice} ${log.numero} · ${log.client || t.dash.unknownClient} (${fmtM(log.montant ?? 0, ' M FCFA', locale)})`
+      : `${t.dash.actReceipt} ${log.numero} ${t.dash.actOf} ${fmtM(log.montant ?? 0, ' M FCFA', locale)} (${log.mode || t.dash.unspecifiedMode})`
+
+  return (
+    <div className="space-y-6 text-slate-100 font-sans pb-12">
+      {/* 👑 Top Executive Enterprise Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-2xl backdrop-blur-xl">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <Sparkles className="w-3.5 h-3.5" /> {t.dash.badge}
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+            {t.dash.title}
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
+            {t.dash.subtitle}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          {/* T-Code Quick Search */}
+          <form onSubmit={handleTCodeSubmit} className="relative">
+            <Terminal className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-amber-400" />
+            <input
+              type="text"
+              value={tcode}
+              onChange={(e) => setTcode(e.target.value.toUpperCase())}
+              onFocus={() => setTcodeFocused(true)}
+              onBlur={() => setTcodeFocused(false)}
+              placeholder={t.dash.tcodePlaceholder}
+              className="h-10 pl-9 pr-3 bg-slate-950 border border-amber-500/30 rounded-xl text-xs text-amber-300 font-mono placeholder-slate-500 focus:outline-none focus:border-amber-400 w-44"
+            />
+          </form>
+
+          {/* Sync Button */}
+          <button
+            onClick={handleSync}
+            disabled={isSyncing || loading}
+            className="h-10 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold rounded-xl flex items-center gap-2 transition cursor-pointer text-slate-200"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-amber-400 ${isSyncing || loading ? 'animate-spin' : ''}`} />
+            {isSyncing || loading ? t.common.loading : `${t.dash.refreshed} (${lastSync ? new Date(lastSync).toLocaleTimeString(locale) : ''})`}
+          </button>
+
+          <Link
+            href="/admin"
+            className="h-10 px-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs rounded-xl flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition cursor-pointer"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            {t.dash.adminErp}
+          </Link>
+        </div>
+      </div>
+
+      {loadError && (
+        <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/40 rounded-2xl px-4 py-3 text-xs text-amber-300">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          {t.dash.backendDown}
+        </div>
+      )}
+
+      {/* 💎 Enterprise KPI Cards (100% réels) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {kpiCards.map((kpi, idx) => {
+          const IconComponent = kpi.icon
+          return (
+            <div key={idx} className={`${kpi.bg} ${kpi.border} border p-4 rounded-2xl flex flex-col items-center justify-center gap-2 shadow-lg`}>
+              <IconComponent className={`w-5 h-5 ${kpi.color}`} />
+              <span className="text-xs font-bold text-slate-400 text-center">{kpi.label}</span>
+              <span className="text-lg font-black text-white">{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : kpi.value}</span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* 📊 Enterprise Charts & Ops */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Revenue Chart  données réelles 12 mois */}
+        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-400" /> {t.dash.revenueTitle}
+            </h2>
+            <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold">{t.dash.revenueSource}</span>
+          </div>
+
+          {revenueMonths.length > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <AreaChart data={revenueMonths}>
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
+                <YAxis stroke="#94a3b8" fontSize={11} />
+                <RechartsTooltip
+                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '12px' }}
+                  itemStyle={{ color: '#f1f5f9' }}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[250px] flex flex-col items-center justify-center text-center gap-2 border border-dashed border-slate-800 rounded-2xl">
+              <BarChart3 className="w-8 h-8 text-slate-400" />
+              <p className="text-sm font-bold text-slate-300">{t.dash.noInvoiceTitle}</p>
+              <p className="text-xs text-slate-500 max-w-xs">{t.dash.noInvoiceHint}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Fleet & Warehouse  agrégats réels */}
+        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Radio className="w-5 h-5 text-indigo-400" /> {t.dash.fleetTitle}
+          </h2>
+
+          <div className="space-y-3">
+            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">{t.dash.fleetSubtitle}</div>
+            <div className="space-y-2">
+              {[
+                { name: t.dash.vehActiveMission, count: data.vehiculesActifs, color: '#10b981' },
+                { name: t.dash.vehAvailable, count: data.camionsDispos, color: '#6366f1' },
+                { name: t.dash.fleetRegistered, count: data.vehiculesTotal, color: '#f59e0b' }
+              ].map((item, idx) => (
+                <div key={idx} className="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="text-xs font-bold text-slate-200">{item.name}</span>
+                  </div>
+                  <span className="text-sm font-black text-white">{fmtInt(item.count, locale)} {t.dash.trucks}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-2 border-t border-slate-800">
+              <div className="text-xs text-slate-400 mb-2 font-bold uppercase tracking-wider">{t.dash.warehousesLabel}</div>
+              {zones.length > 0 ? (
+                <div className="space-y-2">
+                  {zones.slice(0, 5).map((z) => (
+                    <div key={z.entrepot_id} className="space-y-1">
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-slate-300 font-semibold">{z.zone} • {z.nb_articles} {t.dash.itemsAbbr}</span>
+                        <strong className="text-amber-400 font-bold">
+                          {z.occupancy !== null ? `${z.occupancy}%` : t.dash.capacityUnknown}
+                        </strong>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                        <div
+                          className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full"
+                          style={{ width: `${z.occupancy ?? 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 border border-dashed border-slate-800 rounded-xl p-3">
+                  {t.dash.noWarehouse}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 🚀 All 28 ERP Modules Quick Access Grid with Domain Filters */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                {t.dash.quickNavTitle}
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                  {Object.keys(NAVIGATION_REGISTRY).length} modules
+                </span>
+              </h2>
+              <p className="text-xs text-slate-400">
+                Accès direct instantané à l'ensemble des modules opérationnels et portails
+              </p>
+            </div>
+          </div>
+
+          {/* Recherche rapide de module */}
+          <div className="relative w-full md:w-64">
+            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={quickNavQuery}
+              onChange={(e) => setQuickNavQuery(e.target.value)}
+              placeholder="Filtrer les modules..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-7 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+            />
+            {quickNavQuery && (
+              <button
+                type="button"
+                onClick={() => setQuickNavQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-300"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Onglets de filtrage par domaine pour éviter le scroll pénible */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          {ERP_DOMAINS.map((dom) => {
+            const isActive = quickNavDomain === dom.id
+            const label = language === 'en' ? dom.labelEn : dom.label
+            const count =
+              dom.id === 'all'
+                ? Object.keys(NAVIGATION_REGISTRY).length
+                : (dom as any).keys?.filter((k: string) => NAVIGATION_REGISTRY[k])?.length || 0
+
+            return (
+              <button
+                key={dom.id}
+                type="button"
+                onClick={() => setQuickNavDomain(dom.id)}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  isActive
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                    : 'bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <span>{label}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                    isActive ? 'bg-slate-950/20 text-slate-950 font-black' : 'bg-slate-800 text-slate-400'
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Grille filtrée des modules */}
+        {(() => {
+          const allModules = Object.values(NAVIGATION_REGISTRY) as ModuleNavConfig[]
+          const activeDomainObj = ERP_DOMAINS.find((d) => d.id === quickNavDomain)
+          const domainKeys = (activeDomainObj as any)?.keys as string[] | undefined
+
+          const filtered = allModules.filter((mod) => {
+            if (domainKeys && !domainKeys.includes(mod.key)) return false
+            if (quickNavQuery) {
+              const q = quickNavQuery.toLowerCase().trim()
+              const title = localizeTitle(mod, language).toLowerCase()
+              const area = (mod.businessArea || '').toLowerCase()
+              const key = mod.key.toLowerCase()
+              const hasSubMatch = mod.subModules.some((s) =>
+                s.label.toLowerCase().includes(q) || (s.tcode || '').toLowerCase().includes(q)
+              )
+              return title.includes(q) || area.includes(q) || key.includes(q) || hasSubMatch
+            }
+            return true
+          })
+
+          if (filtered.length === 0) {
+            return (
+              <div className="py-12 text-center text-xs text-slate-500 bg-slate-950/40 rounded-2xl border border-slate-800/60">
+                Aucun module ne correspond aux critères sélectionnés.
+              </div>
+            )
+          }
+
+          return (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-3">
+              {filtered.map((mod) => {
+                const IconComponent = mod.icon || LayoutDashboard
+                return (
+                  <Link
+                    key={mod.key}
+                    href={mod.path}
+                    className="bg-slate-950/90 hover:bg-slate-800/90 border border-slate-800/90 hover:border-slate-700 p-3 rounded-2xl flex flex-col items-center text-center gap-2 transition-all hover:scale-105 active:scale-95 group shadow-md"
+                    style={{
+                      borderBottomColor: mod.color,
+                      borderBottomWidth: '2px',
+                    }}
+                  >
+                    <div
+                      className="p-2.5 rounded-xl text-white shadow group-hover:scale-110 transition-transform"
+                      style={{
+                        background: `linear-gradient(135deg, ${mod.color}, #0f172a)`,
+                      }}
+                    >
+                      <IconComponent className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0 w-full">
+                      <span className="text-xs font-bold text-slate-100 group-hover:text-amber-400 transition-colors line-clamp-1">
+                        {localizeTitle(mod, language)}
+                      </span>
+                      <span className="block text-[10px] text-slate-400 truncate mt-0.5">
+                        {mod.subModules.length} sous-modules
+                      </span>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )
+        })()}
+      </div>
+
+      {/* 📡 Last document activity  issu des écritures réelles */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2 pb-3 border-b border-slate-800">
+          <Clock className="w-5 h-5 text-emerald-400" /> {t.dash.lastDocsTitle}
+        </h2>
+
+        {activity.length > 0 ? (
+          <div className="divide-y divide-slate-800/70">
+            {activity.map((log) => (
+              <div key={log.id} className="py-3 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-amber-300 font-mono text-[11px] font-bold shrink-0">
+                    {log.type}
+                  </span>
+                  <span className="text-xs text-slate-200 font-semibold truncate">{activityText(log)}</span>
+                </div>
+                <span className="text-xs text-slate-400 font-mono shrink-0">
+                  {log.date ? new Date(log.date).toLocaleDateString(locale) : t.dash.unknownDate}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-8 flex flex-col items-center justify-center text-center gap-2 border border-dashed border-slate-800 rounded-2xl">
+            <Warehouse className="w-8 h-8 text-slate-400" />
+            <p className="text-sm font-bold text-slate-300">{t.dash.noDocTitle}</p>
+            <p className="text-xs text-slate-500 max-w-md">
+              {t.dash.noDocHint}{' '}
+              <Link href="/finance/overview" className="text-amber-400 font-bold inline-flex items-center gap-1 hover:underline">
+                {t.dash.openFinance} <ArrowRight className="w-3 h-3" />
+              </Link>
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

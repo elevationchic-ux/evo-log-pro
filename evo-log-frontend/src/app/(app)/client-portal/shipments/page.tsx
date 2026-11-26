@@ -1,0 +1,573 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import {
+  Truck,
+  Calendar,
+  MapPin,
+  Package,
+  CheckCircle2,
+  AlertTriangle,
+  Clock,
+  RefreshCw,
+  Search,
+  Menu,
+  ChevronDown,
+  ChevronUp
+} from 'lucide-react';
+import { transportAPI } from '@/lib/api-client';
+import { toast } from 'sonner';
+
+export default function ClientShipmentsPage() {
+  const [missions, setMissions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedMission, setSelectedMission] = useState<any>(null);
+  const [filters, setFilters] = useState({
+    statut: '',
+    dateDebut: '',
+    dateFin: '',
+    search: ''
+  });
+  const [sortBy, setSortBy] = useState<{ field: string; direction: 'asc' | 'desc' }>({
+    field: 'date_creation',
+    direction: 'desc'
+  });
+  const [expandedMissionId, setExpandedMissionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadMissions();
+  }, []);
+
+  const loadMissions = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await transportAPI.getMissions({
+        limit: 100,
+        ...filters,
+        sortBy: `${sortBy.field}:${sortBy.direction}`
+      });
+      setMissions(res.data?.items || res.data || []);
+    } catch (err) {
+      console.error('Failed to load missions:', err);
+      setError('Impossible de charger les missions. Veuillez réessayer.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (missionId: number, newStatus: string) => {
+    try {
+      await transportAPI.updateStatut(missionId, newStatus);
+      setMissions(prev =>
+        prev.map(m =>
+          m.id === missionId ? { ...m, statut: newStatus } : m
+        )
+      );
+      if (selectedMission?.id === missionId) {
+        setSelectedMission((prev: any) => prev ? { ...prev, statut: newStatus } : null);
+      }
+      toast.success(`Mission #${missionId} mise à jour : ${newStatus}.`);
+    } catch {
+      toast.error(`Échec de la mise à jour de la mission #${missionId} : le service transport n'a pas répondu.`);
+    }
+  };
+
+  const handleGenererBL = async (mission: any) => {
+    try {
+      await transportAPI.genererBL(mission.id);
+      toast.success(`Bon de Livraison généré pour la mission ${mission.reference}.`);
+    } catch {
+      toast.error('Génération du Bon de Livraison impossible : le service documentaire n\'a pas répondu.');
+    }
+  };
+
+  const handleToggleExpand = (missionId: string) => {
+    setExpandedMissionId(expandedMissionId === missionId ? null : missionId);
+  };
+
+  const filteredMissions = missions.filter(mission => {
+    if (filters.statut && mission.statut !== filters.statut) return false;
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      return (
+        mission.reference?.toLowerCase().includes(searchTerm) ||
+        mission.origine?.toLowerCase().includes(searchTerm) ||
+        mission.destination?.toLowerCase().includes(searchTerm) ||
+        mission.type_mission?.toLowerCase().includes(searchTerm)
+      );
+    }
+    return true;
+  });
+
+  const sortedMissions = [...filteredMissions].sort((a, b) => {
+    const fieldA = a[sortBy.field];
+    const fieldB = b[sortBy.field];
+
+    if (fieldA === undefined || fieldA === null) return 1;
+    if (fieldB === undefined || fieldB === null) return -1;
+
+    if (sortBy.direction === 'asc') {
+      return fieldA > fieldB ? 1 : -1;
+    } else {
+      return fieldA < fieldB ? 1 : -1;
+    }
+  });
+
+  return (
+    <div className="min-h-[80vh] py-12">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex justify-between items-start sm:items-center sm:justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-200 mb-2">
+              Mes Expéditions
+            </h1>
+            <p className="text-slate-400">
+              Suivez l'état de toutes vos expéditions en temps réel
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSelectedMission(null)}
+              className="btn btn-primary btn-sm flex items-center gap-2"
+            >
+              <Package className="w-4 h-4" /> Nouvelle Expédition
+            </button>
+            <button
+              onClick={loadMissions}
+              className="btn btn-outline btn-sm flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" /> Actualiser
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-500/10 border-l-4 border-red-500 rounded">
+          <AlertTriangle className="w-4 h-4 text-red-600 mr-2" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="mb-6">
+        <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6">
+          <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
+            <Search className="w-5 h-5" /> Filtres
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Statut
+              </label>
+              <select
+                value={filters.statut}
+                onChange={(e) => setFilters(prev => ({ ...prev, statut: e.target.value }))}
+                className="select select-bordered w-full"
+              >
+                <option value="">Tous les statuts</option>
+                <option value="planifiee">Programmée</option>
+                <option value="en_cours">En cours</option>
+                <option value="en_retard">En retard</option>
+                <option value="terminee">Terminée</option>
+                <option value="annulee">Annulée</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Date de Début
+              </label>
+              <input
+                type="date"
+                value={filters.dateDebut}
+                onChange={(e) => setFilters(prev => ({ ...prev, dateDebut: e.target.value }))}
+                className="input input-bordered w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Date de Fin
+              </label>
+              <input
+                type="date"
+                value={filters.dateFin}
+                onChange={(e) => setFilters(prev => ({ ...prev, dateFin: e.target.value }))}
+                className="input input-bordered w-full"
+              />
+            </div>
+            <div className="flex items-end">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Recherche
+              </label>
+              <input
+                type="text"
+                placeholder="Référence, trajet, marchandise..."
+                value={filters.search}
+                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                className="input input-bordered w-full"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Statistics */}
+      <div className="mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6 text-center">
+            <div className="flex items-center justify-center mb-3">
+              <Truck className="w-8 h-8 text-primary" />
+            </div>
+            <p className="text-sm font-medium text-slate-500">Total Expéditions</p>
+            <p className="text-2xl font-bold text-slate-200">{missions.length}</p>
+          </div>
+          <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6 text-center">
+            <div className="flex items-center justify-center mb-3">
+              <CheckCircle2 className="w-8 h-8 text-success" />
+            </div>
+            <p className="text-sm font-medium text-slate-500">Terminées</p>
+            <p className="text-2xl font-bold text-slate-200">
+              {missions.filter(m => m.statut === 'terminee').length}
+            </p>
+          </div>
+          <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6 text-center">
+            <div className="flex items-center justify-center mb-3">
+              <MapPin className="w-8 h-8 text-warning" />
+            </div>
+            <p className="text-sm font-medium text-slate-500">En Cours</p>
+            <p className="text-2xl font-bold text-slate-200">
+              {missions.filter(m => ['en_cours', 'en_retard'].includes(m.statut)).length}
+            </p>
+          </div>
+          <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 p-6 text-center">
+            <div className="flex items-center justify-center mb-3">
+              <Calendar className="w-8 h-8 text-info" />
+            </div>
+            <p className="text-sm font-medium text-slate-500">À Venir</p>
+            <p className="text-2xl font-bold text-slate-200">
+              {missions.filter(m => m.statut === 'planifiee').length}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Missions List */}
+      <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-700 overflow-hidden">
+        <div className="p-6 border-b border-slate-700 flex justify-between items-center">
+          <h3 className="text-lg font-bold text-slate-200">
+            Liste des Expéditions ({filteredMissions.length} résultat{(filteredMissions.length !== 1) ? 's' : ''})
+          </h3>
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <span>Trier par :</span>
+            <select
+              value={sortBy.field}
+              onChange={(e) => setSortBy(prev => ({ ...prev, field: e.target.value }))}
+              className="select select-sm select-bordered"
+            >
+              <option value="date_creation">Date (récent)</option>
+              <option value="dateCreation:asc">Date (ancien)</option>
+              <option value="reference">Référence</option>
+              <option value="statut">Statut</option>
+              <option value="origine">Départ</option>
+            </select>
+          </div>
+        </div>
+
+        {loading && !missions.length && (
+          <div className="p-12 text-center">
+            <RefreshCw className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+            <p className="text-slate-400">Chargement des expéditions...</p>
+          </div>
+        )}
+
+        {!loading && missions.length === 0 && !error && (
+          <div className="p-12 text-center">
+            <Package className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+            <p className="text-slate-500">Aucune expédition trouvée</p>
+            <p className="text-slate-400 text-sm mt-2">
+              Aucune expédition ne correspond aux filtres appliqués
+            </p>
+          </div>
+        )}
+
+        {!loading && missions.length > 0 && (
+          <div className="divide-y divide-slate-800">
+            {sortedMissions.map((mission) => (
+              <div key={mission.id} className="cursor-pointer hover:bg-slate-800 transition-colors">
+                {/* Mission Header */}
+                <div className="flex justify-between items-start px-6 py-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full">
+                        {mission.statut === 'terminee' && (
+                          <CheckCircle2 className="w-4 h-4 text-success" />
+                        )}
+                        {mission.statut === 'en_cours' && (
+                          <div className="w-3 h-3 border-2 border-primary" />
+                        )}
+                        {mission.statut === 'en_retard' && (
+                          <div className="w-3 h-3 border-2 border-warning" />
+                        )}
+                        {mission.statut === 'planifiee' && (
+                          <div className="w-3 h-3 border-2 border-info" />
+                        )}
+                        {mission.statut === 'annulee' && (
+                          <div className="w-3 h-3 border-2 border-destructive" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-200">{mission.reference}</p>
+                        <p className="text-sm text-slate-500 truncate">
+                          {mission.origine || '—'} → {mission.destination || '—'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className={
+                      mission.statut === 'terminee' ? 'badge badge-success' :
+                      mission.statut === 'en_cours' ? 'badge badge-warning' :
+                      mission.statut === 'en_retard' ? 'badge badge-warning' :
+                      mission.statut === 'planifiee' ? 'badge badge-info' :
+                      'badge badge-destructive'
+                    }>
+                      {{
+                        planifiee: 'Programmée',
+                        en_cours: 'En cours',
+                        en_retard: 'En retard',
+                        terminee: 'Terminée',
+                        annulee: 'Annulée',
+                      }[mission.statut as string] || mission.statut || '—'}
+                    </span>
+                    <button
+                      onClick={() => handleToggleExpand(mission.id.toString())}
+                      className="btn btn-ghost btn-sm p-1"
+                      aria-label="Développer/Réduire les détails"
+                    >
+                      {expandedMissionId === mission.id.toString() ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Mission Details (expandable) */}
+                {expandedMissionId === mission.id.toString() && (
+                  <div className="px-6 py-4 bg-slate-800 border-t border-slate-700">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-slate-300">Date de Départ Prévue</p>
+                        <p className="text-slate-500">
+                          {mission.date_debut_prevue ? new Date(mission.date_debut_prevue).toLocaleDateString('fr-FR') : 'Non enregistrée'}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-slate-300">Date d'Arrivée Prévue</p>
+                        <p className="text-slate-500">
+                          {mission.date_fin_prevue ? new Date(mission.date_fin_prevue).toLocaleDateString('fr-FR') : 'Non enregistrée'}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-slate-300">Chauffeur Assigné</p>
+                        <p className="text-slate-500">
+                          {mission.chauffeur ? `${mission.chauffeur.nom} ${mission.chauffeur.prenom || ''}`.trim() : 'Non assigné'}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-slate-300">Camion Assigné</p>
+                        <p className="text-slate-500">
+                          {mission.camion?.immatriculation || 'Non assigné'}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-slate-300">Type de Mission</p>
+                        <p className="text-slate-500 capitalize">
+                          {mission.type_mission || 'Non enregistré'}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-slate-300">Distance</p>
+                        <p className="text-slate-500">
+                          {mission.distance_km ? `${mission.distance_km} km` : 'Non enregistrée'}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-slate-300">Montant Fret</p>
+                        <p className="text-slate-500">
+                          {mission.montant_fret ? `${Number(mission.montant_fret).toLocaleString()} FCFA` : 'Non enregistré'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="mt-4 pt-3 border-t border-slate-700 flex flex-col sm:flex-row gap-3">
+                      <button
+                        onClick={() => handleStatusChange(mission.id, 'en_cours')}
+                        disabled={mission.statut !== 'planifiee'}
+                        className="btn btn-sm btn-outline btn-primary flex-1"
+                      >
+                        Démarrer la Mission
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange(mission.id, 'terminee')}
+                        disabled={mission.statut !== 'en_cours'}
+                        className="btn btn-sm btn-outline btn-success flex-1"
+                      >
+                        Marquer comme Terminée
+                      </button>
+                      <button
+                        onClick={() => handleGenererBL(mission)}
+                        disabled={mission.statut !== 'terminee'}
+                        className="btn btn-sm btn-outline btn-info flex-1"
+                      >
+                        Générer BL
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Selected Mission Detail View */}
+      {selectedMission && (
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-4xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-200">
+                  Mission {selectedMission.reference}
+                </h2>
+                <p className="text-slate-400">
+                  Détails complets de l'expédition
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedMission(null)}
+                className="btn btn-ghost btn-sm"
+                aria-label="Fermer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Mission Info */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-slate-200">Informations Générales</h3>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Référence</p>
+                    <p className="font-mono text-slate-200">{selectedMission.reference}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Statut</p>
+                    <span className={
+                      selectedMission.statut === 'terminee' ? 'badge badge-success' :
+                      selectedMission.statut === 'en_cours' ? 'badge badge-warning' :
+                      selectedMission.statut === 'en_retard' ? 'badge badge-warning' :
+                      selectedMission.statut === 'planifiee' ? 'badge badge-info' :
+                      'badge badge-destructive'
+                    }>
+                      {{
+                        planifiee: 'Programmée',
+                        en_cours: 'En cours',
+                        en_retard: 'En retard',
+                        terminee: 'Terminée',
+                        annulee: 'Annulée',
+                      }[selectedMission.statut as string] || selectedMission.statut || '—'}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Date de Création</p>
+                    <p className="text-slate-500">
+                      {selectedMission.date_creation ? new Date(selectedMission.date_creation).toLocaleDateString('fr-FR') : 'Non enregistrée'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-slate-200">Itinéraire</h3>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Départ</p>
+                    <p className="text-slate-500">{selectedMission.origine || 'Non enregistré'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Arrivée</p>
+                    <p className="text-slate-500">{selectedMission.destination || 'Non enregistré'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Distance Estimée</p>
+                    <p className="text-slate-500">
+                      {selectedMission.distance_km ? `${selectedMission.distance_km} km` : 'Non enregistrée'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-slate-200">Détails du Fret</h3>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Type de Mission</p>
+                    <p className="text-slate-500 capitalize">{selectedMission.type_mission || 'Non enregistré'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">N° B/L</p>
+                    <p className="text-slate-500">
+                      {selectedMission.numero_bl || 'Non enregistré'}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Client</p>
+                    <p className="text-slate-500">
+                      {selectedMission.client?.nom || 'Non rattaché'}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Montant Fret</p>
+                    <p className="text-slate-500">
+                      {selectedMission.montant_fret ? `${Number(selectedMission.montant_fret).toLocaleString()} FCFA` : 'Non enregistré'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div className="lg:col-span-3">
+                <h3 className="text-lg font-semibold text-slate-200">Historique et Suivi</h3>
+                <div className="space-y-4">
+                  {/* Timeline items would go here */}
+                  <div className="border-l-2 border-slate-700 pl-4">
+                    {/* Example timeline entry */}
+                    <div className="mb-4 pb-4 border-b border-slate-700 last:mb-0 last:pb-0 last:border-0">
+                      <div className="flex items-start gap-3">
+                        <div className="w-3 h-3 bg-success rounded-full flex items-center justify-center">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-200">Mission créée</p>
+                          <p className="text-sm text-slate-500">
+                            {selectedMission.date_creation ? new Date(selectedMission.date_creation).toLocaleString('fr-FR') : 'Non enregistrée'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
