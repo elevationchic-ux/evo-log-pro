@@ -458,6 +458,20 @@ def executer_transfert(
 
 
 # ============ INVENTAIRE TOURNANT ============
+@router.get("/inventaires", response_model=List[InventaireTournantResponse])
+def lister_inventaires(
+    statut: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("magasin.inventaire.read"))
+):
+    """Liste des inventaires tournants, plus recents d'abord."""
+    from app.models.magasin_avance import InventaireTournant
+    q = db.query(InventaireTournant)
+    if statut:
+        q = q.filter(InventaireTournant.statut == statut)
+    return q.order_by(InventaireTournant.id.desc()).all()
+
+
 @router.post("/inventaires", response_model=InventaireTournantResponse, status_code=status.HTTP_201_CREATED)
 def creer_inventaire(
     inventaire: InventaireTournantCreate,

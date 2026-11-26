@@ -662,6 +662,17 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         isOhadaCompliant: true,
         requiredRoles: ['MAGASIN', 'FINANCE', 'AUDITOR']
       },
+      {
+        label: "Inventaires tournants & écarts",
+        path: "/magasin-stock/inventaires",
+        icon: (LUCIDE as any)["ClipboardList"],
+        badge: "Inventaire",
+        tcode: "KMAG_INV2",
+        description: "Comptage cyclique, valorisation des écarts et ajustement comptable 603/37x",
+        businessProcess: "Inventaire & régularisation",
+        isOhadaCompliant: true,
+        requiredRoles: ['MAGASIN', 'FINANCE', 'AUDITOR']
+      },
     ]
   },
 
