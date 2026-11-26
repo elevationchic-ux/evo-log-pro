@@ -331,6 +331,11 @@ class MaintenancePlan(Base):
     frequence_unite = Column(String(40), nullable=True)              # jour/mois/an/heure/km/cycle
     seuil_declenchement = Column(String(180), nullable=True)
     prochaine_echeance = Column(Date, nullable=True, index=True)
+ # Releve du compteur technique au moment de la derniere planification :
+ # le moteur compare le dernier ConditionReading a ce baseline pour
+ # declencher l'OT preventif (heures moteur, km, cycles).
+    dernier_releve_compteur = Column(Float, nullable=True)
+    dernier_releve_date = Column(DateTime(timezone=True), nullable=True)
     duree_estimee_h = Column(Float, nullable=True)
     criticite = Column(String(30), nullable=True, index=True)
     cout_estime_par_cycle_xaf = Column(Numeric(18, 2), nullable=True)
