@@ -2521,6 +2521,16 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: "Maintenance préventive ISO 55000",
         requiredRoles: ["maintindustrielle.work_orders.read"],
       },
+      {
+        label: "Ordres & équipements GMAO",
+        path: "/maintenance-gmao/ordres",
+        icon: (LUCIDE as any)["Cog"],
+        badge: "GMAO",
+        tcode: "maint-ordres",
+        description: "Ordres de maintenance et registre des équipements",
+        businessProcess: "Exécution maintenance",
+        requiredRoles: ["maintindustrielle.work_orders.read", "maintindustrielle.assets.read"],
+      },
     ]
   },
 
