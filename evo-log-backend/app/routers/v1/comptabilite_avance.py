@@ -23,6 +23,7 @@ from app.schemas.comptabilite_avance import (
     TFTGenererRequest, TFTResponse, SIGGenererRequest, SIGResponse,
     NoteAnnexeResponse, NotesAnnexesGenererRequest,
     ImmobilisationCreate, ImmobilisationResponse, AmortissementRequest, AmortissementResponse,
+    LiasseFiscaleResponse, LiasseFiscaleGenererRequest,
     ClotureMensuelleRequest, ClotureMensuelleResponse,
     ClotureAnnuelleRequest, ClotureAnnuelleResponse,
     ReportANouveauRequest, ReportANouveauResponse,
@@ -33,11 +34,11 @@ from app.schemas.comptabilite_avance import (
 from app.services.comptabilite_avance_service import (
     JournalAuxiliaireService, LettrageService, GrandLivreService, BalanceService,
     EtatsFinanciersOHADAService, ClotureService, TVAService, ISService,
-    ImmobilisationService,)
+    ImmobilisationService, LiasseFiscaleService,)
 from app.models.finance_ohada import (
     JournalAuxiliaire, Lettrage, GrandLivreLigne, BalanceVerification,
     BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, SIG, AnnexesOHADA,
-    NoteAnnexe, Immobilisation, ExerciceComptable,)
+    NoteAnnexe, Immobilisation, LiasseFiscale, ExerciceComptable,)
 
 router = APIRouter(tags=["Comptabilité Avancée"])  # monte sur /api/v1/comptabilite-avance par main.py
 
@@ -538,6 +539,41 @@ def generer_amortissement(
             db, immobilisation_id, request.date_ecriture, request.periode, request.journal_code)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/liasse-fiscale", response_model=LiasseFiscaleResponse, status_code=status.HTTP_201_CREATED)
+def generer_liasse_fiscale(
+    request: LiasseFiscaleGenererRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("fiscalite.declarations.create"))
+):
+    """Generer la liasse fiscale CEMAC d'un exercice (TVA + IS consolides)"""
+    try:
+        return LiasseFiscaleService.generer_liasse(db, request.annee, request.valide_par)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.get("/liasse-fiscale", response_model=List[LiasseFiscaleResponse])
+def lister_liasses_fiscales(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("fiscalite.declarations.read"))
+):
+    """Lister les liasses fiscales generees"""
+    return LiasseFiscaleService.lister(db)
+
+
+@router.get("/liasse-fiscale/{liasse_id}", response_model=LiasseFiscaleResponse)
+def obtenir_liasse_fiscale(
+    liasse_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("fiscalite.declarations.read"))
+):
+    """Obtenir une liasse fiscale par ID"""
+    liasse = LiasseFiscaleService.obtenir(db, liasse_id)
+    if not liasse:
+        raise HTTPException(status_code=404, detail="Liasse fiscale non trouvée")
+    return liasse
 
 
 @router.post("/etats-financiers/annexes", response_model=AnnexesOHDAResponse)

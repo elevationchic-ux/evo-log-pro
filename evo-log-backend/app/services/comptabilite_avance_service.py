@@ -1,6 +1,7 @@
 """Comptabilité avancée service - Journaux auxiliaires, lettrage, grand livre, balance"""
 from datetime import datetime, date
 from decimal import Decimal
+import json
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func, case
@@ -9,7 +10,7 @@ from app.models.finance_ohada import (
     JournalAuxiliaire, LigneJournal, Lettrage, EcritureLettree,
     GrandLivreLigne, BalanceVerification, LigneBalance,
     BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, SIG, AnnexesOHADA,
-    NoteAnnexe, Immobilisation,
+    NoteAnnexe, Immobilisation, LiasseFiscale,
     TVADeclarable, ISDeclarable, TypeJournal, TypeLettrage, StatutLettrage,
     StatutTaxe, RegimeTVA,)
 
@@ -1789,4 +1790,92 @@ class ImmobilisationService:
             "montant": float(montant),
             "periode": periode,
         }
+
+
+class LiasseFiscaleService:
+    """Liasse fiscale CEMAC : consolide les declarations TVA et IS d'un
+    exercice en un dossier unique, calcule depuis les declarations reelles."""
+
+    @staticmethod
+    def generer_liasse(db: Session, annee: int, valide_par: Optional[str] = None) -> LiasseFiscale:
+        exercice = db.query(ExerciceComptable).filter(ExerciceComptable.annee == annee).first()
+
+        tva_decls = (
+            db.query(TVADeclarable)
+            .filter(TVADeclarable.periode.like(f"{annee}%"))
+            .order_by(TVADeclarable.periode)
+            .all()
+        )
+        is_decls = (
+            db.query(ISDeclarable)
+            .filter(ISDeclarable.annee == annee)
+            .order_by(ISDeclarable.id)
+            .all()
+        )
+
+        def _statut(decls):
+            if not decls:
+                return "brouillon"
+            statuts = [getattr(d.statut, "value", str(d.statut)) for d in decls]
+            if all(s == "payee" for s in statuts):
+                return "deposee"
+            if any(s == "validee" for s in statuts):
+                return "validee"
+            return "brouillon"
+
+        total_tva_collectee = sum(float(d.tva_collectee or 0) for d in tva_decls)
+        total_tva_deductible = sum(float(d.tva_deductible or 0) for d in tva_decls)
+        total_tva_a_payer = sum(float(d.tva_a_payer or 0) for d in tva_decls)
+        total_is = sum(float(d.is_a_payer or 0) for d in is_decls)
+
+        detail = {
+            "declarations_tva": [
+                {
+                    "periode": d.periode,
+                    "base_imposable": float(d.base_imposable or 0),
+                    "tva_collectee": float(d.tva_collectee or 0),
+                    "tva_deductible": float(d.tva_deductible or 0),
+                    "tva_a_payer": float(d.tva_a_payer or 0),
+                    "statut": getattr(d.statut, "value", str(d.statut)),
+                }
+                for d in tva_decls
+            ],
+            "declarations_is": [
+                {
+                    "numero": d.numero_declaration,
+                    "benefice_fiscal": float(d.benefice_fiscal or 0),
+                    "is_du": float(d.is_du or 0),
+                    "is_a_payer": float(d.is_a_payer or 0),
+                    "statut": getattr(d.statut, "value", str(d.statut)),
+                }
+                for d in is_decls
+            ],
+        }
+
+        liasse = LiasseFiscale(
+            annee=annee,
+            exercice_id=exercice.id if exercice else None,
+            date_generation=date.today(),
+            total_tva_collectee=round(total_tva_collectee, 2),
+            total_tva_deductible=round(total_tva_deductible, 2),
+            total_tva_a_payer=round(total_tva_a_payer, 2),
+            total_is=round(total_is, 2),
+            total_impots=round(total_tva_a_payer + total_is, 2),
+            nombre_declarations_tva=len(tva_decls),
+            statut=_statut(tva_decls + is_decls),
+            detail_json=json.dumps(detail, ensure_ascii=False),
+            valide_par=valide_par,
+            date_validation=date.today() if valide_par else None,)
+        db.add(liasse)
+        db.commit()
+        db.refresh(liasse)
+        return liasse
+
+    @staticmethod
+    def lister(db: Session) -> List[LiasseFiscale]:
+        return db.query(LiasseFiscale).order_by(LiasseFiscale.annee.desc()).all()
+
+    @staticmethod
+    def obtenir(db: Session, liasse_id: int) -> Optional[LiasseFiscale]:
+        return db.query(LiasseFiscale).filter(LiasseFiscale.id == liasse_id).first()
 

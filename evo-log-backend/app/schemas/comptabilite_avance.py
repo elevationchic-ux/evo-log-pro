@@ -559,6 +559,33 @@ class AmortissementResponse(BaseModel):
     periode: str
 
 
+class LiasseFiscaleResponse(BaseModel):
+    id: int
+    annee: int
+    exercice_id: Optional[int] = None
+    date_generation: date
+    total_tva_collectee: Decimal
+    total_tva_deductible: Decimal
+    total_tva_a_payer: Decimal
+    total_is: Decimal
+    total_impots: Decimal
+    nombre_declarations_tva: int
+    statut: str
+    detail_json: Optional[str] = None
+    valide_par: Optional[str] = None
+    date_validation: Optional[date] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class LiasseFiscaleGenererRequest(BaseModel):
+    annee: int
+    valide_par: Optional[str] = None
+
+
 # ============ CLÔTURE ============
 
 class ClotureMensuelleRequest(BaseModel):

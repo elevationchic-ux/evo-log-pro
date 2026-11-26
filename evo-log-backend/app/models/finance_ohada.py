@@ -859,6 +859,36 @@ class Immobilisation(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
+class LiasseFiscale(Base):
+    """Liasse fiscale CEMAC : consolidé des déclarations d'un exercice.
+
+    Agrege les declarations TVA periodiques et l'IS de l'exercice en un
+    dossier unique (soldes, echeances, statut global), prete pour le depot
+    au guichet fiscal unique. Les montants sont recalcules depuis les
+    declarations reelles, jamais inventes."""
+    __tablename__ = "liasses_fiscales"
+
+    id = Column(Integer, primary_key=True, index=True)
+    annee = Column(Integer, nullable=False, index=True)
+    exercice_id = Column(Integer, ForeignKey('exercices_comptables.id'), nullable=True)
+    date_generation = Column(Date, nullable=False)
+    total_tva_collectee = Column(Numeric(15, 2), default=0)
+    total_tva_deductible = Column(Numeric(15, 2), default=0)
+    total_tva_a_payer = Column(Numeric(15, 2), default=0)
+    total_is = Column(Numeric(15, 2), default=0)
+    total_impots = Column(Numeric(15, 2), default=0)
+    nombre_declarations_tva = Column(Integer, default=0)
+    statut = Column(String(20), default="brouillon")  # brouillon, validee, deposee
+    detail_json = Column(Text)  # declarations TVA + IS consolidees
+    valide_par = Column(String(100))
+    date_validation = Column(Date)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+ # Relationships
+    exercice = relationship("ExerciceComptable")
+
+
 class NoteAnnexe(Base):
     """Note annexe normalisee SYSCOHADA rattachee a un jeu d'annexes.
 
