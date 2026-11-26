@@ -206,14 +206,14 @@ class MagasinReportingService:
         
         sorties = db.query(func.sum(MouvementStock.quantite)).filter(
             and_(
-                MouvementStock.article_id == article_id,
+                MouvementStock.stock_id == article_id,
                 MouvementStock.type_mouvement == "sortie",
                 MouvementStock.date_mouvement >= date_debut
             )
         ).scalar() or 0
-        
-        stock_actuel = db.query(Stock.quantite).filter(
-            Stock.article_id == article_id
+
+        stock_actuel = db.query(Stock.quantite_disponible).filter(
+            Stock.id == article_id
         ).scalar() or 0
         
         rotation = (sorties / stock_actuel) * (365 / jours) if stock_actuel > 0 else 0
@@ -237,7 +237,8 @@ class MagasinReportingService:
             "seuil": seuil,
             "articles_en_rupture": len(stocks_bas),
             "articles": [
-                {"article_id": s.article_id, "quantite": s.quantite_disponible}
+                {"article_id": s.id, "code_article": s.code_article,
+                 "quantite": float(s.quantite_disponible or 0)}
                 for s in stocks_bas
             ]
         }
