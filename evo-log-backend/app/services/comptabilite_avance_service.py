@@ -9,7 +9,7 @@ from app.models.finance_ohada import (
     JournalAuxiliaire, LigneJournal, Lettrage, EcritureLettree,
     GrandLivreLigne, BalanceVerification, LigneBalance,
     BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, SIG, AnnexesOHADA,
-    NoteAnnexe,
+    NoteAnnexe, Immobilisation,
     TVADeclarable, ISDeclarable, TypeJournal, TypeLettrage, StatutLettrage,
     StatutTaxe, RegimeTVA,)
 
@@ -1617,5 +1617,176 @@ class ISService:
             "solde_is": round(solde, 2),
             "prochaine_echeance": f"{annee + 1}-03-31",
             "statut": statut_val,
+        }
+
+
+class ImmobilisationService:
+    """Registre des immobilisations et dotations aux amortissements OHADA.
+
+    Pont entre le domaine equipements (GMAO) et la comptabilite : chaque
+    immobilisation declare ses comptes SYSCOHADA et sa duree ; la dotation
+    lineaire genere une ecriture equilibrée (681 dotation / 28x amortissement)
+    qui alimente le grand livre, la balance, le bilan (classe 2) et la note
+    annexe immobilisations."""
+
+    @staticmethod
+    def _immobilisation(db: Session, immobilisation_id: int) -> Immobilisation:
+        imm = db.query(Immobilisation).filter(Immobilisation.id == immobilisation_id).first()
+        if not imm:
+            raise ValueError("Immobilisation introuvable")
+        return imm
+
+    @staticmethod
+    def dotation_mensuelle(imm: Immobilisation) -> Decimal:
+        """Dotation lineaire : (valeur d'acquisition - valeur residuelle) / duree."""
+        base = Decimal(str(imm.valeur_acquisition or 0)) - Decimal(str(imm.valeur_residuelle or 0))
+        return (base / Decimal(int(imm.duree_mois))).quantize(Decimal("0.01"))
+
+    @staticmethod
+    def creer_immobilisation(db: Session, data: dict) -> Immobilisation:
+        imm = Immobilisation(**data)
+        db.add(imm)
+        db.commit()
+        db.refresh(imm)
+        return imm
+
+    @staticmethod
+    def lister_immobilisations(db: Session) -> List[Immobilisation]:
+        return db.query(Immobilisation).order_by(Immobilisation.date_acquisition).all()
+
+    @staticmethod
+    def tableau_echeancier(imm: Immobilisation) -> List[Dict[str, Any]]:
+        """Echeancier lineaire complet : dotation, cumul et net comptable."""
+        dotation = ImmobilisationService.dotation_mensuelle(imm)
+        base = Decimal(str(imm.valeur_acquisition or 0)) - Decimal(str(imm.valeur_residuelle or 0))
+        cumul = Decimal("0")
+        lignes = []
+        annee_acq = imm.date_acquisition.year
+        mois_acq = imm.date_acquisition.month
+        for i in range(int(imm.duree_mois)):
+            mois = mois_acq + i
+            annee = annee_acq + (mois - 1) // 12
+            mois = (mois - 1) % 12 + 1
+            montant = min(dotation, base - cumul)
+            cumul += montant
+            lignes.append({
+                "periode": f"{annee}-{mois:02d}",
+                "dotation": float(montant),
+                "cumul_amortissements": float(cumul),
+                "net_comptable": float(Decimal(str(imm.valeur_acquisition or 0)) - cumul),
+            })
+        return lignes
+
+    @staticmethod
+    def _compte_par_numero(db: Session, numero: str):
+        return (
+            db.query(PlanComptableOHADA)
+            .filter(PlanComptableOHADA.numero_compte.like(f"{numero}%"))
+            .order_by(PlanComptableOHADA.numero_compte)
+            .first()
+        )
+
+    @staticmethod
+    def generer_ecriture_amortissement(
+        db: Session,
+        immobilisation_id: int,
+        date_ecriture: date,
+        periode: str,
+        journal_code: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Genere l'ecriture de dotation : DEBIT 681 / CREDIT 28x.
+
+        L'ecriture est creee `valide` avec ses lignes journal et ses lignes
+        grand livre, comme une saisie de piece : elle entre immediatement
+        dans la balance et les etats financiers."""
+        imm = ImmobilisationService._immobilisation(db, immobilisation_id)
+        montant = ImmobilisationService.dotation_mensuelle(imm)
+        if montant <= 0:
+            raise ValueError("Dotation nulle : verifier valeur et duree")
+
+        exercice = db.query(ExerciceComptable).filter(
+            ExerciceComptable.annee == int(str(periode)[:4])
+        ).first()
+        if not exercice:
+            raise ValueError("Exercice comptable introuvable pour cette periode")
+
+        compte_dot = ImmobilisationService._compte_par_numero(db, imm.compte_dotation)
+        compte_amort = ImmobilisationService._compte_par_numero(db, imm.compte_amortissement)
+        if not compte_dot or not compte_amort:
+            raise ValueError("Compte OHADA introuvable (dotation ou amortissement)")
+
+        journal = None
+        if journal_code:
+            journal = db.query(JournalAuxiliaire).filter(
+                JournalAuxiliaire.code_journal == journal_code).first()
+        if not journal:
+            journal = JournalAuxiliaireService.journal_amortissements(db)
+        if not journal:
+            journal = db.query(JournalAuxiliaire).first()
+        if not journal:
+            raise ValueError("Aucun journal auxiliaire : initialiser les journaux d'abord")
+
+        numero = f"AMORT-{imm.id}-{periode}"
+        if db.query(EcritureComptableNew).filter(EcritureComptableNew.numero_ecriture == numero).first():
+            raise ValueError(f"Dotation deja comptabilisee pour {imm.numero_immobilisation} ({periode})")
+
+        piece = EcritureComptableNew(
+            numero_ecriture=numero,
+            date_ecriture=date_ecriture,
+            numero_piece=imm.numero_immobilisation,
+            libelle=f"Dotation aux amortissements {imm.designation} - {periode}",
+            compte_id=None,
+            debit=montant,
+            credit=montant,
+            total_debit=montant,
+            total_credit=montant,
+            statut="valide",
+            devise="XAF",
+            reference_document=imm.numero_immobilisation,
+            type_document="amortissement",
+            periode=periode,
+            journal=journal.code_journal,
+            valider=True,
+            valide_par="immobilisations",
+            date_validation=date.today(),
+            exercice_id=exercice.id,
+            journal_id=journal.id,)
+        db.add(piece)
+        db.flush()
+
+        for order, (compte, col) in enumerate([
+            (compte_dot, "debit"), (compte_amort, "credit")], start=1):
+            montant_ligne = montant if col == "debit" else Decimal("0")
+            montant_ligne_c = Decimal("0") if col == "debit" else montant
+            db.add(LigneJournal(
+                ecriture_id=piece.id,
+                journal_id=journal.id,
+                compte_id=compte.id,
+                compte_numero=compte.numero_compte,
+                compte_intitule=compte.intitule,
+                debit=montant_ligne,
+                credit=montant_ligne_c,
+                devise="XAF",
+                reference_document=imm.numero_immobilisation,
+                libelle_detail=f"Dotation {imm.designation}",
+                order_line=order,))
+            db.add(GrandLivreLigne(
+                compte_id=compte.id,
+                ecriture_id=piece.id,
+                date_ecriture=date_ecriture,
+                libelle=f"Dotation {imm.designation} - {periode}",
+                debit=montant_ligne,
+                credit=montant_ligne_c,
+                devise="XAF",
+                journal=journal.code_journal,
+                periode=periode,))
+
+        db.commit()
+        db.refresh(piece)
+        return {
+            "immobilisation_id": imm.id,
+            "ecriture_id": piece.id,
+            "montant": float(montant),
+            "periode": periode,
         }
 

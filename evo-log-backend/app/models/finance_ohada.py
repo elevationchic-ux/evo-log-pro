@@ -834,6 +834,31 @@ class SIG(Base):
     exercice = relationship("ExerciceComptable")
 
 
+class Immobilisation(Base):
+    """Registre des immobilisations amortissables (pont GMAO <-> OHADA).
+
+    Chaque immobilisation porte ses comptes SYSCOHADA (compte d'actif, compte
+    d'amortissement, compte de dotation) et sa duree : la dotation mensuelle
+    lineaire alimente automatiquement le journal des amortissements, la
+    classe 2 du bilan et la note annexe immobilisations."""
+    __tablename__ = "immobilisations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True)
+    numero_immobilisation = Column(String(50), nullable=False)
+    designation = Column(String(300), nullable=False)
+    date_acquisition = Column(Date, nullable=False)
+    valeur_acquisition = Column(Numeric(15, 2), nullable=False)
+    valeur_residuelle = Column(Numeric(15, 2), default=0)
+    duree_mois = Column(Integer, nullable=False)
+    compte_immobilisation = Column(String(20), nullable=False)   # ex "215"
+    compte_amortissement = Column(String(20), nullable=False)    # ex "2815"
+    compte_dotation = Column(String(20), default="681")           # ex "6815"
+    statut = Column(String(20), default="en_cours")  # en_cours, fully_depreciated, cede
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
 class NoteAnnexe(Base):
     """Note annexe normalisee SYSCOHADA rattachee a un jeu d'annexes.
 

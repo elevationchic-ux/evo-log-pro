@@ -22,6 +22,7 @@ from app.schemas.comptabilite_avance import (
     BilanGenererRequest, CompteResultatGenererRequest, TAFIREGenererRequest,
     TFTGenererRequest, TFTResponse, SIGGenererRequest, SIGResponse,
     NoteAnnexeResponse, NotesAnnexesGenererRequest,
+    ImmobilisationCreate, ImmobilisationResponse, AmortissementRequest, AmortissementResponse,
     ClotureMensuelleRequest, ClotureMensuelleResponse,
     ClotureAnnuelleRequest, ClotureAnnuelleResponse,
     ReportANouveauRequest, ReportANouveauResponse,
@@ -31,11 +32,12 @@ from app.schemas.comptabilite_avance import (
 )
 from app.services.comptabilite_avance_service import (
     JournalAuxiliaireService, LettrageService, GrandLivreService, BalanceService,
-    EtatsFinanciersOHADAService, ClotureService, TVAService, ISService,)
+    EtatsFinanciersOHADAService, ClotureService, TVAService, ISService,
+    ImmobilisationService,)
 from app.models.finance_ohada import (
     JournalAuxiliaire, Lettrage, GrandLivreLigne, BalanceVerification,
     BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, SIG, AnnexesOHADA,
-    NoteAnnexe, ExerciceComptable,)
+    NoteAnnexe, Immobilisation, ExerciceComptable,)
 
 router = APIRouter(tags=["Comptabilité Avancée"])  # monte sur /api/v1/comptabilite-avance par main.py
 
@@ -485,6 +487,57 @@ def lister_notes_annexes(
 ):
     """Lister les notes annexes normalisées d'un jeu d'annexes"""
     return db.query(NoteAnnexe).filter(NoteAnnexe.annexes_id == annexes_id).order_by(NoteAnnexe.numero).all()
+
+
+@router.post("/immobilisations", response_model=ImmobilisationResponse, status_code=status.HTTP_201_CREATED)
+def creer_immobilisation(
+    payload: ImmobilisationCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("immobilisations.actif.create"))
+):
+    """Enregistrer une immobilisation amortissable"""
+    try:
+        return ImmobilisationService.creer_immobilisation(db, payload.model_dump())
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.get("/immobilisations", response_model=List[ImmobilisationResponse])
+def lister_immobilisations(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("immobilisations.actif.read"))
+):
+    """Lister les immobilisations amortissables"""
+    return ImmobilisationService.lister_immobilisations(db)
+
+
+@router.get("/immobilisations/{immobilisation_id}/echeancier")
+def echeancier_immobilisation(
+    immobilisation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("immobilisations.actif.read"))
+):
+    """Echeancier d'amortissement lineaire complet"""
+    try:
+        imm = ImmobilisationService._immobilisation(db, immobilisation_id)
+        return ImmobilisationService.tableau_echeancier(imm)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.post("/immobilisations/{immobilisation_id}/amortissement", response_model=AmortissementResponse)
+def generer_amortissement(
+    immobilisation_id: int,
+    request: AmortissementRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("immobilisations.amortissement.modify"))
+):
+    """Comptabiliser une dotation mensuelle (681 / 28x)"""
+    try:
+        return ImmobilisationService.generer_ecriture_amortissement(
+            db, immobilisation_id, request.date_ecriture, request.periode, request.journal_code)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.post("/etats-financiers/annexes", response_model=AnnexesOHDAResponse)

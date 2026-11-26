@@ -518,6 +518,47 @@ class NotesAnnexesGenererRequest(BaseModel):
     effectif_moyen: Optional[Decimal] = None
 
 
+class ImmobilisationBase(BaseModel):
+    numero_immobilisation: str
+    designation: str
+    date_acquisition: date
+    valeur_acquisition: Decimal = Field(gt=0)
+    valeur_residuelle: Decimal = Decimal("0")
+    duree_mois: int = Field(gt=0)
+    compte_immobilisation: str
+    compte_amortissement: str
+    compte_dotation: str = "681"
+    company_id: Optional[int] = None
+
+
+class ImmobilisationCreate(ImmobilisationBase):
+    pass
+
+
+class ImmobilisationResponse(ImmobilisationBase):
+    id: int
+    statut: str
+    dotation_mensuelle: Optional[Decimal] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class AmortissementRequest(BaseModel):
+    date_ecriture: date
+    periode: str
+    journal_code: Optional[str] = None
+
+
+class AmortissementResponse(BaseModel):
+    immobilisation_id: int
+    ecriture_id: int
+    montant: Decimal
+    periode: str
+
+
 # ============ CLÔTURE ============
 
 class ClotureMensuelleRequest(BaseModel):
