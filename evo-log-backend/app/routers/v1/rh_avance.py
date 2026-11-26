@@ -46,6 +46,16 @@ def get_charges_sociales(employe_id: int, periode: str = Query(..., description=
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
+@router.get("/paie-recapitulatif-annuel", summary="État récapitulatif annuel de paie par employé")
+def recapitulatif_annuel(
+    annee: int = Query(..., ge=2000, le=2100),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),):
+    """Cumule les fiches de paie de l'exercice : brut, net, CNPS salarial
+    enregistre et part patronale CNPS recalculee sur le brut cumule."""
+    return PaieOHADAService.recapitulatif_annuel(db, annee)
+
+
 @router.get("/dipe-mensuel", summary="Générer l'état DIPE mensuel pour l'administration fiscale camerounaise")
 def generer_dipe_mensuel(
     periode: str = Query(..., description="YYYY-MM"),

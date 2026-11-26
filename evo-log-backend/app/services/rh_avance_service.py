@@ -238,6 +238,55 @@ class PaieOHADAService:
         }
 
 
+ # Part patronale CNPS (Cameroun/CEMAC) : pension 4,2 % + accidents du
+ # travail 1,75 % (taux standard milieu de risque — a ajuster par classe
+ # d'activite selon l'arrete en vigueur). Source unique, a reverifier.
+    TAUX_CNPS_PATRONAL_PENSION = 0.042
+    TAUX_CNPS_PATRONAL_AT = 0.0175
+
+    @staticmethod
+    def recapitulatif_annuel(db: Session, annee: int) -> List[Dict[str, Any]]:
+        """Etat recapitulatif annuel de paie par employe.
+
+        Cumule les fiches `salaires` de l'exercice : brut, net, CNPS
+        salarial enregistre, et recalcule la part patronale CNPS sur le
+        brut cumule. Aucun montant n'est estime : les cumuls viennent des
+        fiches reellement enregistrees."""
+        lignes = (
+            db.query(Salaire)
+            .filter(Salaire.annee == annee)
+            .all()
+        )
+        par_employe: Dict[int, Dict[str, Any]] = {}
+        for s in lignes:
+            e = par_employe.setdefault(s.employe_id, {
+                "employe_id": s.employe_id,
+                "mois_payes": 0,
+                "salaire_brut": 0.0,
+                "salaire_net": 0.0,
+                "cnps_salarial": 0.0,
+                "irgm": 0.0,
+            })
+            brut = float(s.salaire_brut or 0)
+            e["mois_payes"] += 1
+            e["salaire_brut"] += brut
+            e["salaire_net"] += float(s.salaire_net or 0)
+            e["cnps_salarial"] += float(s.deductions_cnps or 0)
+            e["irgm"] += float(s.deductions_impot or 0)
+
+        resultats = []
+        for e in par_employe.values():
+            brut = e["salaire_brut"]
+            e["cnps_patronal"] = round(
+                brut * (PaieOHADAService.TAUX_CNPS_PATRONAL_PENSION
+                        + PaieOHADAService.TAUX_CNPS_PATRONAL_AT), 2)
+            e["cout_total_employeur"] = round(brut + e["cnps_patronal"], 2)
+            resultats.append(e)
+
+        resultats.sort(key=lambda x: x["salaire_brut"], reverse=True)
+        return resultats
+
+
 class RecrutementService:
     """Service de recrutement — persistance REELLE (offres_emploi, candidatures).
 
