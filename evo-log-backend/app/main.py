@@ -782,6 +782,11 @@ try:
     safe_include_router(heavylift_deep.router, prefix="/api/v1/convoi-exceptionnel", tags=["convoi-exceptionnel"])
 except ImportError as e:
     logger.warning(f"Router heavylift_deep absent : {e}")
+try:
+    from app.routers.v1 import heavylift
+    safe_include_router(heavylift.router, prefix="/api/v1/convoi-exceptionnel", tags=["convoi-exceptionnel"])
+except ImportError as e:
+    logger.warning(f"Router heavylift absent : {e}")
 # </heavylift>
 # <:parc_b>
 try:
