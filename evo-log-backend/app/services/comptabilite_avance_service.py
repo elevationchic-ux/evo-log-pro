@@ -978,8 +978,8 @@ class EtatsFinanciersOHADAService:
         flux_financement = augmentation_capital + nouveaux_emprunts - remboursements - dividendes
 
         variation_tresorerie = flux_exploitation + flux_investissement + flux_financement
-        treso = _gl_sum("5", GrandLivreLigne.credit) - _gl_sum("5", GrandLivreLigne.debit)
-        tresorerie_fin = treso
+ # Classe 5 = comptes de tresorerie, nature debitrice : solde = debit - credit.
+        tresorerie_fin = _gl_sum("5", GrandLivreLigne.debit) - _gl_sum("5", GrandLivreLigne.credit)
         tresorerie_debut = tresorerie_fin - variation_tresorerie
 
         tft = TFT(
@@ -1831,6 +1831,7 @@ class LiasseFiscaleService:
         detail = {
             "declarations_tva": [
                 {
+                    "numero": d.numero_declaration,
                     "periode": d.periode,
                     "base_imposable": float(d.base_imposable or 0),
                     "tva_collectee": float(d.tva_collectee or 0),
