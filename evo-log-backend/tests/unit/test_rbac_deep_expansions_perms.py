@@ -1,7 +1,7 @@
-"""RBAC des expansions profondes (routeurs *_deep) : parite catalogue + porteurs.
+"""RBAC des routeurs profonds (suffixe *_deep) : parite catalogue + porteurs.
 
-Discipline identique au batch amenagement, generalisee aux 14 routeurs profonds
-generes et montes dans main.py. Deux familles, deux invariants opposes :
+Discipline identique au module amenagement, generalisee aux 14 routeurs
+profonds montes dans main.py. Deux familles, deux invariants opposes :
 
   1. FAMILLE METIER (transit, rh, qhse, magasin, parc, transport, comptabilite,
      tresorerie, port, b2b) : chaque require_perm() doit etre (a) declare au
@@ -60,7 +60,7 @@ METIERS = {
     "finance_deep.py": 37,          # finance -> tresorerie (Phase 3)
     "port_deep.py": 37,             # port_ops -> port (Phase 3)
     "b2b_deep.py": 34,              # nouveau module b2b (Phase 4)
-    "aerien_deep.py": 37,           # fret aerien (ajoute par l'expansion)
+    "aerien_deep.py": 37,           # fret aerien
     "ferroviaire_deep.py": 37,      # fret ferroviaire
     "fluvial_deep.py": 31,          # fret fluvial
     "log3pl_deep.py": 31,           # logistique 3PL
@@ -108,6 +108,12 @@ def test_routeur_plateforme_aucun_code_fantome(router):
     )
 
 
+# Exceptions documentees : le role RSSI audite la console plateforme en
+# lecture seule (journal de la console super admin), cf. permission_catalog.
+# Aucun autre role metier ne peut porter un code superadmin.*.
+PLATEFORME_RWSS = {("RSSI", "superadmin.platform_audit.read")}
+
+
 @pytest.mark.parametrize("router", sorted(PLATEFORME))
 def test_routeur_plateforme_aucun_porteur_metier(router):
  # Invariant inverse: la console est reservee, aucun departement ne la porte.
@@ -115,6 +121,7 @@ def test_routeur_plateforme_aucun_porteur_metier(router):
         porteurs = [
             nom for nom, lvl, _d, grant in ROLE_GRANTS
             if _est_role_metier(nom, lvl) and has_perm(grant, code)
+            and (nom, code) not in PLATEFORME_RWSS
         ]
         assert not porteurs, f"{router} : role metier inattendu sur {code} : {porteurs}"
 
@@ -150,7 +157,7 @@ def test_plateforme_fermee_aux_roles_metiers(code):
 
 
 def test_codes_reconcilies_canoniques_plus_de_noms_inventes():
- # Les noms inventes par le generateur ne doivent plus apparaitre nulle part
+ # Les noms historiques non canoniques ne doivent plus apparaitre nulle part
  # dans les routeurs: ils ont ete reconciles vers les modules canoniques.
     for router in ("comptabilite_deep.py", "finance_deep.py", "port_deep.py"):
         for invente in ("compta.", "finance.", "port_ops."):

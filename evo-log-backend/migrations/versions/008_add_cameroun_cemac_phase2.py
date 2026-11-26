@@ -35,7 +35,7 @@ def upgrade():
         sa.Column('taux_minimum', sa.Float()),
         sa.Column('est_actif', sa.Boolean(), default='true'),
         sa.Column('date_maj', sa.Date()),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('code')
@@ -65,7 +65,7 @@ def upgrade():
         sa.Column('reference_declaration', sa.String(length=50)),
         sa.Column('agent_fiscal', sa.String(length=100)),
         sa.Column('notes', sa.Text()),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),
         sa.PrimaryKeyConstraint('id'),
@@ -89,7 +89,7 @@ def upgrade():
         sa.Column('declarant_id', sa.Integer()),
         sa.Column('description', sa.Text()),
         sa.Column('statut', sa.String(length=20), default='valide'),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['declarant_id'], ['users.id'], ),
         sa.PrimaryKeyConstraint('id'),
@@ -113,7 +113,7 @@ def upgrade():
         sa.Column('signataire', sa.String(length=100)),
         sa.Column('date_signature', sa.Date()),
         sa.Column('statut', sa.String(length=20), default='actif'),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),
         sa.PrimaryKeyConstraint('id'),
@@ -139,7 +139,7 @@ def upgrade():
         sa.Column('date_declaration', sa.Date()),
         sa.Column('date_versement', sa.Date()),
         sa.Column('admin_fiscale', sa.String(length=100)),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),
         sa.PrimaryKeyConstraint('id')
@@ -168,7 +168,7 @@ def upgrade():
         sa.Column('date_maj', sa.Date()),
         sa.Column('categorie', sa.String(length=50)),
         sa.Column('mots_cles', sa.Text()),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('code')
@@ -191,7 +191,7 @@ def upgrade():
         sa.Column('actions_requises', sa.Text()),
         sa.Column('est_resolue', sa.Boolean(), default='false'),
         sa.Column('date_resolution', sa.Date()),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['reglementation_id'], ['reglementations.id'], ),
         sa.PrimaryKeyConstraint('id')
@@ -220,7 +220,7 @@ def upgrade():
         sa.Column('nombre_vues', sa.Integer(), default=0),
         sa.Column('nombre_telechargements', sa.Integer(), default=0),
         sa.Column('note', sa.Float()),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
@@ -245,7 +245,7 @@ def upgrade():
         sa.Column('date_creation', sa.Date(), nullable=False),
         sa.Column('date_maj', sa.Date()),
         sa.Column('created_by', sa.Integer()),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('code')
@@ -268,7 +268,7 @@ def upgrade():
         sa.Column('est_publie', sa.Boolean(), default='true'),
         sa.Column('date_creation', sa.Date(), nullable=False),
         sa.Column('date_maj', sa.Date()),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
@@ -299,7 +299,7 @@ def upgrade():
         sa.Column('version', sa.String(length=20)),
         sa.Column('nombre_vues', sa.Integer(), default=0),
         sa.Column('note_moyenne', sa.Float()),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
@@ -318,7 +318,7 @@ def upgrade():
         sa.Column('melange_questions', sa.Boolean(), default='true'),
         sa.Column('est_actif', sa.Boolean(), default='true'),
         sa.Column('date_creation', sa.Date(), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['module_id'], ['modules_formation.id'], ),
         sa.PrimaryKeyConstraint('id')
@@ -337,7 +337,7 @@ def upgrade():
         sa.Column('explication', sa.Text()),
         sa.Column('points', sa.Integer(), default=1),
         sa.Column('ordre', sa.Integer(), default=0),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.ForeignKeyConstraint(['quiz_id'], ['quizzes_formation.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
@@ -357,7 +357,7 @@ def upgrade():
         sa.Column('statut', sa.String(length=20), default='en_cours'),
         sa.Column('reponses', sa.Text()),
         sa.Column('duree_minutes', sa.Integer()),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['quiz_id'], ['quizzes_formation.id'], ),
         sa.ForeignKeyConstraint(['utilisateur_id'], ['users.id'], ),
@@ -380,7 +380,7 @@ def upgrade():
         sa.Column('numero_certificat', sa.String(length=50), unique=True),
         sa.Column('certificat_url', sa.String(length=255)),
         sa.Column('valide_par', sa.String(length=100)),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['utilisateur_id'], ['users.id'], ),
         sa.ForeignKeyConstraint(['module_id'], ['modules_formation.id'], ),
@@ -405,7 +405,7 @@ def upgrade():
         sa.Column('assigne_a', sa.Integer()),
         sa.Column('solution', sa.Text()),
         sa.Column('satisfaction', sa.Integer()),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['utilisateur_id'], ['users.id'], ),
         sa.ForeignKeyConstraint(['assigne_a'], ['users.id'], ),

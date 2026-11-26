@@ -7,6 +7,7 @@ par les services ("actif", "emis", "pose").
 """
 import pytest
 from datetime import datetime
+from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from app.models.transport_international import (
     OrdreTransport, CarnetTIR, CMR, ScelleRoutier, PositionTransport,

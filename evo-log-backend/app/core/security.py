@@ -21,14 +21,14 @@ from sqlalchemy.orm import Session
 
 import bcrypt
 
-security = HTTPBearer(auto_error=True)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
-# JWT Bearer
-security = HTTPBearer()
+# JWT Bearer. auto_error=False : l'absence d'en-tête Authorization doit
+# produire un 401 explicite (RFC 9110), pas le 403 generique d'HTTPBearer.
+security = HTTPBearer(auto_error=False)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -222,6 +222,11 @@ def decode_token(token: str) -> dict:
 def get_token_payload(
     credentials: HTTPAuthorizationCredentials = Depends(security),) -> dict:
     """Validate an access token and return its claims."""
+    if credentials is None or not getattr(credentials, "credentials", None):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentification requise",
+            headers={"WWW-Authenticate": "Bearer"},)
     payload = decode_token(credentials.credentials)
  # Seul un token d'ACCES est admis ici. Les refresh ("refresh") et les jetons
  # intermediaires 2FA ("2fa") ne doivent JAMAIS autoriser un acces API.
