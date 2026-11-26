@@ -66,6 +66,10 @@ DOMAINS: Dict[str, Dict] = {
                 "consents": ["read", "create", "modify"], "anti_tampering": ["read", "create", "modify"],
                 "retention_policies": ["read", "create", "modify"]}},
             "settings": {"label": "Parametres entreprise", "sub_modules": {"generaux": ["read", "modify"], "communs": ["read", "modify"]}},
+ # juridique (routeur juridique) : contrats a valeur documentaire
+ # (baux, concessions, partenariats), contentieux et echeances/preavis.
+ # Pas de delete : un contrat resilie est conserve, jamais efface.
+            "juridique": {"label": "Juridique & contrats", "sub_modules": {"contrats": ["read", "create", "modify"], "contentieux": ["read", "create", "modify"], "echeances": ["read"]}},
         },
     },
     "finance": {
@@ -406,6 +410,7 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ("DIRECTEUR_FINANCIER", 2, "Direction financiere : pilotage et validation de tous les modules finance", [
         "comptabilite.*.*", "tresorerie.*.*", "facturation.*.*", "fiscalite.*.*",
         "immobilisations.*.*", "achats.commande.approve",
+        "juridique.*.*",
  # L'engagement des credits d'investissement passe par la fiche technique
  # visa de maturite puis le visa du controle financier: le DAF instruit
  # la ligne et l'approuve, il ne gere ni les travaux ni le domaine.
@@ -441,7 +446,7 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
     ]),
     ("AUDITEUR", 3, "Auditeur : lecture transversale, aucune ecriture", [
         "comptabilite.*.read", "tresorerie.*.read", "facturation.*.read",
-        "fiscalite.*.read",
+        "fiscalite.*.read", "juridique.*.read",
         "transport.*.read", "magasin.*.read", "transit.*.read", "audit.journal.read",
  # Lecture transversale des operations du terminal (routeur port_deep).
         "port.*.read",
