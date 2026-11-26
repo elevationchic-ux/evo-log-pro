@@ -463,6 +463,39 @@ class TFTGenererRequest(BaseModel):
     date_tft: date
 
 
+class SIGBase(BaseModel):
+    exercice_id: int
+    date_sig: date
+    effectif_moyen: Decimal = Decimal("0")
+    masse_salariale: Decimal = Decimal("0")
+    chiffre_affaires: Decimal = Decimal("0")
+    excédent_brut_exploitation: Decimal = Decimal("0")
+    capacite_autofinancement: Decimal = Decimal("0")
+    investissements: Decimal = Decimal("0")
+    besoin_en_fonds_de_roulement: Decimal = Decimal("0")
+    tresorerie_nette: Decimal = Decimal("0")
+    resultat_net: Decimal = Decimal("0")
+
+
+class SIGResponse(SIGBase):
+    id: int
+    devise: str
+    notes: Optional[str] = None
+    valide_par: Optional[str] = None
+    date_validation: Optional[date] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class SIGGenererRequest(BaseModel):
+    exercice_id: int
+    date_sig: date
+    effectif_moyen: Optional[Decimal] = None
+
+
 # ============ CLÔTURE ============
 
 class ClotureMensuelleRequest(BaseModel):

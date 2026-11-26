@@ -801,6 +801,39 @@ class TFT(Base):
     exercice = relationship("ExerciceComptable")
 
 
+class SIG(Base):
+    """Situation Globale des Entreprises - SIG OHADA.
+
+    Cinquieme etat financier SYSCOHADA : panorama de synthese de la sante
+    de l'entreprise (effectifs, masse salariale, chiffre d'affaires, EBE,
+    CAF, investissements, BFR, tresorerie, resultat)."""
+    __tablename__ = "sig"
+
+    id = Column(Integer, primary_key=True, index=True)
+    exercice_id = Column(Integer, ForeignKey('exercices_comptables.id'), nullable=False)
+    date_sig = Column(Date, nullable=False)
+
+    effectif_moyen = Column(Numeric(10, 2), default=0)
+    masse_salariale = Column(Numeric(15, 2), default=0)
+    chiffre_affaires = Column(Numeric(15, 2), default=0)
+    excédent_brut_exploitation = Column(Numeric(15, 2), default=0)
+    capacite_autofinancement = Column(Numeric(15, 2), default=0)
+    investissements = Column(Numeric(15, 2), default=0)
+    besoin_en_fonds_de_roulement = Column(Numeric(15, 2), default=0)
+    tresorerie_nette = Column(Numeric(15, 2), default=0)
+    resultat_net = Column(Numeric(15, 2), default=0)
+
+    devise = Column(String(3), default="XAF")
+    notes = Column(Text)
+    valide_par = Column(String(100))
+    date_validation = Column(Date)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+ # Relationships
+    exercice = relationship("ExerciceComptable")
+
+
 class AnnexesOHADA(Base):
     """Annexes OHADA - Notes et informations complémentaires"""
     __tablename__ = "annexes_ohada"

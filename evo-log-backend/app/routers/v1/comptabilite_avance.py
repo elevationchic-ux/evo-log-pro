@@ -20,7 +20,7 @@ from app.schemas.comptabilite_avance import (
     TAFIRECreate, TAFIREResponse,
     AnnexesOHDACreate, AnnexesOHDAResponse, AnnexesGenererRequest,
     BilanGenererRequest, CompteResultatGenererRequest, TAFIREGenererRequest,
-    TFTGenererRequest, TFTResponse,
+    TFTGenererRequest, TFTResponse, SIGGenererRequest, SIGResponse,
     ClotureMensuelleRequest, ClotureMensuelleResponse,
     ClotureAnnuelleRequest, ClotureAnnuelleResponse,
     ReportANouveauRequest, ReportANouveauResponse,
@@ -33,7 +33,7 @@ from app.services.comptabilite_avance_service import (
     EtatsFinanciersOHADAService, ClotureService, TVAService, ISService,)
 from app.models.finance_ohada import (
     JournalAuxiliaire, Lettrage, GrandLivreLigne, BalanceVerification,
-    BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, AnnexesOHADA,
+    BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, SIG, AnnexesOHADA,
     ExerciceComptable,)
 
 router = APIRouter(tags=["Comptabilité Avancée"])  # monte sur /api/v1/comptabilite-avance par main.py
@@ -427,6 +427,35 @@ def obtenir_tft(
     if not tft:
         raise HTTPException(status_code=404, detail="TFT non trouvé")
     return tft
+
+
+@router.post("/etats-financiers/sig", response_model=SIGResponse)
+def generer_sig(
+    request: SIGGenererRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
+):
+    """Générer le SIG (Situation Globale des Entreprises) depuis le grand livre"""
+    sig = EtatsFinanciersOHADAService.generer_sig(
+        db,
+        request.exercice_id,
+        request.date_sig,
+        request.effectif_moyen
+    )
+    return sig
+
+
+@router.get("/etats-financiers/sig/{sig_id}", response_model=SIGResponse)
+def obtenir_sig(
+    sig_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("comptabilite.bilan.read"))
+):
+    """Obtenir un SIG par ID"""
+    sig = db.query(SIG).filter(SIG.id == sig_id).first()
+    if not sig:
+        raise HTTPException(status_code=404, detail="SIG non trouvé")
+    return sig
 
 
 @router.post("/etats-financiers/annexes", response_model=AnnexesOHDAResponse)

@@ -8,7 +8,7 @@ from app.models.finance_ohada import (
     PlanComptableOHADA, EcritureComptableNew, ExerciceComptable, 
     JournalAuxiliaire, LigneJournal, Lettrage, EcritureLettree,
     GrandLivreLigne, BalanceVerification, LigneBalance,
-    BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, AnnexesOHADA,
+    BilanOHADADetaille, CompteResultatOHADADetaille, TAFIRE, TFT, SIG, AnnexesOHADA,
     TVADeclarable, ISDeclarable, TypeJournal, TypeLettrage, StatutLettrage,
     StatutTaxe, RegimeTVA,)
 
@@ -1001,6 +1001,63 @@ class EtatsFinanciersOHADAService:
         db.commit()
         db.refresh(tft)
         return tft
+
+    @staticmethod
+    def generer_sig(
+        db: Session,
+        exercice_id: int,
+        date_sig: date,
+        effectif_moyen: Optional[Decimal] = None
+    ) -> SIG:
+        """Situation Globale des Entreprises (SIG) depuis le grand livre.
+
+        Synthese normative SYSCOHADA : effectifs (saisi, jamais invente),
+        masse salariale (comptes 66), chiffre d'affaires (70), EBE
+        (produits - charges d'exploitation hors dotations), CAF, investissements
+        nets (classe 2), BFR (classes 3-4), tresorerie nette (classe 5) et
+        resultat net (compte de resultat)."""
+        exercice = db.query(ExerciceComptable).filter(ExerciceComptable.id == exercice_id).first()
+        if not exercice:
+            raise ValueError("Exercice introuvable")
+
+        def _gl_sum(prefix: str, col) -> float:
+            return float(
+                db.query(func.coalesce(func.sum(col), 0))
+                .join(PlanComptableOHADA, GrandLivreLigne.compte_id == PlanComptableOHADA.id)
+                .filter(
+                    GrandLivreLigne.periode.like(f"{exercice.annee}-%"),
+                    PlanComptableOHADA.numero_compte.like(f"{prefix}%"),)
+                .scalar()
+            )
+
+        produits = _gl_sum("7", GrandLivreLigne.credit) - _gl_sum("7", GrandLivreLigne.debit)
+        charges_expl = _gl_sum("6", GrandLivreLigne.debit) - _gl_sum("6", GrandLivreLigne.credit)
+        dotations = _gl_sum("681", GrandLivreLigne.debit) + _gl_sum("687", GrandLivreLigne.debit)
+        chiffre_affaires = max(0.0, produits)
+        ebe = produits - (charges_expl - dotations)
+        resultat_net = produits - charges_expl
+        caf = resultat_net + dotations
+        investissements = max(0.0, _gl_sum("2", GrandLivreLigne.debit) - _gl_sum("2", GrandLivreLigne.credit))
+        bfr = (_gl_sum("4", GrandLivreLigne.debit) - _gl_sum("4", GrandLivreLigne.credit)) - (
+            _gl_sum("3", GrandLivreLigne.debit) - _gl_sum("3", GrandLivreLigne.credit))
+        tresorerie = _gl_sum("5", GrandLivreLigne.debit) - _gl_sum("5", GrandLivreLigne.credit)
+
+        sig = SIG(
+            exercice_id=exercice_id,
+            date_sig=date_sig,
+            effectif_moyen=float(effectif_moyen or 0),
+            masse_salariale=round(_gl_sum("66", GrandLivreLigne.debit) - _gl_sum("66", GrandLivreLigne.credit), 2),
+            chiffre_affaires=round(chiffre_affaires, 2),
+            excédent_brut_exploitation=round(ebe, 2),
+            capacite_autofinancement=round(caf, 2),
+            investissements=round(investissements, 2),
+            besoin_en_fonds_de_roulement=round(bfr, 2),
+            tresorerie_nette=round(tresorerie, 2),
+            resultat_net=round(resultat_net, 2),)
+        db.add(sig)
+        db.commit()
+        db.refresh(sig)
+        return sig
 
     @staticmethod
     def generer_annexes_ohada(
