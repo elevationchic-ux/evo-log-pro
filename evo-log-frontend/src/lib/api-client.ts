@@ -1485,6 +1485,12 @@ export const metierAPI = {
     apiClient.post('/api/v1/metier/fret/fluvial', null, { params: { waybill_id: waybillId, code_tarif: codeTarif } }),
   postFret3pl: (codeTarif: string, poidsKg: number) =>
     apiClient.post('/api/v1/metier/fret/3pl', null, { params: { code_tarif: codeTarif, poids_kg: poidsKg } }),
+  postTarifCalculer: (code: string, quantite: number) =>
+    apiClient.post('/api/v1/metier/tarif/calculer', null, { params: { code, quantite } }),
+  getPipelineCorrosion: (troncon: string, seuilMinMm: number) =>
+    apiClient.get(`/api/v1/metier/pipeline/corrosion/${encodeURIComponent(troncon)}`, { params: { seuil_min_mm: seuilMinMm } }),
+  getDouaneValorisation: (valuationId: number) =>
+    apiClient.get(`/api/v1/metier/douane/valorisation/${valuationId}`),
 };
 
 export default apiClient;
