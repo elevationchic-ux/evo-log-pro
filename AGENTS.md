@@ -119,15 +119,20 @@ commercial D2 veille concurrentielle).
   driver-scores) + `deepAPI` ; entrée « Outils & conformité » dans le
   module nav Pilotage
 - ~~Organigramme port autonome~~ : fait — `landingRouteFor`
-  (`src/lib/auth.ts`) route **les 24 rôles métier** vers leur espace
+  (`src/lib/auth.ts`) route **les 29 rôles métier** vers leur espace
   (DAF→finance, chefs de départements→dashboards domaine,
   opérationnels→portails/dashboards, JURISTE→/juridique,
   SECRETAIRE→/portail-employe, CHAUFFEUR→/chauffeur, CLIENT_B2B→
-  /client-portal). Rôles `JURISTE`, `SECRETAIRE`, `CHAUFFEUR` ajoutés à
-  `ROLE_GRANTS` + migration `115_rbac_port_autonome_roles` (mécanisme
-  additif/idempotent de la 107). La nav reste filtrée par
-  `modulesAllowed` + permissions granulaires — chaque rôle ne voit que
-  ses modules.
+  /client-portal, GARDIEN/AGENT_ENTRETIEN→/portail-employe,
+  SUPPORT_IT→/security/dashboard, MANUTENTIONNAIRE/OPERATEUR_CHARIOT→
+  /port-operations/dashboard). Rôles `JURISTE`, `SECRETAIRE`, `CHAUFFEUR`
+  (migration 115) + `GARDIEN`, `AGENT_ENTRETIEN`, `SUPPORT_IT`,
+  `MANUTENTIONNAIRE`, `OPERATEUR_CHARIOT` (migration 116) ajoutés à
+  `ROLE_GRANTS` — mécanisme additif/idempotent. Nav : mapping
+  `port-operations`→modules `port`+`acconage` dans
+  `NAV_TO_PERM_MODULE`, GARDIEN autorisé au module pour ses gate passes,
+  rôles terrain ajoutés aux `requiredRoles` des sous-modules quai/gate.
+  La nav reste filtrée par `modulesAllowed` + permissions granulaires.
 - Validation PostgreSQL : environnement local sans serveur PG ni Docker ;
   schéma validé par `create_all` SQLite (986 tables, 0 erreur via
   `import app.main`)

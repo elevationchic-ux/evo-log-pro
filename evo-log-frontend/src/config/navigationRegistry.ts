@@ -156,7 +156,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         tcode: 'KACC_OPS',
         description: 'Coordination déchargement conteneurs et manutention quai',
         businessProcess: 'Manutention portuaire',
-        requiredRoles: ['PORT_OPERATIONS', 'QUAI', 'MARITIME', 'ACCONAGE']
+        requiredRoles: ['PORT_OPERATIONS', 'QUAI', 'MARITIME', 'ACCONAGE', 'MANUTENTIONNAIRE', 'OPERATEUR_CHARIOT']
       },
       {
         label: 'Planning Accostage & Postes',
@@ -195,7 +195,7 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         icon: (LUCIDE as any)["Ticket"],
         tcode: "registre-gate-passes",
         description: "Laissez-pisser de sortie de marchandise.",
-        requiredRoles: ["port_ops.gate_pass.read"],
+        requiredRoles: ["port_ops.gate_pass.read", "GARDIEN"],
       },
     ]
   },
@@ -2713,6 +2713,12 @@ export function getFilteredNavigationForUser(
  // « amenagement-portuaire ». Sans cette ligne, un ingénieur d'aménagement
  // porteur de droits granulaires ne verrait jamais son département.
     'amenagement-portuaire': ['amenagement'],
+ // La clé de navigation « port-operations » couvre deux modules de
+ // permissions : « port » (quai, gate pass, tally, pesee) et « acconage »
+ // (navire, escale, conteneur, dockers). Sans ce mapping, un gardien de
+ // la guérite ou un manutentionnaire — porteurs de codes port.*/acconage.*
+ // — n'auraient aucun module visible bien que leurs droits soient réels.
+    'port-operations': ['port', 'acconage'],
   };
   const hasGranularAccessTo = (moduleKey: string): boolean => {
     if (userPermissions.length === 0) return false;
@@ -2745,7 +2751,13 @@ export function getFilteredNavigationForUser(
  // 4. SUPPORT STAFF (Secrétaires, Gardiens, Entretien, Support IT):
  // Accès ciblé: Espaces Collaborateurs, Chat & Forum d'entreprise, Dashboard
     if (isSupportStaff) {
-      if (!['portail-employe', 'portail-collaborateur', 'portail-frais', 'portail-qhse', 'chat', 'dashboard'].includes(moduleConfig.key)) {
+      const supportAllowed = ['portail-employe', 'portail-collaborateur', 'portail-frais', 'portail-qhse', 'chat', 'dashboard'];
+ // Le gardien de la guérite gère les gate passes depuis le module
+ // Opérations Portuaires : accès ciblé, uniquement pour lui.
+      if (userRoles.includes('GARDIEN') && moduleConfig.key === 'port-operations') {
+        return moduleConfig;
+      }
+      if (!supportAllowed.includes(moduleConfig.key)) {
  // Support IT peut aussi avoir accès à master-data si besoin
         if (userRoles.includes('SUPPORT_IT') && moduleConfig.key === 'master-data') {
           return moduleConfig;

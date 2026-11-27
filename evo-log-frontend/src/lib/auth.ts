@@ -141,6 +141,9 @@ export function landingRouteFor(roles: string[], roleLevel?: number): string {
   if (has('AUDITEUR', 'AUDIT')) return '/reports-bi/executive-dashboard';
   if (has('JURISTE', 'JURIDIQUE')) return '/juridique';
   if (has('SECRETAIRE')) return '/portail-employe';
+  if (has('SUPPORT_IT')) return '/security/dashboard';
+  if (has('GARDIEN', 'AGENT_ENTRETIEN')) return '/portail-employe';
+  if (has('MANUTENTIONNAIRE', 'OPERATEUR_CHARIOT')) return '/port-operations/dashboard';
 
  // ── Commercial & tracabilite ──────────────────────────────────────────
   if (has('RESPONSABLE_COMMERCIAL', 'COMMERCIAL')) return '/portail-commercial';

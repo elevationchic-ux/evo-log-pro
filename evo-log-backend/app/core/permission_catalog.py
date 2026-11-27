@@ -720,6 +720,36 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "transport.vehicle_document.read",
         "gps.tracking.read",
     ]),
+ # ---- intervenants terrain & support (organigramme complet) ----------
+    ("GARDIEN", 3, "Gardien de la guérite : controle des gate passes et surveillance du parc a quai", [
+        "port.gate_pass.read", "port.gate_pass.create", "port.gate_pass.modify",
+        "port.yard.read", "port.pesee.read",
+        "acconage.navire.read", "acconage.escale.read",
+    ]),
+    ("AGENT_ENTRETIEN", 3, "Agent d'entretien et propreté : nettoyage des zones et gestion des dechets", [
+        "acconage.nettoyage.create", "acconage.nettoyage.modify",
+        "qhse.waste_management.read",
+        "port.yard.read", "port.zone.read",
+    ]),
+    ("SUPPORT_IT", 3, "Support informatique : supervision des acces, journaux et parametres communs", [
+        "tracabilite.access_logs.read", "tracabilite.audit_logs.read",
+        "audit.journal.read",
+        "users.comptes.read", "users.statuts.read",
+        "settings.communs.read",
+    ]),
+    ("MANUTENTIONNAIRE", 3, "Manutentionnaire : execution au quai (arrimage, tally, dockers)", [
+        "acconage.navire.read", "acconage.escale.read", "acconage.moyen.read",
+        "acconage.conteneur.create", "acconage.conteneur.modify",
+        "acconage.dockers.read", "acconage.dockers.create", "acconage.dockers.modify",
+        "port.tally.read", "port.tally.create",
+        "port.stevedoring_crew.read",
+    ]),
+    ("OPERATEUR_CHARIOT", 3, "Operateur de fenwick/chariot elevateur : deplacement des conteneurs en parc", [
+        "acconage.moyen.read",
+        "acconage.conteneur.create", "acconage.conteneur.modify",
+        "acconage.escale.read",
+        "port.yard.read", "port.gate_pass.read",
+    ]),
 ]
 
 # Roles de niveau 0/1: bypass automatique dans le moteur, pas de seed granulaire
