@@ -199,11 +199,15 @@ export default function MetierPage() {
             {SECTIONS.reduce((n, s) => n + s.widgets.length, 0)} indicateurs — données réelles uniquement.
           </p>
         </div>
-        <button onClick={load}
-          className="flex items-center gap-2 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50">
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Actualiser
-        </button>
+        <div className="flex items-center gap-3">
+          <Link href="/metier/calculs" className="text-sm text-blue-600 hover:underline">Calculateurs →</Link>
+          <Link href="/referentiels" className="text-sm text-blue-600 hover:underline">Registres →</Link>
+          <button onClick={load}
+            className="flex items-center gap-2 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50">
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Actualiser
+          </button>
+        </div>
       </div>
 
       {SECTIONS.map((s) => (
