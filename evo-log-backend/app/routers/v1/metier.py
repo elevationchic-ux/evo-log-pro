@@ -233,6 +233,14 @@ def frais_rapports(
     return FraisDService.rapports(db, collaborateur=collaborateur)
 
 
+@router.get("/frais/avances", summary="Avances de frais a regulariser")
+def frais_avances(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("rh.employes.read")),
+) -> Dict[str, Any]:
+    return FraisDService.avances(db)
+
+
 @router.get("/frais/tva-recuperable", summary="TVA recuperable en attente")
 def frais_tva(
     db: Session = Depends(get_db),

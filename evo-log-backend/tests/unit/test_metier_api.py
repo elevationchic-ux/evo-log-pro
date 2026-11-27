@@ -16,6 +16,7 @@ import pytest
     "/api/v1/metier/organisation/abonnements",
     "/api/v1/metier/rh/formation",
     "/api/v1/metier/frais/tva-recuperable",
+    "/api/v1/metier/frais/avances",
     "/api/v1/metier/commercial/pipeline",
     "/api/v1/metier/support/stats",
     "/api/v1/metier/qhse/quasi-accidents",

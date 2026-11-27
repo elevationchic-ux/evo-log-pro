@@ -1417,6 +1417,8 @@ export const metierAPI = {
     apiClient.get('/api/v1/metier/rh/discipline'),
   getFraisRapports: (collaborateur?: string) =>
     apiClient.get('/api/v1/metier/frais/rapports', { params: { collaborateur } }),
+  getFraisAvances: () =>
+    apiClient.get('/api/v1/metier/frais/avances'),
   getFraisTva: () =>
     apiClient.get('/api/v1/metier/frais/tva-recuperable'),
   getOrganisationAbonnements: () =>
