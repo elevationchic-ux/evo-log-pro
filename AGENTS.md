@@ -108,6 +108,10 @@ commercial D2 veille concurrentielle).
 - Validation PostgreSQL : environnement local sans serveur PG ni Docker ;
   schéma validé par `create_all` SQLite (986 tables, 0 erreur via
   `import app.main`)
-- e2e Playwright : specs présentes (`tests/e2e/`) mais pas de
-  playwright.config ni serveurs locaux — à exécuter sur l'environnement
-  déployé (Railway/Vercel)
+- ~~e2e Playwright~~ : partiellement fait — `playwright.config.ts` +
+  `tests/e2e/auth.spec.ts` réécrit sur l'UI réelle (**6 tests verts** en
+  local : login page, login admin, erreur 401, logout, RBAC admin +
+  magasinier ; 1 skip honnête portail B2B). `process-end-to-end.spec.ts`
+  reste `test.skip()` : sélecteurs speculatifs à aligner module par module.
+  Commande : `node node_modules/@playwright/test/cli.js test`
+  (channel chrome système — téléchargement chromium impossible).
