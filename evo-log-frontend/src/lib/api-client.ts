@@ -1375,5 +1375,79 @@ export function registreAPI(modulePath: string) {
   };
 }
 
+// ─── Service Pilotage metier (/api/v1/metier) ────────────
+// Endpoints de lecture analytiques : chaque service refuse honnetement
+// quand les donnees sont absentes (champ "note" dans la reponse).
+export const metierAPI = {
+  getCuvesEnAlerte: (seuilPct = 20) =>
+    apiClient.get('/api/v1/metier/cuves-en-alerte', { params: { seuil_pct: seuilPct } }),
+  getPaieCumuls: (annee?: number) =>
+    apiClient.get('/api/v1/metier/paie/cumuls', { params: { annee } }),
+  getPaieProgressifs: (annee: number, employeId: number) =>
+    apiClient.get('/api/v1/metier/paie/cumuls-progressifs', { params: { annee, employe_id: employeId } }),
+  getPaieBulletin: (employeId: number, annee: number, mois: number) =>
+    apiClient.get('/api/v1/metier/paie/bulletin', { params: { employe_id: employeId, annee, mois } }),
+  getPaieBulletinPdfUrl: (employeId: number, annee: number, mois: number) =>
+    apiUrl(`/metier/paie/bulletin/pdf?employe_id=${employeId}&annee=${annee}&mois=${mois}`),
+  getRentabilite: (clientId?: number) =>
+    apiClient.get('/api/v1/metier/rentabilite', { params: { client_id: clientId } }),
+  getRentabiliteMissions: (missionId?: number) =>
+    apiClient.get('/api/v1/metier/rentabilite/missions', { params: { mission_id: missionId } }),
+  getIndicateursFinanciers: (categorie?: string) =>
+    apiClient.get('/api/v1/metier/indicateurs-financiers', { params: { categorie } }),
+  getQhseDepassements: () =>
+    apiClient.get('/api/v1/metier/qhse/depassements'),
+  getControleBudgetaire: () =>
+    apiClient.get('/api/v1/metier/compta/controle-budgetaire'),
+  getTransportTournees: (chauffeur?: string) =>
+    apiClient.get('/api/v1/metier/transport/tournees', { params: { chauffeur } }),
+  getTransportDg: () =>
+    apiClient.get('/api/v1/metier/transport/dg-conformite'),
+  getFluvialNavigabilite: (bief?: string) =>
+    apiClient.get('/api/v1/metier/fluvial/navigabilite', { params: { bief } }),
+  getMagasinEcarts: (article?: string) =>
+    apiClient.get('/api/v1/metier/magasin/ecarts', { params: { article } }),
+  getFinancePrevisions: () =>
+    apiClient.get('/api/v1/metier/finance/previsions'),
+  getFinanceAffacturage: () =>
+    apiClient.get('/api/v1/metier/finance/affacturage'),
+  getRhFormation: () =>
+    apiClient.get('/api/v1/metier/rh/formation'),
+  getRhDiscipline: () =>
+    apiClient.get('/api/v1/metier/rh/discipline'),
+  getFraisRapports: (collaborateur?: string) =>
+    apiClient.get('/api/v1/metier/frais/rapports', { params: { collaborateur } }),
+  getFraisTva: () =>
+    apiClient.get('/api/v1/metier/frais/tva-recuperable'),
+  getOrganisationAbonnements: () =>
+    apiClient.get('/api/v1/metier/organisation/abonnements'),
+  getDashboardSante: () =>
+    apiClient.get('/api/v1/metier/dashboard/sante'),
+  getAnnuairePerformance: () =>
+    apiClient.get('/api/v1/metier/annuaire/performance'),
+  getAnnuaireDocsExpires: () =>
+    apiClient.get('/api/v1/metier/annuaire/documents-expires'),
+  getPrestatairesHomologues: (specialite?: string) =>
+    apiClient.get('/api/v1/metier/prestataires/homologues', { params: { specialite } }),
+  getQhsePermis: () =>
+    apiClient.get('/api/v1/metier/qhse/permis'),
+  getQhseFormations: () =>
+    apiClient.get('/api/v1/metier/qhse/formations'),
+  getAdminQuotas: () =>
+    apiClient.get('/api/v1/metier/admin/quotas-tenants'),
+  getAdminSauvegardes: () =>
+    apiClient.get('/api/v1/metier/admin/sauvegardes'),
+  getReportsScorecards: (periode?: string) =>
+    apiClient.get('/api/v1/metier/reports/scorecards', { params: { periode } }),
+  getComptaContrePassations: () =>
+    apiClient.get('/api/v1/metier/compta/contre-passations'),
+  getAccreditations: () =>
+    apiClient.get('/api/v1/metier/accreditations'),
+  getSuperadminIncidents: () =>
+    apiClient.get('/api/v1/metier/superadmin/incidents'),
+  getChatSignalements: () =>
+    apiClient.get('/api/v1/metier/chat/signalements'),
+};
+
 export default apiClient;
 
