@@ -703,6 +703,23 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
  # Il audite les logs de la console plateforme (super admin).
         "superadmin.platform_audit.read", "audit.journal.read",
     ]),
+ # ---- roles transverses de l'organigramme port autonome -------------
+    ("JURISTE", 3, "Juridique et contentieux : contrats, echeances et litiges OHADA", [
+        "juridique.contrats.read", "juridique.contrats.create", "juridique.contrats.modify",
+        "juridique.contentieux.read", "juridique.contentieux.create", "juridique.contentieux.modify",
+        "juridique.echeances.read",
+    ]),
+    ("SECRETAIRE", 3, "Secretariat general : accueil, congés et echeances du cabinet", [
+        "conges.demande.read", "conges.demande.create", "conges.demande.modify",
+        "conges.pointage.read",
+        "juridique.echeances.read",
+    ]),
+    ("CHAUFFEUR", 3, "Chauffeur : execution de ses missions et collecte des POD", [
+        "transport.mission.read",
+        "transport.epod.read", "transport.epod.create", "transport.epod.modify",
+        "transport.vehicle_document.read",
+        "gps.tracking.read",
+    ]),
 ]
 
 # Roles de niveau 0/1: bypass automatique dans le moteur, pas de seed granulaire

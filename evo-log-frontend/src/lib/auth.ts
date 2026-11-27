@@ -109,18 +109,48 @@ function toSessionUser(p: BackendSession, accessToken: string, refreshToken?: st
  *  on retombe sur l'ancien comportement (dashboard global). */
 export function landingRouteFor(roles: string[], roleLevel?: number): string {
   const normRoles = roles.map(r => r.toUpperCase());
-  if (normRoles.includes('COMPTABLE') || normRoles.includes('COMPTABILITE')) return '/comptabilite-ohada/dashboard';
-  if (normRoles.includes('CHAUFFEUR')) return '/chauffeur';
-  if (normRoles.includes('MAGASINIER') || normRoles.includes('MAGASIN')) return '/magasin/dashboard';
-  if (normRoles.includes('TRANSPORT') || normRoles.includes('DISPATCHER')) return '/transport/control';
-  if (normRoles.includes('FINANCE')) return '/finance/overview';
-  if (normRoles.includes('DECLARANT') || normRoles.includes('TRANSIT') || normRoles.includes('DOUANE')) return '/transit-douane/dashboard';
-  if (normRoles.includes('PORT_OPERATIONS') || normRoles.includes('ACCONAGE')) return '/port-operations/dashboard';
-  if (normRoles.includes('QHSE')) return '/qhse-securite/dashboard';
-  if (normRoles.includes('RH')) return '/rh-personnel/dashboard';
-  if (normRoles.includes('TECHNICIEN') || normRoles.includes('GMAO')) return '/parc-vehicules/dashboard';
-  if (normRoles.includes('CLIENT_B2B') || normRoles.includes('CLIENT')) return '/client-portal';
-  if (normRoles.includes('ADMIN') || normRoles.includes('MANAGER')) return '/dashboard/global';
+  const has = (...names: string[]) => names.some(n => normRoles.includes(n));
+
+ // ── Direction & finance (organigramme port autonome) ──────────────────
+  if (has('DIRECTEUR_FINANCIER', 'DAF')) return '/finance/overview';
+  if (has('CHEF_COMPTABLE', 'COMPTABLE', 'COMPTABILITE')) return '/comptabilite-ohada/dashboard';
+  if (has('CAISSIER')) return '/finance/encaissements';
+  if (has('FINANCE')) return '/finance/overview';
+
+ // ── RH ────────────────────────────────────────────────────────────────
+  if (has('ADMIN_RH', 'CHEF_RH', 'RH', 'PAIE')) return '/rh-personnel/dashboard';
+
+ // ── Port & exploitation ────────────────────────────────────────────────
+  if (has('CHEF_EXPLOITATION', 'PORT_OPERATIONS', 'ACCONAGE', 'OPERATEUR_ACCONAGE')) return '/port-operations/dashboard';
+  if (has('CHEF_AMENAGEMENT_PORTUAIRE', 'INGENIEUR_AMENAGEMENT', 'AMENAGEMENT')) return '/amenagement-portuaire/dashboard';
+  if (has('TRANSIT_PRINCIPAL', 'DECLARANT', 'TRANSIT', 'DOUANE')) return '/transit-douane/dashboard';
+
+ // ── Magasin & supply chain ─────────────────────────────────────────────
+  if (has('CHEF_MAGASIN', 'MAGASINIER', 'MAGASIN')) return '/magasin/dashboard';
+
+ // ── Parc, maintenance & transport ──────────────────────────────────────
+  if (has('CHEF_PARC', 'TRANSPORT', 'DISPATCHER')) return '/transport/control';
+  if (has('CHEF_MAINTENANCE', 'GMAO', 'TECHNICIEN')) return '/parc-vehicules/dashboard';
+  if (has('TECHNICIEN_MAINTENANCE')) return '/portail-technicien';
+  if (has('CHAUFFEUR')) return '/chauffeur';
+  if (has('COLDCHAIN', 'CHAINE_FROID')) return '/chaine-froid/dashboard';
+
+ // ── QHSE & securite ───────────────────────────────────────────────────
+  if (has('QHSE')) return '/qhse-securite/dashboard';
+  if (has('RSSI')) return '/security/dashboard';
+  if (has('AUDITEUR', 'AUDIT')) return '/reports-bi/executive-dashboard';
+  if (has('JURISTE', 'JURIDIQUE')) return '/juridique';
+  if (has('SECRETAIRE')) return '/portail-employe';
+
+ // ── Commercial & tracabilite ──────────────────────────────────────────
+  if (has('RESPONSABLE_COMMERCIAL', 'COMMERCIAL')) return '/portail-commercial';
+  if (has('RESPONSABLE_TRACABILITE', 'TRACABILITE')) return '/tracabilite/dashboard';
+
+ // ── Client externe ────────────────────────────────────────────────────
+  if (has('CLIENT_B2B', 'CLIENT')) return '/client-portal';
+
+ // ── Administration ────────────────────────────────────────────────────
+  if (has('ADMIN', 'MANAGER', 'COMPANY_ADMIN')) return '/dashboard/global';
  // Hub par défaut: collaborateur (niveau 3) sans rôle métier dédié.
   if (roleLevel === 3) return '/portail-collaborateur';
   return '/dashboard/global';
