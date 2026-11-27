@@ -105,6 +105,10 @@ commercial D2 veille concurrentielle).
 - Endpoints en écriture : déjà couverts par les routeurs CRUD dédiés
   (`*_deep.py`, `new_k_modules.py`) — les services analytiques sont
   volontairement read-only
+- ~~Registres deep sans écran~~ : fait — `src/lib/deep-crud.tsx` +
+  `src/lib/deep-configs/*.ts` (générés depuis routers `*_deep` + schémas
+  Create) → **61 pages `/<domaine>/donnees`** couvrant ~579 ressources
+  CRUD + index `/referentiels`. Régénérer via `_analyse/gen_deep_pages.py`
 - Validation PostgreSQL : environnement local sans serveur PG ni Docker ;
   schéma validé par `create_all` SQLite (986 tables, 0 erreur via
   `import app.main`)
