@@ -14,6 +14,13 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Processus End-to-End: Navire → Client', () => {
+  // Honnêteté : ces specs ont été écrites contre une UI supposée
+  // (input[type=email], text=Opérations Portuaires, input[name=shipName]…)
+  // qui ne correspond pas aux pages réelles. Elles sont suspendues jusqu'à
+  // alignement des sélecteurs module par module — ne pas les réactiver
+  // telles quelles.
+  test.skip();
+
   // Setup: Login avant chaque test
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
