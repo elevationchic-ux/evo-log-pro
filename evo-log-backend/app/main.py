@@ -1046,6 +1046,9 @@ except ImportError as e:
     logger.warning(f"Router departement_d5_deep absent : {e}")
 # </departement_d5>
 
+from app.routers.v1 import metier
+safe_include_router(metier.router, prefix="/api/v1", tags=["metier-analytique"])
+
 from app.routers.v1 import pending_modules
 safe_include_router(pending_modules.router)
 
