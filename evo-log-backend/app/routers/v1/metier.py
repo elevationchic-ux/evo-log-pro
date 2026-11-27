@@ -48,6 +48,8 @@ from app.services.qhse_b_service import QhseBService
 from app.services.parc_service import ParcService
 from app.services.coldchain_e_service import Cold2DoorService
 from app.services.transit_b_service import TransitBService
+from app.services.conteneur_cycle_service import ConteneurCycleService
+from app.services.courier_e_service import CourierEService
 
 router = APIRouter(tags=["metier-analytique"], prefix="/metier")
 
@@ -458,3 +460,24 @@ def transit_conformite(
     current: User = Depends(require_perm("transit.physical_inspection.read")),
 ) -> Dict[str, Any]:
     return TransitBService.taux_conformite(db)
+
+
+@router.get("/conteneurs/{cycle_id}/cycle", summary="Analyse du cycle conteneur")
+def conteneur_cycle(
+    cycle_id: int,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("acconage.manifeste.read")),
+) -> Dict[str, Any]:
+    return ConteneurCycleService.analyser_cycle(db, cycle_id=cycle_id)
+
+
+@router.get("/coursier/performance/{livreur}", summary="Performance livreur coursier")
+def coursier_performance(
+    livreur: str,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.dispatch.read")),
+) -> Dict[str, Any]:
+    return {
+        "performance": CourierEService.performance_livreur(db, livreur=livreur),
+        "productivite": CourierEService.productivite_livreur(db, livreur=livreur),
+    }
