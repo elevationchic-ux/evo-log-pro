@@ -108,7 +108,11 @@ commercial D2 veille concurrentielle).
 - ~~Registres deep sans écran~~ : fait — `src/lib/deep-crud.tsx` +
   `src/lib/deep-configs/*.ts` (générés depuis routers `*_deep` + schémas
   Create) → **61 pages `/<domaine>/donnees`** couvrant ~579 ressources
-  CRUD + index `/referentiels`. Régénérer via `_analyse/gen_deep_pages.py`
+  CRUD (liste + création + **édition/suppression** via PUT/DELETE `/{id}`,
+  pagination client 100/page, datalists de suggestion pour les FK
+  `employe_id`/`client_id`/`fournisseur_id`/`user_id`/`tiers_id`) + index
+  `/referentiels` + module nav « Pilotage & Registres » dans
+  `navigationRegistry.ts`. Régénérer via `_analyse/gen_deep_pages.py`
 - Validation PostgreSQL : environnement local sans serveur PG ni Docker ;
   schéma validé par `create_all` SQLite (986 tables, 0 erreur via
   `import app.main`)
