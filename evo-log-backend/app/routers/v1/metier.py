@@ -3,7 +3,7 @@ metier avances (analytique, alertes, conformite). Donnees reelles
 uniquement — chaque service refuse honnetement sans donnees."""
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -12,6 +12,7 @@ from app.models.user import User
 from app.services.capteur_carburant_service import CapteurCarburantService
 from app.services.paie_service import PaieService
 from app.services.rentabilite_service import RentabiliteService
+from app.services.rentabilite_mission_service import RentabiliteMissionService
 from app.services.economie_service import EconomieService
 from app.services.qhse_deep_service import QhseDeepService
 from app.services.comptabilite_deep_service import ComptabiliteDeepService
@@ -56,6 +57,41 @@ def paie_cumuls(
     return PaieService.cumuls_annuels(db, annee=annee)
 
 
+@router.get("/paie/cumuls-progressifs", summary="IRGM progressif cumule par mois")
+def paie_progressifs(
+    annee: int = Query(...),
+    employe_id: int = Query(...),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("paie.bulletin.read")),
+) -> Dict[str, Any]:
+    return PaieService.cumuls_progressifs(db, annee=annee, employe_id=employe_id)
+
+
+@router.get("/paie/bulletin", summary="Bulletin de paie detaille")
+def paie_bulletin(
+    employe_id: int = Query(...),
+    annee: int = Query(...),
+    mois: int = Query(...),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("paie.bulletin.read")),
+) -> Dict[str, Any]:
+    return PaieService.bulletin(db, employe_id=employe_id, annee=annee, mois=mois)
+
+
+@router.get("/paie/bulletin/pdf", summary="Bulletin de paie en PDF")
+def paie_bulletin_pdf(
+    employe_id: int = Query(...),
+    annee: int = Query(...),
+    mois: int = Query(...),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("paie.bulletin.read")),
+) -> Response:
+    pdf = PaieService.bulletin_pdf(db, employe_id=employe_id, annee=annee, mois=mois)
+    return Response(content=pdf, media_type="application/pdf",
+                    headers={"Content-Disposition":
+                             f"attachment; filename=bulletin_{employe_id}_{annee}_{mois:02d}.pdf"})
+
+
 @router.get("/rentabilite", summary="CA par client et type")
 def rentabilite(
     client_id: Optional[int] = Query(None),
@@ -63,6 +99,15 @@ def rentabilite(
     current: User = Depends(require_perm("comptabilite.balance.read")),
 ) -> Dict[str, Any]:
     return RentabiliteService.par_client(db, client_id=client_id)
+
+
+@router.get("/rentabilite/missions", summary="Rentabilite par mission")
+def rentabilite_missions(
+    mission_id: Optional[int] = Query(None),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.mission.read")),
+) -> Dict[str, Any]:
+    return RentabiliteMissionService.par_mission(db, mission_id=mission_id)
 
 
 @router.get("/indicateurs-financiers", summary="Indicateurs par categorie")
