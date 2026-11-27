@@ -1447,6 +1447,32 @@ export const metierAPI = {
     apiClient.get('/api/v1/metier/superadmin/incidents'),
   getChatSignalements: () =>
     apiClient.get('/api/v1/metier/chat/signalements'),
+  getCommercialPipeline: () =>
+    apiClient.get('/api/v1/metier/commercial/pipeline'),
+  getRhConges: (collaborateur: string, droitAnnuel = 30) =>
+    apiClient.get(`/api/v1/metier/rh/conges/${encodeURIComponent(collaborateur)}`, { params: { droit_annuel: droitAnnuel } }),
+  getSupportStats: () =>
+    apiClient.get('/api/v1/metier/support/stats'),
+  getTransportRepos: () =>
+    apiClient.get('/api/v1/metier/transport/repos-insuffisants'),
+  getDouaneAttente: () =>
+    apiClient.get('/api/v1/metier/douane/declarations-attente'),
+  getCollaborateursConformite: (collaborateur?: string) =>
+    apiClient.get('/api/v1/metier/collaborateurs/conformite', { params: { collaborateur } }),
+  getRecrutementPipeline: (poste?: string) =>
+    apiClient.get('/api/v1/metier/recrutement/pipeline', { params: { poste } }),
+  getFormationCertifications: (joursAlerte = 30) =>
+    apiClient.get('/api/v1/metier/formation/certifications', { params: { jours_alerte: joursAlerte } }),
+  getMaintenanceTickets: () =>
+    apiClient.get('/api/v1/metier/maintenance/tickets-severite'),
+  getQhseQuasiAccidents: () =>
+    apiClient.get('/api/v1/metier/qhse/quasi-accidents'),
+  getParcPneus: () =>
+    apiClient.get('/api/v1/metier/parc/pneus-a-remplacer'),
+  getFroidBilan: (chambre: string) =>
+    apiClient.get('/api/v1/metier/froid/bilan-chambre', { params: { chambre } }),
+  getTransitConformite: () =>
+    apiClient.get('/api/v1/metier/transit/conformite'),
 };
 
 export default apiClient;
