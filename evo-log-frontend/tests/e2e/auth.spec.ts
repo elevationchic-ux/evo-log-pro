@@ -14,7 +14,18 @@ async function login(page: any, ident: string, pass: string) {
   await page.goto('/login');
   await page.fill(IDENT, ident);
   await page.fill(PASS, pass);
-  await page.click('button[type="submit"]');
+  // Enter : contourne l'overlay d'intro (fixed inset-0 z-[100]) qui
+  // intercepte aléatoirement le clic sur le bouton submit
+  await page.press(PASS, 'Enter');
+  // Filet de sécurité : si aucune navigation ni erreur après 15 s
+  // (soumission non déclenchée), recliquer le bouton submit
+  await Promise.race([
+    page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 }).catch(() => {}),
+    page.locator('text=Identifiants incorrects').waitFor({ timeout: 15000 }).catch(() => {}),
+  ]);
+  if (page.url().includes('/login') && !(await page.locator('text=Identifiants incorrects').isVisible().catch(() => false))) {
+    await page.click('button[type="submit"]', { timeout: 10000 }).catch(() => {});
+  }
 }
 
 test.describe('Authentication', () => {
@@ -31,7 +42,7 @@ test.describe('Authentication', () => {
     await login(page, 'admin@kamlog.cm', 'password123');
 
     // Landing domain ~2,2 s puis /dashboard/global
-    await page.waitForURL('/dashboard/global', { timeout: 30000 });
+    await page.waitForURL('/dashboard/global', { timeout: 60000 });
     await expect(page).toHaveURL('/dashboard/global');
   });
 
@@ -44,12 +55,12 @@ test.describe('Authentication', () => {
 
   test('should logout successfully', async ({ page }) => {
     await login(page, 'admin@kamlog.cm', 'password123');
-    await page.waitForURL('/dashboard/global', { timeout: 30000 });
+    await page.waitForURL('/dashboard/global', { timeout: 60000 });
 
     // Menu profil (aria-haspopup="true") → "Se déconnecter" → /logout → /login
     await page.click('button[aria-haspopup="true"]');
     await page.click('text=Se déconnecter');
-    await page.waitForURL('/login', { timeout: 20000 });
+    await page.waitForURL('/login', { timeout: 60000 });
     await expect(page).toHaveURL('/login');
   });
 });
@@ -61,18 +72,19 @@ test.describe('Authentication', () => {
 test.describe('Role-Based Access Control', () => {
   test('ADMIN should land on global dashboard', async ({ page }) => {
     await login(page, 'admin@kamlog.cm', 'password123');
-    await page.waitForURL('/dashboard/global', { timeout: 30000 });
+    await page.waitForURL('/dashboard/global', { timeout: 60000 });
     await expect(page).toHaveURL('/dashboard/global');
   });
 
   test('MAGASINIER should land on magasin dashboard', async ({ page }) => {
     await login(page, 'magasinier@kamlog.cm', 'password123');
-    await page.waitForURL('/magasin/dashboard', { timeout: 30000 });
+    await page.waitForURL('/magasin/dashboard', { timeout: 60000 });
     await expect(page).toHaveURL('/magasin/dashboard');
   });
 
-  test.fixme('CLIENT should only access B2B Portal — aucun rôle CLIENT seedé (portail B2B = flux dédié à aligner)', async ({ page }) => {
+  test('CLIENT_B2B should land on client portal', async ({ page }) => {
     await login(page, 'client@kamlog.cm', 'password123');
+    await page.waitForURL('/client-portal', { timeout: 60000 });
     await expect(page).toHaveURL('/client-portal');
   });
 });

@@ -123,12 +123,15 @@ commercial D2 veille concurrentielle).
   `import app.main`)
 - ~~e2e Playwright~~ : fait en local — `playwright.config.ts` (timeout
   120 s : `next dev` compile les routes à la demande) + `auth.spec.ts`
-  (**6 verts** : login, erreur 401, logout, RBAC admin + magasinier ;
-  1 skip honnête portail B2B) + `process-end-to-end.spec.ts` réécrit sur
-  l'UI réelle (**7 verts** : chaîne de domaines port→douane→magasin→
-  transport→finance + pages transverses `/metier`, `/metier/calculs`,
-  `/referentiels`, `/outils` + vrai appel calculateur congés).
-  Login e2e : `page.press(password, 'Enter')` — un overlay d'intro
-  (`fixed inset-0 z-[100]`) intercepte parfois le clic submit.
+  (**7 verts** : login, erreur 401, logout, RBAC admin + magasinier +
+  CLIENT_B2B → `/client-portal` via rôle `CLIENT_B2B` seedé et règle
+  d'atterrissage dans `src/lib/auth.ts`) + `process-end-to-end.spec.ts`
+  réécrit sur l'UI réelle (**7 verts** : chaîne de domaines
+  port→douane→magasin→transport→finance + pages transverses `/metier`,
+  `/metier/calculs`, `/referentiels`, `/outils` + vrai appel calculateur
+  congés). Login e2e : `page.press(password, 'Enter')` + fallback clic —
+  un overlay d'intro (`fixed inset-0 z-[100]`) intercepte parfois le clic
+  submit. Backend `/auth/login` : rate-limit slowapi 10/min — espacer les
+  runs complets.
   Commande : `node node_modules/@playwright/test/cli.js test`
   (channel chrome système — téléchargement chromium impossible).

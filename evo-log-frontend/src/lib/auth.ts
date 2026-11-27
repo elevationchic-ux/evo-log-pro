@@ -119,6 +119,7 @@ export function landingRouteFor(roles: string[], roleLevel?: number): string {
   if (normRoles.includes('QHSE')) return '/qhse-securite/dashboard';
   if (normRoles.includes('RH')) return '/rh-personnel/dashboard';
   if (normRoles.includes('TECHNICIEN') || normRoles.includes('GMAO')) return '/parc-vehicules/dashboard';
+  if (normRoles.includes('CLIENT_B2B') || normRoles.includes('CLIENT')) return '/client-portal';
   if (normRoles.includes('ADMIN') || normRoles.includes('MANAGER')) return '/dashboard/global';
  // Hub par défaut: collaborateur (niveau 3) sans rôle métier dédié.
   if (roleLevel === 3) return '/portail-collaborateur';
