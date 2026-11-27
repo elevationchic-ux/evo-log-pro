@@ -98,9 +98,10 @@ commercial D2 veille concurrentielle).
 - ~~Paie cumuls~~ : fait (`paie_service` — cumuls annuels, méthode du taux
   cumulé IRGM sur barème source unique `rh_avance_service`, bulletin + PDF
   WeasyPrint avec repli)
-- ~~Exposition API~~ : fait (`/api/v1/metier` — 56 endpoints lecture
-  analytiques, permissions catalogue réel) + page frontend
-  `/app/(app)/metier` + `metierAPI` typé
+- ~~Exposition API~~ : fait (`/api/v1/metier` — 57 endpoints
+  (49 GET analytiques + 7 POST calculateurs + paramètres), permissions
+  catalogue réel) + page frontend `/app/(app)/metier` couvrant tous les
+  GET analytiques en 7 sections par domaine + `metierAPI` typé
 - Endpoints en écriture : déjà couverts par les routeurs CRUD dédiés
   (`*_deep.py`, `new_k_modules.py`) — les services analytiques sont
   volontairement read-only
