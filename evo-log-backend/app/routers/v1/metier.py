@@ -50,6 +50,10 @@ from app.services.coldchain_e_service import Cold2DoorService
 from app.services.transit_b_service import TransitBService
 from app.services.conteneur_cycle_service import ConteneurCycleService
 from app.services.courier_e_service import CourierEService
+from app.services.aerien_service import AirFreightService
+from app.services.ferroviaire_service import RailFreightService
+from app.services.fluvial_service import FluvialFreightService
+from app.services.log3pl_b_service import TplCarrierService
 
 router = APIRouter(tags=["metier-analytique"], prefix="/metier")
 
@@ -481,3 +485,49 @@ def coursier_performance(
         "performance": CourierEService.performance_livreur(db, livreur=livreur),
         "productivite": CourierEService.productivite_livreur(db, livreur=livreur),
     }
+
+
+@router.post("/fret/aerien", summary="Calcul fret aerien (poids x prix/kg + surcharges)")
+def fret_aerien(
+    code_tarif: str,
+    poids_kg: int,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.dispatch.read")),
+) -> Dict[str, Any]:
+    return AirFreightService.calculer_fret(db, code_tarif=code_tarif, poids_kg=poids_kg)
+
+
+@router.post("/fret/ferroviaire", summary="Calcul fret ferroviaire (T x km x P - remise)")
+def fret_ferroviaire(
+    code_tarif: str,
+    tonnes: float,
+    distance_km: float,
+    type_marchandise: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.dispatch.read")),
+) -> Dict[str, Any]:
+    return RailFreightService.calculer_fret(
+        db, code_tarif=code_tarif, tonnes=tonnes,
+        distance_km=distance_km, type_marchandise=type_marchandise)
+
+
+@router.post("/fret/fluvial", summary="Calcul fret batelier par lettre de voiture")
+def fret_fluvial(
+    waybill_id: int,
+    code_tarif: str,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.mission.read")),
+) -> Dict[str, Any]:
+    return FluvialFreightService.calculer_fret(
+        db, waybill_id=waybill_id, code_tarif=code_tarif)
+
+
+@router.post("/fret/3pl", summary="Calcul fret transporteur 3PL")
+def fret_3pl(
+    code_tarif: str,
+    poids_kg: int,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.dispatch.read")),
+) -> Dict[str, Any]:
+    return TplCarrierService.calculer_fret(
+        db, code_tarif=code_tarif, poids_kg=poids_kg)
