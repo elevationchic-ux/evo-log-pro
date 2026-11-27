@@ -35,6 +35,19 @@ from app.services.accreditation_service import AccreditationService
 from app.services.superadmin_deep_service import SuperadminDeepService
 from app.services.chat_service import ChatService
 from app.services.pipeline_e_service import PipelineEService
+from app.services.commercial_service import CommercialService
+from app.services.employe_service import EmployeService
+from app.services.support_service import SupportService
+from app.services.chauffeur_service import ChauffeurService
+from app.services.declarant_service import DeclarantService
+from app.services.collaborateur_service import CollaborateurService
+from app.services.chef_personnel_service import ChefPersonnelService
+from app.services.formation_service import FormationService
+from app.services.technicien_service import TechnicienService
+from app.services.qhse_b_service import QhseBService
+from app.services.parc_service import ParcService
+from app.services.coldchain_e_service import Cold2DoorService
+from app.services.transit_b_service import TransitBService
 
 router = APIRouter(tags=["metier-analytique"], prefix="/metier")
 
@@ -334,3 +347,114 @@ def chat_signalements(
     current: User = Depends(require_perm("admin.nomenclature.read")),
 ) -> Dict[str, Any]:
     return ChatService.signalements(db)
+
+
+@router.get("/commercial/pipeline", summary="Pipeline commercial et devis expires")
+def commercial_pipeline(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("dashboard.nomenclature.read")),
+) -> Dict[str, Any]:
+    return {"pipeline": CommercialService.pipeline(db),
+            "devis_expires": CommercialService.devis_expires(db)}
+
+
+@router.get("/rh/conges/{collaborateur}", summary="Solde de conges collaborateur")
+def rh_conges(
+    collaborateur: str,
+    droit_annuel: int = Query(30),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("conges.demande.read")),
+) -> Dict[str, Any]:
+    return EmployeService.solde_conges(db, collaborateur=collaborateur,
+                                     droit_annuel=droit_annuel)
+
+
+@router.get("/support/stats", summary="Tickets support par priorite et statut")
+def support_stats(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("dashboard.nomenclature.read")),
+) -> Dict[str, Any]:
+    return SupportService.stats_tickets(db)
+
+
+@router.get("/transport/repos-insuffisants", summary="Chauffeurs avec repos insuffisant")
+def transport_repos(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.dispatch.read")),
+) -> Dict[str, Any]:
+    return ChauffeurService.repos_insuffisants(db)
+
+
+@router.get("/douane/declarations-attente", summary="Declarations douanieres en attente")
+def douane_attente(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transit.declaration.read")),
+) -> Dict[str, Any]:
+    return DeclarantService.declarations_en_attente(db)
+
+
+@router.get("/collaborateurs/conformite", summary="Conformite qualite collaborateurs")
+def collaborateurs_conformite(
+    collaborateur: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("rh.employes.read")),
+) -> Dict[str, Any]:
+    return CollaborateurService.conformite(db, collaborateur=collaborateur)
+
+
+@router.get("/recrutement/pipeline", summary="Pipeline de recrutement")
+def recrutement_pipeline(
+    poste: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("rh.employes.read")),
+) -> Dict[str, Any]:
+    return ChefPersonnelService.pipeline(db, poste=poste)
+
+
+@router.get("/formation/certifications", summary="Certifications expirees ou a renouveler")
+def formation_certs(
+    jours_alerte: int = Query(30),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("rh.employes.read")),
+) -> Dict[str, Any]:
+    return FormationService.suivi_certifications(db, jours_alerte=jours_alerte)
+
+
+@router.get("/maintenance/tickets-severite", summary="Tickets de panne par severite")
+def maintenance_tickets(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("maintindustrielle.work_orders.read")),
+) -> Dict[str, Any]:
+    return TechnicienService.tickets_par_severite(db)
+
+
+@router.get("/qhse/quasi-accidents", summary="Quasi-accidents par site")
+def qhse_quasi(db: Session = Depends(get_db),
+              current: User = Depends(require_perm("qhse.accident.read")),
+              ) -> Dict[str, Any]:
+    return QhseBService.analyse_quasi_accidents(db)
+
+
+@router.get("/parc/pneus-a-remplacer", summary="Pneus sous le seuil legal")
+def parc_pneus(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("parc.flotte.read")),
+) -> Dict[str, Any]:
+    return ParcService.pneus_a_remplacer(db)
+
+
+@router.get("/froid/bilan-chambre", summary="Bilan thermique par chambre froide")
+def froid_bilan(
+    chambre: str = Query(...),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("coldchain.transport_legs.read")),
+) -> Dict[str, Any]:
+    return Cold2DoorService.bilan_chambre(db, chambre=chambre)
+
+
+@router.get("/transit/conformite", summary="Taux de conformite des inspections")
+def transit_conformite(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transit.physical_inspection.read")),
+) -> Dict[str, Any]:
+    return TransitBService.taux_conformite(db)
