@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { metierAPI } from '@/lib/api-client';
 import { RefreshCw } from 'lucide-react';
 
@@ -61,8 +62,8 @@ const SECTIONS: Section[] = [
         render: (d) => isNote(d) ? <Empty d={d} /> : <Big value={d.expires ?? d.total ?? 0} label="expirées ou à renouveler (30 j)" /> },
       { titre: 'Recrutement', fetcher: () => metierAPI.getRecrutementPipeline(),
         render: (d) => isNote(d) ? <Empty d={d} /> : <Big value={d.total ?? Object.keys(d).length} label="candidatures en pipeline" /> },
-      { titre: 'Congés', fetcher: () => metierAPI.getRhConges('__all__').catch(() => ({ data: {} })),
-        render: (d) => <p className="text-sm text-gray-500">Consulter par collaborateur</p> },
+      { titre: 'Congés', fetcher: () => metierAPI.getRhConges('__none__').catch(() => ({ data: {} })),
+        render: () => <Link href="/metier/calculs" className="text-sm text-blue-600 hover:underline">Rechercher par collaborateur →</Link> },
     ],
   },
   {
@@ -78,10 +79,10 @@ const SECTIONS: Section[] = [
         render: (d) => isNote(d) ? <Empty d={d} /> : <Big value={d.total ?? d.chauffeurs ?? 0} label="chauffeurs" /> },
       { titre: 'Pneus à remplacer', fetcher: () => metierAPI.getParcPneus(),
         render: (d) => isNote(d) ? <Empty d={d} /> : <Big value={d.total ?? d.pneus ?? 0} label="sous 1,6 mm" /> },
-      { titre: 'Cycle conteneur', fetcher: () => metierAPI.getConteneurCycle(0).catch(() => ({ data: { note: 'Renseigner un ID de cycle' } })),
-        render: (d) => <p className="text-sm text-gray-500">{String(d.note ?? 'Analyse par cycle')}</p> },
-      { titre: 'Coursier', fetcher: () => metierAPI.getCoursierPerformance('—').catch(() => ({ data: { note: 'Renseigner un livreur' } })),
-        render: (d) => <p className="text-sm text-gray-500">{String(d.note ?? 'Performance par livreur')}</p> },
+      { titre: 'Cycle conteneur', fetcher: () => metierAPI.getConteneurCycle(0).catch(() => ({ data: { note: 'Voir /metier/calculs' } })),
+        render: () => <Link href="/metier/calculs" className="text-sm text-blue-600 hover:underline">Ouvrir l'analyse →</Link> },
+      { titre: 'Coursier', fetcher: () => metierAPI.getCoursierPerformance('—').catch(() => ({ data: { note: 'Voir /metier/calculs' } })),
+        render: () => <Link href="/metier/calculs" className="text-sm text-blue-600 hover:underline">Ouvrir l'analyse →</Link> },
       { titre: 'Fluvial navigabilité', fetcher: () => metierAPI.getFluvialNavigabilite(),
         render: (d) => isNote(d) ? <Empty d={d} /> : <Big value={d.biefs_restent ?? d.total ?? 0} label="biefs navigables" /> },
     ],
@@ -95,10 +96,10 @@ const SECTIONS: Section[] = [
         render: (d) => isNote(d) ? <Empty d={d} /> : <Big value={d.total ?? d.declarations ?? 0} label="en attente" /> },
       { titre: 'Transit conformité', fetcher: () => metierAPI.getTransitConformite(),
         render: (d) => isNote(d) ? <Empty d={d} /> : <Big value={d.taux_conformite ?? d.total ?? 0} label="taux / inspections" /> },
-      { titre: 'Corrosion pipeline', fetcher: () => metierAPI.getPipelineCorrosion('—', 0).catch(() => ({ data: { note: 'Renseigner tronçon + seuil' } })),
-        render: (d) => <p className="text-sm text-gray-500">{String(d.note ?? 'Analyse par tronçon')}</p> },
-      { titre: 'Valorisation douanière', fetcher: () => metierAPI.getDouaneValorisation(0).catch(() => ({ data: { note: 'Renseigner un ID de valorisation' } })),
-        render: (d) => <p className="text-sm text-gray-500">{String(d.note ?? 'Valeur par Incoterm')}</p> },
+      { titre: 'Corrosion pipeline', fetcher: () => metierAPI.getPipelineCorrosion('—', 0).catch(() => ({ data: { note: 'Voir /metier/calculs' } })),
+        render: () => <Link href="/metier/calculs" className="text-sm text-blue-600 hover:underline">Ouvrir l'analyse →</Link> },
+      { titre: 'Valorisation douanière', fetcher: () => metierAPI.getDouaneValorisation(0).catch(() => ({ data: { note: 'Voir /metier/calculs' } })),
+        render: () => <Link href="/metier/calculs" className="text-sm text-blue-600 hover:underline">Ouvrir l'analyse →</Link> },
     ],
   },
   {
@@ -112,8 +113,8 @@ const SECTIONS: Section[] = [
         render: (d) => isNote(d) ? <Empty d={d} /> : <Big value={d.expirees ?? d.total ?? 0} label="expirées" /> },
       { titre: 'Quasi-accidents', fetcher: () => metierAPI.getQhseQuasiAccidents(),
         render: (d) => isNote(d) ? <Empty d={d} /> : <Big value={d.total ?? d.quasi ?? 0} label="enregistrés" /> },
-      { titre: 'Chambre froide', fetcher: () => metierAPI.getFroidBilan('—').catch(() => ({ data: { note: 'Renseigner une chambre' } })),
-        render: (d) => <p className="text-sm text-gray-500">{String(d.note ?? 'Bilan thermique')}</p> },
+      { titre: 'Chambre froide', fetcher: () => metierAPI.getFroidBilan('—').catch(() => ({ data: { note: 'Voir /metier/calculs' } })),
+        render: () => <Link href="/metier/calculs" className="text-sm text-blue-600 hover:underline">Ouvrir l'analyse →</Link> },
     ],
   },
   {

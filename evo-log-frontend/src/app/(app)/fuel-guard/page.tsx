@@ -120,6 +120,13 @@ export default function FuelGuardPage() {
             {t('Journal d’alertes', 'Alert log')}
             <ArrowRight className="w-4 h-4" />
           </Link>
+          <Link
+            href="/fuel-guard/sensors"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-700"
+          >
+            <Fuel className="w-4 h-4" />
+            {t('Capteurs cuves', 'Tank sensors')}
+          </Link>
         </div>
       </div>
 

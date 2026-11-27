@@ -1495,5 +1495,29 @@ export const metierAPI = {
     apiClient.get(`/api/v1/metier/douane/valorisation/${valuationId}`),
 };
 
+// Endpoints profonds sans ecran dedie : rapprochement bancaire, controle
+// budgetaire, permis de travail QHSE, capteurs cuve carburant.
+export const deepAPI = {
+  // Comptabilite OHADA (comptabilite_deep)
+  getBankReconciliations: () =>
+    apiClient.get('/api/v1/comptabilite-ohada/bank-reconciliations'),
+  createBankReconciliation: (data: Record<string, unknown>) =>
+    apiClient.post('/api/v1/comptabilite-ohada/bank-reconciliations', data),
+  getBudgetControls: () =>
+    apiClient.get('/api/v1/comptabilite-ohada/budget-controls'),
+  createBudgetControl: (data: Record<string, unknown>) =>
+    apiClient.post('/api/v1/comptabilite-ohada/budget-controls', data),
+  // Portail QHSE (qhse_portal_d_deep)
+  getWorkPermitRequests: () =>
+    apiClient.get('/api/v1/portail-qhse/qsp-work-permit-requests'),
+  createWorkPermitRequest: (data: Record<string, unknown>) =>
+    apiClient.post('/api/v1/portail-qhse/qsp-work-permit-requests', data),
+  // K-FuelGuard (new_k_modules)
+  getFuelSensors: () =>
+    apiClient.get('/api/v1/k-modules/fuel-guard/sensors'),
+  createFuelSensor: (data: { immatriculation_camion: string; niveau_actuel_litres: number; derniere_station?: string }) =>
+    apiClient.post('/api/v1/k-modules/fuel-guard/sensors', data),
+};
+
 export default apiClient;
 

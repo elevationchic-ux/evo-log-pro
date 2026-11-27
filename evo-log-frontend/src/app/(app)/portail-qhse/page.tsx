@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   ShieldAlert, CheckCircle2, Clock, AlertTriangle, RefreshCw,
   Camera, ShieldCheck, HeartPulse, FileText, Search, PlusCircle,
@@ -117,13 +118,21 @@ export default function PortailQHSEPage() {
           </p>
         </div>
 
-        <button
-          onClick={fetchData}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 transition-colors shadow-sm self-start md:self-auto"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Actualiser
-        </button>
+        <div className="flex items-center gap-2 self-start md:self-auto">
+          <Link
+            href="/portail-qhse/permis-travail"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 transition-colors shadow-sm"
+          >
+            Permis de travail
+          </Link>
+          <button
+            onClick={fetchData}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 transition-colors shadow-sm"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Actualiser
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
