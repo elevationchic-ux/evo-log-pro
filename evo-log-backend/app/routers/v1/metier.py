@@ -54,6 +54,9 @@ from app.services.aerien_service import AirFreightService
 from app.services.ferroviaire_service import RailFreightService
 from app.services.fluvial_service import FluvialFreightService
 from app.services.log3pl_b_service import TplCarrierService
+from app.services.gap_bridge_service import TarifService
+from app.services.pipeline_e_service import PipelineEService
+from app.services.transit_deep_service import CustomsValuationService
 
 router = APIRouter(tags=["metier-analytique"], prefix="/metier")
 
@@ -531,3 +534,33 @@ def fret_3pl(
 ) -> Dict[str, Any]:
     return TplCarrierService.calculer_fret(
         db, code_tarif=code_tarif, poids_kg=poids_kg)
+
+
+@router.post("/tarif/calculer", summary="Prix depuis la grille tarifaire (HT + TVA)")
+def tarif_calculer(
+    code: str,
+    quantite: float,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("comptabilite.balance.read")),
+) -> Dict[str, Any]:
+    return TarifService.calculer_prix(db, code=code, quantite=quantite)
+
+
+@router.get("/pipeline/corrosion/{troncon}", summary="Analyse corrosion troncon pipeline")
+def pipeline_corrosion(
+    troncon: str,
+    seuil_min_mm: float = Query(...),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.carburant.read")),
+) -> Dict[str, Any]:
+    return PipelineEService.analyse_corrosion(
+        db, troncon=troncon, seuil_min_mm=seuil_min_mm)
+
+
+@router.get("/douane/valorisation/{valuation_id}", summary="Valeur en douane selon Incoterm")
+def douane_valorisation(
+    valuation_id: int,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transit.customs_valuation.read")),
+) -> Dict[str, Any]:
+    return CustomsValuationService.calculer_valeur(db, valuation_id=valuation_id)
