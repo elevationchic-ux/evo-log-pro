@@ -1531,6 +1531,25 @@ export const deepAPI = {
     apiClient.get('/api/v1/admin-tenant/admtd-tenant-backups'),
   createTenantBackup: (data: Record<string, unknown>) =>
     apiClient.post('/api/v1/admin-tenant/admtd-tenant-backups', data),
+  // Comptabilite OHADA avances (comptabilite_deep)
+  getAssetRegistrations: () => apiClient.get('/api/v1/comptabilite-ohada/asset-registrations'),
+  createAssetRegistration: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/asset-registrations', d),
+  getDepreciationSchedules: () => apiClient.get('/api/v1/comptabilite-ohada/depreciation-schedules'),
+  createDepreciationSchedule: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/depreciation-schedules', d),
+  getProvisions: () => apiClient.get('/api/v1/comptabilite-ohada/provisions'),
+  createProvision: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/provisions', d),
+  getIntercompanyEntries: () => apiClient.get('/api/v1/comptabilite-ohada/intercompany-entries'),
+  createIntercompanyEntry: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/intercompany-entries', d),
+  getAuditPafs: () => apiClient.get('/api/v1/comptabilite-ohada/audit-pafs'),
+  createAuditPaf: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/audit-pafs', d),
+  getTaxDeclarations: () => apiClient.get('/api/v1/comptabilite-ohada/tax-declarations'),
+  createTaxDeclaration: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/tax-declarations', d),
+  getPayrollEntries: () => apiClient.get('/api/v1/comptabilite-ohada/payroll-entries'),
+  createPayrollEntry: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/payroll-entries', d),
+  getTreasuryAccounts: () => apiClient.get('/api/v1/comptabilite-ohada/treasury-accounts'),
+  createTreasuryAccount: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/treasury-accounts', d),
+  getAnalyticalSections: () => apiClient.get('/api/v1/comptabilite-ohada/analytical-sections'),
+  createAnalyticalSection: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/analytical-sections', d),
 };
 
 export default apiClient;
