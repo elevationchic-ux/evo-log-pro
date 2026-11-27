@@ -93,7 +93,20 @@ commercial D2 veille concurrentielle).
 
 ## Reste à couvrir (prochains chantiers)
 
-- Économie / analytique (rentabilité par mission/client/unité)
-- Exposition API/routeurs des nouveaux services métier
-- Paie : bulletin PDF, cumuls IRGM annuels progressifs
-- Validation PostgreSQL + e2e Playwright
+- ~~Économie / analytique~~ : fait (`economie_service`, `rentabilite_service`,
+  `rentabilite_mission_service` — recette fret vs couts par mission)
+- ~~Paie cumuls~~ : fait (`paie_service` — cumuls annuels, méthode du taux
+  cumulé IRGM sur barème source unique `rh_avance_service`, bulletin + PDF
+  WeasyPrint avec repli)
+- ~~Exposition API~~ : fait (`/api/v1/metier` — 35 endpoints lecture
+  analytiques, permissions catalogue réel) + page frontend
+  `/app/(app)/metier` + `metierAPI` typé
+- Endpoints en écriture : déjà couverts par les routeurs CRUD dédiés
+  (`*_deep.py`, `new_k_modules.py`) — les services analytiques sont
+  volontairement read-only
+- Validation PostgreSQL : environnement local sans serveur PG ni Docker ;
+  schéma validé par `create_all` SQLite (986 tables, 0 erreur via
+  `import app.main`)
+- e2e Playwright : specs présentes (`tests/e2e/`) mais pas de
+  playwright.config ni serveurs locaux — à exécuter sur l'environnement
+  déployé (Railway/Vercel)
