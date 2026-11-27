@@ -12,7 +12,7 @@ import {
   BarChart3, PieChart, LineChart, FileText, BookOpen,
   Radio, Wifi, MessageSquare, Bell,
   LayoutDashboard, Layers, Grid, FileCheck, ShoppingCart, RotateCcw,
-  ArrowRightLeft, Bot, CheckCircle2, Inbox, AlertTriangle,
+  ArrowRightLeft, Bot, CheckCircle2, Inbox, AlertTriangle, Database,
  // Identité du département Aménagement portuaire (registres réels du circuit
  // camerounais: schéma directeur, PIP/CDMT, COLIFE, titre domanial, PPP…).
   DraftingCompass, ScrollText, HardHat, CalendarRange, Gavel, Stamp,
@@ -2610,6 +2610,46 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
     ]
   },
 
+ // ============================================================================
+ // 🎯 PILOTAGE: INDICATEURS METIER, CALCULATEURS & REGISTRES DE DONNEES
+ // ============================================================================
+  pilotage: {
+    key: 'pilotage',
+    title: 'Pilotage & Registres',
+    path: '/metier',
+    icon: BarChart3,
+    color: '#0ea5e9',
+    glow: 'shadow-sky-500/50 border-sky-500/60',
+    bgGradient: 'from-sky-600 to-cyan-600',
+    businessArea: 'Pilotage Transverse',
+    processPhase: 'Supervision & Données de Référence',
+    subModules: [
+      {
+        label: 'Pilotage métier',
+        path: '/metier',
+        icon: BarChart3,
+        badge: 'KPI',
+        description: 'Indicateurs analytiques par domaine (paie, finance, transport, QHSE, admin)',
+        businessProcess: 'Pilotage transverse'
+      },
+      {
+        label: 'Calculateurs & analyses',
+        path: '/metier/calculs',
+        icon: Calculator,
+        description: 'Fret aérien/ferroviaire/fluvial/3PL, tarifs, bulletin de paie, corrosion, valorisation',
+        businessProcess: 'Calculs métier'
+      },
+      {
+        label: 'Registres de données',
+        path: '/referentiels',
+        icon: Database,
+        badge: 'CRUD',
+        description: 'Accès CRUD à tous les registres profonds des domaines (données réelles)',
+        businessProcess: 'Données de référence'
+      },
+    ]
+  },
+
 
 };
 
@@ -2690,7 +2730,7 @@ export function getFilteredNavigationForUser(
 
  // 3. COMPANY ADMIN: Accède à l'administration d'entreprise, aux rapports BI, au chat, aux prestataires et au chef du personnel
     if (isCompanyAdmin) {
-      if (['admin-tenant', 'reports-bi', 'chat', 'portail-employe', 'dashboard', 'master-data', 'rh', 'annuaire-prestataires', 'chef-personnel'].includes(moduleConfig.key)) {
+      if (['admin-tenant', 'reports-bi', 'chat', 'portail-employe', 'dashboard', 'master-data', 'rh', 'annuaire-prestataires', 'chef-personnel', 'pilotage'].includes(moduleConfig.key)) {
         return moduleConfig;
       }
     }
@@ -2717,7 +2757,11 @@ export function getFilteredNavigationForUser(
       moduleConfig.key === 'portail-employe' ||
       moduleConfig.key === 'portail-collaborateur' ||
       moduleConfig.key === 'portail-frais' ||
-      moduleConfig.key === 'portail-qhse';
+      moduleConfig.key === 'portail-qhse' ||
+ // Pilotage transversal : visible pour tout collaborateur connecté ;
+ // chaque endpoint /metier et /<domaine>/donnees reste protégé par ses
+ // permissions backend (403 si non autorisé) — pas de donnée exposée.
+      moduleConfig.key === 'pilotage';
 
     const isModuleAllowed =
       isUniversalPortal || hasRoleAccess || hasModuleAccess || hasGranularAccessTo(moduleConfig.key);
