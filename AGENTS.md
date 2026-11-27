@@ -113,6 +113,11 @@ commercial D2 veille concurrentielle).
   `employe_id`/`client_id`/`fournisseur_id`/`user_id`/`tiers_id`) + index
   `/referentiels` + module nav « Pilotage & Registres » dans
   `navigationRegistry.ts`. Régénérer via `_analyse/gen_deep_pages.py`
+- ~~Préfixes API sans UI~~ : fait — page `/app/(app)/outils` couvre les 6
+  derniers préfixes (`privacy` RGPD, `e-invoicing`, `marketplace` clés API,
+  `freight-exchange` offres, `digital-twin` yard-state, `gamification`
+  driver-scores) + `deepAPI` ; entrée « Outils & conformité » dans le
+  module nav Pilotage
 - Validation PostgreSQL : environnement local sans serveur PG ni Docker ;
   schéma validé par `create_all` SQLite (986 tables, 0 erreur via
   `import app.main`)
