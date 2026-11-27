@@ -1550,6 +1550,24 @@ export const deepAPI = {
   createTreasuryAccount: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/treasury-accounts', d),
   getAnalyticalSections: () => apiClient.get('/api/v1/comptabilite-ohada/analytical-sections'),
   createAnalyticalSection: (d: Record<string, unknown>) => apiClient.post('/api/v1/comptabilite-ohada/analytical-sections', d),
+  // Outils & conformite (privacy, e-invoicing, marketplace, freight-exchange,
+  // digital-twin, gamification)
+  getPrivacyPolicy: () => apiClient.get('/api/v1/privacy/policy'),
+  getPrivacyRegistry: () => apiClient.get('/api/v1/privacy/registry'),
+  exportMyData: () => apiClient.get('/api/v1/privacy/export-my-data'),
+  notifyBreach: (d: { incident_type: string; description: string; affected_count?: number }) =>
+    apiClient.post('/api/v1/privacy/notify-breach', d),
+  signEinvoice: (d: { invoice_number: string; client_niu: string; total_ht: number; total_tva: number; total_ttc: number }) =>
+    apiClient.post('/api/v1/e-invoicing/sign-invoice', d),
+  verifyEinvoice: (hash: string) => apiClient.get(`/api/v1/e-invoicing/verify/${hash}`),
+  getApiKeys: () => apiClient.get('/api/v1/marketplace/api-keys'),
+  createApiKey: (d: { key_name: string; allowed_ips?: string[] }) =>
+    apiClient.post('/api/v1/marketplace/api-keys', d),
+  getFreightOffers: () => apiClient.get('/api/v1/freight-exchange/offers'),
+  publishFreightOffer: (d: { origin: string; destination: string; cargo_type?: string; weight_tons: number; offered_price_xaf: number }) =>
+    apiClient.post('/api/v1/freight-exchange/offers', d),
+  getYardState: () => apiClient.get('/api/v1/digital-twin/yard-state'),
+  getDriverScores: () => apiClient.get('/api/v1/gamification/driver-scores'),
 };
 
 export default apiClient;

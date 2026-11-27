@@ -2647,6 +2647,13 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         description: 'Accès CRUD à tous les registres profonds des domaines (données réelles)',
         businessProcess: 'Données de référence'
       },
+      {
+        label: 'Outils & conformité',
+        path: '/outils',
+        icon: Shield,
+        description: 'RGPD, facturation électronique, clés API, bourse de fret, jumeau numérique, éco-conduite',
+        businessProcess: 'Conformité transverse'
+      },
     ]
   },
 
