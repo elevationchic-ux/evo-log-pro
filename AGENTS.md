@@ -98,7 +98,7 @@ commercial D2 veille concurrentielle).
 - ~~Paie cumuls~~ : fait (`paie_service` — cumuls annuels, méthode du taux
   cumulé IRGM sur barème source unique `rh_avance_service`, bulletin + PDF
   WeasyPrint avec repli)
-- ~~Exposition API~~ : fait (`/api/v1/metier` — 35 endpoints lecture
+- ~~Exposition API~~ : fait (`/api/v1/metier` — 49 endpoints lecture
   analytiques, permissions catalogue réel) + page frontend
   `/app/(app)/metier` + `metierAPI` typé
 - Endpoints en écriture : déjà couverts par les routeurs CRUD dédiés
