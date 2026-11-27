@@ -30,24 +30,42 @@ type Budget = {
   statut?: string | null;
 };
 
+type Reversal = {
+  id: number;
+  reference: string;
+  ecriture_origine?: string | null;
+  date_reversal?: string | null;
+  compte_debit?: string | null;
+  compte_credit?: string | null;
+  montant?: number | null;
+  motif?: string | null;
+  statut?: string | null;
+};
+
 const fmt = (n?: number | null) => (n === null || n === undefined ? '—' : n.toLocaleString('fr-FR'));
 
 export default function RapprochementsPage() {
   const [rappro, setRappro] = useState<Rapprochement[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [reversals, setReversals] = useState<Reversal[]>([]);
   const [loading, setLoading] = useState(true);
   const [formR, setFormR] = useState({ reference: '', compte_banque: '', solde_banque_xaf: '', solde_compta_xaf: '', ecart_xaf: '' });
   const [formB, setFormB] = useState({ reference: '', centre_cout: '', exercice: new Date().getFullYear().toString(), budget_prevu_xaf: '', consomme_xaf: '' });
+  const [formV, setFormV] = useState({ reference: '', ecriture_origine: '', compte_debit: '', compte_credit: '', montant: '', motif: '' });
   const [msg, setMsg] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
     try {
-      const [r, b] = await Promise.all([deepAPI.getBankReconciliations(), deepAPI.getBudgetControls()]);
+      const [r, b, v] = await Promise.all([
+        deepAPI.getBankReconciliations(), deepAPI.getBudgetControls(), deepAPI.getJournalReversals(),
+      ]);
       const rd = (r.data ?? r) as Rapprochement[] | { items?: Rapprochement[] };
       const bd = (b.data ?? b) as Budget[] | { items?: Budget[] };
+      const vd = (v.data ?? v) as Reversal[] | { items?: Reversal[] };
       setRappro(Array.isArray(rd) ? rd : (rd.items ?? []));
       setBudgets(Array.isArray(bd) ? bd : (bd.items ?? []));
+      setReversals(Array.isArray(vd) ? vd : (vd.items ?? []));
     } catch { /* endpoints peuvent être vides */ }
     setLoading(false);
   };
@@ -81,12 +99,28 @@ export default function RapprochementsPage() {
     } catch (err: unknown) { setMsg(err instanceof Error ? err.message : 'Erreur'); }
   };
 
+  const submitV = async (e: React.FormEvent) => {
+    e.preventDefault(); setMsg(null);
+    try {
+      await deepAPI.createJournalReversal({
+        reference: formV.reference,
+        ecriture_origine: formV.ecriture_origine || undefined,
+        compte_debit: formV.compte_debit || undefined,
+        compte_credit: formV.compte_credit || undefined,
+        montant: formV.montant ? Number(formV.montant) : undefined,
+        motif: formV.motif || undefined,
+      });
+      setMsg('Contre-passation enregistrée.');
+      setFormV({ reference: '', ecriture_origine: '', compte_debit: '', compte_credit: '', montant: '', motif: '' }); load();
+    } catch (err: unknown) { setMsg(err instanceof Error ? err.message : 'Erreur'); }
+  };
+
   return (
     <div className="p-6 space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <Link href="/comptabilite-ohada/dashboard" className="text-sm text-gray-400 hover:text-gray-600">← Comptabilité OHADA</Link>
-          <h1 className="text-2xl font-bold mt-1">Rapprochements & contrôle budgétaire</h1>
+          <h1 className="text-2xl font-bold mt-1">Rapprochements, budget & contre-passations</h1>
         </div>
         <button onClick={load} className="flex items-center gap-2 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50">
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Actualiser
@@ -164,6 +198,46 @@ export default function RapprochementsPage() {
                 </tr>
               ))}
               {!loading && budgets.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">Aucun contrôle budgétaire</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Contre-passations</h2>
+        <form onSubmit={submitV} className="bg-white border rounded-xl p-5 shadow-sm grid grid-cols-7 gap-3 items-end mb-4">
+          <label className="text-sm"><span className="block text-xs text-gray-500 mb-1">Référence *</span>
+            <input required value={formV.reference} onChange={(e) => setFormV({ ...formV, reference: e.target.value })} className="w-full border rounded px-2 py-1.5 text-sm" /></label>
+          <label className="text-sm"><span className="block text-xs text-gray-500 mb-1">Écriture origine</span>
+            <input value={formV.ecriture_origine} onChange={(e) => setFormV({ ...formV, ecriture_origine: e.target.value })} className="w-full border rounded px-2 py-1.5 text-sm" /></label>
+          <label className="text-sm"><span className="block text-xs text-gray-500 mb-1">Compte débit</span>
+            <input value={formV.compte_debit} onChange={(e) => setFormV({ ...formV, compte_debit: e.target.value })} className="w-full border rounded px-2 py-1.5 text-sm" placeholder="701000" /></label>
+          <label className="text-sm"><span className="block text-xs text-gray-500 mb-1">Compte crédit</span>
+            <input value={formV.compte_credit} onChange={(e) => setFormV({ ...formV, compte_credit: e.target.value })} className="w-full border rounded px-2 py-1.5 text-sm" placeholder="411000" /></label>
+          <label className="text-sm"><span className="block text-xs text-gray-500 mb-1">Montant XAF</span>
+            <input type="number" value={formV.montant} onChange={(e) => setFormV({ ...formV, montant: e.target.value })} className="w-full border rounded px-2 py-1.5 text-sm" /></label>
+          <label className="text-sm"><span className="block text-xs text-gray-500 mb-1">Motif</span>
+            <input value={formV.motif} onChange={(e) => setFormV({ ...formV, motif: e.target.value })} className="w-full border rounded px-2 py-1.5 text-sm" /></label>
+          <button className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Créer</button>
+        </form>
+        <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-left text-xs text-gray-500">
+              <tr><th className="px-4 py-3">Référence</th><th className="px-4 py-3">Écriture origine</th><th className="px-4 py-3">Débit</th><th className="px-4 py-3">Crédit</th><th className="px-4 py-3">Montant</th><th className="px-4 py-3">Motif</th><th className="px-4 py-3">Statut</th></tr>
+            </thead>
+            <tbody>
+              {reversals.map((v) => (
+                <tr key={v.id} className="border-t">
+                  <td className="px-4 py-2 font-medium">{v.reference}</td>
+                  <td className="px-4 py-2">{v.ecriture_origine ?? '—'}</td>
+                  <td className="px-4 py-2">{v.compte_debit ?? '—'}</td>
+                  <td className="px-4 py-2">{v.compte_credit ?? '—'}</td>
+                  <td className="px-4 py-2">{fmt(v.montant)}</td>
+                  <td className="px-4 py-2">{v.motif ?? '—'}</td>
+                  <td className="px-4 py-2">{v.statut ?? '—'}</td>
+                </tr>
+              ))}
+              {!loading && reversals.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">Aucune contre-passation</td></tr>}
             </tbody>
           </table>
         </div>

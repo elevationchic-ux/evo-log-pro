@@ -1517,6 +1517,20 @@ export const deepAPI = {
     apiClient.get('/api/v1/k-modules/fuel-guard/sensors'),
   createFuelSensor: (data: { immatriculation_camion: string; niveau_actuel_litres: number; derniere_station?: string }) =>
     apiClient.post('/api/v1/k-modules/fuel-guard/sensors', data),
+  // Contre-passations comptables (compta_c_deep)
+  getJournalReversals: () =>
+    apiClient.get('/api/v1/comptabilite-ohada/cmptc-journal-reversals'),
+  createJournalReversal: (data: Record<string, unknown>) =>
+    apiClient.post('/api/v1/comptabilite-ohada/cmptc-journal-reversals', data),
+  // Admin tenant : impersonations + sauvegardes (admin_tenant_c_deep)
+  getImpersonationLogs: () =>
+    apiClient.get('/api/v1/admin-tenant/admtd-impersonation-logs'),
+  createImpersonationLog: (data: Record<string, unknown>) =>
+    apiClient.post('/api/v1/admin-tenant/admtd-impersonation-logs', data),
+  getTenantBackups: () =>
+    apiClient.get('/api/v1/admin-tenant/admtd-tenant-backups'),
+  createTenantBackup: (data: Record<string, unknown>) =>
+    apiClient.post('/api/v1/admin-tenant/admtd-tenant-backups', data),
 };
 
 export default apiClient;

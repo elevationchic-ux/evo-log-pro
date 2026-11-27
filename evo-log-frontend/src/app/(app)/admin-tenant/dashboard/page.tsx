@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import {
-  Shield, Users, Building2, Settings, Activity,
+  Shield, ShieldCheck, Users, Building2, Settings, Activity,
   Globe, Database, CheckCircle2, AlertTriangle, Plus
 } from 'lucide-react';
 import Link from 'next/link';
@@ -68,6 +68,7 @@ export default function AdminTenantDashboard() {
           { href: '/admin-tenant/audit-logs', icon: Activity, label: 'Journaux d Audit', desc: 'Traçabilité des actions utilisateurs, modifications critiques et connexions', tcode: 'KSUP_AUD' },
           { href: '/admin-tenant/integrations', icon: Globe, label: 'Intégrations & APIs', desc: 'Connecteurs Sage, Mobile Money (OM/MOMO), SYDONIA, GPS télémat.', tcode: 'KSUP_INT' },
           { href: '/admin-tenant/global-settings', icon: Database, label: 'Paramètres Globaux ERP', desc: 'Exercices comptables, devises, TVA, calendriers OHADA, référentiels', tcode: 'KSUP_CFG' },
+          { href: '/admin-tenant/securite', icon: ShieldCheck, label: 'Sécurité & Sauvegardes', desc: 'Journal des impersonations support et état des sauvegardes tenants', tcode: 'KSUP_SEC' },
         ].map(item => (
           <Link
             key={item.href}
