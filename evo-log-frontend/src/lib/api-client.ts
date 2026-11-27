@@ -1473,6 +1473,18 @@ export const metierAPI = {
     apiClient.get('/api/v1/metier/froid/bilan-chambre', { params: { chambre } }),
   getTransitConformite: () =>
     apiClient.get('/api/v1/metier/transit/conformite'),
+  getConteneurCycle: (cycleId: number) =>
+    apiClient.get(`/api/v1/metier/conteneurs/${cycleId}/cycle`),
+  getCoursierPerformance: (livreur: string) =>
+    apiClient.get(`/api/v1/metier/coursier/performance/${encodeURIComponent(livreur)}`),
+  postFretAerien: (codeTarif: string, poidsKg: number) =>
+    apiClient.post('/api/v1/metier/fret/aerien', null, { params: { code_tarif: codeTarif, poids_kg: poidsKg } }),
+  postFretFerrovial: (codeTarif: string, tonnes: number, distanceKm: number, typeMarchandise?: string) =>
+    apiClient.post('/api/v1/metier/fret/ferroviaire', null, { params: { code_tarif: codeTarif, tonnes, distance_km: distanceKm, type_marchandise: typeMarchandise } }),
+  postFretFluvial: (waybillId: number, codeTarif: string) =>
+    apiClient.post('/api/v1/metier/fret/fluvial', null, { params: { waybill_id: waybillId, code_tarif: codeTarif } }),
+  postFret3pl: (codeTarif: string, poidsKg: number) =>
+    apiClient.post('/api/v1/metier/fret/3pl', null, { params: { code_tarif: codeTarif, poids_kg: poidsKg } }),
 };
 
 export default apiClient;
