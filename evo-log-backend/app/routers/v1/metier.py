@@ -15,6 +15,15 @@ from app.services.rentabilite_service import RentabiliteService
 from app.services.economie_service import EconomieService
 from app.services.qhse_deep_service import QhseDeepService
 from app.services.comptabilite_deep_service import ComptabiliteDeepService
+from app.services.transport_b_service import TransportBService
+from app.services.magasin_b_service import MagasinBService
+from app.services.finance_c_service import FinanceCService
+from app.services.rh_c_service import RhCService
+from app.services.frais_d_service import FraisDService
+from app.services.organization_service import OrganizationService
+from app.services.dashboard_deep_service import DashboardDeepService
+from app.services.transport_deep_service import TransportDeepService
+from app.services.fluvial_b_service import FluvialBService
 
 router = APIRouter(tags=["metier-analytique"], prefix="/metier")
 
@@ -69,3 +78,106 @@ def controle_budgetaire(
     current: User = Depends(require_perm("comptabilite.budget_control.read")),
 ) -> Dict[str, Any]:
     return ComptabiliteDeepService.controle_budgetaire(db)
+
+
+@router.get("/transport/tournees", summary="Tournees par chauffeur")
+def transport_tournees(
+    chauffeur: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.dispatch.read")),
+) -> Dict[str, Any]:
+    return TransportBService.tournees(db, chauffeur=chauffeur)
+
+
+@router.get("/transport/dg-conformite", summary="Conformite marchandises dangereuses")
+def transport_dg(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.dispatch.read")),
+) -> Dict[str, Any]:
+    return TransportDeepService.conformite_dg(db)
+
+
+@router.get("/fluvial/navigabilite", summary="Navigabilite par bief")
+def fluvial_nav(
+    bief: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("transport.mission.read")),
+) -> Dict[str, Any]:
+    return FluvialBService.navigabilite(db, bief=bief)
+
+
+@router.get("/magasin/ecarts", summary="Ecarts d'inventaire")
+def magasin_ecarts(
+    article: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("magasin.inventaire.read")),
+) -> Dict[str, Any]:
+    return MagasinBService.ecarts_inventaire(db, article=article)
+
+
+@router.get("/finance/previsions", summary="Positions de tresorerie previsionnelles")
+def finance_previsions(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("tresorerie.mouvement.read")),
+) -> Dict[str, Any]:
+    return FinanceCService.previsions(db)
+
+
+@router.get("/finance/affacturage", summary="Avances d'affacturage")
+def finance_affacturage(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("tresorerie.mouvement.read")),
+) -> Dict[str, Any]:
+    return FinanceCService.affacturage(db)
+
+
+@router.get("/rh/formation", summary="Plans de formation et realisation")
+def rh_formation(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("rh.employes.read")),
+) -> Dict[str, Any]:
+    return RhCService.formation(db)
+
+
+@router.get("/rh/discipline", summary="Sanctions disciplinaires actives")
+def rh_discipline(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("rh.employes.read")),
+) -> Dict[str, Any]:
+    return RhCService.discipline(db)
+
+
+@router.get("/frais/rapports", summary="Notes de frais par statut")
+def frais_rapports(
+    collaborateur: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("rh.employes.read")),
+) -> Dict[str, Any]:
+    return FraisDService.rapports(db, collaborateur=collaborateur)
+
+
+@router.get("/frais/tva-recuperable", summary="TVA recuperable en attente")
+def frais_tva(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("rh.employes.read")),
+) -> Dict[str, Any]:
+    return FraisDService.tva_recuperable(db)
+
+
+@router.get("/organisation/abonnements", summary="Sante des abonnements tenant")
+def organisation_abonnements(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("admin.nomenclature.read")),
+) -> Dict[str, Any]:
+    return OrganizationService.abonnements(db)
+
+
+@router.get("/dashboard/sante", summary="Sante des modules et alertes")
+def dashboard_sante(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_perm("dashboard.nomenclature.read")),
+) -> Dict[str, Any]:
+    return {
+        "modules": DashboardDeepService.sante_modules(db),
+        "alertes": DashboardDeepService.alertes(db),
+    }
