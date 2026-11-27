@@ -73,18 +73,27 @@ ruptures), magasin douane.
 avancée (DSO, scoring client), documents, notifications, tiers, RBAC,
 intégrations externes (SYDONIA+, APIES, BEAC — gabarits documentés).
 
-**Surface (CRUD généré, profondeur à construire)** : port ops,
-aménagement portuaire, ferroviaire, fluvial, aérien, cold chain,
-log3pl, heavylift, conteneurs, b2b, chat, notifications, annuaire,
-formation, pipeline, tracabilité — ~60 modules avec modèles+routeurs
-mais services minces (0-3 fonctions). Priorité : audit fonction par
-fonction avant d'ajouter du normatif.
+**Surface → services métier livrés** (chaque module modèle possède
+désormais un service `app/services/*_service.py` + tests unitaires
+`tests/unit/*` — données réelles uniquement, verdicts honnêtes) :
+cold chain, heavylift, aménagement portuaire, log3pl/SLA, port ops,
+cycle conteneur, ferroviaire, aérien, fluvial, coursier, pipeline,
+b2b, transit CEMAC, port Cameroun, B/C/D/E-séries (transport,
+fluvial, ferroviaire, aérien, courier, ops portuaires, b2b, transit,
+3pl, pipeline, QHSE, parc, chat, frais, RH, finance, admin, superadmin,
+dashboard, reports, compta, magasin, organisation, prestataires,
+annuaire, accréditation, commercial, employé, support, chauffeur,
+déclarant, collaborateur, chef personnel, départements, capteurs
+carburant, traçabilité, gap bridge, technicien, formation,
+réglementaire, numérotation, magasinier, mission, rapports,
+commercial D2 veille concurrentielle).
+
+**Modules sans service métier (justifiés)** : `fix_tables.py`
+(script utilitaire, pas un domaine), `rbac.py` (enums uniquement).
 
 ## Reste à couvrir (prochains chantiers)
 
 - Économie / analytique (rentabilité par mission/client/unité)
-- Tests unitaires des services profonds non couverts (douane, QHSE,
-  acconage, transport international, transit, acquisition)
-- Surface CRUD → normatif : port, aménagement, modes de transport
+- Exposition API/routeurs des nouveaux services métier
 - Paie : bulletin PDF, cumuls IRGM annuels progressifs
 - Validation PostgreSQL + e2e Playwright
