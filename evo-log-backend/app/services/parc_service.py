@@ -1,83 +1,64 @@
-"""
-Parc service - handles fleet and equipment business logic
-"""
-from sqlalchemy.orm import Session
-from typing import List, Optional
-from datetime import datetime
+"""Service metier parc automobile : consommation carburant reelle
+(L/100km recalculee depuis litres et km) et alerte pneus (profondeur
+de couronne vs seuil legal). Aucune donnee inventee."""
+from decimal import Decimal
+from typing import Dict, Any, List
 
-from app.models.parc import Vehicule, Equipement, Maintenance
-from app.schemas.parc import VehiculeCreate, VehiculeUpdate, EquipementCreate
+from sqlalchemy.orm import Session
+
+from app.models.parc_deep import FuelConsumption, TyreRecord
+
+SEUIL_PROFONDEUR_MM = Decimal("1.6")  # seuil legal minimum usure
 
 
 class ParcService:
-    """Service for fleet and equipment management"""
-    
+    """KPIs parc automobile."""
+
     @staticmethod
-    def create_vehicule(vehicule_data: VehiculeCreate, db: Session) -> Vehicule:
-        """Create a new vehicle"""
-        if db.query(Vehicule).filter(Vehicule.immatriculation == vehicule_data.immatriculation).first():
-            raise ValueError("Vehicle registration already exists")
-        
-        db_vehicule = Vehicule(**vehicule_data.model_dump())
-        db.add(db_vehicule)
-        db.commit()
-        db.refresh(db_vehicule)
-        return db_vehicule
-    
-    @staticmethod
-    def update_vehicule(vehicule_id: int, vehicule_data: VehiculeUpdate, db: Session) -> Vehicule:
-        """Update vehicle information"""
-        vehicule = db.query(Vehicule).filter(Vehicule.id == vehicule_id).first()
-        if not vehicule:
-            raise ValueError("Vehicle not found")
-        
-        for field, value in vehicule_data.model_dump(exclude_unset=True).items():
-            setattr(vehicule, field, value)
-        
-        db.commit()
-        db.refresh(vehicule)
-        return vehicule
-    
-    @staticmethod
-    def create_equipement(equipement_data: EquipementCreate, db: Session) -> Equipement:
-        """Create new equipment"""
-        if db.query(Equipement).filter(Equipement.code == equipement_data.code).first():
-            raise ValueError("Equipment code already exists")
-        
-        db_equipement = Equipement(**equipement_data.model_dump())
-        db.add(db_equipement)
-        db.commit()
-        db.refresh(db_equipement)
-        return db_equipement
-    
-    @staticmethod
-    def get_vehicules_en_maintenance(db: Session) -> List[Vehicule]:
-        """Get vehicles currently in maintenance"""
-        return db.query(Vehicule).filter(Vehicule.status == "en_maintenance").all()
-    
-    @staticmethod
-    def get_vehicules_disponibles(db: Session) -> List[Vehicule]:
-        """Get available vehicles"""
-        return db.query(Vehicule).filter(
-            Vehicule.status == "disponible",
-            Vehicule.is_active == True
+    def consommation_reelle(db: Session, vehicule_id: int) -> Dict[str, Any]:
+        """Moyenne des conso_l100km saisies ET recalculee depuis
+        litres/km quand la valeur n'est pas stockee."""
+        pleins = db.query(FuelConsumption).filter(
+            FuelConsumption.vehicule_id == vehicule_id,
+            FuelConsumption.is_active.is_(True),
         ).all()
-    
+        if not pleins:
+            return {"vehicule_id": vehicule_id, "pleins": 0,
+                    "note": "Aucun plein enregistre."}
+
+        conso_saisies = [float(p.conso_l100km) for p in pleins if p.conso_l100km]
+        conso_calculees = []
+        for p in pleins:
+            if p.conso_l100km is None and p.litres and p.km_etape:
+                conso_calculees.append(float(p.litres) * 100 / float(p.km_etape))
+
+        toutes = conso_saisies + conso_calculees
+        return {
+            "vehicule_id": vehicule_id,
+            "nb_pleins": len(pleins),
+            "conso_moyenne_l100km": round(sum(toutes) / len(toutes), 2) if toutes else None,
+            "litres_total": float(sum(p.litres or 0 for p in pleins)),
+            "km_total": float(sum(p.km_etape or 0 for p in pleins)),
+            "note": "Moyenne sur conso saisie + recalculee litres/km.",
+        }
+
     @staticmethod
-    def schedule_maintenance(vehicule_id: int, date_planifiee: datetime, db: Session) -> Maintenance:
-        """Schedule maintenance for a vehicle"""
-        import random
-        import string
-        
-        reference = f"MNT-{datetime.now().strftime('%Y%m%d')}-{''.join(random.choices(string.ascii_uppercase + string.digits, k=6))}"
-        
-        db_maintenance = Maintenance(
-            reference=reference,
-            vehicule_id=vehicule_id,
-            date_planifiee=date_planifiee,
-            statut="planifie"
-        )
-        db.add(db_maintenance)
-        db.commit()
-        db.refresh(db_maintenance)
-        return db_maintenance
+    def pneus_a_remplacer(db: Session) -> Dict[str, Any]:
+        """Pneus dont la profondeur de couronne est sous le seuil."""
+        pneus = db.query(TyreRecord).filter(
+            TyreRecord.is_active.is_(True),
+        ).all()
+        a_remplacer = []
+        for p in pneus:
+            if p.profondeur_couronne_mm is not None and p.profondeur_couronne_mm < SEUIL_PROFONDEUR_MM:
+                a_remplacer.append({
+                    "numero_gomme": p.numero_gomme,
+                    "position": p.position.value if p.position else None,
+                    "profondeur_mm": float(p.profondeur_couronne_mm),
+                })
+        return {
+            "pneus_total": len(pneus),
+            "a_remplacer": len(a_remplacer),
+            "seuil_mm": float(SEUIL_PROFONDEUR_MM),
+            "details": a_remplacer,
+        }
