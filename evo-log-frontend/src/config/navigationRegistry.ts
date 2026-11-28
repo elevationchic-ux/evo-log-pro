@@ -1453,16 +1453,6 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         requiredRoles: ['ADMIN', 'SUPER_ADMIN']
       },
       {
-        label: 'Agences & Sites Opérationnels',
-        path: '/admin/agencies',
-        icon: Building,
-        badge: 'Agences',
-        tcode: 'KADM_AGC',
-        description: 'Gestion des agences Siège Douala, Port Kribi et limbé',
-        businessProcess: 'Organisation locale',
-        requiredRoles: ['ADMIN', 'SUPER_ADMIN']
-      },
-      {
         label: 'Agences, succursales & extensions',
         path: '/agences',
         icon: Building2,
@@ -3001,7 +2991,6 @@ applyAdvanced(ADVANCED_SUBMODULES_2);
 const ADVANCED_SUBMODULES_3: AdvancedSubModuleEntry[] = [
   { family: 'finance-ohada', label: 'Acquisitions & Immobilisations', path: '/acquisition', icon: TrendingUp, badge: 'Immo', description: 'Suivi des acquisitions et entrees d’immobilisations', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
   { family: 'qhse-securite', label: 'Registre QHSE', path: '/qhse', icon: Shield, badge: 'Avancé', description: 'Registre general QHSE (liste, creation, consultation)', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'QHSE'] },
-  { family: 'admin-saas', label: 'Administration Agence', path: '/admin-agency', icon: Building, badge: 'Agence', description: 'Pilotage des agences et points de service du tenant', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
   { family: 'transit-douane', label: 'Dossiers Transit (listes)', path: '/transit', icon: Landmark, badge: 'Avancé', description: 'Registre et suivi des dossiers de transit (CRUD complet)', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'TRANSIT', 'DOUANE'] },
   { family: 'admin-tenant', label: 'Tiers (clients & fournisseurs)', path: '/tiers', icon: Users, badge: 'Tiers', description: 'Annuaire unifie des tiers : clients, fournisseurs, partenaires', requiredRoles: ['ADMIN', 'SUPER_ADMIN'] },
 ];

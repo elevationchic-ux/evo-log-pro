@@ -168,7 +168,17 @@ reconstruit `livraisons`, `missions_sous_traitant`, `pods`, `documents_pod`
   `livraisons` — migration 118. Frontend : `agencesAPI`, sélecteur du
   header désormais branché sur le backend (avant : localStorage
   cosmétique), page `/agences` (référentiel + comparatif + effectifs +
-  switch). Permissions catalogue `agences.*`.
+  switch). Permissions catalogue `agences.*` : `/moi` expose
+  `peut_gerer_reseau`/`peut_voir_pilotage`/`peut_voir_comptes`/
+  `peut_gerer_comptes` évalués via `can()` — les onglets sensibles sont
+  masqués côté UI. Grants : AUDITEUR `agences.*.read`, DAF
+  `agences.pilotage.read` (migration 119). Consolidation : `/admin/agencies`
+  et `/admin-agency` sont des redirections vers `/agences` ; l'ancien
+  routeur `admin_agency.py` (`/api/v1/admin/agencies`) reste monté pour
+  compat API mais n'a plus de consommateur frontend (tenant_enforcement
+  scope déjà `Agency.company_id`). Seules les tables dotées d'`agency_id`
+  sont filtrées — les modules `*_deep` restent globaux (extension
+  incrémentale possible).
 - Validation PostgreSQL : environnement local sans serveur PG ni Docker ;
   schéma validé par `create_all` SQLite (986 tables, 0 erreur via
   `import app.main`)

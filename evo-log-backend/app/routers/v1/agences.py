@@ -27,7 +27,7 @@ from sqlalchemy.orm import Session
 
 from app.core.agency_context import bypass_agency_filter
 from app.core.database import get_db
-from app.core.permissions import require_perm
+from app.core.permissions import can, require_perm
 from app.core.security import get_current_user
 from app.models.user import User
 from app.models.agency import Agency
@@ -172,7 +172,10 @@ def mon_contexte_agence(
         "agence_active": _serialize(active) if active else None,
         "filtrage_actif": is_agency_enforcement_active() and get_current_agency() is not None,
         "agences": [_serialize(a) for a in accessibles],
-        "peut_gerer_reseau": current_user.is_superuser or current_user.role_level <= 2,
+        "peut_gerer_reseau": can(current_user, "agences.agences.create"),
+        "peut_voir_pilotage": can(current_user, "agences.pilotage.read"),
+        "peut_voir_comptes": can(current_user, "agences.comptes.read"),
+        "peut_gerer_comptes": can(current_user, "agences.comptes.modify"),
     }
 
 
@@ -468,7 +471,7 @@ def tableau_de_bord_agence(
     agency_id: int,
     jours: int = Query(30, ge=1, le=365),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_perm("agences.pilotage.read")),
 ):
     """Dashboard d'une agence : KPI complets + activite recente reelle."""
     agency = _get_agence_or_404(db, agency_id, current_user)

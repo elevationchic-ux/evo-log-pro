@@ -43,7 +43,7 @@ type Tab = 'reseau' | 'comparatif' | 'effectifs' | 'detail';
 export default function AgencesPage() {
   const [tab, setTab] = useState<Tab>('reseau');
   const [agences, setAgences] = useState<Agency[]>([]);
-  const [contexte, setContexte] = useState<{ agence_active: Agency | null; filtrage_actif: boolean; peut_gerer_reseau: boolean } | null>(null);
+  const [contexte, setContexte] = useState<{ agence_active: Agency | null; filtrage_actif: boolean; peut_gerer_reseau: boolean; peut_voir_pilotage?: boolean; peut_voir_comptes?: boolean; peut_gerer_comptes?: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [comparatif, setComparatif] = useState<{ agences: ComparatifRow[]; donnees_non_rattachees?: Record<string, number> } | null>(null);
@@ -66,7 +66,11 @@ export default function AgencesPage() {
       ]);
       if (resCtx.status === 'fulfilled') {
         const d = resCtx.value.data as any;
-        setContexte({ agence_active: d.agence_active, filtrage_actif: !!d.filtrage_actif, peut_gerer_reseau: !!d.peut_gerer_reseau });
+        setContexte({
+          agence_active: d.agence_active, filtrage_actif: !!d.filtrage_actif,
+          peut_gerer_reseau: !!d.peut_gerer_reseau, peut_voir_pilotage: !!d.peut_voir_pilotage,
+          peut_voir_comptes: !!d.peut_voir_comptes, peut_gerer_comptes: !!d.peut_gerer_comptes,
+        });
       }
       if (resList.status === 'fulfilled') {
         setAgences((resList.value.data as any)?.items ?? []);
@@ -147,8 +151,8 @@ export default function AgencesPage() {
 
   const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'reseau', label: 'Réseau d’agences', icon: <Building2 className="w-4 h-4" /> },
-    { key: 'comparatif', label: 'Comparatif inter-agences', icon: <BarChart3 className="w-4 h-4" /> },
-    { key: 'effectifs', label: 'Effectifs', icon: <UserCog className="w-4 h-4" /> },
+    ...(contexte?.peut_voir_pilotage ? [{ key: 'comparatif' as Tab, label: 'Comparatif inter-agences', icon: <BarChart3 className="w-4 h-4" /> }] : []),
+    ...(contexte?.peut_voir_comptes ? [{ key: 'effectifs' as Tab, label: 'Effectifs', icon: <UserCog className="w-4 h-4" /> }] : []),
     { key: 'detail', label: 'Fiche agence', icon: <GitBranch className="w-4 h-4" /> },
   ];
 
@@ -255,7 +259,9 @@ export default function AgencesPage() {
                 )}
                 {a.is_current && <span className="ml-auto text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-600 text-white">Active</span>}
                 <button onClick={() => void ouvrirDetail(a)} className="text-xs text-slate-300 hover:text-white font-medium px-2 py-1.5">Détail</button>
-                <button onClick={() => void chargerEffectifs(a)} className="text-xs text-slate-300 hover:text-white font-medium px-2 py-1.5">Effectifs</button>
+                {contexte?.peut_voir_comptes && (
+                  <button onClick={() => void chargerEffectifs(a)} className="text-xs text-slate-300 hover:text-white font-medium px-2 py-1.5">Effectifs</button>
+                )}
                 {contexte?.peut_gerer_reseau && (
                   <button onClick={() => void handleDelete(a.id)} className="text-xs text-rose-400 hover:text-rose-300 font-medium px-2 py-1.5">Supprimer</button>
                 )}

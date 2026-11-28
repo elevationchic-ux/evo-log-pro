@@ -417,6 +417,9 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
         "comptabilite.*.*", "tresorerie.*.*", "facturation.*.*", "fiscalite.*.*",
         "immobilisations.*.*", "achats.commande.approve",
         "juridique.*.*",
+ # Le reseau d'agences engage des centres de couts et du CA par site:
+ # le DAF lit le comparatif inter-agences, sans administrer le reseau.
+        "agences.pilotage.read",
  # L'engagement des credits d'investissement passe par la fiche technique
  # visa de maturite puis le visa du controle financier: le DAF instruit
  # la ligne et l'approuve, il ne gere ni les travaux ni le domaine.
@@ -470,6 +473,9 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
  # L'auditeur verifie le domaine: lire les pieces a valeur (programmation,
  # marches, titres, concessions) sans pouvoir y toucher.
         "amenagement.*.read",
+ # Lecture transversale du reseau d'agences (comparatif, effectifs) —
+ # coherent avec le mandat "lecture seule, aucune ecriture" de l'auditeur.
+        "agences.*.read",
     ]),
     ("TRANSIT_PRINCIPAL", 2, "Transitaire principal : gestion et validation des dossiers", [
         "transit.*.*", "acconage.*.read", "magasin.stock.read", "fiscalite.declarations.read",

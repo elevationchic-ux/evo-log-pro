@@ -174,7 +174,6 @@ export const adminAPI = {
   getRoles: () => apiClient.get('/api/v1/admin/roles'),
   createRole: (data: any) => apiClient.post('/api/v1/admin/roles', data),
   getAuditLogs: (params?: Record<string, unknown>) => apiClient.get('/api/v1/admin/audit-logs', { params }),
-  getAgencies: (params?: Record<string, unknown>) => apiClient.get('/api/v1/admin/agencies', { params }),
   getDashboardKpis: () => apiClient.get('/api/v1/admin/dashboard/global-kpis'),
   getSystemHealth: () => apiClient.get('/api/v1/admin/system-health'),
 };
@@ -1069,15 +1068,6 @@ export const goodsDeclarationAPI = {
 };
 
 // ─── Service Admin Agencies (Succursales) ─────────────────────────────────
-export const adminAgencyAPI = {
-  getAll: (params?: Record<string, unknown>) => apiClient.get('/api/v1/admin/agencies', { params }),
-  getStats: () => apiClient.get('/api/v1/admin/agencies/stats'),
-  getById: (id: number) => apiClient.get(`/api/v1/admin/agencies/${id}`),
-  create: (data: unknown) => apiClient.post('/api/v1/admin/agencies', data),
-  update: (id: number, data: unknown) => apiClient.put(`/api/v1/admin/agencies/${id}`, data),
-  delete: (id: number) => apiClient.delete(`/api/v1/admin/agencies/${id}`),
-};
-
 // ─── Module Agences & succursales (reseau territorial) ─────────────────────
 export const agencesAPI = {
   contexte: () => apiClient.get('/api/v1/agences/moi'),
