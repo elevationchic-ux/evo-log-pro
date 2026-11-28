@@ -515,6 +515,14 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         requiredRoles: ['TRANSPORT', 'FINANCE']
       },
       {
+        label: 'Analytique flotte avancée',
+        path: '/transport-avance/analytique',
+        icon: BarChart3,
+        badge: 'KPI',
+        description: 'Coûts km, anomalies carburant, temps de conduite, accidents, GPS, géofencing, KPIs',
+        businessProcess: 'Pilotage transport'
+      },
+      {
         label: "Fiche vehicule",
         path: "/transport-flotte/vehicle-registry",
         icon: (LUCIDE as any)["Truck"],

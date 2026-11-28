@@ -1568,6 +1568,10 @@ export const deepAPI = {
     apiClient.post('/api/v1/freight-exchange/offers', d),
   getYardState: () => apiClient.get('/api/v1/digital-twin/yard-state'),
   getDriverScores: () => apiClient.get('/api/v1/gamification/driver-scores'),
+  // IA predictive (bi / fuelguard / finance selon module)
+  getForecastDemand: () => apiClient.get('/api/v1/ai/predictive/forecast-demand'),
+  getFuelAnomalies: () => apiClient.get('/api/v1/ai/predictive/fuel-anomalies'),
+  getClientRiskScore: (clientId: number) => apiClient.get(`/api/v1/ai/predictive/client-risk-score/${clientId}`),
 };
 
 export default apiClient;

@@ -54,7 +54,13 @@ function useSubmit() {
 }
 
 export default function OutilsPage() {
-  const [tab, setTab] = useState<'confidentialite' | 'facturation' | 'clés' | 'bourse' | 'jumeau' | 'eco'>('confidentialite');
+  const [tab, setTab] = useState<'confidentialite' | 'facturation' | 'clés' | 'bourse' | 'jumeau' | 'ia' | 'eco'>('confidentialite');
+
+  // IA prédictive
+  const forecast = useFetch(() => deepAPI.getForecastDemand());
+  const fuelAnomalies = useFetch(() => deepAPI.getFuelAnomalies());
+  const riskScore = useSubmit();
+  const [riskClientId, setRiskClientId] = useState('');
 
   // Confidentialité
   const policy = useFetch(() => deepAPI.getPrivacyPolicy());
@@ -98,6 +104,7 @@ export default function OutilsPage() {
           ['clés', 'Clés API'],
           ['bourse', 'Bourse de fret'],
           ['jumeau', 'Jumeau & éco-conduite'],
+          ['ia', 'IA prédictive'],
         ] as const).map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)}
             className={`px-4 py-2 text-sm rounded-t-lg ${tab === k ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
@@ -283,6 +290,36 @@ export default function OutilsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Panel titre="État du parc (jumeau numérique)"><Json data={yard.data} loading={yard.loading} /></Panel>
           <Panel titre="Scores éco-conduite chauffeurs"><Json data={scores.data} loading={scores.loading} /></Panel>
+        </div>
+      )}
+
+      {tab === 'ia' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Panel titre="Prévision de demande transport">
+            <Json data={forecast.data} loading={forecast.loading} />
+            <button onClick={forecast.reload} className="mt-2 text-xs text-blue-600 hover:underline">Actualiser</button>
+          </Panel>
+          <Panel titre="Anomalies carburant (tickets réels)">
+            <Json data={fuelAnomalies.data} loading={fuelAnomalies.loading} />
+            <button onClick={fuelAnomalies.reload} className="mt-2 text-xs text-blue-600 hover:underline">Actualiser</button>
+          </Panel>
+          <Panel titre="Score de risque client">
+            <form className="flex gap-2" onSubmit={(e) => {
+              e.preventDefault();
+              riskScore.run(() => deepAPI.getClientRiskScore(Number(riskClientId)));
+            }}>
+              <input required type="number" placeholder="ID client" value={riskClientId}
+                onChange={(e) => setRiskClientId(e.target.value)} className="flex-1 border rounded px-2 py-1.5 text-sm" />
+              <button disabled={riskScore.loading} className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50">Évaluer</button>
+            </form>
+            {riskScore.error && <p className="text-sm text-red-600 mt-2">{riskScore.error}</p>}
+            {riskScore.result && <pre className="text-xs bg-gray-50 border rounded p-3 mt-2 overflow-auto max-h-60">{JSON.stringify(riskScore.result, null, 2)}</pre>}
+          </Panel>
+          <Panel titre="Note">
+            <p className="text-sm text-gray-500">
+              L'assistant IA conversationnel (<code>/ai/assistant/chat</code>) répond 501 côté backend — il n'est volontairement pas exposé tant qu'il n'est pas implémenté.
+            </p>
+          </Panel>
         </div>
       )}
     </div>

@@ -133,6 +133,13 @@ commercial D2 veille concurrentielle).
   `NAV_TO_PERM_MODULE`, GARDIEN autorisé au module pour ses gate passes,
   rôles terrain ajoutés aux `requiredRoles` des sous-modules quai/gate.
   La nav reste filtrée par `modulesAllowed` + permissions granulaires.
+- ~~IA prédictive sans UX~~ : fait — `/outils` onglet « IA prédictive »
+  (forecast-demand, fuel-anomalies, client-risk-score) ; l'assistant
+  conversationnel `/ai/assistant/chat` répond 501 → volontairement non
+  exposé. Page `/transport-avance/analytique` : 13 endpoints GET
+  paramétrés de `transport_avance.py` (coûts km, carburant, temps
+  conduite, sous-traitants, accidents, maintenance, GPS, géofencing,
+  conducteurs, KPIs) + entrée nav sous `transport-flotte`.
 - Validation PostgreSQL : environnement local sans serveur PG ni Docker ;
   schéma validé par `create_all` SQLite (986 tables, 0 erreur via
   `import app.main`)
