@@ -48,7 +48,11 @@ export default function AgencesPage() {
   const [search, setSearch] = useState('');
   const [comparatif, setComparatif] = useState<{ agences: ComparatifRow[]; donnees_non_rattachees?: Record<string, number> } | null>(null);
   const [detail, setDetail] = useState<any>(null);
-  const [utilisateurs, setUtilisateurs] = useState<{ id: number; email: string; full_name?: string; role_level: number; is_active: boolean }[]>([]);
+  const [utilisateurs, setUtilisateurs] = useState<{ id: number; email: string; full_name?: string; role_level: number; is_active: boolean; agency_id?: number | null }[]>([]);
+  const [candidats, setCandidats] = useState<{ id: number; email: string; full_name?: string; role_level: number; is_active: boolean; agency_id?: number | null }[]>([]);
+  const [affectationOuverte, setAffectationOuverte] = useState(false);
+  const [userAffecte, setUserAffecte] = useState('');
+  const [edition, setEdition] = useState<Agency | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     code: '', name: '', type_agence: 'AGENCE', parent_id: '',
@@ -113,25 +117,67 @@ export default function AgencesPage() {
   const chargerEffectifs = async (a: Agency) => {
     setTab('effectifs');
     setDetail(a);
+    setAffectationOuverte(false); setUserAffecte('');
     try {
       const res = await agencesAPI.utilisateurs(a.id);
       setUtilisateurs((res.data as any)?.items ?? []);
     } catch { setUtilisateurs([]); }
+    if (contexte?.peut_gerer_comptes) {
+      try {
+        const res = await agencesAPI.candidats(a.id);
+        setCandidats(((res.data as any)?.items ?? []).filter((u: any) => u.is_active));
+      } catch { setCandidats([]); }
+    } else { setCandidats([]); }
+  };
+
+  const handleAffecter = async () => {
+    if (!detail || !userAffecte) return;
+    try {
+      await agencesAPI.affecter(detail.id, Number(userAffecte));
+      setAffectationOuverte(false); setUserAffecte('');
+      await chargerEffectifs(detail);
+      await fetchReseau();
+    } catch (e: any) { setError(e?.response?.data?.detail ?? 'Affectation impossible'); }
+  };
+
+  const handleDesaffecter = async (userId: number) => {
+    if (!detail) return;
+    try {
+      await agencesAPI.desaffecter(detail.id, userId);
+      await chargerEffectifs(detail);
+      await fetchReseau();
+    } catch (e: any) { setError(e?.response?.data?.detail ?? 'Désaffectation impossible'); }
   };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault(); setError(null);
+    const payload = {
+      ...formData,
+      parent_id: formData.parent_id ? Number(formData.parent_id) : null,
+    };
     try {
-      await agencesAPI.creer({
-        ...formData,
-        parent_id: formData.parent_id ? Number(formData.parent_id) : null,
-      });
-      setIsModalOpen(false);
+      if (edition) {
+        await agencesAPI.maj(edition.id, payload);
+      } else {
+        await agencesAPI.creer(payload);
+      }
+      setIsModalOpen(false); setEdition(null);
       setFormData({ code: '', name: '', type_agence: 'AGENCE', parent_id: '', address: '', city: 'Douala', country: 'Cameroun', phone: '', email: '', is_headquarters: false });
       await fetchReseau();
     } catch (e: any) {
-      setError(e?.response?.data?.detail ?? 'Création impossible');
+      setError(e?.response?.data?.detail ?? (edition ? 'Mise à jour impossible' : 'Création impossible'));
     }
+  };
+
+  const ouvrirEdition = (a: Agency) => {
+    setEdition(a);
+    setFormData({
+      code: a.code, name: a.name, type_agence: a.type_agence ?? 'AGENCE',
+      parent_id: a.parent_id ? String(a.parent_id) : '',
+      address: a.address ?? '', city: a.city ?? 'Douala', country: a.country ?? 'Cameroun',
+      phone: a.phone ?? '', email: a.email ?? '', is_headquarters: !!a.is_headquarters,
+    });
+    setIsModalOpen(true);
   };
 
   const handleActiver = async (id: number) => {
@@ -176,7 +222,7 @@ export default function AgencesPage() {
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
           {contexte?.peut_gerer_reseau && (
-            <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/20">
+            <button onClick={() => { setEdition(null); setFormData({ code: '', name: '', type_agence: 'AGENCE', parent_id: '', address: '', city: 'Douala', country: 'Cameroun', phone: '', email: '', is_headquarters: false }); setIsModalOpen(true); }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/20">
               <Plus className="w-4 h-4" /> Nouvelle agence
             </button>
           )}
@@ -263,7 +309,10 @@ export default function AgencesPage() {
                   <button onClick={() => void chargerEffectifs(a)} className="text-xs text-slate-300 hover:text-white font-medium px-2 py-1.5">Effectifs</button>
                 )}
                 {contexte?.peut_gerer_reseau && (
-                  <button onClick={() => void handleDelete(a.id)} className="text-xs text-rose-400 hover:text-rose-300 font-medium px-2 py-1.5">Supprimer</button>
+                  <>
+                    <button onClick={() => void ouvrirEdition(a)} className="text-xs text-slate-300 hover:text-white font-medium px-2 py-1.5">Modifier</button>
+                    <button onClick={() => void handleDelete(a.id)} className="text-xs text-rose-400 hover:text-rose-300 font-medium px-2 py-1.5">Supprimer</button>
+                  </>
                 )}
               </div>
             </div>
@@ -345,8 +394,28 @@ export default function AgencesPage() {
         <div className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden">
           <div className="p-5 border-b border-slate-800 flex items-center justify-between">
             <h2 className="font-bold text-white flex items-center gap-2"><Users className="w-5 h-5 text-blue-400" /> Effectifs — {detail.name}</h2>
-            <button onClick={() => setTab('reseau')} className="text-xs text-slate-400 hover:text-white flex items-center gap-1"><ArrowLeft className="w-3.5 h-3.5" /> Retour</button>
+            <div className="flex items-center gap-2">
+              {contexte?.peut_gerer_comptes && (
+                <button onClick={() => setAffectationOuverte(!affectationOuverte)} className="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-600/20 text-blue-300 hover:bg-blue-600/40 border border-blue-500/30">
+                  {affectationOuverte ? 'Fermer' : '+ Affecter un collaborateur'}
+                </button>
+              )}
+              <button onClick={() => setTab('reseau')} className="text-xs text-slate-400 hover:text-white flex items-center gap-1"><ArrowLeft className="w-3.5 h-3.5" /> Retour</button>
+            </div>
           </div>
+          {affectationOuverte && (
+            <div className="px-5 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center gap-3">
+              <select value={userAffecte} onChange={(e) => setUserAffecte(e.target.value)} className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white">
+                <option value="">— Sélectionner un collaborateur —</option>
+                {candidats.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.full_name || u.email} ({u.email}){u.agency_id ? ' — déjà rattaché ailleurs' : ''}
+                  </option>
+                ))}
+              </select>
+              <button onClick={() => void handleAffecter()} disabled={!userAffecte} className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm font-bold">Affecter</button>
+            </div>
+          )}
           {utilisateurs.length === 0 ? (
             <div className="p-12 text-center text-slate-500">Aucun collaborateur rattaché à cette agence.</div>
           ) : (
@@ -357,6 +426,7 @@ export default function AgencesPage() {
                   <th className="px-4 py-3">Email</th>
                   <th className="px-4 py-3 text-right">Niveau</th>
                   <th className="px-4 py-3">Statut</th>
+                  {contexte?.peut_gerer_comptes && <th className="px-4 py-3"></th>}
                 </tr>
               </thead>
               <tbody>
@@ -368,6 +438,11 @@ export default function AgencesPage() {
                     <td className="px-4 py-3">
                       <span className={`text-xs font-bold ${u.is_active ? 'text-emerald-400' : 'text-slate-500'}`}>{u.is_active ? 'Actif' : 'Inactif'}</span>
                     </td>
+                    {contexte?.peut_gerer_comptes && (
+                      <td className="px-4 py-3 text-right">
+                        <button onClick={() => void handleDesaffecter(u.id)} className="text-[11px] font-bold text-rose-400 hover:text-rose-300">Retirer</button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -414,7 +489,7 @@ export default function AgencesPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2"><Building2 className="w-5 h-5 text-blue-400" /> Nouvelle agence / extension</h2>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2"><Building2 className="w-5 h-5 text-blue-400" /> {edition ? `Modifier — ${edition.name}` : 'Nouvelle agence / extension'}</h2>
               <button onClick={() => setIsModalOpen(false)} className="p-1 rounded-lg text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleCreate} className="space-y-4">
@@ -470,8 +545,8 @@ export default function AgencesPage() {
                 Désigner comme siège social
               </label>
               <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold">Annuler</button>
-                <button type="submit" className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold">Créer</button>
+                <button type="button" onClick={() => { setIsModalOpen(false); setEdition(null); }} className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold">Annuler</button>
+                <button type="submit" className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold">{edition ? 'Enregistrer' : 'Créer'}</button>
               </div>
             </form>
           </div>

@@ -1081,6 +1081,7 @@ export const agencesAPI = {
   comparatif: () => apiClient.get('/api/v1/agences/comparatif/tableau'),
   tableauBord: (id: number, jours = 30) => apiClient.get(`/api/v1/agences/${id}/tableau-de-bord`, { params: { jours } }),
   utilisateurs: (id: number) => apiClient.get(`/api/v1/agences/${id}/utilisateurs`),
+  candidats: (id: number) => apiClient.get(`/api/v1/agences/${id}/utilisateurs/candidats`),
   affecter: (agencyId: number, userId: number) => apiClient.put(`/api/v1/agences/${agencyId}/utilisateurs/${userId}`),
   desaffecter: (agencyId: number, userId: number) => apiClient.delete(`/api/v1/agences/${agencyId}/utilisateurs/${userId}`),
 };

@@ -536,6 +536,39 @@ def utilisateurs_agence(
     }
 
 
+@router.get("/{agency_id}/utilisateurs/candidats")
+def candidats_affectation(
+    agency_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("agences.comptes.modify")),
+):
+    """Utilisateurs du tenant affectables a l'agence : non rattaches ou
+    rattaches a une autre agence (une reaffectation deplace agency_id)."""
+    agency = _get_agence_or_404(db, agency_id, current_user)
+    with bypass_agency_filter():
+        users = (
+            db.query(User)
+            .filter(or_(User.agency_id.is_(None), User.agency_id != agency_id))
+            .order_by(User.full_name)
+            .all()
+        )
+    return {
+        "agence": _serialize(agency),
+        "total": len(users),
+        "items": [
+            {
+                "id": u.id,
+                "email": u.email,
+                "full_name": u.full_name,
+                "role_level": u.role_level,
+                "is_active": u.is_active,
+                "agency_id": u.agency_id,
+            }
+            for u in users
+        ],
+    }
+
+
 @router.put("/{agency_id}/utilisateurs/{user_id}")
 def affecter_utilisateur(
     agency_id: int,
