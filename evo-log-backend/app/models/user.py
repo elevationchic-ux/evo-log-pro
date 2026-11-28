@@ -35,6 +35,10 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
     agency_id = Column(Integer, ForeignKey('agencies.id'))
+ # Agence ACTIVE de la session (choisie via POST /agences/{id}/activer) :
+ # distincte de agency_id (agence d'appartenance). Le middleware la publie
+ # dans le contexte agence pour le filtrage ORM.
+    current_agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True)
     phone = Column(String(20))
  # Identite employe (distinguee du role/casquette): un Utilisateur porte
  # un matricule et un poste; le Role determine l'acces (beaucoup-a-beaucoup).
@@ -81,7 +85,7 @@ class User(Base):
     company = relationship("Company", back_populates="users")
     department = relationship("Department", back_populates="users", foreign_keys=[department_id])
     b2b_portal = relationship("B2BPortal")
-    agency = relationship("Agency", back_populates="users")
+    agency = relationship("Agency", back_populates="users", foreign_keys=[agency_id])
     organization = relationship("Organization", back_populates="users")
     accreditations = relationship(
         "Accreditation",

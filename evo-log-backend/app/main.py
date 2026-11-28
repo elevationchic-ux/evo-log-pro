@@ -32,6 +32,7 @@ from app.middleware.idempotency import IdempotencyMiddleware
 from app.middleware.tracing import TracingMiddleware
 from app.middleware.tenant_context import TenantContextMiddleware
 import app.core.tenant_enforcement  # noqa: F401 - enregistre les evenements ORM d'isolation tenant
+import app.core.agency_enforcement  # noqa: F401 - enregistre les evenements ORM de perimetre agence
 from app.utils.error_handlers import setup_error_handlers, setup_monitoring
 from app.services.events.event_service import event_service
 from app.services.events.workflow_orchestrator import register_all_handlers
@@ -340,7 +341,7 @@ def safe_include_router(router, **kwargs):
     """Include required routers; startup must fail on registration errors."""
     app.include_router(router, **kwargs)
 
-from app.routers.v1 import auth, tiers, transport, transport_exploitation, finance, parc, parc_purchase_store, customer_support_fleet, documents, alerts, magasin, magasin_store, magasin_stock, magasin_analytics, gateway, transactions, master_data, admin, admin_agency, suppliers, notifications, bill_of_loading, purchase, incidents, public_api, rh, acconage, transit, maintenance, qhse, goods_declaration, removal_slip, reception_mag3, chat, prestataires, chef_personnel
+from app.routers.v1 import auth, tiers, transport, transport_exploitation, finance, parc, parc_purchase_store, customer_support_fleet, documents, alerts, magasin, magasin_store, magasin_stock, magasin_analytics, gateway, transactions, master_data, admin, admin_agency, agences, suppliers, notifications, bill_of_loading, purchase, incidents, public_api, rh, acconage, transit, maintenance, qhse, goods_declaration, removal_slip, reception_mag3, chat, prestataires, chef_personnel
 
 safe_include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 
@@ -377,6 +378,7 @@ safe_include_router(reception_mag3.router, prefix="/api/v1/magasin/receptions-ma
 safe_include_router(master_data.router, prefix="/api/v1/master-data", tags=["Master Data"])
 safe_include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"])
 safe_include_router(admin_agency.router, prefix="/api/v1/admin/agencies", tags=["Admin Agencies"])
+safe_include_router(agences.router, prefix="/api/v1/agences", tags=["Agences & succursales"])
 safe_include_router(suppliers.router, prefix="/api/v1/suppliers", tags=["Suppliers"])
 safe_include_router(notifications.router, prefix="/api/v1/notifications", tags=["Notifications"])
 safe_include_router(bill_of_loading.router, prefix="/api/v1/bill-of-loading", tags=["Bill of Loading"])

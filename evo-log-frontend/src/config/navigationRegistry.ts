@@ -1463,6 +1463,14 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         requiredRoles: ['ADMIN', 'SUPER_ADMIN']
       },
       {
+        label: 'Agences, succursales & extensions',
+        path: '/agences',
+        icon: Building2,
+        badge: 'Réseau',
+        description: 'Bascule d\'agence active, périmètre des données par site, comparatif inter-agences, effectifs',
+        businessProcess: 'Pilotage réseau'
+      },
+      {
         label: 'Collaborateurs & Attribution des Rôles',
         path: '/admin-tenant/users-rbac',
         icon: Users,

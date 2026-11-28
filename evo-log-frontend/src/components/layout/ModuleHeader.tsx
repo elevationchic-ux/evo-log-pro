@@ -11,7 +11,7 @@ import { useAuth } from './AuthProvider'
 import { useSettings } from './SettingsProvider'
 import { useI18n } from '@/hooks/useI18n'
 import { toast } from 'sonner'
-import { apiClient } from '@/lib/api-client'
+import { agencesAPI } from '@/lib/api-client'
 import { HelpAndShortcutsModal } from '@/components/shared/HelpAndShortcutsModal'
 import { AppBreadcrumb } from '@/components/shared/AppBreadcrumb'
 import { RecentWorkingTabs } from '@/components/shared/RecentWorkingTabs'
@@ -75,25 +75,48 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
   const [minutesLeft, setMinutesLeft] = useState<number | null>(null)
   const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false)
 
- // Agences REELLES du tenant (table agencies via /admin/agencies). Aucune
- // agence inventee: le selecteur n'apparait que si des agences existent.
-  const [agencies, setAgencies] = useState<{ id: number; code: string; name: string }[]>([])
+ // Agences REELLES du tenant via /api/v1/agences/moi : la selection appelle
+ // POST /agences/{id}/activer (ou /reinitialiser) puis recharge l'app pour que
+ // TOUTES les donnees soient re-interrogees sous le nouveau perimetre ORM.
+  const [agencies, setAgencies] = useState<{ id: number; code: string; name: string; is_current?: boolean }[]>([])
+  const [activeAgencyId, setActiveAgencyId] = useState<number | null>(null)
+  const [agencySwitching, setAgencySwitching] = useState(false)
   useEffect(() => {
-    apiClient.get('/api/v1/admin/agencies', { params: { is_active: true, limit: 50 } })
+    agencesAPI.contexte()
       .then((res: any) => {
-        const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? [])
-        const list = items.map((a: any) => ({ id: a.id, code: a.code || String(a.id), name: [a.name, a.city].filter(Boolean).join(', ') }))
+        const d = res.data ?? {}
+        const list = (d.agences ?? []).map((a: any) => ({
+          id: a.id, code: a.code || String(a.id), name: [a.name, a.city].filter(Boolean).join(', '),
+        }))
         setAgencies(list)
-        if (list.length > 0) {
-          const saved = typeof window !== 'undefined' ? window.localStorage.getItem('evolog_active_agency') : null
-          const match = list.find((a: any) => a.name === saved)
-          setSelectedAgency(match ? match.name : list[0].name)
-        }
+        const active = d.agence_active
+        setActiveAgencyId(active?.id ?? null)
+        setSelectedAgency(active ? [active.name, active.city].filter(Boolean).join(', ') : (list.length ? 'Consolidé' : ''))
       })
       .catch(() => setAgencies([]))
   }, [])
 
-  const AGENCIES = agencies.map(a => ({ id: a.code, name: a.name, icon: 'domain' }))
+  const switchAgency = async (agencyId: number | null) => {
+    if (agencySwitching) return
+    setAgencySwitching(true)
+    try {
+      if (agencyId === null) {
+        await agencesAPI.reinitialiser()
+        toast.success(language === 'en' ? 'Consolidated view active' : 'Vue consolidée active', { icon: '🏢' })
+      } else {
+        const ag = agencies.find((a) => a.id === agencyId)
+        await agencesAPI.activer(agencyId)
+        toast.success(language === 'en' ? `Active agency: ${ag?.name ?? agencyId}` : `Agence active : ${ag?.name ?? agencyId}`, { icon: '🏢' })
+      }
+      window.location.reload()
+    } catch (e: any) {
+      const detail = e?.response?.data?.detail
+      toast.error(typeof detail === 'string' ? detail : (language === 'en' ? 'Agency switch failed' : 'Bascule agence impossible'), { icon: '⚠️' })
+      setAgencySwitching(false)
+    }
+  }
+
+  const AGENCIES = agencies.map(a => ({ id: a.code, name: a.name, agencyId: a.id, icon: 'domain' }))
 
  // Source de vérité unique: TOUS les modules et sous-modules de la registry.
  // Invisibilité: la console Super-Admin CADC n'apparaît que pour un niveau 0.
@@ -476,18 +499,31 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                   <div className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-outline bg-surface shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="flex items-center justify-between border-b border-outline bg-surface-container-low px-4 py-2.5">
                       <span className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">{t.shell.agency}</span>
-                      <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-bold uppercase text-primary">Global</span>
+                      <span className={`rounded px-1.5 py-0.5 text-[11px] font-bold uppercase ${activeAgencyId ? 'bg-primary/10 text-primary' : 'bg-surface-container text-on-surface-variant'}`}>
+                        {activeAgencyId ? 'Agence' : 'Global'}
+                      </span>
                     </div>
                     <div className="py-1">
+                      <button
+                        role="option"
+                        aria-selected={activeAgencyId === null}
+                        disabled={agencySwitching}
+                        onClick={() => { setIsAgencyMenuOpen(false); void switchAgency(null) }}
+                        className={`w-full flex items-center gap-3 border-l-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-surface-container-low ${activeAgencyId === null ? 'border-primary bg-surface-container-low font-semibold text-primary' : 'border-transparent text-on-surface'}`}
+                      >
+                        <span className="material-symbols-outlined text-[16px] text-on-surface-variant">public</span>
+                        <span>Vue consolidée (toutes agences)</span>
+                      </button>
                       {AGENCIES.map((agency) => (
                         <button
                           key={agency.id}
                           role="option"
-                          aria-selected={selectedAgency === agency.name}
-                          onClick={() => { setSelectedAgency(agency.name); window.localStorage.setItem('evolog_active_agency', agency.name); setIsAgencyMenuOpen(false); toast.success(`Agence → ${agency.name}`, { icon: '🏢' }) }}
-                          className={`w-full flex items-center gap-3 border-l-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-surface-container-low ${selectedAgency === agency.name ? 'border-primary bg-surface-container-low font-semibold text-primary' : 'border-transparent text-on-surface'}`}
+                          aria-selected={activeAgencyId === agency.agencyId}
+                          disabled={agencySwitching}
+                          onClick={() => { setIsAgencyMenuOpen(false); void switchAgency(agency.agencyId) }}
+                          className={`w-full flex items-center gap-3 border-l-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-surface-container-low ${activeAgencyId === agency.agencyId ? 'border-primary bg-surface-container-low font-semibold text-primary' : 'border-transparent text-on-surface'}`}
                         >
-                          <span className={`material-symbols-outlined text-[16px] ${selectedAgency === agency.name ? 'text-primary' : 'text-on-surface-variant'}`}>{agency.icon}</span>
+                          <span className={`material-symbols-outlined text-[16px] ${activeAgencyId === agency.agencyId ? 'text-primary' : 'text-on-surface-variant'}`}>{agency.icon}</span>
                           <span>{agency.name}</span>
                         </button>
                       ))}
@@ -571,23 +607,32 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                     </div>
 
                     {/* Agency Switcher (affiche seulement si agences reelles) */}
-                    {AGENCIES.length > 0 && (
+                    {(AGENCIES.length > 0 || activeAgencyId !== null) && (
                     <div className="p-3 space-y-1.5">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant px-1">
                         {t.shell.operatingAgency}
                       </span>
                       <div className="grid grid-cols-3 gap-1">
+                        <button
+                          type="button"
+                          disabled={agencySwitching}
+                          onClick={() => { setIsProfileMenuOpen(false); void switchAgency(null) }}
+                          className={`px-2 py-2 min-h-11 rounded-lg text-center font-bold text-[11px] transition-colors ${
+                            activeAgencyId === null
+                              ? 'bg-primary text-on-primary'
+                              : 'bg-surface-container hover:bg-surface-container-high text-on-surface'
+                          }`}
+                        >
+                          Consolidé
+                        </button>
                         {AGENCIES.map((ag) => (
                           <button
                             key={ag.id}
                             type="button"
-                            onClick={() => {
-                              setSelectedAgency(ag.name);
-                              window.localStorage.setItem('evolog_active_agency', ag.name);
-                              toast.success(language === 'en' ? `Active agency: ${ag.name}` : `Agence active : ${ag.name}`, { icon: '🏢' });
-                            }}
+                            disabled={agencySwitching}
+                            onClick={() => { setIsProfileMenuOpen(false); void switchAgency(ag.agencyId) }}
                             className={`px-2 py-2 min-h-11 rounded-lg text-center font-bold text-[11px] transition-colors ${
-                              selectedAgency === ag.name
+                              activeAgencyId === ag.agencyId
                                 ? 'bg-primary text-on-primary'
                                 : 'bg-surface-container hover:bg-surface-container-high text-on-surface'
                             }`}
@@ -596,6 +641,14 @@ export function ModuleHeader({ currentModule, onMenuClick }: ModuleHeaderProps) 
                           </button>
                         ))}
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => { setIsProfileMenuOpen(false); router.push('/agences'); }}
+                        className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-semibold text-primary hover:bg-primary/10 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">domain</span>
+                        Gérer les agences
+                      </button>
                     </div>
                     )}
 

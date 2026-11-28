@@ -13,8 +13,11 @@ class Agency(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
+    parent_id = Column(Integer, ForeignKey("agencies.id"), nullable=True)
     code = Column(String(20), unique=True, nullable=False, index=True)
     name = Column(String(100), nullable=False)
+    type_agence = Column(String(20), default="AGENCE")  # SIEGE / AGENCE / EXTENSION / BUREAU
     address = Column(Text)
     city = Column(String(50))
     country = Column(String(50), default="Cameroun")
@@ -26,5 +29,6 @@ class Agency(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
  # Relationships
-    users = relationship("User", back_populates="agency")
+    users = relationship("User", back_populates="agency", foreign_keys="User.agency_id")
     organization = relationship("Organization", back_populates="agencies")
+    parent = relationship("Agency", remote_side=[id])

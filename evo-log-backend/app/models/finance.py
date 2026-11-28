@@ -36,6 +36,7 @@ class Facture(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True, index=True)
     numero_facture = Column(String(50), nullable=False, index=True)
     client_id = Column(Integer, ForeignKey("clients.id"))
  # default=date.today, jamais func.now(): la colonne est Date alors que

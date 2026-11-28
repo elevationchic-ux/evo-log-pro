@@ -23,6 +23,7 @@ class Vehicule(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True, index=True)
     immatriculation = Column(String(20), unique=True, nullable=False, index=True)
     marque = Column(String(50))
     modele = Column(String(50))

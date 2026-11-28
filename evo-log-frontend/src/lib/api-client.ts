@@ -1078,6 +1078,23 @@ export const adminAgencyAPI = {
   delete: (id: number) => apiClient.delete(`/api/v1/admin/agencies/${id}`),
 };
 
+// ─── Module Agences & succursales (reseau territorial) ─────────────────────
+export const agencesAPI = {
+  contexte: () => apiClient.get('/api/v1/agences/moi'),
+  lister: (params?: Record<string, unknown>) => apiClient.get('/api/v1/agences', { params }),
+  detail: (id: number) => apiClient.get(`/api/v1/agences/${id}`),
+  creer: (data: unknown) => apiClient.post('/api/v1/agences', data),
+  maj: (id: number, data: unknown) => apiClient.put(`/api/v1/agences/${id}`, data),
+  supprimer: (id: number) => apiClient.delete(`/api/v1/agences/${id}`),
+  activer: (id: number) => apiClient.post(`/api/v1/agences/${id}/activer`),
+  reinitialiser: () => apiClient.post('/api/v1/agences/reinitialiser'),
+  comparatif: () => apiClient.get('/api/v1/agences/comparatif/tableau'),
+  tableauBord: (id: number, jours = 30) => apiClient.get(`/api/v1/agences/${id}/tableau-de-bord`, { params: { jours } }),
+  utilisateurs: (id: number) => apiClient.get(`/api/v1/agences/${id}/utilisateurs`),
+  affecter: (agencyId: number, userId: number) => apiClient.put(`/api/v1/agences/${agencyId}/utilisateurs/${userId}`),
+  desaffecter: (agencyId: number, userId: number) => apiClient.delete(`/api/v1/agences/${agencyId}/utilisateurs/${userId}`),
+};
+
 // ─── Service Notifications Multi-Canal ────────────────────────────────────
 export const notificationSystemAPI = {
   getAll: (params?: Record<string, unknown>) => apiClient.get('/api/v1/notification-system', { params }),

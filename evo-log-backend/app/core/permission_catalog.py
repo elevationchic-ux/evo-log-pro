@@ -70,6 +70,12 @@ DOMAINS: Dict[str, Dict] = {
  # (baux, concessions, partenariats), contentieux et echeances/preavis.
  # Pas de delete : un contrat resilie est conserve, jamais efface.
             "juridique": {"label": "Juridique & contrats", "sub_modules": {"contrats": ["read", "create", "modify"], "contentieux": ["read", "create", "modify"], "echeances": ["read"]}},
+ # reseau d'agences / succursales / extensions (routeur agences).
+ # « agences » = CRUD du referentiel, « pilotage » = dashboards et
+ # comparatif inter-agences, « comptes » = affectation des utilisateurs.
+ # Tout collaborateur peut changer d'agence active (contexte propre) ;
+ # ces codes ne concernent que l'administration du reseau.
+            "agences": {"label": "Agences & succursales", "sub_modules": {"agences": ACTIONS, "pilotage": ["read"], "comptes": ["read", "modify"]}},
         },
     },
     "finance": {

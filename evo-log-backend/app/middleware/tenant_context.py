@@ -26,6 +26,9 @@ from app.core.security import decode_token
 from app.core.tenant_context import (
     clear_current_tenant,
     set_current_tenant,)
+from app.core.agency_context import (
+    clear_current_agency,
+    set_current_agency,)
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +43,7 @@ class TenantContextMiddleware:
             return
 
         company_id = None
+        agency_id = None
         try:
             request = Request(scope)
             authorization = request.headers.get("authorization", "")
@@ -48,20 +52,29 @@ class TenantContextMiddleware:
                 payload = decode_token(token)
                 subject = payload.get("sub") if payload else None
                 if subject is not None and str(subject).isdigit():
-                    company_id = self._resolve_company(int(subject))
+                    company_id, agency_id = self._resolve(int(subject))
         except Exception as exc:  # never block a request on tenant resolution
             logger.debug("Tenant resolution skipped: %s", exc)
             company_id = None
+            agency_id = None
 
         set_current_tenant(company_id)
+        set_current_agency(agency_id)
         try:
             await self.app(scope, receive, send)
         finally:
             clear_current_tenant()
+            clear_current_agency()
 
     @staticmethod
-    def _resolve_company(user_id: int):
-        """Return the company_id to scope to, or None for no scoping."""
+    def _resolve(user_id: int):
+        """Return (company_id, agency_id) scoping for the request.
+
+        ``company_id`` : None for superuser/platform (no tenant scoping).
+        ``agency_id``  : the user's selected agency (``current_agency_id``);
+                         None when unset or for superusers — agency filtering
+                         then stays inactive and they see every agency.
+        """
         from app.core.database import SessionLocal
         from app.models.user import User
 
@@ -73,10 +86,12 @@ class TenantContextMiddleware:
                 .first()
             )
             if user is None:
-                return None
- # Super admins / platform operators bypass tenant scoping.
+                return None, None
+ # Super admins / platform operators bypass tenant AND agency scoping.
             if getattr(user, "is_superuser", False) or getattr(user, "role_level", 9) == 0:
-                return None
-            return getattr(user, "company_id", None)
+                return None, None
+            company_id = getattr(user, "company_id", None)
+            agency_id = getattr(user, "current_agency_id", None)
+            return company_id, agency_id
         finally:
             db.close()

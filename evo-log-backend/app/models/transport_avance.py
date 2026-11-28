@@ -23,6 +23,7 @@ class Tournée(Base):
     __tablename__ = "tours"
     
     id = Column(Integer, primary_key=True, index=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True, index=True)
     numero_tournee = Column(String(50), unique=True, nullable=False)
     conducteur_id = Column(Integer, ForeignKey('conducteurs.id'), nullable=False)
     camion_id = Column(Integer, ForeignKey('camions.id'), nullable=False)
@@ -53,6 +54,7 @@ class Livraison(Base):
     __tablename__ = "livraisons"
     
     id = Column(Integer, primary_key=True, index=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True, index=True)
     numero_livraison = Column(String(50), unique=True, nullable=False)
     tournee_id = Column(Integer, ForeignKey('tours.id'), nullable=False)
     client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)

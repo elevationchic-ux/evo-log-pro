@@ -150,6 +150,25 @@ reconstruit `livraisons`, `missions_sous_traitant`, `pods`, `documents_pod`
   paramétrés de `transport_avance.py` (coûts km, carburant, temps
   conduite, sous-traitants, accidents, maintenance, GPS, géofencing,
   conducteurs, KPIs) + entrée nav sous `transport-flotte`.
+- ~~Changement d'agence~~ : fait — module Agences complet.
+  `app/core/agency_context.py` + `agency_enforcement.py` (miroir
+  `tenant_*` : contextvars + events ORM `do_orm_execute`/`before_flush`,
+  fail-open hors contexte, `agency_id NULL` = donnée partagée visible
+  par toutes les agences) ; résolution de l'agence active dans
+  `TenantContextMiddleware` (`User.current_agency_id`, superuser/role
+  level 0 bypass). Routeur `/api/v1/agences` : liste, CRUD, switch
+  (`POST /{id}/activer` persiste `current_agency_id`), `/moi`,
+  `/comparatif/tableau` (dashboard comparatif inter-agences :
+  utilisateurs, tiers, missions, factures…), `/{id}/tableau-de-bord`,
+  `/{id}/utilisateurs` (affectation). `Agency` gagne `company_id`
+  (isolement tenant), `parent_id`, `type_agence` (SIEGE/AGENCE/
+  EXTENSION/BUREAU). `agency_id` ajouté sur `tiers` (hérité
+  Client/Fournisseur/Partenaire), `camions`, `conducteurs`, `missions`,
+  `vehicules`, `navires`, `escales`, `conteneurs`, `factures`, `tours`,
+  `livraisons` — migration 118. Frontend : `agencesAPI`, sélecteur du
+  header désormais branché sur le backend (avant : localStorage
+  cosmétique), page `/agences` (référentiel + comparatif + effectifs +
+  switch). Permissions catalogue `agences.*`.
 - Validation PostgreSQL : environnement local sans serveur PG ni Docker ;
   schéma validé par `create_all` SQLite (986 tables, 0 erreur via
   `import app.main`)

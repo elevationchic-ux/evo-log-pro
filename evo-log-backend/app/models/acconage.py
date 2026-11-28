@@ -17,6 +17,7 @@ class Navire(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True, index=True)
     nom = Column(String(100), nullable=False)
     imo = Column(String(20))
     pavillon = Column(String(50))
@@ -62,6 +63,7 @@ class Escale(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True, index=True)
     numero_escale = Column(String(50), nullable=False, index=True)
     navire_id = Column(Integer, ForeignKey('navires.id'))
     port_id = Column(Integer, ForeignKey('agencies.id'))  # Using agency as port reference
@@ -210,6 +212,7 @@ class Conteneur(Base):
     __tablename__ = "conteneurs"
     
     id = Column(Integer, primary_key=True, index=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True, index=True)
     numero = Column(String(20), unique=True, nullable=False, index=True)
     type_conteneur = Column(String(20))  # "20' Dry", "40' Dry", "40' Reefer", "Tank", etc.
     statut = Column(String(20))  # "full", "empty", "damage"

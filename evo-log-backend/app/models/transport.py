@@ -25,6 +25,7 @@ class Camion(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True, index=True)
     immatriculation = Column(String(20), nullable=False, index=True)
     marque = Column(String(50))
     modele = Column(String(50))
@@ -65,6 +66,7 @@ class Conducteur(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True, index=True)
     nom = Column(String(100), nullable=False)
     prenom = Column(String(100), nullable=False)
     numero_permis = Column(String(50), nullable=False)
@@ -105,6 +107,7 @@ class Mission(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id'), nullable=True, index=True)
     reference = Column(String(50), nullable=False, index=True)
     camion_id = Column(Integer, ForeignKey('camions.id'))
     conducteur_id = Column(Integer, ForeignKey('conducteurs.id'))
