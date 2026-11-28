@@ -33,6 +33,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.models.magasin import (
     BandeLivraison,
     Commande,
@@ -49,7 +50,7 @@ from app.schemas.magasin_stock import (
     SafetyStockLine,
     TurnoverLine,)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def _num(value, default: float = 0.0) -> float:

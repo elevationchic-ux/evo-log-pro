@@ -50,7 +50,7 @@ def _envelope(rows, schema) -> dict:
 
 
 # ─── PARC: zones & emplacements & gate ─────────────────────────────────────
-parc_router = APIRouter()
+parc_router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @parc_router.get("/zones", response_model=dict)

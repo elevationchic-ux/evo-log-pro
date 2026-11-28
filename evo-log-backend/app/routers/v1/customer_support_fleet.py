@@ -22,6 +22,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.models.customer_support import (
     Customer, ContractCustomer, SupportTicket, SupportIncident, FleetDocument,)
 from app.models.parc import CarburantRecord, Vehicule, VehiculeStatus
@@ -91,7 +92,7 @@ def _valider_ticket_champs(data: dict) -> None:
 
 
 # ─── FLEET ────────────────────────────────────────────────────────────────────
-fleet_router = APIRouter()
+fleet_router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @fleet_router.get("/vehicles", response_model=dict)
@@ -210,7 +211,7 @@ async def upload_fleet_document(
 
 
 # ─── CUSTOMERS (CRM) ──────────────────────────────────────────────────────────
-customer_router = APIRouter()
+customer_router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @customer_router.get("", response_model=dict)
@@ -286,7 +287,7 @@ async def delete_customer(customer_id: int, db: Session = Depends(get_db)):
 
 
 # ─── SUPPORT ──────────────────────────────────────────────────────────────────
-support_router = APIRouter()
+support_router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @support_router.get("/tickets", response_model=dict)

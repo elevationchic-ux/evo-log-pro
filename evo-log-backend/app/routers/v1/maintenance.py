@@ -11,6 +11,7 @@ from typing import List, Optional
 from datetime import datetime, timezone
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.models.parc import Maintenance, Vehicule
 from app.schemas.parc import MaintenanceCreate
 from app.services.maintenance_gmao_avance_service import (
@@ -18,7 +19,7 @@ from app.services.maintenance_gmao_avance_service import (
     TelematicsOBD2IoTService
 )
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def _iso(dt):

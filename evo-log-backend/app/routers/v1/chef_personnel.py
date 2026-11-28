@@ -649,7 +649,7 @@ def attribuer_dotation(
 
 # ============ PASSERELLE POINTEUSE BIOMETRIQUE / RFID QUAI ============
 @router.post("/pointage-biometrique")
-def enregistrer_pointage_biometrique(payload: dict, db: Session = Depends(get_db)):
+def enregistrer_pointage_biometrique(payload: dict, db: Session = Depends(get_db), current_user: User = Depends(require_chef_personnel_access)):
     """Enregistre un pointage biométrique/RFID et calcule automatiquement les heures normales et majorations"""
     badge_id = payload.get("badge_rfid", "BADGE-PAD-042")
     type_event = payload.get("type_event", "ENTREE") # ENTREE / SORTIE
@@ -679,7 +679,7 @@ def enregistrer_pointage_biometrique(payload: dict, db: Session = Depends(get_db
 
 # ============ ENTRETIENS ANNUELS & EVALUATION DES COMPETENCES GPEC ============
 @router.post("/evaluations/entretien-annuel")
-def enregistrer_entretien_annuel(payload: dict, db: Session = Depends(get_db)):
+def enregistrer_entretien_annuel(payload: dict, db: Session = Depends(get_db), current_user: User = Depends(require_chef_personnel_access)):
     """Enregistre l'évaluation annuelle, les objectifs et le suivi des habilitations de sécurité (CACES, IMDG)"""
     employe_id = payload.get("employe_id", 1)
     note_globale = payload.get("note_globale", 4.5) # sur 5

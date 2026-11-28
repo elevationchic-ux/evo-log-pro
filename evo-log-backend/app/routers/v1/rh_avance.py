@@ -17,7 +17,7 @@ from app.schemas.rh_avance import (
     InscriptionFormationRequest
 )
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 # --- ENDPOINTS PAIE OHADA CAMEROUN ---

@@ -39,6 +39,15 @@ frontend `npm run dev` (:3000, `NEXT_PUBLIC_API_URL=http://localhost:8000`).
   `app/core/permission_catalog.py` (sinon 403 silencieux). Modules :
   `comptabilite.*`, `fiscalite.*`, `immobilisations.*`, `maintindustrielle.*`,
   `juridique.*`, `magasin.*`, `rh.*`.
+- **Auth** : aucun endpoint métier ne doit être public. Les routeurs
+  internes utilisent `APIRouter(dependencies=[Depends(get_current_user)])`
+  ou `require_perm(...)` par endpoint ; seuls restent publics : `auth/*`
+  (login/register/refresh/2fa/forgot), webhooks (mobile-money, WhatsApp),
+  `public_api/contact`, `status`, `pending_modules` (stub `pending:true`),
+  `onboarding/register`, healthchecks (`collaboration`, `iot`, `telematics`).
+  Ne jamais ajouter d'endpoint sans dépendance auth — l'audit 2025 a
+  fermé ~150 endpoints exposés (tiers, transit, parc, magasin_store,
+  fiscalite_cameroun, acconage, rh_avance, audit, marketplace, fleet…).
 - **Tenant** : modèles avec `company_id` ; l'isolation est appliquée par
   `tenant_enforcement` (fail-open hors contexte tenant — les services
   doivent filtrer explicitement quand nécessaire).

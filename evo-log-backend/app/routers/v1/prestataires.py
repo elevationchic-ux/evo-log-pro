@@ -251,7 +251,7 @@ def get_mes_cotations(
 
 # ============ GÉOLOCALISATION DÉPANNEUR 24/7 LE PLUS PROCHE ============
 @router.post("/depannage-urgent/recherche-proche")
-def trouver_depanneur_plus_proche(payload: dict):
+def trouver_depanneur_plus_proche(payload: dict, current_user: User = Depends(require_purchase_access)):
     """Calcule le garage de dépannage 24/7 le plus proche selon les coordonnées GPS de la panne"""
     import math
     lat_panne = float(payload.get("latitude", 4.0511))
@@ -294,7 +294,7 @@ def trouver_depanneur_plus_proche(payload: dict):
 
 # ============ CONTRAT D'AFFRÈTEMENT NUMÉRIQUE B2B ============
 @router.post("/affretement/contrat-signer")
-def emettre_contrat_affretement(payload: dict, db: Session = Depends(get_db)):
+def emettre_contrat_affretement(payload: dict, db: Session = Depends(get_db), current_user: User = Depends(require_purchase_access)):
     """Génère le bon d'affrètement sous-traitant avec signature électronique et engagement de délai"""
     contrat_id = f"BA-B2B-{datetime.now().strftime('%Y%m%d%H%M')}"
     return {
@@ -314,7 +314,7 @@ def emettre_contrat_affretement(payload: dict, db: Session = Depends(get_db)):
 
 # ============ PAIEMENT SÉCURISÉ SOUS SÉQUESTRE ESCROW ============
 @router.post("/escrow/paiement-sequestre")
-def bloquer_paiement_escrow(payload: dict):
+def bloquer_paiement_escrow(payload: dict, current_user: User = Depends(require_purchase_access)):
     """Place les fonds en séquestre débloqués uniquement après confirmation de réparation"""
     montant = payload.get("montant_xaf", 120000)
     return {

@@ -358,7 +358,7 @@ def reset_user_password(
 # ==============================================================================
 
 @router.get("/roles")
-def get_roles(db: Session = Depends(get_db)):
+def get_roles(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get all RBAC roles with assigned user count"""
     db_roles = db.query(Role).all()
     roles_dict = {r.name: r for r in db_roles}
@@ -398,7 +398,7 @@ def get_roles(db: Session = Depends(get_db)):
 
 
 @router.post("/roles", status_code=status.HTTP_201_CREATED)
-def create_role(payload: Dict[str, Any], db: Session = Depends(get_db)):
+def create_role(payload: Dict[str, Any], db: Session = Depends(get_db), current_user: User = Depends(require_superadmin)):
     """Create a new role"""
     name = payload.get("name", "").strip().upper().replace(" ", "_")
     description = payload.get("description", "")
@@ -537,7 +537,7 @@ def get_audit_logs(
 # ==============================================================================
 
 @router.get("/dashboard/global-kpis")
-def get_global_kpis(db: Session = Depends(get_db)):
+def get_global_kpis(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Consolidated platform KPIs for SaaS Super Administrator.
 
     Uniquement des agregats reels : aucune valeur par defaut inventee, aucun

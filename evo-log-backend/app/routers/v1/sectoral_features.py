@@ -15,6 +15,7 @@
 import hashlib
 
 from fastapi import APIRouter, Depends, status, UploadFile, File, HTTPException
+from app.core.security import get_current_user
 from pydantic import BaseModel, Field
 from typing import Optional
 from sqlalchemy.orm import Session
@@ -25,7 +26,7 @@ from app.utils.external import call_provider, provider_configured
 from app.models.advanced_crud import LotSerial, TemperatureReading, Consignation
 from app.models.acconage import MarchandiseDangereuse
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def _org(context: TenantContext):

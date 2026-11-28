@@ -28,6 +28,7 @@ from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.utils.tenant import get_current_tenant_context, TenantContext
 from app.models.new_k_modules import (
     CotationDevis, ElectronicPOD, FuelTankSensor, PurchaseOrder, ComplianceAudit,)
@@ -38,7 +39,7 @@ from app.models.acconage import Navire, Escale, OperationAcconage
 from app.models.transport import Mission, Camion, MissionStatus, CamionStatus
 from app.models.finance import Facture, FactureStatus
 
-router = APIRouter(tags=["New K-Modules"])  # monte sur /api/v1/k-modules par main.py
+router = APIRouter(dependencies=[Depends(get_current_user)], tags=["New K-Modules"])  # monte sur /api/v1/k-modules par main.py
 
 
 # --- Helpers de serialisation / scope ---

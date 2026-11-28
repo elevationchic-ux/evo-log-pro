@@ -12,10 +12,11 @@ from typing import List, Optional
 from datetime import datetime
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.schemas.acconage import NavireCreate, NavireResponse, EscaleCreate, EscaleUpdate, EscaleResponse
 from app.models.acconage import Navire, Escale, OperationAcconage, Conteneur
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get("/navires", response_model=List[NavireResponse])

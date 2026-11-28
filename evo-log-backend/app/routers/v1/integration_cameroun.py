@@ -12,9 +12,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.models.douane_cameroun import BSC, CSC, DUM, APE, TauxReferenceBEAC
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def _serialize(obj) -> dict:

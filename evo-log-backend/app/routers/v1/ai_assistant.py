@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from app.core.security import get_current_user
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -15,7 +16,7 @@ from app.models.transport import Mission, Camion, MissionStatus, CamionStatus
 from app.models.magasin import Stock
 from app.models.finance import Facture, FactureStatus
 
-router = APIRouter(tags=["AI Assistant"])
+router = APIRouter(dependencies=[Depends(get_current_user)], tags=["AI Assistant"])
 
 
 class ChatMessage(BaseModel):

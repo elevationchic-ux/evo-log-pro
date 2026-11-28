@@ -593,7 +593,8 @@ async def verify_2fa(
 @router.post("/revoke-sessions")
 async def revoke_sessions(
     request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Revoke all active sessions on other devices"""
     return {

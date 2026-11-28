@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends
+from app.core.security import get_current_user
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.utils.tenant import get_current_tenant_context, TenantContext
 from app.models.transport import Conducteur, Mission, MissionStatus
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get("/driver-scores")

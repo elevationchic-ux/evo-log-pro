@@ -11,6 +11,8 @@ import io
 import csv
 
 from app.core.database import get_db
+from app.core.permissions import require_perm
+from app.models.user import User
 from app.models.audit import AuditLog
 
 router = APIRouter()
@@ -24,7 +26,8 @@ def get_audit_logs(
     action: Optional[str] = None,
     user_id: Optional[int] = None,
     search: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("audit.journal.read"))
 ):
     """Retrieve certified audit trail logs"""
     query = db.query(AuditLog)
@@ -118,13 +121,13 @@ def get_audit_logs(
 
 
 @router.get("/admin-logs")
-def get_admin_logs(db: Session = Depends(get_db)):
+def get_admin_logs(db: Session = Depends(get_db), current_user: User = Depends(require_perm("audit.journal.read"))):
     """Retrieve dedicated admin operations audit trail"""
-    return get_audit_logs(skip=0, limit=100, db=db)
+    return get_audit_logs(skip=0, limit=100, db=db, current_user=current_user)
 
 
 @router.get("/export")
-def export_audit_logs(db: Session = Depends(get_db)):
+def export_audit_logs(db: Session = Depends(get_db), current_user: User = Depends(require_perm("audit.journal.export"))):
     """Export audit log trail as CSV file certified for auditors and ISO 27001 inspections"""
     output = io.StringIO()
     writer = csv.writer(output, delimiter=';')

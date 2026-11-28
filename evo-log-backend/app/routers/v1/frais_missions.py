@@ -9,9 +9,10 @@ from pydantic import BaseModel
 from datetime import datetime
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.models.frais_mission import FraisMission, AvanceMission
 
-router = APIRouter(prefix="/frais-missions", tags=["Notes de Frais & Avances Missions"])
+router = APIRouter(dependencies=[Depends(get_current_user)], prefix="/frais-missions", tags=["Notes de Frais & Avances Missions"])
 
 
 class FraisCreate(BaseModel):

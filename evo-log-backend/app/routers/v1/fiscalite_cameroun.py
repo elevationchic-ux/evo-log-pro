@@ -5,12 +5,13 @@ from typing import List, Optional
 from datetime import datetime, date
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.services.fiscalite_cameroun_service import (
     FiscaliteCamerounService,
     OHADAService
 )
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.post("/declarations")

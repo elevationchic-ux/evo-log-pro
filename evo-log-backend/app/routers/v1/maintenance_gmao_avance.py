@@ -3,9 +3,10 @@ from typing import List
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.services.maintenance_gmao_avance_service import MaintenancePreventiveService, AnalyticsMaintenanceService
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.post("/preventif/generer-ordres", summary="Générer automatiquement les ordres de travail préventifs")
