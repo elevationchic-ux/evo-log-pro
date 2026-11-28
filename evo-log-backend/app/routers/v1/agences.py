@@ -342,14 +342,25 @@ def detail_agence(
     agency = _get_agence_or_404(db, agency_id, current_user)
 
     with bypass_agency_filter():
-        collaborateurs = db.query(User).filter(User.agency_id == agency_id).all()
         enfants = db.query(Agency).filter(Agency.parent_id == agency_id).all()
+        collaborateurs = (
+            db.query(User).filter(User.agency_id == agency_id).all()
+            if can(current_user, "agences.comptes.read") else []
+        )
 
-    return {
+    # Fiche referentielle ouverte a tout collaborateur ; les blocs sensibles
+    # (KPI financiers, effectifs nominaux) exigent les memes droits que les
+    # endpoints dedies — sinon GET /{id} contournerait pilotage/comptes.read.
+    resp = {
         **_serialize(agency),
         "is_current": agency.id == current_user.current_agency_id,
         "created_at": agency.created_at.isoformat() if agency.created_at else None,
-        "collaborateurs": [
+        "extensions": [_serialize(e) for e in enfants],
+    }
+    if can(current_user, "agences.pilotage.read"):
+        resp["kpis"] = _kpis_agence(db, agency_id)
+    if can(current_user, "agences.comptes.read"):
+        resp["collaborateurs"] = [
             {
                 "id": u.id,
                 "email": u.email,
@@ -358,10 +369,8 @@ def detail_agence(
                 "is_active": u.is_active,
             }
             for u in collaborateurs
-        ],
-        "extensions": [_serialize(e) for e in enfants],
-        "kpis": _kpis_agence(db, agency_id),
-    }
+        ]
+    return resp
 
 
 @router.put("/{agency_id}")
