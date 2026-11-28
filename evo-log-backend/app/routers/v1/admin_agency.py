@@ -10,6 +10,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from app.core.database import get_db
+from app.core.permissions import require_perm
 from app.core.security import get_current_user
 from app.models.user import User
 from app.models.agency import Agency
@@ -28,6 +29,8 @@ class AgencyCreate(BaseModel):
     is_active: Optional[bool] = True
     is_headquarters: Optional[bool] = False
     organization_id: Optional[int] = None
+    type_agence: Optional[str] = None
+    parent_id: Optional[int] = None
 
 
 class AgencyUpdate(BaseModel):
@@ -39,6 +42,8 @@ class AgencyUpdate(BaseModel):
     email: Optional[str] = None
     is_active: Optional[bool] = None
     is_headquarters: Optional[bool] = None
+    type_agence: Optional[str] = None
+    parent_id: Optional[int] = None
 
 
 @router.get("/")
@@ -125,7 +130,7 @@ async def get_agency_stats(
 async def create_agency(
     payload: AgencyCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("agences.agences.create"))
 ):
     """Crée une nouvelle agence ou succursale"""
  # Vérification code unique
@@ -143,7 +148,10 @@ async def create_agency(
         email=payload.email,
         is_active=payload.is_active if payload.is_active is not None else True,
         is_headquarters=payload.is_headquarters or False,
-        organization_id=payload.organization_id
+        organization_id=payload.organization_id,
+        type_agence=(payload.type_agence or "AGENCE").upper(),
+        parent_id=payload.parent_id,
+        company_id=getattr(current_user, "company_id", None),
     )
 
     db.add(agency)
@@ -164,7 +172,12 @@ async def get_agency_detail(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Détail d'une agence avec la liste de ses collaborateurs"""
+    """Détail d'une agence avec la liste de ses collaborateurs.
+
+    La liste nominative des collaborateurs est reservee aux détenteurs de
+    ``agences.comptes.read`` — coherent avec le routeur /agences."""
+    from app.core.permissions import can
+
     agency = db.query(Agency).filter(Agency.id == id).first()
     if not agency:
         raise HTTPException(status_code=404, detail=f"Agence #{id} non trouvée")
@@ -190,7 +203,7 @@ async def get_agency_detail(
                 "is_active": u.is_active
             }
             for u in (agency.users or [])
-        ]
+        ] if can(current_user, "agences.comptes.read") else [],
     }
 
 
@@ -199,7 +212,7 @@ async def update_agency(
     id: int,
     payload: AgencyUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("agences.agences.modify"))
 ):
     """Met à jour les informations d'une agence"""
     agency = db.query(Agency).filter(Agency.id == id).first()
@@ -221,7 +234,7 @@ async def update_agency(
 async def delete_agency(
     id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("agences.agences.delete"))
 ):
     """Désactive ou supprime une agence"""
     agency = db.query(Agency).filter(Agency.id == id).first()
