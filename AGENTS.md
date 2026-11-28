@@ -88,6 +88,16 @@ carburant, traçabilité, gap bridge, technicien, formation,
 réglementaire, numérotation, magasinier, mission, rapports,
 commercial D2 veille concurrentielle).
 
+**Transport avancé** (`transport_avance.py` + `transport_avance_complete.py`) :
+schemas/routeur/service réalignés sur les modèles réels (Tournée→`tours`,
+Livraison→`clients`/`point_dechargement`, enums `MissionStatus`/`CamionStatus`,
+`Conducteur.is_active`). `PositionGPS.kilmetrage_actuel` = coquille du modèle,
+conservée partout. `AnalyticsTransportService.kpi_transport` calcule depuis
+`KPIPerformance`/`Mission` (plus de valeurs codées en dur). Migration `117`
+reconstruit `livraisons`, `missions_sous_traitant`, `pods`, `documents_pod`
+(FK `client_id` était typée `Date`). UI : `/transport-avance/analytique`
+(GET) + `/transport-avance/operations` (tous les POST/PUT + dispatch/POD).
+
 **Modules sans service métier (justifiés)** : `fix_tables.py`
 (script utilitaire, pas un domaine), `rbac.py` (enums uniquement).
 

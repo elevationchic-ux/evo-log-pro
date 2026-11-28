@@ -181,20 +181,19 @@ def creer_pod(
         pod.livraison_id,
         pod.signature_client,
         pod.photo_marchandise,
-        pod.coordonnees
+        pod.coordonnees_livraison
     )
 
 
 @router.post("/pod/{pod_id}/valider", response_model=PODResponse)
 def valider_pod(
     pod_id: int,
-    valide_par: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.mission.create"))
 ):
-    """Valider une preuve de livraison"""
+    """Valider une preuve de livraison (valide_par = utilisateur courant)"""
     try:
-        return EPODService.valider_pod(db, pod_id, valide_par)
+        return EPODService.valider_pod(db, pod_id, current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

@@ -175,9 +175,6 @@ export const adminAPI = {
   createRole: (data: any) => apiClient.post('/api/v1/admin/roles', data),
   getAuditLogs: (params?: Record<string, unknown>) => apiClient.get('/api/v1/admin/audit-logs', { params }),
   getAgencies: (params?: Record<string, unknown>) => apiClient.get('/api/v1/admin/agencies', { params }),
-  createAgency: (data: unknown) => apiClient.post('/api/v1/admin/agencies', data),
-  updateAgency: (id: number, data: unknown) => apiClient.put(`/api/v1/admin/agencies/${id}`, data),
-  deleteAgency: (id: number) => apiClient.delete(`/api/v1/admin/agencies/${id}`),
   getDashboardKpis: () => apiClient.get('/api/v1/admin/dashboard/global-kpis'),
   getSystemHealth: () => apiClient.get('/api/v1/admin/system-health'),
 };
@@ -193,7 +190,6 @@ export const saasConsoleAPI = {
  // Entreprises: CRUD total + logo + allocation modules + accréditations
   listCompanies: (search?: string) =>
     apiClient.get(`${CADC_BASE}/companies`, { params: search ? { search } : undefined }),
-  getCompany: (id: number) => apiClient.get(`${CADC_BASE}/companies/${id}`),
   createCompany: (data: Record<string, unknown>) => apiClient.post(`${CADC_BASE}/companies`, data),
   updateCompany: (id: number, data: Record<string, unknown>) =>
     apiClient.patch(`${CADC_BASE}/companies/${id}`, data),
@@ -209,10 +205,6 @@ export const saasConsoleAPI = {
     apiClient.put(`${CADC_BASE}/companies/${id}/modules`, { modules }),
 
  // Admins entreprise (designes par le CADC - Phase 2)
-  listCompanyAdmins: (id: number) =>
-    apiClient.get(`${CADC_BASE}/companies/${id}/admins`),
-  createCompanyAdmin: (id: number, data: Record<string, unknown>) =>
-    apiClient.post(`${CADC_BASE}/companies/${id}/admins`, data),
 
  // File des demandes d'accreditation emises par les admins entreprise
   listPendingAccreditationRequests: () =>
@@ -261,14 +253,6 @@ export const companyAdminAPI = {
 
   listMembers: (params?: Record<string, unknown>, companyId?: number) =>
     apiClient.get(`${CA_BASE}/utilisateurs`, { params: { ...params, ...(companyId ? { company_id: companyId } : {}) } }),
-  createMember: (data: Record<string, unknown>, companyId?: number) =>
-    apiClient.post(`${CA_BASE}/utilisateurs`, data, { params: companyId ? { company_id: companyId } : undefined }),
-  updateMember: (id: number, data: Record<string, unknown>) =>
-    apiClient.put(`${CA_BASE}/utilisateurs/${id}`, data),
-  setMemberRoles: (id: number, roles: string[]) =>
-    apiClient.patch(`${CA_BASE}/utilisateurs/${id}/responsabilites`, { roles }),
-  toggleMemberStatus: (id: number) =>
-    apiClient.patch(`${CA_BASE}/utilisateurs/${id}/statut`),
 
   modulesOverview: (companyId?: number) =>
     apiClient.get(`${CA_BASE}/modules`, { params: companyId ? { company_id: companyId } : undefined }),
@@ -306,8 +290,6 @@ export const departmentAPI = {
  // Phase 4 Tranche B (ecriture): le chef gere les tours de garde et valide les pointages.
   createPlanning: (data: { employe_id: number; date_jour: string; quart: string; poste_assigne: string; statut?: string; observations?: string }, departmentId?: number) =>
     apiClient.post(`${DEPT_BASE}/planning`, data, { params: departmentId ? { department_id: departmentId } : undefined }),
-  updatePlanning: (id: number, data: { quart?: string; poste_assigne?: string; statut?: string; observations?: string }, departmentId?: number) =>
-    apiClient.put(`${DEPT_BASE}/planning/${id}`, data, { params: departmentId ? { department_id: departmentId } : undefined }),
   deletePlanning: (id: number, departmentId?: number) =>
     apiClient.delete(`${DEPT_BASE}/planning/${id}`, { params: departmentId ? { department_id: departmentId } : undefined }),
   validatePresence: (pointageId: number, departmentId?: number) =>
@@ -318,22 +300,16 @@ export const departmentAPI = {
  *  et modules communs (acces partages) par entreprise. */
 export const rbacAPI = {
   getPermissionCatalog: () => apiClient.get('/api/rbac/permissions/catalog'),
-  listRolesWithPermissions: () => apiClient.get('/api/rbac/roles'),
   getRolePermissions: (roleId: number) => apiClient.get(`/api/rbac/roles/${roleId}/permissions`),
   setRolePermissions: (roleId: number, codes: string[]) =>
     apiClient.put(`/api/rbac/roles/${roleId}/permissions`, { codes }),
-  checkPermission: (data: { user_id: number; tenant_id?: number; permission_code: string }) =>
-    apiClient.post('/api/rbac/permissions/check', data),
   listAccreditations: (params?: Record<string, unknown>) => apiClient.get('/api/accreditations/', { params }),
-  myAccreditations: () => apiClient.get('/api/accreditations/mes-accreditations'),
   createAccreditation: (data: any, companyId?: number) =>
     apiClient.post('/api/accreditations/', data, { params: companyId ? { company_id: companyId } : {} }),
-  updateAccreditation: (id: number, data: any) => apiClient.put(`/api/accreditations/${id}`, data),
   deleteAccreditation: (id: number) => apiClient.delete(`/api/accreditations/${id}`),
   listSharedAccess: (params?: Record<string, unknown>) => apiClient.get('/api/shared-access/', { params }),
   setSharedAccess: (data: { module_key: string; libelle?: string; autorise_tous_utilisateurs: boolean }, companyId?: number) =>
     apiClient.post('/api/shared-access/', data, { params: companyId ? { company_id: companyId } : {} }),
-  deleteSharedAccess: (id: number) => apiClient.delete(`/api/shared-access/${id}`),
   seedSharedAccess: (companyId?: number) =>
     apiClient.post('/api/shared-access/initialiser', null, { params: companyId ? { company_id: companyId } : {} }),
 };
@@ -388,18 +364,12 @@ export const transportAPI = {
     apiClient.get('/api/transport/missions', { params }),
   getMission: (id: number) =>
     apiClient.get(`/api/transport/missions/${id}`),
-  createMission: (data: unknown) =>
-    apiClient.post('/api/transport/missions', data),
   updateStatut: (id: number, statut: string) =>
     apiClient.patch(`/api/transport/missions/${id}/statut`, { statut }),
-  demarrerMission: (id: number) =>
-    apiClient.post(`/api/transport/missions/${id}/demarrer`),
   livrerMission: (id: any, dataOrSignature: any, nom_receptionnaire?: string) =>
     apiClient.post(`/api/transport/missions/${id}/livrer`, typeof dataOrSignature === 'string' ? { signature: dataOrSignature, nom_receptionnaire } : dataOrSignature),
   getCamions: (params?: Record<string, unknown>) =>
     apiClient.get('/api/transport/camions', { params }),
-  createCamion: (data: unknown) =>
-    apiClient.post('/api/transport/camions', data),
   getChauffeurs: (params?: Record<string, unknown>) =>
     apiClient.get('/api/transport/chauffeurs', { params }),
   createChauffeur: (data: unknown) =>
@@ -418,20 +388,6 @@ export const transportAPI = {
     apiClient.get('/api/transport/kpis'),
   getVehiclesHistory: (params?: Record<string, unknown>) =>
     apiClient.get('/api/transport/analytics/vehicles-history', { params }),
-  getGPS: () =>
-    apiClient.get('/api/transport/gps'),
-  getPannes: (camionId: number) =>
-    apiClient.get(`/api/transport/camions/${camionId}/pannes`),
-  updatePanne: (camionId: number, panneId: number, data: unknown) =>
-    apiClient.put(`/api/transport/camions/${camionId}/pannes/${panneId}`, data),
-  debloquerCamion: (camionId: number) =>
-    apiClient.put(`/api/transport/camions/${camionId}/debloquer`),
-  associerRemorque: (camionId: number, remorqueId: number | null) =>
-    apiClient.put(`/api/transport/camions/${camionId}/associer-remorque?remorque_id=${remorqueId || ''}`),
-  dissocierRemorque: (camionId: number) =>
-    apiClient.put(`/api/transport/camions/${camionId}/dissocier-remorque`),
-  getHistoriqueCouplage: (camionId: number) =>
-    apiClient.get(`/api/transport/camions/${camionId}/historique-couplage`),
   optimizeVRP: (data?: unknown) => apiClient.post('/api/v1/transport/vrp-optimize', data),
   getCorridorsCEMAC: () => apiClient.get('/api/v1/transport/corridors-cemac'),
   getFleetTCO: () => apiClient.get('/api/v1/transport/flotte/tco')
@@ -465,32 +421,14 @@ export const financeAPI = {
     apiClient.get('/api/finance/kpis'),
   getAnalyticsChartData: () =>
     apiClient.get('/api/finance/analytics/chart-data'),
-  getPayroll: () =>
-    apiClient.get('/api/finance/payroll/drivers'),
   getChartOfAccounts: (params?: Record<string, unknown>) =>
     apiClient.get('/api/finance/plan-comptable', { params }),
-  createChartAccount: (data: unknown) =>
-    apiClient.post('/api/finance/plan-comptable', data),
 };
 
 // ─── Service Purchases (K-Achats) ─────────────────────────
 export const purchaseAPI = {
   getRequisitions: (params?: Record<string, unknown>) =>
     apiClient.get('/api/purchase/requisitions/', { params }),
-  createRequisition: (data: unknown) =>
-    apiClient.post('/api/purchase/requisitions/', data),
-  getRequisition: (id: number) =>
-    apiClient.get(`/api/purchase/requisitions/${id}`),
-  updateRequisition: (id: number, data: unknown) =>
-    apiClient.put(`/api/purchase/requisitions/${id}`, data),
-  deleteRequisition: (id: number) =>
-    apiClient.delete(`/api/purchase/requisitions/${id}`),
-  submitRequisition: (id: number) =>
-    apiClient.post(`/api/purchase/requisitions/${id}/submit`),
-  approveRequisition: (id: number, notes?: string) =>
-    apiClient.post(`/api/purchase/requisitions/${id}/approve`, { notes_approbation: notes }),
-  rejectRequisition: (id: number, notes?: string) =>
-    apiClient.post(`/api/purchase/requisitions/${id}/reject`, { notes_approbation: notes }),
 };
 
 
@@ -504,22 +442,11 @@ export const parcAPI = {
     apiClient.get('/api/v1/parc/vehicules', { params }),
   getEmplacements: (params?: Record<string, unknown>) =>
     apiClient.get('/api/parc/emplacements', { params }),
-  getStock: (params?: Record<string, unknown>) =>
-    apiClient.get('/api/parc/stock', { params }),
   gateIn: (data: unknown) => apiClient.post('/api/parc/gate-in', data),
   gateOut: (data: unknown) => apiClient.post('/api/parc/gate-out', data),
  // extractOCR SUPPRIME: la route backend /parc/ocr-extract n'existe plus
  // (aucun moteur OCR cote serveur). Laisser ce helper aurait entretenu un
  // appel mort vers un 404. L'ecran du parc est passe en saisie manuelle.
-  getWorkshopRepairs: () =>
-    apiClient.get('/api/parc/workshop'),
-  createZone: (data: unknown) => apiClient.post('/api/parc/zones', data),
-  updateZone: (id: number, data: unknown) => apiClient.put(`/api/parc/zones/${id}`, data),
-  deleteZone: (id: number) => apiClient.delete(`/api/parc/zones/${id}`),
-  createEmplacement: (data: unknown) => apiClient.post('/api/parc/emplacements', data),
-  updateEmplacement: (id: number, data: unknown) => apiClient.put(`/api/parc/emplacements/${id}`, data),
-  deleteEmplacement: (id: number) => apiClient.delete(`/api/parc/emplacements/${id}`),
-  createWorkshopRepair: (data: unknown) => apiClient.post('/api/parc/workshop', data),
   getStocksActifs: () => apiClient.get('/api/parc/stock-actifs'),
 };
 
@@ -529,8 +456,6 @@ export const tiersAPI = {
     apiClient.get('/api/tiers', { params }),
   getClients: (params?: Record<string, unknown>) =>
     apiClient.get('/api/tiers', { params: { ...params, type_tiers: 'CLIENT' } }),
-  getClient: (id: number) =>
-    apiClient.get(`/api/tiers/${id}`),
   getTiersById: (id: number) =>
     apiClient.get(`/api/tiers/${id}`),
   createTiers: (data: unknown) =>
@@ -545,20 +470,12 @@ export const tiersAPI = {
 export const suppliersAPI = {
   getSuppliers: (params?: Record<string, unknown>) =>
     apiClient.get('/api/suppliers', { params }),
-  getSupplier: (id: number) =>
-    apiClient.get(`/api/suppliers/${id}`),
-  createSupplier: (data: unknown) =>
-    apiClient.post('/api/suppliers', data),
-  updateSupplier: (id: number, data: unknown) =>
-    apiClient.put(`/api/suppliers/${id}`, data),
 };
 
 // ─── Service Master Data ──────────────────────────────────
 export const masterDataAPI = {
   getArticles: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin/articles', { params }),
-  getArticle: (id: number) =>
-    apiClient.get(`/api/magasin/articles/${id}`),
   createArticle: (data: unknown) =>
     apiClient.post('/api/magasin/articles', data),
   updateArticle: (id: number, data: unknown) =>
@@ -567,35 +484,18 @@ export const masterDataAPI = {
     apiClient.delete(`/api/magasin/articles/${id}`),
   getTiers: (params?: Record<string, unknown>) =>
     apiClient.get('/api/tiers', { params }),
-  getTier: (id: number) =>
-    apiClient.get(`/api/tiers/${id}`),
   getArticleCategories: () =>
     apiClient.get('/api/master-data/article-categories'),
-  getIncoterms: () =>
-    apiClient.get('/api/master-data/incoterms'),
-  getContainerTypes: () =>
-    apiClient.get('/api/master-data/container-types'),
   getSummary: () =>
     apiClient.get('/api/v1/master-data'),
   getNomenclatures: (params?: Record<string, unknown>) =>
     apiClient.get('/api/v1/master-data/nomenclatures-cemac', { params }),
-  createNomenclature: (data: unknown) =>
-    apiClient.post('/api/v1/master-data/nomenclatures-cemac', data),
   getBureauxDouane: (type_bureau?: string) =>
     apiClient.get('/api/v1/master-data/bureaux-douane', { params: { type_bureau } }),
-  getTauxBEAC: (devise?: string) =>
-    apiClient.get('/api/v1/master-data/taux-beac', { params: { devise } }),
-  getCorridors: () =>
-    apiClient.get('/api/v1/master-data/corridors'),
 };
 
 // ─── Service Magasin ────────────────────────────────────── // 📦 Service Magasin 🏭
 export const magasinAPI = {
-  generateStockValuationReport: (params: any) => apiClient.post('/api/magasin/reports/stock-valuation', params),
-  generateMouvementAnalysisReport: (params: any) => apiClient.post('/api/magasin/reports/mouvement-analysis', params),
-  generateClientPerformanceReport: (params: any) => apiClient.post('/api/magasin/reports/client-performance', params),
-  exportReportToCSV: (data: any) => apiClient.post('/api/magasin/reports/export/csv', data),
-  exportReportToJSON: (data: any) => apiClient.post('/api/magasin/reports/export/json', data),
   exportClientsToCSV: () => apiClient.get('/api/magasin/export/clients/csv'),
   exportArticlesToCSV: () => apiClient.get('/api/magasin/export/articles/csv'),
   importArticlesFromCSV: (data: any) => apiClient.post('/api/magasin/import/articles', data),
@@ -603,7 +503,6 @@ export const magasinAPI = {
   importMagasinsFromCSV: (data: any) => apiClient.post('/api/magasin/import/magasins', data),
   getArticles: (params?: any) => apiClient.get('/api/magasin/articles', { params }),
   exportMagasinsToCSV: () => apiClient.get('/api/magasin/export/magasins/csv'),
-  deleteMagasin: (id: number) => apiClient.delete(`/api/magasin/magasins/${id}`),
   getMagasins: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin/magasins', { params }),
   getStocks: (params?: Record<string, unknown>) =>
@@ -614,17 +513,9 @@ export const magasinAPI = {
     apiClient.get('/api/magasin/entrepots/occupation'),
   getClients: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin/clients', { params }),
-  createClient: (data: unknown) =>
-    apiClient.post('/api/magasin/clients', data),
-  updateClient: (id: number, data: unknown) =>
-    apiClient.put(`/api/magasin/clients/${id}`, data),
-  deleteClient: (id: number) =>
-    apiClient.delete(`/api/magasin/clients/${id}`),
  // Bons de réception fournisseur (la route /magasin-avance/
  // receptions existe enfin sur le modèle réel payload: fournisseur_id,
  // entrepot_id, commande_fournisseur_id?, date_reception?, notes?).
-  getReceptions: (params?: Record<string, unknown>) =>
-    apiClient.get('/api/magasin-avance/receptions', { params }),
   createReception: async (data: {
     fournisseur_id: number;
     entrepot_id: number;
@@ -639,20 +530,12 @@ export const magasinAPI = {
     const response = await apiClient.post('/api/magasin/removal-slips', data)
     return response.data
   },
-  createReceptionMag3: (data: unknown) =>
-    apiClient.post('/api/magasin/receptions-mag3', data),
   getDeclarations: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin-douane/declarations', { params }),
   getDeclaration: (id: number) =>
     apiClient.get(`/api/magasin-douane/declarations/${id}`),
-  getDeclarationReceptionsSummary: (id: number) =>
-    apiClient.get(`/api/magasin/declarations/${id}/receptions-summary`),
-  getDeclarationReceptionsHistory: (id: number) =>
-    apiClient.get(`/api/magasin/declarations/${id}/receptions-history`),
  // completeReception SUPPRIMÉ (): clone sans appelant de
  // createReception vers l'ancienne route morte /magasin-avance/receptions.
-  getCommandes: (params?: Record<string, unknown>) =>
-    apiClient.get('/api/magasin/commandes', { params }),
   getHistory: (params?: Record<string, unknown>) =>
     apiClient.get('/api/magasin/history', { params }),
  // Ordres de Transfert
@@ -672,8 +555,6 @@ export const magasinAPI = {
     apiClient.post(`/api/magasin/ordres-transfert/${id}/receptionner`),
   annulerOrdreTransfert: (id: number) =>
     apiClient.post(`/api/magasin/ordres-transfert/${id}/annuler`),
-  getTransactions: () =>
-    apiClient.get('/api/magasin/transactions'),
   getStockStatuses: () =>
     apiClient.get('/api/magasin/stock-statuses'),
   getArticleByCode: (code: string) =>
@@ -689,8 +570,6 @@ export const magasinAPI = {
     const response = await apiClient.post('/api/magasin/bandes-livraison', data)
     return response.data
   },
-  updateBande: (id: number, data: unknown) =>
-    apiClient.put(`/api/magasin/bandes-livraison/${id}`, data),
  // Special endpoints
   createBandeFromOrdreTransfert: (otId: number, prepare_par: string) =>
     apiClient.post(`/api/magasin/bandes-livraison/from-ordre-transfert/${otId}`, null, { params: { prepare_par } }),
@@ -703,37 +582,10 @@ export const magasinAPI = {
   executeCrossDocking: (data: unknown) => apiClient.post('/api/magasin/cross-docking', data),
   scanRFBarcode: (data: unknown) => apiClient.post('/api/magasin/rf-scan', data),
   getROPAnalysis: (articleCode?: string) => apiClient.get('/api/magasin/reapprovisionnement/rop', { params: { article_code: articleCode } }),
-  generateWavePicking: (data: unknown) => apiClient.post('/api/v1/magasin-wms-avance/picking/vague', data),
-  regulariserInventaire: (data: unknown) => apiClient.post('/api/v1/magasin-wms-avance/inventaire/regulariser', data)
 };
 
 // ─── Advanced Analytics Endpoints ────────────────────────
 export const analyticsAPI = {
-  postDemandForecast: (data: {
-    article_id: number;
-    magasin_id?: number;
-    horizon_days?: number;
-  }) =>
-    apiClient.post('/api/magasin/analytics/demand-forecast', data),
-  postStockTurnoverAnalysis: (data: {
-    article_id: number;
-    months?: number;
-  }) =>
-    apiClient.post('/api/magasin/analytics/stock-turnover', data),
-  postSafetyStockCalculation: (data: {
-    article_id: number;
-    magasin_id: number;
-    service_level?: number;
-    lead_time_days?: number;
-  }) =>
-    apiClient.post('/api/magasin/analytics/safety-stock', data),
-  postAnomalyDetection: (data: {
-    article_id: number;
-    magasin_id: number;
-    days?: number;
-    sensitivity?: number;
-  }) =>
-    apiClient.post('/api/magasin/analytics/anomaly-detection', data)
 };
 
 // ─── Service Notifications ───────────────────────────────
@@ -801,8 +653,6 @@ export const portailRHAPI = {
 // ─── Service Chat Collaboratif & Meeting Rooms & WebRTC ────────────
 export const chatCollabAPI = {
   getDirectory: (q?: string) => apiClient.get('/api/v1/chat/directory', { params: q ? { q } : {} }),
-  getForumMessages: () => apiClient.get('/api/v1/chat/forum'),
-  postForumMessage: (content: string) => apiClient.post('/api/v1/chat/forum', { content }),
   getDirectMessages: (colleagueId: number) => apiClient.get(`/api/v1/chat/direct/${colleagueId}`),
   sendDirectMessage: (recipientId: number, content: string) =>
     apiClient.post('/api/v1/chat/direct', { recipient_id: recipientId, content }),
@@ -812,18 +662,12 @@ export const chatCollabAPI = {
   getRoomMessages: (roomIdentifier: string) => apiClient.get(`/api/v1/chat/rooms/${roomIdentifier}/messages`),
   sendRoomMessage: (roomIdentifier: string, content: string) =>
     apiClient.post(`/api/v1/chat/rooms/${roomIdentifier}/messages`, { content }),
-  getWebRTCConfig: () => apiClient.get('/api/v1/chat/webrtc/config'),
   sendWebRTCSignal: (data: { room_uuid: string; target_user_id?: number; signal_type: string; payload: unknown }) =>
     apiClient.post('/api/v1/chat/call/signal', data),
-  fetchPendingSignals: (roomUuid: string, since = 0) =>
-    apiClient.get(`/api/v1/chat/call/signals/${roomUuid}`, { params: { since } }),
-  getCallStatus: (roomUuid: string) => apiClient.get(`/api/v1/chat/call/status/${roomUuid}`),
 };
 
 // ─── Service Gateway ───────────────────────────────────────────────
 export const gatewayAPI = {
-  getPasserellesEnAttente: () => apiClient.get('/api/v1/gateway', { params: { statut: 'en_attente' } }).then(r => r.data),
-  getPasserelles: () => apiClient.get('/api/v1/gateway').then(r => r.data),
   getAll: (params?: Record<string, unknown>) => apiClient.get('/api/v1/gateway', { params }),
   getStats: () => apiClient.get('/api/v1/gateway/stats'),
   getById: (id: number) => apiClient.get(`/api/v1/gateway/${id}`),
@@ -847,12 +691,7 @@ export const acconageAPI = {
   getNavires: (params?: Record<string, unknown>) => apiClient.get('/api/v1/acconage/navires', { params }),
   createAcconage: (data: unknown) => apiClient.post('/api/v1/acconage', data),
   updateAcconage: (id: number, data: unknown) => apiClient.put(`/api/v1/acconage/${id}`, data),
-  importBaplie: (data: { escale_id: number; edi_content: string }) => apiClient.post('/api/v1/acconage/baplie/import', data),
-  exportBaplie: (escaleId: number) => apiClient.get(`/api/v1/acconage/baplie/export/${escaleId}`),
   getYardState: () => apiClient.get('/api/v1/acconage/yard/state'),
-  assignYardSlot: (data: unknown) => apiClient.post('/api/v1/acconage/yard/assign', data),
-  calculatePortDues: (escaleId: number, portCode = 'PAD') => apiClient.get(`/api/v1/acconage/facturation-quai/${escaleId}?port_code=${portCode}`),
-  generatePortInvoice: (escaleId: number, data?: unknown) => apiClient.post(`/api/v1/acconage/facturation-quai/${escaleId}/generer-facture`, data)
 };
 
 // ─── Service Transit ────────────────────────────────
@@ -869,9 +708,6 @@ export const maintenanceAPI = {
   getMaintenance: (id: number) => apiClient.get(`/api/v1/maintenance/${id}`),
   createMaintenance: (data: unknown) => apiClient.post('/api/v1/maintenance', data),
   updateMaintenance: (id: number, data: unknown) => apiClient.put(`/api/v1/maintenance/${id}`, data),
-  destockerPieces: (data: unknown) => apiClient.post('/api/v1/maintenance/destockage-pieces', data),
-  getCarnetEntretien: (vin: string) => apiClient.get(`/api/v1/maintenance/carnet-entretien/${vin}`),
-  diagnostiquerTelematics: (immat: string) => apiClient.get(`/api/v1/maintenance/telematics/obd2/${immat}`),
   getKPIs: () => apiClient.get('/api/v1/maintenance/analytics/kpis')
 };
 
@@ -884,10 +720,6 @@ export const qhseAPI = {
   createQhseRecord: (data: unknown) => apiClient.post('/api/v1/qhse', data),
   createIncident: (data: unknown) => apiClient.post('/api/v1/qhse', data),
   updateQhseRecord: (id: number, data: unknown) => apiClient.put(`/api/v1/qhse/${id}`, data),
-  deleteQhseRecord: (id: number) => apiClient.delete(`/api/v1/qhse/${id}`),
-  createPermisTravail: (data: unknown) => apiClient.post('/api/v1/qhse/permis-travail', data),
-  checkIMDGSegregation: (data: { classes_imdg: string[] }) => apiClient.post('/api/v1/qhse/imdg/segregation', data),
-  getBilanCSSTCNPS: (annee = 2026) => apiClient.get(`/api/v1/qhse/csst-cnps/bilan?annee=${annee}`)
 };
 
 
@@ -933,7 +765,6 @@ export const amenagementAPI = {
 
  // 1. Schémas directeurs & périmètres
   listSchemas: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/schemas-directeurs`, { params }),
-  getSchema: (id: number) => apiClient.get(`${AMGT}/schemas-directeurs/${id}`),
   createSchema: (data: unknown) => apiClient.post(`${AMGT}/schemas-directeurs`, data),
   updateSchema: (id: number, data: unknown) => apiClient.put(`${AMGT}/schemas-directeurs/${id}`, data),
  // Atteste l'acte pris par le gouvernement (n° réel d'arrêté + date), ne
@@ -945,7 +776,6 @@ export const amenagementAPI = {
 
  // 2. Projets d'aménagement
   listProjets: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/projets`, { params }),
-  getProjet: (id: number) => apiClient.get(`${AMGT}/projets/${id}`),
   createProjet: (data: unknown) => apiClient.post(`${AMGT}/projets`, data),
   updateProjet: (id: number, data: unknown) => apiClient.put(`${AMGT}/projets/${id}`, data),
  // Retrait declaratif: le backend exige un motif (>= 3 caracteres), jamais un
@@ -958,7 +788,6 @@ export const amenagementAPI = {
 
  // 3. Programmation & maturité (PIP / CDMT)
   listProgrammation: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/programmation`, { params }),
-  getProgrammation: (id: number) => apiClient.get(`${AMGT}/programmation/${id}`),
   createProgrammation: (data: unknown) => apiClient.post(`${AMGT}/programmation`, data),
   updateProgrammation: (id: number, data: unknown) => apiClient.put(`${AMGT}/programmation/${id}`, data),
   viserControleFinancier: (id: number, params: { date_visa: string; autorite_visa: string; numero_engagement?: string }) =>
@@ -971,7 +800,6 @@ export const amenagementAPI = {
 
  // 4. Marchés publics & PPP
   listMarches: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/marches`, { params }),
-  getMarche: (id: number) => apiClient.get(`${AMGT}/marches/${id}`),
   createMarche: (data: unknown) => apiClient.post(`${AMGT}/marches`, data),
   updateMarche: (id: number, data: unknown) => apiClient.put(`${AMGT}/marches/${id}`, data),
   attribuerMarche: (id: number, params: { attributaire: string; date_attribution: string; montant_attribue_xaf?: number; reference_deliberation?: string }) =>
@@ -982,7 +810,6 @@ export const amenagementAPI = {
 
  // 5. Titres domaniaux & occupations
   listTitres: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/titres-domaniaux`, { params }),
-  getTitre: (id: number) => apiClient.get(`${AMGT}/titres-domaniaux/${id}`),
   createTitre: (data: unknown) => apiClient.post(`${AMGT}/titres-domaniaux`, data),
   updateTitre: (id: number, data: unknown) => apiClient.put(`${AMGT}/titres-domaniaux/${id}`, data),
   deciderTitre: (id: number, params: { accord: boolean; date_decision: string; autorite_emettrice?: string; reference_deliberation?: string; motif_refus?: string }) =>
@@ -990,7 +817,6 @@ export const amenagementAPI = {
 
  // 6. Concessions & contrats d'exploitation
   listConcessions: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/concessions`, { params }),
-  getConcession: (id: number) => apiClient.get(`${AMGT}/concessions/${id}`),
   createConcession: (data: unknown) => apiClient.post(`${AMGT}/concessions`, data),
   updateConcession: (id: number, data: unknown) => apiClient.put(`${AMGT}/concessions/${id}`, data),
   getObligationsConcession: (id: number) => apiClient.get(`${AMGT}/concessions/${id}/obligations`),
@@ -998,7 +824,6 @@ export const amenagementAPI = {
 
  // 7. Inventaire des infrastructures
   listInfrastructures: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/infrastructures`, { params }),
-  getInfrastructure: (id: number) => apiClient.get(`${AMGT}/infrastructures/${id}`),
   createInfrastructure: (data: unknown) => apiClient.post(`${AMGT}/infrastructures`, data),
   updateInfrastructure: (id: number, data: unknown) => apiClient.put(`${AMGT}/infrastructures/${id}`, data),
  // Sortie d'inventaire sur motif obligatoire (démolition, sortie de
@@ -1010,7 +835,6 @@ export const amenagementAPI = {
 
  // 8. Dragage & profondeurs disponibles
   listDragages: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/dragage`, { params }),
-  getDragage: (id: number) => apiClient.get(`${AMGT}/dragage/${id}`),
   createDragage: (data: unknown) => apiClient.post(`${AMGT}/dragage`, data),
   updateDragage: (id: number, data: unknown) => apiClient.put(`${AMGT}/dragage/${id}`, data),
   consignerBathymetrie: (id: number, params: { profondeur_obtenue_m: number; date_releve: string; volume_mesure_m3?: number }) =>
@@ -1019,7 +843,6 @@ export const amenagementAPI = {
 
  // 9. Autorisations administratives (EIES, permis)
   listAutorisations: (params?: Record<string, unknown>) => apiClient.get(`${AMGT}/autorisations`, { params }),
-  getAutorisation: (id: number) => apiClient.get(`${AMGT}/autorisations/${id}`),
   createAutorisation: (data: unknown) => apiClient.post(`${AMGT}/autorisations`, data),
   updateAutorisation: (id: number, data: unknown) => apiClient.put(`${AMGT}/autorisations/${id}`, data),
   depotAutorisation: (id: number) => apiClient.post(`${AMGT}/autorisations/${id}/depot`),
@@ -1052,16 +875,13 @@ export const cotationsAPI = {
 export const rfqPrestatairesAPI = {
   listPrestataires: (params?: Record<string, unknown>) =>
     apiClient.get('/api/v1/prestataires', { params }),
-  getCotations: () => apiClient.get('/api/v1/prestataires/cotations'),
  // CotationCreate: prestataire_id, titre_besoin, description_besoin,
  // urgence, date_intervention_souhaitee, lieu_intervention, budget_max_estime.
-  createCotation: (data: unknown) => apiClient.post('/api/v1/prestataires/cotations', data),
 };
 
 // ─── Service Tracking & e-POD ──────────────────────────────────────────
 export const trackingAPI = {
   getEpods: () => apiClient.get('/api/v1/transport-international/preuves-livraison'),
-  createEpod: (data: unknown) => apiClient.post('/api/v1/transport-international/preuves-livraison', data),
 };
 
 // ─── Service FuelGuard (contrôle carburant) ─────────────────────────────────
@@ -1089,8 +909,6 @@ export const complianceAPI = {
  // qui repondait 501 sans modele; les ecrans consomment maintenant la donnee.
   getAudits: (params?: Record<string, unknown>) =>
     apiClient.get('/api/v1/qhse/audits', { params }),
-  createAudit: (data: unknown) => apiClient.post('/api/v1/qhse/audits', data),
-  updateAudit: (id: number, data: unknown) => apiClient.put(`/api/v1/qhse/audits/${id}`, data),
   getCertifications: (params?: Record<string, unknown>) =>
     apiClient.get('/api/v1/qhse/certifications', { params }),
 };
@@ -1123,7 +941,6 @@ export const supportAPI = {
   getIncidents: (params?: Record<string, unknown>) => apiClient.get('/api/v1/support/incidents', { params }),
   createIncident: (data: unknown) => apiClient.post('/api/v1/support/incidents', data),
   getTickets: (params?: Record<string, unknown>) => apiClient.get('/api/v1/support/tickets', { params }),
-  getTicket: (id: number) => apiClient.get(`/api/v1/support/tickets/${id}`),
   createTicket: (data: unknown) => apiClient.post('/api/v1/support/tickets', data),
  // Transition reelle: statut (ouvert/en_cours/resolu/ferme), priorite
  // (basse/normale/haute/urgente) et assignation, colonnes existantes.
@@ -1139,8 +956,6 @@ export const b2bPortalAPI = {
   createBooking: (data: unknown) => apiClient.post('/api/v1/b2b-portal/booking', data),
   trackCargo: (query: string) => apiClient.get(`/api/v1/b2b-portal/tracking/${encodeURIComponent(query)}`),
   processPayment: (data: unknown) => apiClient.post('/api/v1/b2b-portal/payments/checkout', data),
-  getNotificationPreferences: (clientId?: number) => apiClient.get('/api/v1/b2b-portal/notifications/preferences', { params: clientId ? { client_id: clientId } : undefined }),
-  updateNotificationPreferences: (data: unknown, clientId?: number) => apiClient.put('/api/v1/b2b-portal/notifications/preferences', data, { params: clientId ? { client_id: clientId } : undefined }),
 };
 
 
@@ -1149,12 +964,7 @@ export const api = apiClient;
 // ─── Service Fleet / Parc Véhicules ──────────────────────────────────────────
 export const fleetAPI = {
   getVehicles: (params?: Record<string, unknown>) => apiClient.get('/api/v1/fleet/vehicles', { params }),
-  getVehicle: (id: number) => apiClient.get(`/api/v1/fleet/vehicles/${id}`),
   createVehicle: (data: unknown) => apiClient.post('/api/v1/fleet/vehicles', data),
-  updateVehicle: (id: number, data: unknown) => apiClient.put(`/api/v1/fleet/vehicles/${id}`, data),
-  deleteVehicle: (id: number) => apiClient.delete(`/api/v1/fleet/vehicles/${id}`),
-  getFuelRecords: (params?: Record<string, unknown>) => apiClient.get('/api/v1/fleet/fuel-records', { params }),
-  createFuelRecord: (data: unknown) => apiClient.post('/api/v1/fleet/fuel-records', data),
   getDocuments: (vehicleId?: number) => apiClient.get('/api/v1/fleet/documents', { params: { vehicle_id: vehicleId } }),
   uploadDocument: (data: FormData) => apiClient.post('/api/v1/fleet/documents', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
@@ -1162,19 +972,13 @@ export const fleetAPI = {
 // ─── Service CRM / Clients B2B ──────────────────────────────────────────
 export const customerAPI = {
   getCustomers: (params?: Record<string, unknown>) => apiClient.get('/api/v1/customers', { params }),
-  getCustomer: (id: number) => apiClient.get(`/api/v1/customers/${id}`),
   createCustomer: (data: unknown) => apiClient.post('/api/v1/customers', data),
-  updateCustomer: (id: number, data: unknown) => apiClient.put(`/api/v1/customers/${id}`, data),
-  deleteCustomer: (id: number) => apiClient.delete(`/api/v1/customers/${id}`),
-  getContracts: (params?: Record<string, unknown>) => apiClient.get('/api/v1/customers/contracts', { params }),
   createContract: (data: unknown) => apiClient.post('/api/v1/customers/contracts', data),
 };
 
 // ─── Service Audit Logs ──────────────────────────────────────────
 export const auditAPI = {
   getLogs: (params?: Record<string, unknown>) => apiClient.get('/api/v1/audit/logs', { params }),
-  getAdminLogs: (params?: Record<string, unknown>) => apiClient.get('/api/v1/audit/admin-logs', { params }),
-  exportLogs: (params?: Record<string, unknown>) => apiClient.get('/api/v1/audit/export', { params, responseType: 'blob' }),
 };
 
 // ─── Service Bill of Loading / Connaissements / BSC ───────────────────────
@@ -1280,9 +1084,6 @@ export const notificationSystemAPI = {
   getStats: () => apiClient.get('/api/v1/notification-system/stats'),
   getById: (id: number) => apiClient.get(`/api/v1/notification-system/${id}`),
   send: (data: unknown) => apiClient.post('/api/v1/notification-system/send', data),
-  getTemplates: (canal?: string) => apiClient.get('/api/v1/notification-system/templates', { params: { canal } }),
-  createTemplate: (data: unknown) => apiClient.post('/api/v1/notification-system/templates', data),
-  markRead: (id: number) => apiClient.post(`/api/v1/notification-system/${id}/read`),
 };
 
 // ─── Service Partner API B2B ──────────────────────────────────────────────
@@ -1291,7 +1092,6 @@ export const partnerB2BAPI = {
   getWebhooks: (statut?: string) => apiClient.get('/api/v1/partner-api/webhooks', { params: { statut } }),
   createWebhook: (data: unknown) => apiClient.post('/api/v1/partner-api/webhooks', data),
   track: (ref: string) => apiClient.get(`/api/v1/partner-api/track/${encodeURIComponent(ref)}`),
-  submitCotation: (data: unknown) => apiClient.post('/api/v1/partner-api/cotation-request', data),
   deleteWebhook: (id: number) => apiClient.delete(`/api/v1/partner-api/webhooks/${id}`),
 };
 
@@ -1310,7 +1110,6 @@ export const fraisMissionsAPI = {
 export const maintenanceGMAOAPI = {
   getWorkOrders: (params?: Record<string, unknown>) => apiClient.get('/api/v1/maintenance-gmao/ordres', { params }),
   getEquipment: (params?: Record<string, unknown>) => apiClient.get('/api/v1/maintenance-gmao/equipements', { params }),
-  createWorkOrder: (data: unknown) => apiClient.post('/api/v1/maintenance-gmao/ordres', data),
   updateWorkOrder: (id: number, data: unknown) => apiClient.put(`/api/v1/maintenance-gmao/ordres/${id}`, data),
 };
 
@@ -1318,7 +1117,6 @@ export const maintenanceGMAOAPI = {
 export const transitAvanceAPI = {
   getDossiers: (params?: Record<string, unknown>) => apiClient.get('/api/v1/transit-avance/dossiers', { params }),
   getBureauxDouane: () => apiClient.get('/api/v1/transit-avance/bureaux-douane'),
-  createBureau: (data: unknown) => apiClient.post('/api/v1/transit-avance/bureaux-douane', data),
 };
 
 // --- Service Documents / GED (archivage legal inclus) -------------------------
@@ -1383,12 +1181,8 @@ export const metierAPI = {
     apiClient.get('/api/v1/metier/cuves-en-alerte', { params: { seuil_pct: seuilPct } }),
   getPaieCumuls: (annee?: number) =>
     apiClient.get('/api/v1/metier/paie/cumuls', { params: { annee } }),
-  getPaieProgressifs: (annee: number, employeId: number) =>
-    apiClient.get('/api/v1/metier/paie/cumuls-progressifs', { params: { annee, employe_id: employeId } }),
   getPaieBulletin: (employeId: number, annee: number, mois: number) =>
     apiClient.get('/api/v1/metier/paie/bulletin', { params: { employe_id: employeId, annee, mois } }),
-  getPaieBulletinPdfUrl: (employeId: number, annee: number, mois: number) =>
-    apiUrl(`/metier/paie/bulletin/pdf?employe_id=${employeId}&annee=${annee}&mois=${mois}`),
   getRentabilite: (clientId?: number) =>
     apiClient.get('/api/v1/metier/rentabilite', { params: { client_id: clientId } }),
   getRentabiliteMissions: (missionId?: number) =>
@@ -1415,8 +1209,6 @@ export const metierAPI = {
     apiClient.get('/api/v1/metier/rh/formation'),
   getRhDiscipline: () =>
     apiClient.get('/api/v1/metier/rh/discipline'),
-  getFraisRapports: (collaborateur?: string) =>
-    apiClient.get('/api/v1/metier/frais/rapports', { params: { collaborateur } }),
   getFraisAvances: () =>
     apiClient.get('/api/v1/metier/frais/avances'),
   getFraisTva: () =>

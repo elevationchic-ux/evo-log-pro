@@ -450,5 +450,5 @@ __all__ = [
     "ZoneGeofencingCreate", "ZoneGeofencingUpdate", "ZoneGeofencingResponse",
     "EvenementVehiculeCreate", "EvenementVehiculeResponse",
     "CoutKmResponse", "AnomalieCarburantResponse", "PerformanceSousTraitantResponse",
-    "StatistiquesAccidentsResponse", "ComportementConducteurResponse", "KPITransportResponse"
+    "StatistiquesAccidentsResponse", "ComportementConducteurResponse"
 ]

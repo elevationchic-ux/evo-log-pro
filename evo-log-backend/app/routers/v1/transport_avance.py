@@ -1,8 +1,10 @@
 """Advanced transport router - Route optimization, fuel tracking, subcontractors"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
-from datetime import date, datetime
+from sqlalchemy import func, and_
+from typing import List, Optional
+from datetime import date, datetime, timedelta
+from uuid import uuid4
 
 from app.core.database import get_db
 from app.core.permissions import require_perm
@@ -22,11 +24,24 @@ from app.schemas.transport_avance import (
     ZoneGeofencingCreate, ZoneGeofencingUpdate, ZoneGeofencingResponse,
     EvenementVehiculeCreate, EvenementVehiculeResponse,
     CoutKmResponse, AnomalieCarburantResponse, PerformanceSousTraitantResponse,
-    StatistiquesAccidentsResponse, ComportementConducteurResponse, KPITransportResponse
+    StatistiquesAccidentsResponse, ComportementConducteurResponse
 )
 
 
 router = APIRouter(tags=["Transport Avancé"])  # monte sur /api/v1/transport-avance par main.py
+
+LIMITE_CONDUITE_MINUTES = 540  # 9 h/jour
+
+
+def _code(prefix: str) -> str:
+    return f"{prefix}-{datetime.now().strftime('%Y%m%d')}-{uuid4().hex[:6].upper()}"
+
+
+def _get_or_404(db: Session, model, ident: int, label: str):
+    obj = db.query(model).filter(model.id == ident).first()
+    if not obj:
+        raise HTTPException(status_code=404, detail=f"{label} non trouvé(e)")
+    return obj
 
 
 # ============ TOURNÉES ============
@@ -37,14 +52,16 @@ def creer_tournee(
     current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Create delivery tour/route"""
-    from app.models.transport_avance import Tournée
+    from app.models.transport_avance import Tournée, StatutTournée
     t = Tournée(
-        vehicule_id=tournee.vehicule_id,
+        numero_tournee=_code("TRN"),
         conducteur_id=tournee.conducteur_id,
+        camion_id=tournee.camion_id,
         date_tournee=tournee.date_tournee,
-        origine=tournee.origine,
-        destination=tournee.destination,
-        statut="planifie"
+        type_tournee=tournee.type_tournee,
+        notes=tournee.notes,
+        statut=StatutTournée.PLANIFIEE,
+        createur=current_user.id
     )
     db.add(t)
     db.commit()
@@ -60,17 +77,22 @@ def ajouter_livraison(
     current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Add delivery stop to tour"""
-    from app.models.transport_avance import Livraison
+    from app.models.transport_avance import Tournée, Livraison
+    tournee = _get_or_404(db, Tournée, tournee_id, "Tournée")
     l = Livraison(
+        numero_livraison=_code("LIV"),
         tournee_id=tournee_id,
         client_id=livraison.client_id,
-        adresse=livraison.adresse,
-        ordre_arret=livraison.ordre_arret,
-        fenetre_horaire_debut=livraison.fenetre_horaire_debut,
-        fenetre_horaire_fin=livraison.fenetre_horaire_fin,
+        point_dechargement=livraison.point_dechargement,
+        heure_debut_prevue=livraison.heure_debut_prevue,
+        heure_fin_prevue=livraison.heure_fin_prevue,
+        nombre_colis=livraison.nombre_colis,
+        poids_total=livraison.poids_total,
+        commentaire=livraison.commentaire,
         statut="en_attente"
     )
     db.add(l)
+    tournee.nombre_livraisons = (tournee.nombre_livraisons or 0) + 1
     db.commit()
     db.refresh(l)
     return l
@@ -82,19 +104,16 @@ def optimiser_tournee(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.modify"))
 ):
-    """Optimize route (placeholder for actual routing algorithm)"""
+    """Resynchronise le compteur de livraisons de la tournée.
+
+    Aucun moteur de routage n'est branché : l'endpoint vérifie la tournée,
+    recompte ses arrêts réels et renvoie l'état courant (pas de statut
+    'optimise' fictif — l'enum StatutTournée n'en prévoit pas).
+    """
     from app.models.transport_avance import Tournée, Livraison
-    
-    tournee = db.query(Tournée).filter(Tournée.id == tournee_id).first()
-    if not tournee:
-        raise HTTPException(status_code=404, detail="Tournée non trouvée")
-    
-    livraisons = db.query(Livraison).filter(Livraison.tournee_id == tournee_id).all()
-    
-    for idx, livraison in enumerate(livraisons):
-        livraison.ordre_arret = idx + 1
-    
-    tournee.statut = "optimise"
+    tournee = _get_or_404(db, Tournée, tournee_id, "Tournée")
+    nb = db.query(func.count(Livraison.id)).filter(Livraison.tournee_id == tournee_id).scalar() or 0
+    tournee.nombre_livraisons = nb
     db.commit()
     db.refresh(tournee)
     return tournee
@@ -107,15 +126,13 @@ def demarrer_tournee(
     current_user: User = Depends(require_perm("transport.dispatch.modify"))
 ):
     """Start tour execution"""
-    from app.models.transport_avance import Tournée
-    
-    tournee = db.query(Tournée).filter(Tournée.id == tournee_id).first()
-    if not tournee:
-        raise HTTPException(status_code=404, detail="Tournée non trouvée")
-    
-    tournee.statut = "en_cours"
-    tournee.heure_depart = datetime.utcnow()
-    
+    from app.models.transport_avance import Tournée, StatutTournée
+    tournee = _get_or_404(db, Tournée, tournee_id, "Tournée")
+    if tournee.statut == StatutTournée.EN_COURS:
+        raise HTTPException(status_code=409, detail="Tournée déjà en cours")
+    if tournee.statut == StatutTournée.TERMINEE:
+        raise HTTPException(status_code=409, detail="Tournée déjà terminée")
+    tournee.statut = StatutTournée.EN_COURS
     db.commit()
     db.refresh(tournee)
     return tournee
@@ -127,19 +144,18 @@ def completer_tournee(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.modify"))
 ):
-    """Complete tour"""
-    from app.models.transport_avance import Tournée
-    
-    tournee = db.query(Tournée).filter(Tournée.id == tournee_id).first()
-    if not tournee:
-        raise HTTPException(status_code=404, detail="Tournée non trouvée")
-    
-    tournee.statut = "complete"
-    tournee.heure_arrivee = datetime.utcnow()
-    
-    if tournee.heure_depart:
-        tournee.duree_reelle_heures = (tournee.heure_arrivee - tournee.heure_depart).total_seconds() / 3600
-    
+    """Complete tour — recalcule livraisons effectuées et performance réelle"""
+    from app.models.transport_avance import Tournée, Livraison, StatutTournée
+    tournee = _get_or_404(db, Tournée, tournee_id, "Tournée")
+    effectuees = db.query(func.count(Livraison.id)).filter(
+        Livraison.tournee_id == tournee_id,
+        Livraison.statut == "livre"
+    ).scalar() or 0
+    total = tournee.nombre_livraisons or 0
+    tournee.nombre_livraisons_effectuees = effectuees
+    if total > 0:
+        tournee.performance = round((effectuees / total) * 100, 2)
+    tournee.statut = StatutTournée.TERMINEE
     db.commit()
     db.refresh(tournee)
     return tournee
@@ -152,15 +168,22 @@ def enregistrer_frais_kilometrique(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
-    """Record mileage expense"""
+    """Record mileage expense (indemnité kilométrique)"""
     from app.models.transport_avance import FraisKilometrique
+    km = frais.kilometrage_parcouru
+    theorique = frais.kilometrage_theorique
+    montant = round(km * frais.taux_indemnite, 2) if frais.taux_indemnite is not None else None
+    surplus = round(km - theorique, 2) if theorique is not None else None
     f = FraisKilometrique(
-        vehicule_id=frais.vehicule_id,
-        date_debut=frais.date_debut,
-        date_fin=frais.date_fin,
-        kilometres_parcourus=frais.kilometres_parcourus,
-        taux_remboursement=frais.taux_remboursement,
-        montant=frais.montant
+        employe_id=frais.employe_id,
+        mission_id=frais.mission_id,
+        kilometrage_parcouru=km,
+        kilometrage_theorique=theorique,
+        taux_indemnite=frais.taux_indemnite,
+        montant_indemnite=montant,
+        surconsommation=surplus,
+        statut="en_attente",
+        commentaires=frais.commentaires
     )
     db.add(f)
     db.commit()
@@ -168,41 +191,43 @@ def enregistrer_frais_kilometrique(
     return f
 
 
-@router.get("/frais-km/cout/{vehicule_id}/{mois}/{annee}", response_model=CoutKmResponse)
+@router.get("/frais-km/cout/{camion_id}/{mois}/{annee}", response_model=CoutKmResponse)
 def calculer_cout_km(
-    vehicule_id: int,
+    camion_id: int,
     mois: int,
     annee: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
-    """Calculate cost per kilometer for month"""
+    """Calculate cost per kilometer for month (via missions du camion)"""
     from app.models.transport_avance import FraisKilometrique
-    from sqlalchemy import func, and_
-    from datetime import timedelta
-    
+    from app.models.transport import Mission
+
+    if not 1 <= mois <= 12:
+        raise HTTPException(status_code=400, detail="Mois invalide (1-12)")
     debut_mois = date(annee, mois, 1)
-    fin_mois = (date(annee, mois + 1, 1) - timedelta(days=1)) if mois < 12 else date(annee, 12, 31)
-    
+    fin_mois = (date(annee + 1, 1, 1) - timedelta(days=1)) if mois == 12 else (date(annee, mois + 1, 1) - timedelta(days=1))
+
     result = db.query(
-        func.sum(FraisKilometrique.kilometres_parcourus).label("km"),
-        func.sum(FraisKilometrique.montant).label("cout")
-    ).filter(
+        func.sum(FraisKilometrique.kilometrage_parcouru).label("km"),
+        func.sum(FraisKilometrique.montant_indemnite).label("cout")
+    ).join(Mission, FraisKilometrique.mission_id == Mission.id).filter(
         and_(
-            FraisKilometrique.vehicule_id == vehicule_id,
-            FraisKilometrique.date_debut >= debut_mois,
-            FraisKilometrique.date_fin <= fin_mois
+            Mission.camion_id == camion_id,
+            FraisKilometrique.date_frais >= debut_mois,
+            FraisKilometrique.date_frais <= fin_mois
         )
     ).first()
-    
-    km = result.km or 0
-    cout = result.cout or 0
-    cout_par_km = cout / km if km > 0 else 0
-    
+
+    km = float(result.km or 0)
+    cout = float(result.cout or 0)
     return {
+        "camion_id": camion_id,
+        "mois": mois,
+        "annee": annee,
         "kilometres": km,
         "cout_total": cout,
-        "cout_par_km": round(cout_par_km, 2)
+        "cout_par_km": round(cout / km, 2) if km > 0 else 0
     }
 
 
@@ -215,17 +240,54 @@ def enregistrer_plein_carburant(
     prix_litre: float,
     kilometrage: int,
     station: str,
+    numero_ticket: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
-    """Record fuel fill-up and calculate consumption"""
+    """Record fuel fill-up — persisté dans fleet_carburant_records (parc)
+    et consommation calculée si l'index précédent est connu."""
+    from app.models.parc import CarburantRecord, Vehicule
+
+    vehicule = db.query(Vehicule).filter(Vehicule.id == vehicule_id).first()
+    precedent = db.query(CarburantRecord).filter(
+        CarburantRecord.vehicule_id == vehicule_id,
+        CarburantRecord.kilometrage.isnot(None)
+    ).order_by(CarburantRecord.kilometrage.desc()).first()
+    index_precedent = precedent.kilometrage if precedent else None
+
+    record = CarburantRecord(
+        vehicule_id=vehicule_id,
+        immatriculation=vehicule.immatriculation if vehicule else None,
+        date_plein=date_plein,
+        litres=litres,
+        prix_litre=prix_litre,
+        cout=round(litres * prix_litre, 2),
+        kilometrage=kilometrage,
+        station=station,
+        numero_ticket=numero_ticket,
+        index_precedent=index_precedent,
+        statut="valide"
+    )
+    db.add(record)
+    db.commit()
+    db.refresh(record)
+
+    conso_100km = None
+    if index_precedent is not None and kilometrage > index_precedent:
+        conso_100km = round((litres / (kilometrage - index_precedent)) * 100, 2)
+
     return {
+        "id": record.id,
         "vehicule_id": vehicule_id,
-        "date_plein": date_plein,
-        "litres": litres,
-        "prix_litre": prix_litre,
+        "immatriculation": record.immatriculation,
+        "date_plein": record.date_plein,
+        "litres": float(litres),
+        "prix_litre": float(prix_litre),
+        "cout": float(record.cout or 0),
         "kilometrage": kilometrage,
-        "station": station
+        "station": station,
+        "index_precedent": index_precedent,
+        "consommation_l_100km": conso_100km
     }
 
 
@@ -242,11 +304,12 @@ def detecter_anomalie_carburant(
     difference = abs(consommation_actuelle - consommation_theorique)
     pourcentage_difference = (difference / consommation_theorique) * 100 if consommation_theorique > 0 else 0
     anomalie = pourcentage_difference > (tolerance * 100)
-    
+
     return {
+        "vehicule_id": vehicule_id,
         "consommation_actuelle": consommation_actuelle,
         "consommation_theorique": consommation_theorique,
-        "difference": difference,
+        "difference": round(difference, 2),
         "pourcentage_difference": round(pourcentage_difference, 2),
         "anomalie_detectee": anomalie,
         "niveau_alerte": "critique" if pourcentage_difference > 50 else "modere" if anomalie else "normal"
@@ -260,18 +323,21 @@ def enregistrer_temps_conduite(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
-    """Record driving period"""
+    """Record driving period (minutes) — conformité légale 9 h/j calculée"""
     from app.models.transport_avance import TempsConduite
-    
-    duree_heures = (temps.fin_conduite - temps.debut_conduite).total_seconds() / 3600
-    
+    conformite = temps.temps_conduite <= LIMITE_CONDUITE_MINUTES
     t = TempsConduite(
         conducteur_id=temps.conducteur_id,
-        vehicule_id=temps.vehicule_id,
-        debut_conduite=temps.debut_conduite,
-        fin_conduite=temps.fin_conduite,
-        duree_heures=duree_heures,
-        kilometres=temps.kilometres
+        mission_id=temps.mission_id,
+        date=temps.date,
+        heure_debut_conduite=temps.heure_debut_conduite,
+        heure_fin_conduite=temps.heure_fin_conduite,
+        temps_conduite=temps.temps_conduite,
+        temps_repos=temps.temps_repos,
+        temps_service=(temps.temps_conduite or 0) + (temps.temps_repos or 0),
+        conformite_legale=conformite,
+        statut="conforme" if conformite else "non_conforme",
+        commentaires=temps.commentaires
     )
     db.add(t)
     db.commit()
@@ -286,30 +352,30 @@ def verifier_conformite_temps(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
-    """Check driving time compliance"""
+    """Check driving time compliance for a driver on a given day"""
     from app.models.transport_avance import TempsConduite
-    from sqlalchemy import and_, func
-    
-    debut_jour = datetime.combine(date_verif, datetime.min.time())
-    fin_jour = datetime.combine(date_verif, datetime.max.time())
-    
-    temps_conduite = db.query(TempsConduite).filter(
+
+    enregistrements = db.query(TempsConduite).filter(
         and_(
             TempsConduite.conducteur_id == conducteur_id,
-            TempsConduite.debut_conduite >= debut_jour,
-            TempsConduite.debut_conduite <= fin_jour
+            TempsConduite.date == date_verif
         )
     ).all()
-    
-    total_heures = sum(t.duree_heures for t in temps_conduite)
-    non_conforme = total_heures > 9.0
-    
+
+    total_minutes = sum(t.temps_conduite or 0 for t in enregistrements)
+    infractions = sum(1 for t in enregistrements if t.conformite_legale is False)
+    depassement = total_minutes > LIMITE_CONDUITE_MINUTES
+    conforme = not depassement and infractions == 0
+
     return {
+        "conducteur_id": conducteur_id,
         "date": date_verif,
-        "total_heures_conduite": round(total_heures, 2),
-        "limite_journaliere": 9.0,
-        "conforme": not non_conforme,
-        "alerte": "Depassement temps de conduite journalier" if non_conforme else None
+        "total_minutes_conduite": total_minutes,
+        "limite_journaliere_minutes": LIMITE_CONDUITE_MINUTES,
+        "infractions": infractions,
+        "conforme": conforme,
+        "alerte": "Dépassement du temps de conduite journalier" if depassement else
+                  (f"{infractions} enregistrement(s) non conforme(s)" if infractions else None)
     }
 
 
@@ -322,14 +388,17 @@ def creer_sous_traitant(
 ):
     """Create subcontractor record"""
     from app.models.transport_avance import SousTraitant
-    
+
     s = SousTraitant(
+        code=sous_traitant.code or _code("ST"),
         nom=sous_traitant.nom,
-        siret=sous_traitant.siret,
+        type_service=sous_traitant.type_service,
+        specialite=sous_traitant.specialite,
+        numero_licence=sous_traitant.numero_licence,
         adresse=sous_traitant.adresse,
+        ville=sous_traitant.ville,
         telephone=sous_traitant.telephone,
         email=sous_traitant.email,
-        specialites=",".join(sous_traitant.specialites),
         statut="actif"
     )
     db.add(s)
@@ -345,15 +414,20 @@ def creer_contrat_sous_traitant(
     current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Create subcontractor contract"""
-    from app.models.transport_avance import ContratSousTraitant
-    
+    from app.models.transport_avance import ContratSousTraitant, SousTraitant
+    _get_or_404(db, SousTraitant, contrat.sous_traitant_id, "Sous-traitant")
+
     c = ContratSousTraitant(
         sous_traitant_id=contrat.sous_traitant_id,
+        numero_contrat=contrat.numero_contrat,
+        type_service=contrat.type_service,
         date_debut=contrat.date_debut,
         date_fin=contrat.date_fin,
-        tarif_km=contrat.tarif_km,
-        tarif_fixe=contrat.tarif_fixe,
-        conditions=contrat.conditions,
+        tarif_unitaire=contrat.tarif_unitaire,
+        unite_tarif=contrat.unite_tarif,
+        volume_minimum=contrat.volume_minimum,
+        conditions_paiement=contrat.conditions_paiement,
+        notes=contrat.notes,
         statut="actif"
     )
     db.add(c)
@@ -369,13 +443,23 @@ def attribuer_mission_sous_traitant(
     current_user: User = Depends(require_perm("transport.dispatch.create"))
 ):
     """Assign mission to subcontractor"""
-    from app.models.transport_avance import MissionSousTraitant
-    
+    from app.models.transport_avance import MissionSousTraitant, SousTraitant
+    _get_or_404(db, SousTraitant, mission.sous_traitant_id, "Sous-traitant")
+
     m = MissionSousTraitant(
+        numero_mission=_code("STM"),
+        sous_traitant_id=mission.sous_traitant_id,
         contrat_id=mission.contrat_id,
-        mission_id=mission.mission_id,
-        kilometrage_estime=mission.kilometrage_estime,
-        statut="attribue"
+        client_id=mission.client_id,
+        date_mission=mission.date_mission,
+        point_depart=mission.point_depart,
+        point_arrivee=mission.point_arrivee,
+        distance=mission.distance,
+        type_marchandise=mission.type_marchandise,
+        poids=mission.poids,
+        cout_estime=mission.cout_estime,
+        notes=mission.notes,
+        statut="planifiee"
     )
     db.add(m)
     db.commit()
@@ -391,40 +475,49 @@ def evaluer_performance_sous_traitant(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
-    """Evaluate subcontractor performance"""
-    from app.models.transport_avance import MissionSousTraitant, ContratSousTraitant
-    from sqlalchemy import and_
-    
-    missions = db.query(MissionSousTraitant).join(ContratSousTraitant).filter(
+    """Evaluate subcontractor performance from real mission records"""
+    from app.models.transport_avance import MissionSousTraitant
+
+    missions = db.query(MissionSousTraitant).filter(
         and_(
-            ContratSousTraitant.sous_traitant_id == sous_traitant_id,
-            MissionSousTraitant.date_creation >= debut_periode,
-            MissionSousTraitant.date_creation <= fin_periode
+            MissionSousTraitant.sous_traitant_id == sous_traitant_id,
+            MissionSousTraitant.date_mission >= debut_periode,
+            MissionSousTraitant.date_mission <= fin_periode
         )
     ).all()
-    
-    if not missions:
-        return {"note": 0, "missions": 0, "taux_completion": 0}
-    
-    total_missions = len(missions)
-    missions_completees = sum(1 for m in missions if m.statut == "complete")
-    taux_completion = (missions_completees / total_missions) * 100
-    
-    retards = []
-    for mission in missions:
-        if mission.date_livraison_reelle and mission.date_livraison_prevue:
-            retard = (mission.date_livraison_reelle - mission.date_livraison_prevue).days
-            retards.append(retard)
-    
-    retard_moyen = sum(retards) / len(retards) if retards else 0
-    note = min(100, taux_completion * 0.7 + max(0, 100 - abs(retard_moyen)) * 0.3)
-    
+
+    total = len(missions)
+    if total == 0:
+        return {
+            "sous_traitant_id": sous_traitant_id,
+            "missions_totales": 0,
+            "missions_terminees": 0,
+            "taux_completion": 0,
+            "ponctualite_moyenne": None,
+            "qualite_moyenne": None,
+            "note": 0
+        }
+
+    terminees = [m for m in missions if m.statut == "terminee"]
+    ponctualites = [m.ponctualite for m in missions if m.ponctualite is not None]
+    qualites = [m.qualite_service for m in missions if m.qualite_service is not None]
+
+    taux_completion = (len(terminees) / total) * 100
+    ponctualite_moy = sum(ponctualites) / len(ponctualites) if ponctualites else None
+    qualite_moy = sum(qualites) / len(qualites) if qualites else None
+
+    # Note : moyenne des évaluations saisies si présentes, sinon taux de completion
+    notes = [n for n in ponctualites + qualites]
+    note = round(sum(notes) / len(notes), 2) if notes else round(taux_completion, 2)
+
     return {
-        "note": round(note, 2),
-        "missions": total_missions,
-        "missions_completees": missions_completees,
+        "sous_traitant_id": sous_traitant_id,
+        "missions_totales": total,
+        "missions_terminees": len(terminees),
         "taux_completion": round(taux_completion, 2),
-        "retard_moyen_jours": round(retard_moyen, 2)
+        "ponctualite_moyenne": round(ponctualite_moy, 2) if ponctualite_moy is not None else None,
+        "qualite_moyenne": round(qualite_moy, 2) if qualite_moy is not None else None,
+        "note": note
     }
 
 
@@ -437,17 +530,27 @@ def declarer_accident(
 ):
     """Report transport accident"""
     from app.models.transport_avance import AccidentTransport
-    
+
     a = AccidentTransport(
+        numero_accident=_code("ACC"),
         vehicule_id=accident.vehicule_id,
         conducteur_id=accident.conducteur_id,
+        mission_id=accident.mission_id,
         date_accident=accident.date_accident,
+        heure_accident=accident.heure_accident,
         lieu=accident.lieu,
-        description=accident.description,
+        type_accident=accident.type_accident,
+        gravite=accident.gravite,
+        blesses=accident.blesses,
+        deces=accident.deces,
         degats_materiels=accident.degats_materiels,
-        blessures=accident.blessures,
         temoins=accident.temoins,
-        statut="enquete_en_cours"
+        constat=accident.constat,
+        assureur=accident.assureur,
+        numero_police=accident.numero_police,
+        montant_dommages=accident.montant_dommages,
+        notes=accident.notes,
+        statut="en_cours"
     )
     db.add(a)
     db.commit()
@@ -458,27 +561,16 @@ def declarer_accident(
 @router.put("/accidents/{accident_id}/enquete", response_model=AccidentTransportResponse)
 def ajouter_enquete(
     accident_id: int,
-    enqueteur_id: int,
-    rapport: str,
-    conclusions: str,
-    actions_correctives: str,
+    enquete: AccidentTransportUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.modify"))
 ):
-    """Add investigation findings"""
+    """Add investigation findings (constat, statut, clôture)"""
     from app.models.transport_avance import AccidentTransport
-    
-    accident = db.query(AccidentTransport).filter(AccidentTransport.id == accident_id).first()
-    if not accident:
-        raise HTTPException(status_code=404, detail="Accident non trouvé")
-    
-    accident.enqueteur_id = enqueteur_id
-    accident.rapport_enquete = rapport
-    accident.conclusions = conclusions
-    accident.actions_correctives = actions_correctives
-    accident.date_enquete = datetime.utcnow()
-    accident.statut = "enquete_complete"
-    
+
+    accident = _get_or_404(db, AccidentTransport, accident_id, "Accident")
+    for field, value in enquete.model_dump(exclude_unset=True).items():
+        setattr(accident, field, value)
     db.commit()
     db.refresh(accident)
     return accident
@@ -493,24 +585,22 @@ def obtenir_statistiques_accidents(
 ):
     """Get accident statistics for period"""
     from app.models.transport_avance import AccidentTransport
-    from sqlalchemy import and_
-    
+
     accidents = db.query(AccidentTransport).filter(
         and_(
             AccidentTransport.date_accident >= datetime.combine(debut_periode, datetime.min.time()),
             AccidentTransport.date_accident <= datetime.combine(fin_periode, datetime.max.time())
         )
     ).all()
-    
-    total = len(accidents)
-    avec_blessures = sum(1 for a in accidents if a.blessures and a.blessures.lower() != "aucune")
-    avec_degats = sum(1 for a in accidents if a.degats_materiels and a.degats_materiels.lower() != "aucun")
-    
+
     return {
-        "total_accidents": total,
-        "avec_blessures": avec_blessures,
-        "avec_degats_materiels": avec_degats,
-        "taux_avec_blessures": round((avec_blessures / total) * 100, 2) if total > 0 else 0
+        "debut_periode": debut_periode,
+        "fin_periode": fin_periode,
+        "accidents_totaux": len(accidents),
+        "avec_blesses": sum(1 for a in accidents if (a.blesses or 0) > 0),
+        "avec_deces": sum(1 for a in accidents if (a.deces or 0) > 0),
+        "montant_total_dommages": round(sum(float(a.montant_dommages or 0) for a in accidents), 2),
+        "montant_total_rembourse": round(sum(float(a.montant_rembourse or 0) for a in accidents), 2)
     }
 
 
@@ -523,13 +613,15 @@ def planifier_maintenance_preventive(
 ):
     """Schedule preventive maintenance"""
     from app.models.transport_avance import MaintenancePreventive
-    
+
     m = MaintenancePreventive(
         vehicule_id=maintenance.vehicule_id,
         type_maintenance=maintenance.type_maintenance,
-        date_prevue=maintenance.date_prevue,
         kilometrage_prevu=maintenance.kilometrage_prevu,
-        description=maintenance.description,
+        date_prevue=maintenance.date_prevue,
+        periodicite=maintenance.periodicite,
+        cout_estime=maintenance.cout_estime,
+        notes=maintenance.notes,
         statut="planifie"
     )
     db.add(m)
@@ -541,28 +633,24 @@ def planifier_maintenance_preventive(
 @router.put("/maintenance-preventive/{maintenance_id}/executer", response_model=MaintenancePreventiveResponse)
 def executer_maintenance(
     maintenance_id: int,
-    date_execution: date,
-    kilometrage_reel: int,
-    cout: float,
-    technicien: str,
-    observations: str,
+    date_effective: date,
+    cout_reel: Optional[float] = None,
+    realise_par: Optional[str] = None,
+    notes: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.modify"))
 ):
     """Execute preventive maintenance"""
     from app.models.transport_avance import MaintenancePreventive
-    
-    m = db.query(MaintenancePreventive).filter(MaintenancePreventive.id == maintenance_id).first()
-    if not m:
-        raise HTTPException(status_code=404, detail="Maintenance non trouvée")
-    
-    m.date_execution = date_execution
-    m.kilometrage_reel = kilometrage_reel
-    m.cout = cout
-    m.technicien = technicien
-    m.observations = observations
-    m.statut = "execute"
-    
+
+    m = _get_or_404(db, MaintenancePreventive, maintenance_id, "Maintenance")
+    m.date_effective = date_effective
+    m.cout_reel = cout_reel
+    m.realise_par = realise_par
+    if notes:
+        m.notes = notes
+    m.statut = "realisee"
+
     db.commit()
     db.refresh(m)
     return m
@@ -576,17 +664,16 @@ def obtenir_maintenances_urgentes(
 ):
     """Get maintenance due within critical period"""
     from app.models.transport_avance import MaintenancePreventive
-    from sqlalchemy import and_
-    
+
     date_limite = date.today() + timedelta(days=jours_critique)
-    
+
     maintenances = db.query(MaintenancePreventive).filter(
         and_(
             MaintenancePreventive.date_prevue <= date_limite,
             MaintenancePreventive.statut == "planifie"
         )
     ).order_by(MaintenancePreventive.date_prevue.asc()).all()
-    
+
     return maintenances
 
 
@@ -599,14 +686,21 @@ def enregistrer_position(
 ):
     """Record GPS position"""
     from app.models.transport_avance import PositionGPS
-    
+
     p = PositionGPS(
         vehicule_id=position.vehicule_id,
+        conducteur_id=position.conducteur_id,
         latitude=position.latitude,
         longitude=position.longitude,
+        altitude=position.altitude,
         vitesse=position.vitesse,
         direction=position.direction,
-        horodatage=position.horodatage
+        statut_moteur=position.statut_moteur,
+        statut_vehicule=position.statut_vehicule,
+        kilmetrage_actuel=position.kilmetrage_actuel,
+        niveau_carburant=position.niveau_carburant,
+        alerte=position.alerte,
+        horodatage=position.horodatage or datetime.utcnow()
     )
     db.add(p)
     db.commit()
@@ -622,11 +716,11 @@ def obtenir_derniere_position(
 ):
     """Get last known position of vehicle"""
     from app.models.transport_avance import PositionGPS
-    
+
     position = db.query(PositionGPS).filter(
         PositionGPS.vehicule_id == vehicule_id
     ).order_by(PositionGPS.horodatage.desc()).first()
-    
+
     if not position:
         raise HTTPException(status_code=404, detail="Position non trouvée")
     return position
@@ -642,8 +736,7 @@ def obtenir_trajectoire(
 ):
     """Get vehicle trajectory for time period"""
     from app.models.transport_avance import PositionGPS
-    from sqlalchemy import and_
-    
+
     return db.query(PositionGPS).filter(
         and_(
             PositionGPS.vehicule_id == vehicule_id,
@@ -662,13 +755,18 @@ def creer_zone_geofencing(
 ):
     """Create geofencing zone"""
     from app.models.transport_avance import ZoneGeofencing
-    
+
     z = ZoneGeofencing(
         nom_zone=zone.nom_zone,
         type_zone=zone.type_zone,
+        description=zone.description,
         latitude_centre=zone.latitude_centre,
         longitude_centre=zone.longitude_centre,
-        rayon_metres=zone.rayon_metres,
+        rayon=zone.rayon_metres,
+        ville=zone.ville,
+        limite_vitesse=zone.limite_vitesse,
+        alerte_entree=zone.alerte_entree,
+        alerte_sortie=zone.alerte_sortie,
         statut="actif"
     )
     db.add(z)
@@ -685,20 +783,33 @@ def verifier_violation_geofencing(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
-    """Check if position violates any geofencing zones"""
+    """Check if position is inside any active geofencing zone (approx. equirectangulaire)"""
     from app.models.transport_avance import ZoneGeofencing
-    
+    import math
+
     zones = db.query(ZoneGeofencing).filter(ZoneGeofencing.statut == "actif").all()
-    
-    violations = []
+
+    dedans = []
     for zone in zones:
-        distance = ((latitude - zone.latitude_centre) ** 2 + 
-                   (longitude - zone.longitude_centre) ** 2) ** 0.5 * 111000
-        
-        if distance <= zone.rayon_metres:
-            violations.append(zone)
-    
-    return violations
+        lat_rad = math.radians(float(zone.latitude_centre or 0))
+        dx = (longitude - float(zone.longitude_centre or 0)) * math.cos(lat_rad) * 111320
+        dy = (latitude - float(zone.latitude_centre or 0)) * 110540
+        distance = math.sqrt(dx * dx + dy * dy)
+        if distance <= float(zone.rayon or 0):
+            dedans.append({
+                "id": zone.id,
+                "nom_zone": zone.nom_zone,
+                "type_zone": zone.type_zone,
+                "distance_metres": round(distance, 1)
+            })
+
+    return {
+        "vehicule_id": vehicule_id,
+        "latitude": latitude,
+        "longitude": longitude,
+        "zones_actives_detectees": dedans,
+        "violation": len(dedans) > 0
+    }
 
 
 @router.post("/geofencing/evenements", response_model=EvenementVehiculeResponse, status_code=status.HTTP_201_CREATED)
@@ -709,14 +820,14 @@ def enregistrer_evenement_vehicule(
 ):
     """Record vehicle event (geofence violation, speeding, etc.)"""
     from app.models.transport_avance import EvenementVehicule
-    
+
     e = EvenementVehicule(
         vehicule_id=evenement.vehicule_id,
         type_evenement=evenement.type_evenement,
         description=evenement.description,
-        latitude=evenement.latitude,
-        longitude=evenement.longitude,
-        date_evenement=datetime.utcnow()
+        localisation=evenement.localisation,
+        operateur=evenement.operateur,
+        date_evenement=evenement.date_evenement or datetime.utcnow()
     )
     db.add(e)
     db.commit()
@@ -733,23 +844,22 @@ def evaluer_conducteur(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
-    """Evaluate driver behavior score"""
-    from app.models.transport_avance import TempsConduite, AccidentTransport, EvenementVehicule
-    from app.models.parc import Vehicule
-    from app.models.transport import Mission
-    from sqlalchemy import and_, func
-    
+    """Evaluate driver behavior score from real records (heures, accidents, missions)"""
+    from app.models.transport_avance import TempsConduite, AccidentTransport
+    from app.models.transport import Mission, MissionStatus
+
     debut = datetime.combine(debut_periode, datetime.min.time())
     fin = datetime.combine(fin_periode, datetime.max.time())
-    
-    temps_conduite = db.query(func.sum(TempsConduite.duree_heures)).filter(
+
+    minutes = db.query(func.sum(TempsConduite.temps_conduite)).filter(
         and_(
             TempsConduite.conducteur_id == conducteur_id,
-            TempsConduite.debut_conduite >= debut,
-            TempsConduite.debut_conduite <= fin
+            TempsConduite.date >= debut_periode,
+            TempsConduite.date <= fin_periode
         )
     ).scalar() or 0
-    
+    heures_conduite = round(minutes / 60, 2)
+
     accidents = db.query(AccidentTransport).filter(
         and_(
             AccidentTransport.conducteur_id == conducteur_id,
@@ -757,31 +867,29 @@ def evaluer_conducteur(
             AccidentTransport.date_accident <= fin
         )
     ).count()
-    
-    violations = db.query(EvenementVehicule).filter(
+
+    missions = db.query(Mission).filter(
         and_(
-            EvenementVehicule.vehicule_id.in_(
-                db.query(Vehicule.id).join(Mission).filter(
-                    Mission.conducteur_id == conducteur_id
-                )
-            ),
-            EvenementVehicule.type_evenement == "violation_geofence",
-            EvenementVehicule.date_evenement >= debut,
-            EvenementVehicule.date_evenement <= fin
+            Mission.conducteur_id == conducteur_id,
+            Mission.date_debut_reelle >= debut,
+            Mission.date_debut_reelle <= fin
         )
     ).count()
-    
-    score_base = 100
-    score = score_base - (accidents * 20) - (violations * 5)
-    score = max(0, min(100, score))
-    
+
+    # Score : 100 - 20/accident - 2 point par heure au-delà de 45h/semaine-equivalent
+    score = 100 - (accidents * 20) - max(0, heures_conduite - 45) * 2
+    score = max(0, min(100, round(score, 2)))
+    niveau = "excellent" if score >= 90 else "bon" if score >= 70 else "moyen" if score >= 50 else "critique"
+
     return {
         "conducteur_id": conducteur_id,
-        "heures_conduite": round(temps_conduite, 2),
+        "debut_periode": debut_periode,
+        "fin_periode": fin_periode,
+        "heures_conduite": heures_conduite,
         "accidents": accidents,
-        "violations_geofence": violations,
-        "score_comportement": round(score, 2),
-        "niveau": "excellent" if score >= 90 else "bon" if score >= 70 else "moyen" if score >= 50 else "critique"
+        "missions": missions,
+        "score_comportement": score,
+        "niveau": niveau
     }
 
 
@@ -793,21 +901,58 @@ def calculer_taux_livraison_ponctuelle(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
-    """Calculate on-time delivery rate"""
-    taux = KPITransportService.calculer_taux_livraison_ponctuelle(db, debut_periode, fin_periode)
-    return {"taux_livraison_ponctuelle": taux}
+    """Taux de livraisons terminées à l'heure (date_fin_reelle <= date_fin_prevue)"""
+    from app.models.transport import Mission, MissionStatus
+
+    missions = db.query(Mission).filter(
+        and_(
+            Mission.statut == MissionStatus.TERMINEE,
+            Mission.date_fin_reelle.isnot(None),
+            Mission.date_fin_reelle >= datetime.combine(debut_periode, datetime.min.time()),
+            Mission.date_fin_reelle <= datetime.combine(fin_periode, datetime.max.time())
+        )
+    ).all()
+
+    evaluables = [m for m in missions if m.date_fin_prevue is not None]
+    if not evaluables:
+        return {"taux_livraison_ponctuelle": None, "missions_evaluees": 0,
+                "note": "Aucune mission terminée avec date de fin prévue sur la période"}
+
+    a_lheure = sum(1 for m in evaluables if m.date_fin_reelle <= m.date_fin_prevue)
+    taux = round((a_lheure / len(evaluables)) * 100, 2)
+    return {"taux_livraison_ponctuelle": taux, "missions_evaluees": len(evaluables)}
 
 
-@router.get("/kpi/utilisation-vehicules/{vehicule_id}")
+@router.get("/kpi/utilisation-vehicules/{camion_id}")
 def calculer_taux_utilisation_vehicules(
-    vehicule_id: int,
+    camion_id: int,
     jours: int = 30,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
-    """Calculate vehicle utilization rate"""
-    taux = KPITransportService.calculer_taux_utilisation_vehicules(db, vehicule_id, jours)
-    return {"vehicule_id": vehicule_id, "taux_utilisation": taux}
+    """Taux d'utilisation d'un camion : jours avec mission / jours observés"""
+    from app.models.transport import Mission
+
+    depuis = datetime.utcnow() - timedelta(days=jours)
+    missions = db.query(Mission).filter(
+        and_(
+            Mission.camion_id == camion_id,
+            Mission.date_debut_reelle >= depuis
+        )
+    ).all()
+
+    jours_utilises = len({m.date_debut_reelle.date() for m in missions if m.date_debut_reelle})
+    km_total = sum(float(m.distance_km or 0) for m in missions)
+    taux = round((jours_utilises / jours) * 100, 2) if jours > 0 else 0
+
+    return {
+        "camion_id": camion_id,
+        "periode_jours": jours,
+        "missions": len(missions),
+        "jours_utilises": jours_utilises,
+        "distance_km_totale": round(km_total, 2),
+        "taux_utilisation": taux
+    }
 
 
 @router.get("/kpi/variance-carburant/{vehicule_id}")
@@ -818,7 +963,43 @@ def calculer_variance_carburant(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_perm("transport.dispatch.read"))
 ):
-    """Calculate fuel variance (actual vs theoretical)"""
-    return KPITransportService.calculer_variance_carburant(
-        db, vehicule_id, debut_periode, fin_periode
-    )
+    """Variance carburant : consommation réelle (pleins) vs consommation_moyenne du véhicule"""
+    from app.models.parc import CarburantRecord, Vehicule
+
+    vehicule = db.query(Vehicule).filter(Vehicule.id == vehicule_id).first()
+    if not vehicule:
+        raise HTTPException(status_code=404, detail="Véhicule non trouvé")
+
+    records = db.query(CarburantRecord).filter(
+        and_(
+            CarburantRecord.vehicule_id == vehicule_id,
+            CarburantRecord.date_plein >= datetime.combine(debut_periode, datetime.min.time()),
+            CarburantRecord.date_plein <= datetime.combine(fin_periode, datetime.max.time()),
+            CarburantRecord.kilometrage.isnot(None)
+        )
+    ).order_by(CarburantRecord.kilometrage.asc()).all()
+
+    if len(records) < 2:
+        return {
+            "vehicule_id": vehicule_id,
+            "note": "Au moins deux pleins avec index kilométrique sont requis pour calculer la consommation"
+        }
+
+    litres_total = sum(float(r.litres or 0) for r in records)
+    km_total = float(records[-1].kilometrage) - float(records[0].kilometrage)
+    if km_total <= 0:
+        return {"vehicule_id": vehicule_id, "note": "Index kilométrique non croissant — mesure impossible"}
+
+    conso_reelle = round((litres_total / km_total) * 100, 2)
+    conso_theorique = float(vehicule.consommation_moyenne) if vehicule.consommation_moyenne else None
+    variance = round(((conso_reelle - conso_theorique) / conso_theorique) * 100, 2) if conso_theorique else None
+
+    return {
+        "vehicule_id": vehicule_id,
+        "pleins": len(records),
+        "litres_total": round(litres_total, 2),
+        "kilometres": round(km_total, 2),
+        "consommation_reelle_l_100km": conso_reelle,
+        "consommation_theorique_l_100km": conso_theorique,
+        "variance_pourcentage": variance
+    }

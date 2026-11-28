@@ -100,7 +100,7 @@ class PODBase(BaseModel):
     livraison_id: int
     signature_client: Optional[str] = None
     photo_marchandise: Optional[str] = None
-    coordonnees: Optional[str] = None
+    coordonnees_livraison: Optional[str] = None
 
 
 class PODCreate(PODBase):
@@ -175,90 +175,113 @@ class TableauBordTransportResponse(BaseModel):
 class KPIResponse(BaseModel):
     periode: str
     taux_reussite: float
-    satisfaction_client: float
+    satisfaction_client: Optional[float] = None
     note_performance: float
+    nombre_missions: int = 0
+    nombre_km_parcourus: float = 0
 
 
 class AlertPerformanceResponse(BaseModel):
     type: str
     gravite: str
     valeur: float
-
 # ============ TOURNÉES & LIVRAISONS ============
+# Schémas alignés sur app/models/transport_avance.py (Tournée, Livraison)
 
-class TourneeBase(BaseModel):
-    vehicule_id: Optional[int] = None
-    conducteur_id: Optional[int] = None
-    date_tournee: Optional[date] = None
-    origine: Optional[str] = None
-    destination: Optional[str] = None
-    statut: Optional[str] = "planifie"
-
-
-class TourneeCreate(TourneeBase):
-    pass
+class TourneeCreate(BaseModel):
+    conducteur_id: int
+    camion_id: int
+    date_tournee: date
+    type_tournee: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class TourneeUpdate(BaseModel):
-    vehicule_id: Optional[int] = None
-    conducteur_id: Optional[int] = None
     statut: Optional[str] = None
-    date_debut_reelle: Optional[datetime] = None
-    date_fin_reelle: Optional[datetime] = None
+    type_tournee: Optional[str] = None
+    notes: Optional[str] = None
 
 
-class TourneeResponse(TourneeBase):
+class TourneeResponse(BaseModel):
     id: int
     numero_tournee: Optional[str] = None
+    conducteur_id: Optional[int] = None
+    camion_id: Optional[int] = None
+    date_tournee: Optional[date] = None
+    statut: Optional[str] = None
+    nombre_livraisons: Optional[int] = None
+    nombre_livraisons_effectuees: Optional[int] = None
+    type_tournee: Optional[str] = None
+    notes: Optional[str] = None
     created_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
 
-class LivraisonBase(BaseModel):
-    tournee_id: Optional[int] = None
-    client_id: Optional[int] = None
-    adresse_livraison: Optional[str] = None
-    destinataire: Optional[str] = None
-    statut: Optional[str] = "en_attente"
-
-
-class LivraisonCreate(LivraisonBase):
-    pass
+class LivraisonCreate(BaseModel):
+    client_id: int
+    point_dechargement: str
+    heure_debut_prevue: Optional[str] = None
+    heure_fin_prevue: Optional[str] = None
+    nombre_colis: Optional[int] = None
+    poids_total: Optional[float] = None
+    commentaire: Optional[str] = None
 
 
 class LivraisonUpdate(BaseModel):
     statut: Optional[str] = None
-    date_livraison: Optional[datetime] = None
-    signature: Optional[str] = None
+    heure_debut_reelle: Optional[str] = None
+    heure_fin_reelle: Optional[str] = None
+    nombre_colis: Optional[int] = None
+    poids_total: Optional[float] = None
+    preuve_livraison: Optional[str] = None
+    commentaire: Optional[str] = None
 
 
-class LivraisonResponse(LivraisonBase):
+class LivraisonResponse(BaseModel):
     id: int
     numero_livraison: Optional[str] = None
+    tournee_id: Optional[int] = None
+    client_id: Optional[int] = None
+    point_dechargement: Optional[str] = None
+    heure_debut_prevue: Optional[str] = None
+    heure_fin_prevue: Optional[str] = None
+    heure_debut_reelle: Optional[str] = None
+    heure_fin_reelle: Optional[str] = None
+    statut: Optional[str] = None
+    nombre_colis: Optional[int] = None
+    poids_total: Optional[float] = None
+    commentaire: Optional[str] = None
     created_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
 
 # ============ FRAIS & TEMPS DE CONDUITE ============
+# Alignés sur FraisKilometrique / TempsConduite (colonnes réelles)
 
 class FraisKilometriqueCreate(BaseModel):
-    mission_id: int
-    distance_km: float
-    taux_km: float
-    montant: Optional[float] = None
-    justificatif: Optional[str] = None
+    employe_id: int
+    mission_id: Optional[int] = None
+    kilometrage_parcouru: float
+    kilometrage_theorique: Optional[float] = None
+    taux_indemnite: Optional[float] = None
+    commentaires: Optional[str] = None
 
 
 class FraisKilometriqueResponse(BaseModel):
     id: int
-    mission_id: int
-    distance_km: float
-    taux_km: float
-    montant: float
+    employe_id: Optional[int] = None
+    mission_id: Optional[int] = None
+    date_frais: Optional[date] = None
+    kilometrage_parcouru: Optional[float] = None
+    kilometrage_theorique: Optional[float] = None
+    taux_indemnite: Optional[float] = None
+    montant_indemnite: Optional[float] = None
+    surconsommation: Optional[float] = None
+    statut: Optional[str] = None
     created_at: Optional[datetime] = None
 
     class Config:
@@ -267,20 +290,28 @@ class FraisKilometriqueResponse(BaseModel):
 
 class TempsConduiteCreate(BaseModel):
     conducteur_id: int
-    date_service: date
-    duree_conduite_minutes: int
-    duree_pause_minutes: int
-    duree_repos_minutes: int
+    mission_id: Optional[int] = None
+    date: date
+    heure_debut_conduite: str
+    heure_fin_conduite: Optional[str] = None
+    temps_conduite: int  # minutes
+    temps_repos: Optional[int] = None
+    commentaires: Optional[str] = None
 
 
 class TempsConduiteResponse(BaseModel):
     id: int
-    conducteur_id: int
-    date_service: date
-    duree_conduite_minutes: int
-    duree_pause_minutes: int
-    duree_repos_minutes: int
-    conforme: bool = True
+    conducteur_id: Optional[int] = None
+    mission_id: Optional[int] = None
+    date: Optional[date] = None
+    heure_debut_conduite: Optional[str] = None
+    heure_fin_conduite: Optional[str] = None
+    temps_conduite: Optional[int] = None
+    temps_repos: Optional[int] = None
+    temps_service: Optional[int] = None
+    conformite_legale: Optional[bool] = None
+    statut: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -288,38 +319,56 @@ class TempsConduiteResponse(BaseModel):
 
 class ConformiteTempsResponse(BaseModel):
     conducteur_id: int
-    periode: str
-    taux_conformite: float
-    infractions_detectees: int
-    details: List[str] = []
+    date: date
+    total_minutes_conduite: int
+    limite_journaliere_minutes: int = 540
+    infractions: int = 0
+    conforme: bool
+    alerte: Optional[str] = None
 
 
 # ============ SOUS-TRAITANCE ============
+# Alignés sur SousTraitant / ContratSousTraitant / MissionSousTraitant
 
-class SousTraitantBase(BaseModel):
-    raison_sociale: str
-    niu: Optional[str] = None
-    rccm: Optional[str] = None
+class SousTraitantCreate(BaseModel):
+    nom: str
+    code: Optional[str] = None
+    type_service: Optional[str] = None
+    specialite: Optional[str] = None
+    numero_licence: Optional[str] = None
+    adresse: Optional[str] = None
+    ville: Optional[str] = None
     telephone: Optional[str] = None
     email: Optional[str] = None
-    adresse: Optional[str] = None
-    actif: bool = True
-
-
-class SousTraitantCreate(SousTraitantBase):
-    pass
 
 
 class SousTraitantUpdate(BaseModel):
-    raison_sociale: Optional[str] = None
+    nom: Optional[str] = None
+    type_service: Optional[str] = None
+    specialite: Optional[str] = None
+    numero_licence: Optional[str] = None
+    adresse: Optional[str] = None
+    ville: Optional[str] = None
     telephone: Optional[str] = None
     email: Optional[str] = None
-    actif: Optional[bool] = None
+    statut: Optional[str] = None
 
 
-class SousTraitantResponse(SousTraitantBase):
+class SousTraitantResponse(BaseModel):
     id: int
-    code_sous_traitant: Optional[str] = None
+    code: Optional[str] = None
+    nom: Optional[str] = None
+    type_service: Optional[str] = None
+    specialite: Optional[str] = None
+    numero_licence: Optional[str] = None
+    adresse: Optional[str] = None
+    ville: Optional[str] = None
+    telephone: Optional[str] = None
+    email: Optional[str] = None
+    statut: Optional[str] = None
+    evaluation_performance: Optional[float] = None
+    date_debut_contrat: Optional[date] = None
+    date_fin_contrat: Optional[date] = None
     created_at: Optional[datetime] = None
 
     class Config:
@@ -329,75 +378,134 @@ class SousTraitantResponse(SousTraitantBase):
 class ContratSousTraitantCreate(BaseModel):
     sous_traitant_id: int
     numero_contrat: str
+    type_service: Optional[str] = None
     date_debut: date
     date_fin: Optional[date] = None
-    conditions_tarifaires: Optional[str] = None
+    tarif_unitaire: Optional[float] = None
+    unite_tarif: Optional[str] = None
+    volume_minimum: Optional[float] = None
+    conditions_paiement: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class ContratSousTraitantUpdate(BaseModel):
     date_fin: Optional[date] = None
+    tarif_unitaire: Optional[float] = None
+    conditions_paiement: Optional[str] = None
     statut: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class ContratSousTraitantResponse(BaseModel):
     id: int
-    sous_traitant_id: int
-    numero_contrat: str
-    date_debut: date
+    sous_traitant_id: Optional[int] = None
+    numero_contrat: Optional[str] = None
+    type_service: Optional[str] = None
+    date_debut: Optional[date] = None
     date_fin: Optional[date] = None
-    statut: str = "actif"
+    tarif_unitaire: Optional[float] = None
+    unite_tarif: Optional[str] = None
+    statut: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
 
 
 class MissionSousTraitantCreate(BaseModel):
-    mission_id: int
     sous_traitant_id: int
-    tarif_convenu: float
-    devise: str = "XAF"
+    contrat_id: Optional[int] = None
+    client_id: int
+    date_mission: date
+    point_depart: str
+    point_arrivee: str
+    distance: Optional[float] = None
+    type_marchandise: Optional[str] = None
+    poids: Optional[float] = None
+    cout_estime: Optional[float] = None
+    notes: Optional[str] = None
 
 
 class MissionSousTraitantUpdate(BaseModel):
     statut: Optional[str] = None
-    tarif_final: Optional[float] = None
+    cout_reel: Optional[float] = None
+    qualite_service: Optional[float] = None
+    ponctualite: Optional[float] = None
+    notes: Optional[str] = None
 
 
 class MissionSousTraitantResponse(BaseModel):
     id: int
-    mission_id: int
-    sous_traitant_id: int
-    tarif_convenu: float
-    statut: str = "assignee"
+    numero_mission: Optional[str] = None
+    sous_traitant_id: Optional[int] = None
+    contrat_id: Optional[int] = None
+    client_id: Optional[int] = None
+    date_mission: Optional[date] = None
+    point_depart: Optional[str] = None
+    point_arrivee: Optional[str] = None
+    distance: Optional[float] = None
+    type_marchandise: Optional[str] = None
+    poids: Optional[float] = None
+    statut: Optional[str] = None
+    cout_estime: Optional[float] = None
+    cout_reel: Optional[float] = None
+    qualite_service: Optional[float] = None
+    ponctualite: Optional[float] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
 
 
+# ============ ACCIDENTS & MAINTENANCE PRÉVENTIVE ========
 # ============ ACCIDENTS & MAINTENANCE PRÉVENTIVE ============
 
 class AccidentTransportCreate(BaseModel):
     vehicule_id: int
-    conducteur_id: Optional[int] = None
+    conducteur_id: int
+    mission_id: Optional[int] = None
     date_accident: datetime
+    heure_accident: Optional[str] = None
     lieu: str
-    gravite: str
-    description: str
+    type_accident: Optional[str] = None
+    gravite: Optional[str] = None
+    blesses: int = 0
+    deces: int = 0
+    degats_materiels: Optional[str] = None
+    temoins: Optional[str] = None
+    constat: Optional[str] = None
+    assureur: Optional[str] = None
+    numero_police: Optional[str] = None
+    montant_dommages: Optional[float] = None
+    notes: Optional[str] = None
 
 
 class AccidentTransportUpdate(BaseModel):
     statut: Optional[str] = None
-    montant_assurance: Optional[float] = None
-    date_resolution: Optional[date] = None
+    constat: Optional[str] = None
+    notes: Optional[str] = None
+    montant_rembourse: Optional[float] = None
+    date_clos: Optional[date] = None
 
 
 class AccidentTransportResponse(BaseModel):
     id: int
-    vehicule_id: int
-    date_accident: datetime
-    lieu: str
-    gravite: str
-    statut: str = "signale"
+    numero_accident: Optional[str] = None
+    vehicule_id: Optional[int] = None
+    conducteur_id: Optional[int] = None
+    mission_id: Optional[int] = None
+    date_accident: Optional[datetime] = None
+    heure_accident: Optional[str] = None
+    lieu: Optional[str] = None
+    type_accident: Optional[str] = None
+    gravite: Optional[str] = None
+    blesses: Optional[int] = None
+    deces: Optional[int] = None
+    statut: Optional[str] = None
+    montant_dommages: Optional[float] = None
+    montant_rembourse: Optional[float] = None
+    date_clos: Optional[date] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -406,23 +514,35 @@ class AccidentTransportResponse(BaseModel):
 class MaintenancePreventiveCreate(BaseModel):
     vehicule_id: int
     type_maintenance: str
+    kilometrage_prevu: int
     date_prevue: date
-    kilometrage_prevu: Optional[int] = None
-    description: Optional[str] = None
+    periodicite: Optional[int] = None
+    cout_estime: Optional[float] = None
+    notes: Optional[str] = None
 
 
 class MaintenancePreventiveUpdate(BaseModel):
     statut: Optional[str] = None
-    date_realisee: Optional[date] = None
+    date_effective: Optional[date] = None
     cout_reel: Optional[float] = None
+    realise_par: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class MaintenancePreventiveResponse(BaseModel):
     id: int
-    vehicule_id: int
-    type_maintenance: str
-    date_prevue: date
-    statut: str = "planifiee"
+    vehicule_id: Optional[int] = None
+    type_maintenance: Optional[str] = None
+    kilometrage_prevu: Optional[int] = None
+    date_prevue: Optional[date] = None
+    date_effective: Optional[date] = None
+    periodicite: Optional[int] = None
+    statut: Optional[str] = None
+    cout_estime: Optional[float] = None
+    cout_reel: Optional[float] = None
+    realise_par: Optional[str] = None
+    notes: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -432,44 +552,73 @@ class MaintenancePreventiveResponse(BaseModel):
 
 class PositionGPSCreate(BaseModel):
     vehicule_id: int
+    conducteur_id: Optional[int] = None
     latitude: float
     longitude: float
+    altitude: Optional[float] = None
     vitesse: Optional[float] = None
-    cap: Optional[float] = None
-    timestamp: Optional[datetime] = None
+    direction: Optional[float] = None
+    statut_moteur: Optional[str] = None
+    statut_vehicule: Optional[str] = None
+    kilmetrage_actuel: Optional[int] = None  # nom historique du modèle (coquille conservée)
+    niveau_carburant: Optional[int] = None
+    alerte: Optional[str] = None
+    horodatage: Optional[datetime] = None
 
 
 class PositionGPSResponse(BaseModel):
     id: int
-    vehicule_id: int
-    latitude: float
-    longitude: float
+    vehicule_id: Optional[int] = None
+    conducteur_id: Optional[int] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    altitude: Optional[float] = None
     vitesse: Optional[float] = None
-    timestamp: datetime
+    direction: Optional[float] = None
+    horodatage: Optional[datetime] = None
+    statut_moteur: Optional[str] = None
+    statut_vehicule: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
 
 
 class ZoneGeofencingCreate(BaseModel):
-    nom: str
-    type_zone: str = "circulaire"
-    centre_latitude: Optional[float] = None
-    centre_longitude: Optional[float] = None
-    rayon_metres: Optional[float] = None
-    polygone_coordonnees: Optional[str] = None
+    nom_zone: str
+    type_zone: Optional[str] = None
+    description: Optional[str] = None
+    latitude_centre: float
+    longitude_centre: float
+    rayon_metres: float
+    ville: Optional[str] = None
+    limite_vitesse: Optional[int] = None
+    alerte_entree: Optional[bool] = True
+    alerte_sortie: Optional[bool] = True
 
 
 class ZoneGeofencingUpdate(BaseModel):
-    nom: Optional[str] = None
-    actif: Optional[bool] = None
+    nom_zone: Optional[str] = None
+    type_zone: Optional[str] = None
+    description: Optional[str] = None
+    statut: Optional[str] = None
+    limite_vitesse: Optional[int] = None
 
 
 class ZoneGeofencingResponse(BaseModel):
     id: int
-    nom: str
-    type_zone: str
-    actif: bool = True
+    nom_zone: Optional[str] = None
+    type_zone: Optional[str] = None
+    description: Optional[str] = None
+    latitude_centre: Optional[float] = None
+    longitude_centre: Optional[float] = None
+    rayon: Optional[float] = None
+    ville: Optional[str] = None
+    limite_vitesse: Optional[int] = None
+    alerte_entree: Optional[bool] = None
+    alerte_sortie: Optional[bool] = None
+    statut: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -478,61 +627,74 @@ class ZoneGeofencingResponse(BaseModel):
 class EvenementVehiculeCreate(BaseModel):
     vehicule_id: int
     type_evenement: str
-    timestamp: datetime
     description: Optional[str] = None
+    localisation: Optional[str] = None
+    operateur: Optional[str] = None
+    date_evenement: Optional[datetime] = None
 
 
 class EvenementVehiculeResponse(BaseModel):
     id: int
-    vehicule_id: int
-    type_evenement: str
-    timestamp: datetime
+    vehicule_id: Optional[int] = None
+    type_evenement: Optional[str] = None
+    date_evenement: Optional[datetime] = None
+    localisation: Optional[str] = None
+    operateur: Optional[str] = None
+    description: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
 
 
 # ============ ANALYTICS AVANCÉS ============
+# Réponses alignées sur ce que les endpoints calculent réellement
 
 class CoutKmResponse(BaseModel):
-    vehicule_id: int
-    periode: str
+    camion_id: int
+    mois: int
+    annee: int
+    kilometres: float
     cout_total: float
-    distance_km: float
     cout_par_km: float
 
 
 class AnomalieCarburantResponse(BaseModel):
     vehicule_id: int
-    type_anomalie: str
-    niveau_gravite: str
-    description: str
-    date_detection: datetime
+    consommation_actuelle: float
+    consommation_theorique: float
+    difference: float
+    pourcentage_difference: float
+    anomalie_detectee: bool
+    niveau_alerte: str
 
 
 class PerformanceSousTraitantResponse(BaseModel):
     sous_traitant_id: int
     missions_totales: int
-    taux_ponctualite: float
-    note_qualite: float
+    missions_terminees: int
+    taux_completion: float
+    ponctualite_moyenne: Optional[float] = None
+    qualite_moyenne: Optional[float] = None
+    note: float
 
 
 class StatistiquesAccidentsResponse(BaseModel):
-    periode: str
+    debut_periode: date
+    fin_periode: date
     accidents_totaux: int
-    par_gravite: dict
-    cout_total: float
+    avec_blesses: int
+    avec_deces: int
+    montant_total_dommages: float
+    montant_total_rembourse: float
 
 
 class ComportementConducteurResponse(BaseModel):
     conducteur_id: int
-    score_ecoconduite: float
-    exces_vitesse: int
-    freinages_brusques: int
-
-
-class KPITransportResponse(BaseModel):
-    taux_disponibilité_flotte: float
-    taux_ponctualite_livraison: float
-    consommation_moyenne_100km: float
-    cout_moyen_km: float
+    debut_periode: date
+    fin_periode: date
+    heures_conduite: float
+    accidents: int
+    missions: int
+    score_comportement: float
+    niveau: str

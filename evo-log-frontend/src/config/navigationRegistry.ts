@@ -523,6 +523,14 @@ export const NAVIGATION_REGISTRY: Record<string, ModuleNavConfig> = {
         businessProcess: 'Pilotage transport'
       },
       {
+        label: 'Opérations transport avancées',
+        path: '/transport-avance/operations',
+        icon: Truck,
+        badge: 'OPS',
+        description: 'Tournées & livraisons, sous-traitance, accidents, maintenance, GPS, géofencing, dispatch, POD',
+        businessProcess: 'Exécution transport'
+      },
+      {
         label: "Fiche vehicule",
         path: "/transport-flotte/vehicle-registry",
         icon: (LUCIDE as any)["Truck"],

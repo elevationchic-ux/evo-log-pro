@@ -187,7 +187,7 @@ class MissionSousTraitant(Base):
     numero_mission = Column(String(50), unique=True, nullable=False)
     sous_traitant_id = Column(Integer, ForeignKey('sous_traitants.id'), nullable=False)
     contrat_id = Column(Integer, ForeignKey('contrats_sous_traitants.id'))
-    client_id = Column(Date, nullable=False)
+    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
     date_mission = Column(Date, nullable=False)
     point_depart = Column(String(200), nullable=False)
     point_arrivee = Column(String(200), nullable=False)

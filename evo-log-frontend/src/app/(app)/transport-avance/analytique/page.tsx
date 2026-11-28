@@ -113,10 +113,10 @@ export default function TransportAvanceAnalytiquePage() {
         <h2 className="text-lg font-semibold mb-3 border-b pb-2">Coûts & consommations</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Form titre="Coût par kilomètre (mois)" champs={[
-            { name: 'vehicule_id', label: 'ID véhicule', type: 'number', required: true },
+            { name: 'camion_id', label: 'ID camion', type: 'number', required: true },
             { name: 'mois', label: 'Mois (1-12)', type: 'number', required: true },
             { name: 'annee', label: 'Année', type: 'number', required: true },
-          ]} onSubmit={(v) => coutKm.run(() => apiClient.get(`${B}/frais-km/cout/${v.vehicule_id}/${v.mois}/${v.annee}`))}
+          ]} onSubmit={(v) => coutKm.run(() => apiClient.get(`${B}/frais-km/cout/${v.camion_id}/${v.mois}/${v.annee}`))}
             {...coutKm} />
           <Form titre="Anomalie carburant" champs={[
             { name: 'vehicule_id', label: 'ID véhicule', type: 'number', required: true },
