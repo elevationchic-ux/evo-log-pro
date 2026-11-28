@@ -2900,6 +2900,7 @@ const ADVANCED_SUBMODULES: AdvancedSubModuleEntry[] = [
 
  // 💰 Finance OHADA
   { family: 'finance-ohada', label: 'Cotations & Devis', path: '/cotations', icon: Calculator, badge: 'Avancé', description: 'Cotations, calculs de prix et generation de devis', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
+  { family: 'finance-ohada', label: 'Chaîne complète d\'achats', path: '/procurement/chaine', icon: ShoppingCart, badge: 'Chaîne', description: 'Appels d\'offres, offres, comparatifs, contrats-cadres, réceptions, litiges, évaluations fournisseurs', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
   { family: 'finance-ohada', label: 'Achats / Procurement', path: '/procurement', icon: ShoppingCart, badge: 'Avancé', description: 'Processus achats, appels d offres et fournisseurs', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
   { family: 'finance-ohada', label: 'Passation Commandes', path: '/purchase', icon: ShoppingCart, badge: 'BC', description: 'Commandes d achat et suivis fournisseurs', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },
   { family: 'finance-ohada', label: 'Facturation Automatique', path: '/auto-invoicing', icon: Receipt, badge: 'Auto', description: 'Facturation recurrente et emission automatique', requiredRoles: ['ADMIN', 'SUPER_ADMIN', 'FINANCE'] },

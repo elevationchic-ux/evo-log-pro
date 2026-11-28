@@ -347,7 +347,12 @@ DOMAINS: Dict[str, Dict] = {
     "commerce": {
         "label": "Achats & Commerce",
         "modules": {
-            "achats": {"label": "Achats", "sub_modules": {"commande": ACTIONS, "reception": ACTIONS}},
+            "achats": {"label": "Achats", "sub_modules": {"commande": ACTIONS, "reception": ACTIONS,
+ # chaine complete d'achats (routeur acquisition) : consultation
+ # (appels d'offres, cahiers des charges, offres, comparatifs),
+ # contrats-cadres, litiges fournisseurs et evaluations.
+                "consultation": ACTIONS, "contrat_cadre": ACTIONS, "litige": ACTIONS,
+                "evaluation": ["read", "create", "modify"]}},
             "fournisseurs": {"label": "Fournisseurs", "sub_modules": {"referentiel": ACTIONS}},
             "cotations": {"label": "Cotation & devis", "sub_modules": {"cotation": ACTIONS}},
  # Portail client B2B (routeur b2b_deep). Registres propres de la relation
@@ -420,6 +425,8 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
  # Le reseau d'agences engage des centres de couts et du CA par site:
  # le DAF lit le comparatif inter-agences, sans administrer le reseau.
         "agences.pilotage.read",
+ # Lecture transverse des achats (engagements de depenses).
+        "achats.*.read",
  # L'engagement des credits d'investissement passe par la fiche technique
  # visa de maturite puis le visa du controle financier: le DAF instruit
  # la ligne et l'approuve, il ne gere ni les travaux ni le domaine.
@@ -476,6 +483,8 @@ ROLE_GRANTS: List[Tuple[str, int, str, List[str]]] = [
  # Lecture transversale du reseau d'agences (comparatif, effectifs) —
  # coherent avec le mandat "lecture seule, aucune ecriture" de l'auditeur.
         "agences.*.read",
+ # Lecture transverse des achats et du referentiel fournisseurs.
+        "achats.*.read", "fournisseurs.*.read",
     ]),
     ("TRANSIT_PRINCIPAL", 2, "Transitaire principal : gestion et validation des dossiers", [
         "transit.*.*", "acconage.*.read", "magasin.stock.read", "fiscalite.declarations.read",

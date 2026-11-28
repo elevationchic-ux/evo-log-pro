@@ -268,6 +268,13 @@ export default function ProcurementPage() {
             <ClipboardList className="w-4 h-4" />
             {t('Circuit d\'approbation', 'Approval queue')}
           </Link>
+          <Link
+            href="/procurement/chaine"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-700"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            {t('Chaîne complète', 'Full chain')}
+          </Link>
           <button
             type="button"
             onClick={() => setModalOpen(true)}

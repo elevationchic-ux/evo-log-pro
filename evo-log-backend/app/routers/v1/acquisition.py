@@ -5,6 +5,7 @@ from typing import List
 from datetime import datetime, date
 
 from app.core.database import get_db
+from app.core.permissions import require_perm
 from app.core.security import get_current_user
 from app.models.user import User
 from app.schemas.acquisition import (
@@ -31,17 +32,35 @@ from app.services.acquisition_service import (
     ContratCadreService, BonCommandeService, ReceptionService, LitigeFournisseurService,
     EvaluationFournisseurService, AcquisitionReportingService
 )
-from app.models.acquisition import AppelOffres, CahierCharges, Comparatif, ContratCadre, BonCommande
+from app.models.acquisition import (
+    AppelOffres, CahierCharges, Offre, EvaluationOffre, Comparatif,
+    ContratCadre, BonCommande, Reception, LitigeFournisseur,
+    EvaluationFournisseur,
+)
 
 router = APIRouter(tags=["Acquisition"])  # monte sur /api/v1/acquisition par main.py
 
 
 # ============ APPELS D'OFFRES ============
+@router.get("/appels-offres", response_model=List[AppelOffresResponse])
+def lister_appels_offres(
+    statut: str = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("achats.consultation.read"))
+):
+    """List appels d'offres"""
+    q = db.query(AppelOffres)
+    if statut:
+        q = q.filter(AppelOffres.statut == statut)
+    return q.order_by(AppelOffres.id.desc()).offset(skip).limit(limit).all()
+
 @router.post("/appels-offres", response_model=AppelOffresResponse, status_code=status.HTTP_201_CREATED)
 def creer_appel_offres(
     appel: AppelOffresCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.create"))
 ):
     """Create tender/call for bids"""
     return AppelOffresService.creer_appel_offres(
@@ -55,7 +74,7 @@ def creer_appel_offres(
 def publier_appel(
     appel_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.modify"))
 ):
     """Publish tender"""
     return AppelOffresService.publier_appel(db, appel_id)
@@ -66,7 +85,7 @@ def mettre_a_jour_appel(
     appel_id: int,
     appel: AppelOffresUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.modify"))
 ):
     """Update tender"""
     a = db.query(AppelOffres).filter(AppelOffres.id == appel_id).first()
@@ -82,11 +101,25 @@ def mettre_a_jour_appel(
 
 
 # ============ CAHIERS DES CHARGES ============
+@router.get("/cahiers-charges", response_model=List[CahierChargesResponse])
+def lister_cahiers_charges(
+    appel_id: int = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("achats.consultation.read"))
+):
+    """List cahiers des charges"""
+    q = db.query(CahierCharges)
+    if appel_id:
+        q = q.filter(CahierCharges.appel_offres_id == appel_id)
+    return q.order_by(CahierCharges.id.desc()).offset(skip).limit(limit).all()
+
 @router.post("/cahiers-charges", response_model=CahierChargesResponse, status_code=status.HTTP_201_CREATED)
 def creer_cahier_charges(
     cdc: CahierChargesCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.create"))
 ):
     """Create cahier des charges"""
     return CahierChargesService.creer_cahier_charges(
@@ -101,7 +134,7 @@ def ajouter_ligne_cdc(
     cdc_id: int,
     ligne: LigneCDCCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.create"))
 ):
     """Add line to cahier des charges"""
     return CahierChargesService.ajouter_ligne_cdc(
@@ -116,7 +149,7 @@ def mettre_a_jour_cdc(
     cdc_id: int,
     cdc: CahierChargesUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.modify"))
 ):
     """Update cahier des charges"""
     c = db.query(CahierCharges).filter(CahierCharges.id == cdc_id).first()
@@ -132,11 +165,25 @@ def mettre_a_jour_cdc(
 
 
 # ============ OFFRES ============
+@router.get("/offres", response_model=List[OffreResponse])
+def lister_offres(
+    appel_id: int = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("achats.consultation.read"))
+):
+    """List offres fournisseurs"""
+    q = db.query(Offre)
+    if appel_id:
+        q = q.filter(Offre.appel_offres_id == appel_id)
+    return q.order_by(Offre.id.desc()).offset(skip).limit(limit).all()
+
 @router.post("/offres", response_model=OffreResponse, status_code=status.HTTP_201_CREATED)
 def enregistrer_offre(
     offre: OffreCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.create"))
 ):
     """Register supplier bid"""
     return OffreService.enregistrer_offre(
@@ -150,7 +197,7 @@ def evaluer_offre(
     offre_id: int,
     evaluation: EvaluationOffreCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.create"))
 ):
     """Evaluate bid on criterion"""
     return OffreService.evaluer_offre(
@@ -164,7 +211,7 @@ def mettre_a_jour_offre(
     offre_id: int,
     offre: OffreUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.modify"))
 ):
     """Update bid"""
     o = db.query(Offre).filter(Offre.id == offre_id).first()
@@ -180,11 +227,25 @@ def mettre_a_jour_offre(
 
 
 # ============ COMPARATIFS ============
+@router.get("/comparatifs", response_model=List[ComparatifResponse])
+def lister_comparatifs(
+    appel_id: int = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("achats.consultation.read"))
+):
+    """List comparatifs d'offres"""
+    q = db.query(Comparatif)
+    if appel_id:
+        q = q.filter(Comparatif.appel_offres_id == appel_id)
+    return q.order_by(Comparatif.id.desc()).offset(skip).limit(limit).all()
+
 @router.post("/comparatifs", response_model=ComparatifResponse, status_code=status.HTTP_201_CREATED)
 def creer_comparatif(
     comparatif: ComparatifCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.create"))
 ):
     """Create comparison matrix"""
     return ComparatifService.creer_comparatif(
@@ -198,7 +259,7 @@ def ajouter_ligne_comparatif(
     comparatif_id: int,
     ligne: LigneComparatifCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.create"))
 ):
     """Add line to comparison"""
     return ComparatifService.ajouter_ligne_comparatif(
@@ -213,7 +274,7 @@ def mettre_a_jour_comparatif(
     comparatif_id: int,
     comparatif: ComparatifUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.consultation.modify"))
 ):
     """Update comparison matrix"""
     c = db.query(Comparatif).filter(Comparatif.id == comparatif_id).first()
@@ -229,11 +290,28 @@ def mettre_a_jour_comparatif(
 
 
 # ============ CONTRATS CADRE ============
+@router.get("/contrats-cadre", response_model=List[ContratCadreResponse])
+def lister_contrats_cadre(
+    statut: str = None,
+    fournisseur_id: int = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("achats.contrat_cadre.read"))
+):
+    """List contrats-cadres"""
+    q = db.query(ContratCadre)
+    if statut:
+        q = q.filter(ContratCadre.statut == statut)
+    if fournisseur_id:
+        q = q.filter(ContratCadre.fournisseur_id == fournisseur_id)
+    return q.order_by(ContratCadre.id.desc()).offset(skip).limit(limit).all()
+
 @router.post("/contrats-cadre", response_model=ContratCadreResponse, status_code=status.HTTP_201_CREATED)
 def creer_contrat_cadre(
     contrat: ContratCadreCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.contrat_cadre.create"))
 ):
     """Create framework contract"""
     return ContratCadreService.creer_contrat_cadre(
@@ -247,7 +325,7 @@ def mettre_a_jour_contrat_cadre(
     contrat_id: int,
     contrat: ContratCadreUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.contrat_cadre.modify"))
 ):
     """Update framework contract"""
     c = db.query(ContratCadre).filter(ContratCadre.id == contrat_id).first()
@@ -269,7 +347,7 @@ def lister_bons_commande(
     skip: int = 0,
     limit: int = 200,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.commande.read"))
 ):
     """List purchase orders"""
     q = db.query(BonCommande)
@@ -282,7 +360,7 @@ def lister_bons_commande(
 def creer_bon_commande(
     bc: BonCommandeCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.commande.create"))
 ):
     """Create purchase order"""
     return BonCommandeService.creer_bon_commande(
@@ -295,7 +373,7 @@ def creer_bon_commande(
 def valider_bc(
     bc_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.commande.approve"))
 ):
     """Validate purchase order"""
     return BonCommandeService.valider_bc(db, bc_id, current_user.username)
@@ -306,7 +384,7 @@ def mettre_a_jour_bc(
     bc_id: int,
     bc: BonCommandeUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.commande.modify"))
 ):
     """Update purchase order"""
     b = db.query(BonCommande).filter(BonCommande.id == bc_id).first()
@@ -322,11 +400,28 @@ def mettre_a_jour_bc(
 
 
 # ============ RÉCEPTIONS ============
+@router.get("/receptions", response_model=List[ReceptionResponse])
+def lister_receptions(
+    bc_id: int = None,
+    statut: str = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("achats.reception.read"))
+):
+    """List receptions"""
+    q = db.query(Reception)
+    if bc_id:
+        q = q.filter(Reception.bc_id == bc_id)
+    if statut:
+        q = q.filter(Reception.statut == statut)
+    return q.order_by(Reception.id.desc()).offset(skip).limit(limit).all()
+
 @router.post("/receptions", response_model=ReceptionResponse, status_code=status.HTTP_201_CREATED)
 def creer_reception(
     reception: ReceptionCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.reception.create"))
 ):
     """Create goods receipt"""
     return ReceptionService.creer_reception(
@@ -339,7 +434,7 @@ def creer_reception(
 def valider_reception(
     reception_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.reception.approve"))
 ):
     """Validate goods receipt"""
     return ReceptionService.valider_reception(
@@ -352,7 +447,7 @@ def mettre_a_jour_reception(
     reception_id: int,
     reception: ReceptionUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.reception.modify"))
 ):
     """Update goods receipt"""
     r = db.query(Reception).filter(Reception.id == reception_id).first()
@@ -368,11 +463,28 @@ def mettre_a_jour_reception(
 
 
 # ============ LITIGES FOURNISSEURS ============
+@router.get("/litiges", response_model=List[LitigeFournisseurResponse])
+def lister_litiges(
+    fournisseur_id: int = None,
+    statut: str = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("achats.litige.read"))
+):
+    """List litiges fournisseurs"""
+    q = db.query(LitigeFournisseur)
+    if fournisseur_id:
+        q = q.filter(LitigeFournisseur.fournisseur_id == fournisseur_id)
+    if statut:
+        q = q.filter(LitigeFournisseur.statut == statut)
+    return q.order_by(LitigeFournisseur.id.desc()).offset(skip).limit(limit).all()
+
 @router.post("/litiges", response_model=LitigeFournisseurResponse, status_code=status.HTTP_201_CREATED)
 def creer_litige(
     litige: LitigeFournisseurCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.litige.create"))
 ):
     """Create supplier dispute"""
     return LitigeFournisseurService.creer_litige(
@@ -386,7 +498,7 @@ def ajouter_historique(
     litige_id: int,
     historique: HistoriqueLitigeCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.litige.create"))
 ):
     """Add dispute history entry"""
     return LitigeFournisseurService.ajouter_historique(
@@ -400,7 +512,7 @@ def mettre_a_jour_litige(
     litige_id: int,
     litige: LitigeFournisseurUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.litige.modify"))
 ):
     """Update supplier dispute"""
     l = db.query(LitigeFournisseur).filter(LitigeFournisseur.id == litige_id).first()
@@ -416,11 +528,25 @@ def mettre_a_jour_litige(
 
 
 # ============ ÉVALUATIONS FOURNISSEURS ============
+@router.get("/evaluations-fournisseur", response_model=List[EvaluationFournisseurResponse])
+def lister_evaluations_fournisseur(
+    fournisseur_id: int = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_perm("achats.evaluation.read"))
+):
+    """List evaluations fournisseurs"""
+    q = db.query(EvaluationFournisseur)
+    if fournisseur_id:
+        q = q.filter(EvaluationFournisseur.fournisseur_id == fournisseur_id)
+    return q.order_by(EvaluationFournisseur.id.desc()).offset(skip).limit(limit).all()
+
 @router.post("/evaluations-fournisseur", response_model=EvaluationFournisseurResponse, status_code=status.HTTP_201_CREATED)
 def creer_evaluation_fournisseur(
     evaluation: EvaluationFournisseurCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.evaluation.create"))
 ):
     """Create supplier evaluation"""
     return EvaluationFournisseurService.creer_evaluation(
@@ -435,7 +561,7 @@ def mettre_a_jour_evaluation_fournisseur(
     evaluation_id: int,
     evaluation: EvaluationFournisseurUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("achats.evaluation.modify"))
 ):
     """Update supplier evaluation"""
     e = db.query(EvaluationFournisseur).filter(EvaluationFournisseur.id == evaluation_id).first()
@@ -454,7 +580,7 @@ def mettre_a_jour_evaluation_fournisseur(
 def rapport_fournisseur(
     fournisseur_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_perm("fournisseurs.referentiel.read"))
 ):
     """Generate supplier report"""
     return AcquisitionReportingService.rapport_fournisseur(db, fournisseur_id)

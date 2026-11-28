@@ -899,6 +899,23 @@ export const procurementAPI = {
   createOrder: (data: unknown) => apiClient.post('/api/v1/acquisition/bons-commande', data),
   updateOrder: (id: number, data: unknown) => apiClient.put(`/api/v1/acquisition/bons-commande/${id}`, data),
   validateOrder: (id: number) => apiClient.put(`/api/v1/acquisition/bons-commande/${id}/valider`),
+  // Chaine complete d'achats (lectures) — GET ajoutes au routeur acquisition
+  getAppelsOffres: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/acquisition/appels-offres', { params }),
+  getCahiersCharges: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/acquisition/cahiers-charges', { params }),
+  getOffres: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/acquisition/offres', { params }),
+  getComparatifs: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/acquisition/comparatifs', { params }),
+  getContratsCadre: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/acquisition/contrats-cadre', { params }),
+  getReceptions: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/acquisition/receptions', { params }),
+  getLitiges: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/acquisition/litiges', { params }),
+  getEvaluationsFournisseur: (params?: Record<string, unknown>) =>
+    apiClient.get('/api/v1/acquisition/evaluations-fournisseur', { params }),
 };
 
 // ─── Service Compliance & Réglementation ──────────────────────────────────────────
