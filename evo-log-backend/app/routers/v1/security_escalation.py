@@ -12,10 +12,11 @@ from sqlalchemy.orm import Session
 from typing import Dict, Any
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.utils.tenant import get_current_tenant_context, TenantContext
 from app.models.advanced_crud import SecurityEscalationSetting
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 # Valeurs par defaut DOCUMENTEES (affichees tant qu'aucune regle n'est enregistree).
 DEFAULT_ESCALATION_SETTINGS: Dict[str, Any] = {

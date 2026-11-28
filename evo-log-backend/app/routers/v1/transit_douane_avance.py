@@ -2,6 +2,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
+from app.core.permissions import require_perm
+from app.core.security import get_current_user
+from app.models.user import User
 from app.services.transit_douane_avance_service import DUMService, GuichetUniqueService, TaxationDouaniereService
 from app.schemas.transit_douane_avance import (
     DumCreateRequest,
@@ -14,7 +17,7 @@ router = APIRouter()
 
 
 @router.post("/taxation/simuler", response_model=TaxationResultResponse, summary="Simuler la liquidation des droits et taxes en douane")
-def simuler_taxation(payload: SimulationTaxationRequest, db: Session = Depends(get_db)):
+def simuler_taxation(payload: SimulationTaxationRequest, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transit.declaration.read"))):
     """Calcule le Droit de Douane (TEC CEMAC), TVA 19.25%, Redevance informatique et précompte IS.
 
     Délégué au moteur UNIQUE ``app.services.taxation_douaniere``. La réponse
@@ -37,7 +40,7 @@ def simuler_taxation(payload: SimulationTaxationRequest, db: Session = Depends(g
 
 
 @router.post("/dum/creer", summary="Créer une DUM avec liquidation automatique")
-def creer_dum(payload: DumCreateRequest, db: Session = Depends(get_db)):
+def creer_dum(payload: DumCreateRequest, db: Session = Depends(get_db), current_user: User = Depends(require_perm("transit.declaration.create"))):
     """Génère une DUM SYDONIA World avec calcul complet des taxes."""
     return DUMService.creer_dum(
         db=db,
@@ -50,7 +53,7 @@ def creer_dum(payload: DumCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/guce/teletransmettre/{numero_dum}", response_model=GuceTeletransmissionResponse, summary="Télétransmettre au Guichet Unique GUCE Cameroun")
-def teletransmettre_guce(numero_dum: str):
+def teletransmettre_guce(numero_dum: str, current_user: User = Depends(require_perm("transit.declaration.modify"))):
     """Télétransmet le dossier électronique au Guichet Unique des Opérations du Commerce Extérieur de Douala."""
     return GuichetUniqueService.teletransmettre_guce(
         numero_dum=numero_dum,

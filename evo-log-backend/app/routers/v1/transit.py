@@ -7,10 +7,11 @@ from typing import List
 from datetime import datetime
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.schemas.transit import DossierTransitCreate, DossierTransitUpdate, DossierTransitResponse, DeclarationDouaniereCreate, DeclarationDouaniereResponse
 from app.models.transit import DossierTransit, DeclarationDouaniere
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get("/dossiers", response_model=List[DossierTransitResponse])

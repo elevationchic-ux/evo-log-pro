@@ -6,10 +6,11 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.schemas.parc import VehiculeCreate, VehiculeUpdate, VehiculeResponse, EquipementCreate, EquipementResponse
 from app.models.parc import Vehicule, Equipement
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get("/vehicules", response_model=List[VehiculeResponse])
